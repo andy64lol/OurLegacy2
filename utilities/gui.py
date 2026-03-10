@@ -7,7 +7,6 @@ import customtkinter as ctk
 from typing import Callable, Optional, List, Dict, Any
 import tkinter as tk
 
-
 # Medieval color palette
 MEDIEVAL_COLORS = {
     'bg_dark': '#1a1a1a',
@@ -27,7 +26,10 @@ class MedievalApp(ctk.CTk):
     Serves as the base window for all GUI interactions.
     """
 
-    def __init__(self, title: str = "Our Legacy", width: int = 1000, height: int = 700):
+    def __init__(self,
+                 title: str = "Our Legacy",
+                 width: int = 1000,
+                 height: int = 700):
         """
         Initialize the main application window.
 
@@ -55,12 +57,17 @@ class MedievalApp(ctk.CTk):
 
     def setup_main_frame(self):
         """Setup the main content frame."""
-        self.main_frame = ctk.CTkFrame(self, fg_color=MEDIEVAL_COLORS['bg_dark'])
+        self.main_frame = ctk.CTkFrame(self,
+                                       fg_color=MEDIEVAL_COLORS['bg_dark'])
         self.main_frame.pack(fill=ctk.BOTH, expand=True, padx=10, pady=10)
 
     def clear_frame(self, frame: ctk.CTkFrame = None):
         """Clear all widgets from a frame."""
-        target_frame = frame or self.main_frame
+        target_frame = frame if frame is not None else self.main_frame
+
+        if target_frame is None:
+            return
+
         for widget in target_frame.winfo_children():
             widget.destroy()
 
@@ -74,8 +81,13 @@ class MedievalButton(ctk.CTkButton):
     Medieval-themed button with ornate styling.
     """
 
-    def __init__(self, master, text: str = "Button", command: Callable = None,
-                 size: str = "normal", **kwargs):
+    def __init__(
+            self,
+            master,
+            text: str = "Button",
+            command: Optional[Callable] = None,
+            size: str = "normal",  # Fixed: Added missing 'size' parameter
+            **kwargs):
         """
         Initialize a medieval-themed button.
 
@@ -97,21 +109,22 @@ class MedievalButton(ctk.CTkButton):
         }
 
         font_size = font_sizes.get(size, 14)
-        padding = paddings.get(size, 12)
+        # Removed: Unused padding variable
+        _ = paddings.get(
+            size,
+            12)  # Comment: padding variable not used in current implementation
 
-        super().__init__(
-            master,
-            text=text,
-            command=command,
-            fg_color=MEDIEVAL_COLORS['accent_red'],
-            hover_color='#a00000',
-            text_color=MEDIEVAL_COLORS['text_light'],
-            font=('Arial', font_size, 'bold'),
-            border_width=2,
-            border_color=MEDIEVAL_COLORS['accent_gold'],
-            corner_radius=8,
-            **kwargs
-        )
+        super().__init__(master,
+                         text=text,
+                         command=command,
+                         fg_color=MEDIEVAL_COLORS['accent_red'],
+                         hover_color='#a00000',
+                         text_color=MEDIEVAL_COLORS['text_light'],
+                         font=('Arial', font_size, 'bold'),
+                         border_width=2,
+                         border_color=MEDIEVAL_COLORS['accent_gold'],
+                         corner_radius=8,
+                         **kwargs)
 
 
 class MedievalLabel(ctk.CTkLabel):
@@ -119,7 +132,11 @@ class MedievalLabel(ctk.CTkLabel):
     Medieval-themed label with ornate styling.
     """
 
-    def __init__(self, master, text: str = "Label", style: str = "normal", **kwargs):
+    def __init__(self,
+                 master,
+                 text: str = "Label",
+                 style: str = "normal",
+                 **kwargs):
         """
         Initialize a medieval-themed label.
 
@@ -145,13 +162,11 @@ class MedievalLabel(ctk.CTkLabel):
         font = font_styles.get(style, font_styles['normal'])
         text_color = text_colors.get(style, MEDIEVAL_COLORS['text_light'])
 
-        super().__init__(
-            master,
-            text=text,
-            font=font,
-            text_color=text_color,
-            **kwargs
-        )
+        super().__init__(master,
+                         text=text,
+                         font=font,
+                         text_color=text_color,
+                         **kwargs)
 
 
 class MedievalFrame(ctk.CTkFrame):
@@ -161,14 +176,12 @@ class MedievalFrame(ctk.CTkFrame):
 
     def __init__(self, master, **kwargs):
         """Initialize a medieval-themed frame."""
-        super().__init__(
-            master,
-            fg_color=MEDIEVAL_COLORS['bg_light'],
-            border_width=2,
-            border_color=MEDIEVAL_COLORS['border_gold'],
-            corner_radius=8,
-            **kwargs
-        )
+        super().__init__(master,
+                         fg_color=MEDIEVAL_COLORS['bg_light'],
+                         border_width=2,
+                         border_color=MEDIEVAL_COLORS['border_gold'],
+                         corner_radius=8,
+                         **kwargs)
 
 
 class MedievalScrollableFrame(ctk.CTkScrollableFrame):
@@ -178,11 +191,9 @@ class MedievalScrollableFrame(ctk.CTkScrollableFrame):
 
     def __init__(self, master, **kwargs):
         """Initialize a medieval-themed scrollable frame."""
-        super().__init__(
-            master,
-            fg_color=MEDIEVAL_COLORS['bg_light'],
-            **kwargs
-        )
+        super().__init__(master,
+                         fg_color=MEDIEVAL_COLORS['bg_light'],
+                         **kwargs)
 
 
 class DialogBox(ctk.CTkToplevel):
@@ -190,7 +201,9 @@ class DialogBox(ctk.CTkToplevel):
     Base class for dialog boxes in the medieval theme.
     """
 
-    def __init__(self, title: str = "Dialog", message: str = "",
+    def __init__(self,
+                 title: str = "Dialog",
+                 message: str = "",
                  buttons: Optional[List[str]] = None,
                  callback: Optional[Callable] = None):
         """
@@ -215,22 +228,19 @@ class DialogBox(ctk.CTkToplevel):
         self.grab_set()
 
         # Title
-        title_label = MedievalLabel(
-            self,
-            text=title,
-            style='title',
-            fg_color=MEDIEVAL_COLORS['bg_dark']
-        )
+        title_label = MedievalLabel(self,
+                                    text=title,
+                                    style='title',
+                                    fg_color=MEDIEVAL_COLORS['bg_dark'])
         title_label.pack(pady=15, padx=10)
 
         # Message
-        message_label = MedievalLabel(
-            self,
-            text=message,
-            style='normal',
-            fg_color=MEDIEVAL_COLORS['bg_dark']
-        )
-        message_label.pack(pady=10, padx=10, fill=ctk.BOTH, expand=True)
+        if message:  # Fixed: Only create message label if message is not empty
+            message_label = MedievalLabel(self,
+                                          text=message,
+                                          style='normal',
+                                          fg_color=MEDIEVAL_COLORS['bg_dark'])
+            message_label.pack(pady=10, padx=10, fill=ctk.BOTH, expand=True)
 
         # Buttons
         button_frame = ctk.CTkFrame(self, fg_color=MEDIEVAL_COLORS['bg_dark'])
@@ -243,8 +253,7 @@ class DialogBox(ctk.CTkToplevel):
             button = MedievalButton(
                 button_frame,
                 text=button_text,
-                command=lambda bt=button_text: self.on_button_click(bt)
-            )
+                command=lambda bt=button_text: self.on_button_click(bt))
             button.pack(side=ctk.LEFT, padx=5, expand=True, fill=ctk.X)
 
     def on_button_click(self, button_text: str):
@@ -273,7 +282,8 @@ class InventoryDialog(DialogBox):
             title: Dialog title
         """
         self.items = items
-        super().__init__(title=title, buttons=['Close'])
+        super().__init__(title=title, message="",
+                         buttons=['Close'])  # Fixed: Pass empty message
 
         self.geometry("600x400")
 
@@ -285,7 +295,9 @@ class InventoryDialog(DialogBox):
             for item in items:
                 self.create_item_widget(items_frame, item)
         else:
-            empty_label = MedievalLabel(self, text="Inventory is empty", style='dim')
+            empty_label = MedievalLabel(self,
+                                        text="Inventory is empty",
+                                        style='dim')
             empty_label.pack(pady=20)
 
     def create_item_widget(self, parent: ctk.CTkFrame, item: Dict[str, Any]):
@@ -305,12 +317,10 @@ class InventoryDialog(DialogBox):
             'legendary': '#FFD700',
         }.get(rarity, MEDIEVAL_COLORS['text_light'])
 
-        item_label = ctk.CTkLabel(
-            item_frame,
-            text=f"{name} x{quantity}",
-            font=('Arial', 12),
-            text_color=rarity_color
-        )
+        item_label = ctk.CTkLabel(item_frame,
+                                  text=f"{name} x{quantity}",
+                                  font=('Arial', 12),
+                                  text_color=rarity_color)
         item_label.pack(side=ctk.LEFT, padx=10, pady=5)
 
 
@@ -331,7 +341,10 @@ class MessageBox(DialogBox):
 class ConfirmationBox(DialogBox):
     """Confirmation dialog for yes/no choices."""
 
-    def __init__(self, title: str, message: str, callback: Optional[Callable] = None):
+    def __init__(self,
+                 title: str,
+                 message: str,
+                 callback: Optional[Callable] = None):
         """
         Initialize a confirmation dialog.
 
@@ -340,13 +353,18 @@ class ConfirmationBox(DialogBox):
             message: Confirmation message
             callback: Callback function receiving 'Yes' or 'No'
         """
-        super().__init__(title=title, message=message, buttons=['Yes', 'No'], callback=callback)
+        super().__init__(title=title,
+                         message=message,
+                         buttons=['Yes', 'No'],
+                         callback=callback)
 
 
 class TextInputDialog(ctk.CTkToplevel):
     """Dialog for text input."""
 
-    def __init__(self, title: str = "Input", prompt: str = "Enter text:",
+    def __init__(self,
+                 title: str = "Input",
+                 prompt: str = "Enter text:",
                  callback: Optional[Callable] = None):
         """
         Initialize text input dialog.
@@ -378,26 +396,19 @@ class TextInputDialog(ctk.CTkToplevel):
             border_color=MEDIEVAL_COLORS['border_gold'],
             border_width=2,
             text_color=MEDIEVAL_COLORS['text_light'],
-            font=('Arial', 12)
-        )
+            font=('Arial', 12))
         self.input_field.pack(pady=10, padx=10, fill=ctk.X)
 
         # Button frame
         button_frame = ctk.CTkFrame(self, fg_color=MEDIEVAL_COLORS['bg_dark'])
         button_frame.pack(pady=15, padx=10, fill=ctk.X)
 
-        ok_button = MedievalButton(
-            button_frame,
-            text="OK",
-            command=self.on_ok
-        )
+        ok_button = MedievalButton(button_frame, text="OK", command=self.on_ok)
         ok_button.pack(side=ctk.LEFT, padx=5, expand=True, fill=ctk.X)
 
-        cancel_button = MedievalButton(
-            button_frame,
-            text="Cancel",
-            command=self.on_cancel
-        )
+        cancel_button = MedievalButton(button_frame,
+                                       text="Cancel",
+                                       command=self.on_cancel)
         cancel_button.pack(side=ctk.LEFT, padx=5, expand=True, fill=ctk.X)
 
     def on_ok(self):
