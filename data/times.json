@@ -1,0 +1,42 @@
+{
+    "dawn": {
+        "description": "time_dawn_desc",
+        "start_hour": 0,
+        "end_hour": 5
+    },
+    "morning": {
+        "description": "time_morning_desc",
+        "start_hour": 6,
+        "end_hour": 11
+    },
+    "noon": {
+        "description": "time_noon_desc",
+        "start_hour": 12,
+        "end_hour": 17
+    },
+    "afternoon": {
+        "description": "time_afternoon_desc",
+        "start_hour": 18,
+        "end_hour": 23
+    },
+    "dusk": {
+        "description": "time_dusk_desc",
+        "start_hour": 24,
+        "end_hour": 29
+    },
+    "evening": {
+        "description": "time_evening_desc",
+        "start_hour": 30,
+        "end_hour": 35
+    },
+    "night": {
+        "description": "time_night_desc",
+        "start_hour": 36,
+        "end_hour": 41
+    },
+    "midnight": {
+        "description": "time_midnight_desc",
+        "start_hour": 42,
+        "end_hour": 47
+    }
+}

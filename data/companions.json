@@ -1,0 +1,171 @@
+{
+  "companion_1": {
+    "name": "Borin the Brave",
+    "class": "Fighter",
+    "rank": "common",
+    "description": "A stalwart fighter who increases your attack and draws enemy attention.",
+    "attack_bonus": 3,
+    "defense_bonus": 2,
+    "action_chance": 0.6,
+    "abilities": [{"name": "Shield Bash", "type": "taunt", "chance": 15, "duration": 1}],
+    "price": 100
+  },
+  "companion_2": {
+    "name": "Lyra the Swift",
+    "class": "Scout",
+    "rank": "uncommon",
+    "description": "A nimble scout who increases your speed and critical chance.",
+    "speed_bonus": 4,
+    "crit_chance": 5,
+    "action_chance": 0.7,
+    "abilities": [{"name": "Quick Strike", "type": "attack_boost", "attack_bonus": 2, "duration": 2}],
+    "price": 120
+  },
+  "companion_3": {
+    "name": "Eldon the Wise",
+    "class": "Mage",
+    "rank": "rare",
+    "description": "A sage who bolsters your magic and restores a small amount of MP each battle.",
+    "mp_bonus": 15,
+    "spell_power_bonus": 5,
+    "action_chance": 0.6,
+    "abilities": [{"name": "Arcane Insight", "type": "mp_regen", "mp_per_turn": 3, "duration": 4}],
+    "price": 150
+  },
+  "companion_4": {
+    "name": "Mira the Healer",
+    "class": "Support",
+    "rank": "rare",
+    "description": "A caring companion who provides occasional healing during exploration and battles.",
+    "healing_bonus": 25,
+    "action_chance": 0.6,
+    "abilities": [{"name": "Tend Wounds", "type": "heal", "healing": 20, "chance": 60}],
+    "price": 140
+  },
+  "companion_5": {
+    "name": "Tharos the Bulwark",
+    "class": "Guardian",
+    "rank": "epic",
+    "description": "A veteran guardian whose presence greatly increases defense and enemy taunt chance.",
+    "defense_bonus": 8,
+    "taunt_chance": 20,
+    "action_chance": 0.75,
+    "abilities": [{"name": "Hold The Line", "type": "taunt", "chance": 30, "duration": 2}],
+    "price": 350
+  },
+  "companion_6": {
+    "name": "Seraphine the Arcane",
+    "class": "Mage",
+    "rank": "epic",
+    "description": "A master of the arcane who significantly boosts MP and spell power for the party.",
+    "mp_bonus": 50,
+    "spell_power_bonus": 10,
+    "action_chance": 0.65,
+    "abilities": [{"name": "Arcane Surge", "type": "spell_power", "spell_power_bonus": 8, "duration": 3}],
+    "price": 400
+  },
+  "companion_7": {
+    "name": "Ragnar the Warlord",
+    "class": "Berserker",
+    "rank": "legendary",
+    "description": "A fearsome warrior that drastically increases attack and critical damage.",
+    "attack_bonus": 12,
+    "crit_damage_bonus": 15,
+    "action_chance": 0.8,
+    "abilities": [{"name": "Rage", "type": "attack_boost", "attack_bonus": 8, "duration": 2}],
+    "price": 420
+  },
+  "companion_8": {
+    "name": "Astra the Lifegiver",
+    "class": "Cleric",
+    "rank": "legendary",
+    "description": "A legendary healer whose aura restores HP after each battle and provides large healing boosts.",
+    "healing_bonus": 80,
+    "post_battle_heal": 30,
+    "action_chance": 0.6,
+    "abilities": [{"name": "Sanctuary", "type": "post_battle_heal", "heal": 30}],
+    "price": 450
+  },
+  "companion_9": {
+    "name": "Nyx the Shadow",
+    "class": "Assassin",
+    "rank": "rare",
+    "description": "A silent killer that increases critical chance and deals extra damage from stealth.",
+    "attack_bonus": 6,
+    "crit_chance": 10,
+    "action_chance": 0.55,
+    "abilities": [{"name": "Backstab", "type": "crit_boost", "crit_damage_bonus": 10, "duration": 1}],
+    "price": 220
+  },
+  "companion_10": {
+    "name": "Galen the Tactician",
+    "class": "Strategist",
+    "rank": "uncommon",
+    "description": "A battlefield planner who grants small party-wide buffs and improves mission rewards.",
+    "attack_bonus": 2,
+    "defense_bonus": 2,
+    "action_chance": 0.5,
+    "abilities": [{"name": "Inspire", "type": "party_buff", "attack_bonus": 2, "defense_bonus": 2, "duration": 3}],
+    "price": 160
+  },
+  "companion_11": {
+    "name": "Skiff von Stratoscrate",
+    "class": "Warlock",
+    "rank": "legendary",
+    "description": "A master of forbidden magics who greatly enhances spell power and MP regeneration, born from the darkness of the abyss, she's known as the lord of the abyss.",
+    "mp_bonus": 700,
+    "attack_bonus": 190,
+    "crit_damage_bonus": 150,
+    "speed_bonus": 100,
+    "spell_power_bonus": 150,
+    "action_chance": 0.7,
+    "abilities": [{"name": "Forbidden Knowledge", "type": "mp_regen", "mp_per_turn": 7, "duration": 5}],
+    "price": 900
+  },
+  "companion_12":{
+    "name": "Baijiang the shade",
+    "class": "Ninja",
+    "rank": "legendary",
+    "description": "A stealthy ninja who excels in speed and critical strikes, mastering the art of silent elimination.",
+    "attack_bonus": 190,
+    "speed_bonus": 300,
+    "crit_chance": 50,
+    "crit_damage_bonus": 200,
+    "action_chance": 0.9,
+    "abilities": [{"name": "Shadow Strike", "type": "crit_boost", "crit_damage_bonus": 20, "duration": 3}],
+    "price": 950
+  },
+  "companion_13": {
+    "name": "Kaelen of the Wild",
+    "class": "Druid",
+    "rank": "rare",
+    "description": "A wild druid who brings the power of nature to your side.",
+    "attack_bonus": 5,
+    "mp_bonus": 20,
+    "action_chance": 0.65,
+    "abilities": [{"name": "Entangle", "type": "debuff", "effect": "slow", "duration": 2}],
+    "price": 280
+  },
+  "companion_14": {
+    "name": "Father Thomas",
+    "class": "Priest",
+    "rank": "uncommon",
+    "description": "A humble priest who provides consistent healing and protection.",
+    "healing_bonus": 30,
+    "defense_bonus": 4,
+    "action_chance": 0.6,
+    "abilities": [{"name": "Blessing", "type": "buff", "effect": "defense_boost", "duration": 3}],
+    "price": 200
+  },
+  "companion_15": {
+    "name": "Sir Galahad",
+    "class": "Paladin",
+    "rank": "epic",
+    "description": "A noble paladin who shields his allies with divine grace.",
+    "defense_bonus": 12,
+    "attack_bonus": 8,
+    "action_chance": 0.7,
+    "abilities": [{"name": "Holy Shield", "type": "buff", "effect": "shield", "duration": 2}],
+    "price": 500
+  }
+}

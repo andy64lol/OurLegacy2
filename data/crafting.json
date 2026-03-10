@@ -1,0 +1,540 @@
+{
+  "version": "1.0",
+  "description": "Alchemy and crafting recipes for Our Legacy",
+  "categories": [
+    "Potions",
+    "Elixirs",
+    "Enchantments",
+    "Utility",
+    "Consumables"
+  ],
+  "recipes": {
+    "health_potion_basic": {
+      "name": "Basic Health Potion",
+      "description": "A simple healing potion that restores 30 HP",
+      "category": "Potions",
+      "output": {
+        "Health Potion": 1
+      },
+      "materials": {
+        "Herb": 2,
+        "Spring Water": 1
+      },
+      "skill_requirement": 1,
+      "craft_time": 1,
+      "rarity": "common"
+    },
+    "health_potion_greater": {
+      "name": "Greater Health Potion",
+      "description": "A powerful healing potion that restores 75 HP",
+      "category": "Potions",
+      "output": {
+        "Large Health Potion": 1
+      },
+      "materials": {
+        "Health Potion": 1,
+        "Crystal Shard": 2,
+        "Phoenix Feather": 1
+      },
+      "skill_requirement": 3,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "mana_potion_basic": {
+      "name": "Basic Mana Potion",
+      "description": "Restores 25 MP for spellcasting",
+      "category": "Potions",
+      "output": {
+        "Mana Potion": 1
+      },
+      "materials": {
+        "Mana Herb": 2,
+        "Spring Water": 1
+      },
+      "skill_requirement": 1,
+      "craft_time": 1,
+      "rarity": "common"
+    },
+    "mana_potion_greater": {
+      "name": "Greater Mana Potion",
+      "description": "Restores 50 MP and enhances magical abilities",
+      "category": "Potions",
+      "output": {
+        "Mana Potion": 2
+      },
+      "materials": {
+        "Mana Potion": 1,
+        "Crystal Shard": 3,
+        "Dark Crystal": 1
+      },
+      "skill_requirement": 4,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "frost_potion": {
+      "name": "Frost Potion",
+      "description": "A magical potion that temporarily boosts defense by 5",
+      "category": "Potions",
+      "output": {
+        "Frost Potion": 1
+      },
+      "materials": {
+        "Ice Crystal": 2,
+        "Crystal Shard": 1,
+        "Spring Water": 1
+      },
+      "skill_requirement": 3,
+      "craft_time": 2,
+      "rarity": "rare"
+    },
+    "elixir_giant_strength": {
+      "name": "Elixir of Giant Strength",
+      "description": "Grants giant strength for a short time, +15 attack",
+      "category": "Elixirs",
+      "output": {
+        "Elixir of Giant Strength": 1
+      },
+      "materials": {
+        "Orc Tooth": 3,
+        "Troll Hide": 1,
+        "Ancient Relic": 1
+      },
+      "skill_requirement": 5,
+      "craft_time": 3,
+      "rarity": "rare"
+    },
+    "elixir_shadow_step": {
+      "name": "Shadowstep Elixir",
+      "description": "Allows instantaneous movement through shadows (3 charges)",
+      "category": "Elixirs",
+      "output": {
+        "Shadowstep Elixir": 1
+      },
+      "materials": {
+        "Shadow Essence": 2,
+        "Void Crystal": 2,
+        "Dark Crystal": 1
+      },
+      "skill_requirement": 6,
+      "craft_time": 3,
+      "rarity": "rare"
+    },
+    "phoenix_tears": {
+      "name": "Phoenix Tears",
+      "description": "A drop of phoenix tears that fully restores health",
+      "category": "Potions",
+      "output": {
+        "Phoenix Tears": 1
+      },
+      "materials": {
+        "Phoenix Feather": 3,
+        "Crystal Shard": 5,
+        "Fire Gem": 2,
+        "Eternal Essence": 1
+      },
+      "skill_requirement": 8,
+      "craft_time": 5,
+      "rarity": "legendary"
+    },
+    "dragons_breath_potion": {
+      "name": "Dragon's Breath Potion",
+      "description": "Grants fire breath attack ability for 3 turns",
+      "category": "Potions",
+      "output": {
+        "Dragon's Breath Potion": 1
+      },
+      "materials": {
+        "Dragon Scale": 3,
+        "Fire Gem": 2,
+        "Demon Blood": 1
+      },
+      "skill_requirement": 7,
+      "craft_time": 4,
+      "rarity": "legendary"
+    },
+    "iron_weapon": {
+      "name": "Iron Sword",
+      "description": "A sturdy iron blade, reliable and well-balanced",
+      "category": "Enchantments",
+      "output": {
+        "Iron Sword": 1
+      },
+      "materials": {
+        "Iron Ore": 3,
+        "Coal": 1,
+        "Leather Strip": 1
+      },
+      "skill_requirement": 2,
+      "craft_time": 2,
+      "rarity": "common"
+    },
+    "steel_dagger": {
+      "name": "Steel Dagger",
+      "description": "A sharp steel dagger favored by rogues",
+      "category": "Enchantments",
+      "output": {
+        "Steel Dagger": 1
+      },
+      "materials": {
+        "Steel Ingot": 2,
+        "Leather Strip": 1,
+        "Wolf Fang": 1
+      },
+      "skill_requirement": 2,
+      "craft_time": 2,
+      "rarity": "common"
+    },
+    "leather_armor": {
+      "name": "Leather Armor",
+      "description": "Flexible leather armor that provides basic protection",
+      "category": "Enchantments",
+      "output": {
+        "Leather Armor": 1
+      },
+      "materials": {
+        "Leather": 4,
+        "Leather Strip": 2,
+        "Bone Fragment": 1
+      },
+      "skill_requirement": 2,
+      "craft_time": 2,
+      "rarity": "common"
+    },
+    "chain_mail": {
+      "name": "Chain Mail",
+      "description": "Interlocked metal rings provide good protection",
+      "category": "Enchantments",
+      "output": {
+        "Chain Mail": 1
+      },
+      "materials": {
+        "Steel Ingot": 4,
+        "Iron Ore": 2,
+        "Leather Strip": 1
+      },
+      "skill_requirement": 4,
+      "craft_time": 3,
+      "rarity": "uncommon"
+    },
+    "poison_dagger": {
+      "name": "Poison Dagger",
+      "description": "A blade that applies poison damage",
+      "category": "Enchantments",
+      "output": {
+        "Venomstrike Dagger": 1
+      },
+      "materials": {
+        "Steel Dagger": 1,
+        "Venom Sac": 2,
+        "Serpent Tail": 3
+      },
+      "skill_requirement": 5,
+      "craft_time": 3,
+      "rarity": "rare"
+    },
+    "fire_gem_extraction": {
+      "name": "Fire Gem",
+      "description": "Extract a fire gem from elemental essence",
+      "category": "Utility",
+      "output": {
+        "Fire Gem": 1
+      },
+      "materials": {
+        "Fire Essence": 3,
+        "Crystal Shard": 2
+      },
+      "skill_requirement": 4,
+      "craft_time": 2,
+      "rarity": "rare"
+    },
+    "ice_crystal_extraction": {
+      "name": "Ice Crystal",
+      "description": "Extract an ice crystal from elemental essence",
+      "category": "Utility",
+      "output": {
+        "Ice Crystal": 1
+      },
+      "materials": {
+        "Ice Essence": 3,
+        "Crystal Shard": 2
+      },
+      "skill_requirement": 4,
+      "craft_time": 2,
+      "rarity": "rare"
+    },
+    "dark_crystal_extraction": {
+      "name": "Dark Crystal",
+      "description": "Extract dark energy into a usable crystal",
+      "category": "Utility",
+      "output": {
+        "Dark Crystal": 1
+      },
+      "materials": {
+        "Shadow Essence": 3,
+        "Void Crystal": 1,
+        "Soul Fragment": 1
+      },
+      "skill_requirement": 5,
+      "craft_time": 3,
+      "rarity": "rare"
+    },
+    "luck_charm": {
+      "name": "Luck Charm",
+      "description": "A simple charm believed to bring good fortune",
+      "category": "Utility",
+      "output": {
+        "Luck Charm": 1
+      },
+      "materials": {
+        "Crystal Shard": 1,
+        "Gold Nugget": 1
+      },
+      "skill_requirement": 1,
+      "craft_time": 1,
+      "rarity": "common"
+    },
+    "fortune_charm": {
+      "name": "Fortune Charm",
+      "description": "An ornate charm that attracts luck and prosperity",
+      "category": "Utility",
+      "output": {
+        "Fortune Charm": 1
+      },
+      "materials": {
+        "Luck Charm": 1,
+        "Crystal Shard": 2,
+        "Gold Nugget": 3
+      },
+      "skill_requirement": 3,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "stone_shield": {
+      "name": "Stone Shield",
+      "description": "A shield carved from enchanted stone",
+      "category": "Enchantments",
+      "output": {
+        "Stone Shield": 1
+      },
+      "materials": {
+        "Stone Block": 4,
+        "Iron Ore": 2,
+        "Ancient Relic": 1
+      },
+      "skill_requirement": 4,
+      "craft_time": 3,
+      "rarity": "uncommon"
+    },
+    "wooden_shield": {
+      "name": "Wooden Shield",
+      "description": "A simple wooden shield that provides basic protection",
+      "category": "Enchantments",
+      "output": {
+        "Wooden Shield": 1
+      },
+      "materials": {
+        "Hardwood": 3,
+        "Leather Strip": 1
+      },
+      "skill_requirement": 1,
+      "craft_time": 1,
+      "rarity": "common"
+    },
+    "buckler_shield": {
+      "name": "Buckler Shield",
+      "description": "A small buckler that offers balanced defense and agility",
+      "category": "Enchantments",
+      "output": {
+        "Buckler Shield": 1
+      },
+      "materials": {
+        "Steel Ingot": 2,
+        "Leather": 1,
+        "Leather Strip": 1
+      },
+      "skill_requirement": 3,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "hunting_spear": {
+      "name": "Hunting Spear",
+      "description": "A sturdy spear perfect for hunting large game",
+      "category": "Enchantments",
+      "output": {
+        "Hunting Spear": 1
+      },
+      "materials": {
+        "Hardwood": 3,
+        "Iron Ore": 1,
+        "Wolf Fang": 2
+      },
+      "skill_requirement": 2,
+      "craft_time": 2,
+      "rarity": "common"
+    },
+    "warrior_spear": {
+      "name": "Warrior Spear",
+      "description": "A battle-tested spear favored by warriors",
+      "category": "Enchantments",
+      "output": {
+        "Warrior Spear": 1
+      },
+      "materials": {
+        "Hardwood": 4,
+        "Steel Ingot": 2,
+        "Orc Tooth": 1
+      },
+      "skill_requirement": 3,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "elixirs_of_nature": {
+      "name": "Nature's Blessing",
+      "description": "A charm that connects the wearer to the natural world",
+      "category": "Utility",
+      "output": {
+        "Nature's Blessing": 1
+      },
+      "materials": {
+        "Herb": 5,
+        "Phoenix Feather": 1,
+        "Crystal Shard": 2
+      },
+      "skill_requirement": 4,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "poison_weapon": {
+      "name": "Toxic Thorn",
+      "description": "A blade coated with natural toxins",
+      "category": "Enchantments",
+      "output": {
+        "Toxic Thorn": 1
+      },
+      "materials": {
+        "Steel Dagger": 1,
+        "Venom Sac": 3,
+        "Serpent Tail": 2
+      },
+      "skill_requirement": 5,
+      "craft_time": 3,
+      "rarity": "rare"
+    },
+    "swamp_scale_armor": {
+      "name": "Swamp Scale Armor",
+      "description": "Armor crafted from hydra scales, providing poison resistance",
+      "category": "Enchantments",
+      "output": {
+        "Swamp Scale Armor": 1
+      },
+      "materials": {
+        "Swamp Scale": 5,
+        "Steel Ingot": 3,
+        "Venom Sac": 2
+      },
+      "skill_requirement": 6,
+      "craft_time": 4,
+      "rarity": "rare"
+    },
+    "bread": {
+      "name": "Bread",
+      "description": "A basic staple food made from wheat",
+      "category": "Consumables",
+      "output": {
+        "Bread": 1
+      },
+      "materials": {
+        "Wheat": 2
+      },
+      "skill_requirement": 1,
+      "craft_time": 1,
+      "rarity": "common"
+    },
+    "salad": {
+      "name": "Salad",
+      "description": "Fresh vegetables mixed together",
+      "category": "Consumables",
+      "output": {
+        "Salad": 1
+      },
+      "materials": {
+        "Lettuce": 1,
+        "Tomato": 1,
+        "Carrot": 1
+      },
+      "skill_requirement": 1,
+      "craft_time": 1,
+      "rarity": "common"
+    },
+    "corn_soup": {
+      "name": "Corn Soup",
+      "description": "A warm and comforting soup made with corn",
+      "category": "Consumables",
+      "output": {
+        "Corn Soup": 1
+      },
+      "materials": {
+        "Corn": 2,
+        "Potato": 1
+      },
+      "skill_requirement": 2,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "apple_pie": {
+      "name": "Apple Pie",
+      "description": "A delicious baked treat with apples",
+      "category": "Consumables",
+      "output": {
+        "Apple Pie": 1
+      },
+      "materials": {
+        "Apple": 2,
+        "Wheat": 1
+      },
+      "skill_requirement": 2,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "fruit_smoothie": {
+      "name": "Fruit Smoothie",
+      "description": "A refreshing blend of berries and fruit",
+      "category": "Consumables",
+      "output": {
+        "Fruit Smoothie": 1
+      },
+      "materials": {
+        "Strawberry": 2,
+        "Grape": 1
+      },
+      "skill_requirement": 2,
+      "craft_time": 1,
+      "rarity": "uncommon"
+    },
+    "dragon_fruit_juice": {
+      "name": "Dragon Fruit Juice",
+      "description": "A magical and potent juice made from dragon fruit",
+      "category": "Consumables",
+      "output": {
+        "Dragon Fruit Juice": 1
+      },
+      "materials": {
+        "Dragon Fruit": 1
+      },
+      "skill_requirement": 5,
+      "craft_time": 3,
+      "rarity": "epic"
+    }
+  },
+  "material_categories": {
+    "ores": ["Iron Ore", "Coal", "Steel Ingot", "Gold Nugget"],
+    "herbs": ["Herb", "Mana Herb", "Spring Water"],
+    "crystals": ["Crystal Shard", "Dark Crystal", "Ice Crystal", "Void Crystal", "Fire Gem"],
+    "monster_parts": ["Goblin Ear", "Orc Tooth", "Bone Fragment", "Wolf Fang", "Venom Sac", "Serpent Tail", "Swamp Scale", "Troll Hide"],
+    "magical": ["Phoenix Feather", "Dragon Scale", "Ancient Relic", "Eternal Essence", "Soul Fragment", "Shadow Essence", "Fire Essence", "Ice Essence"],
+    "leather": ["Leather", "Leather Strip"],
+    "wood": ["Hardwood", "Stone Block"],
+    "crops": ["Wheat", "Corn", "Tomato", "Potato", "Carrot", "Apple", "Grape", "Strawberry", "Lettuce", "Dragon Fruit"]
+  }
+}
+

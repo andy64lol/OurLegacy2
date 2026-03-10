@@ -1,0 +1,45 @@
+# Ignore save files and cache
+data/saves/
+bash/
+# But keep the translation checker script
+!bash/check_translations.sh
+# Ignore non-important utility scripts
+bash/non_important/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+scripts/activities.json
+.zencoder/
+.zenflow/
+.replit
+.env
+mods/
+.vercel/
+node_modules/
+server.py
+# Generated scripts for fixing prints
+bash/fix_prints*.sh
+bash/backups/
+./replit/
+.config/
+.cache/
+.pythonlibs/
+replit.md

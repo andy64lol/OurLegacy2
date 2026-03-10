@@ -1,0 +1,136 @@
+{
+  "version": "1.0",
+  "description": "Farming crops and fruits for Our Legacy farming system",
+  "crops": {
+    "wheat": {
+      "name": "Wheat",
+      "description": "A common grain crop, takes 3 days to mature",
+      "growth_time": 3,
+      "harvest_amount": 3,
+      "sell_price": 15,
+      "rarity": "common"
+    },
+    "corn": {
+      "name": "Corn",
+      "description": "A nutritious crop that grows well in summer",
+      "growth_time": 4,
+      "harvest_amount": 2,
+      "sell_price": 20,
+      "rarity": "common"
+    },
+    "tomato": {
+      "name": "Tomato",
+      "description": "A versatile red fruit, popular for cooking",
+      "growth_time": 5,
+      "harvest_amount": 4,
+      "sell_price": 25,
+      "rarity": "uncommon"
+    },
+    "potato": {
+      "name": "Potato",
+      "description": "A hearty root vegetable with many uses",
+      "growth_time": 6,
+      "harvest_amount": 5,
+      "sell_price": 18,
+      "rarity": "common"
+    },
+    "carrot": {
+      "name": "Carrot",
+      "description": "A crisp and sweet orange vegetable",
+      "growth_time": 4,
+      "harvest_amount": 3,
+      "sell_price": 22,
+      "rarity": "common"
+    },
+    "apple": {
+      "name": "Apple",
+      "description": "A juicy fruit from an apple tree",
+      "growth_time": 7,
+      "harvest_amount": 6,
+      "sell_price": 30,
+      "rarity": "uncommon"
+    },
+    "grape": {
+      "name": "Grape",
+      "description": "Sweet grapes from the vineyard",
+      "growth_time": 8,
+      "harvest_amount": 8,
+      "sell_price": 35,
+      "rarity": "uncommon"
+    },
+    "strawberry": {
+      "name": "Strawberry",
+      "description": "A sweet and delicate red berry",
+      "growth_time": 5,
+      "harvest_amount": 4,
+      "sell_price": 40,
+      "rarity": "rare"
+    },
+    "lettuce": {
+      "name": "Lettuce",
+      "description": "Fresh leafy greens for salads",
+      "growth_time": 3,
+      "harvest_amount": 2,
+      "sell_price": 16,
+      "rarity": "common"
+    },
+    "dragon_fruit": {
+      "name": "Dragon Fruit",
+      "description": "A rare and exotic magical fruit",
+      "growth_time": 12,
+      "harvest_amount": 3,
+      "sell_price": 80,
+      "rarity": "epic"
+    }
+  },
+  "foods": {
+    "bread": {
+      "name": "Bread",
+      "description": "A basic staple food made from wheat",
+      "effect": "heal",
+      "value": 30,
+      "sell_price": 25,
+      "rarity": "common"
+    },
+    "salad": {
+      "name": "Salad",
+      "description": "Fresh vegetables mixed together",
+      "effect": "heal",
+      "value": 25,
+      "sell_price": 30,
+      "rarity": "common"
+    },
+    "corn_soup": {
+      "name": "Corn Soup",
+      "description": "A warm and comforting soup made with corn",
+      "effect": "heal",
+      "value": 40,
+      "sell_price": 35,
+      "rarity": "uncommon"
+    },
+    "apple_pie": {
+      "name": "Apple Pie",
+      "description": "A delicious baked treat with apples",
+      "effect": "heal",
+      "value": 50,
+      "sell_price": 45,
+      "rarity": "uncommon"
+    },
+    "fruit_smoothie": {
+      "name": "Fruit Smoothie",
+      "description": "A refreshing blend of berries and fruit",
+      "effect": "heal",
+      "value": 35,
+      "sell_price": 40,
+      "rarity": "uncommon"
+    },
+    "dragon_fruit_juice": {
+      "name": "Dragon Fruit Juice",
+      "description": "A magical and potent juice made from dragon fruit",
+      "effect": "heal",
+      "value": 100,
+      "sell_price": 120,
+      "rarity": "epic"
+    }
+  }
+}

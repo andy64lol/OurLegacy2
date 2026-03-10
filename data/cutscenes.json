@@ -1,0 +1,70 @@
+{
+  "welcome_cutscene": {
+    "id": "welcome_cutscene",
+    "iterable": false,
+    "content": {
+      "text": "Welcome to Our Legacy, adventurer! Your journey begins now.",
+      "wait": 3,
+      "choice": {
+        "continue": {
+          "text": "Are you ready to embark on this epic adventure?",
+          "wait": 2,
+          "choice": {
+            "yes": {
+              "text": "Excellent! Let the legend begin...",
+              "wait": 2
+            },
+            "no": {
+              "text": "I don't care lol. Just begin!",
+              "wait": 2
+            }
+          }
+        }
+      }
+    }
+  },
+  "first_area_enter": {
+    "id": "first_area_enter",
+    "iterable": false,
+    "content": {
+      "text": "You step into the Dark Forest for the first time. The trees whisper ancient secrets.",
+      "wait": 4,
+      "choice": {
+        "explore": {
+          "text": "Do you wish to explore deeper into the forest?",
+          "wait": 2,
+          "choice": {
+            "yes": {
+              "text": "The forest welcomes you. Danger and opportunity await.",
+              "wait": 3
+            }
+          }
+        }
+      }
+    }
+  },
+  "mission_accept_tutorial": {
+    "id": "mission_accept_tutorial",
+    "iterable": false,
+    "content": {
+      "text": "You have accepted your first mission! Missions are the heart of your adventure.",
+      "wait": 3,
+      "choice": {
+        "learn": {
+          "text": "Would you like to learn more about missions?",
+          "wait": 2,
+          "choice": {
+            "yes": {
+              "text": "Missions reward experience, gold, and items. Complete them to grow stronger!",
+              "wait": 4
+            },
+            "no": {
+              "text": "Very well. Experience will teach you the rest.",
+              "wait": 2
+            }
+          }
+        }
+      }
+    }
+  }
+}

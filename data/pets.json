@@ -1,0 +1,174 @@
+{
+  "slime": {
+    "name": "Slime",
+    "description": "A bouncy green slime that helps you find items.",
+    "price": 500,
+    "boosts": {
+      "item_find_chance": 0.05,
+      "gold_gain": 0.02
+    }
+  },
+  "wolf_pup": {
+    "name": "Wolf Pup",
+    "description": "A loyal wolf pup that increases your attack.",
+    "price": 1200,
+    "boosts": {
+      "attack": 5,
+      "speed": 2
+    }
+  },
+  "owl": {
+    "name": "Owl",
+    "description": "A wise owl that increases your magic power.",
+    "price": 1000,
+    "boosts": {
+      "mp": 20,
+      "defense": 3
+    }
+  },
+  "phoenix_chick": {
+    "name": "Phoenix Chick",
+    "description": "A legendary bird that boosts your HP and recovery.",
+    "price": 5000,
+    "boosts": {
+      "hp": 50,
+      "hp_regen": 2
+    }
+  },
+  "dragon_hatchling": {
+    "name": "Dragon Hatchling",
+    "description": "A tiny dragon that breathes small sparks and boosts all stats.",
+    "price": 10000,
+    "boosts": {
+      "attack": 10,
+      "defense": 10,
+      "speed": 5,
+      "hp": 100
+    }
+  },
+  "shadow_cat": {
+    "name": "Shadow Cat",
+    "description": "A cat made of shadows that increases speed and critical chance.",
+    "price": 2500,
+    "boosts": {
+      "speed": 15,
+      "crit_chance": 0.1
+    }
+  },
+  "golden_retriever": {
+    "name": "Golden Retriever",
+    "description": "A very good boy who finds extra gold everywhere.",
+    "price": 1500,
+    "boosts": {
+      "gold_gain": 0.2
+    }
+  },
+  "forest_sprite": {
+    "name": "Forest Sprite",
+    "description": "A tiny forest spirit that guides you to hidden treasures.",
+    "price": 1800,
+    "boosts": {
+      "item_find_chance": 0.08,
+      "speed": 3
+    }
+  },
+
+  "iron_tortoise": {
+    "name": "Iron Tortoise",
+    "description": "A heavily armored tortoise that strengthens your defenses.",
+    "price": 2200,
+    "boosts": {
+      "defense": 8,
+      "hp": 30
+    }
+  },
+
+  "arcane_fairy": {
+    "name": "Arcane Fairy",
+    "description": "A glowing fairy that enhances magical energy.",
+    "price": 2500,
+    "boosts": {
+      "mp": 40,
+      "crit_chance": 0.05
+    }
+  },
+
+  "battle_boar": {
+    "name": "Battle Boar",
+    "description": "A fierce boar that charges into combat with you.",
+    "price": 2000,
+    "boosts": {
+      "attack": 7,
+      "hp": 40
+    }
+  },
+
+  "wind_fox": {
+    "name": "Wind Fox",
+    "description": "A swift fox that increases movement and strike precision.",
+    "price": 2600,
+    "boosts": {
+      "speed": 12,
+      "crit_chance": 0.07
+    }
+  },
+
+  "holy_lamb": {
+    "name": "Holy Lamb",
+    "description": "A blessed creature that passively restores vitality.",
+    "price": 3000,
+    "boosts": {
+      "hp_regen": 4,
+      "defense": 5
+    }
+  },
+
+  "treasure_mimic": {
+    "name": "Treasure Mimic",
+    "description": "A mischievous chest-creature that multiplies your gold gains.",
+    "price": 4000,
+    "boosts": {
+      "gold_gain": 0.35,
+      "item_find_chance": 0.05
+    }
+  },
+
+  "storm_hawk": {
+    "name": "Storm Hawk",
+    "description": "A lightning-fast predator that enhances speed and power.",
+    "price": 3500,
+    "boosts": {
+      "attack": 8,
+      "speed": 10
+    }
+  },
+  "dragon_turtle": {
+    "name": "Dragon Turtle",
+    "description": "An ancient hybrid beast that provides immense physical protection.",
+    "price": 6000,
+    "boosts": {
+      "defense": 15,
+      "hp": 80,
+      "hp_regen": 3
+    }
+  },
+  "void_stalker": {
+    "name": "Void Stalker",
+    "description": "A creature from the abyss that sharpens your critical strikes.",
+    "price": 7500,
+    "boosts": {
+      "crit_chance": 0.15,
+      "speed": 10,
+      "attack": 5
+    }
+  },
+  "lucky_cat": {
+    "name": "Lucky Cat",
+    "description": "A waving cat figurine come to life, attracting luck and fortune.",
+    "price": 4500,
+    "boosts": {
+      "gold_gain": 0.25,
+      "item_find_chance": 0.15
+    }
+  }
+}

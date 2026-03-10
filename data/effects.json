@@ -1,0 +1,135 @@
+{
+  "poison": {
+    "description": "Deals damage over time",
+    "type": "damage_over_time",
+    "damage": 5,
+    "duration": 5,
+    "tick_rate": 1
+  },
+  "stun": {
+    "description": "Paralyzes the target, preventing action",
+    "type": "action_block",
+    "duration": 2,
+    "chance": 0.7
+  },
+  "blind": {
+    "description": "Reduces accuracy and critical chance",
+    "type": "accuracy_reduction",
+    "accuracy_penalty": 30,
+    "critical_reduction": 0.5,
+    "duration": 8
+  },
+  "slow": {
+    "description": "Reduces target's speed",
+    "type": "speed_reduction",
+    "speed_penalty": 5,
+    "duration": 10
+  },
+  "defense_boost": {
+    "description": "Increases defense temporarily",
+    "type": "stat_boost",
+    "defense_bonus": 8,
+    "duration": 15
+  },
+  "speed_boost": {
+    "description": "Increases speed temporarily",
+    "type": "stat_boost",
+    "speed_bonus": 6,
+    "duration": 12
+  },
+  "shield": {
+    "description": "Absorbs incoming damage",
+    "type": "damage_absorb",
+    "absorb_amount": 30,
+    "duration": 10
+  },
+  "reveal": {
+    "description": "Reveals enemy weaknesses and increases critical chance",
+    "type": "reconnaissance",
+    "critical_bonus": 0.2,
+    "weakness_reveal": true,
+    "duration": 8
+  },
+  "burn": {
+    "description": "Fire damage over time",
+    "type": "damage_over_time",
+    "damage": 7,
+    "duration": 4,
+    "tick_rate": 1
+  },
+  "freeze": {
+    "description": "Ice immobilization with periodic damage",
+    "type": "mixed_effect",
+    "stun_duration": 3,
+    "damage_per_turn": 4,
+    "chance": 0.6
+  },
+  "curse": {
+    "description": "Reduces all stats",
+    "type": "stat_reduction",
+    "attack_penalty": 4,
+    "defense_penalty": 3,
+    "speed_penalty": 3,
+    "duration": 12
+  },
+  "regeneration": {
+    "description": "Heals over time",
+    "type": "healing_over_time",
+    "heal_amount": 8,
+    "duration": 6,
+    "tick_rate": 1
+  },
+  "strength_boost": {
+    "description": "Increases attack power",
+    "type": "stat_boost",
+    "attack_bonus": 6,
+    "duration": 15
+  },
+  "mana_regeneration": {
+    "description": "Restores MP over time",
+    "type": "mp_over_time",
+    "mp_amount": 6,
+    "duration": 8,
+    "tick_rate": 1
+  },
+  "silence": {
+    "description": "Prevents spell casting",
+    "type": "action_block",
+    "duration": 5,
+    "chance": 0.8
+  },
+  "heal": {
+    "description": "Restores health points",
+    "type": "instant_heal",
+    "heal_amount": 50
+  },
+  "mp_restore": {
+    "description": "Restores mana points",
+    "type": "instant_mp_restore",
+    "mp_amount": 30
+  },
+  "giant_strength": {
+    "description": "Temporarily grants giant strength and increased attack power",
+    "type": "stat_boost",
+    "attack_bonus": 15,
+    "duration": 5
+  },
+  "shadow_step": {
+    "description": "Allows instantaneous movement through shadows",
+    "type": "utility",
+    "charges": 3,
+    "evasion_bonus": 20
+  },
+  "full_heal": {
+    "description": "Fully restores health",
+    "type": "instant_heal",
+    "heal_percent": 100
+  },
+  "dragon_breath": {
+    "description": "Grants fire breath attack ability",
+    "type": "temporary_ability",
+    "damage": 50,
+    "duration": 3,
+    "ability_name": "Dragon Breath"
+  }
+}
