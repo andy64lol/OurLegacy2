@@ -1,5 +1,5 @@
 """
-Medieval-themed GUI for Our Legacy RPG using customtkinter.
+Medieval-themed GUI for Our Legacy 2 RPG using customtkinter.
 Provides a complete GUI-based interface for the game.
 """
 
@@ -42,7 +42,7 @@ class MedievalWindow(ctk.CTk):
     """
 
     def __init__(self,
-                 title: str = "Our Legacy",
+                 title: str = "Our Legacy 2",
                  width: int = 1000,
                  height: int = 700):
         """
@@ -432,19 +432,13 @@ class TextInputDialog(ctk.CTkToplevel):
         """Get the input result."""
         return self.result
 
-
-# ============================================
-# NEW GUI COMPONENTS FOR GAME WINDOW
-# ============================================
-
-
 class GameWindow(ctk.CTk):
     """
     Main game window with sidebar, content area, message panel, and status bar.
     """
 
     def __init__(self,
-                 title: str = "Our Legacy",
+                 title: str = "Our Legacy 2",
                  width: int = 1200,
                  height: int = 800):
         """Initialize the game window."""
@@ -514,7 +508,7 @@ class GameWindow(ctk.CTk):
         """Setup the sidebar navigation."""
         # Title
         title_label = MedievalLabel(self.sidebar,
-                                    text="OUR LEGACY",
+                                    text="Our Legacy 2",
                                     style='title')
         title_label.pack(pady=20, padx=10)
 
@@ -1043,7 +1037,7 @@ class WelcomeView(BaseGameView):
         content = self.game_window.game_content
 
         # Title
-        title = MedievalLabel(content, text="OUR LEGACY", style='title')
+        title = MedievalLabel(content, text="Our Legacy 2", style='title')
         title.pack(pady=30)
 
         subtitle = MedievalLabel(content,
