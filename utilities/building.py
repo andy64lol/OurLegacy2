@@ -3,6 +3,7 @@ import time
 from typing import Dict, List
 from utilities.crafting import visit_alchemy
 import random
+from utilities.gui import gui_safe_input
 
 
 def build_home(self):
@@ -16,7 +17,7 @@ def build_home(self):
         print(
             f"{Colors.YELLOW}You haven't purchased any housing items yet! Visit the Housing Shop first.{Colors.END}"
         )
-        input(self.lang.get("press_enter"))
+        gui_safe_input(self.lang.get("press_enter"))
         return
 
     while True:
@@ -206,7 +207,7 @@ def remove_housing_item(self):
         self.player.comfort_points -= item.get('comfort_points', 0)
 
     print(f"{Colors.YELLOW}Removed item from {target_slot}.{Colors.END}")
-    input(self.lang.get("press_enter"))
+    gui_safe_input(self.lang.get("press_enter"))
 
 
 def _place_housing_item(self):
@@ -313,7 +314,7 @@ def _place_housing_item(self):
     print(
         f"{Colors.GREEN}Placed {item.get('name', item_id)} in {target_slot}!{Colors.END}"
     )
-    input(self.lang.get("press_enter"))
+    gui_safe_input(self.lang.get("press_enter"))
 
 
 def build_structures(self):
@@ -555,11 +556,11 @@ def manage_slot(self, slot_name: str, available_items: List[Dict]):
             if current_item:
                 self.player.building_slots[slot_name] = None
                 print(self.lang.get("n_slot_cleared"))
-                input(self.lang.get("press_enter"))
+                gui_safe_input(self.lang.get("press_enter"))
                 break
             else:
                 print(f"\n{Colors.YELLOW}Slot is already empty.{Colors.END}")
-                input(self.lang.get("press_enter"))
+                gui_safe_input(self.lang.get("press_enter"))
         elif choice.isdigit():
             item_idx = int(choice) - 1
             if 0 <= item_idx < len(available_items):
@@ -602,14 +603,14 @@ def manage_slot(self, slot_name: str, available_items: List[Dict]):
                     print(
                         f"Total comfort: {Colors.CYAN}{self.player.comfort_points}{Colors.END}"
                     )
-                    input(self.lang.get("press_enter"))
+                    gui_safe_input(self.lang.get("press_enter"))
                     break
                 else:
                     needed = swap_cost - self.player.gold
                     print(
                         f"\n{Colors.RED}✗ Not enough gold! Need {needed} more.{Colors.END}"
                     )
-                    input(self.lang.get("press_enter"))
+                    gui_safe_input(self.lang.get("press_enter"))
 
 
 def farm(self):
@@ -628,7 +629,7 @@ def farm(self):
         print(
             f"\n{Colors.YELLOW}You need to build a farm first! Use the 'Build Structures' option.{Colors.END}"
         )
-        input(self.lang.get("press_enter"))
+        gui_safe_input(self.lang.get("press_enter"))
         return
 
     while True:
@@ -745,7 +746,7 @@ def plant_crop(self, crop_tuple):
 
     if not farm_choices:
         print(self.lang.get("no_active_farms_available"))
-        input(self.lang.get("press_enter"))
+        gui_safe_input(self.lang.get("press_enter"))
         return
 
     choice = ask(
@@ -780,7 +781,7 @@ def plant_crop(self, crop_tuple):
                     f"\n{Colors.YELLOW}This farm plot is full! ({max_plots}/{max_plots} plants){Colors.END}"
                 )
 
-            input(self.lang.get("press_enter"))
+            gui_safe_input(self.lang.get("press_enter"))
 
 
 def harvest_crops(self):
@@ -827,7 +828,7 @@ def harvest_crops(self):
     if not harvested:
         print(f"{Colors.YELLOW}No crops are ready to harvest yet.{Colors.END}")
 
-    input(self.lang.get("press_enter"))
+    gui_safe_input(self.lang.get("press_enter"))
 
 
 def view_farming_inventory(self):
@@ -881,7 +882,7 @@ def view_farming_inventory(self):
         print(
             f"{Colors.YELLOW}You have no crops in your inventory yet.{Colors.END}"
         )
-        input(self.lang.get("press_enter"))
+        gui_safe_input(self.lang.get("press_enter"))
 
 
 def sell_crops(self):
@@ -924,7 +925,7 @@ def sell_crops(self):
         f"\n{Colors.GREEN}✓ Sold all crops for {Colors.GOLD}{total_gold} gold{Colors.END}{Colors.GREEN}!{Colors.END}"
     )
     print(f"Total gold: {Colors.GOLD}{self.player.gold}{Colors.END}")
-    input(self.lang.get("press_enter"))
+    gui_safe_input(self.lang.get("press_enter"))
 
 
 def training(self):
@@ -943,7 +944,7 @@ def training(self):
         print(
             f"\n{Colors.YELLOW}You need to build a Training Place first! Use the 'Build Structures' option.{Colors.END}"
         )
-        input(self.lang.get("press_enter"))
+        gui_safe_input(self.lang.get("press_enter"))
         return
 
     # Calculate training effectiveness based on buildings
@@ -1090,7 +1091,7 @@ def training(self):
                 f"Speed: {Colors.YELLOW}{old_stats['speed']} → {self.player.speed}{Colors.END}"
             )
 
-            input(self.lang.get('press_enter'))
+            gui_safe_input(self.lang.get('press_enter'))
         else:
             print(self.lang.get("invalid_choice_2"))
             time.sleep(1)

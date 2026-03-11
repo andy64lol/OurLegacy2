@@ -1559,6 +1559,13 @@ def is_gui_mode() -> bool:
     return GUI_MODE
 
 
+def gui_safe_input(prompt: str = '', default: str = '') -> str:
+    """Return *default* immediately in GUI mode; otherwise call input(prompt)."""
+    if GUI_MODE:
+        return default
+    return input(prompt)
+
+
 def show_gui(message: str,
              title: str = "Message",
              dialog_type: str = "message"):
@@ -1583,10 +1590,11 @@ def show_message_gui(title: str, message: str):
         print(f"[{title}] {message}")
 
 
-def show_choice_gui(title: str,
-                    message: str,
-                    choices: List[str],
-                    callback: Optional[Callable[[str], None]] = None) -> Optional[str]:
+def show_choice_gui(
+        title: str,
+        message: str,
+        choices: List[str],
+        callback: Optional[Callable[[str], None]] = None) -> Optional[str]:
     """
     Show a choice dialog and return the selected option.
     """
@@ -1600,9 +1608,10 @@ def show_choice_gui(title: str,
         return None
 
 
-def show_input_gui(title: str,
-                   prompt: str,
-                   callback: Optional[Callable[[str], None]] = None) -> Optional[str]:
+def show_input_gui(
+        title: str,
+        prompt: str,
+        callback: Optional[Callable[[str], None]] = None) -> Optional[str]:
     """
     Show an input dialog and return the user's input.
     """
@@ -1733,7 +1742,8 @@ class CharacterCreationView(BaseGameView):
         p.base_attack = p.attack
         p.base_defense = p.defense
         p.base_speed = p.speed
-        p.give_starting_items(chosen_class, self.game.classes_data, self.game.items_data, self.game.lang)
+        p.give_starting_items(chosen_class, self.game.classes_data,
+                              self.game.items_data, self.game.lang)
         self.game.visited_areas.add(self.game.player.current_area)
         self.game.update_weather()
 
@@ -2353,21 +2363,28 @@ class TravelView(BaseGameView):
         content = self.game_window.game_content
 
         if not self.game.player:
-            MedievalLabel(content, text="No character created", style='normal').pack(pady=20)
+            MedievalLabel(content, text="No character created",
+                          style='normal').pack(pady=20)
             return
 
         area_data = self.game.areas_data.get(self.game.current_area, {})
         area_name = area_data.get('name', self.game.current_area)
 
         MedievalLabel(content, text="Travel", style='title').pack(pady=20)
-        MedievalLabel(content, text=f"Current Location: {area_name}", style='subtitle').pack(pady=5)
+        MedievalLabel(content,
+                      text=f"Current Location: {area_name}",
+                      style='subtitle').pack(pady=5)
 
         connected = area_data.get('connected_areas', [])
         if not connected:
-            MedievalLabel(content, text="No connected areas from here.", style='dim').pack(pady=20)
+            MedievalLabel(content,
+                          text="No connected areas from here.",
+                          style='dim').pack(pady=20)
             return
 
-        MedievalLabel(content, text="Where would you like to travel?", style='normal').pack(pady=10)
+        MedievalLabel(content,
+                      text="Where would you like to travel?",
+                      style='normal').pack(pady=10)
 
         areas_frame = MedievalFrame(content)
         areas_frame.pack(pady=10, padx=30, fill=ctk.BOTH, expand=True)
@@ -2378,26 +2395,42 @@ class TravelView(BaseGameView):
             dest_desc = dest_data.get('description', '')
             min_level = dest_data.get('min_level', 1)
 
-            row = ctk.CTkFrame(areas_frame, fg_color=MEDIEVAL_COLORS['bg_dark'])
+            row = ctk.CTkFrame(areas_frame,
+                               fg_color=MEDIEVAL_COLORS['bg_dark'])
             row.pack(fill=ctk.X, padx=10, pady=5)
 
             info = ctk.CTkFrame(row, fg_color='transparent')
-            info.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True, padx=10, pady=8)
+            info.pack(side=ctk.LEFT,
+                      fill=ctk.BOTH,
+                      expand=True,
+                      padx=10,
+                      pady=8)
 
-            ctk.CTkLabel(info, text=dest_name, text_color=MEDIEVAL_COLORS['accent_gold'],
+            ctk.CTkLabel(info,
+                         text=dest_name,
+                         text_color=MEDIEVAL_COLORS['accent_gold'],
                          font=('Arial', 13, 'bold')).pack(anchor='w')
             if dest_desc:
-                ctk.CTkLabel(info, text=dest_desc[:80] + ('…' if len(dest_desc) > 80 else ''),
-                             text_color=MEDIEVAL_COLORS['text_dim'], font=('Arial', 11)).pack(anchor='w')
+                ctk.CTkLabel(info,
+                             text=dest_desc[:80] +
+                             ('…' if len(dest_desc) > 80 else ''),
+                             text_color=MEDIEVAL_COLORS['text_dim'],
+                             font=('Arial', 11)).pack(anchor='w')
             if min_level > 1:
-                ctk.CTkLabel(info, text=f"Min Level: {min_level}",
-                             text_color=MEDIEVAL_COLORS['text_dim'], font=('Arial', 10)).pack(anchor='w')
+                ctk.CTkLabel(info,
+                             text=f"Min Level: {min_level}",
+                             text_color=MEDIEVAL_COLORS['text_dim'],
+                             font=('Arial', 10)).pack(anchor='w')
 
             can_travel = self.game.player.level >= min_level
-            btn = MedievalButton(row, text="Travel →", size='small',
-                                 command=lambda aid=area_id, aname=dest_name: self._travel_to(aid, aname))
+            btn = MedievalButton(row,
+                                 text="Travel →",
+                                 size='small',
+                                 command=lambda aid=area_id, aname=dest_name:
+                                 self._travel_to(aid, aname))
             if not can_travel:
-                btn.configure(state='disabled', fg_color=MEDIEVAL_COLORS['text_dim'])
+                btn.configure(state='disabled',
+                              fg_color=MEDIEVAL_COLORS['text_dim'])
             btn.pack(side=ctk.RIGHT, padx=10, pady=8)
 
     def _travel_to(self, area_id: str, area_name: str):
@@ -2408,7 +2441,8 @@ class TravelView(BaseGameView):
         self.game.update_weather()
         self.game_window.update_status(self.game.player)
         self.game_window.show_land_buttons(area_id == "your_land")
-        self.game_window.add_message(f"You travel to {area_name}.", MEDIEVAL_COLORS['accent_gold'])
+        self.game_window.add_message(f"You travel to {area_name}.",
+                                     MEDIEVAL_COLORS['accent_gold'])
         self.show()
 
 
@@ -2420,20 +2454,26 @@ class BossView(BaseGameView):
         content = self.game_window.game_content
 
         if not self.game.player:
-            MedievalLabel(content, text="No character created", style='normal').pack(pady=20)
+            MedievalLabel(content, text="No character created",
+                          style='normal').pack(pady=20)
             return
 
         area_data = self.game.areas_data.get(self.game.current_area, {})
         area_name = area_data.get('name', self.game.current_area)
         possible_bosses = area_data.get('possible_bosses', [])
 
-        MedievalLabel(content, text="Boss Battles", style='title').pack(pady=20)
+        MedievalLabel(content, text="Boss Battles",
+                      style='title').pack(pady=20)
 
         if not possible_bosses:
-            MedievalLabel(content, text=f"No bosses in {area_name}.", style='dim').pack(pady=20)
+            MedievalLabel(content,
+                          text=f"No bosses in {area_name}.",
+                          style='dim').pack(pady=20)
             return
 
-        MedievalLabel(content, text=f"Bosses in {area_name}:", style='subtitle').pack(pady=10)
+        MedievalLabel(content,
+                      text=f"Bosses in {area_name}:",
+                      style='subtitle').pack(pady=10)
 
         bosses_frame = MedievalScrollableFrame(content, height=400)
         bosses_frame.pack(pady=10, padx=30, fill=ctk.BOTH, expand=True)
@@ -2442,28 +2482,43 @@ class BossView(BaseGameView):
             boss_data = self.game.bosses_data.get(boss_id, {})
             boss_name = boss_data.get('name', boss_id)
 
-            row = ctk.CTkFrame(bosses_frame, fg_color=MEDIEVAL_COLORS['bg_dark'])
+            row = ctk.CTkFrame(bosses_frame,
+                               fg_color=MEDIEVAL_COLORS['bg_dark'])
             row.pack(fill=ctk.X, padx=5, pady=5)
 
             info = ctk.CTkFrame(row, fg_color='transparent')
-            info.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True, padx=10, pady=8)
+            info.pack(side=ctk.LEFT,
+                      fill=ctk.BOTH,
+                      expand=True,
+                      padx=10,
+                      pady=8)
 
-            ctk.CTkLabel(info, text=boss_name, text_color=MEDIEVAL_COLORS['health_red'],
+            ctk.CTkLabel(info,
+                         text=boss_name,
+                         text_color=MEDIEVAL_COLORS['health_red'],
                          font=('Arial', 14, 'bold')).pack(anchor='w')
 
             on_cooldown, cooldown_text = self._check_cooldown(boss_id)
             if on_cooldown:
-                ctk.CTkLabel(info, text=cooldown_text, text_color=MEDIEVAL_COLORS['text_dim'],
+                ctk.CTkLabel(info,
+                             text=cooldown_text,
+                             text_color=MEDIEVAL_COLORS['text_dim'],
                              font=('Arial', 11)).pack(anchor='w')
 
             hp = boss_data.get('hp', '?')
-            ctk.CTkLabel(info, text=f"HP: {hp}", text_color=MEDIEVAL_COLORS['text_dim'],
+            ctk.CTkLabel(info,
+                         text=f"HP: {hp}",
+                         text_color=MEDIEVAL_COLORS['text_dim'],
                          font=('Arial', 11)).pack(anchor='w')
 
-            btn = MedievalButton(row, text="Fight!", size='small',
-                                 command=lambda bid=boss_id: self._fight_boss(bid))
+            btn = MedievalButton(
+                row,
+                text="Fight!",
+                size='small',
+                command=lambda bid=boss_id: self._fight_boss(bid))
             if on_cooldown:
-                btn.configure(state='disabled', fg_color=MEDIEVAL_COLORS['text_dim'])
+                btn.configure(state='disabled',
+                              fg_color=MEDIEVAL_COLORS['text_dim'])
             btn.pack(side=ctk.RIGHT, padx=10, pady=8)
 
     def _check_cooldown(self, boss_id: str):
@@ -2484,17 +2539,20 @@ class BossView(BaseGameView):
     def _fight_boss(self, boss_id: str):
         on_cooldown, cooldown_text = self._check_cooldown(boss_id)
         if on_cooldown:
-            self.game_window.add_message(cooldown_text, MEDIEVAL_COLORS['health_red'])
+            self.game_window.add_message(cooldown_text,
+                                         MEDIEVAL_COLORS['health_red'])
             return
         boss_data = self.game.bosses_data.get(boss_id)
         if not boss_data:
             return
         from utilities.entities import Boss
         boss = Boss(boss_data, self.game.dialogues_data)
-        self.game_window.add_message(f"You challenge {boss.name}!", MEDIEVAL_COLORS['health_red'])
+        self.game_window.add_message(f"You challenge {boss.name}!",
+                                     MEDIEVAL_COLORS['health_red'])
         start_dialogue = boss.get_dialogue("on_start_battle")
         if start_dialogue:
-            self.game_window.add_message(f'{boss.name}: "{start_dialogue}"', MEDIEVAL_COLORS['accent_gold'])
+            self.game_window.add_message(f'{boss.name}: "{start_dialogue}"',
+                                         MEDIEVAL_COLORS['accent_gold'])
         self.game.battle(boss)
         self.game_window.update_status(self.game.player)
         self.show()
@@ -2508,7 +2566,8 @@ class CompanionsView(BaseGameView):
         content = self.game_window.game_content
 
         if not self.game.player:
-            MedievalLabel(content, text="No character created", style='normal').pack(pady=20)
+            MedievalLabel(content, text="No character created",
+                          style='normal').pack(pady=20)
             return
 
         player = self.game.player
@@ -2516,25 +2575,41 @@ class CompanionsView(BaseGameView):
 
         active = getattr(player, 'companions', [])
         if active:
-            MedievalLabel(content, text="Active Companions", style='subtitle').pack(pady=10, anchor='w', padx=30)
+            MedievalLabel(content, text="Active Companions",
+                          style='subtitle').pack(pady=10, anchor='w', padx=30)
             active_frame = MedievalScrollableFrame(content, height=150)
             active_frame.pack(pady=5, padx=30, fill=ctk.X)
             for comp_id in active:
                 comp_data = self.game.companions_data.get(comp_id, {})
                 name = comp_data.get('name', comp_id)
                 role = comp_data.get('role', '')
-                row = ctk.CTkFrame(active_frame, fg_color=MEDIEVAL_COLORS['bg_dark'])
+                row = ctk.CTkFrame(active_frame,
+                                   fg_color=MEDIEVAL_COLORS['bg_dark'])
                 row.pack(fill=ctk.X, padx=5, pady=3)
-                ctk.CTkLabel(row, text=f"{name}  —  {role}",
-                             text_color=MEDIEVAL_COLORS['text_light'], font=('Arial', 12)).pack(side=ctk.LEFT, padx=10, pady=5)
-                MedievalButton(row, text="Dismiss", size='small',
-                               command=lambda cid=comp_id: self._dismiss(cid)).pack(side=ctk.RIGHT, padx=10, pady=5)
+                ctk.CTkLabel(row,
+                             text=f"{name}  —  {role}",
+                             text_color=MEDIEVAL_COLORS['text_light'],
+                             font=('Arial', 12)).pack(side=ctk.LEFT,
+                                                      padx=10,
+                                                      pady=5)
+                MedievalButton(
+                    row,
+                    text="Dismiss",
+                    size='small',
+                    command=lambda cid=comp_id: self._dismiss(cid)).pack(
+                        side=ctk.RIGHT, padx=10, pady=5)
         else:
-            MedievalLabel(content, text="No active companions.", style='dim').pack(pady=5, padx=30, anchor='w')
+            MedievalLabel(content, text="No active companions.",
+                          style='dim').pack(pady=5, padx=30, anchor='w')
 
-        available = [cid for cid in self.game.companions_data.keys() if cid not in active]
+        available = [
+            cid for cid in self.game.companions_data.keys()
+            if cid not in active
+        ]
         if available:
-            MedievalLabel(content, text="Available Companions", style='subtitle').pack(pady=10, anchor='w', padx=30)
+            MedievalLabel(content,
+                          text="Available Companions",
+                          style='subtitle').pack(pady=10, anchor='w', padx=30)
             avail_frame = MedievalScrollableFrame(content, height=200)
             avail_frame.pack(pady=5, padx=30, fill=ctk.BOTH, expand=True)
             for comp_id in available:
@@ -2542,27 +2617,38 @@ class CompanionsView(BaseGameView):
                 name = comp_data.get('name', comp_id)
                 role = comp_data.get('role', '')
                 cost = comp_data.get('hire_cost', comp_data.get('cost', 0))
-                row = ctk.CTkFrame(avail_frame, fg_color=MEDIEVAL_COLORS['bg_dark'])
+                row = ctk.CTkFrame(avail_frame,
+                                   fg_color=MEDIEVAL_COLORS['bg_dark'])
                 row.pack(fill=ctk.X, padx=5, pady=3)
-                ctk.CTkLabel(row, text=f"{name}  ({role})  —  {cost} gold",
-                             text_color=MEDIEVAL_COLORS['text_light'], font=('Arial', 12)).pack(side=ctk.LEFT, padx=10, pady=5)
+                ctk.CTkLabel(row,
+                             text=f"{name}  ({role})  —  {cost} gold",
+                             text_color=MEDIEVAL_COLORS['text_light'],
+                             font=('Arial', 12)).pack(side=ctk.LEFT,
+                                                      padx=10,
+                                                      pady=5)
                 can_afford = player.gold >= cost
-                btn = MedievalButton(row, text="Hire", size='small',
-                                     command=lambda cid=comp_id, c=cost: self._hire(cid, c))
+                btn = MedievalButton(
+                    row,
+                    text="Hire",
+                    size='small',
+                    command=lambda cid=comp_id, c=cost: self._hire(cid, c))
                 if not can_afford:
-                    btn.configure(state='disabled', fg_color=MEDIEVAL_COLORS['text_dim'])
+                    btn.configure(state='disabled',
+                                  fg_color=MEDIEVAL_COLORS['text_dim'])
                 btn.pack(side=ctk.RIGHT, padx=10, pady=5)
 
     def _hire(self, comp_id: str, cost: int):
         player = self.game.player
         if player.gold < cost:
-            self.game_window.add_message("Not enough gold.", MEDIEVAL_COLORS['health_red'])
+            self.game_window.add_message("Not enough gold.",
+                                         MEDIEVAL_COLORS['health_red'])
             return
         player.gold -= cost
         player.companions.append(comp_id)
         name = self.game.companions_data.get(comp_id, {}).get('name', comp_id)
         self.game_window.update_status(player)
-        self.game_window.add_message(f"{name} joins your party!", MEDIEVAL_COLORS['exp_green'])
+        self.game_window.add_message(f"{name} joins your party!",
+                                     MEDIEVAL_COLORS['exp_green'])
         self.show()
 
     def _dismiss(self, comp_id: str):
@@ -2570,7 +2656,8 @@ class CompanionsView(BaseGameView):
         if comp_id in player.companions:
             player.companions.remove(comp_id)
         name = self.game.companions_data.get(comp_id, {}).get('name', comp_id)
-        self.game_window.add_message(f"{name} has left the party.", MEDIEVAL_COLORS['text_dim'])
+        self.game_window.add_message(f"{name} has left the party.",
+                                     MEDIEVAL_COLORS['text_dim'])
         self.show()
 
 
@@ -2582,14 +2669,18 @@ class ChallengesView(BaseGameView):
         content = self.game_window.game_content
 
         if not self.game.player:
-            MedievalLabel(content, text="No character created", style='normal').pack(pady=20)
+            MedievalLabel(content, text="No character created",
+                          style='normal').pack(pady=20)
             return
 
-        MedievalLabel(content, text="Weekly Challenges", style='title').pack(pady=20)
+        MedievalLabel(content, text="Weekly Challenges",
+                      style='title').pack(pady=20)
 
         challenges = self.game.weekly_challenges_data.get('challenges', [])
         if not challenges:
-            MedievalLabel(content, text="No challenges available.", style='dim').pack(pady=20)
+            MedievalLabel(content,
+                          text="No challenges available.",
+                          style='dim').pack(pady=20)
             return
 
         scroll = MedievalScrollableFrame(content, height=450)
@@ -2607,19 +2698,31 @@ class ChallengesView(BaseGameView):
             header = ctk.CTkFrame(card, fg_color='transparent')
             header.pack(fill=ctk.X, padx=10, pady=(8, 2))
 
-            name_color = MEDIEVAL_COLORS['exp_green'] if is_done else MEDIEVAL_COLORS['accent_gold']
-            ctk.CTkLabel(header, text=challenge.get('name', cid),
-                         text_color=name_color, font=('Arial', 13, 'bold')).pack(side=ctk.LEFT)
+            name_color = MEDIEVAL_COLORS[
+                'exp_green'] if is_done else MEDIEVAL_COLORS['accent_gold']
+            ctk.CTkLabel(header,
+                         text=challenge.get('name', cid),
+                         text_color=name_color,
+                         font=('Arial', 13, 'bold')).pack(side=ctk.LEFT)
 
             status_text = "✓ COMPLETED" if is_done else f"{progress}/{target}"
-            status_color = MEDIEVAL_COLORS['exp_green'] if is_done else MEDIEVAL_COLORS['text_light']
-            ctk.CTkLabel(header, text=status_text, text_color=status_color,
+            status_color = MEDIEVAL_COLORS[
+                'exp_green'] if is_done else MEDIEVAL_COLORS['text_light']
+            ctk.CTkLabel(header,
+                         text=status_text,
+                         text_color=status_color,
                          font=('Arial', 12)).pack(side=ctk.RIGHT)
 
-            ctk.CTkLabel(card, text=challenge.get('description', ''),
-                         text_color=MEDIEVAL_COLORS['text_dim'], font=('Arial', 11)).pack(anchor='w', padx=10, pady=2)
+            ctk.CTkLabel(card,
+                         text=challenge.get('description', ''),
+                         text_color=MEDIEVAL_COLORS['text_dim'],
+                         font=('Arial', 11)).pack(anchor='w', padx=10, pady=2)
 
             reward_exp = challenge.get('reward_exp', 0)
             reward_gold = challenge.get('reward_gold', 0)
-            ctk.CTkLabel(card, text=f"Reward: {reward_exp} EXP + {reward_gold} Gold",
-                         text_color=MEDIEVAL_COLORS['gold_yellow'], font=('Arial', 11)).pack(anchor='w', padx=10, pady=(2, 8))
+            ctk.CTkLabel(card,
+                         text=f"Reward: {reward_exp} EXP + {reward_gold} Gold",
+                         text_color=MEDIEVAL_COLORS['gold_yellow'],
+                         font=('Arial', 11)).pack(anchor='w',
+                                                  padx=10,
+                                                  pady=(2, 8))

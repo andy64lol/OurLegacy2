@@ -11,7 +11,6 @@ import time
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 import difflib
-import signal
 import traceback
 import io
 from utilities.settings import get_setting, set_setting
@@ -2571,77 +2570,12 @@ class Game:
         sys.stdout = _orig_stdout
         set_gui_mode(False)
 
-    def run(self):
-        """Main game loop"""
-        choice = self.display_welcome()
-
-        if choice == "new_game":
-            self.create_character()
-        elif choice == "load_game":
-            self.load_game()
-            if not self.player:
-                print(self.lang.get('ui_no_game_loaded'))
-                self.create_character()
-
-        # Ensure player has reference to data and up-to-date stats
-        if self.player:
-            self.player.weather_data = getattr(self, 'weather_data', {})
-            self.player.times_data = getattr(self, 'times_data', {})
-            self.player.update_stats_from_equipment(self.items_data,
-                                                    self.companions_data)
-
-        # Main game loop
-        while True:
-            self.main_menu()
-
 
 def main():
-    """Main entry point. Pass --gui or -g to launch in GUI mode."""
-    use_gui = '--gui' in sys.argv or '-g' in sys.argv
-
+    """Main entry point — launches the GUI."""
     game = Game()
-
-    if use_gui:
-        game.run_gui()
-        return
-
-    # CLI mode: setup Ctrl+C / uncaught exception handlers then enter the text loop
-    try:
-        def _handle_sigint(signum, frame):
-            print(
-                "\nReceived interrupt (SIGINT). Attempting to save before exit..."
-            )
-            try:
-                game.save_on_error(filename_prefix="err_save_unstable_")
-            finally:
-                sys.exit(1)
-
-        signal.signal(signal.SIGINT, _handle_sigint)
-
-        def _handle_exception(exc_type, exc_value, exc_tb):
-            print(
-                "Unhandled exception occurred. Attempting to save game before exiting..."
-            )
-            try:
-                game.save_on_error((exc_type, exc_value, exc_tb),
-                                   filename_prefix="err_save_unstable_")
-            except Exception:
-                pass
-            traceback.print_exception(exc_type, exc_value, exc_tb)
-            sys.exit(1)
-
-        sys.excepthook = _handle_exception
-    except Exception:
-        pass
-
-    game.run()
+    game.run_gui()
 
 
 if __name__ == "__main__":
-    if '--gui' in sys.argv or '-g' in sys.argv:
-        main()
-    else:
-        clear_screen()
-        main()
-        time.sleep(1)
-        clear_screen()
+    main()

@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 
 from utilities.settings import Colors
+from utilities.gui import gui_safe_input
 
 
 def get_rarity_color(rarity: str) -> str:
@@ -58,7 +59,7 @@ class DungeonSystem:
                 f"Progress: Room {self.dungeon_progress + 1}/{len(self.dungeon_rooms)}"
             )
 
-            choice = input("Continue dungeon (C) or Exit (E)? ").strip().upper()
+            choice = gui_safe_input("Continue dungeon (C) or Exit (E)? ", 'C').strip().upper()
             if choice == 'C':
                 self.continue_dungeon()
             elif choice == 'E':
@@ -106,8 +107,8 @@ class DungeonSystem:
             print(f"   {desc}")
             print(f"   Status: {status}")
 
-        choice = input(
-            f"\nChoose dungeon (1-{len(dungeons)}) or press Enter to cancel: ")
+        choice = gui_safe_input(
+            f"\nChoose dungeon (1-{len(dungeons)}) or press Enter to cancel: ", '')
         if choice and choice.isdigit():
             idx = int(choice) - 1
             if 0 <= idx < len(dungeons):
@@ -267,8 +268,9 @@ class DungeonSystem:
         max_attempts = question_data.get('max_attempts', 3)
 
         while attempts < max_attempts:
-            answer = input(
-                f"Your answer ({max_attempts - attempts} tries left, or type 'leave'): "
+            answer = gui_safe_input(
+                f"Your answer ({max_attempts - attempts} tries left, or type 'leave'): ",
+                'leave'
             ).strip().lower()
 
             if answer == 'leave':
@@ -535,7 +537,7 @@ class DungeonSystem:
             return
         print(self.lang.get('ui_suspicious_chest'))
 
-        choice = input("Open the chest (O) or leave it (L)? ").strip().upper()
+        choice = gui_safe_input("Open the chest (O) or leave it (L)? ", 'L').strip().upper()
 
         if choice == 'L':
             print(self.lang.get('ui_leave_chest_alone'))
@@ -618,7 +620,7 @@ class DungeonSystem:
         time_limit = challenge.get('time_limit', 30)
         start_time = time.time()
 
-        choice = input(f"Your choice (1-{len(options)}): ").strip()
+        choice = gui_safe_input(f"Your choice (1-{len(options)}): ", '').strip()
 
         # Check time limit
         elapsed = time.time() - start_time
