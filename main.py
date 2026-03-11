@@ -689,7 +689,8 @@ class Game:
         area_data = self.areas_data.get(self.current_area, {})
         area_name = area_data.get("name", "Unknown Area")
 
-        gui_print(self.lang.get("exploring_area_msg").format(area_name=area_name))
+        gui_print(
+            self.lang.get("exploring_area_msg").format(area_name=area_name))
 
         # Random encounter chance
         if random.random() < 0.7:  # 70% chance of encounter
@@ -705,7 +706,8 @@ class Game:
             if random.random() < 0.3:  # 30% chance to find gold
                 found_gold = random.randint(5, 20)
                 self.player.gold += found_gold
-                gui_print(self.lang.get("found_gold_msg").format(gold=found_gold))
+                gui_print(
+                    self.lang.get("found_gold_msg").format(gold=found_gold))
 
     def random_encounter(self):
         """Handle random encounter with regular enemies"""
@@ -882,7 +884,8 @@ class Game:
                 old_mp = self.player.mp
                 self.player.mp = min(self.player.max_mp,
                                      self.player.mp + mp_amount)
-                gui_print(f"Used {item}, restored {self.player.mp - old_mp} MP!")
+                gui_print(
+                    f"Used {item}, restored {self.player.mp - old_mp} MP!")
 
     def view_inventory(self):
         """View character inventory"""
@@ -981,7 +984,8 @@ class Game:
                 )
                 for i, item in enumerate(consumables, 1):
                     item_data = self.items_data.get(item, {})
-                    gui_print(f"{i}. {item} - {item_data.get('description', '')}")
+                    gui_print(
+                        f"{i}. {item} - {item_data.get('description', '')}")
                 sel = ask(
                     f"Choose item to use (1-{len(consumables)}) or press Enter: "
                 )
@@ -1035,10 +1039,12 @@ class Game:
                         f"   {Colors.DARK_GRAY}{mission.get('description')}{Colors.END}"
                     )
 
-                gui_print(f"\n{self.lang.get('options_available_cancel_back')}")
+                gui_print(
+                    f"\n{self.lang.get('options_available_cancel_back')}")
             else:
                 gui_print(self.lang.get("no_active_missions"))
-                gui_print(f"\n{self.lang.get('options_available_missions_back')}")
+                gui_print(
+                    f"\n{self.lang.get('options_available_missions_back')}")
 
             choice = ask("\nChoose an option: ").upper()
 
@@ -1091,7 +1097,8 @@ class Game:
 
             for i, mission_id in enumerate(current_page_missions, 1):
                 mission = self.missions_data.get(mission_id, {})
-                gui_print(f"{i}. {Colors.BOLD}{mission.get('name')}{Colors.END}")
+                gui_print(
+                    f"{i}. {Colors.BOLD}{mission.get('name')}{Colors.END}")
                 gui_print(f"   {mission.get('description')}")
 
                 # Requirements
@@ -1170,7 +1177,8 @@ class Game:
                         'type': mission_type
                     }
 
-                gui_print(f"Mission accepted: {mission.get('name', 'Unknown')}")
+                gui_print(
+                    f"Mission accepted: {mission.get('name', 'Unknown')}")
 
                 # Check for accept cutscene
                 accept_cutscene = mission.get('accept_cutscene')
@@ -1352,7 +1360,8 @@ class Game:
                 self.completed_missions.append(mission_id)
 
                 gui_print(self.lang.get("nrewards_claimed"))
-                gui_print(f"Gained {Colors.MAGENTA}{exp} experience{Colors.END}")
+                gui_print(
+                    f"Gained {Colors.MAGENTA}{exp} experience{Colors.END}")
                 gui_print(f"Gained {Colors.GOLD}{gold} gold{Colors.END}")
                 if items:
                     gui_print(f"Received items: {', '.join(items)}")
@@ -1384,7 +1393,8 @@ class Game:
             gui_print(
                 f"\n{Colors.BOLD}=== SHOPS IN {area_data.get('name', self.current_area).upper()} ==={Colors.END}"
             )
-            gui_print(f"Your gold: {Colors.GOLD}{self.player.gold}{Colors.END}\n")
+            gui_print(
+                f"Your gold: {Colors.GOLD}{self.player.gold}{Colors.END}\n")
             for i, shop_id in enumerate(available_shops, 1):
                 if shop_id == "housing_shop":
                     shop_name = "Housing Shop"
@@ -1634,7 +1644,8 @@ class Game:
             f"\n{Colors.MAGENTA}{Colors.BOLD}=== ELITE MARKET ==={Colors.END}")
         gui_print(self.lang.get('welcome_elite_market'))
         if self.player:
-            gui_print(f"\nYour gold: {Colors.GOLD}{self.player.gold}{Colors.END}")
+            gui_print(
+                f"\nYour gold: {Colors.GOLD}{self.player.gold}{Colors.END}")
 
         # Check cooldown
         remaining = self.market_api.get_cooldown_remaining()
@@ -1749,7 +1760,8 @@ class Game:
                 rarity_color = get_rarity_color(rarity)
                 price_color = Colors.GREEN if market_price <= self.player.gold else Colors.RED
 
-                gui_print(f"\n{i}. {rarity_color}{name}{Colors.END} ({item_type})")
+                gui_print(
+                    f"\n{i}. {rarity_color}{name}{Colors.END} ({item_type})")
                 gui_print(f"   {Colors.DARK_GRAY}{desc}{Colors.END}")
                 gui_print(
                     f"   {rarity_color}{rarity.title()}{Colors.END} | Level {level_req}"
@@ -2031,7 +2043,8 @@ class Game:
         gui_print(
             f"MP restored: {old_mp} → {Colors.GREEN}{self.player.mp}{Colors.END}"
         )
-        gui_print(f"Gold remaining: {Colors.GOLD}{self.player.gold}{Colors.END}")
+        gui_print(
+            f"Gold remaining: {Colors.GOLD}{self.player.gold}{Colors.END}")
 
     def pet_shop(self):
         """Menu for buying and managing pets."""
@@ -2318,9 +2331,7 @@ class Game:
             GameWindow, WelcomeView, CharacterCreationView, SettingsView,
             ExploreView, CharacterView, InventoryView, MissionsView, ShopView,
             TavernView, MarketView, DungeonsView, HousingView, FarmView,
-            TrainingView, TravelView, BossView, CompanionsView, ChallengesView,
-            set_main_window, set_gui_mode,
-        )
+            TrainingView, TravelView, BossView, CompanionsView, ChallengesView)
 
         window = GameWindow(title="Our Legacy", width=1200, height=800)
         window.game = self
@@ -2333,24 +2344,24 @@ class Game:
 
         # Instantiate all views
         views: Dict[str, Any] = {
-            "welcome":           WelcomeView(window, self),
-            "create_character":  CharacterCreationView(window, self),
-            "character":         CharacterView(window, self),
-            "inventory":         InventoryView(window, self),
-            "explore":           ExploreView(window, self),
-            "missions":          MissionsView(window, self),
-            "shop":              ShopView(window, self),
-            "tavern":            TavernView(window, self),
-            "market":            MarketView(window, self),
-            "dungeons":          DungeonsView(window, self),
-            "housing":           HousingView(window, self),
-            "farm":              FarmView(window, self),
-            "training":          TrainingView(window, self),
-            "travel":            TravelView(window, self),
-            "boss":              BossView(window, self),
-            "companions":        CompanionsView(window, self),
-            "challenges":        ChallengesView(window, self),
-            "settings":          SettingsView(window, self),
+            "welcome": WelcomeView(window, self),
+            "create_character": CharacterCreationView(window, self),
+            "character": CharacterView(window, self),
+            "inventory": InventoryView(window, self),
+            "explore": ExploreView(window, self),
+            "missions": MissionsView(window, self),
+            "shop": ShopView(window, self),
+            "tavern": TavernView(window, self),
+            "market": MarketView(window, self),
+            "dungeons": DungeonsView(window, self),
+            "housing": HousingView(window, self),
+            "farm": FarmView(window, self),
+            "training": TrainingView(window, self),
+            "travel": TravelView(window, self),
+            "boss": BossView(window, self),
+            "companions": CompanionsView(window, self),
+            "challenges": ChallengesView(window, self),
+            "settings": SettingsView(window, self),
         }
 
         def _refresh_status():
@@ -2361,26 +2372,26 @@ class Game:
         def menu_callback(action: str):
             """Route sidebar nav actions to the matching view (Phase 2.4)."""
             view_map = {
-                "explore":    "explore",
-                "character":  "character",
-                "travel":     "travel",
-                "inventory":  "inventory",
-                "missions":   "missions",
-                "boss":       "boss",
-                "tavern":     "tavern",
-                "shop":       "shop",
-                "market":     "market",
-                "dungeons":   "dungeons",
+                "explore": "explore",
+                "character": "character",
+                "travel": "travel",
+                "inventory": "inventory",
+                "missions": "missions",
+                "boss": "boss",
+                "tavern": "tavern",
+                "shop": "shop",
+                "market": "market",
+                "dungeons": "dungeons",
                 "companions": "companions",
                 "challenges": "challenges",
-                "settings":   "settings",
+                "settings": "settings",
                 "furnish_home": "housing",
-                "farm":       "farm",
-                "training":   "training",
+                "farm": "farm",
+                "training": "training",
             }
 
             if action in view_map:
-                if not self.player and action not in ("settings",):
+                if not self.player and action not in ("settings", ):
                     window.add_message("Create or load a character first.")
                     views["welcome"].show()
                     return
@@ -2439,13 +2450,10 @@ class Game:
 
         # Wire the WelcomeView buttons to use GUI-specific character creation
         welcome_view = views["welcome"]
-        welcome_view.on_new_game = lambda: (
-            views["create_character"].show()
-        )
-        welcome_view.on_load_game = lambda: (
-            self.save_load_system.load_game() or _refresh_status() or
-            views["character"].show() if self.player else views["welcome"].show()
-        )
+        welcome_view.on_new_game = lambda: (views["create_character"].show())
+        welcome_view.on_load_game = lambda: (self.save_load_system.load_game(
+        ) or _refresh_status() or views["character"].show() if self.player else
+                                             views["welcome"].show())
 
         # Show the welcome screen and start the GUI event loop
         views["welcome"].show()
