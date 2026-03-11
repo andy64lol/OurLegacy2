@@ -22,7 +22,10 @@ from utilities.market import MarketAPI
 from utilities.language import LanguageManager
 from utilities.dungeons import DungeonSystem
 from utilities.entities import Enemy, Boss
-import readline
+try:
+    import readline
+except ImportError:
+    readline = None
 from utilities.UI import Colors, clear_screen, create_progress_bar, create_separator, create_section_header, display_welcome_screen, display_main_menu
 from utilities.shop import visit_specific_shop
 from utilities.crafting import visit_alchemy
@@ -98,7 +101,15 @@ def ask(prompt: str,
     - `valid_choices`: list of allowed responses (comparison controlled by `case_sensitive`).
     - `allow_empty`: if False, empty input will be rejected.
     - Returns the stripped input string.
+    - In GUI mode, returns '' immediately (GUI views handle interaction).
     """
+    try:
+        from utilities.gui import is_gui_mode
+        if is_gui_mode():
+            return ''
+    except Exception:
+        pass
+
     if lang is None:
 
         class MockLang:
@@ -2321,8 +2332,20 @@ class Game:
 
     def quit_game(self):
         """Quit the game"""
+        try:
+            from utilities.gui import is_gui_mode
+            _in_gui = is_gui_mode()
+        except Exception:
+            _in_gui = False
+
         print(f"\n{self.lang.get('ui_have_you_saved')}")
-        response = input(">>> ").strip().lower()
+        if _in_gui:
+            response = ''
+        else:
+            try:
+                response = input(">>> ").strip().lower()
+            except EOFError:
+                response = ''
         if response == "no":
             clear_screen()
             print(self.lang.get('ui_saving_progress'))

@@ -922,7 +922,13 @@ class DungeonSystem:
         self.dungeon_state = {}
 
     def _clear_screen(self):
-        """Clear the terminal screen in a cross-platform way."""
+        """Clear the terminal screen in a cross-platform way (no-op in GUI mode)."""
+        try:
+            from utilities.gui import is_gui_mode
+            if is_gui_mode():
+                return
+        except Exception:
+            pass
         import os
         time.sleep(1)
         command = 'cls' if os.name == 'nt' else 'clear'

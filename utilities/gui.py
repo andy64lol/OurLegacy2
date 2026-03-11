@@ -1501,7 +1501,9 @@ class Colors:
 
 
 def clear_screen():
-    """Clear the terminal screen."""
+    """Clear the terminal screen (no-op in GUI mode)."""
+    if GUI_MODE:
+        return
     import os
     import time
     time.sleep(0.1)

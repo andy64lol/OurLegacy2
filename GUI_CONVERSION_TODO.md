@@ -13,9 +13,9 @@
 - [x] 2.2 Replace all input() calls with GUI input dialogs (GUI mode is event-driven; blocking input() not called)
 - [x] 2.3 Integrate GUI window initialization (Game.run_gui() creates GameWindow, wires all views)
 - [x] 2.4 Convert main game loop to GUI event-driven (tkinter mainloop() + sidebar menu_callback)
-- [ ] 2.5 Ensure modules use also the new GUI system
-- [ ] 2.6 Remove the old TUI system
-- [ ] 2.7 Use shell commands to hunt down those remaining
+- [x] 2.5 Ensure modules use also the new GUI system
+- [x] 2.6 Remove the old TUI system
+- [x] 2.7 Use shell commands to hunt down those remaining
 
 ## Phase 3: Modify utilities/UI.py
 - [ ] 3.1 Replace CLI display functions with GUI equivalents
