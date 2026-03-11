@@ -679,7 +679,7 @@ class GameWindow(ctk.CTk):
         for widget in self.game_content.winfo_children():
             widget.destroy()
 
-    def add_message(self, message: str, color: str = None):
+    def add_message(self, message: str, color: Optional[str] = None):
         """Add a message to the message panel."""
         if color is None:
             color = MEDIEVAL_COLORS['text_light']
@@ -815,7 +815,7 @@ class ChoiceDialog(ctk.CTkToplevel):
                  title: str,
                  message: str,
                  choices: List[str],
-                 callback: Callable[[str], None] = None):
+                 callback: Optional[Callable[[str], None]] = None):
         """Initialize choice dialog."""
         super().__init__()
         self.title(title)
@@ -876,7 +876,7 @@ class InputDialog(ctk.CTkToplevel):
                  title: str,
                  prompt: str,
                  default: str = "",
-                 callback: Callable[[str], None] = None):
+                 callback: Optional[Callable[[str], None]] = None):
         """Initialize input dialog."""
         super().__init__()
         self.title(title)
@@ -944,7 +944,7 @@ class NumberInputDialog(ctk.CTkToplevel):
                  min_val: int = 1,
                  max_val: int = 999,
                  default: int = 1,
-                 callback: Callable[[int], None] = None):
+                 callback: Optional[Callable[[int], None]] = None):
         """Initialize number input dialog."""
         super().__init__()
         self.title(title)
