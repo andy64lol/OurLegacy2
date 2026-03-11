@@ -25,3 +25,4 @@
 - [ ] 4.1 Ensure no TUI and CLI elements are found except for debugs
 - [ ] 4.2 Test the GUI conversion
 - [ ] 4.3 Fix any issues found
+- [ ] 4.4 Modify README.md
