@@ -1441,3 +1441,10 @@ def show_confirmation_gui(title: str, message: str, callback: Callable[[bool], N
     """Show a confirmation dialog."""
     if GUI_MODE and _main_window is not None:
         def on_result(result):
+            if callback:
+                callback(result == "Yes")
+        ConfirmationBox(title=title, message=message, callback=on_result)
+    else:
+        answer = input(f"{message} (yes/no): ").strip().lower()
+        if callback:
+            callback(answer in ("yes", "y"))
