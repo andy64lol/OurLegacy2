@@ -38,3 +38,47 @@
   - ANSI codes no longer appear in the message panel (stripped at Colors.wrap and add_message levels)
   - progress bars and section headers render cleanly in GUI mode
 - [x] 4.4 Modify README.md
+
+## Phase 5 New: Fix battle issues
+- [ ] fix this error:
+    ``
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "/usr/lib/python3.11/tkinter/__init__.py", line 1948, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "/home/andy64lolxd/.local/lib/python3.11/site-packages/customtkinter/windows/widgets/ctk_button.py", line 554, in _clicked
+    self._command()
+  File "/home/andy64lolxd/our_legacy_2/utilities/gui.py", line 1459, in do_explore
+    self.game.explore()
+  File "/home/andy64lolxd/our_legacy_2/main.py", line 696, in explore
+    self.random_encounter()
+  File "/home/andy64lolxd/our_legacy_2/main.py", line 731, in random_encounter
+    self.battle(enemy)
+  File "/home/andy64lolxd/our_legacy_2/main.py", line 806, in battle
+    self.battle_system.battle(enemy)
+  File "/home/andy64lolxd/our_legacy_2/utilities/battle.py", line 58, in battle
+    self.game.player.display_stats()
+  File "/home/andy64lolxd/our_legacy_2/utilities/character.py", line 353, in display_stats
+    gui_print("\nEquipment:")
+  File "/home/andy64lolxd/our_legacy_2/utilities/gui.py", line 1576, in gui_print
+    _main_window.add_message(message)
+  File "/home/andy64lolxd/our_legacy_2/utilities/gui.py", line 693, in add_message
+    msg_label.pack(fill=ctk.X, padx=5, pady=2)
+  File "/home/andy64lolxd/.local/lib/python3.11/site-packages/customtkinter/windows/widgets/core_widget_classes/ctk_base_class.py", line 298, in pack
+    return super().pack(**self._apply_argument_scaling(kwargs))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/tkinter/__init__.py", line 2452, in pack_configure
+    self.tk.call(
+KeyboardInterrupt```
+
+## Phase 6 New: Add Training and etc to be used
+- [ ] Make training logic to be used back
+
+## Phase 7 New: Remake the style since current style doesn't feel good
+- [ ] Modify the colours and styles
+- [ ] Modify the ANSII stripping to be replaced with coloured text
+- [ ] Modify the old TUI Progress bar to be GUI
+- [ ] Use the assets from data/assets/
+- [ ] Make it to be more rpg-like
+- [ ] Use font in ttf from data/assets/fonts/
