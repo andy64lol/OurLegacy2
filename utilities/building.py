@@ -3,18 +3,18 @@ import time
 from typing import Dict, List
 from utilities.crafting import visit_alchemy
 import random
-from utilities.gui import gui_safe_input
+from utilities.gui import gui_safe_input, gui_print
 
 
 def build_home(self):
     from main import ask, clear_screen, get_rarity_color
     """Build and manage structures on your land"""
     if not self.player:
-        print(self.lang.get("no_character"))
+        gui_print(self.lang.get("no_character"))
         return
 
     if not self.player.housing_owned:
-        print(
+        gui_print(
             f"{Colors.YELLOW}You haven't purchased any housing items yet! Visit the Housing Shop first.{Colors.END}"
         )
         gui_safe_input(self.lang.get("press_enter"))
@@ -22,14 +22,14 @@ def build_home(self):
 
     while True:
         clear_screen()
-        print(
+        gui_print(
             f"\n{Colors.BOLD}{Colors.CYAN}=== BUILD STRUCTURES ==={Colors.END}"
         )
-        print(
+        gui_print(
             f"{Colors.YELLOW}Manage your buildings and customize your property{Colors.END}\n"
         )
 
-        print(
+        gui_print(
             f"Comfort Points: {Colors.CYAN}{self.player.comfort_points}{Colors.END}\n"
         )
 
@@ -65,7 +65,7 @@ def build_home(self):
             },
         }
         for b_type, info in building_types.items():
-            print(f"{Colors.BOLD}{info['label']} Slots:{Colors.END}")
+            gui_print(f"{Colors.BOLD}{info['label']} Slots:{Colors.END}")
             for i in range(1, info["slots"] + 1):
                 slot = f"{b_type}_{i}"
                 item_id = self.player.building_slots.get(slot)
@@ -73,18 +73,18 @@ def build_home(self):
                     item = self.housing_data[item_id]
                     rarity_color = get_rarity_color(
                         item.get('rarity', 'common'))
-                    print(
+                    gui_print(
                         f"  {slot}: {rarity_color}{item.get('name', item_id)}{Colors.END}"
                     )
                 else:
-                    print(f"  {slot}: {Colors.GRAY}Empty{Colors.END}")
-            print()
+                    gui_print(f"  {slot}: {Colors.GRAY}Empty{Colors.END}")
+            gui_print()
 
-        print(self.lang.get("options_1"))
-        print(f"1. {self.lang.get('place_item_slot')}")
-        print(f"2. {self.lang.get('remove_item_slot')}")
-        print(f"3. {self.lang.get('view_home_status')}")
-        print(f"B. {self.lang.get('back')}")
+        gui_print(self.lang.get("options_1"))
+        gui_print(f"1. {self.lang.get('place_item_slot')}")
+        gui_print(f"2. {self.lang.get('remove_item_slot')}")
+        gui_print(f"3. {self.lang.get('view_home_status')}")
+        gui_print(f"B. {self.lang.get('back')}")
 
         choice = ask(
             f"\n{Colors.CYAN}Choose option: {Colors.END}").strip().upper()
@@ -98,7 +98,7 @@ def build_home(self):
         elif choice == '3':
             self.view_home_status()
         else:
-            print(self.lang.get("invalid_choice_1"))
+            gui_print(self.lang.get("invalid_choice_1"))
             time.sleep(1)
 
 
@@ -108,19 +108,19 @@ def view_home_status(self):
     if not self.player:
         return
 
-    print(self.lang.get("n_home_details"))
-    print(
+    gui_print(self.lang.get("n_home_details"))
+    gui_print(
         f"\nComfort Points: {Colors.CYAN}{self.player.comfort_points}{Colors.END}"
     )
     placed_items = [
         item_id for item_id in self.player.building_slots.values()
         if item_id is not None
     ]
-    print(f"Total Items Placed: {len(placed_items)}")
-    print(f"Unique Items Placed: {len(set(placed_items))}")
+    gui_print(f"Total Items Placed: {len(placed_items)}")
+    gui_print(f"Unique Items Placed: {len(set(placed_items))}")
 
     # Calculate comfort distribution
-    print(self.lang.get("nitem_breakdown"))
+    gui_print(self.lang.get("nitem_breakdown"))
     item_comforts = {}
     for item_id in placed_items:
         item_data = self.housing_data.get(item_id, {})
@@ -139,13 +139,13 @@ def view_home_status(self):
 
     total_displayed = 0
     for name, info in sorted_items[:10]:  # Show top 10
-        print(f"  {name}: x{info['count']} = +{info['total_comfort']} comfort")
+        gui_print(f"  {name}: x{info['count']} = +{info['total_comfort']} comfort")
         total_displayed += 1
 
     if len(sorted_items) > 10:
         remaining_comfort = sum(info["total_comfort"]
                                 for _, info in sorted_items[10:])
-        print(
+        gui_print(
             f"  ... and {len(sorted_items) - 10} more items (+{remaining_comfort} comfort)"
         )
 
@@ -163,16 +163,16 @@ def remove_housing_item(self):
     ]
 
     if not occupied_slots:
-        print(self.lang.get("no_items_to_remove"))
+        gui_print(self.lang.get("no_items_to_remove"))
         return
 
-    print(self.lang.get("nplaced_items"))
+    gui_print(self.lang.get("nplaced_items"))
     for i, slot in enumerate(occupied_slots, 1):
         item_id = self.player.building_slots[slot]
         if item_id in self.housing_data:
             item = self.housing_data[item_id]
             rarity_color = get_rarity_color(item.get('rarity', 'common'))
-            print(
+            gui_print(
                 f"{i}. {slot}: {rarity_color}{item.get('name', item_id)}{Colors.END}"
             )
 
@@ -184,12 +184,12 @@ def remove_housing_item(self):
         return
 
     if not choice.isdigit():
-        print(self.lang.get("invalid_choice"))
+        gui_print(self.lang.get("invalid_choice"))
         return
 
     idx = int(choice) - 1
     if not (0 <= idx < len(occupied_slots)):
-        print(self.lang.get("invalid_item_number"))
+        gui_print(self.lang.get("invalid_item_number"))
         return
 
     target_slot = occupied_slots[idx]
@@ -206,7 +206,7 @@ def remove_housing_item(self):
     if item:
         self.player.comfort_points -= item.get('comfort_points', 0)
 
-    print(f"{Colors.YELLOW}Removed item from {target_slot}.{Colors.END}")
+    gui_print(f"{Colors.YELLOW}Removed item from {target_slot}.{Colors.END}")
     gui_safe_input(self.lang.get("press_enter"))
 
 
@@ -216,15 +216,15 @@ def _place_housing_item(self):
     if not self.player:
         return
     if not self.player.housing_owned:
-        print(self.lang.get("no_housing_items"))
+        gui_print(self.lang.get("no_housing_items"))
         return
 
-    print(self.lang.get("navailable_items"))
+    gui_print(self.lang.get("navailable_items"))
     for i, item_id in enumerate(self.player.housing_owned, 1):
         if item_id in self.housing_data:
             item = self.housing_data[item_id]
             rarity_color = get_rarity_color(item.get('rarity', 'common'))
-            print(
+            gui_print(
                 f"{i}. {rarity_color}{item.get('name', item_id)}{Colors.END} ({item.get('type', 'misc')})"
             )
 
@@ -236,19 +236,19 @@ def _place_housing_item(self):
         return
 
     if not choice.isdigit():
-        print(self.lang.get("invalid_choice"))
+        gui_print(self.lang.get("invalid_choice"))
         return
 
     idx = int(choice) - 1
     if not (0 <= idx < len(self.player.housing_owned)):
-        print(self.lang.get("invalid_item_number"))
+        gui_print(self.lang.get("invalid_item_number"))
         return
 
     item_id = self.player.housing_owned[idx]
     item = self.housing_data.get(item_id)
 
     if not item:
-        print(self.lang.get("item_data_not_found"))
+        gui_print(self.lang.get("item_data_not_found"))
         return
 
     item_type = item.get('type', 'decoration')
@@ -279,12 +279,12 @@ def _place_housing_item(self):
     ]
 
     if not empty_slots:
-        print(f"No available slots for {item_type} items.")
+        gui_print(f"No available slots for {item_type} items.")
         return
 
-    print(f"\nAvailable slots for {item_type}:")
+    gui_print(f"\nAvailable slots for {item_type}:")
     for i, slot in enumerate(empty_slots, 1):
-        print(f"{i}. {slot}")
+        gui_print(f"{i}. {slot}")
 
     slot_choice = ask(
         f"\nChoose slot (1-{len(empty_slots)}) or press Enter to cancel: "
@@ -294,12 +294,12 @@ def _place_housing_item(self):
         return
 
     if not slot_choice.isdigit():
-        print(self.lang.get("invalid_choice"))
+        gui_print(self.lang.get("invalid_choice"))
         return
 
     slot_idx = int(slot_choice) - 1
     if not (0 <= slot_idx < len(empty_slots)):
-        print(self.lang.get("invalid_slot_number"))
+        gui_print(self.lang.get("invalid_slot_number"))
         return
 
     target_slot = empty_slots[slot_idx]
@@ -311,7 +311,7 @@ def _place_housing_item(self):
     if item:
         self.player.comfort_points += item.get('comfort_points', 0)
 
-    print(
+    gui_print(
         f"{Colors.GREEN}Placed {item.get('name', item_id)} in {target_slot}!{Colors.END}"
     )
     gui_safe_input(self.lang.get("press_enter"))
@@ -321,15 +321,15 @@ def build_structures(self):
     from main import ask, clear_screen
     """Build and manage structures on your land"""
     if not self.player:
-        print(self.lang.get("no_character"))
+        gui_print(self.lang.get("no_character"))
         return
 
     while True:
         clear_screen()
-        print(
+        gui_print(
             f"\n{Colors.BOLD}{Colors.CYAN}=== BUILD STRUCTURES ==={Colors.END}"
         )
-        print(
+        gui_print(
             f"{Colors.YELLOW}Manage your buildings and customize your property{Colors.END}\n"
         )
 
@@ -394,19 +394,19 @@ def build_structures(self):
 
         # Display building slots
         menu_idx = 1
-        print(self.lang.get("building_slotsn"))
+        gui_print(self.lang.get("building_slotsn"))
 
         for b_type, info in building_types.items():
             placed = placed_items.get(b_type, 0)
             max_slots = info["slots"]
             status_color = Colors.GREEN if placed > 0 else Colors.DARK_GRAY
 
-            print(
+            gui_print(
                 f"{Colors.CYAN}{menu_idx}.{Colors.END} {Colors.BOLD}{info['label']}{Colors.END} [{status_color}{placed}/{max_slots}{Colors.END}]"
             )
             menu_idx += 1
 
-        print(self.lang.get("nq_quit"))
+        gui_print(self.lang.get("nq_quit"))
         choice = ask(
             f"\n{Colors.CYAN}Choose a building type to manage: {Colors.END}"
         ).strip().upper()
@@ -428,22 +428,22 @@ def manage_building_slots(self, b_type: str, b_info: Dict,
     from main import ask, clear_screen
     """Manage slots for a specific building type"""
     if not self.player:
-        print(self.lang.get("no_character"))
+        gui_print(self.lang.get("no_character"))
         return
 
     while True:
         clear_screen()
-        print(
+        gui_print(
             f"\n{Colors.BOLD}{Colors.CYAN}=== {b_info['label'].upper()} SLOTS ==={Colors.END}"
         )
-        print(
+        gui_print(
             f"{Colors.YELLOW}Manage your {b_info['label'].lower()} placements{Colors.END}\n"
         )
 
         max_slots = b_info["slots"]
 
         # Display all slots for this type
-        print(self.lang.get("slots"))
+        gui_print(self.lang.get("slots"))
         slot_list = []
         for i in range(1, max_slots + 1):
             slot_name = f"{b_type}_{i}"
@@ -454,20 +454,20 @@ def manage_building_slots(self, b_type: str, b_info: Dict,
                 item_name = item_data.get("name", item_id)
                 item_price = item_data.get("price", 0)
                 swap_cost = int(item_price * 0.1)
-                print(
+                gui_print(
                     f"{Colors.CYAN}{i}.{Colors.END} [{Colors.GREEN}✓{Colors.END}] {Colors.BOLD}{Colors.YELLOW}{item_name}{Colors.END}"
                 )
-                print(
+                gui_print(
                     f"   Swap cost: {Colors.GOLD}{swap_cost} gold{Colors.END} (10% of {item_price})"
                 )
             else:
-                print(
+                gui_print(
                     f"{Colors.CYAN}{i}.{Colors.END} [{Colors.DARK_GRAY}-{Colors.END}] {Colors.DARK_GRAY}Empty{Colors.END}"
                 )
 
             slot_list.append(slot_name)
 
-        print(
+        gui_print(
             f"\n{Colors.YELLOW}Available items in inventory: {len(available_items)}{Colors.END}"
         )
 
@@ -475,17 +475,17 @@ def manage_building_slots(self, b_type: str, b_info: Dict,
                                    1):  # Show first 3 available
             item_name = item["data"].get("name", item["id"])
             item_comfort = item["data"].get("comfort_points", 0)
-            print(
+            gui_print(
                 f"  • {Colors.BOLD}{item_name}{Colors.END} (+{Colors.CYAN}{item_comfort}{Colors.END} comfort)"
             )
 
         if len(available_items) > 3:
-            print(
+            gui_print(
                 f"  • {Colors.DARK_GRAY}... and {len(available_items) - 3} more items{Colors.END}"
             )
 
-        print(f"\n{Colors.CYAN}1-{max_slots}.{Colors.END} Manage slot")
-        print(self.lang.get("b_back_to_land_menu"))
+        gui_print(f"\n{Colors.CYAN}1-{max_slots}.{Colors.END} Manage slot")
+        gui_print(self.lang.get("b_back_to_land_menu"))
 
         choice = ask(
             f"\n{Colors.CYAN}Choose action: {Colors.END}").strip().upper()
@@ -502,14 +502,14 @@ def manage_slot(self, slot_name: str, available_items: List[Dict]):
     from main import ask, clear_screen
     """Manage a specific building slot"""
     if not self.player:
-        print(self.lang.get("no_character"))
+        gui_print(self.lang.get("no_character"))
         return
 
     current_item = self.player.building_slots.get(slot_name)
 
     while True:
         clear_screen()
-        print(
+        gui_print(
             f"\n{Colors.BOLD}{Colors.CYAN}=== MANAGE {slot_name.upper()} ==={Colors.END}"
         )
 
@@ -519,14 +519,14 @@ def manage_slot(self, slot_name: str, available_items: List[Dict]):
             current_price = current_data.get("price", 0)
             swap_cost = int(current_price * 0.1)
 
-            print(
+            gui_print(
                 f"{Colors.BOLD}Current item:{Colors.END} {Colors.YELLOW}{current_name}{Colors.END}"
             )
-            print(f"Swap cost: {Colors.GOLD}{swap_cost} gold{Colors.END}\n")
+            gui_print(f"Swap cost: {Colors.GOLD}{swap_cost} gold{Colors.END}\n")
         else:
-            print(self.lang.get("current_item_emptyn"))
+            gui_print(self.lang.get("current_item_emptyn"))
 
-        print(self.lang.get("available_items_to_placen"))
+        gui_print(self.lang.get("available_items_to_placen"))
 
         for idx, item in enumerate(available_items, 1):
             item_id = item["id"]
@@ -536,15 +536,15 @@ def manage_slot(self, slot_name: str, available_items: List[Dict]):
             item_price = item_data.get("price", 0)
             swap_cost = int(item_price * 0.1)
 
-            print(
+            gui_print(
                 f"{Colors.CYAN}{idx}.{Colors.END} {Colors.BOLD}{Colors.YELLOW}{item_name}{Colors.END}"
             )
-            print(
+            gui_print(
                 f"   Comfort: {Colors.CYAN}+{item_comfort}{Colors.END} | Swap cost: {Colors.GOLD}{swap_cost}g{Colors.END}"
             )
 
-        print(self.lang.get("nc_clear_this_slot"))
-        print(self.lang.get("b_back"))
+        gui_print(self.lang.get("nc_clear_this_slot"))
+        gui_print(self.lang.get("b_back"))
 
         choice = ask(
             f"\n{Colors.CYAN}Select item to place or action: {Colors.END}"
@@ -555,11 +555,11 @@ def manage_slot(self, slot_name: str, available_items: List[Dict]):
         elif choice == 'C':
             if current_item:
                 self.player.building_slots[slot_name] = None
-                print(self.lang.get("n_slot_cleared"))
+                gui_print(self.lang.get("n_slot_cleared"))
                 gui_safe_input(self.lang.get("press_enter"))
                 break
             else:
-                print(f"\n{Colors.YELLOW}Slot is already empty.{Colors.END}")
+                gui_print(f"\n{Colors.YELLOW}Slot is already empty.{Colors.END}")
                 gui_safe_input(self.lang.get("press_enter"))
         elif choice.isdigit():
             item_idx = int(choice) - 1
@@ -578,7 +578,7 @@ def manage_slot(self, slot_name: str, available_items: List[Dict]):
                 if self.player.gold >= swap_cost:
                     if swap_cost > 0:
                         self.player.gold -= swap_cost
-                        print(
+                        gui_print(
                             f"\n{Colors.GREEN}✓ Paid {Colors.GOLD}{swap_cost} gold{Colors.GREEN} to swap.{Colors.END}"
                         )
 
@@ -597,17 +597,17 @@ def manage_slot(self, slot_name: str, available_items: List[Dict]):
 
                     item_name = selected_item["data"].get(
                         "name", selected_item["id"])
-                    print(
+                    gui_print(
                         f"{Colors.GREEN}✓ Placed {Colors.BOLD}{item_name}{Colors.END}{Colors.GREEN} in {slot_name}!{Colors.END}"
                     )
-                    print(
+                    gui_print(
                         f"Total comfort: {Colors.CYAN}{self.player.comfort_points}{Colors.END}"
                     )
                     gui_safe_input(self.lang.get("press_enter"))
                     break
                 else:
                     needed = swap_cost - self.player.gold
-                    print(
+                    gui_print(
                         f"\n{Colors.RED}✗ Not enough gold! Need {needed} more.{Colors.END}"
                     )
                     gui_safe_input(self.lang.get("press_enter"))
@@ -617,7 +617,7 @@ def farm(self):
     from main import ask, clear_screen
     """Farm crops on your land"""
     if not self.player:
-        print(self.lang.get("no_character"))
+        gui_print(self.lang.get("no_character"))
         return
 
     # Check if player has any farm buildings
@@ -626,7 +626,7 @@ def farm(self):
         for i in range(1, 3))
 
     if not has_farm:
-        print(
+        gui_print(
             f"\n{Colors.YELLOW}You need to build a farm first! Use the 'Build Structures' option.{Colors.END}"
         )
         gui_safe_input(self.lang.get("press_enter"))
@@ -634,30 +634,30 @@ def farm(self):
 
     while True:
         clear_screen()
-        print(self.lang.get("n_farming"))
-        print(
+        gui_print(self.lang.get("n_farming"))
+        gui_print(
             f"{Colors.YELLOW}Tend to your crops and harvest your bounty{Colors.END}\n"
         )
 
         # Show available crops to plant
         crops_data = self.farming_data.get("crops", {})
 
-        print(self.lang.get("available_crops_to_plantn"))
+        gui_print(self.lang.get("available_crops_to_plantn"))
         crops_list = list(crops_data.items())
         for idx, (crop_id, crop_data) in enumerate(crops_list, 1):
             name = crop_data.get("name", crop_id)
             description = crop_data.get("description", "")
             growth_time = crop_data.get("growth_time", 0)
             harvest = crop_data.get("harvest_amount", 0)
-            print(
+            gui_print(
                 f"{Colors.CYAN}{idx}.{Colors.END} {Colors.BOLD}{name}{Colors.END}"
             )
-            print(f"   {description}")
-            print(
+            gui_print(f"   {description}")
+            gui_print(
                 f"   Growth: {Colors.YELLOW}{growth_time} days{Colors.END} | Harvest: {Colors.GREEN}+{harvest}{Colors.END}\n"
             )
 
-        print(self.lang.get("farm_statusn"))
+        gui_print(self.lang.get("farm_statusn"))
 
         # Show farm plot status
         for farm_idx in range(1, 3):
@@ -666,7 +666,7 @@ def farm(self):
                 farm_slot) is not None
 
             if has_building:
-                print(
+                gui_print(
                     f"{Colors.GOLD}Farm Plot {farm_idx}:{Colors.END} {Colors.GREEN}✓ Active{Colors.END}"
                 )
                 plots = self.player.farm_plots.get(farm_slot, [])
@@ -677,25 +677,25 @@ def farm(self):
                                                        plant.get("crop"))
                         days_left = plant.get("days_left", 0)
                         if days_left > 0:
-                            print(
+                            gui_print(
                                 f"  {plant_idx}. {crop_name} - {Colors.YELLOW}{days_left} days{Colors.END} until ready"
                             )
                         else:
-                            print(
+                            gui_print(
                                 f"  {plant_idx}. {crop_name} - {Colors.GREEN}Ready to harvest!{Colors.END}"
                             )
                 else:
-                    print(f"  {Colors.GRAY}Empty - Ready to plant{Colors.END}")
+                    gui_print(f"  {Colors.GRAY}Empty - Ready to plant{Colors.END}")
             else:
-                print(
+                gui_print(
                     f"Farm Plot {farm_idx}: {Colors.DARK_GRAY}Not built{Colors.END}"
                 )
-            print()
+            gui_print()
 
-        print(f"{Colors.CYAN}1-{len(crops_list)}.{Colors.END} Plant a crop")
-        print(self.lang.get("h_harvest_crops"))
-        print(self.lang.get("v_view_inventory"))
-        print(self.lang.get("b_back_1"))
+        gui_print(f"{Colors.CYAN}1-{len(crops_list)}.{Colors.END} Plant a crop")
+        gui_print(self.lang.get("h_harvest_crops"))
+        gui_print(self.lang.get("v_view_inventory"))
+        gui_print(self.lang.get("b_back_1"))
 
         choice = ask(
             f"\n{Colors.CYAN}Choose action: {Colors.END}").strip().upper()
@@ -724,10 +724,10 @@ def plant_crop(self, crop_tuple):
 
     # Select which farm to plant in
     clear_screen()
-    print(
+    gui_print(
         f"\n{Colors.BOLD}{Colors.CYAN}=== PLANT {crop_name.upper()} ==={Colors.END}\n"
     )
-    print(self.lang.get("select_farm_plot"))
+    gui_print(self.lang.get("select_farm_plot"))
 
     farm_choices = []
     for farm_idx in range(1, 3):
@@ -739,13 +739,13 @@ def plant_crop(self, crop_tuple):
             plant_count = len(plots)
             max_plots = self.farming_data.get("max_plots_per_farm", 3)
 
-            print(
+            gui_print(
                 f"{len(farm_choices) + 1}. Farm Plot {farm_idx} - {Colors.GREEN}{plant_count}/{max_plots} plants{Colors.END}"
             )
             farm_choices.append(farm_slot)
 
     if not farm_choices:
-        print(self.lang.get("no_active_farms_available"))
+        gui_print(self.lang.get("no_active_farms_available"))
         gui_safe_input(self.lang.get("press_enter"))
         return
 
@@ -770,14 +770,14 @@ def plant_crop(self, crop_tuple):
                     "days_left":
                     growth_time
                 })
-                print(
+                gui_print(
                     f"\n{Colors.GREEN}✓ Planted {crop_name} in {farm_slot}!{Colors.END}"
                 )
-                print(
+                gui_print(
                     f"It will be ready to harvest in {Colors.YELLOW}{growth_time} days{Colors.END}"
                 )
             else:
-                print(
+                gui_print(
                     f"\n{Colors.YELLOW}This farm plot is full! ({max_plots}/{max_plots} plants){Colors.END}"
                 )
 
@@ -791,7 +791,7 @@ def harvest_crops(self):
         return
 
     clear_screen()
-    print(f"\n{Colors.BOLD}{Colors.CYAN}=== HARVEST CROPS ==={Colors.END}\n")
+    gui_print(f"\n{Colors.BOLD}{Colors.CYAN}=== HARVEST CROPS ==={Colors.END}\n")
 
     harvested = False
     for farm_idx in range(1, 3):
@@ -815,7 +815,7 @@ def harvest_crops(self):
                 for _ in range(harvest_amount):
                     self.player.inventory.append(crop_name)
 
-                print(
+                gui_print(
                     f"{Colors.GREEN}✓ Harvested {Colors.BOLD}{harvest_amount}x {crop_name}{Colors.END}{Colors.GREEN} from {farm_slot}!{Colors.END}"
                 )
                 crops_to_remove.append(plant_idx)
@@ -826,7 +826,7 @@ def harvest_crops(self):
             plots.pop(idx)
 
     if not harvested:
-        print(f"{Colors.YELLOW}No crops are ready to harvest yet.{Colors.END}")
+        gui_print(f"{Colors.YELLOW}No crops are ready to harvest yet.{Colors.END}")
 
     gui_safe_input(self.lang.get("press_enter"))
 
@@ -838,7 +838,7 @@ def view_farming_inventory(self):
         return
 
     clear_screen()
-    print(
+    gui_print(
         f"\n{Colors.BOLD}{Colors.CYAN}=== FARMING INVENTORY ==={Colors.END}\n")
 
     crops_data = self.farming_data.get("crops", {})
@@ -854,22 +854,22 @@ def view_farming_inventory(self):
             crop_counts[item] = crop_counts.get(item, 0) + 1
 
     if crop_counts:
-        print(self.lang.get("crops_in_inventoryn"))
+        gui_print(self.lang.get("crops_in_inventoryn"))
         for crop_name, count in crop_counts.items():
             crop_id = crop_names[crop_name]
             crop_data = crops_data.get(crop_id, {})
             sell_price = crop_data.get("sell_price", 0)
 
-            print(
+            gui_print(
                 f"{Colors.GREEN}✓{Colors.END} {Colors.BOLD}{crop_name}{Colors.END} x{count}"
             )
-            print(
+            gui_print(
                 f"  Sell price: {Colors.GOLD}{sell_price}g{Colors.END} each | Total: {Colors.GOLD}{sell_price * count}g{Colors.END}\n"
             )
 
-        print(self.lang.get("s_sell_crops"))
-        print(self.lang.get("c_cook_crops_alchemy"))
-        print(self.lang.get("b_back_2"))
+        gui_print(self.lang.get("s_sell_crops"))
+        gui_print(self.lang.get("c_cook_crops_alchemy"))
+        gui_print(self.lang.get("b_back_2"))
 
         choice = ask(
             f"\n{Colors.CYAN}Choose action: {Colors.END}").strip().upper()
@@ -879,7 +879,7 @@ def view_farming_inventory(self):
         elif choice == 'C':
             visit_alchemy(self)  # Reuse existing alchemy system
     else:
-        print(
+        gui_print(
             f"{Colors.YELLOW}You have no crops in your inventory yet.{Colors.END}"
         )
         gui_safe_input(self.lang.get("press_enter"))
@@ -892,7 +892,7 @@ def sell_crops(self):
         return
 
     clear_screen()
-    print(self.lang.get("n_sell_crops_n"))
+    gui_print(self.lang.get("n_sell_crops_n"))
 
     crops_data = self.farming_data.get("crops", {})
     crop_names = {
@@ -914,17 +914,17 @@ def sell_crops(self):
         subtotal = sell_price * count
         total_gold += subtotal
 
-        print(f"{crop_name} x{count}: {Colors.GOLD}{subtotal}g{Colors.END}")
+        gui_print(f"{crop_name} x{count}: {Colors.GOLD}{subtotal}g{Colors.END}")
 
         # Remove from inventory
         for _ in range(count):
             self.player.inventory.remove(crop_name)
 
     self.player.gold += total_gold
-    print(
+    gui_print(
         f"\n{Colors.GREEN}✓ Sold all crops for {Colors.GOLD}{total_gold} gold{Colors.END}{Colors.GREEN}!{Colors.END}"
     )
-    print(f"Total gold: {Colors.GOLD}{self.player.gold}{Colors.END}")
+    gui_print(f"Total gold: {Colors.GOLD}{self.player.gold}{Colors.END}")
     gui_safe_input(self.lang.get("press_enter"))
 
 
@@ -932,7 +932,7 @@ def training(self):
     from main import ask, clear_screen
     """Training system for improving stats using training_place buildings"""
     if not self.player:
-        print(self.lang.get("no_character"))
+        gui_print(self.lang.get("no_character"))
         return
 
     # Check if player has any training_place buildings
@@ -941,7 +941,7 @@ def training(self):
         for i in range(1, 4))
 
     if not has_training_place:
-        print(
+        gui_print(
             f"\n{Colors.YELLOW}You need to build a Training Place first! Use the 'Build Structures' option.{Colors.END}"
         )
         gui_safe_input(self.lang.get("press_enter"))
@@ -952,45 +952,45 @@ def training(self):
 
     while True:
         clear_screen()
-        print(
+        gui_print(
             f"\n{Colors.BOLD}{Colors.CYAN}=== TRAINING GROUND ==={Colors.END}")
-        print(
+        gui_print(
             f"{Colors.YELLOW}Train to improve your stats! Each training session affects all your stats.{Colors.END}\n"
         )
 
         # Show training facility info
         self._display_training_facilities()
 
-        print(self.lang.get("current_stats_1"))
-        print(
+        gui_print(self.lang.get("current_stats_1"))
+        gui_print(
             f"HP: {Colors.RED}{self.player.max_hp}{Colors.END} | MP: {Colors.BLUE}{self.player.max_mp}{Colors.END}"
         )
-        print(
+        gui_print(
             f"Attack: {Colors.RED}{self.player.attack}{Colors.END} | Defense: {Colors.GREEN}{self.player.defense}{Colors.END} | Speed: {Colors.YELLOW}{self.player.speed}{Colors.END}\n"
         )
 
-        print(self.lang.get("training_typesn"))
-        print(self.lang.get("1_morning_training_1d4"))
-        print(
+        gui_print(self.lang.get("training_typesn"))
+        gui_print(self.lang.get("1_morning_training_1d4"))
+        gui_print(
             f"   {Colors.GREEN}4: +4%{Colors.END} | {Colors.YELLOW}3: +2%{Colors.END} | {Colors.RED}1-2: -1%{Colors.END}"
         )
-        print()
-        print(self.lang.get("2_calm_training_1d6"))
-        print(
+        gui_print()
+        gui_print(self.lang.get("2_calm_training_1d6"))
+        gui_print(
             f"   {Colors.GREEN}6: +13%{Colors.END} | {Colors.GREEN}5: +10%{Colors.END} | {Colors.YELLOW}4: +7%{Colors.END} | {Colors.YELLOW}3: +1%{Colors.END} | {Colors.RED}1-2: -3%{Colors.END}"
         )
-        print()
-        print(self.lang.get("3_normal_training_1d8"))
-        print(
+        gui_print()
+        gui_print(self.lang.get("3_normal_training_1d8"))
+        gui_print(
             f"   {Colors.GREEN}5-8: +10%{Colors.END} | {Colors.RED}1-3: -7%{Colors.END}"
         )
-        print()
-        print(self.lang.get("4_intense_training_1d20"))
-        print(
+        gui_print()
+        gui_print(self.lang.get("4_intense_training_1d20"))
+        gui_print(
             f"   {Colors.GREEN}16-20: +20%{Colors.END} | {Colors.GREEN}11-15: +15%{Colors.END} | {Colors.YELLOW}10: +10%{Colors.END} | {Colors.RED}5-9: -10%{Colors.END} | {Colors.RED}1-4: -20%{Colors.END}"
         )
-        print()
-        print(self.lang.get("b_back_3"))
+        gui_print()
+        gui_print(self.lang.get("b_back_3"))
 
         choice = ask(f"\n{Colors.CYAN}Choose training type: {Colors.END}"
                      ).strip().upper()
@@ -1021,10 +1021,10 @@ def training(self):
             # Apply training facility bonus
             final_bonus_percent = base_bonus_percent * training_bonus
 
-            print(
+            gui_print(
                 f"\n{Colors.BOLD}{Colors.CYAN}=== {name.upper()} ==={Colors.END}"
             )
-            print(
+            gui_print(
                 f"You rolled a {Colors.YELLOW}{roll}{Colors.END} on a d{dice_sides}!"
             )
 
@@ -1036,15 +1036,15 @@ def training(self):
                 bonus_description = ""
 
             if final_bonus_percent > 0:
-                print(
+                gui_print(
                     f"{Colors.GREEN}Success!{Colors.END} All stats increase by {Colors.GREEN}+{final_bonus_percent:.1f}%{Colors.END}{bonus_description}"
                 )
             elif final_bonus_percent < 0:
-                print(
+                gui_print(
                     f"{Colors.RED}Training failed!{Colors.END} All stats decrease by {Colors.RED}{abs(final_bonus_percent):.1f}%{Colors.END}{bonus_description}"
                 )
             else:
-                print(self.lang.get("no_change_in_stats"))
+                gui_print(self.lang.get("no_change_in_stats"))
 
             # Calculate stat changes
             old_stats = {
@@ -1074,26 +1074,26 @@ def training(self):
                 self.player.hp = min(self.player.hp, self.player.max_hp)
                 self.player.mp = min(self.player.mp, self.player.max_mp)
 
-            print(self.lang.get("nstat_changes"))
-            print(
+            gui_print(self.lang.get("nstat_changes"))
+            gui_print(
                 f"HP: {Colors.RED}{old_stats['max_hp']} → {self.player.max_hp}{Colors.END}"
             )
-            print(
+            gui_print(
                 f"MP: {Colors.BLUE}{old_stats['max_mp']} → {self.player.max_mp}{Colors.END}"
             )
-            print(
+            gui_print(
                 f"Attack: {Colors.RED}{old_stats['attack']} → {self.player.attack}{Colors.END}"
             )
-            print(
+            gui_print(
                 f"Defense: {Colors.GREEN}{old_stats['defense']} → {self.player.defense}{Colors.END}"
             )
-            print(
+            gui_print(
                 f"Speed: {Colors.YELLOW}{old_stats['speed']} → {self.player.speed}{Colors.END}"
             )
 
             gui_safe_input(self.lang.get('press_enter'))
         else:
-            print(self.lang.get("invalid_choice_2"))
+            gui_print(self.lang.get("invalid_choice_2"))
             time.sleep(1)
 
 
@@ -1148,7 +1148,7 @@ def _display_training_facilities(self):
     if not self.player:
         return
 
-    print(self.lang.get("training_facilities_1"))
+    gui_print(self.lang.get("training_facilities_1"))
 
     facilities = []
     for i in range(1, 4):
@@ -1176,22 +1176,22 @@ def _display_training_facilities(self):
 
     if facilities:
         for facility in facilities:
-            print(f"  • {facility}")
+            gui_print(f"  • {facility}")
 
         effectiveness = self._calculate_training_effectiveness()
         if effectiveness > 1.0:
-            print(
+            gui_print(
                 f"  {Colors.GREEN}Training Effectiveness: x{effectiveness:.1f} (better facilities = better results){Colors.END}"
             )
         elif effectiveness < 1.0:
-            print(
+            gui_print(
                 f"  {Colors.YELLOW}Training Effectiveness: x{effectiveness:.1f} (upgrade facilities for better results){Colors.END}"
             )
         else:
-            print(
+            gui_print(
                 f"  {Colors.GRAY}Training Effectiveness: x{effectiveness:.1f}{Colors.END}"
             )
     else:
-        print(self.lang.get("no_training_facilities_built"))
+        gui_print(self.lang.get("no_training_facilities_built"))
 
-    print()
+    gui_print()

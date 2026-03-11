@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 
 from utilities.settings import Colors
-from utilities.gui import gui_safe_input
+from utilities.gui import gui_safe_input, gui_print
 
 
 def get_rarity_color(rarity: str) -> str:
@@ -44,18 +44,18 @@ class DungeonSystem:
     def visit_dungeons(self):
         """Visit the dungeon menu to select and enter dungeons"""
         if not self.game.player:
-            print(self.lang.get("no_character"))
+            gui_print(self.lang.get("no_character"))
             return
 
-        print(self.lang.get("n_dungeons"))
-        print(self.lang.get('ui_dungeon_portal'))
+        gui_print(self.lang.get("n_dungeons"))
+        gui_print(self.lang.get('ui_dungeon_portal'))
 
         # Check if player is in a dungeon
         if self.current_dungeon:
-            print(
+            gui_print(
                 f"\n{Colors.YELLOW}You are currently in: {self.current_dungeon['name']}{Colors.END}"
             )
-            print(
+            gui_print(
                 f"Progress: Room {self.dungeon_progress + 1}/{len(self.dungeon_rooms)}"
             )
 
@@ -69,7 +69,7 @@ class DungeonSystem:
         # Show available dungeons (filter by allowed_areas)
         all_dungeons = self.dungeons_data.get('dungeons', [])
         if not all_dungeons:
-            print(self.lang.get('ui_no_dungeons'))
+            gui_print(self.lang.get('ui_no_dungeons'))
             return
 
         # Filter dungeons by allowed_areas for current location
@@ -80,13 +80,13 @@ class DungeonSystem:
                 dungeons.append(dungeon)
 
         if not dungeons:
-            print(
+            gui_print(
                 f"\n{Colors.YELLOW}No dungeons available in {self.game.current_area}.{Colors.END}"
             )
-            print(self.lang.get('ui_travel_find_dungeons'))
+            gui_print(self.lang.get('ui_travel_find_dungeons'))
             return
 
-        print(
+        gui_print(
             f"\n{Colors.CYAN}Available Dungeons in {self.game.current_area}:{Colors.END}"
         )
         for i, dungeon in enumerate(dungeons, 1):
@@ -101,11 +101,11 @@ class DungeonSystem:
 
             status = f"{Colors.GREEN}Available{Colors.END}" if level_ok else f"{Colors.RED}Level {min_level}+ required{Colors.END}"
 
-            print(
+            gui_print(
                 f"{i}. {Colors.BOLD}{name}{Colors.END} (Difficulty {difficulty[0]}-{difficulty[1]}, {rooms} rooms)"
             )
-            print(f"   {desc}")
-            print(f"   Status: {status}")
+            gui_print(f"   {desc}")
+            gui_print(f"   Status: {status}")
 
         choice = gui_safe_input(
             f"\nChoose dungeon (1-{len(dungeons)}) or press Enter to cancel: ", '')
@@ -118,18 +118,18 @@ class DungeonSystem:
                     self.enter_dungeon(dungeon)
                     self._clear_screen()
                 else:
-                    print(
+                    gui_print(
                         f"You need to be at least level {min_level} to enter this dungeon."
                     )
             else:
-                print(self.lang.get("invalid_choice"))
+                gui_print(self.lang.get("invalid_choice"))
 
     def enter_dungeon(self, dungeon: Dict[str, Any]):
         """Enter a dungeon and generate rooms"""
-        print(
+        gui_print(
             f"\n{Colors.MAGENTA}{Colors.BOLD}Entering {dungeon['name']}!{Colors.END}"
         )
-        print(dungeon['description'])
+        gui_print(dungeon['description'])
 
         # Set dungeon state
         self.current_dungeon = dungeon
@@ -196,7 +196,7 @@ class DungeonSystem:
     def continue_dungeon(self):
         """Continue through the current dungeon"""
         if not self.current_dungeon or not self.dungeon_rooms:
-            print(self.lang.get('ui_no_active_dungeon'))
+            gui_print(self.lang.get('ui_no_active_dungeon'))
             return
 
         # Loop through rooms until dungeon is complete
@@ -205,7 +205,7 @@ class DungeonSystem:
             # Get current room
             room = self.dungeon_rooms[self.dungeon_progress]
 
-            print(
+            gui_print(
                 f"\n{Colors.CYAN}{Colors.BOLD}=== Room {room['room_number']} ==={Colors.END}"
             )
 
@@ -239,25 +239,25 @@ class DungeonSystem:
         """Handle a question/riddle room"""
         if not self.game.player:
             return
-        print(self.lang.get('ui_mystical_pedestal'))
+        gui_print(self.lang.get('ui_mystical_pedestal'))
 
         # Get random question from challenge templates
         challenge_templates = self.dungeons_data.get('challenge_templates', {})
         question_template = challenge_templates.get('question', {})
 
         if not question_template or not question_template.get('types'):
-            print(self.lang.get('ui_no_questions'))
+            gui_print(self.lang.get('ui_no_questions'))
             self.advance_room()
             return
 
         question_data = random.choice(question_template['types'])
 
-        print(self.lang.get("nriddle"))
-        print(question_data['question'])
+        gui_print(self.lang.get("nriddle"))
+        gui_print(question_data['question'])
 
         # Show hints if available
         if question_data.get('hints'):
-            print(
+            gui_print(
                 f"\n{Colors.DARK_GRAY}Hints available (type 'hint' to see them){Colors.END}"
             )
 
@@ -274,50 +274,50 @@ class DungeonSystem:
             ).strip().lower()
 
             if answer == 'leave':
-                print(self.lang.get('ui_give_up_riddle'))
+                gui_print(self.lang.get('ui_give_up_riddle'))
                 break
 
             if answer == 'hint' and question_data.get('hints'):
-                print(self.lang.get("nhints"))
+                gui_print(self.lang.get("nhints"))
                 for i, hint in enumerate(question_data['hints'], 1):
-                    print(f"{i}. {hint}")
+                    gui_print(f"{i}. {hint}")
                 continue
 
             # Check time limit
             elapsed = time.time() - start_time
             if elapsed > time_limit:
-                print(self.lang.get("times_up"))
+                gui_print(self.lang.get("times_up"))
                 break
 
             # Check answer
             correct_answer = question_data.get('answer', '').lower()
             if answer == correct_answer:
-                print(self.lang.get("correct"))
+                gui_print(self.lang.get("correct"))
                 answered_correctly = True
 
                 # Give rewards
                 reward = question_data.get('success_reward', {})
                 if reward.get('gold') and self.game.player:
                     self.game.player.gold += reward['gold']
-                    print(f"You gained {reward['gold']} gold!")
+                    gui_print(f"You gained {reward['gold']} gold!")
                 if reward.get('experience') and self.game.player:
                     self.game.player.gain_experience(reward['experience'])
-                    print(f"You gained {reward['experience']} experience!")
+                    gui_print(f"You gained {reward['experience']} experience!")
                 break
             else:
                 attempts += 1
-                print(self.lang.get("incorrect"))
+                gui_print(self.lang.get("incorrect"))
 
                 # Show close matches
                 close = difflib.get_close_matches(answer, [correct_answer],
                                                   n=1,
                                                   cutoff=0.6)
                 if close:
-                    print(
+                    gui_print(
                         f"{Colors.YELLOW}Close, but not quite right.{Colors.END}"
                     )
                 else:
-                    print(
+                    gui_print(
                         f"{Colors.YELLOW}Try again or ask for a hint.{Colors.END}"
                     )
 
@@ -329,7 +329,7 @@ class DungeonSystem:
             damage = question_data.get('failure_damage', 15)
             if self.game.player:
                 actual_damage = self.game.player.take_damage(damage)
-                print(
+                gui_print(
                     f"You took {actual_damage} damage from the failed riddle!")
 
                 if self.game.player.is_alive():
@@ -342,16 +342,16 @@ class DungeonSystem:
     def handle_battle_room(self, room: Dict[str, Any]):
         """Handle a battle room with enemies"""
         if not self.game.player:
-            print(self.lang.get('ui_no_player_battle'))
+            gui_print(self.lang.get('ui_no_player_battle'))
             self.advance_room()
             return
 
         if not self.enemies_data or not self.areas_data:
-            print(self.lang.get('ui_game_data_missing'))
+            gui_print(self.lang.get('ui_game_data_missing'))
             self.advance_room()
             return
 
-        print(self.lang.get('ui_combat_approaching'))
+        gui_print(self.lang.get('ui_combat_approaching'))
 
         # Generate enemies based on difficulty
         difficulty = room.get('difficulty', 1)
@@ -397,13 +397,13 @@ class DungeonSystem:
 
         # Handle case where no valid enemies were found
         if not enemies:
-            print(
+            gui_print(
                 f"{Colors.YELLOW}No enemies found! You proceed safely.{Colors.END}"
             )
             self.advance_room()
             return
 
-        print(
+        gui_print(
             self.lang.get("encounter_enemies_msg").format(count=len(enemies)))
 
         # Battle each enemy
@@ -414,14 +414,14 @@ class DungeonSystem:
                 break
 
             if len(enemies) > 1:
-                print(
+                gui_print(
                     f"\n{Colors.RED}Enemy {i+1} of {len(enemies)}:{Colors.END}"
                 )
 
             self.game.battle(enemy)
 
         if self.game.player and self.game.player.is_alive():
-            print(self.lang.get("you_cleared_the_battle_room"))
+            gui_print(self.lang.get("you_cleared_the_battle_room"))
             self.advance_room()
         else:
             self.dungeon_death()
@@ -429,10 +429,10 @@ class DungeonSystem:
     def handle_chest_room(self, room: Dict[str, Any]):
         """Handle a treasure chest room"""
         if not self.game.player:
-            print(self.lang.get('ui_no_player_chest'))
+            gui_print(self.lang.get('ui_no_player_chest'))
             self.advance_room()
             return
-        print(self.lang.get('ui_chest_center_room'))
+        gui_print(self.lang.get('ui_chest_center_room'))
 
         # Determine chest quality based on difficulty
         difficulty = room.get('difficulty', 1)
@@ -449,7 +449,7 @@ class DungeonSystem:
         chest_data = chest_templates.get(chest_type,
                                          chest_templates.get('small', {}))
 
-        print(
+        gui_print(
             self.lang.get("found_chest_msg").format(
                 name=chest_data.get('name', 'chest')))
 
@@ -467,8 +467,8 @@ class DungeonSystem:
         self.game.player.gold += gold_reward
         self.game.player.gain_experience(exp_reward)
 
-        print(f"\n{Colors.GOLD}You found {gold_reward} gold!{Colors.END}")
-        print(
+        gui_print(f"\n{Colors.GOLD}You found {gold_reward} gold!{Colors.END}")
+        gui_print(
             f"{Colors.MAGENTA}You gained {exp_reward} experience!{Colors.END}")
 
         # Generate items
@@ -495,7 +495,7 @@ class DungeonSystem:
                 # No legendary items available, add bonus gold instead
                 bonus_gold = 100 * count
                 self.game.player.gold += bonus_gold
-                print(
+                gui_print(
                     f"{Colors.YELLOW}No legendary items found! Added {bonus_gold} bonus gold instead.{Colors.END}"
                 )
 
@@ -516,38 +516,38 @@ class DungeonSystem:
                 # No items of this rarity, add bonus gold instead
                 bonus_gold = random.randint(25, 75)
                 self.game.player.gold += bonus_gold
-                print(
+                gui_print(
                     f"{Colors.DARK_GRAY}No items of {rarity} rarity found. Added {bonus_gold} gold instead.{Colors.END}"
                 )
 
         if items_found:
-            print(self.lang.get("items_found"))
+            gui_print(self.lang.get("items_found"))
             for item in items_found:
                 item_data = self.items_data.get(item, {})
                 color = get_rarity_color(item_data.get('rarity', 'common'))
-                print(f"  - {color}{item}{Colors.END}")
+                gui_print(f"  - {color}{item}{Colors.END}")
 
         self.advance_room()
 
     def handle_trap_chest_room(self, room: Dict[str, Any]):
         """Handle a trapped chest room"""
         if not self.game.player:
-            print(self.lang.get('ui_no_player_trap'))
+            gui_print(self.lang.get('ui_no_player_trap'))
             self.advance_room()
             return
-        print(self.lang.get('ui_suspicious_chest'))
+        gui_print(self.lang.get('ui_suspicious_chest'))
 
         choice = gui_safe_input("Open the chest (O) or leave it (L)? ", 'L').strip().upper()
 
         if choice == 'L':
-            print(self.lang.get('ui_leave_chest_alone'))
+            gui_print(self.lang.get('ui_leave_chest_alone'))
             self.advance_room()
             return
 
         # Roll for trap
         trap_chance = 0.7  # 70% chance of trap
         if random.random() < trap_chance:
-            print(self.lang.get("trap_triggered"))
+            gui_print(self.lang.get("trap_triggered"))
 
             # Get random trap
             trap_templates = self.dungeons_data.get('challenge_templates',
@@ -556,7 +556,7 @@ class DungeonSystem:
 
             if trap_types:
                 trap = random.choice(trap_types)
-                print(trap['description'])
+                gui_print(trap['description'])
 
                 # Roll d20 for trap avoidance
                 roll = random.randint(1, 20)
@@ -569,12 +569,12 @@ class DungeonSystem:
                 threshold += mod_data.get('threshold',
                                           0) - 10  # Adjust threshold
 
-                print(
+                gui_print(
                     self.lang.get("roll_result_msg").format(
                         roll=roll, threshold=threshold))
 
                 if roll >= threshold:
-                    print(
+                    gui_print(
                         f"{Colors.GREEN}You successfully avoid the trap!{Colors.END}"
                     )
 
@@ -582,40 +582,40 @@ class DungeonSystem:
                     reward = trap_templates.get('success_reward', {})
                     if reward.get('gold'):
                         self.game.player.gold += reward['gold']
-                        print(
+                        gui_print(
                             self.lang.get("found_gold_chest_msg").format(
                                 gold=reward['gold']))
                     if reward.get('experience'):
                         self.game.player.gain_experience(reward['experience'])
-                        print(f"You gained {reward['experience']} experience!")
+                        gui_print(f"You gained {reward['experience']} experience!")
 
         self.advance_room()
 
     def handle_multi_choice_room(self, room: Dict[str, Any]):
         """Handle a multiple choice decision room"""
         if not self.game.player:
-            print(self.lang.get('ui_no_player_multichoice'))
+            gui_print(self.lang.get('ui_no_player_multichoice'))
             self.advance_room()
             return
-        print(self.lang.get('ui_crossroads_paths'))
+        gui_print(self.lang.get('ui_crossroads_paths'))
 
         # Get random selection challenge
         challenge_templates = self.dungeons_data.get('challenge_templates', {})
         selection_template = challenge_templates.get('selection', {})
 
         if not selection_template.get('types'):
-            print(self.lang.get('ui_paths_safe'))
+            gui_print(self.lang.get('ui_paths_safe'))
             self.advance_room()
             return
 
         challenge = random.choice(selection_template['types'])
 
-        print(self.lang.get("ndecision"))
-        print(challenge['question'])
+        gui_print(self.lang.get("ndecision"))
+        gui_print(challenge['question'])
 
         options = challenge.get('options', [])
         for i, option in enumerate(options, 1):
-            print(f"{i}. {option['text']}")
+            gui_print(f"{i}. {option['text']}")
 
         time_limit = challenge.get('time_limit', 30)
         start_time = time.time()
@@ -625,7 +625,7 @@ class DungeonSystem:
         # Check time limit
         elapsed = time.time() - start_time
         if elapsed > time_limit:
-            print(self.lang.get("you_took_too_long_to_decide"))
+            gui_print(self.lang.get("you_took_too_long_to_decide"))
             # Random bad outcome
             bad_options = [
                 opt for opt in options if not opt.get('correct', False)
@@ -637,10 +637,10 @@ class DungeonSystem:
         elif choice.isdigit() and 1 <= int(choice) <= len(options):
             outcome = options[int(choice) - 1]
         else:
-            print(self.lang.get("invalid_choice"))
+            gui_print(self.lang.get("invalid_choice"))
             return
 
-        print(f"\n{outcome['reason']}")
+        gui_print(f"\n{outcome['reason']}")
 
         if outcome.get('correct', False):
             # Success reward
@@ -648,16 +648,16 @@ class DungeonSystem:
             if self.game.player:
                 if reward.get('gold'):
                     self.game.player.gold += reward['gold']
-                    print(f"You gained {reward['gold']} gold!")
+                    gui_print(f"You gained {reward['gold']} gold!")
                 if reward.get('experience'):
                     self.game.player.gain_experience(reward['experience'])
-                    print(f"You gained {reward['experience']} experience!")
+                    gui_print(f"You gained {reward['experience']} experience!")
         else:
             # Failure penalty
             if self.game.player:
                 damage = challenge.get('failure_damage', 10)
                 actual_damage = self.game.player.take_damage(damage)
-                print(f"You took {actual_damage} damage!")
+                gui_print(f"You took {actual_damage} damage!")
 
                 if not self.game.player.is_alive():
                     self.dungeon_death()
@@ -667,7 +667,7 @@ class DungeonSystem:
 
     def handle_empty_room(self, room: Dict[str, Any]):
         """Handle an empty room"""
-        print(self.lang.get('ui_room_empty'))
+        gui_print(self.lang.get('ui_room_empty'))
 
         # Small chance for hidden treasure or encounter
         if random.random() < 0.3:  # 30% chance
@@ -676,19 +676,19 @@ class DungeonSystem:
                 if self.game.player:
                     gold_found = random.randint(10, 50)
                     self.game.player.gold += gold_found
-                    print(
+                    gui_print(
                         f"{Colors.GOLD}You found {gold_found} gold hidden in the room!{Colors.END}"
                     )
             else:
                 # Random encounter
-                print(self.lang.get('ui_hear_noise'))
+                gui_print(self.lang.get('ui_hear_noise'))
                 time.sleep(1)
                 self.game.random_encounter()
                 if self.game.player and not self.game.player.is_alive():
                     self.dungeon_death()
                     return
         else:
-            print(self.lang.get('ui_nothing_interest'))
+            gui_print(self.lang.get('ui_nothing_interest'))
 
         self.advance_room()
 
@@ -705,22 +705,22 @@ class DungeonSystem:
             from utilities.entities import Boss
             boss = Boss(boss_data, self.dialogues_data)
 
-            print(self.lang.get("nboss_battle"))
-            print(self.lang.get("face_boss_msg").format(name=boss.name))
-            print(boss.description)
+            gui_print(self.lang.get("nboss_battle"))
+            gui_print(self.lang.get("face_boss_msg").format(name=boss.name))
+            gui_print(boss.description)
 
             # Print start dialogue if available
             start_dialogue = boss.get_dialogue("on_start_battle")
             if start_dialogue:
-                print(
+                gui_print(
                     f"\n{Colors.CYAN}{boss.name}:{Colors.END} {start_dialogue}"
                 )
 
             self.game.battle(boss)
 
             if self.game.player and self.game.player.is_alive():
-                print(self.lang.get("nvictory"))
-                print(
+                gui_print(self.lang.get("nvictory"))
+                gui_print(
                     self.lang.get("defeated_boss_msg").format(name=boss.name))
 
                 # Boss rewards
@@ -730,16 +730,16 @@ class DungeonSystem:
                 self.game.player.gain_experience(exp_reward)
                 self.game.player.gold += gold_reward
 
-                print(
+                gui_print(
                     f"Gained {Colors.MAGENTA}{exp_reward} experience{Colors.END}"
                 )
-                print(f"Gained {Colors.GOLD}{gold_reward} gold{Colors.END}")
+                gui_print(f"Gained {Colors.GOLD}{gold_reward} gold{Colors.END}")
 
                 # Boss loot
                 if hasattr(boss, 'loot_table') and boss.loot_table:
                     loot = random.choice(boss.loot_table)
                     self.game.player.inventory.append(loot)
-                    print(f"{Colors.YELLOW}Boss loot: {loot}!{Colors.END}")
+                    gui_print(f"{Colors.YELLOW}Boss loot: {loot}!{Colors.END}")
                     self.game.update_mission_progress('collect', loot)
 
                 self.complete_dungeon()
@@ -747,7 +747,7 @@ class DungeonSystem:
                 self.dungeon_death()
         else:
             # Boss not found - try to find a suitable replacement or generate a generic boss
-            print(
+            gui_print(
                 f"{Colors.YELLOW}Boss data not found. A powerful enemy appears!{Colors.END}"
             )
 
@@ -763,11 +763,11 @@ class DungeonSystem:
                     self.game.player.gain_experience(exp_reward)
                     self.game.player.gold += gold_reward
 
-                    print(self.lang.get('ui_defeated_guardian'))
-                    print(
+                    gui_print(self.lang.get('ui_defeated_guardian'))
+                    gui_print(
                         f"Gained {Colors.MAGENTA}{exp_reward} experience{Colors.END}"
                     )
-                    print(
+                    gui_print(
                         f"Gained {Colors.GOLD}{gold_reward} gold{Colors.END}")
 
                     # Give a random item from completion reward if available
@@ -775,7 +775,7 @@ class DungeonSystem:
                     if items:
                         loot = random.choice(items)
                         self.game.player.inventory.append(loot)
-                        print(
+                        gui_print(
                             f"{Colors.YELLOW}Special item: {loot}!{Colors.END}"
                         )
 
@@ -790,7 +790,7 @@ class DungeonSystem:
         if self.dungeon_progress >= len(self.dungeon_rooms):
             self.complete_dungeon()
         else:
-            print(self.lang.get("nmoving_to_the_next_room"))
+            gui_print(self.lang.get("nmoving_to_the_next_room"))
             time.sleep(1)
             self._clear_screen()
 
@@ -800,8 +800,8 @@ class DungeonSystem:
             return
 
         dungeon = self.current_dungeon
-        print(self.lang.get("ndungeon_complete"))
-        print(
+        gui_print(self.lang.get("ndungeon_complete"))
+        gui_print(
             self.lang.get("cleared_dungeon_msg").format(name=dungeon['name']))
 
         # Calculate completion time
@@ -816,7 +816,7 @@ class DungeonSystem:
         end_time = datetime.now()
         duration = end_time - start_time
 
-        print(
+        gui_print(
             f"Completion time: {duration.seconds // 60}m {duration.seconds % 60}s"
         )
 
@@ -826,31 +826,31 @@ class DungeonSystem:
         # Give completion rewards
         completion_reward = dungeon.get('completion_reward', {})
         if completion_reward and self.game.player:
-            print(
+            gui_print(
                 f"\n{Colors.GOLD}{Colors.BOLD}Completion Rewards:{Colors.END}")
 
             # Gold reward
             gold_reward = completion_reward.get('gold', 0)
             if gold_reward > 0:
                 self.game.player.gold += gold_reward
-                print(f"  {Colors.GOLD}+{gold_reward} gold{Colors.END}")
+                gui_print(f"  {Colors.GOLD}+{gold_reward} gold{Colors.END}")
 
             # Experience reward
             exp_reward = completion_reward.get('experience', 0)
             if exp_reward > 0:
                 self.game.player.gain_experience(exp_reward)
-                print(
+                gui_print(
                     f"  {Colors.MAGENTA}+{exp_reward} experience{Colors.END}")
 
             # Item rewards
             items = completion_reward.get('items', [])
             if items:
-                print(self.lang.get("items_received"))
+                gui_print(self.lang.get("items_received"))
                 for item_name in items:
                     self.game.player.inventory.append(item_name)
                     item_data = self.items_data.get(item_name, {})
                     color = get_rarity_color(item_data.get('rarity', 'common'))
-                    print(f"    - {color}{item_name}{Colors.END}")
+                    gui_print(f"    - {color}{item_name}{Colors.END}")
                     self.game.update_mission_progress('collect', item_name)
 
         # Clear dungeon state
@@ -866,11 +866,11 @@ class DungeonSystem:
 
         # Check for none here
         if self.current_dungeon is not None:
-            print(
+            gui_print(
                 f"\n{Colors.YELLOW}Exiting {self.current_dungeon['name']}...{Colors.END}"
             )
         else:
-            print(self.lang.get("nexiting_dungeon"))
+            gui_print(self.lang.get("nexiting_dungeon"))
 
         # Optional: penalty for early exit
         if self.dungeon_progress > 0 and self.game.player:
@@ -878,7 +878,7 @@ class DungeonSystem:
                                100)  # 10% of gold or 100 max
             if penalty_gold > 0:
                 self.game.player.gold -= penalty_gold
-                print(
+                gui_print(
                     f"{Colors.RED}Exit penalty: Lost {penalty_gold} gold{Colors.END}"
                 )
 
@@ -892,10 +892,10 @@ class DungeonSystem:
         """Handle death in dungeon"""
         if not self.game.player:
             return
-        print(
+        gui_print(
             f"\n{Colors.RED}{Colors.BOLD}You have fallen in the dungeon!{Colors.END}"
         )
-        print(
+        gui_print(
             f"\n{Colors.RED}{Colors.BOLD}You have fallen in the dungeon!{Colors.END}"
         )
 
@@ -908,12 +908,12 @@ class DungeonSystem:
             gold_loss = min(self.game.player.gold // 5,
                             200)  # 20% of gold or 200 max
             self.game.player.gold -= gold_loss
-            print(
+            gui_print(
                 self.lang.get("lost_gold_dungeon_msg").format(gold=gold_loss))
 
         # Return to starting village
         self.game.current_area = "starting_village"
-        print(self.lang.get("respawn"))
+        gui_print(self.lang.get("respawn"))
 
         # Clear dungeon state
         self.current_dungeon = None

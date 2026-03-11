@@ -1568,6 +1568,17 @@ def gui_safe_input(prompt: str = '', default: str = '') -> str:
     return input(prompt)
 
 
+def gui_print(*args, sep: str = ' ', end: str = '\n', **kwargs):
+    """Drop-in replacement for print() that routes output to the GUI message panel
+    when in GUI mode, or falls back to the built-in print() in CLI mode."""
+    message = sep.join(str(a) for a in args)
+    if GUI_MODE and _main_window is not None:
+        _main_window.add_message(message)
+    else:
+        import builtins
+        builtins.print(*args, sep=sep, end=end, **kwargs)
+
+
 def show_gui(message: str,
              title: str = "Message",
              dialog_type: str = "message"):

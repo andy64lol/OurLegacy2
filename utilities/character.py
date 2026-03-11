@@ -1,3 +1,4 @@
+from utilities.gui import gui_print
 """
 Character and Stats Management for Our Legacy
 Centralized Character class and related logic
@@ -334,24 +335,24 @@ class Character:
         from utilities.UI import Colors
         from utilities.battle import create_hp_mp_bar
 
-        print(
+        gui_print(
             f"\n{Colors.wrap(f'=== {self.name} ({self.character_class}) ===', Colors.CYAN)}"
         )
-        print(f"Level: {self.level} ({self.rank})")
-        print(f"HP: {create_hp_mp_bar(self.hp, self.max_hp, 20, Colors.RED)}")
-        print(f"MP: {create_hp_mp_bar(self.mp, self.max_mp, 20, Colors.BLUE)}")
-        print(
+        gui_print(f"Level: {self.level} ({self.rank})")
+        gui_print(f"HP: {create_hp_mp_bar(self.hp, self.max_hp, 20, Colors.RED)}")
+        gui_print(f"MP: {create_hp_mp_bar(self.mp, self.max_mp, 20, Colors.BLUE)}")
+        gui_print(
             f"EXP: {create_hp_mp_bar(self.experience, self.experience_to_next, 20, Colors.GREEN)}"
         )
-        print(f"Gold: {Colors.wrap(str(self.gold), Colors.GOLD)}")
-        print(f"Attack: {self.get_effective_attack()} (Base: {self.attack})")
-        print(
+        gui_print(f"Gold: {Colors.wrap(str(self.gold), Colors.GOLD)}")
+        gui_print(f"Attack: {self.get_effective_attack()} (Base: {self.attack})")
+        gui_print(
             f"Defense: {self.get_effective_defense()} (Base: {self.defense})")
-        print(f"Speed: {self.get_effective_speed()} (Base: {self.speed})")
+        gui_print(f"Speed: {self.get_effective_speed()} (Base: {self.speed})")
         if self.equipment:
-            print("\nEquipment:")
+            gui_print("\nEquipment:")
             for slot, item in self.equipment.items():
-                print(f"  {slot.replace('_', ' ').title()}: {item or 'None'}")
+                gui_print(f"  {slot.replace('_', ' ').title()}: {item or 'None'}")
 
     def update_stats_from_equipment(
             self,
@@ -444,7 +445,7 @@ class Character:
                                   lang: Any):
         """Display all available character classes from classes.json"""
         from main import Colors
-        print(f"\n{lang.get('ui_choose_class', 'Choose your class:')}")
+        gui_print(f"\n{lang.get('ui_choose_class', 'Choose your class:')}")
 
         color_map = [
             Colors.RED, Colors.BLUE, Colors.GREEN, Colors.YELLOW,
@@ -455,7 +456,7 @@ class Character:
             color = color_map[(i - 1) % len(color_map)]
             description = class_data.get("description",
                                          "No description available")
-            print(f"{color}{i}. {class_name}{Colors.END} - {description}")
+            gui_print(f"{color}{i}. {class_name}{Colors.END} - {description}")
 
     def select_class(self, classes_data: Dict[str, Any], lang: Any) -> str:
         """Allow user to select a class from available options"""
@@ -479,7 +480,7 @@ class Character:
                     if 0 <= choice_idx < len(class_names):
                         return class_names[choice_idx]
                     else:
-                        print(
+                        gui_print(
                             f"Invalid choice. Please enter a number between 1 and {len(class_names)}."
                         )
                         continue
@@ -499,7 +500,7 @@ class Character:
                     for cn in class_names:
                         if cn.lower() == close[0]:
                             return cn
-                print(
+                gui_print(
                     "Invalid class name. Try again or use the numeric choice.")
         finally:
             # restore completer
@@ -513,10 +514,10 @@ class Character:
         """Create a new character"""
         from main import Colors, ask, clear_screen
 
-        print(
+        gui_print(
             f"{Colors.BOLD}{lang.get('character_creation', 'Character Creation')}{Colors.END}"
         )
-        print(lang.get("separator_30", "=" * 30))
+        gui_print(lang.get("separator_30", "=" * 30))
 
         name = ask(lang.get("enter_name", "Enter your name: "))
         if not name:
@@ -560,7 +561,7 @@ class Character:
         self.base_defense = self.defense
         self.base_speed = self.speed
 
-        print(
+        gui_print(
             lang.get(
                 "welcome_adventurer",
                 "Welcome, adventurer {name}! You are a {char_class}.").format(
@@ -590,10 +591,10 @@ class Character:
 
         if items:
             from main import Colors
-            print(
+            gui_print(
                 f"{Colors.YELLOW}You received starting equipment:{Colors.END}")
             for item in items:
-                print(f"  - {item}")
+                gui_print(f"  - {item}")
 
         # Auto-equip first weapon and armor if available
         for slot in ("weapon", "armor"):
@@ -602,7 +603,7 @@ class Character:
                 if item_type == slot:
                     self.equip(item, items_data)
                     from main import Colors
-                    print(
+                    gui_print(
                         lang.get("equipped_msg",
                                  "Equipped {item}").format(item=item))
                     break

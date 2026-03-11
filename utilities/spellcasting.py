@@ -1,3 +1,4 @@
+from utilities.gui import gui_print
 # spellcasting.py
 # Spell casting utility, separated from main.py
 # Progressing through decentralisation...
@@ -47,7 +48,7 @@ class SpellCastingSystem:
         cost = spell_data.get('mp_cost', 0)
         
         if self.player.mp < cost:
-            print(self.lang.get("not_enough_mp", "Not enough MP!"))
+            gui_print(self.lang.get("not_enough_mp", "Not enough MP!"))
             return {'success': False, 'error': 'Not enough MP'}
         
         # Pay cost
@@ -65,7 +66,7 @@ class SpellCastingSystem:
         elif spell_type == 'debuff':
             self._cast_debuff_spell(enemy, spell_name, spell_data, result)
         else:
-            print(f"Unknown spell type: {spell_type}")
+            gui_print(f"Unknown spell type: {spell_type}")
             # Refund MP for unknown spell types
             self.player.mp += cost
             result['success'] = False
@@ -88,17 +89,17 @@ class SpellCastingSystem:
         
         if roll == 1:
             meme_key = f"roll_1_meme_{random.randint(1, 3)}"
-            print(self.lang.get(meme_key))
+            gui_print(self.lang.get(meme_key))
         elif roll == 20:
             meme_key = f"roll_20_meme_{random.randint(1, 3)}"
-            print(self.lang.get(meme_key))
+            gui_print(self.lang.get(meme_key))
         else:
-            print(self.lang.get("roll_msg", roll=roll))
+            gui_print(self.lang.get("roll_msg", roll=roll))
         
         damage = int(base_damage * roll / 10)
         actual = enemy.take_damage(damage)
         
-        print(f"You cast {spell_name} for {actual} damage!")
+        gui_print(f"You cast {spell_name} for {actual} damage!")
         result['damage'] = actual
         
         # Apply effects if any
@@ -108,13 +109,13 @@ class SpellCastingSystem:
             effect_type = effect_data.get('type', '')
             
             if effect_type == 'damage_over_time':
-                print(f"{Colors.RED}{enemy.name} is afflicted with {effect_name}!{Colors.END}")
+                gui_print(f"{Colors.RED}{enemy.name} is afflicted with {effect_name}!{Colors.END}")
             elif effect_type == 'stun':
                 if random.random() < effect_data.get('chance', 0.5):
-                    print(f"{Colors.YELLOW}{enemy.name} is stunned!{Colors.END}")
+                    gui_print(f"{Colors.YELLOW}{enemy.name} is stunned!{Colors.END}")
             elif effect_type == 'mixed_effect':
                 if random.random() < effect_data.get('chance', 0.5):
-                    print(f"{Colors.CYAN}{enemy.name} is frozen!{Colors.END}")
+                    gui_print(f"{Colors.CYAN}{enemy.name} is frozen!{Colors.END}")
     
     def _cast_heal_spell(self, spell_name: str, spell_data: Dict[str, Any], result: Dict[str, Any]):
         """Cast a heal spell"""
@@ -123,7 +124,7 @@ class SpellCastingSystem:
         self.player.heal(heal_amount)
         healed = self.player.hp - old_hp
         
-        print(f"You cast {spell_name} and healed {healed} HP!")
+        gui_print(f"You cast {spell_name} and healed {healed} HP!")
         result['healed'] = healed
         
         # Apply healing effects if any
@@ -131,7 +132,7 @@ class SpellCastingSystem:
         for effect_name in effects:
             effect_data = self.effects_data.get(effect_name, {})
             if effect_data.get('type') == 'healing_over_time':
-                print(f"{Colors.GREEN}You are affected by regeneration!{Colors.END}")
+                gui_print(f"{Colors.GREEN}You are affected by regeneration!{Colors.END}")
     
     def _cast_buff_spell(self, spell_name: str, spell_data: Dict[str, Any], result: Dict[str, Any]):
         """Cast a buff spell"""
@@ -157,14 +158,14 @@ class SpellCastingSystem:
             if modifiers:
                 self.player.apply_buff(effect_name, duration, modifiers)
                 mod_str = ', '.join(f"{v} {k}" for k, v in modifiers.items())
-                print(f"{Colors.GREEN}Applied buff: {effect_name} (+{mod_str}) for {duration} turns{Colors.END}")
+                gui_print(f"{Colors.GREEN}Applied buff: {effect_name} (+{mod_str}) for {duration} turns{Colors.END}")
             else:
                 # Non-numeric effects still applied as a marker buff
                 self.player.apply_buff(effect_name, duration, {})
                 if effect_type == 'damage_absorb':
-                    print(f"{Colors.BLUE}You create a magical shield!{Colors.END}")
+                    gui_print(f"{Colors.BLUE}You create a magical shield!{Colors.END}")
                 elif effect_type == 'reconnaissance':
-                    print(f"{Colors.CYAN}You can see enemy weaknesses!{Colors.END}")
+                    gui_print(f"{Colors.CYAN}You can see enemy weaknesses!{Colors.END}")
         
         result['buffs_applied'] = len(effects)
     
@@ -179,13 +180,13 @@ class SpellCastingSystem:
             
             if effect_type == 'action_block':
                 if random.random() < effect_data.get('chance', 0.5):
-                    print(f"{Colors.YELLOW}{enemy.name} is stunned and cannot act!{Colors.END}")
+                    gui_print(f"{Colors.YELLOW}{enemy.name} is stunned and cannot act!{Colors.END}")
             elif effect_type == 'accuracy_reduction':
-                print(f"{Colors.RED}{enemy.name}'s accuracy is reduced!{Colors.END}")
+                gui_print(f"{Colors.RED}{enemy.name}'s accuracy is reduced!{Colors.END}")
             elif effect_type == 'speed_reduction':
-                print(f"{Colors.YELLOW}{enemy.name} is slowed!{Colors.END}")
+                gui_print(f"{Colors.YELLOW}{enemy.name} is slowed!{Colors.END}")
             elif effect_type == 'stat_reduction':
-                print(f"{Colors.RED}{enemy.name}'s stats are cursed!{Colors.END}")
+                gui_print(f"{Colors.RED}{enemy.name}'s stats are cursed!{Colors.END}")
         
         result['debuffs_applied'] = len(effects)
     
@@ -196,7 +197,7 @@ class SpellCastingSystem:
         available = self.get_available_spells(weapon_name)
         
         if not available:
-            print(self.lang.get("no_spells_available", "No spells available for this weapon."))
+            gui_print(self.lang.get("no_spells_available", "No spells available for this weapon."))
             return None
         
         page = 0
@@ -209,24 +210,24 @@ class SpellCastingSystem:
             end_idx = start_idx + per_page
             current_spells = available[start_idx:end_idx]
             
-            print(f"\n{Colors.BOLD}=== SPELLS (Page {page + 1}/{total_pages}) ==={Colors.END}")
-            print(f"MP: {Colors.BLUE}{self.player.mp}/{self.player.max_mp}{Colors.END}\n")
+            gui_print(f"\n{Colors.BOLD}=== SPELLS (Page {page + 1}/{total_pages}) ==={Colors.END}")
+            gui_print(f"MP: {Colors.BLUE}{self.player.mp}/{self.player.max_mp}{Colors.END}\n")
             
             for i, (sname, sdata) in enumerate(current_spells, 1):
                 cost = sdata.get('mp_cost', 0)
                 mp_color = Colors.BLUE if self.player.mp >= cost else Colors.RED
-                print(f"{i}. {Colors.CYAN}{sname}{Colors.END} - Cost: {mp_color}{cost} MP{Colors.END}")
-                print(f"   {sdata.get('description', '')}")
+                gui_print(f"{i}. {Colors.CYAN}{sname}{Colors.END} - Cost: {mp_color}{cost} MP{Colors.END}")
+                gui_print(f"   {sdata.get('description', '')}")
             
-            print("\nOptions:")
+            gui_print("\nOptions:")
             if total_pages > 1:
                 if page > 0:
-                    print(f"P. {self.lang.get('ui_previous_page', 'Previous Page')}")
+                    gui_print(f"P. {self.lang.get('ui_previous_page', 'Previous Page')}")
                 if page < total_pages - 1:
-                    print(f"N. {self.lang.get('ui_next_page', 'Next Page')}")
+                    gui_print(f"N. {self.lang.get('ui_next_page', 'Next Page')}")
             
-            print(f"1-{len(current_spells)}. Cast Spell")
-            print(f"B. {self.lang.get('back', 'Back')}")
+            gui_print(f"1-{len(current_spells)}. Cast Spell")
+            gui_print(f"B. {self.lang.get('back', 'Back')}")
             
             choice = ask("\nChoose an option: ").strip().upper()
             
@@ -242,10 +243,10 @@ class SpellCastingSystem:
                     sname, sdata = current_spells[idx]
                     return (sname, sdata)
                 else:
-                    print(self.lang.get('invalid_selection', "Invalid selection"))
+                    gui_print(self.lang.get('invalid_selection', "Invalid selection"))
                     import time
                     time.sleep(1)
             else:
-                print(self.lang.get("invalid_choice", "Invalid choice"))
+                gui_print(self.lang.get("invalid_choice", "Invalid choice"))
                 import time
                 time.sleep(1)

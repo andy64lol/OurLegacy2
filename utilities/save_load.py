@@ -1,3 +1,4 @@
+from utilities.gui import gui_print
 import json
 import os
 from datetime import datetime
@@ -19,7 +20,7 @@ class SaveLoadSystem:
     def save_game(self, filename_prefix: str = ""):
         """Save the game with an optional filename prefix."""
         if not self.game.player:
-            print(self.lang.get('no_character_save'))
+            gui_print(self.lang.get('no_character_save'))
             return
 
         p = self.game.player
@@ -99,7 +100,7 @@ class SaveLoadSystem:
 
         with open(filename, 'w') as f:
             json.dump(save_data, f, indent=2)
-        print(
+        gui_print(
             self.lang.get("game_saved_success",
                           "Game saved successfully: {filename}").format(
                               filename=filename))
@@ -108,17 +109,17 @@ class SaveLoadSystem:
         """Load a saved game."""
         saves_dir = "data/saves"
         if not os.path.exists(saves_dir):
-            print(self.lang.get('no_save_files', "No save files found."))
+            gui_print(self.lang.get('no_save_files', "No save files found."))
             return
 
         save_files = [f for f in os.listdir(saves_dir) if f.endswith('.json')]
         if not save_files:
-            print(self.lang.get('no_save_files', "No save files found."))
+            gui_print(self.lang.get('no_save_files', "No save files found."))
             return
 
-        print(self.lang.get('available_save_files', "Available save files:"))
+        gui_print(self.lang.get('available_save_files', "Available save files:"))
         for i, save_file in enumerate(save_files, 1):
-            print(f"{i}. {save_file.replace('_save.json', '')}")
+            gui_print(f"{i}. {save_file.replace('_save.json', '')}")
 
         choice = self.game.ask(
             self.lang.get(
@@ -134,7 +135,7 @@ class SaveLoadSystem:
                         save_data = json.load(f)
                     self._load_save_data_internal(save_data)
                 except Exception as e:
-                    print(
+                    gui_print(
                         self.lang.get(
                             "error_loading_save",
                             "Error loading save file: {error}").format(
@@ -218,7 +219,7 @@ class SaveLoadSystem:
             pass
         p.update_stats_from_equipment(self.game.items_data,
                                       self.game.companions_data)
-        print(
+        gui_print(
             self.lang.get(
                 "game_loaded_welcome",
                 "Game loaded successfully! Welcome back, {player_name}!").
@@ -257,11 +258,11 @@ class SaveLoadSystem:
                 p.equipment[slot] = None
 
         if invalid:
-            print(
+            gui_print(
                 f"\n{Colors.YELLOW}{self.lang.get('invalid_items_unequipped', 'Some items were auto-unequipped:')}{Colors.END}"
             )
             for s, n, r in invalid:
-                print(f"  - {s.title()}: {n} ({r})")
+                gui_print(f"  - {s.title()}: {n} ({r})")
 
     def _load_equipment_data(self, player_data: Dict, save_version: str):
         p = self.game.player
@@ -283,7 +284,7 @@ class SaveLoadSystem:
                 p.class_data = cd
                 p.level_up_bonuses = cd.get("level_up_bonuses", {})
         else:
-            print(
+            gui_print(
                 f"{Colors.YELLOW}{self.lang.get('legacy_save_warning', 'Loading legacy save. Equipment may not be restored.')}{Colors.END}"
             )
             eq = {"weapon": None, "armor": None, "accessory": None}

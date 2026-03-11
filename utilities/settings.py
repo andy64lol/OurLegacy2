@@ -1,3 +1,4 @@
+from utilities.gui import gui_print
 """
 Settings Management for Our Legacy
 Centralized configuration and settings handler
@@ -34,7 +35,7 @@ class SettingsManager:
                     # Merge with defaults to ensure all keys exist
                     self.settings.update(loaded_settings)
         except (json.JSONDecodeError, IOError, OSError) as e:
-            print(f"Warning: Could not load settings: {e}")
+            gui_print(f"Warning: Could not load settings: {e}")
             self.settings = DEFAULT_SETTINGS.copy()
     
     def save_settings(self):
@@ -45,7 +46,7 @@ class SettingsManager:
                 json.dump(self.settings, f, indent=2)
             return True
         except (IOError, OSError) as e:
-            print(f"Error saving settings: {e}")
+            gui_print(f"Error saving settings: {e}")
             return False
     
     def get(self, key: str, default=None):

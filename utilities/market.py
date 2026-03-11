@@ -1,3 +1,4 @@
+from utilities.gui import gui_print
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 import requests
@@ -50,7 +51,7 @@ class MarketAPI:
         """Fetch market data from the API with caching, cooldown, and fallback endpoints"""
         # Check cache validity
         if not force_refresh and self._is_cache_valid():
-            print(
+            gui_print(
                 f"{self.Colors.CYAN}{self.lang.get('visiting_market')}{self.Colors.END}")
             return self.cache
 
@@ -60,14 +61,14 @@ class MarketAPI:
                 datetime.now() - self.last_fetch)
             mins = int(remaining.total_seconds() // 60)
             secs = int(remaining.total_seconds() % 60)
-            print(
+            gui_print(
                 self.lang.get(
                     "market_closed_msg",
                     "Merchants have left and the market is closed! Please come back in {mins}m {secs}s"
                 ).format(mins=mins, secs=secs))
             return None
 
-        print(
+        gui_print(
             f"{self.Colors.CYAN}{self.lang.get('checking_merchants_msg', 'Checking if merchants are in the market...')}{self.Colors.END}"
         )
 
@@ -79,14 +80,14 @@ class MarketAPI:
                     data = response.json()
                     self.cache = data
                     self.last_fetch = datetime.now()
-                    print(
+                    gui_print(
                         f"{self.Colors.GREEN}{self.lang.get('market_open_msg', 'Market is open!')}{self.Colors.END}"
                     )
                     return data
             except Exception:
                 continue
 
-        print(
+        gui_print(
             f"{self.Colors.RED}{self.lang.get('market_reach_error', 'Failed to reach any market merchants at this time.')}{self.Colors.END}"
         )
         return None

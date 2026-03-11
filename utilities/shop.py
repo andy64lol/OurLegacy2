@@ -1,3 +1,4 @@
+from utilities.gui import gui_print
 # utilities/shop.py
 from utilities.settings import Colors
 
@@ -17,7 +18,7 @@ def get_rarity_color(rarity: str) -> str:
 def visit_general_shop(self, shop_data):
     """Visit a general shop (not housing)"""
     if not self.player:
-        print(self.lang.get("no_character"))
+        gui_print(self.lang.get("no_character"))
         return
 
     shop_name = shop_data.get("name", "Shop")
@@ -25,12 +26,12 @@ def visit_general_shop(self, shop_data):
     items = shop_data.get("items", [])
     max_buy = shop_data.get("max_buy", 99)
 
-    print(f"\n{Colors.BOLD}=== {shop_name.upper()} ==={Colors.END}")
-    print(welcome_msg)
-    print(f"Your gold: {Colors.GOLD}{self.player.gold}{Colors.END}")
+    gui_print(f"\n{Colors.BOLD}=== {shop_name.upper()} ==={Colors.END}")
+    gui_print(welcome_msg)
+    gui_print(f"Your gold: {Colors.GOLD}{self.player.gold}{Colors.END}")
 
     if not items:
-        print(self.lang.get('ui_shop_no_items'))
+        gui_print(self.lang.get('ui_shop_no_items'))
         return
 
     # Group items by type for better display
@@ -48,7 +49,7 @@ def visit_general_shop(self, shop_data):
             })
 
     if not item_details:
-        print(self.lang.get('ui_no_valid_items_shop'))
+        gui_print(self.lang.get('ui_no_valid_items_shop'))
         return
 
     page_size = 8
@@ -59,7 +60,7 @@ def visit_general_shop(self, shop_data):
         end = start + page_size
         page_items = item_details[start:end]
 
-        print(f"\n--- Items (Page {current_page + 1}) ---")
+        gui_print(f"\n--- Items (Page {current_page + 1}) ---")
         for i, item in enumerate(page_items, 1):
             rarity_color = get_rarity_color(item['rarity'])
             owned_count = self.player.inventory.count(item['id'])
@@ -71,21 +72,21 @@ def visit_general_shop(self, shop_data):
             elif owned_count > 0:
                 status = f" {Colors.YELLOW}(Owned: {owned_count}){Colors.END}"
 
-            print(
+            gui_print(
                 f"{start + i}. {rarity_color}{item['name']}{Colors.END} - {Colors.GOLD}{item['price']}g{Colors.END}{status}"
             )
-            print(f"   {item['description']}")
+            gui_print(f"   {item['description']}")
 
         total_pages = (len(item_details) + page_size - 1) // page_size
-        print(f"\nPage {current_page + 1}/{total_pages}")
+        gui_print(f"\nPage {current_page + 1}/{total_pages}")
 
         if total_pages > 1:
             if current_page > 0:
-                print(f"P. {self.lang.get('ui_previous_page')}")
+                gui_print(f"P. {self.lang.get('ui_previous_page')}")
             if current_page < total_pages - 1:
-                print(f"N. {self.lang.get('ui_next_page')}")
-        print(f"S. {self.lang.get('ui_sell_items')}")
-        print(f"B. {self.lang.get('back')}")
+                gui_print(f"N. {self.lang.get('ui_next_page')}")
+        gui_print(f"S. {self.lang.get('ui_sell_items')}")
+        gui_print(f"B. {self.lang.get('back')}")
         from main import ask
 
         choice = ask("\nChoose item to buy or option: ").strip().upper()
@@ -95,7 +96,7 @@ def visit_general_shop(self, shop_data):
         elif choice == 'S':
             self.shop_sell()
             # Refresh gold display after selling
-            print(f"\nYour gold: {Colors.GOLD}{self.player.gold}{Colors.END}")
+            gui_print(f"\nYour gold: {Colors.GOLD}{self.player.gold}{Colors.END}")
         elif choice == 'N' and current_page < total_pages - 1:
             current_page += 1
         elif choice == 'P' and current_page > 0:
@@ -107,7 +108,7 @@ def visit_general_shop(self, shop_data):
                 owned_count = self.player.inventory.count(item['id'])
 
                 if owned_count >= max_buy:
-                    print(
+                    gui_print(
                         f"{Colors.RED}You already own the maximum amount ({max_buy}) of this item.{Colors.END}"
                     )
                     continue
@@ -115,30 +116,30 @@ def visit_general_shop(self, shop_data):
                 if self.player.gold >= item['price']:
                     self.player.gold -= item['price']
                     self.player.inventory.append(item['id'])
-                    print(
+                    gui_print(
                         f"{Colors.GREEN}Purchased {item['name']} for {item['price']} gold!{Colors.END}"
                     )
                     self.update_mission_progress('collect', item['id'])
                 else:
-                    print(
+                    gui_print(
                         f"{Colors.RED}Not enough gold! Need {item['price']}, have {self.player.gold}.{Colors.END}"
                     )
             else:
-                print(self.lang.get("invalid_item_number"))
+                gui_print(self.lang.get("invalid_item_number"))
         else:
-            print(self.lang.get("invalid_choice"))
+            gui_print(self.lang.get("invalid_choice"))
 
 
 def visit_specific_shop(self, shop_id):
     """Visit a specific shop by ID"""
 
     if not self.player:
-        print(self.lang.get("no_character"))
+        gui_print(self.lang.get("no_character"))
         return
 
     shop_data = self.shops_data.get(shop_id, {})
     if not shop_data:
-        print(f"Shop {shop_id} not found.")
+        gui_print(f"Shop {shop_id} not found.")
         return
 
     self.visit_general_shop(shop_data)
@@ -151,10 +152,10 @@ def shop_sell(self):
 
     sellable = [it for it in self.player.inventory]
     if not sellable:
-        print(self.lang.get('you_have_nothing_sell'))
+        gui_print(self.lang.get('you_have_nothing_sell'))
         return
 
-    print(f"\n{self.lang.get('ui_your_inventory')}")
+    gui_print(f"\n{self.lang.get('ui_your_inventory')}")
     for i, item in enumerate(sellable, 1):
         equip_marker = ''
         for slot, eq in self.player.equipment.items():
@@ -162,7 +163,7 @@ def shop_sell(self):
                 equip_marker = ' (equipped)'
         price = self.items_data.get(item, {}).get('price', 0)
         sell_price = price // 2 if price else 0
-        print(f"{i}. {item}{equip_marker} - Sell for {sell_price} gold")
+        gui_print(f"{i}. {item}{equip_marker} - Sell for {sell_price} gold")
     from main import ask
 
     choice = ask(
@@ -171,17 +172,17 @@ def shop_sell(self):
         return
     idx = int(choice) - 1
     if not (0 <= idx < len(sellable)):
-        print(self.lang.get('invalid_selection'))
+        gui_print(self.lang.get('invalid_selection'))
         return
 
     item = sellable[idx]
     # Prevent selling equipped items
     if item in self.player.equipment.values():
-        print(self.lang.get('unequip_before_selling'))
+        gui_print(self.lang.get('unequip_before_selling'))
         return
 
     price = self.items_data.get(item, {}).get('price', 0)
     sell_price = price // 2 if price else 0
     self.player.inventory.remove(item)
     self.player.gold += sell_price
-    print(f"Sold {item} for {sell_price} gold.")
+    gui_print(f"Sold {item} for {sell_price} gold.")
