@@ -28,9 +28,37 @@ from utilities.UI import Colors, clear_screen, create_progress_bar, create_separ
 from utilities.shop import visit_specific_shop
 from utilities.crafting import visit_alchemy
 from utilities.building import build_home, build_structures, farm, training
+import re as _re
 
 # Global color toggle
 COLORS_ENABLED = True
+
+
+class GUIPrint:
+    """Redirects sys.stdout writes to the GUI message panel, stripping ANSI codes."""
+
+    _ANSI = _re.compile(r'\033\[[0-9;]*[A-Za-z]')
+
+    def __init__(self, window):
+        self._window = window
+        self._buf = ""
+
+    def write(self, text: str):
+        if not text:
+            return
+        self._buf += text
+        while "\n" in self._buf:
+            line, self._buf = self._buf.split("\n", 1)
+            clean = self._ANSI.sub('', line).rstrip()
+            if clean:
+                self._window.add_message(clean)
+
+    def flush(self):
+        if self._buf.strip():
+            clean = self._ANSI.sub('', self._buf).rstrip()
+            if clean:
+                self._window.add_message(clean)
+            self._buf = ""
 
 
 def loading_indicator(message: str = "Loading"):
@@ -466,10 +494,17 @@ class Game:
         while True:
             clear_screen()
             print(self.lang.get("n_settings"))
-            print(f"\n{Colors.CYAN}{Colors.BOLD}=== {self.lang.get('settings', 'SETTINGS')} ==={Colors.END}")
-            print(f"{Colors.CYAN}1.{Colors.END} {self.lang.get('language', 'Language')}")
-            print(f"{Colors.CYAN}2.{Colors.END} {self.lang.get('display_settings', 'Display/Color Settings')}")
-            print(f"{Colors.CYAN}3.{Colors.END} {self.lang.get('back', 'Back')}")
+            print(
+                f"\n{Colors.CYAN}{Colors.BOLD}=== {self.lang.get('settings', 'SETTINGS')} ==={Colors.END}"
+            )
+            print(
+                f"{Colors.CYAN}1.{Colors.END} {self.lang.get('language', 'Language')}"
+            )
+            print(
+                f"{Colors.CYAN}2.{Colors.END} {self.lang.get('display_settings', 'Display/Color Settings')}"
+            )
+            print(
+                f"{Colors.CYAN}3.{Colors.END} {self.lang.get('back', 'Back')}")
 
             choice = ask(f"{Colors.CYAN}Choose an option (1-3): {Colors.END}")
 
@@ -486,15 +521,20 @@ class Game:
         """Display settings for colors and display options"""
         from utilities.UI import Colors
         global COLORS_ENABLED
-        
+
         while True:
             clear_screen()
-            print(f"\n{Colors.CYAN}{Colors.BOLD}=== {self.lang.get('display_settings', 'DISPLAY SETTINGS')} ==={Colors.END}")
-            
+            print(
+                f"\n{Colors.CYAN}{Colors.BOLD}=== {self.lang.get('display_settings', 'DISPLAY SETTINGS')} ==={Colors.END}"
+            )
+
             # Color status
             color_status = f"{Colors.GREEN}ON{Colors.END}" if COLORS_ENABLED else f"{Colors.RED}OFF{Colors.END}"
-            print(f"\n{Colors.CYAN}1.{Colors.END} {self.lang.get('color_output', 'Color Output')}: {color_status}")
-            print(f"{Colors.CYAN}2.{Colors.END} {self.lang.get('back', 'Back')}")
+            print(
+                f"\n{Colors.CYAN}1.{Colors.END} {self.lang.get('color_output', 'Color Output')}: {color_status}"
+            )
+            print(
+                f"{Colors.CYAN}2.{Colors.END} {self.lang.get('back', 'Back')}")
 
             choice = ask(f"{Colors.CYAN}Choose an option (1-2): {Colors.END}")
 
@@ -513,7 +553,6 @@ class Game:
                 break
             else:
                 print(self.lang.get("invalid_choice"))
-            
 
     def create_character(self):
         """Create a new character and initialize starting state."""
@@ -2389,6 +2428,149 @@ class Game:
         for material in gathered.keys():
             self.update_mission_progress('collect', material)
 
+    def run_gui(self):
+        """Launch the GUI game window and start the event-driven game loop (Phase 2.3 + 2.4)."""
+        from utilities.gui import (
+            GameWindow, WelcomeView, CharacterCreationView, SettingsView,
+            ExploreView, CharacterView, InventoryView, MissionsView, ShopView,
+            TavernView, MarketView, DungeonsView, HousingView, FarmView,
+            TrainingView, TravelView, BossView, CompanionsView, ChallengesView,
+            set_main_window, set_gui_mode,
+        )
+
+        window = GameWindow(title="Our Legacy", width=1200, height=800)
+        window.game = self
+        set_main_window(window)
+        set_gui_mode(True)
+
+        # Redirect stdout → GUI message panel (Phase 2.1)
+        _orig_stdout = sys.stdout
+        sys.stdout = GUIPrint(window)
+
+        # Instantiate all views
+        views: Dict[str, Any] = {
+            "welcome":           WelcomeView(window, self),
+            "create_character":  CharacterCreationView(window, self),
+            "character":         CharacterView(window, self),
+            "inventory":         InventoryView(window, self),
+            "explore":           ExploreView(window, self),
+            "missions":          MissionsView(window, self),
+            "shop":              ShopView(window, self),
+            "tavern":            TavernView(window, self),
+            "market":            MarketView(window, self),
+            "dungeons":          DungeonsView(window, self),
+            "housing":           HousingView(window, self),
+            "farm":              FarmView(window, self),
+            "training":          TrainingView(window, self),
+            "travel":            TravelView(window, self),
+            "boss":              BossView(window, self),
+            "companions":        CompanionsView(window, self),
+            "challenges":        ChallengesView(window, self),
+            "settings":          SettingsView(window, self),
+        }
+
+        def _refresh_status():
+            if self.player:
+                window.update_status(self.player)
+                window.show_land_buttons(self.current_area == "your_land")
+
+        def menu_callback(action: str):
+            """Route sidebar nav actions to the matching view (Phase 2.4)."""
+            view_map = {
+                "explore":    "explore",
+                "character":  "character",
+                "travel":     "travel",
+                "inventory":  "inventory",
+                "missions":   "missions",
+                "boss":       "boss",
+                "tavern":     "tavern",
+                "shop":       "shop",
+                "market":     "market",
+                "dungeons":   "dungeons",
+                "companions": "companions",
+                "challenges": "challenges",
+                "settings":   "settings",
+                "furnish_home": "housing",
+                "farm":       "farm",
+                "training":   "training",
+            }
+
+            if action in view_map:
+                if not self.player and action not in ("settings",):
+                    window.add_message("Create or load a character first.")
+                    views["welcome"].show()
+                    return
+                views[view_map[action]].show()
+
+            elif action == "alchemy":
+                if self.player:
+                    visit_alchemy(self)
+                    _refresh_status()
+
+            elif action == "rest":
+                if self.player:
+                    cost = max(5, self.player.level * 2)
+                    if self.player.gold >= cost:
+                        self.player.gold -= cost
+                        self.player.hp = self.player.max_hp
+                        self.player.mp = self.player.max_mp
+                        window.add_message(
+                            f"You rest. Spent {cost} gold. HP and MP restored.",
+                            "#00cc00")
+                        _refresh_status()
+                    else:
+                        window.add_message(
+                            f"Need {cost} gold to rest. You have {self.player.gold}.",
+                            "#cc0000")
+
+            elif action == "pet_shop":
+                if self.player:
+                    self.pet_shop()
+                    _refresh_status()
+
+            elif action == "build":
+                if self.player:
+                    build_structures(self)
+                    _refresh_status()
+
+            elif action == "save":
+                self.save_load_system.save_game()
+
+            elif action == "load":
+                self.save_load_system.load_game()
+                if self.player:
+                    _refresh_status()
+                    views["character"].show()
+
+            elif action == "claim":
+                self.claim_rewards()
+                _refresh_status()
+
+            elif action == "quit":
+                sys.stdout = _orig_stdout
+                set_gui_mode(False)
+                window.destroy()
+
+        window.menu_callback = menu_callback
+
+        # Wire the WelcomeView buttons to use GUI-specific character creation
+        welcome_view = views["welcome"]
+        welcome_view.on_new_game = lambda: (
+            views["create_character"].show()
+        )
+        welcome_view.on_load_game = lambda: (
+            self.save_load_system.load_game() or _refresh_status() or
+            views["character"].show() if self.player else views["welcome"].show()
+        )
+
+        # Show the welcome screen and start the GUI event loop
+        views["welcome"].show()
+        window.mainloop()
+
+        # Restore stdout after window closes
+        sys.stdout = _orig_stdout
+        set_gui_mode(False)
+
     def run(self):
         """Main game loop"""
         choice = self.display_welcome()
@@ -2414,12 +2596,17 @@ class Game:
 
 
 def main():
-    """Main entry point"""
+    """Main entry point. Pass --gui or -g to launch in GUI mode."""
+    use_gui = '--gui' in sys.argv or '-g' in sys.argv
+
     game = Game()
 
-    # Setup global handlers for Ctrl+C and uncaught exceptions so we can save before exit
+    if use_gui:
+        game.run_gui()
+        return
+
+    # CLI mode: setup Ctrl+C / uncaught exception handlers then enter the text loop
     try:
-        # SIGINT handler
         def _handle_sigint(signum, frame):
             print(
                 "\nReceived interrupt (SIGINT). Attempting to save before exit..."
@@ -2431,7 +2618,6 @@ def main():
 
         signal.signal(signal.SIGINT, _handle_sigint)
 
-        # Unhandled exception hook
         def _handle_exception(exc_type, exc_value, exc_tb):
             print(
                 "Unhandled exception occurred. Attempting to save game before exiting..."
@@ -2441,20 +2627,21 @@ def main():
                                    filename_prefix="err_save_unstable_")
             except Exception:
                 pass
-            # Print the traceback to stderr then exit
             traceback.print_exception(exc_type, exc_value, exc_tb)
             sys.exit(1)
 
         sys.excepthook = _handle_exception
     except Exception:
-        # If handler setup fails, continue without it
         pass
 
     game.run()
 
 
 if __name__ == "__main__":
-    clear_screen()
-    main()
-    time.sleep(1)
-    clear_screen()
+    if '--gui' in sys.argv or '-g' in sys.argv:
+        main()
+    else:
+        clear_screen()
+        main()
+        time.sleep(1)
+        clear_screen()
