@@ -177,7 +177,9 @@ def ask(prompt: str,
                          "Invalid input. Allowed choices: {choices}").format(
                              choices=', '.join(cmp_choices or [])))
 
-        # Retry loop
+        # Retry loop continues at top of while True
+
+    return ""
 
 
 def _make_completer(options: List[str]):
@@ -2386,8 +2388,6 @@ class Game:
                 "challenges": "challenges",
                 "settings": "settings",
                 "furnish_home": "housing",
-                "farm": "farm",
-                "training": "training",
             }
 
             if action in view_map:
@@ -2421,6 +2421,16 @@ class Game:
             elif action == "pet_shop":
                 if self.player:
                     self.pet_shop()
+                    _refresh_status()
+
+            elif action == "farm":
+                if self.player:
+                    farm(self)
+                    _refresh_status()
+
+            elif action == "training":
+                if self.player:
+                    training(self)
                     _refresh_status()
 
             elif action == "build":
