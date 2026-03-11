@@ -2333,12 +2333,20 @@ class Game:
             GameWindow, WelcomeView, CharacterCreationView, SettingsView,
             ExploreView, CharacterView, InventoryView, MissionsView, ShopView,
             TavernView, MarketView, DungeonsView, HousingView, FarmView,
-            TrainingView, TravelView, BossView, CompanionsView, ChallengesView)
+            TrainingView, TravelView, BossView, CompanionsView, ChallengesView,
+            load_game_font)
+
+        # Load game font (can be done before window)
+        load_game_font()
 
         window = GameWindow(title="Our Legacy", width=1200, height=800)
         window.game = self
         set_main_window(window)
         set_gui_mode(True)
+
+        # Load game title images AFTER window is created (requires tkinter root)
+        from utilities.gui import load_game_title_images
+        load_game_title_images()
 
         # Redirect stdout → GUI message panel (Phase 2.1)
         _orig_stdout = sys.stdout

@@ -10,12 +10,15 @@ from tkinter import messagebox
 import threading
 from datetime import datetime
 
-# Medieval color palette - Enhanced RPG-style colors
+# Medieval color palette - Enhanced RPG-style colors with slate gray primary
 MEDIEVAL_COLORS = {
     'bg_dark': '#0f0f14',        # Darker background
     'bg_darker': '#08080c',      # Even darker for panels
     'bg_light': '#1e1e28',       # Slightly lighter for cards
     'bg_hover': '#2a2a38',       # Hover state
+    'primary_slate': '#708090',  # Slate gray - primary accent color
+    'primary_slate_light': '#8a9ba8',  # Lighter slate
+    'primary_slate_dark': '#5a6a7a',  # Darker slate
     'accent_gold': '#c9a227',    # Rich gold
     'accent_gold_bright': '#ffd700',  # Bright gold for highlights
     'accent_red': '#8b1a1a',     # Deep red
@@ -25,6 +28,7 @@ MEDIEVAL_COLORS = {
     'text_bright': '#fff8e8',    # Bright text
     'border_gold': '#6b5d47',    # Gold border
     'border_dim': '#3a3a4a',     # Dim border
+    'border_slate': '#4a5a6a',   # Slate border
     'health_red': '#cc2222',     # Health bar red
     'health_green': '#22cc44',   # Health bar green
     'mana_blue': '#2266cc',      # Mana bar blue
@@ -65,6 +69,10 @@ ANSI_TO_GUI = {
 GAME_FONT = None
 GAME_FONT_BOLD = None
 
+# Game title images
+GAME_TITLE_IMAGE = None
+GAME_TITLE_IMAGE_LARGE = None
+
 def load_game_font():
     """Load the game font from assets if available."""
     global GAME_FONT, GAME_FONT_BOLD
@@ -78,6 +86,36 @@ def load_game_font():
             GAME_FONT_BOLD = font.Font(family="Game Font", size=12, weight="bold")
             return True
         except Exception:
+            pass
+    return False
+
+
+def load_game_title_images():
+    """Load the game title images from assets if available."""
+    global GAME_TITLE_IMAGE, GAME_TITLE_IMAGE_LARGE
+    import os
+    
+    # Try to load the smaller title for in-game use
+    title_path = 'data/assets/game_title_our_legacy_2_720px_300px.png'
+    if os.path.exists(title_path):
+        try:
+            from PIL import Image
+            img = Image.open(title_path)
+            img = img.resize((360, 150), Image.Resampling.LANCZOS)
+            GAME_TITLE_IMAGE = ctk.CTkImage(light_image=img, dark_image=img, size=(360, 150))
+            
+            # Load larger title for welcome screen
+            large_title_path = 'data/assets/game_title_our_legacy_2.png'
+            if os.path.exists(large_title_path):
+                img_large = Image.open(large_title_path)
+                img_large = img_large.resize((720, 300), Image.Resampling.LANCZOS)
+                GAME_TITLE_IMAGE_LARGE = ctk.CTkImage(light_image=img_large, dark_image=img_large, size=(720, 300))
+            else:
+                GAME_TITLE_IMAGE_LARGE = GAME_TITLE_IMAGE
+            
+            return True
+        except Exception as e:
+            print(f"Could not load game title images: {e}")
             pass
     return False
 
@@ -177,6 +215,7 @@ class MedievalButton(ctk.CTkButton):
                  text: str = "Button",
                  command: Optional[Callable] = None,
                  size: str = "normal",
+                 use_slate: bool = True,
                  **kwargs):
         """
         Initialize a medieval-themed button.
@@ -186,6 +225,7 @@ class MedievalButton(ctk.CTkButton):
             text: Button text
             command: Callback function when clicked
             size: Button size ('small', 'normal', 'large')
+            use_slate: Use slate gray as primary color (default True)
         """
         font_sizes = {
             'small': 12,
@@ -195,17 +235,31 @@ class MedievalButton(ctk.CTkButton):
 
         font_size = font_sizes.get(size, 14)
 
-        super().__init__(master,
-                         text=text,
-                         command=command,
-                         fg_color=MEDIEVAL_COLORS['accent_red'],
-                         hover_color='#a00000',
-                         text_color=MEDIEVAL_COLORS['text_light'],
-                         font=('Arial', font_size, 'bold'),
-                         border_width=2,
-                         border_color=MEDIEVAL_COLORS['accent_gold'],
-                         corner_radius=8,
-                         **kwargs)
+        # Use slate gray as primary color
+        if use_slate:
+            super().__init__(master,
+                             text=text,
+                             command=command,
+                             fg_color=MEDIEVAL_COLORS['primary_slate'],
+                             hover_color=MEDIEVAL_COLORS['primary_slate_light'],
+                             text_color=MEDIEVAL_COLORS['text_light'],
+                             font=('Arial', font_size, 'bold'),
+                             border_width=2,
+                             border_color=MEDIEVAL_COLORS['border_slate'],
+                             corner_radius=8,
+                             **kwargs)
+        else:
+            super().__init__(master,
+                             text=text,
+                             command=command,
+                             fg_color=MEDIEVAL_COLORS['accent_red'],
+                             hover_color='#a00000',
+                             text_color=MEDIEVAL_COLORS['text_light'],
+                             font=('Arial', font_size, 'bold'),
+                             border_width=2,
+                             border_color=MEDIEVAL_COLORS['accent_gold'],
+                             corner_radius=8,
+                             **kwargs)
 
 
 class MedievalLabel(ctk.CTkLabel):
@@ -1124,9 +1178,21 @@ class WelcomeView(BaseGameView):
 
         content = self.game_window.game_content
 
-        # Title
-        title = MedievalLabel(content, text="Our Legacy 2", style='title')
-        title.pack(pady=30)
+        # Try to load and display game title image
+        from utilities.gui import GAME_TITLE_IMAGE_LARGE, load_game_title_images
+        
+        # Try to load images if not already loaded
+        if GAME_TITLE_IMAGE_LARGE is None:
+            load_game_title_images()
+        
+        # Display game title image if available
+        if GAME_TITLE_IMAGE_LARGE:
+            title_image_label = ctk.CTkLabel(content, image=GAME_TITLE_IMAGE_LARGE, text="")
+            title_image_label.pack(pady=20)
+        else:
+            # Fallback to text title
+            title = MedievalLabel(content, text="Our Legacy 2", style='title')
+            title.pack(pady=30)
 
         subtitle = MedievalLabel(content,
                                  text="A Medieval Fantasy RPG",
@@ -1136,30 +1202,33 @@ class WelcomeView(BaseGameView):
         # Separator
         ctk.CTkLabel(content, text="").pack(pady=20)
 
-        # Menu buttons
-        new_game_btn = MedievalButton(content,
+        # Menu buttons with better styling
+        button_frame = ctk.CTkFrame(content, fg_color='transparent')
+        button_frame.pack(pady=10, padx=50, fill=ctk.X)
+
+        new_game_btn = MedievalButton(button_frame,
                                       text="New Game",
                                       command=self.on_new_game,
                                       size='large')
-        new_game_btn.pack(pady=10, padx=50, fill=ctk.X)
+        new_game_btn.pack(pady=10, fill=ctk.X)
 
-        load_game_btn = MedievalButton(content,
+        load_game_btn = MedievalButton(button_frame,
                                        text="Load Game",
                                        command=self.on_load_game,
                                        size='large')
-        load_game_btn.pack(pady=10, padx=50, fill=ctk.X)
+        load_game_btn.pack(pady=10, fill=ctk.X)
 
-        settings_btn = MedievalButton(content,
+        settings_btn = MedievalButton(button_frame,
                                       text="Settings",
                                       command=self.on_settings,
                                       size='large')
-        settings_btn.pack(pady=10, padx=50, fill=ctk.X)
+        settings_btn.pack(pady=10, fill=ctk.X)
 
-        quit_btn = MedievalButton(content,
+        quit_btn = MedievalButton(button_frame,
                                   text="Quit",
                                   command=self.on_quit,
                                   size='large')
-        quit_btn.pack(pady=10, padx=50, fill=ctk.X)
+        quit_btn.pack(pady=10, fill=ctk.X)
 
     def on_new_game(self):
         """Handle new game."""

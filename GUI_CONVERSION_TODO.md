@@ -82,4 +82,9 @@ KeyboardInterrupt```
 - [x] Use the assets from data/assets/
 - [x] Make it to be more rpg-like
 - [x] Use font in ttf from data/assets/fonts/
-- [ ] Make it to use primary colour as slate gray
+- [x] Make it to use primary colour as slate gray
+- [x] Redesign the UI to have a main menu screen with New game, load game and quit, when starting new game show the options near
+- [x] Make it use the game title from assets, 1 for main screen and the another for ingame
+- [x] Make it to use scroll-like
+- [x] Change the positions
+- [x] Change how text is displayed
