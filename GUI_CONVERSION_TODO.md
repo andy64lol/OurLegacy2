@@ -40,7 +40,7 @@
 - [x] 4.4 Modify README.md
 
 ## Phase 5 New: Fix battle issues
-- [ ] fix this error:
+- [x] fix this error:
     ``
 Exception in Tkinter callback
 Traceback (most recent call last):
@@ -73,12 +73,13 @@ Traceback (most recent call last):
 KeyboardInterrupt```
 
 ## Phase 6 New: Add Training and etc to be used
-- [ ] Make training logic to be used back
+- [x] Make training logic to be used back
 
 ## Phase 7 New: Remake the style since current style doesn't feel good
-- [ ] Modify the colours and styles
-- [ ] Modify the ANSII stripping to be replaced with coloured text
-- [ ] Modify the old TUI Progress bar to be GUI
-- [ ] Use the assets from data/assets/
-- [ ] Make it to be more rpg-like
-- [ ] Use font in ttf from data/assets/fonts/
+- [x] Modify the colours and styles
+- [x] Modify the ANSII stripping to be replaced with coloured text
+- [x] Modify the old TUI Progress bar to be GUI
+- [x] Use the assets from data/assets/
+- [x] Make it to be more rpg-like
+- [x] Use font in ttf from data/assets/fonts/
+- [ ] Make it to use primary colour as slate gray
