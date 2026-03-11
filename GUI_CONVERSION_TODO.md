@@ -1,12 +1,12 @@
 # GUI Conversion TODO List
 
 ## Phase 1: Expand utilities/gui.py
-- [ ] 1.1 Add GameWindow class (main window with sidebar, content area, message panel, status bar)
-- [ ] 1.2 Add MenuSystem classes (MainMenuView, CharacterCreationView, SettingsView)
-- [ ] 1.3 Add GameView classes (ExploreView, BattleView, InventoryView, ShopView, etc.)
-- [ ] 1.4 Enhance dialogs (ChoiceDialog, InputDialog, MessageDialog)
-- [ ] 1.5 Add message/log panel for game output
-- [ ] 1.6 Add input handling for choices
+- [x] 1.1 Add GameWindow class (main window with sidebar, content area, message panel, status bar)
+- [x] 1.2 Add MenuSystem classes (CharacterCreationView, SettingsView, WelcomeView)
+- [x] 1.3 Add GameView classes (ExploreView, BattleView, InventoryView, ShopView, MissionsView, TavernView, MarketView, DungeonsView, HousingView, FarmView, TrainingView)
+- [x] 1.4 Enhance dialogs (ChoiceDialog, InputDialog, NumberInputDialog, MessageBox, ConfirmationBox)
+- [x] 1.5 Add message/log panel for game output
+- [x] 1.6 Add input handling for choices
 
 ## Phase 2: Modify main.py
 - [ ] 2.1 Replace all print() calls with GUI display functions
