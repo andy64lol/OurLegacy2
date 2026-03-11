@@ -10,30 +10,106 @@ from tkinter import messagebox
 import threading
 from datetime import datetime
 
-# Medieval color palette
+# Medieval color palette - Enhanced RPG-style colors
 MEDIEVAL_COLORS = {
-    'bg_dark': '#1a1a1a',
-    'bg_darker': '#0d0d0d',
-    'bg_light': '#2d2d2d',
-    'accent_gold': '#d4af37',
-    'accent_red': '#8b0000',
-    'text_light': '#e8d5c4',
-    'text_dim': '#8b8b7a',
-    'border_gold': '#6b5d47',
-    'health_red': '#cc0000',
-    'mana_blue': '#0066cc',
-    'exp_green': '#00cc00',
-    'gold_yellow': '#ffd700',
+    'bg_dark': '#0f0f14',        # Darker background
+    'bg_darker': '#08080c',      # Even darker for panels
+    'bg_light': '#1e1e28',       # Slightly lighter for cards
+    'bg_hover': '#2a2a38',       # Hover state
+    'accent_gold': '#c9a227',    # Rich gold
+    'accent_gold_bright': '#ffd700',  # Bright gold for highlights
+    'accent_red': '#8b1a1a',     # Deep red
+    'accent_red_bright': '#ff3333',  # Bright red for damage
+    'text_light': '#e8dcc8',     # Warm off-white
+    'text_dim': '#7a7a6a',       # Muted text
+    'text_bright': '#fff8e8',    # Bright text
+    'border_gold': '#6b5d47',    # Gold border
+    'border_dim': '#3a3a4a',     # Dim border
+    'health_red': '#cc2222',     # Health bar red
+    'health_green': '#22cc44',   # Health bar green
+    'mana_blue': '#2266cc',      # Mana bar blue
+    'mana_blue_bright': '#4488ff',  # Bright mana
+    'exp_green': '#22cc66',      # Experience green
+    'exp_purple': '#9966cc',     # Experience purple
+    'gold_yellow': '#ffcc00',    # Gold color
+    'silver': '#c0c0c0',         # Silver
+    'warning_yellow': '#ffcc00', # Warning yellow
+    'error_red': '#ff4444',      # Error red
+    'success_green': '#44cc44',  # Success green
+    'info_blue': '#4488cc',      # Info blue
 }
 
 # Rarity colors
 RARITY_COLORS = {
-    'common': '#ffffff',
+    'common': '#b0b0b0',
     'uncommon': '#92D050',
     'rare': '#4472C4',
-    'epic': '#7030A0',
+    'epic': '#9B59B6',
     'legendary': '#FFD700',
 }
+
+# ANSI color code to GUI color mapping
+ANSI_TO_GUI = {
+    '\033[91m': MEDIEVAL_COLORS['accent_red_bright'],   # RED
+    '\033[92m': MEDIEVAL_COLORS['exp_green'],           # GREEN
+    '\033[93m': MEDIEVAL_COLORS['gold_yellow'],         # YELLOW
+    '\033[94m': MEDIEVAL_COLORS['mana_blue'],           # BLUE
+    '\033[95m': MEDIEVAL_COLORS['exp_purple'],          # MAGENTA
+    '\033[96m': MEDIEVAL_COLORS['mana_blue_bright'],    # CYAN
+    '\033[97m': MEDIEVAL_COLORS['text_bright'],         # WHITE
+    '\033[1m': MEDIEVAL_COLORS['text_bright'],          # BOLD
+    '\033[0m': MEDIEVAL_COLORS['text_light'],           # END
+}
+
+# Custom font settings
+GAME_FONT = None
+GAME_FONT_BOLD = None
+
+def load_game_font():
+    """Load the game font from assets if available."""
+    global GAME_FONT, GAME_FONT_BOLD
+    import os
+    
+    font_path = 'data/assets/fonts/Game_Font_Main.ttf'
+    if os.path.exists(font_path):
+        try:
+            from tkinter import font
+            GAME_FONT = font.Font(family="Game Font", size=12)
+            GAME_FONT_BOLD = font.Font(family="Game Font", size=12, weight="bold")
+            return True
+        except Exception:
+            pass
+    return False
+
+def parse_ansi_colors(text: str) -> tuple:
+    """Parse ANSI color codes from text and return (cleaned_text, color).
+    
+    Returns a tuple of (text_without_ansi, preferred_color).
+    If no ANSI codes found, returns (text, None).
+    """
+    import re
+    
+    # Remove ANSI codes and track the last color code used
+    ansi_pattern = re.compile(r'\033\[[0-9;]*m')
+    
+    # Find all ANSI codes in the text
+    codes = ansi_pattern.findall(text)
+    
+    # Remove all ANSI codes
+    clean_text = ansi_pattern.sub('', text)
+    
+    # Map the last ANSI code to GUI color
+    color = None
+    if codes:
+        # Use the last color code (most recent)
+        last_code = codes[-1] if codes else None
+        if last_code in ANSI_TO_GUI:
+            color = ANSI_TO_GUI[last_code]
+        # Handle bold
+        elif '\033[1m' in codes:
+            color = MEDIEVAL_COLORS['text_bright']
+    
+    return clean_text, color
 
 
 class MedievalWindow(ctk.CTk):
@@ -676,23 +752,35 @@ class GameWindow(ctk.CTk):
 
     def add_message(self, message: str, color: Optional[str] = None):
         """Add a message to the message panel."""
-        import re
-        message = re.sub(r'\033\[[0-9;]*m', '', message)
-
+        # Parse ANSI colors from the message
+        message, ansi_color = parse_ansi_colors(message)
+        
+        # Use explicit color if provided, otherwise use ANSI-derived color
+        if color is None:
+            color = ansi_color
         if color is None:
             color = MEDIEVAL_COLORS['text_light']
 
-        msg_label = ctk.CTkLabel(self.message_panel,
-                                 text=message,
-                                 text_color=color,
-                                 anchor='w',
-                                 justify='left')
-        msg_label.pack(fill=ctk.X, padx=5, pady=2)
+        # Use after() to ensure this runs on the main thread (fixes battle thread issues)
+        def _add_message():
+            try:
+                msg_label = ctk.CTkLabel(self.message_panel,
+                                         text=message,
+                                         text_color=color,
+                                         anchor='w',
+                                         justify='left')
+                msg_label.pack(fill=ctk.X, padx=5, pady=2)
 
-        self.message_log.append(message)
+                self.message_log.append(message)
 
-        # Auto-scroll to bottom
-        self.message_panel._parent_canvas.yview_moveto(1.0)
+                # Auto-scroll to bottom
+                self.message_panel._parent_canvas.yview_moveto(1.0)
+            except Exception:
+                # Silently ignore errors (e.g., if window is being destroyed)
+                pass
+
+        # Schedule the message addition on the main thread
+        self.after(0, _add_message)
 
     def clear_messages(self):
         """Clear all messages from the panel."""
