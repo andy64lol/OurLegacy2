@@ -460,7 +460,7 @@ class GameWindow(ctk.CTk):
         self.configure(fg_color=MEDIEVAL_COLORS['bg_dark'])
 
         # Game reference
-        self.game = None
+        self.game: Optional[Any] = None
 
         # Current view
         self.current_view = None
