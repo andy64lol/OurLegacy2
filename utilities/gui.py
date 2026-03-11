@@ -682,6 +682,9 @@ class GameWindow(ctk.CTk):
 
     def add_message(self, message: str, color: Optional[str] = None):
         """Add a message to the message panel."""
+        import re
+        message = re.sub(r'\033\[[0-9;]*m', '', message)
+
         if color is None:
             color = MEDIEVAL_COLORS['text_light']
 
@@ -1497,7 +1500,15 @@ class Colors:
 
     @classmethod
     def wrap(cls, text: str, color_code: str) -> str:
+        if GUI_MODE:
+            return text
         return f"{color_code}{text}{cls.END}"
+
+    @staticmethod
+    def strip(text: str) -> str:
+        """Remove all ANSI escape sequences from *text*."""
+        import re
+        return re.sub(r'\033\[[0-9;]*m', '', text)
 
 
 def clear_screen():

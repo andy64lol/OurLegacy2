@@ -19,11 +19,22 @@
 - [x] 2.8 Use grep -rn --include=\*.py -e 'input(' -e 'print(' . Also check for debugs and spare them (since they're not game logic)
 
 ## Phase 3: Modify utilities/UI.py
-- [ ] 3.1 Replace CLI display functions with GUI equivalents
-- [ ] 3.2 Keep Colors class for potential GUI color mapping
+- [x] 3.1 Replace CLI display functions with GUI equivalents
+  - Colors.wrap() now returns plain text in GUI mode (no ANSI escape sequences)
+  - create_progress_bar() renders without ANSI codes in GUI mode
+  - create_section_header() returns plain text in GUI mode
+  - Added Colors.strip() helper to remove ANSI codes from any string
+  - add_message() in GameWindow strips ANSI codes as a safety net
+  - Colors.wrap() in gui.py also returns plain text in GUI mode
+- [x] 3.2 Keep Colors class for potential GUI color mapping
 
 ## Phase 4: Test and Fix
-- [ ] 4.1 Ensure no TUI and CLI elements are found except for debugs
-- [ ] 4.2 Test the GUI conversion
-- [ ] 4.3 Fix any issues found
-- [ ] 4.4 Modify README.md
+- [x] 4.1 Ensure no TUI and CLI elements are found except for debugs
+  - All remaining input() calls are properly guarded (return early in GUI mode or are explicit CLI fallbacks)
+  - All remaining print() calls in gui.py are CLI fallbacks inside else branches
+  - setup_venv.py and serve.py are infrastructure scripts, not game logic — exempt
+- [x] 4.2 Test the GUI conversion
+- [x] 4.3 Fix any issues found
+  - ANSI codes no longer appear in the message panel (stripped at Colors.wrap and add_message levels)
+  - progress bars and section headers render cleanly in GUI mode
+- [x] 4.4 Modify README.md

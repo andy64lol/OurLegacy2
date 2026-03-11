@@ -1,11 +1,10 @@
-# ⚔️ Our Legacy - Fantasy RPG Game (GUI Edition)
+# ⚔️ Our Legacy 2
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 ![customtkinter](https://img.shields.io/badge/GUI-customtkinter-orange.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ## 📑 Quick Links
-- [Overview](#overview)
 - [Quick Start](#quick-start)
 - [Features](#features)
 - [Installation](#installation--setup)
