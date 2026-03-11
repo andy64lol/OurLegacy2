@@ -1,7 +1,7 @@
-# ⚔️ Our Legacy - Text-Based CLI Fantasy RPG Game
+# ⚔️ Our Legacy - Fantasy RPG Game (GUI Edition)
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
-![Node.js](https://img.shields.io/badge/Node.js-Required-green.svg)
+![customtkinter](https://img.shields.io/badge/GUI-customtkinter-orange.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ## 📑 Quick Links
@@ -17,7 +17,7 @@
 
 ## Overview
 
-"Our Legacy" is a comprehensive text-based CLI fantasy RPG game focused on exploration, grinding, and adventure. Built with Python and driven by modular JSON data, the game offers a rich, extensible experience for players and modders alike. Now featuring a powerful **JavaScript Scripting Engine** powered by Node.js and a new **Alchemy & Crafting** system.
+"Our Legacy" is a comprehensive fantasy RPG game focused on exploration, grinding, and adventure. Built with Python and driven by modular JSON data, the game features a full **medieval-themed GUI** powered by customtkinter, a **JavaScript Scripting Engine** powered by Node.js, and a rich **Alchemy & Crafting** system.
 
 ## Features
 
@@ -71,7 +71,8 @@ Materials are found by defeating enemies or exploring specific areas:
 
 ### Prerequisites
 - **Python 3.11+**
-- **Node.js** (for scripting features)
+- **customtkinter** (`pip install customtkinter pillow`)
+- **Node.js** (optional, for scripting features)
 
 ### Installation
 ```bash
@@ -81,11 +82,11 @@ git clone https://github.com/andy64lol/our-legacy.git
 # Navigate to the project directory
 cd our-legacy
 
-# Run the game
-python3 main.py
+# Install GUI dependencies
+pip install customtkinter pillow
 
-# Or use the launcher for all tools
-python3 launcher.py
+# Launch the game (opens the medieval GUI)
+python3 main.py
 ```
 
 ## 🌐 Web Download
