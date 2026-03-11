@@ -79,7 +79,7 @@ class SaveLoadSystem:
         os.makedirs(saves_dir, exist_ok=True)
         safe_prefix = (filename_prefix or "").replace('/', '_')
 
-        overwrite_by_uuid = self.game.mod_manager.settings.get(
+        overwrite_by_uuid = False # Mod manager removed - using default
             "overwrite_save_by_uuid", False)
         if overwrite_by_uuid and not filename_prefix:
             existing_save = None

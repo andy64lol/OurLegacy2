@@ -15,7 +15,6 @@ import signal
 import traceback
 import io
 from utilities.settings import get_setting, set_setting
-from utilities.mod_manager import ModManager
 from utilities.character import Character
 from utilities.battle import BattleSystem
 from utilities.spellcasting import SpellCastingSystem
@@ -227,8 +226,7 @@ class Game:
         self.lang = LanguageManager(get_setting_func=get_setting,
                                     set_setting_func=set_setting)
 
-        # Initialize ModManager with translation support
-        self.mod_manager = ModManager(lang=self.lang)
+        # Mod manager removed
 
         # Initialize Market API with translation support
         self.market_api = MarketAPI(lang=self.lang, colors=Colors)
@@ -297,27 +295,22 @@ class Game:
                 self.weather_data = {}
                 self.times_data = {}
 
-            # Apply mod data
-            mod_enemies = self.mod_manager.load_mod_data("enemies.json")
-            self.enemies_data.update(mod_enemies)
+            ## Mod data removed
+            # Mod data loading removed
 
-            mod_areas = self.mod_manager.load_mod_data("areas.json")
-            self.areas_data.update(mod_areas)
+            # mod_areas removed
+            # self.areas_data.update(mod_areas) removed
 
-            mod_items = self.mod_manager.load_mod_data("items.json")
-            self.items_data.update(mod_items)
+            # mod_items removed
+            # self.items_data.update(mod_items) removed
 
-            mod_missions = self.mod_manager.load_mod_data("missions.json")
-            self.missions_data.update(mod_missions)
+            # mod_missions removed
+            # self.missions_data.update(mod_missions) removed
 
-            mod_bosses = self.mod_manager.load_mod_data("bosses.json")
-            self.bosses_data.update(mod_bosses)
+            # mod_bosses removed
+            # self.bosses_data.update(mod_bosses) removed
 
-            mod_spells = self.mod_manager.load_mod_data("spells.json")
-            self.spells_data.update(mod_spells)
-
-            mod_effects = self.mod_manager.load_mod_data("effects.json")
-            self.effects_data.update(mod_effects)
+            # mod_spells removed
 
         except FileNotFoundError as e:
             print(f"Error loading game data: {e}")
@@ -378,83 +371,6 @@ class Game:
                 self.farming_data = json.load(f)
         except FileNotFoundError:
             self.farming_data = {}
-
-        # Load mod data after base game data
-        self._load_mod_data()
-
-    def _load_mod_data(self):
-        """Load and merge mod data into base game data"""
-        # Discover available mods
-        self.mod_manager.discover_mods()
-
-        # Get enabled mods
-        enabled_mods = self.mod_manager.get_enabled_mods()
-
-        if not enabled_mods:
-            return
-
-        print(self.lang.get("nloading_mods"))
-
-        # Load mod data for each data type
-        mod_data_types = [('areas.json', 'areas_data'),
-                          ('enemies.json', 'enemies_data'),
-                          ('items.json', 'items_data'),
-                          ('missions.json', 'missions_data'),
-                          ('bosses.json', 'bosses_data'),
-                          ('companions.json', 'companions_data'),
-                          ('classes.json', 'classes_data'),
-                          ('spells.json', 'spells_data'),
-                          ('effects.json', 'effects_data'),
-                          ('crafting.json', 'crafting_data'),
-                          ('dungeons.json', 'dungeons_data'),
-                          ('dialogues.json', 'dialogues_data'),
-                          ('cutscenes.json', 'cutscenes_data'),
-                          ('weekly_challenges.json', 'weekly_challenges_data'),
-                          ('housing.json', 'housing_data'),
-                          ('shops.json', 'shops_data'),
-                          ('weather.json', 'weather_data'),
-                          ('times.json', 'times_data')]
-
-        for file_name, attr_name in mod_data_types:
-            mod_data = self.mod_manager.load_mod_data(file_name)
-            if mod_data:
-                # Merge mod data into base data
-                base_data = getattr(self, attr_name)
-
-                # Special handling for dungeons: merge nested structures
-                if file_name == 'dungeons.json':
-                    if 'dungeons' in mod_data:
-                        if 'dungeons' not in base_data:
-                            base_data['dungeons'] = []
-                        base_data['dungeons'].extend(mod_data['dungeons'])
-                    if 'challenge_templates' in mod_data:
-                        if 'challenge_templates' not in base_data:
-                            base_data['challenge_templates'] = {}
-                        base_data['challenge_templates'].update(
-                            mod_data['challenge_templates'])
-                    if 'chest_templates' in mod_data:
-                        if 'chest_templates' not in base_data:
-                            base_data['chest_templates'] = {}
-                        base_data['chest_templates'].update(
-                            mod_data['chest_templates'])
-                # Special handling for weekly_challenges: merge nested challenge arrays
-                elif file_name == 'weekly_challenges.json':
-                    if 'challenges' in mod_data:
-                        if 'challenges' not in base_data:
-                            base_data['challenges'] = []
-                        base_data['challenges'].extend(mod_data['challenges'])
-                        # Initialize progress tracking for new challenges
-                        for challenge in mod_data['challenges']:
-                            self.challenge_progress[challenge['id']] = 0
-                else:
-                    # Standard merge for other data types
-                    base_data.update(mod_data)
-
-                print(
-                    f"  Loaded {len(mod_data)} entries from mods for {file_name}"
-                )
-
-        print(self.lang.get("mod_loading_complete_1"))
 
     def load_config(self):
         """Load configuration - uses hardcoded defaults since config file is removed"""
@@ -550,113 +466,54 @@ class Game:
         while True:
             clear_screen()
             print(self.lang.get("n_settings"))
+            print(f"\n{Colors.CYAN}{Colors.BOLD}=== {self.lang.get('settings', 'SETTINGS')} ==={Colors.END}")
+            print(f"{Colors.CYAN}1.{Colors.END} {self.lang.get('language', 'Language')}")
+            print(f"{Colors.CYAN}2.{Colors.END} {self.lang.get('display_settings', 'Display/Color Settings')}")
+            print(f"{Colors.CYAN}3.{Colors.END} {self.lang.get('back', 'Back')}")
 
-            # Get current settings
-            mods_enabled = self.mod_manager.settings.get("mods_enabled", True)
-
-            print(
-                f"\n1. Mod System: {'{Colors.GREEN}Enabled{Colors.END}' if mods_enabled else '{Colors.RED}Disabled{Colors.END}'}"
-            )
-            print(self.lang.get("mod_menu_goback"))
-
-            choice = ask("\nChoose an option: ").strip()
+            choice = ask(f"{Colors.CYAN}Choose an option (1-3): {Colors.END}")
 
             if choice == "1":
-                # Toggle mods system
-                self.mod_manager.toggle_mods_system()
-                if self.mod_manager.settings.get("mods_enabled", True):
-                    print(self.lang.get("mod_system_enabled_1"))
+                self.change_language_menu()
+            elif choice == "2":
+                self.display_settings_menu()
+            elif choice == "3" or not choice:
+                break
+            else:
+                print(self.lang.get("invalid_choice"))
+
+    def display_settings_menu(self):
+        """Display settings for colors and display options"""
+        from utilities.UI import Colors
+        global COLORS_ENABLED
+        
+        while True:
+            clear_screen()
+            print(f"\n{Colors.CYAN}{Colors.BOLD}=== {self.lang.get('display_settings', 'DISPLAY SETTINGS')} ==={Colors.END}")
+            
+            # Color status
+            color_status = f"{Colors.GREEN}ON{Colors.END}" if COLORS_ENABLED else f"{Colors.RED}OFF{Colors.END}"
+            print(f"\n{Colors.CYAN}1.{Colors.END} {self.lang.get('color_output', 'Color Output')}: {color_status}")
+            print(f"{Colors.CYAN}2.{Colors.END} {self.lang.get('back', 'Back')}")
+
+            choice = ask(f"{Colors.CYAN}Choose an option (1-2): {Colors.END}")
+
+            if choice == "1":
+                # Toggle colors
+                if COLORS_ENABLED:
+                    COLORS_ENABLED = False
+                    set_setting('colors_enabled', False)
+                    print(f"\n{Colors.YELLOW}Colors disabled.{Colors.END}")
                 else:
-                    print(self.lang.get("03331mmod_system_disabled0330m"))
-                print(
-                    f"{Colors.YELLOW}Note: Changes take effect on game restart.{Colors.END}"
-                )
-                ask("\nPress Enter to continue...")
+                    COLORS_ENABLED = True
+                    set_setting('colors_enabled', True)
+                    print(f"\n{Colors.GREEN}Colors enabled.{Colors.END}")
+                time.sleep(1)
             elif choice == "2" or not choice:
                 break
             else:
                 print(self.lang.get("invalid_choice"))
-
-    def mods_welcome(self):
-        """Mods menu available from welcome screen"""
-        from utilities.UI import Colors
-        while True:
-            clear_screen()
-            print(self.lang.get("n_mods"))
-
-            # Refresh mod list
-            self.mod_manager.discover_mods()
-            mods_list = self.mod_manager.get_mod_list()
-
-            if not mods_list:
-                print(
-                    f"\n{Colors.YELLOW}{self.lang.get('no_mods_found')}{Colors.END}"
-                )
-                print(self.lang.get("place_mods_instruction"))
-                ask("\nPress Enter to go back...")
-                break
-
-            # Mod system status
-            mods_system_enabled = self.mod_manager.settings.get(
-                "mods_enabled", True)
-            status_color = Colors.GREEN if mods_system_enabled else Colors.RED
-            status_text = "Enabled" if mods_system_enabled else "Disabled"
-            print(
-                f"\nMod System Status: {status_color}{status_text}{Colors.END}"
-            )
-
-            print(
-                f"\n{Colors.CYAN}Installed Mods ({len(mods_list)}):{Colors.END}"
-            )
-
-            for i, mod in enumerate(mods_list, 1):
-                name = mod.get('name', mod.get('folder_name', 'Unknown'))
-                description = mod.get('description', '')
-                author = mod.get('author', 'Unknown')
-                version = mod.get('version', '1.0')
-                enabled = mod.get('enabled', False)
-
-                status = f"{Colors.GREEN}[ENABLED]{Colors.END}" if enabled else f"{Colors.RED}[DISABLED]{Colors.END}"
-                print(f"\n{i}. {Colors.BOLD}{name}{Colors.END} {status}")
-                print(f"   Version: {version}")
-                print(f"   Author: {author}")
-                if description:
-                    # Truncate long descriptions
-                    desc = description[:100] + "..." if len(
-                        description) > 100 else description
-                    print(f"   {desc}")
-
-            print(self.lang.get("noptions"))
-            print(f"1-{len(mods_list)}. Toggle Mod")
-            print(f"R. {self.lang.get('ui_refresh_mod_list')}")
-            print(f"B. {self.lang.get('ui_back_to_main_menu')}")
-
-            choice = ask("\nChoose an option: ").strip().upper()
-
-            if choice == 'B' or not choice:
-                break
-            elif choice == 'R':
-                # Refresh mods
-                self.mod_manager.discover_mods()
-                print(self.lang.get("mod_list_refreshed"))
-                time.sleep(0.5)
-            elif choice.isdigit():
-                idx = int(choice) - 1
-                if 0 <= idx < len(mods_list):
-                    mod = mods_list[idx]
-                    folder_name = mod.get('folder_name')
-                    if isinstance(folder_name, str):
-                        self.mod_manager.toggle_mod(folder_name)
-                        print(
-                            f"{Colors.YELLOW}Note: Changes take effect on game restart.{Colors.END}"
-                        )
-                        ask("\nPress Enter to continue...")
-                else:
-                    print(self.lang.get("invalid_mod_number"))
-                    time.sleep(1)
-            else:
-                print(self.lang.get("invalid_choice"))
-                time.sleep(1)
+            
 
     def create_character(self):
         """Create a new character and initialize starting state."""

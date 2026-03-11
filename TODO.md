@@ -1,27 +1,7 @@
-# TODO: GUI Implementation for Our Legacy RPG
+# TODO 
 
-## Phase 1: Virtual Environment Setup
-- [x] Create setup_venv.py script to detect/create venv
-- [x] Install customtkinter and dependencies in venv
-
-## Phase 2: GUI Module Creation
-- [x] Create utilities/gui.py with medieval-themed components
-- [x] Implement MedievalApp main window class
-- [x] Implement themed widgets (buttons, frames, labels)
-- [x] Create dialog classes for game interactions
-
-## Phase 3: Main.py Integration
-- [ ] Add venv detection at startup
-- [ ] Prompt user to create venv if not found
-- [ ] Replace CLI input/output with GUI dialogs
-- [ ] Integrate GUI into game loop
-
-## Phase 4: UI.py Updates
-- [ ] Add GUI wrapper functions
-- [ ] Maintain backward compatibility
-- [ ] Add medieval styling to UI elements
-
-## Phase 5: Testing
-- [ ] Test venv creation and dependency installation
-- [ ] Test GUI functionality
-- [ ] Test all game features in GUI mode
+1. Make UI.py part of GUI.py. [x]
+2. Replace all CLI TUI in the Game to be 100% GUI version, meaning the need to replace all print and input and etc to stop being only command based[ ]
+3. Check for problems using pylance [x]
+4. Delete mod loading mechanics [x]
+5. Ensure setup_venv runs first when executing [ ]
