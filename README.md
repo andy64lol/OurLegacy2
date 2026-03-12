@@ -143,23 +143,6 @@ Our_Legacy/
 │   ├── dungeons.json       # Procedural dungeons with challenges
 │   ├── weekly_challenges.json  # Recurring challenges
 │   └── saves/              # Player save files (.json)
-├── mods/                   # Installed mods (downloaded and custom)
-│   └── The Ether/          # Example mod structure
-│       ├── mod.json        # Mod metadata
-│       ├── bosses.json     # New bosses
-│       ├── areas.json      # New areas
-│       ├── enemies.json    # New enemies
-│       ├── items.json      # New items
-│       ├── dungeons.json   # New dungeons
-│       ├── dialogues.json  # New dialogue text
-│       └── ...other files
-├── api/                    # API modules for marketplace
-│   ├── market.js
-│   ├── ping.js
-│   ├── upload_test.js
-│   ├── send_message.js
-│   ├── create_user.js
-│   └── data/
 └── LICENSE                 # Project license
 ```
 
