@@ -1,265 +1,106 @@
-from utilities.gui import gui_print
-def visit_alchemy(self):
-    from main import Colors, ask, clear_screen
-    """Visit the Alchemy workshop to craft items"""
-    if not self.player:
-        gui_print(self.lang.get("no_character"))
-        return
-
-    if not self.crafting_data or not self.crafting_data.get('recipes'):
-        gui_print(self.lang.get('ui_no_crafting_recipes'))
-        return
-
-    gui_print(
-        f"\n{Colors.MAGENTA}{Colors.BOLD}=== ALCHEMY WORKSHOP ==={Colors.END}")
-    gui_print(
-        "Welcome to the Alchemy Workshop! Here you can craft potions, elixirs, and items."
-    )
-    gui_print(f"\nYour gold: {Colors.GOLD}{self.player.gold}{Colors.END}")
-
-    # Display available materials from inventory
-    self._display_crafting_materials()
-
-    while True:
-        clear_screen()
-        gui_print(self.lang.get("n_alchemy_workshop"))
-        gui_print(
-            "Categories: [P]otions, [E]lixirs, [E]ntchantments, [U]tility, [A]ll"
-        )
-        gui_print(self.lang.get('ui_craft_item'))
-
-        choice = ask("\nChoose an option: ").strip().upper()
-
-        if choice == 'B' or not choice:
-            break
-        elif choice == 'P':
-            self._display_recipes_by_category('Potions')
-        elif choice == 'E':
-            # Ask which type of E (Elixirs or Enchantments)
-            gui_print(self.lang.get('ui_elixirs_enchantments'))
-            sub = ask("Choose (E/N): ").strip().upper()
-            if sub == 'E':
-                self._display_recipes_by_category('Elixirs')
-            elif sub == 'N':
-                self._display_recipes_by_category('Enchantments')
-        elif choice == 'U':
-            self._display_recipes_by_category('Utility')
-        elif choice == 'A':
-            self._display_all_recipes()
-        elif choice == 'C':
-            self._craft_item()
-        elif choice == 'M':
-            self._display_crafting_materials()
-        else:
-            gui_print(self.lang.get("invalid_choice"))
+"""
+Crafting System for Our Legacy 2 - Flask Edition
+Pure functions that operate on player dicts.
+"""
+from typing import Dict, List, Any, Optional
 
 
-def _display_crafting_materials(self):
-    """Display materials available in player's inventory"""
-    if not self.player:
-        return
-
-    gui_print(self.lang.get("n_your_materials"))
-
-    # Get all material categories
-    material_categories = self.crafting_data.get('material_categories', {})
-
-    # Collect all possible materials
-    all_materials = set()
+def get_crafting_materials(player: Dict[str, Any], crafting_data: Dict[str, Any]) -> Dict[str, int]:
+    """Return dict of material_id -> count in player inventory."""
+    material_categories = crafting_data.get('material_categories', {})
+    all_materials: set = set()
     for materials in material_categories.values():
         all_materials.update(materials)
 
-    # Count materials in inventory
-    material_counts = {}
-    for item in self.player.inventory:
+    counts: Dict[str, int] = {}
+    for item in player.get('inventory', []):
         if item in all_materials:
-            material_counts[item] = material_counts.get(item, 0) + 1
-
-    if not material_counts:
-        gui_print(self.lang.get('ui_no_crafting_materials'))
-        gui_print(
-            "Materials can be found as drops from enemies or purchased from shops."
-        )
-        return
-
-    gui_print(f"{'Material':<25} {'Quantity':<10}")
-    gui_print("-" * 35)
-    for material, count in sorted(material_counts.items()):
-        gui_print(f"{material:<25} {count:<10}")
+            counts[item] = counts.get(item, 0) + 1
+    return counts
 
 
-def _display_recipes_by_category(self, category: str):
-    from main import Colors, get_rarity_color
-    """Display recipes filtered by category"""
-    if not self.crafting_data:
-        return
-
-    recipes = self.crafting_data.get('recipes', {})
-    category_recipes = [(rid, rdata) for rid, rdata in recipes.items()
-                        if rdata.get('category') == category]
-
-    if not category_recipes:
-        gui_print(self.lang.get("no_recipes_category").format(category=category))
-        return
-
-    gui_print(f"\n{Colors.BOLD}=== {category.upper()} ==={Colors.END}")
-    for i, (rid, rdata) in enumerate(category_recipes, 1):
-        name = rdata.get('name', rid)
-        rarity = rdata.get('rarity', 'common')
-        rarity_color = get_rarity_color(rarity)
-        gui_print(f"{i}. {rarity_color}{name}{Colors.END}")
+def get_recipes(crafting_data: Dict[str, Any], category: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Return list of recipe dicts, optionally filtered by category."""
+    recipes = crafting_data.get('recipes', {})
+    result = []
+    for rid, rdata in recipes.items():
+        if category and rdata.get('category') != category:
+            continue
+        result.append({
+            'id': rid,
+            'name': rdata.get('name', rid),
+            'category': rdata.get('category', 'Unknown'),
+            'rarity': rdata.get('rarity', 'common'),
+            'description': rdata.get('description', ''),
+            'materials': rdata.get('materials', {}),
+            'output': rdata.get('output', {}),
+            'skill_requirement': rdata.get('skill_requirement', 1),
+        })
+    return result
 
 
-def _display_all_recipes(self):
-    from main import Colors, ask, get_rarity_color
-    """Display all available recipes"""
-    if not self.crafting_data:
-        return
+def check_recipe_craftable(player: Dict[str, Any], recipe: Dict[str, Any]) -> Dict[str, Any]:
+    """Check if player can craft a recipe. Returns {'ok': bool, 'missing': list}."""
+    level = player.get('level', 1)
+    req = recipe.get('skill_requirement', 1)
+    if level < req:
+        return {'ok': False, 'missing': [], 'reason': f'Level {req} required (you are level {level}).'}
 
-    recipes = self.crafting_data.get('recipes', {})
-    if not recipes:
-        gui_print(f"\n{self.lang.get('ui_no_recipes_available')}")
-        return
+    inventory = player.get('inventory', [])
+    missing = []
+    for material, qty in recipe.get('materials', {}).items():
+        have = inventory.count(material)
+        if have < qty:
+            missing.append({'material': material, 'need': qty, 'have': have})
 
-    page_size = 10
-    recipe_list = list(recipes.items())
-    current_page = 0
-
-    while True:
-        start = current_page * page_size
-        end = start + page_size
-        page_items = recipe_list[start:end]
-
-        gui_print(self.lang.get("n_all_recipes"))
-        for i, (rid, rdata) in enumerate(page_items, 1):
-            name = rdata.get('name', rid)
-            category = rdata.get('category', 'Unknown')
-            rarity = rdata.get('rarity', 'common')
-            rarity_color = get_rarity_color(rarity)
-            gui_print(
-                f"{start + i}. {rarity_color}{name}{Colors.END} ({category})")
-
-        total_pages = (len(recipe_list) + page_size - 1) // page_size
-        gui_print(f"\nPage {current_page + 1}/{total_pages}")
-
-        if total_pages > 1:
-            if current_page > 0:
-                gui_print(f"P. {self.lang.get('ui_previous_page')}")
-            if current_page < total_pages - 1:
-                gui_print(f"N. {self.lang.get('ui_next_page')}")
-        gui_print(f"C. {self.lang.get('ui_craft_option')}")
-        gui_print(f"B. {self.lang.get('back')}")
-
-        choice = ask("\nChoose an option: ").strip().upper()
-
-        if choice == 'B':
-            break
-        elif choice == 'N' and current_page < total_pages - 1:
-            current_page += 1
-        elif choice == 'P' and current_page > 0:
-            current_page -= 1
-        elif choice == 'C':
-            self._craft_item()
-        else:
-            gui_print(self.lang.get("invalid_choice"))
+    return {'ok': len(missing) == 0, 'missing': missing, 'reason': None}
 
 
-def _craft_item(self):
-    from main import Colors, ask, get_rarity_color
-    """Craft an item using materials from inventory"""
-    if not self.player or not self.crafting_data:
-        gui_print(self.lang.get('ui_cannot_craft'))
-        return
+def craft_item(player: Dict[str, Any], recipe_id: str, crafting_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Craft an item from a recipe. Modifies player dict in place.
+    Returns {'ok': bool, 'message': str, 'items_crafted': list}
+    """
+    recipes = crafting_data.get('recipes', {})
+    recipe = recipes.get(recipe_id)
+    if not recipe:
+        return {'ok': False, 'message': f'Recipe {recipe_id} not found.', 'items_crafted': []}
 
-    recipes = self.crafting_data.get('recipes', {})
+    check = check_recipe_craftable(player, recipe)
+    if not check['ok']:
+        if check.get('reason'):
+            return {'ok': False, 'message': check['reason'], 'items_crafted': []}
+        missing_str = ', '.join(f"{m['need'] - m['have']}x {m['material']}" for m in check['missing'])
+        return {'ok': False, 'message': f'Missing materials: {missing_str}', 'items_crafted': []}
 
-    # Show all recipes for selection
-    gui_print(self.lang.get("n_craft_item"))
-    recipe_names = list(recipes.keys())
+    inventory = player.get('inventory', [])
+    for material, qty in recipe.get('materials', {}).items():
+        for _ in range(qty):
+            inventory.remove(material)
 
-    for i, rid in enumerate(recipe_names, 1):
-        rdata = recipes[rid]
-        name = rdata.get('name', rid)
-        rarity = rdata.get('rarity', 'common')
-        rarity_color = get_rarity_color(rarity)
-        gui_print(f"{i}. {rarity_color}{name}{Colors.END}")
+    items_crafted = []
+    for item, qty in recipe.get('output', {}).items():
+        for _ in range(qty):
+            inventory.append(item)
+        items_crafted.append({'item': item, 'quantity': qty})
 
-    choice = ask(
-        f"\nChoose recipe (1-{len(recipe_names)}) or press Enter to cancel: "
-    ).strip()
+    player['inventory'] = inventory
+    name = recipe.get('name', recipe_id)
+    items_str = ', '.join(f"{ic['quantity']}x {ic['item']}" for ic in items_crafted)
+    return {
+        'ok': True,
+        'message': f"Successfully crafted {name}! Received: {items_str}",
+        'items_crafted': items_crafted,
+        'recipe_name': name,
+    }
 
-    if not choice:
-        return
 
-    if not choice.isdigit():
-        gui_print(self.lang.get("invalid_choice"))
-        return
-
-    idx = int(choice) - 1
-    if not (0 <= idx < len(recipe_names)):
-        gui_print(self.lang.get('invalid_recipe_number'))
-        return
-
-    recipe_id = recipe_names[idx]
-    recipe = recipes[recipe_id]
-
-    # Check skill requirement
-    skill_req = recipe.get('skill_requirement', 1)
-    if self.player.level < skill_req:
-        gui_print(
-            f"\n{Colors.RED}You need at least level {skill_req} to craft this item.{Colors.END}"
-        )
-        return
-
-    # Get materials required
-    materials_needed = recipe.get('materials', {})
-
-    # Check if player has materials
-    missing_materials = []
-    for material, quantity in materials_needed.items():
-        in_inventory = self.player.inventory.count(material)
-        if in_inventory < quantity:
-            missing_materials.append(
-                f"{material} (need {quantity}, have {in_inventory})")
-
-    if missing_materials:
-        gui_print(self.lang.get("nmissing_materials"))
-        for m in missing_materials:
-            gui_print(f"  - {m}")
-        gui_print(f"\n{self.lang.get('ui_gather_more_materials')}")
-        return
-
-    # Show craft confirmation
-    output_items = recipe.get('output', {})
-    gui_print(self.lang.get("n_craft_confirmation"))
-    gui_print(self.lang.get("recipe_name_msg").format(name=recipe.get('name')))
-    gui_print(
-        f"Output: {', '.join(f'{qty}x {item}' for item, qty in output_items.items())}"
-    )
-    gui_print(f"\n{self.lang.get('ui_materials_consume')}")
-    for material, quantity in materials_needed.items():
-        gui_print(f"  - {quantity}x {material}")
-
-    confirm = ask("\nCraft this item? (y/n): ").strip().lower()
-    if confirm != 'y':
-        gui_print(self.lang.get('ui_crafting_cancelled'))
-        return
-
-    # Consume materials
-    for material, quantity in materials_needed.items():
-        for _ in range(quantity):
-            self.player.inventory.remove(material)
-
-    # Add crafted items to inventory
-    for item, quantity in output_items.items():
-        for _ in range(quantity):
-            self.player.inventory.append(item)
-            self.update_mission_progress('collect', item)
-
-    gui_print(
-        f"\n{Colors.GREEN}Successfully crafted {recipe.get('name')}!{Colors.END}"
-    )
-    for item, quantity in output_items.items():
-        gui_print(
-            self.lang.get("received_quantity_item").format(quantity=quantity,
-                                                           item=item))
+def get_recipe_categories(crafting_data: Dict[str, Any]) -> List[str]:
+    """Return list of unique recipe categories."""
+    recipes = crafting_data.get('recipes', {})
+    cats = set()
+    for rdata in recipes.values():
+        cat = rdata.get('category')
+        if cat:
+            cats.add(cat)
+    return sorted(cats)

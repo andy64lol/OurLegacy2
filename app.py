@@ -11,6 +11,30 @@ import json
 import random
 import os
 
+from utilities.UI import Colors, get_rarity_color, create_progress_bar
+from utilities.dice import Dice
+from utilities.entities import Enemy, Boss
+from utilities.character import build_new_character, get_available_classes
+from utilities.battle import (
+    battle_round_player_attack, battle_round_enemy_attack,
+    battle_round_player_flee, battle_round_player_defend,
+    collect_battle_rewards, handle_player_defeat, get_spells_for_weapon,
+)
+from utilities.shop import get_shop_items, buy_item, sell_item
+from utilities.spellcasting import get_available_spells, cast_spell, can_cast_spell
+from utilities.crafting import get_recipes, craft_item, check_recipe_craftable, get_recipe_categories
+from utilities.building import (
+    get_building_status, place_housing_item, remove_housing_item_slot,
+    plant_crop, harvest_crop,
+)
+from utilities.dungeons import (
+    get_available_dungeons, generate_dungeon_rooms,
+    process_chest_room, process_empty_room, process_battle_room,
+    process_question_room, answer_question, complete_dungeon,
+)
+from utilities.market import get_market_api
+from utilities.save_load import save_game, list_saves, load_save
+
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
@@ -1233,6 +1257,290 @@ def api_load():
     session.modified = True
 
     return jsonify({'ok': True})
+
+
+# ─── Crafting Routes ──────────────────────────────────────────────────────────
+
+
+@app.route('/crafting')
+def crafting():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    crafting_data = GAME_DATA.get('crafting', {})
+    recipes = get_recipes(crafting_data)
+    categories = get_recipe_categories(crafting_data)
+
+    enriched = []
+    for recipe in recipes:
+        check = check_recipe_craftable(player, recipe)
+        enriched.append({**recipe, 'can_craft': check['ok'], 'missing': check.get('missing', [])})
+
+    return render_template(
+        'crafting.html',
+        player=player,
+        recipes=enriched,
+        categories=categories,
+        messages=list(reversed(get_messages()))[:15],
+    )
+
+
+@app.route('/action/craft', methods=['POST'])
+def action_craft():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    recipe_id = request.form.get('recipe_id', '')
+    crafting_data = GAME_DATA.get('crafting', {})
+    result = craft_item(player, recipe_id, crafting_data)
+    color = 'var(--green-bright)' if result['ok'] else 'var(--red)'
+    add_message(result['message'], color)
+    save_player(player)
+    return redirect(url_for('crafting'))
+
+
+# ─── Dungeon Routes ────────────────────────────────────────────────────────────
+
+
+@app.route('/dungeons')
+def dungeons():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    area_key = session.get('current_area', 'starting_village')
+    dungeons_data = GAME_DATA.get('dungeons', {})
+    available = get_available_dungeons(dungeons_data, area_key, player.get('level', 1))
+    active = session.get('active_dungeon')
+
+    return render_template(
+        'dungeons.html',
+        player=player,
+        dungeons=available,
+        active_dungeon=active,
+        messages=list(reversed(get_messages()))[:15],
+    )
+
+
+@app.route('/action/dungeon/enter', methods=['POST'])
+def dungeon_enter():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    dungeon_id = request.form.get('dungeon_id', '')
+    dungeons_data = GAME_DATA.get('dungeons', {})
+    all_dungeons = dungeons_data.get('dungeons', [])
+    dungeon = next((d for d in all_dungeons if d.get('id') == dungeon_id or
+                    d.get('name', '').lower().replace(' ', '_') == dungeon_id), None)
+
+    if not dungeon:
+        add_message('Unknown dungeon.', 'var(--red)')
+        return redirect(url_for('dungeons'))
+
+    rooms = generate_dungeon_rooms(dungeon)
+    session['active_dungeon'] = {'dungeon': dungeon, 'rooms': rooms, 'room_index': 0}
+    session.modified = True
+    add_message(f'You enter {dungeon.get("name", "the dungeon")}!', 'var(--gold)')
+    return redirect(url_for('dungeon_room'))
+
+
+@app.route('/dungeon/room')
+def dungeon_room():
+    player = get_player()
+    active = session.get('active_dungeon')
+    if not player or not active:
+        return redirect(url_for('dungeons'))
+
+    rooms = active['rooms']
+    idx = active['room_index']
+    if idx >= len(rooms):
+        return redirect(url_for('dungeon_complete'))
+
+    room = rooms[idx]
+    return render_template(
+        'dungeon_room.html',
+        player=player,
+        room=room,
+        room_num=idx + 1,
+        total_rooms=len(rooms),
+        dungeon=active['dungeon'],
+        messages=list(reversed(get_messages()))[:10],
+    )
+
+
+@app.route('/action/dungeon/proceed', methods=['POST'])
+def dungeon_proceed():
+    player = get_player()
+    active = session.get('active_dungeon')
+    if not player or not active:
+        return redirect(url_for('dungeons'))
+
+    rooms = active['rooms']
+    idx = active['room_index']
+    if idx >= len(rooms):
+        return redirect(url_for('dungeon_complete'))
+
+    room = rooms[idx]
+    room_type = room.get('type', 'empty')
+
+    dungeons_data = GAME_DATA.get('dungeons', {})
+    items_data = GAME_DATA.get('items', {})
+    enemies_data = GAME_DATA.get('enemies', {})
+    areas_data = GAME_DATA.get('areas', {})
+    area_key = session.get('current_area', 'starting_village')
+
+    if room_type == 'chest':
+        result = process_chest_room(player, room, dungeons_data, items_data)
+    elif room_type == 'battle':
+        result = process_battle_room(player, room, enemies_data, areas_data, area_key)
+        if result['type'] == 'battle':
+            enemy = result['enemy']
+            session['battle_enemy'] = enemy
+            session['battle_log'] = [f'A {enemy.get("name", "enemy")} confronts you in the dungeon!']
+            active['room_index'] = idx + 1
+            session['active_dungeon'] = active
+            save_player(player)
+            return redirect(url_for('battle'))
+    elif room_type == 'empty':
+        result = process_empty_room(room)
+    else:
+        result = {'messages': [{'text': 'You proceed through the chamber...', 'color': 'var(--text-dim)'}]}
+
+    for msg in result.get('messages', []):
+        add_message(msg['text'], msg.get('color', 'var(--text-light)'))
+
+    active['room_index'] = idx + 1
+    session['active_dungeon'] = active
+    save_player(player)
+
+    if active['room_index'] >= len(rooms):
+        return redirect(url_for('dungeon_complete'))
+    return redirect(url_for('dungeon_room'))
+
+
+@app.route('/dungeon/complete')
+def dungeon_complete():
+    player = get_player()
+    active = session.get('active_dungeon')
+    if not player:
+        return redirect(url_for('index'))
+
+    if active:
+        dungeon = active.get('dungeon', {})
+        result = complete_dungeon(player, dungeon)
+        for msg in result.get('messages', []):
+            add_message(msg['text'], msg.get('color', 'var(--gold)'))
+        session.pop('active_dungeon', None)
+        save_player(player)
+
+    return redirect(url_for('game'))
+
+
+# ─── Elite Market Routes ───────────────────────────────────────────────────────
+
+
+@app.route('/market')
+def market():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    market_api = get_market_api()
+    result = market_api.fetch_market_data()
+    market_items = []
+    cooldown_msg = None
+
+    if result.get('ok') and result.get('data', {}).get('ok'):
+        market_items = result['data'].get('items', [])
+    elif result.get('cooldown'):
+        cooldown_msg = result.get('message', 'Market is closed.')
+    elif not result.get('ok'):
+        cooldown_msg = result.get('message', 'Could not reach the market.')
+
+    return render_template(
+        'market.html',
+        player=player,
+        market_items=market_items,
+        cooldown_msg=cooldown_msg,
+        messages=list(reversed(get_messages()))[:15],
+    )
+
+
+@app.route('/action/market/buy', methods=['POST'])
+def market_buy():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    item_name = request.form.get('item_name', '')
+    item_price = int(request.form.get('item_price', 0))
+
+    if player['gold'] < item_price:
+        add_message(f'Not enough gold. Need {item_price} gold.', 'var(--red)')
+    else:
+        player['gold'] -= item_price
+        player['inventory'].append(item_name)
+        add_message(f'Purchased {item_name} from the Elite Market for {item_price} gold!', 'var(--gold)')
+
+    save_player(player)
+    return redirect(url_for('market'))
+
+
+# ─── Server-side Save / Load ──────────────────────────────────────────────────
+
+
+@app.route('/api/server_save', methods=['POST'])
+def api_server_save():
+    player = get_player()
+    if not player:
+        return jsonify({'ok': False, 'message': 'No active character.'})
+
+    result = save_game(
+        player=player,
+        current_area=session.get('current_area', 'starting_village'),
+        visited_areas=session.get('visited_areas', []),
+        completed_missions=session.get('completed_missions', []),
+    )
+    return jsonify(result)
+
+
+@app.route('/api/server_saves', methods=['GET'])
+def api_server_saves():
+    saves = list_saves()
+    return jsonify({'saves': saves})
+
+
+@app.route('/api/server_load', methods=['POST'])
+def api_server_load():
+    data = request.get_json(force=True, silent=True) or {}
+    filepath = data.get('filepath', '')
+    if not filepath:
+        return jsonify({'ok': False, 'message': 'No file path provided.'})
+
+    result = load_save(filepath)
+    if result.get('ok'):
+        session['player'] = result['player']
+        session['current_area'] = result['current_area']
+        session['visited_areas'] = result['visited_areas']
+        session['completed_missions'] = result['completed_missions']
+        session['messages'] = []
+        session.modified = True
+
+    return jsonify({'ok': result.get('ok'), 'message': result.get('message', '')})
+
+
+# ─── Utility API Endpoints ─────────────────────────────────────────────────────
+
+
+@app.route('/api/player_stats')
+def api_player_stats():
+    player = get_player()
+    if not player:
+        return jsonify({'ok': False})
+    return jsonify({'ok': True, 'player': player})
 
 
 @app.route('/new_game')

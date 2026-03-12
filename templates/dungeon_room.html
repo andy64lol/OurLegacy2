@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="game-layout">
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <img src="/static/banner.png" alt="Our Legacy 2" class="sidebar-banner">
+        </div>
+        <div class="panel sidebar-panel">
+            <div class="panel-title">{{ player.name }}</div>
+            <div class="panel-body">
+                <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
+                <div class="char-level">Level {{ player.level }}</div>
+                <div class="bar-group">
+                    <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="bar-group">
+                    <div class="bar-label">MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="gold-display">Gold: <span class="gold-amount">{{ player.gold }}</span></div>
+            </div>
+        </div>
+        <div class="panel sidebar-panel">
+            <div class="panel-title">Dungeon Progress</div>
+            <div class="panel-body">
+                <div style="font-size:14px;color:var(--text-light);">Room {{ room_num }} / {{ total_rooms }}</div>
+                <div class="bar-group" style="margin-top:8px;">
+                    <div class="bar-track">
+                        <div class="bar-fill bar-exp" style="width:{{ (room_num / total_rooms * 100)|int }}%"></div>
+                    </div>
+                </div>
+                <div style="margin-top:8px;font-size:13px;color:var(--text-dim);">{{ dungeon.name }}</div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-area">
+        <div class="panel">
+            <div class="panel-title">
+                Room {{ room_num }} / {{ total_rooms }} &mdash;
+                <span style="color:var(--gold);text-transform:capitalize;">{{ room.type }} Chamber</span>
+            </div>
+            <div class="panel-body">
+                {% if messages %}
+                <div style="margin-bottom:16px;">
+                    {% for msg in messages %}
+                    <div style="color:{{ msg.color }};">{{ msg.text }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if room.type == 'battle' %}
+                <div class="text-dim" style="margin-bottom:16px;">An enemy stands in your way! You are being redirected to battle...</div>
+                {% elif room.type == 'chest' %}
+                <div style="color:var(--gold);margin-bottom:8px;">A treasure chest awaits you!</div>
+                {% elif room.type == 'empty' %}
+                <div class="text-dim" style="margin-bottom:8px;">The chamber appears empty...</div>
+                {% elif room.type == 'boss' %}
+                <div style="color:var(--red);font-weight:bold;margin-bottom:8px;">The final guardian awaits!</div>
+                {% endif %}
+
+                <form method="POST" action="/action/dungeon/proceed">
+                    <button type="submit" class="btn btn-primary" style="margin-top:16px;">
+                        {% if room_num == total_rooms %}Complete Dungeon{% else %}Proceed to Next Room{% endif %}
+                    </button>
+                </form>
+                <a href="/dungeons" class="btn btn-secondary" style="margin-top:8px;display:inline-block;">
+                    Abandon Dungeon
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="game-layout">
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <img src="/static/banner.png" alt="Our Legacy 2" class="sidebar-banner">
+        </div>
+        <div class="panel sidebar-panel">
+            <div class="panel-title">{{ player.name }}</div>
+            <div class="panel-body">
+                <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
+                <div class="char-level">Level {{ player.level }}</div>
+                <div class="bar-group">
+                    <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="gold-display">Gold: <span class="gold-amount">{{ player.gold }}</span></div>
+            </div>
+        </div>
+        <div class="panel sidebar-panel">
+            <div class="panel-title">Navigation</div>
+            <div class="panel-body">
+                <a href="/game" class="btn btn-secondary" style="width:100%;display:block;">Return to Game</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-area">
+        <div class="panel">
+            <div class="panel-title">Elite Market</div>
+            <div class="panel-body">
+                {% if messages %}
+                <div style="margin-bottom:12px;">
+                    {% for msg in messages[:5] %}
+                    <div style="color:{{ msg.color }};">{{ msg.text }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if cooldown_msg %}
+                <div class="panel" style="padding:20px;text-align:center;color:var(--text-dim);">
+                    <div style="font-size:24px;margin-bottom:8px;">&#128274;</div>
+                    <div>{{ cooldown_msg }}</div>
+                    <div style="margin-top:12px;font-size:13px;">The Elite Market refreshes every 10 minutes.</div>
+                </div>
+                {% elif not market_items %}
+                <div class="text-dim">No items are currently listed on the Elite Market. Try again shortly.</div>
+                {% else %}
+                <div style="margin-bottom:12px;font-size:13px;color:var(--text-dim);">
+                    {{ market_items|length }} elite items available. Market refreshes every 10 minutes.
+                </div>
+                {% for item in market_items %}
+                {% set price = item.marketPrice or item.price or 0 %}
+                <div class="shop-item-row" style="margin-bottom:10px;padding:12px;background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <div>
+                            <span class="item-name rarity-{{ (item.rarity or 'common')|lower }}">{{ item.name or item.itemName }}</span>
+                            <span class="item-rarity"> &mdash; {{ (item.rarity or 'common')|title }}</span>
+                            {% if item.type %}
+                            <span class="text-dim"> ({{ item.type }})</span>
+                            {% endif %}
+                            {% if item.description %}
+                            <div class="item-desc" style="margin-top:4px;">{{ item.description }}</div>
+                            {% endif %}
+                            {% if item.stats %}
+                            <div style="margin-top:4px;font-size:12px;color:var(--green-bright);">
+                                {% for stat, val in item.stats.items() %}
+                                +{{ val }} {{ stat }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="gold-amount">{{ price }} gold</span>
+                            {% if player.gold >= price %}
+                            <form method="POST" action="/action/market/buy">
+                                <input type="hidden" name="item_name" value="{{ item.name or item.itemName }}">
+                                <input type="hidden" name="item_price" value="{{ price }}">
+                                <button type="submit" class="btn btn-primary">Buy</button>
+                            </form>
+                            {% else %}
+                            <button class="btn btn-disabled" disabled>Not enough gold</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

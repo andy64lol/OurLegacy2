@@ -1,252 +1,122 @@
-from utilities.gui import gui_print
-# spellcasting.py
-# Spell casting utility, separated from main.py
-# Progressing through decentralisation...
-
+"""
+Spell Casting System for Our Legacy 2 - Flask Edition
+Stateless functions that operate on player dicts.
+"""
 import random
-from typing import Dict, List, Any, Optional
-from utilities.settings import Colors
-import utilities.dice
+from typing import Dict, List, Any, Optional, Tuple
+from utilities.dice import Dice
 
 
-class SpellCastingSystem:
-    """System for handling spell casting"""
-    
-    def __init__(self, game_instance):
-        self.game = game_instance
-        self.player = game_instance.player
-        self.lang = game_instance.lang
-        self.spells_data = game_instance.spells_data
-        self.effects_data = game_instance.effects_data
-        self.items_data = game_instance.items_data
-        self.dice_util = utilities.dice.Dice()
-    
-    def get_available_spells(self, weapon_name: Optional[str]) -> List[tuple]:
-        """Get available spells for a weapon"""
-        if not weapon_name:
-            return []
-        
-        available = []
-        for sname, sdata in self.spells_data.items():
-            allowed = sdata.get('allowed_weapons', [])
-            if weapon_name in allowed:
-                available.append((sname, sdata))
-        return available
-    
-    def can_cast_spells(self, weapon_name: Optional[str]) -> bool:
-        """Check if a weapon can cast spells"""
-        if not weapon_name:
-            return False
-        weapon_data = self.items_data.get(weapon_name, {})
-        return bool(weapon_data.get('magic_weapon'))
-    
-    def cast_spell(self, enemy, spell_name: str, spell_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Cast a spell on an enemy"""
-        if not self.player:
-            return {'success': False, 'error': 'No player'}
-        
-        cost = spell_data.get('mp_cost', 0)
-        
-        if self.player.mp < cost:
-            gui_print(self.lang.get("not_enough_mp", "Not enough MP!"))
-            return {'success': False, 'error': 'Not enough MP'}
-        
-        # Pay cost
-        self.player.mp -= cost
-        
-        spell_type = spell_data.get('type')
-        result = {'success': True, 'type': spell_type, 'spell_name': spell_name}
-        
-        if spell_type == 'damage':
-            self._cast_damage_spell(enemy, spell_name, spell_data, result)
-        elif spell_type == 'heal':
-            self._cast_heal_spell(spell_name, spell_data, result)
-        elif spell_type == 'buff':
-            self._cast_buff_spell(spell_name, spell_data, result)
-        elif spell_type == 'debuff':
-            self._cast_debuff_spell(enemy, spell_name, spell_data, result)
-        else:
-            gui_print(f"Unknown spell type: {spell_type}")
-            # Refund MP for unknown spell types
-            self.player.mp += cost
-            result['success'] = False
-            result['error'] = 'Unknown spell type'
-        
-        # Check for cast cutscene
-        cast_cutscene = spell_data.get('cast_cutscene')
-        if cast_cutscene and hasattr(self.game, 'cutscenes_data') and cast_cutscene in self.game.cutscenes_data:
-            if hasattr(self.game, 'play_cutscene'):
-                self.game.play_cutscene(cast_cutscene)
-        
-        return result
-    
-    def _cast_damage_spell(self, enemy, spell_name: str, spell_data: Dict[str, Any], result: Dict[str, Any]):
-        """Cast a damage spell"""
+def get_available_spells(weapon_name: Optional[str], items_data: Dict[str, Any],
+                         spells_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Return list of spells available for the given weapon."""
+    if not weapon_name:
+        return []
+    weapon = items_data.get(weapon_name, {})
+    if not weapon.get('magic_weapon'):
+        return []
+    spells = []
+    for sname, sdata in spells_data.items():
+        if weapon_name in sdata.get('allowed_weapons', []):
+            spells.append({
+                'name': sname,
+                'mp_cost': sdata.get('mp_cost', 0),
+                'type': sdata.get('type', 'damage'),
+                'power': sdata.get('power', 0),
+                'description': sdata.get('description', ''),
+                'effects': sdata.get('effects', []),
+            })
+    return spells
+
+
+def can_cast_spell(player: Dict[str, Any], spell_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Check if the player can cast a spell."""
+    cost = spell_data.get('mp_cost', 0)
+    if player.get('mp', 0) < cost:
+        return {'ok': False, 'message': f'Not enough MP! Need {cost}, have {player.get("mp", 0)}.'}
+    return {'ok': True}
+
+
+def cast_spell(player: Dict[str, Any], enemy_dict: Dict[str, Any],
+               spell_name: str, spell_data: Dict[str, Any],
+               effects_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Cast a spell. Modifies player dict in place (MP cost).
+    Returns a result dict with messages and outcome data.
+    """
+    messages = []
+    cost = spell_data.get('mp_cost', 0)
+    check = can_cast_spell(player, spell_data)
+    if not check['ok']:
+        return {'ok': False, 'message': check['message'], 'messages': [{'text': check['message'], 'color': 'var(--red)'}]}
+
+    player['mp'] = player.get('mp', 0) - cost
+    spell_type = spell_data.get('type')
+    result = {'ok': True, 'spell_name': spell_name, 'spell_type': spell_type, 'messages': messages}
+    dice = Dice()
+
+    if spell_type == 'damage':
         power = spell_data.get('power', 0)
-        base_damage = power + (self.player.get_effective_attack() // 2)
-        
-        roll = self.dice_util.roll_1d(20)
-        
+        base_damage = power + (player.get('attack', 10) // 2)
+        roll = dice.roll_1d(20)
+
         if roll == 1:
-            meme_key = f"roll_1_meme_{random.randint(1, 3)}"
-            gui_print(self.lang.get(meme_key))
+            messages.append({'text': 'Critical miss! The spell fizzles!', 'color': 'var(--red)'})
         elif roll == 20:
-            meme_key = f"roll_20_meme_{random.randint(1, 3)}"
-            gui_print(self.lang.get(meme_key))
-        else:
-            gui_print(self.lang.get("roll_msg", roll=roll))
-        
+            messages.append({'text': 'Critical hit! The spell surges with power!', 'color': 'var(--gold)'})
+
         damage = int(base_damage * roll / 10)
-        actual = enemy.take_damage(damage)
-        
-        gui_print(f"You cast {spell_name} for {actual} damage!")
+        enemy_defense = enemy_dict.get('defense', 2)
+        actual = max(1, damage - enemy_defense)
+        enemy_dict['hp'] = max(0, enemy_dict.get('hp', 0) - actual)
+
+        messages.append({'text': f'You cast {spell_name} for {actual} damage!', 'color': 'var(--blue)'})
         result['damage'] = actual
-        
-        # Apply effects if any
-        effects = spell_data.get('effects', [])
-        for effect_name in effects:
-            effect_data = self.effects_data.get(effect_name, {})
-            effect_type = effect_data.get('type', '')
-            
-            if effect_type == 'damage_over_time':
-                gui_print(f"{Colors.RED}{enemy.name} is afflicted with {effect_name}!{Colors.END}")
-            elif effect_type == 'stun':
-                if random.random() < effect_data.get('chance', 0.5):
-                    gui_print(f"{Colors.YELLOW}{enemy.name} is stunned!{Colors.END}")
-            elif effect_type == 'mixed_effect':
-                if random.random() < effect_data.get('chance', 0.5):
-                    gui_print(f"{Colors.CYAN}{enemy.name} is frozen!{Colors.END}")
-    
-    def _cast_heal_spell(self, spell_name: str, spell_data: Dict[str, Any], result: Dict[str, Any]):
-        """Cast a heal spell"""
+        result['enemy_hp'] = enemy_dict['hp']
+        result['enemy_alive'] = enemy_dict['hp'] > 0
+
+        for effect_name in spell_data.get('effects', []):
+            effect = effects_data.get(effect_name, {})
+            etype = effect.get('type', '')
+            if etype == 'damage_over_time':
+                messages.append({'text': f'{enemy_dict.get("name", "Enemy")} is burning!', 'color': 'var(--red)'})
+            elif etype == 'stun' and random.random() < effect.get('chance', 0.5):
+                messages.append({'text': f'{enemy_dict.get("name", "Enemy")} is stunned!', 'color': 'var(--yellow)'})
+
+    elif spell_type == 'heal':
         heal_amount = spell_data.get('power', 0)
-        old_hp = self.player.hp
-        self.player.heal(heal_amount)
-        healed = self.player.hp - old_hp
-        
-        gui_print(f"You cast {spell_name} and healed {healed} HP!")
+        old_hp = player.get('hp', 0)
+        player['hp'] = min(player.get('max_hp', 100), old_hp + heal_amount)
+        healed = player['hp'] - old_hp
+        messages.append({'text': f'You cast {spell_name} and healed {healed} HP!', 'color': 'var(--green-bright)'})
         result['healed'] = healed
-        
-        # Apply healing effects if any
-        effects = spell_data.get('effects', [])
-        for effect_name in effects:
-            effect_data = self.effects_data.get(effect_name, {})
-            if effect_data.get('type') == 'healing_over_time':
-                gui_print(f"{Colors.GREEN}You are affected by regeneration!{Colors.END}")
-    
-    def _cast_buff_spell(self, spell_name: str, spell_data: Dict[str, Any], result: Dict[str, Any]):
-        """Cast a buff spell"""
+
+    elif spell_type == 'buff':
         power = spell_data.get('power', 0)
-        effects = spell_data.get('effects', [])
-        
-        for effect_name in effects:
-            effect_data = self.effects_data.get(effect_name, {})
-            effect_type = effect_data.get('type', '')
-            
-            # Collect numeric modifiers from effect_data
+        for effect_name in spell_data.get('effects', []):
+            effect = effects_data.get(effect_name, {})
             modifiers = {}
-            for k, v in effect_data.items():
-                if isinstance(v, (int, float)) and (
-                    k.endswith('_bonus') or
-                    k in ('hp_bonus', 'mp_bonus', 'absorb_amount', 'critical_bonus')
-                ):
+            for k, v in effect.items():
+                if isinstance(v, (int, float)) and (k.endswith('_bonus') or k in ('absorb_amount',)):
                     modifiers[k] = int(v)
-            
-            duration = int(effect_data.get('duration', max(3, power or 3)))
-            
-            # Apply as temporary buff
-            if modifiers:
-                self.player.apply_buff(effect_name, duration, modifiers)
-                mod_str = ', '.join(f"{v} {k}" for k, v in modifiers.items())
-                gui_print(f"{Colors.GREEN}Applied buff: {effect_name} (+{mod_str}) for {duration} turns{Colors.END}")
-            else:
-                # Non-numeric effects still applied as a marker buff
-                self.player.apply_buff(effect_name, duration, {})
-                if effect_type == 'damage_absorb':
-                    gui_print(f"{Colors.BLUE}You create a magical shield!{Colors.END}")
-                elif effect_type == 'reconnaissance':
-                    gui_print(f"{Colors.CYAN}You can see enemy weaknesses!{Colors.END}")
-        
-        result['buffs_applied'] = len(effects)
-    
-    def _cast_debuff_spell(self, enemy, spell_name: str, spell_data: Dict[str, Any], result: Dict[str, Any]):
-        """Cast a debuff spell"""
-        power = spell_data.get('power', 0)
-        effects = spell_data.get('effects', [])
-        
-        for effect_name in effects:
-            effect_data = self.effects_data.get(effect_name, {})
-            effect_type = effect_data.get('type', '')
-            
-            if effect_type == 'action_block':
-                if random.random() < effect_data.get('chance', 0.5):
-                    gui_print(f"{Colors.YELLOW}{enemy.name} is stunned and cannot act!{Colors.END}")
-            elif effect_type == 'accuracy_reduction':
-                gui_print(f"{Colors.RED}{enemy.name}'s accuracy is reduced!{Colors.END}")
-            elif effect_type == 'speed_reduction':
-                gui_print(f"{Colors.YELLOW}{enemy.name} is slowed!{Colors.END}")
-            elif effect_type == 'stat_reduction':
-                gui_print(f"{Colors.RED}{enemy.name}'s stats are cursed!{Colors.END}")
-        
-        result['debuffs_applied'] = len(effects)
-    
-    def select_spell(self, weapon_name: Optional[str]) -> Optional[tuple]:
-        """Display spell selection menu and return selected spell"""
-        from main import clear_screen, ask
-        
-        available = self.get_available_spells(weapon_name)
-        
-        if not available:
-            gui_print(self.lang.get("no_spells_available", "No spells available for this weapon."))
-            return None
-        
-        page = 0
-        per_page = 10
-        
-        while True:
-            clear_screen()
-            total_pages = max(1, (len(available) + per_page - 1) // per_page)
-            start_idx = page * per_page
-            end_idx = start_idx + per_page
-            current_spells = available[start_idx:end_idx]
-            
-            gui_print(f"\n{Colors.BOLD}=== SPELLS (Page {page + 1}/{total_pages}) ==={Colors.END}")
-            gui_print(f"MP: {Colors.BLUE}{self.player.mp}/{self.player.max_mp}{Colors.END}\n")
-            
-            for i, (sname, sdata) in enumerate(current_spells, 1):
-                cost = sdata.get('mp_cost', 0)
-                mp_color = Colors.BLUE if self.player.mp >= cost else Colors.RED
-                gui_print(f"{i}. {Colors.CYAN}{sname}{Colors.END} - Cost: {mp_color}{cost} MP{Colors.END}")
-                gui_print(f"   {sdata.get('description', '')}")
-            
-            gui_print("\nOptions:")
-            if total_pages > 1:
-                if page > 0:
-                    gui_print(f"P. {self.lang.get('ui_previous_page', 'Previous Page')}")
-                if page < total_pages - 1:
-                    gui_print(f"N. {self.lang.get('ui_next_page', 'Next Page')}")
-            
-            gui_print(f"1-{len(current_spells)}. Cast Spell")
-            gui_print(f"B. {self.lang.get('back', 'Back')}")
-            
-            choice = ask("\nChoose an option: ").strip().upper()
-            
-            if choice == 'B' or not choice:
-                return None
-            elif choice == 'N' and page < total_pages - 1:
-                page += 1
-            elif choice == 'P' and page > 0:
-                page -= 1
-            elif choice.isdigit():
-                idx = int(choice) - 1
-                if 0 <= idx < len(current_spells):
-                    sname, sdata = current_spells[idx]
-                    return (sname, sdata)
-                else:
-                    gui_print(self.lang.get('invalid_selection', "Invalid selection"))
-                    import time
-                    time.sleep(1)
-            else:
-                gui_print(self.lang.get("invalid_choice", "Invalid choice"))
-                import time
-                time.sleep(1)
+            duration = int(effect.get('duration', max(3, power or 3)))
+            player.setdefault('active_buffs', []).append({'name': effect_name, 'duration': duration, 'modifiers': modifiers})
+            mod_str = ', '.join(f"+{v} {k}" for k, v in modifiers.items()) if modifiers else effect.get('type', '')
+            messages.append({'text': f'Buff applied: {effect_name} ({mod_str}) for {duration} turns!', 'color': 'var(--green-bright)'})
+        result['buffs_applied'] = len(spell_data.get('effects', []))
+
+    elif spell_type == 'debuff':
+        for effect_name in spell_data.get('effects', []):
+            effect = effects_data.get(effect_name, {})
+            etype = effect.get('type', '')
+            if etype == 'action_block' and random.random() < effect.get('chance', 0.5):
+                messages.append({'text': f'{enemy_dict.get("name", "Enemy")} is stunned!', 'color': 'var(--yellow)'})
+            elif etype == 'speed_reduction':
+                messages.append({'text': f'{enemy_dict.get("name", "Enemy")} is slowed!', 'color': 'var(--yellow)'})
+        result['debuffs_applied'] = len(spell_data.get('effects', []))
+
+    else:
+        player['mp'] = player.get('mp', 0) + cost
+        return {'ok': False, 'message': f'Unknown spell type: {spell_type}', 'messages': [{'text': f'Unknown spell type!', 'color': 'var(--red)'}]}
+
+    return result

@@ -1,495 +1,277 @@
-from utilities.gui import gui_print
+"""
+Battle System for Our Legacy 2 - Flask Edition
+Stateless battle functions that return result dicts.
+"""
 import random
 from datetime import datetime
-import utilities.dice
-from utilities.UI import Colors
+from typing import Dict, List, Any, Optional, Tuple
+from utilities.dice import Dice
+from utilities.entities import Enemy, Boss
 
 
-def create_hp_mp_bar(current, maximum, width=15, color=None):
-    if color is None:
-        color = Colors.RED
+def create_hp_mp_bar(current: int, maximum: int, width: int = 15, color: str = None) -> str:
     if maximum <= 0:
         return "[" + " " * width + "]"
     filled_width = max(0, min(width, int((current / maximum) * width)))
     filled = "█" * filled_width
     empty = "░" * (width - filled_width)
-    return f"[{Colors.wrap(filled, color)}{empty}] {current}/{maximum}"
+    return f"[{filled}{empty}] {current}/{maximum}"
 
 
-def create_boss_hp_bar(current, maximum, width=40, color=None):
-    if color is None:
-        color = Colors.RED
+def create_boss_hp_bar(current: int, maximum: int, width: int = 40) -> str:
     if maximum <= 0:
         return "[" + " " * width + "]"
     filled_width = max(0, min(width, int((current / maximum) * width)))
     filled = "█" * filled_width
     empty = "░" * (width - filled_width)
     percentage = (current / maximum) * 100
-    boss_label = Colors.wrap("BOSS HP", f"{Colors.BOLD}{Colors.RED}")
-    bar = f"[{Colors.wrap(filled, color)}{empty}]"
-    percent_text = Colors.wrap(f"{percentage:.1f}%", Colors.BOLD)
-    return f"{boss_label} {bar} {percent_text} ({current}/{maximum})"
+    return f"BOSS HP [{filled}{empty}] {percentage:.1f}% ({current}/{maximum})"
 
 
-class BattleSystem:
+def get_effective_attack(player: Dict[str, Any]) -> int:
+    base = player.get('attack', 10)
+    bonus = sum(b.get('modifiers', {}).get('attack_bonus', 0) for b in player.get('active_buffs', []))
+    return base + bonus
 
-    def __init__(self, game_instance):
-        self.game = game_instance
-        # Player accessed via self.game.player
-        self.lang = game_instance.lang
-        self.items_data = game_instance.items_data
-        self.companions_data = game_instance.companions_data
-        self.spells_data = game_instance.spells_data
-        self.effects_data = game_instance.effects_data
 
-    def battle(self, enemy):
-        """Handle turn-based battle"""
-        if not self.game.player:
-            return
+def get_effective_defense(player: Dict[str, Any]) -> int:
+    base = player.get('defense', 8)
+    bonus = sum(b.get('modifiers', {}).get('defense_bonus', 0) for b in player.get('active_buffs', []))
+    total = base + bonus
+    if player.get('defending'):
+        total = int(total * 1.5)
+    return total
 
-        gui_print(self.lang.get("n_battle"))
-        gui_print(f"VS {enemy.name}")
 
-        player_fled = False
-        player_first = self.game.player.get_effective_speed() >= enemy.speed
+def get_effective_speed(player: Dict[str, Any]) -> int:
+    base = player.get('speed', 10)
+    bonus = sum(b.get('modifiers', {}).get('speed_bonus', 0) for b in player.get('active_buffs', []))
+    return base + bonus
 
-        while self.game.player.is_alive() and enemy.is_alive():
-            # Display current HP/MP at the start of each turn
-            self.game.player.display_stats()
 
-            if hasattr(self.game, 'Boss') and isinstance(
-                    enemy, self.game.Boss):
-                enemy_hp_bar = create_boss_hp_bar(enemy.hp, enemy.max_hp)
-            else:
-                enemy_hp_bar = create_hp_mp_bar(enemy.hp, enemy.max_hp, 20,
-                                                Colors.RED)
-
-            gui_print(f"\n{Colors.BOLD}{enemy.name}{Colors.END}")
-            if hasattr(self.game, 'Boss') and isinstance(
-                    enemy, self.game.Boss):
-                gui_print(enemy_hp_bar)
-            else:
-                gui_print(f"HP: {enemy_hp_bar} {enemy.hp}/{enemy.max_hp}")
-
-            if player_first:
-                if not self.player_turn(enemy):
-                    player_fled = True
-                    break
-                if enemy.is_alive() and self.game.player.companions:
-                    self.companions_act(enemy)
-                if enemy.is_alive():
-                    self.enemy_turn(enemy)
-            else:
-                self.enemy_turn(enemy)
-                if self.game.player.is_alive():
-                    if not self.player_turn(enemy):
-                        player_fled = True
-                        break
-                    if enemy.is_alive() and self.game.player.companions:
-                        self.companions_act(enemy)
-
-            if self.game.player.tick_buffs():
-                self.game.player.update_stats_from_equipment(
-                    self.game.items_data, self.game.companions_data)
-
-        if player_fled:
-            gui_print(
-                self.lang.get("nyou_fled_from_the_battle",
-                              "You fled from the battle!"))
-            return
-
-        if self.game.player.is_alive():
-            gui_print(
-                f"\n{Colors.GREEN}{self.lang.get('defeat_enemy_msg', 'You defeated the {enemy_name}!').format(enemy_name=enemy.name)}{Colors.END}"
-            )
-            if hasattr(self.game, 'Boss') and isinstance(
-                    enemy, self.game.Boss):
-                self.game.player.bosses_killed[
-                    enemy.name] = datetime.now().isoformat()
-
-            exp_reward = enemy.experience_reward
-            gold_reward = enemy.gold_reward
-
-            if self.game.player.current_weather == "sunny":
-                exp_reward = int(exp_reward * 1.1)
-                gui_print(
-                    f"{Colors.YELLOW}{self.lang.get('sunny_weather_bonus', 'Sunny weather bonus: +10% EXP!')}{Colors.END}"
-                )
-            elif self.game.player.current_weather == "stormy":
-                gold_reward = int(gold_reward * 1.2)
-                gui_print(
-                    f"{Colors.CYAN}{self.lang.get('stormy_weather_bonus', 'Stormy weather bonus: +20% Gold (hazardous conditions)!')}{Colors.END}"
-                )
-
-            gui_print(
-                f"{self.lang.get('gain_exp_msg', 'Gained {Colors.MAGENTA}{exp_reward} experience{Colors.END}').format(exp_reward=exp_reward, Colors=Colors)}"
-            )
-            gui_print(
-                f"{self.lang.get('gain_gold_msg', 'Gained {Colors.GOLD}{gold_reward} gold{Colors.END}').format(gold_reward=gold_reward, Colors=Colors)}"
-            )
-
-            self.game.player.gain_experience(exp_reward)
-            self.game.player.gold += gold_reward
-            self.game.update_mission_progress('kill', enemy.name)
-            self.game.update_challenge_progress('kill_count')
-
-            if enemy.loot_table and random.random() < 0.5:
-                loot = random.choice(enemy.loot_table)
-                self.game.player.inventory.append(loot)
-                gui_print(
-                    f"{Colors.YELLOW}{self.lang.get('loot_acquired_msg', 'Loot acquired: {loot}!').format(loot=loot)}{Colors.END}"
-                )
-                self.game.update_mission_progress('collect', loot)
-
-            if self.game.player.companions:
-                for companion in self.game.player.companions:
-                    if isinstance(companion, dict):
-                        comp_name = companion.get('name')
-                        comp_id = companion.get('id')
-                    else:
-                        comp_name = companion
-                        comp_id = None
-
-                    comp_data = None
-                    for cid, cdata in self.companions_data.items():
-                        if cdata.get('name') == comp_name or cid == comp_id:
-                            comp_data = cdata
-                            break
-
-                    if comp_data and comp_data.get('post_battle_heal'):
-                        amt = int(comp_data.get('post_battle_heal', 0))
-                        if amt > 0:
-                            self.game.player.heal(amt)
-                            gui_print(
-                                f"{Colors.GREEN}{self.lang.get('companion_heal_msg', '{comp_name} restores {amt} HP after battle!').format(comp_name=comp_data.get('name'), amt=amt)}{Colors.END}"
-                            )
-        else:
-            gui_print(
-                f"\n{Colors.RED}{self.lang.get('defeat_player_msg', 'You were defeated by the {enemy_name}...').format(enemy_name=enemy.name)}{Colors.END}"
-            )
-            self.game.player.hp = self.game.player.max_hp // 2
-            self.game.player.mp = self.game.player.max_mp // 2
-            gui_print(self.lang.get("respawn"))
-            self.game.current_area = "starting_village"
-
-    def player_turn(self, enemy) -> bool:
-        """Player's turn in battle. Returns False if player fled."""
-        if not self.game.player:
-            return True
-
-        dice_util = utilities.dice.Dice()
-
-        gui_print(self.lang.get("nyour_turn"))
-        gui_print(f"1. {self.lang.get('attack')}")
-        gui_print(f"2. {self.lang.get('use_item')}")
-        gui_print(f"3. {self.lang.get('defend')}")
-        gui_print(f"4. {self.lang.get('flee')}")
-
-        weapon_name = self.game.player.equipment.get('weapon')
-        weapon_data = self.items_data.get(weapon_name,
-                                          {}) if weapon_name else {}
-        can_cast = bool(weapon_data.get('magic_weapon'))
-        if can_cast:
-            gui_print(f"5. {self.lang.get('cast_spell')}")
-
-        choice = self.game.ask(
-            "Choose action (1-5): " if can_cast else "Choose action (1-4): ")
-
-        if choice == "1":
-            base_damage = self.game.player.get_effective_attack()
-            roll = dice_util.roll_1d(20)
-            if roll == 1:
-                gui_print(self.lang.get(f"roll_1_meme_{random.randint(1, 3)}"))
-            elif roll == 20:
-                gui_print(self.lang.get(f"roll_20_meme_{random.randint(1, 3)}"))
-            else:
-                gui_print(self.lang.get("roll_msg", roll=roll))
-
-            damage = int(base_damage * roll / 10)
-            actual_damage = enemy.take_damage(damage)
-            gui_print(
-                self.lang.get("player_attack_msg",
-                              "You attack for {damage} damage!").format(
-                                  damage=actual_damage))
-        elif choice == "2":
-            self.game.use_item_in_battle()
-        elif choice == "5" and can_cast:
-            spell = self.game.spell_casting_system.select_spell(weapon_name)
-            if spell:
-                sname, sdata = spell
-                self.game.spell_casting_system.cast_spell(enemy, sname, sdata)
-        elif choice == "3":
-            gui_print(
-                Colors.wrap(self.lang.get("you_defend", "You defend!"),
-                            Colors.BLUE))
-            self.game.player.defending = True
-        elif choice == "4":
-            flee_chance = 0.7 if self.game.player.get_effective_speed(
-            ) > enemy.speed else 0.4
-            if random.random() < flee_chance:
-                gui_print(
-                    self.lang.get("you_successfully_fled",
-                                  "You successfully fled!"))
-                return False
-            else:
-                gui_print(self.lang.get("failed_to_flee", "Failed to flee!"))
-                return True
-        else:
-            gui_print(
-                self.lang.get("invalid_choice_turn_lost",
-                              "Invalid choice, turn lost!"))
-
-        return True
-
-    def companion_action_for(self, companion, enemy):
-        """Perform an action for a specific companion dict or name."""
-        if not self.game.player:
-            return
-
-        if isinstance(companion, dict):
-            comp_name = companion.get('name')
-            comp_id = companion.get('id')
-        else:
-            comp_name = companion
-            comp_id = None
-
-        comp_data = None
-        for cid, cdata in self.companions_data.items():
-            if cdata.get('name') == comp_name or cid == comp_id:
-                comp_data = cdata
-                break
-
-        if not comp_data:
-            return
-
-        abilities = comp_data.get('abilities', [])
-        used_ability = False
-
-        for ability in abilities:
-            chance = ability.get('chance')
-            triggered = False
-            if chance is None:
-                triggered = True
-            else:
-                if isinstance(chance, float) and 0 <= chance <= 1:
-                    triggered = random.random() < chance
-                else:
-                    try:
-                        triggered = random.randint(1, 100) <= int(chance)
-                    except Exception:
-                        triggered = False
-
-            if not triggered:
-                continue
-
-            used_ability = True
-            atype = ability.get('type')
-
-            if atype in ('attack_boost', 'rage', 'crit_boost'):
-                bonus = int(
-                    ability.get('attack_bonus', 0)
-                    or ability.get('crit_damage_bonus', 0) or 0)
-                companion_damage = int(
-                    self.game.player.get_effective_attack() * 0.6 +
-                    comp_data.get('attack_bonus', 0) + bonus)
-                actual_damage = enemy.take_damage(companion_damage)
-                gui_print(
-                    f"{Colors.CYAN}{self.lang.get('companion_ability_attack_msg', '{comp_name} uses {ability_name} for {damage} damage!').format(comp_name=comp_name, ability_name=ability.get('name'), damage=actual_damage)}{Colors.END}"
-                )
-            elif atype == 'taunt':
-                dur = int(ability.get('duration', 1))
-                dbonus = int(
-                    ability.get('defense_bonus',
-                                comp_data.get('defense_bonus', 0)))
-                self.game.player.apply_buff(ability.get('name'), dur,
-                                            {'defense_bonus': dbonus})
-                gui_print(
-                    f"{Colors.BLUE}{self.lang.get('companion_taunt_msg', '{comp_name} uses {ability_name} and draws enemy attention!').format(comp_name=comp_name, ability_name=ability.get('name'))}{Colors.END}"
-                )
-            elif atype == 'heal':
-                heal_amt = int(
-                    ability.get(
-                        'healing',
-                        ability.get('heal', comp_data.get('healing_bonus', 0))
-                        or 0))
-                self.game.player.heal(heal_amt)
-                gui_print(
-                    f"{Colors.GREEN}{self.lang.get('companion_ability_heal_msg', '{comp_name} uses {ability_name} and heals you for {heal_amt} HP!').format(comp_name=comp_name, ability_name=ability.get('name'), heal_amt=heal_amt)}{Colors.END}"
-                )
-            elif atype == 'mp_regen':
-                dur = int(ability.get('duration', 3))
-                mp_per = int(ability.get('mp_per_turn', 0))
-                if mp_per > 0:
-                    self.game.player.apply_buff(ability.get('name'), dur,
-                                                {'mp_per_turn': mp_per})
-                    gui_print(
-                        f"{Colors.CYAN}{self.lang.get('companion_mp_regen_msg', '{comp_name} grants {mp_per} MP/turn for {dur} turns!').format(comp_name=comp_name, mp_per=mp_per, dur=dur)}{Colors.END}"
-                    )
-            elif atype == 'spell_power':
-                dur = int(ability.get('duration', 3))
-                sp = int(ability.get('spell_power_bonus', 0))
-                if sp:
-                    self.game.player.apply_buff(ability.get('name'), dur,
-                                                {'spell_power_bonus': sp})
-                    gui_print(
-                        f"{Colors.CYAN}{self.lang.get('companion_spell_power_msg', '{comp_name} increases spell power by {sp} for {dur} turns!').format(comp_name=comp_name, sp=sp, dur=dur)}{Colors.END}"
-                    )
-            elif atype == 'party_buff':
-                dur = int(ability.get('duration', 3))
-                mods = {}
-                for k in ('attack_bonus', 'defense_bonus', 'speed_bonus'):
-                    if ability.get(k) is not None:
-                        mods[k] = int(ability.get(k))
-                if mods:
-                    self.game.player.apply_buff(ability.get('name'), dur, mods)
-                    gui_print(
-                        f"{Colors.CYAN}{self.lang.get('companion_party_buff_msg', '{comp_name} uses {ability_name}, granting party buffs: {mods}!').format(comp_name=comp_name, ability_name=ability.get('name'), mods=mods)}{Colors.END}"
-                    )
+def player_take_damage(player: Dict[str, Any], raw_damage: int) -> int:
+    """Apply damage to player dict. Returns actual damage taken."""
+    defense = get_effective_defense(player)
+    damage = max(1, raw_damage - defense)
+    remaining = damage
+    for b in list(player.get('active_buffs', [])):
+        mods = b.get('modifiers', {})
+        if remaining <= 0:
             break
+        if mods.get('absorb_amount', 0) > 0:
+            avail = mods['absorb_amount']
+            use = min(avail, remaining)
+            remaining -= use
+            mods['absorb_amount'] = avail - use
+    taken = max(0, remaining)
+    player['hp'] = max(0, player.get('hp', 0) - taken)
+    return taken
 
-        if not used_ability:
-            action_type = random.choice(['attack', 'defend', 'heal'])
-            if action_type == 'attack' and comp_data.get('attack_bonus',
-                                                         0) > 0:
-                companion_damage = int(
-                    self.game.player.get_effective_attack() * 0.6 +
-                    comp_data.get('attack_bonus', 0))
-                actual_damage = enemy.take_damage(companion_damage)
-                gui_print(
-                    f"{Colors.CYAN}{self.lang.get('companion_attack_msg', '{comp_name} attacks for {damage} damage!').format(comp_name=comp_name, damage=actual_damage)}{Colors.END}"
-                )
-            elif action_type == 'heal' and comp_data.get('healing_bonus',
-                                                         0) > 0:
-                heal_amount = comp_data.get('healing_bonus', 0)
-                self.game.player.heal(heal_amount)
-                gui_print(
-                    f"{Colors.GREEN}{self.lang.get('companion_heal_msg_simple', '{comp_name} heals you for {heal_amount} HP!').format(comp_name=comp_name, heal_amount=heal_amount)}{Colors.END}"
-                )
-            elif action_type == 'defend' and comp_data.get('defense_bonus',
-                                                           0) > 0:
-                gui_print(
-                    f"{Colors.BLUE}{self.lang.get('companion_defend_msg', '{comp_name} helps you defend, reducing incoming damage!').format(comp_name=comp_name)}{Colors.END}"
-                )
-                self.game.player.defending = True
 
-    def companions_act(self, enemy):
-        """Each companion has a chance to act on their own each turn."""
-        if not self.game.player:
-            return
-        for companion in list(self.game.player.companions):
-            chance = 0.5
-            if isinstance(companion, dict) and companion.get('action_chance'):
-                chance = companion.get('action_chance') or 0.5
-            if random.random() < chance:
-                self.companion_action_for(companion, enemy)
+def tick_buffs(player: Dict[str, Any]) -> bool:
+    """Tick player buffs. Returns True if any expired."""
+    changed = False
+    buffs = player.get('active_buffs', [])
+    remaining = []
+    for buff in buffs:
+        buff['duration'] -= 1
+        if buff['duration'] > 0:
+            remaining.append(buff)
+        else:
+            changed = True
+    player['active_buffs'] = remaining
+    return changed
 
-    def enemy_turn(self, enemy):
-        """Enemy's turn in battle"""
-        if not self.game.player:
-            return
 
-        dice_util = utilities.dice.Dice()
+def battle_round_player_attack(player: Dict[str, Any], enemy_dict: Dict[str, Any],
+                                items_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Execute the player's attack portion of a battle round.
+    Returns a result dict with messages, damage dealt, etc.
+    """
+    dice = Dice()
+    messages = []
+    result = {"action": "attack", "messages": messages, "enemy_alive": True, "player_alive": True}
 
-        if hasattr(self.game, 'Boss') and isinstance(enemy, self.game.Boss):
-            for abil in enemy.cooldowns:
-                if enemy.cooldowns[abil] > 0:
-                    enemy.cooldowns[abil] -= 1
+    atk = get_effective_attack(player)
+    roll = dice.roll_1d(20)
 
-            available_abilities = [
-                a for a in enemy.special_abilities
-                if enemy.cooldowns.get(a['name'], 0) == 0
-                and enemy.mp >= a.get('mp_cost', 0)
-            ]
+    if roll == 1:
+        messages.append({"text": "Critical miss! Your weapon slips!", "color": "var(--red)"})
+    elif roll == 20:
+        messages.append({"text": "Critical hit! A perfect strike!", "color": "var(--gold)"})
 
-            current_phase = enemy.phases[
-                enemy.
-                current_phase_index] if enemy.current_phase_index >= 0 else {}
-            unlocked = current_phase.get("special_abilities_unlocked", [])
-            if unlocked:
-                available_abilities = [
-                    a for a in available_abilities if a['name'] in unlocked
-                ]
+    damage = int(atk * roll / 10)
+    enemy = Enemy(enemy_dict)
+    enemy.hp = enemy_dict.get('hp', enemy.max_hp)
+    actual = enemy.take_damage(damage)
+    enemy_dict['hp'] = enemy.hp
 
-            if available_abilities and random.random() < 0.4:
-                ability = random.choice(available_abilities)
-                gui_print(
-                    f"\n{Colors.RED}{self.lang.get('enemy_ability_msg', '{enemy_name} uses {ability_name}!').format(enemy_name=enemy.name, ability_name=ability['name'])}{Colors.END}"
-                )
-                gui_print(
-                    f"{Colors.DARK_GRAY}{ability.get('description')}{Colors.END}"
-                )
-                enemy.mp -= ability.get('mp_cost', 0)
-                enemy.cooldowns[ability['name']] = ability.get('cooldown', 0)
+    messages.append({"text": f"You attack for {actual} damage! (Rolled {roll}/20)", "color": "var(--green-bright)"})
+    result["damage_dealt"] = actual
+    result["enemy_alive"] = enemy.is_alive()
+    result["enemy_hp"] = enemy.hp
 
-                if 'damage' in ability:
-                    dmg = ability['damage']
-                    if self.game.player.defending:
-                        dmg //= 2
-                    actual = self.game.player.take_damage(dmg)
-                    gui_print(
-                        self.lang.get(
-                            "enemy_ability_damage_msg",
-                            "It deals {damage} damage!").format(damage=actual))
+    if not enemy.is_alive():
+        messages.append({"text": f"You defeated {enemy_dict.get('name', 'the enemy')}!", "color": "var(--gold)"})
 
-                if 'stun_chance' in ability and random.random(
-                ) < ability['stun_chance']:
-                    gui_print(
-                        f"{Colors.YELLOW}{self.lang.get('stun_msg', 'You are stunned and skip your next turn!')}{Colors.END}"
-                    )
-                    self.game.player.apply_buff("Stunned", 1,
-                                                {"speed_bonus": -999})
+    return result
 
-                if 'heal_amount' in ability:
-                    heal = ability['heal_amount']
-                    enemy.hp = min(enemy.max_hp, enemy.hp + heal)
-                    gui_print(
-                        self.lang.get(
-                            "enemy_heal_msg",
-                            "{enemy_name} heals for {heal} HP!").format(
-                                enemy_name=enemy.name, heal=heal))
-                return
 
-        base_damage = enemy.attack
-        roll = dice_util.roll_1d(max(1, self.game.player.level))
-        gui_print(
-            self.lang.get("enemy_roll_msg",
-                          "{enemy_name} rolls the dice...").format(
-                              enemy_name=enemy.name))
-        gui_print(
-            self.lang.get("enemy_rolled_val_msg",
-                          "{enemy_name} rolled a {roll}!").format(
-                              enemy_name=enemy.name, roll=roll))
+def battle_round_player_defend(player: Dict[str, Any]) -> Dict[str, Any]:
+    """Player chooses to defend."""
+    player['defending'] = True
+    return {
+        "action": "defend",
+        "messages": [{"text": "You take a defensive stance, reducing incoming damage!", "color": "var(--blue)"}],
+        "enemy_alive": True,
+        "player_alive": True,
+    }
 
-        damage = int(base_damage * roll / 10)
-        if self.game.player.defending:
-            damage = damage // 2
-            self.game.player.defending = False
 
-        actual_damage = self.game.player.take_damage(damage)
-        gui_print(
-            self.lang.get("enemy_attack_msg",
-                          "{enemy_name} attacks for {damage} damage!").format(
-                              enemy_name=enemy.name, damage=actual_damage))
+def battle_round_player_flee(player: Dict[str, Any], enemy_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Player attempts to flee."""
+    p_speed = get_effective_speed(player)
+    e_speed = enemy_dict.get('speed', 5)
+    flee_chance = 0.7 if p_speed > e_speed else 0.4
+    fled = random.random() < flee_chance
+    msg = "You successfully fled the battle!" if fled else "Failed to flee! The enemy blocks your path."
+    color = "var(--yellow)" if fled else "var(--red)"
+    return {
+        "action": "flee",
+        "fled": fled,
+        "messages": [{"text": msg, "color": color}],
+        "enemy_alive": True,
+        "player_alive": True,
+    }
 
-        if self.game.player.companions:
-            companion_defense_bonus = 0
-            for companion in self.game.player.companions:
-                if isinstance(companion, dict):
-                    comp_name = companion.get('name')
-                    comp_id = companion.get('id')
-                else:
-                    comp_name = companion
-                    comp_id = None
 
-                for cid, cdata in self.companions_data.items():
-                    if cdata.get('name') == comp_name or cid == comp_id:
-                        companion_defense_bonus += cdata.get(
-                            'defense_bonus', 0)
-                        break
+def battle_round_enemy_attack(player: Dict[str, Any], enemy_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Enemy attacks the player. Modifies player dict in place."""
+    dice = Dice()
+    messages = []
 
-            if companion_defense_bonus > 0:
-                damage_reduction = int(companion_defense_bonus * 0.5)
-                self.game.player.heal(damage_reduction)
-                gui_print(
-                    f"{Colors.BLUE}{self.lang.get('companions_mitigate_msg', 'Companions mitigate {damage} damage!').format(damage=damage_reduction)}{Colors.END}"
-                )
+    e_name = enemy_dict.get('name', 'The enemy')
+    e_atk = enemy_dict.get('attack', 5)
+    roll = dice.roll_1d(max(1, player.get('level', 1)))
+    raw_damage = int(e_atk * roll / 10)
+
+    was_defending = player.get('defending', False)
+    if was_defending:
+        raw_damage = raw_damage // 2
+        player['defending'] = False
+
+    actual = player_take_damage(player, raw_damage)
+    messages.append({"text": f"{e_name} attacks you for {actual} damage!", "color": "var(--red)"})
+
+    if was_defending:
+        messages.append({"text": "Your defensive stance reduced the damage!", "color": "var(--blue)"})
+
+    player_alive = player.get('hp', 0) > 0
+    if not player_alive:
+        messages.append({"text": "You have been defeated...", "color": "var(--red)"})
+
+    return {
+        "action": "enemy_attack",
+        "damage_taken": actual,
+        "messages": messages,
+        "enemy_alive": True,
+        "player_alive": player_alive,
+    }
+
+
+def collect_battle_rewards(player: Dict[str, Any], enemy_dict: Dict[str, Any],
+                           items_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Collect rewards after defeating an enemy. Modifies player dict in place."""
+    messages = []
+    e_name = enemy_dict.get('name', 'the enemy')
+    exp_reward = enemy_dict.get('experience_reward', enemy_dict.get('exp_reward', 20))
+    gold_reward = enemy_dict.get('gold_reward', 10)
+
+    weather = player.get('current_weather', 'sunny')
+    if weather == "sunny":
+        exp_reward = int(exp_reward * 1.1)
+        messages.append({"text": "Sunny weather bonus: +10% EXP!", "color": "var(--gold)"})
+    elif weather == "stormy":
+        gold_reward = int(gold_reward * 1.2)
+        messages.append({"text": "Stormy weather bonus: +20% Gold!", "color": "var(--blue)"})
+
+    old_level = player.get('level', 1)
+    player['experience'] = player.get('experience', 0) + exp_reward
+    leveled_up = False
+    while player['experience'] >= player.get('experience_to_next', 100):
+        player['experience'] -= player['experience_to_next']
+        player['level'] = player.get('level', 1) + 1
+        player['experience_to_next'] = int(player.get('experience_to_next', 100) * 1.5)
+        bonuses = player.get('level_up_bonuses', {})
+        player['max_hp'] = player.get('max_hp', 100) + bonuses.get('hp', 10)
+        player['max_mp'] = player.get('max_mp', 50) + bonuses.get('mp', 2)
+        player['attack'] = player.get('attack', 10) + bonuses.get('attack', 2)
+        player['defense'] = player.get('defense', 8) + bonuses.get('defense', 1)
+        player['speed'] = player.get('speed', 10) + bonuses.get('speed', 1)
+        player['hp'] = player['max_hp']
+        player['mp'] = player['max_mp']
+        leveled_up = True
+
+    player['gold'] = player.get('gold', 0) + gold_reward
+    messages.append({"text": f"Defeated {e_name}! Gained {exp_reward} EXP and {gold_reward} gold.", "color": "var(--gold)"})
+
+    if leveled_up:
+        messages.append({"text": f"Level up! You are now level {player['level']}!", "color": "var(--gold)"})
+
+    loot_gained = None
+    loot_table = enemy_dict.get('loot_table', enemy_dict.get('drops', []))
+    if loot_table and random.random() < 0.5:
+        loot = random.choice(loot_table)
+        player.setdefault('inventory', []).append(loot)
+        loot_gained = loot
+        messages.append({"text": f"Loot acquired: {loot}!", "color": "var(--yellow)"})
+
+    return {
+        "messages": messages,
+        "exp_reward": exp_reward,
+        "gold_reward": gold_reward,
+        "leveled_up": leveled_up,
+        "new_level": player.get('level', 1),
+        "loot": loot_gained,
+    }
+
+
+def handle_player_defeat(player: Dict[str, Any]) -> Dict[str, Any]:
+    """Handle player being defeated. Modifies player dict and returns to starting village."""
+    player['hp'] = player.get('max_hp', 100) // 2
+    player['mp'] = player.get('max_mp', 50) // 2
+    return {
+        "messages": [
+            {"text": "You were defeated in battle...", "color": "var(--red)"},
+            {"text": "You wake up at the Starting Village, weakened but alive.", "color": "var(--yellow)"},
+        ],
+        "respawn_area": "starting_village",
+    }
+
+
+def build_enemy_from_area(area_key: str, enemies_data: Dict[str, Any], areas_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Pick a random enemy from the current area."""
+    area = areas_data.get(area_key, {})
+    possible = area.get('possible_enemies', [])
+    if not possible:
+        possible = [k for k in enemies_data.keys()][:5]
+    if not possible:
+        return None
+    enemy_key = random.choice(possible)
+    enemy_data = enemies_data.get(enemy_key)
+    if not enemy_data:
+        return None
+    return dict(enemy_data)
+
+
+def get_spells_for_weapon(weapon_name: Optional[str], items_data: Dict[str, Any],
+                          spells_data: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
+    """Return list of (spell_name, spell_data) available for the given weapon."""
+    if not weapon_name:
+        return []
+    weapon = items_data.get(weapon_name, {})
+    if not weapon.get('magic_weapon'):
+        return []
+    return [(sname, sdata) for sname, sdata in spells_data.items()
+            if weapon_name in sdata.get('allowed_weapons', [])]

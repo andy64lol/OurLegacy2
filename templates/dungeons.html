@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="game-layout">
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <img src="/static/banner.png" alt="Our Legacy 2" class="sidebar-banner">
+        </div>
+        <div class="panel sidebar-panel">
+            <div class="panel-title">{{ player.name }}</div>
+            <div class="panel-body">
+                <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
+                <div class="char-level">Level {{ player.level }}</div>
+                <div class="bar-group">
+                    <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="gold-display">Gold: <span class="gold-amount">{{ player.gold }}</span></div>
+            </div>
+        </div>
+        <div class="panel sidebar-panel">
+            <div class="panel-title">Navigation</div>
+            <div class="panel-body">
+                <a href="/game" class="btn btn-secondary" style="width:100%;display:block;">Return to Game</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-area">
+        <div class="panel">
+            <div class="panel-title">Dungeon Entrances</div>
+            <div class="panel-body">
+                {% if active_dungeon %}
+                <div class="message-row" style="background:var(--panel-bg);padding:12px;margin-bottom:12px;border:1px solid var(--gold);border-radius:6px;">
+                    <strong style="color:var(--gold);">Active Dungeon:</strong> {{ active_dungeon.dungeon.name }}
+                    &mdash; Room {{ active_dungeon.room_index + 1 }} / {{ active_dungeon.rooms|length }}
+                    <a href="/dungeon/room" class="btn btn-primary" style="margin-left:12px;">Continue</a>
+                </div>
+                {% endif %}
+
+                {% if messages %}
+                <div style="margin-bottom:12px;">
+                    {% for msg in messages[:5] %}
+                    <div style="color:{{ msg.color }};">{{ msg.text }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if not dungeons %}
+                <div class="text-dim">No dungeons are accessible in your current area at your level. Explore the world to find them.</div>
+                {% else %}
+                {% for dungeon in dungeons %}
+                <div class="panel" style="margin-bottom:12px;padding:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <div>
+                            <div class="panel-title" style="font-size:18px;margin-bottom:4px;">{{ dungeon.name }}</div>
+                            <div class="item-desc">{{ dungeon.description }}</div>
+                            <div style="margin-top:6px;font-size:13px;color:var(--text-dim);">
+                                Rooms: {{ dungeon.rooms }} &bull; Min Level: {{ dungeon.min_level }}
+                            </div>
+                        </div>
+                        {% if dungeon.available %}
+                        <form method="POST" action="/action/dungeon/enter">
+                            <input type="hidden" name="dungeon_id" value="{{ dungeon.id }}">
+                            <button type="submit" class="btn btn-primary">Enter Dungeon</button>
+                        </form>
+                        {% else %}
+                        <div class="text-dim">Requires Level {{ dungeon.min_level }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
