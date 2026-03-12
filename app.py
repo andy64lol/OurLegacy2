@@ -10,6 +10,7 @@ import base64
 import json
 import random
 import os
+import time as _time_module
 
 from utilities.UI import Colors, get_rarity_color, create_progress_bar
 from utilities.dice import Dice
@@ -65,6 +66,11 @@ GAME_DATA = {
     'farming': load_json('farming.json'),
     'pets': load_json('pets.json'),
     'dungeons': load_json('dungeons.json'),
+    'weekly_challenges': load_json('weekly_challenges.json').get('challenges', []),
+    'weather': load_json('weather.json'),
+    'times': load_json('times.json'),
+    'dialogues': load_json('dialogues.json'),
+    'cutscenes': load_json('cutscenes.json'),
 }
 
 BUILDING_TYPES = {
@@ -77,6 +83,33 @@ BUILDING_TYPES = {
 }
 
 EQUIPPABLE_TYPES = {'weapon', 'armor', 'offhand', 'accessory'}
+
+# Crafting materials grouped by area difficulty tier
+MATERIALS_BY_TIER = {
+    1: ['Iron Ore', 'Herbs', 'Goblin Ears', 'Wolf Fangs'],
+    2: ['Coal', 'Mana Herbs', 'Orc Teeth', 'Crystal Shards'],
+    3: ['Steel Ingot', 'Dark Crystals', 'Fire Gems', 'Venom Sacs'],
+    4: ['Gold Nugget', 'Spring Water', 'Phoenix Feathers', 'Dragon Scales'],
+    5: ['Dragon Scales', 'Phoenix Feathers', 'Ancient Relics'],
+}
+
+TIME_PERIODS = ['Dawn', 'Morning', 'Noon', 'Afternoon', 'Dusk', 'Evening', 'Night', 'Midnight']
+TIME_ICONS = {
+    'Dawn': '🌅', 'Morning': '☀️', 'Noon': '🌤️', 'Afternoon': '🌥️',
+    'Dusk': '🌆', 'Evening': '🌙', 'Night': '🌑', 'Midnight': '⭐',
+}
+
+# Training options at Your Land
+TRAINING_OPTIONS = {
+    'attack': {'label': 'Attack Training', 'stat': 'attack', 'cost': 80, 'gain': 1},
+    'defense': {'label': 'Defense Training', 'stat': 'defense', 'cost': 80, 'gain': 1},
+    'speed': {'label': 'Speed Training', 'stat': 'speed', 'cost': 80, 'gain': 1},
+    'max_hp': {'label': 'Endurance Training', 'stat': 'max_hp', 'cost': 100, 'gain': 10},
+    'max_mp': {'label': 'Meditation Training', 'stat': 'max_mp', 'cost': 100, 'gain': 5},
+}
+
+# Boss challenge cooldown in seconds (8 hours)
+BOSS_CHALLENGE_COOLDOWN = 8 * 3600
 
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
@@ -140,6 +173,8 @@ def gain_experience(player, amount):
         player['mp'] = player['max_mp']
         player['rank'] = get_rank(player['level'])
         leveled = True
+    if leveled:
+        update_level_challenges(player)
     return leveled
 
 
@@ -151,6 +186,168 @@ def advance_crops(player):
             growth_time = crop_info.get('growth_time', 5)
             if crop_info['turns'] >= growth_time:
                 crop_info['ready'] = True
+
+
+# ─── Time of Day ──────────────────────────────────────────────────────────────
+
+
+def get_game_time(player):
+    """Return current time period name based on game ticks (each period = 6 ticks)."""
+    ticks = player.get('game_ticks', 0)
+    period_idx = (ticks // 6) % len(TIME_PERIODS)
+    return TIME_PERIODS[period_idx]
+
+
+def advance_game_time(player):
+    """Increment game ticks by 1."""
+    player['game_ticks'] = player.get('game_ticks', 0) + 1
+
+
+# ─── Weather ──────────────────────────────────────────────────────────────────
+
+
+def roll_area_weather(area):
+    """Roll weather based on area weather_probabilities, or fall back to defaults."""
+    probs = area.get('weather_probabilities')
+    if probs:
+        choices = list(probs.keys())
+        weights = list(probs.values())
+        return random.choices(choices, weights=weights, k=1)[0]
+    area_name = area.get('name', '').lower()
+    if 'tomb' in area_name or 'cavern' in area_name or 'underground' in area_name:
+        return 'null'
+    return random.choices(['sunny', 'rainy', 'snowy', 'stormy'], weights=[50, 25, 15, 10], k=1)[0]
+
+
+def get_weather_bonuses(weather_key):
+    """Return exp and gold bonus multipliers for given weather."""
+    weather_def = GAME_DATA['weather'].get(weather_key, {})
+    bonuses = weather_def.get('bonuses', {})
+    return bonuses.get('exp_bonus', 0.0), bonuses.get('gold_bonus', 0.0)
+
+
+# ─── Weekly Challenges ────────────────────────────────────────────────────────
+
+
+def update_weekly_challenge(player, event_type, amount=1):
+    """Track weekly challenge progress for the given event type."""
+    ch_prog = player.setdefault('weekly_challenges_progress', {})
+    for ch in GAME_DATA['weekly_challenges']:
+        ch_id = ch['id']
+        prog = ch_prog.get(ch_id, {})
+        if prog.get('claimed'):
+            continue
+        if ch['type'] == event_type:
+            entry = ch_prog.setdefault(ch_id, {})
+            entry['count'] = entry.get('count', 0) + amount
+
+
+def update_level_challenges(player):
+    """Update level_reach challenges to match current level."""
+    ch_prog = player.setdefault('weekly_challenges_progress', {})
+    for ch in GAME_DATA['weekly_challenges']:
+        if ch['type'] == 'level_reach':
+            ch_id = ch['id']
+            prog = ch_prog.get(ch_id, {})
+            if prog.get('claimed'):
+                continue
+            entry = ch_prog.setdefault(ch_id, {})
+            entry['count'] = max(entry.get('count', 0), player.get('level', 1))
+
+
+def build_challenges_display(player):
+    """Build challenge display list for template."""
+    ch_prog = player.get('weekly_challenges_progress', {})
+    result = []
+    for ch in GAME_DATA['weekly_challenges']:
+        ch_id = ch['id']
+        prog = ch_prog.get(ch_id, {})
+        count = prog.get('count', 0)
+        target = ch['target']
+        claimed = prog.get('claimed', False)
+        result.append({
+            'id': ch_id,
+            'name': ch['name'],
+            'description': ch['description'],
+            'type': ch['type'],
+            'count': min(count, target),
+            'target': target,
+            'claimed': claimed,
+            'ready': not claimed and count >= target,
+            'reward_exp': ch.get('reward_exp', 0),
+            'reward_gold': ch.get('reward_gold', 0),
+        })
+    return result
+
+
+# ─── Boss Dialogue ────────────────────────────────────────────────────────────
+
+
+def get_boss_dialogue(boss_key, timing):
+    """Return boss dialogue text for 'start' or 'defeat'."""
+    return GAME_DATA['dialogues'].get(f'{boss_key}.boss.{timing}', '')
+
+
+# ─── Cutscenes ────────────────────────────────────────────────────────────────
+
+
+def trigger_cutscene(cutscene_id):
+    """Queue a cutscene to display on next game page load, if not already seen."""
+    seen = session.get('seen_cutscenes', [])
+    cutscene_def = GAME_DATA['cutscenes'].get(cutscene_id)
+    if cutscene_def and not cutscene_def.get('iterable', True) and cutscene_id in seen:
+        return
+    session['pending_cutscene'] = cutscene_id
+    session.modified = True
+
+
+# ─── Status Effects ────────────────────────────────────────────────────────────
+
+
+def apply_status_effect(effects_dict, effect_key, turns=None):
+    """Add or refresh a status effect. Uses duration from effects.json if turns not specified."""
+    effect_def = load_json('effects.json').get(effect_key, {})
+    duration = turns or effect_def.get('duration', 3)
+    effects_dict[effect_key] = {
+        'turns': duration,
+        'data': effect_def,
+    }
+
+
+def process_turn_effects(entity, effects_dict, log, entity_label):
+    """Process all active status effects for an entity. Returns updated effects dict."""
+    to_remove = []
+    stunned = False
+    for eff_key, eff_info in list(effects_dict.items()):
+        data = eff_info.get('data', {})
+        eff_type = data.get('type', '')
+
+        if eff_type == 'damage_over_time':
+            dmg = data.get('damage', 5)
+            entity['hp'] = max(0, entity['hp'] - dmg)
+            log.append(f'{entity_label} takes {dmg} {eff_key} damage! ({eff_info["turns"]-1} turns left)')
+        elif eff_type == 'healing_over_time':
+            heal = data.get('heal_amount', 8)
+            entity['hp'] = min(entity.get('max_hp', entity['hp']), entity['hp'] + heal)
+            log.append(f'{entity_label} regenerates {heal} HP!')
+        elif eff_type == 'action_block':
+            stunned = True
+            log.append(f'{entity_label} is stunned and cannot act!')
+
+        eff_info['turns'] -= 1
+        if eff_info['turns'] <= 0:
+            to_remove.append(eff_key)
+            if eff_type == 'stat_boost':
+                # Revert stat boosts
+                for stat_key in ('defense_bonus', 'attack_bonus', 'speed_bonus'):
+                    if stat_key in data:
+                        stat = stat_key.replace('_bonus', '')
+                        entity[stat] = max(1, entity.get(stat, 0) - data[stat_key])
+
+    for k in to_remove:
+        effects_dict.pop(k, None)
+
+    return stunned
 
 
 # ─── Equipment Helpers ───────────────────────────────────────────────────────
@@ -172,13 +369,25 @@ def apply_item_bonuses(player, item_data, direction=1):
         val = item_data.get(bonus_key, 0)
         if val:
             player[stat_key] = max(1, player.get(stat_key, 0) + int(val) * sign * direction)
-    # hp_bonus also raises current hp when equipping
     hp_bonus = item_data.get('hp_bonus', 0)
     if hp_bonus and direction == 1:
         player['hp'] = min(player['hp'] + hp_bonus, player['max_hp'])
     mp_bonus = item_data.get('mp_bonus', 0)
     if mp_bonus and direction == 1:
         player['mp'] = min(player['mp'] + mp_bonus, player['max_mp'])
+
+
+def _ensure_equipment_slots(player):
+    """Ensure player has all equipment slots including 3 accessory slots."""
+    if 'equipment' not in player:
+        player['equipment'] = {}
+    for slot in ('weapon', 'armor', 'offhand', 'accessory_1', 'accessory_2', 'accessory_3'):
+        player['equipment'].setdefault(slot, None)
+    # Migrate old single 'accessory' slot
+    if 'accessory' in player['equipment']:
+        old_val = player['equipment'].pop('accessory')
+        if old_val and not player['equipment'].get('accessory_1'):
+            player['equipment']['accessory_1'] = old_val
 
 
 def equip_item(player, item_name):
@@ -200,8 +409,21 @@ def equip_item(player, item_name):
     if req.get('class') and req['class'] != player.get('class', ''):
         return False, f"Only {req['class']} can equip {item_name}."
 
-    equipment = player.setdefault('equipment', {})
-    slot = item_type  # weapon/armor/offhand/accessory
+    _ensure_equipment_slots(player)
+    equipment = player['equipment']
+
+    # Determine slot
+    if item_type == 'accessory':
+        slot = None
+        for i in range(1, 4):
+            s = f'accessory_{i}'
+            if not equipment.get(s):
+                slot = s
+                break
+        if not slot:
+            slot = 'accessory_1'  # Replace slot 1 if all full
+    else:
+        slot = item_type
 
     # Unequip current item in slot
     current = equipment.get(slot)
@@ -301,12 +523,10 @@ def check_mission_completable(mission_id, player):
     if mission_id in completed:
         return False, 'Already completed.'
 
-    # Level requirement
     unlock_level = mission.get('unlock_level', 1)
     if player.get('level', 1) < unlock_level:
         return False, f'Requires level {unlock_level}.'
 
-    # Prerequisites
     prereqs = mission.get('prerequisites', [])
     for prereq in prereqs:
         if prereq not in completed:
@@ -427,7 +647,10 @@ def create():
             'speed': stats['speed'],
             'gold': cls_data.get('starting_gold', 100),
             'inventory': list(cls_data.get('starting_items', ['Health Potion'])),
-            'equipment': {'weapon': None, 'armor': None, 'offhand': None, 'accessory': None},
+            'equipment': {
+                'weapon': None, 'armor': None, 'offhand': None,
+                'accessory_1': None, 'accessory_2': None, 'accessory_3': None,
+            },
             'companions': [],
             'rank': 'F-Tier Adventurer',
             'level_up_bonuses': cls_data.get('level_up_bonuses', {
@@ -439,6 +662,9 @@ def create():
             'crops': {},
             'pet': None,
             'explore_count': 0,
+            'game_ticks': 0,
+            'weekly_challenges_progress': {},
+            'boss_cooldowns': {},
         }
         save_player(player)
         session['messages'] = []
@@ -446,6 +672,9 @@ def create():
         session['completed_missions'] = []
         session['visited_areas'] = ['starting_village']
         session['quest_progress'] = {}
+        session['seen_cutscenes'] = []
+        session['current_weather'] = 'sunny'
+        trigger_cutscene('welcome_cutscene')
         add_message(f'Welcome, {name} the {cls}! Your legend begins.', 'var(--gold)')
         add_message('You stand at the gates of the Starting Village. Adventure awaits.', 'var(--text-light)')
         return redirect(url_for('game'))
@@ -459,11 +688,7 @@ def game():
     if not player:
         return redirect(url_for('index'))
 
-    # Ensure equipment has all slots
-    if 'equipment' not in player:
-        player['equipment'] = {}
-    for slot in ('weapon', 'armor', 'offhand', 'accessory'):
-        player['equipment'].setdefault(slot, None)
+    _ensure_equipment_slots(player)
 
     area_key = session.get('current_area', 'starting_village')
     area = GAME_DATA['areas'].get(area_key, {})
@@ -472,11 +697,13 @@ def game():
     connections = []
     for conn_key in area.get('connections', []):
         conn_area = GAME_DATA['areas'].get(conn_key, {})
+        difficulty = conn_area.get('difficulty', 0)
         connections.append({
             'key': conn_key,
             'name': conn_area.get('name', conn_key.replace('_', ' ').title()),
             'has_danger': bool(conn_area.get('possible_enemies')),
             'visited': conn_key in session.get('visited_areas', []),
+            'difficulty': difficulty,
         })
 
     # Shop items
@@ -524,7 +751,7 @@ def game():
             'stats': _item_stat_summary(item_data),
         })
 
-    # Equipment info
+    # Equipment info — includes 3 accessory slots
     equipped_details = {}
     for slot, item_name in player.get('equipment', {}).items():
         if item_name:
@@ -537,7 +764,7 @@ def game():
                     'stats': _item_stat_summary(item_data),
                 }
 
-    # Missions — filter by level and prerequisites, compute progress
+    # Missions
     completed = session.get('completed_missions', [])
     completed_set = set(completed)
     available_missions = []
@@ -662,9 +889,10 @@ def game():
             },
             'current_pet': pet_data_current,
             'owned_housing': owned_set,
+            'training_options': TRAINING_OPTIONS,
         }
 
-    # ── Companion system ──────────────────────────────────────────────────
+    # Companion system
     active_companions = []
     for comp in player.get('companions', []):
         if isinstance(comp, dict):
@@ -695,6 +923,48 @@ def game():
                 'stat_summary': _companion_stat_summary(comp_data),
             })
 
+    # Time and weather
+    game_time = get_game_time(player)
+    game_time_icon = TIME_ICONS.get(game_time, '')
+    current_weather = session.get('current_weather', 'sunny')
+    weather_def = GAME_DATA['weather'].get(current_weather, {})
+    weather_display = current_weather.title()
+    weather_icons = {'sunny': '☀️', 'rainy': '🌧️', 'snowy': '❄️', 'stormy': '⛈️', 'null': '🌑'}
+    weather_icon = weather_icons.get(current_weather, '')
+    weather_bonus_exp = int(weather_def.get('bonuses', {}).get('exp_bonus', 0) * 100)
+    weather_bonus_gold = int(weather_def.get('bonuses', {}).get('gold_bonus', 0) * 100)
+
+    # Weekly challenges
+    challenges_display = build_challenges_display(player)
+
+    # Boss challenges for current area
+    available_bosses = []
+    now_ts = _time_module.time()
+    boss_cooldowns = player.get('boss_cooldowns', {})
+    for boss_key in area.get('possible_bosses', []):
+        boss_data = GAME_DATA['bosses'].get(boss_key, {})
+        if not boss_data:
+            continue
+        cooldown_until = boss_cooldowns.get(boss_key, 0)
+        on_cooldown = now_ts < cooldown_until
+        secs_left = max(0, int(cooldown_until - now_ts))
+        hours_left = secs_left // 3600
+        mins_left = (secs_left % 3600) // 60
+        available_bosses.append({
+            'key': boss_key,
+            'name': boss_data.get('name', boss_key.replace('_', ' ').title()),
+            'on_cooldown': on_cooldown,
+            'cooldown_str': f'{hours_left}h {mins_left}m' if on_cooldown else '',
+        })
+
+    # Pending cutscene
+    pending_cutscene_id = session.get('pending_cutscene')
+    pending_cutscene = None
+    if pending_cutscene_id:
+        cs = GAME_DATA['cutscenes'].get(pending_cutscene_id)
+        if cs:
+            pending_cutscene = {'id': pending_cutscene_id, 'content': cs.get('content', {})}
+
     save_player(player)
     return render_template(
         'game.html',
@@ -713,6 +983,16 @@ def game():
         land_data=land_data,
         active_companions=active_companions,
         companions_available=companions_available,
+        game_time=game_time,
+        game_time_icon=game_time_icon,
+        current_weather=current_weather,
+        weather_display=weather_display,
+        weather_icon=weather_icon,
+        weather_bonus_exp=weather_bonus_exp,
+        weather_bonus_gold=weather_bonus_gold,
+        challenges=challenges_display,
+        available_bosses=available_bosses,
+        pending_cutscene=pending_cutscene,
     )
 
 
@@ -746,6 +1026,21 @@ def _companion_stat_summary(comp_data):
     return ', '.join(parts)
 
 
+# ─── Cutscene API ─────────────────────────────────────────────────────────────
+
+
+@app.route('/api/dismiss_cutscene', methods=['POST'])
+def dismiss_cutscene():
+    cutscene_id = session.pop('pending_cutscene', None)
+    if cutscene_id:
+        seen = session.get('seen_cutscenes', [])
+        if cutscene_id not in seen:
+            seen.append(cutscene_id)
+        session['seen_cutscenes'] = seen
+        session.modified = True
+    return jsonify({'ok': True})
+
+
 # ─── Exploration ─────────────────────────────────────────────────────────────
 
 
@@ -762,6 +1057,17 @@ def action_explore():
 
     player['explore_count'] = player.get('explore_count', 0) + 1
     advance_crops(player)
+    advance_game_time(player)
+
+    # Roll weather
+    new_weather = roll_area_weather(area)
+    session['current_weather'] = new_weather
+    weather_def = GAME_DATA['weather'].get(new_weather, {})
+    weather_icons = {'sunny': '☀️', 'rainy': '🌧️', 'snowy': '❄️', 'stormy': '⛈️', 'null': '🌑'}
+    add_message(
+        f'{weather_icons.get(new_weather, "")} The weather is {new_weather.title()}.',
+        'var(--text-dim)'
+    )
 
     # Boss encounter: 8% chance if area has bosses
     if possible_bosses and random.random() < 0.08:
@@ -783,8 +1089,13 @@ def action_explore():
                 'loot_table': boss_data.get('unique_loot', []),
                 'is_boss': True,
             }
+            dialogue = get_boss_dialogue(boss_key, 'start')
             session['battle_enemy'] = enemy
             session['battle_log'] = [f'⚠ {enemy["name"]} blocks your path! Prepare for a boss battle! (HP: {enemy["hp"]})']
+            if dialogue:
+                session['battle_log'].append(f'"{dialogue}"')
+            session['battle_player_effects'] = {}
+            session['battle_enemy_effects'] = {}
             session.modified = True
             save_player(player)
             return redirect(url_for('battle'))
@@ -811,22 +1122,44 @@ def action_explore():
         }
         session['battle_enemy'] = enemy
         session['battle_log'] = [f'A {enemy["name"]} emerges from the shadows! (HP: {enemy["hp"]})']
+        session['battle_player_effects'] = {}
+        session['battle_enemy_effects'] = {}
         session.modified = True
         save_player(player)
         return redirect(url_for('battle'))
-    elif roll < 0.70:
-        gold_found = random.randint(5, 25)
+
+    # Non-combat exploration outcomes
+    # 30% chance to find gold (5-20)
+    if random.random() < 0.30:
+        gold_found = random.randint(5, 20)
         player['gold'] += gold_found
-        add_message(f'You search the area and find {gold_found} gold coins.', 'var(--gold)')
-    elif roll < 0.82:
+        add_message(f'You spot {gold_found} gold coins glinting on the ground.', 'var(--gold)')
+
+    # 40% chance to gather crafting materials
+    if random.random() < 0.40:
+        difficulty = area.get('difficulty', 1)
+        tier = max(1, min(difficulty, 5))
+        mats = MATERIALS_BY_TIER.get(tier, MATERIALS_BY_TIER[1])
+        num = random.randint(1, 3)
+        gathered = random.choices(mats, k=num)
+        for mat in gathered:
+            player['inventory'].append(mat)
+        mat_str = ', '.join(gathered)
+        add_message(f'You gather materials: {mat_str}.', 'var(--green-bright)')
+
+    # Other exploration outcomes
+    roll2 = random.random()
+    if roll2 < 0.20:
         heal = random.randint(10, 30)
         player['hp'] = min(player['max_hp'], player['hp'] + heal)
-        add_message(f'You discover an herb and recover {heal} HP.', 'var(--green-bright)')
-    elif roll < 0.90:
+        add_message(f'You discover a healing herb and recover {heal} HP.', 'var(--green-bright)')
+    elif roll2 < 0.35:
         player['inventory'].append('Health Potion')
         add_message('You find a discarded Health Potion on the ground.', 'var(--text-light)')
+    elif roll2 < 0.50:
+        add_message('You explore thoroughly but encounter no danger.', 'var(--text-dim)')
     else:
-        add_message('You explore thoroughly but find nothing of note.', 'var(--text-dim)')
+        add_message('The area is quiet. You keep your senses sharp.', 'var(--text-dim)')
 
     save_player(player)
     return redirect(url_for('game'))
@@ -854,6 +1187,7 @@ def action_rest():
     player['hp'] = player['max_hp']
     player['mp'] = player['max_mp']
     advance_crops(player)
+    advance_game_time(player)
 
     if cost > 0:
         add_message(f'You rest for {cost} gold. HP and MP fully restored.', 'var(--green-bright)')
@@ -879,9 +1213,14 @@ def action_travel():
         dest_area = GAME_DATA['areas'].get(dest_key, {})
         dest_name = dest_area.get('name', dest_key.replace('_', ' ').title())
         visited = session.get('visited_areas', [])
-        if dest_key not in visited:
+        first_visit = dest_key not in visited
+        if first_visit:
             visited.append(dest_key)
             session['visited_areas'] = visited
+            # Trigger cutscene if area has one
+            cs_id = dest_area.get('first_time_enter_cutscene')
+            if cs_id:
+                trigger_cutscene(cs_id)
         add_message(f'You travel to {dest_name}.', 'var(--wood-light)')
         session.modified = True
     else:
@@ -889,6 +1228,70 @@ def action_travel():
 
     save_player(player)
     return redirect(url_for('game'))
+
+
+# ─── Manual Boss Challenge ─────────────────────────────────────────────────────
+
+
+@app.route('/action/challenge_boss', methods=['POST'])
+def action_challenge_boss():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    boss_key = request.form.get('boss_key', '')
+    area_key = session.get('current_area', 'starting_village')
+    area = GAME_DATA['areas'].get(area_key, {})
+
+    if boss_key not in area.get('possible_bosses', []):
+        add_message('That boss is not available in this area.', 'var(--red)')
+        return redirect(url_for('game'))
+
+    boss_data = GAME_DATA['bosses'].get(boss_key, {})
+    if not boss_data:
+        add_message('Unknown boss.', 'var(--red)')
+        return redirect(url_for('game'))
+
+    # Check cooldown
+    now_ts = _time_module.time()
+    boss_cooldowns = player.get('boss_cooldowns', {})
+    cooldown_until = boss_cooldowns.get(boss_key, 0)
+    if now_ts < cooldown_until:
+        remaining = int(cooldown_until - now_ts)
+        h = remaining // 3600
+        m = (remaining % 3600) // 60
+        add_message(f'{boss_data.get("name")} is not ready to fight yet. Cooldown: {h}h {m}m.', 'var(--red)')
+        return redirect(url_for('game'))
+
+    # Set cooldown
+    boss_cooldowns[boss_key] = now_ts + BOSS_CHALLENGE_COOLDOWN
+    player['boss_cooldowns'] = boss_cooldowns
+
+    lvl = player['level']
+    scale = 1 + (lvl - 1) * 0.12
+    enemy = {
+        'key': boss_key,
+        'name': boss_data.get('name', boss_key.replace('_', ' ').title()),
+        'hp': int(boss_data.get('hp', 200) * scale),
+        'max_hp': int(boss_data.get('hp', 200) * scale),
+        'attack': int(boss_data.get('attack', 20) * scale),
+        'defense': int(boss_data.get('defense', 10) * scale),
+        'speed': boss_data.get('speed', 12),
+        'exp_reward': int(boss_data.get('experience_reward', 200) * scale),
+        'gold_reward': int(boss_data.get('gold_reward', 100) * scale),
+        'loot_table': boss_data.get('unique_loot', []),
+        'is_boss': True,
+    }
+    dialogue = get_boss_dialogue(boss_key, 'start')
+    session['battle_enemy'] = enemy
+    session['battle_log'] = [f'⚔ You challenge {enemy["name"]}! Prepare yourself! (HP: {enemy["hp"]})']
+    if dialogue:
+        session['battle_log'].append(f'"{dialogue}"')
+    session['battle_player_effects'] = {}
+    session['battle_enemy_effects'] = {}
+    session.modified = True
+    save_player(player)
+    return redirect(url_for('battle'))
 
 
 @app.route('/action/buy', methods=['POST'])
@@ -971,7 +1374,6 @@ def action_hire_companion():
 
     player['gold'] -= price
 
-    # Apply stat bonuses
     for stat_key in ('attack_bonus', 'defense_bonus', 'speed_bonus'):
         bonus = comp_data.get(stat_key, 0)
         if bonus:
@@ -1006,7 +1408,6 @@ def action_dismiss_companion():
 
     comp_data = GAME_DATA['companions'].get(comp_id, {})
 
-    # Reverse stat bonuses
     for stat_key in ('attack_bonus', 'defense_bonus', 'speed_bonus'):
         bonus = comp_data.get(stat_key, 0)
         if bonus:
@@ -1044,7 +1445,6 @@ def action_use_item():
         item_data = {}
     item_type = item_data.get('type', '')
 
-    # Equippable items — equip them
     if item_type in EQUIPPABLE_TYPES:
         ok, msg = equip_item(player, item_name)
         color = 'var(--green-bright)' if ok else 'var(--red)'
@@ -1123,6 +1523,11 @@ def action_complete_mission():
         return redirect(url_for('game'))
 
     mission = GAME_DATA['missions'].get(mission_id, {})
+
+    # Trigger mission accept cutscene on first ever mission completion
+    if not completed:
+        trigger_cutscene('mission_accept_tutorial')
+
     completed.append(mission_id)
     session['completed_missions'] = completed
 
@@ -1144,13 +1549,58 @@ def action_complete_mission():
     if leveled:
         add_message(f'Level Up! You are now level {player["level"]}!', 'var(--gold)')
 
-    # Remove progress tracking for completed mission
+    # Update weekly challenge
+    update_weekly_challenge(player, 'mission_count', 1)
+
     quest_progress = session.get('quest_progress', {})
     quest_progress.pop(mission_id, None)
     session['quest_progress'] = quest_progress
 
     save_player(player)
     return redirect(url_for('game'))
+
+
+# ─── Weekly Challenges ────────────────────────────────────────────────────────
+
+
+@app.route('/action/claim_challenge', methods=['POST'])
+def action_claim_challenge():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    ch_id = request.form.get('challenge_id', '')
+    ch_def = next((c for c in GAME_DATA['weekly_challenges'] if c['id'] == ch_id), None)
+    if not ch_def:
+        add_message('Unknown challenge.', 'var(--red)')
+        return redirect(url_for('game') + '#challenges')
+
+    ch_prog = player.setdefault('weekly_challenges_progress', {})
+    prog = ch_prog.get(ch_id, {})
+
+    if prog.get('claimed'):
+        add_message('Challenge already claimed.', 'var(--text-dim)')
+        return redirect(url_for('game') + '#challenges')
+
+    count = prog.get('count', 0)
+    target = ch_def['target']
+    if count < target:
+        add_message(f'Challenge not yet completed ({count}/{target}).', 'var(--red)')
+        return redirect(url_for('game') + '#challenges')
+
+    exp = ch_def.get('reward_exp', 0)
+    gold = ch_def.get('reward_gold', 0)
+    player['gold'] += gold
+    leveled = gain_experience(player, exp)
+    ch_prog[ch_id]['claimed'] = True
+
+    add_message(f'Challenge Complete: {ch_def["name"]}!', 'var(--gold)')
+    add_message(f'Reward: +{exp} EXP, +{gold} gold.', 'var(--text-light)')
+    if leveled:
+        add_message(f'Level Up! You are now level {player["level"]}!', 'var(--gold)')
+
+    save_player(player)
+    return redirect(url_for('game') + '#challenges')
 
 
 # ─── Your Land Routes ────────────────────────────────────────────────────────
@@ -1364,6 +1814,46 @@ def land_buy_pet():
     return redirect(url_for('game') + '#land')
 
 
+# ─── Training (Your Land) ─────────────────────────────────────────────────────
+
+
+@app.route('/action/land/train', methods=['POST'])
+def land_train():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    if session.get('current_area') != 'your_land':
+        add_message('You can only train at Your Land.', 'var(--red)')
+        return redirect(url_for('game'))
+
+    training_key = request.form.get('training_key', '')
+    option = TRAINING_OPTIONS.get(training_key)
+    if not option:
+        add_message('Unknown training option.', 'var(--red)')
+        return redirect(url_for('game') + '#land')
+
+    cost = option['cost']
+    if player['gold'] < cost:
+        add_message(f'Not enough gold. Training costs {cost} gold.', 'var(--red)')
+        save_player(player)
+        return redirect(url_for('game') + '#land')
+
+    player['gold'] -= cost
+    stat = option['stat']
+    gain = option['gain']
+    player[stat] = player.get(stat, 0) + gain
+    # If training max_hp, also restore current hp a bit
+    if stat == 'max_hp':
+        player['hp'] = min(player['hp'] + gain, player['max_hp'])
+    elif stat == 'max_mp':
+        player['mp'] = min(player['mp'] + gain, player['max_mp'])
+
+    add_message(f'{option["label"]} complete! +{gain} {stat.replace("max_","").upper()} (cost: {cost}g)', 'var(--green-bright)')
+    save_player(player)
+    return redirect(url_for('game') + '#land')
+
+
 # ─── Battle Routes ────────────────────────────────────────────────────────────
 
 
@@ -1382,6 +1872,16 @@ def battle():
     weapon = player.get('equipment', {}).get('weapon')
     available_spells = get_available_spells(weapon, GAME_DATA['items'], GAME_DATA['spells'])
 
+    # Status effects
+    player_effects = session.get('battle_player_effects', {})
+    enemy_effects = session.get('battle_enemy_effects', {})
+
+    # Boss start dialogue (shown once)
+    boss_dialogue = None
+    if enemy.get('is_boss'):
+        boss_key = enemy.get('key', '')
+        boss_dialogue = get_boss_dialogue(boss_key, 'start')
+
     return render_template(
         'battle.html',
         player=player,
@@ -1389,6 +1889,9 @@ def battle():
         battle_log=battle_log[-14:],
         usable_items=usable_items,
         available_spells=available_spells,
+        player_effects=player_effects,
+        enemy_effects=enemy_effects,
+        boss_dialogue=boss_dialogue,
     )
 
 
@@ -1406,6 +1909,25 @@ def battle_spell():
     available_spells = get_available_spells(weapon, items_data, spells_data)
     available_names = [s['name'] for s in available_spells]
     log = session.get('battle_log', [])
+    player_effects = session.get('battle_player_effects', {})
+    enemy_effects = session.get('battle_enemy_effects', {})
+
+    # Process effects at start of turn
+    stunned = process_turn_effects(player, player_effects, log, 'You')
+    session['battle_player_effects'] = player_effects
+    process_turn_effects(enemy, enemy_effects, log, enemy['name'])
+    session['battle_enemy_effects'] = enemy_effects
+
+    if player['hp'] <= 0:
+        return _handle_defeat(player, enemy, log)
+    if enemy.get('hp', 1) <= 0:
+        return _handle_victory(player, enemy, log)
+
+    if stunned:
+        session['battle_log'] = log
+        session['battle_enemy'] = enemy
+        save_player(player)
+        return redirect(url_for('battle'))
 
     if spell_name not in available_names:
         log.append('That spell is unavailable with your current weapon.')
@@ -1430,14 +1952,26 @@ def battle_spell():
         return _handle_victory(player, enemy, log)
 
     e_dmg = max(1, enemy['attack'] - player['defense'] + random.randint(-2, 4))
+    # Apply shield effect
+    if 'shield' in player_effects:
+        absorb = player_effects['shield'].get('data', {}).get('absorb_amount', 0)
+        reduction = min(absorb, e_dmg)
+        e_dmg = max(0, e_dmg - reduction)
+        if reduction > 0:
+            log.append(f'Your shield absorbs {reduction} damage!')
     player['hp'] = max(0, player['hp'] - e_dmg)
-    log.append(f'The {enemy["name"]} strikes back for {e_dmg} damage!')
+    if e_dmg > 0:
+        log.append(f'The {enemy["name"]} strikes back for {e_dmg} damage!')
+    else:
+        log.append(f'The {enemy["name"]} attacks but your shield holds!')
 
     if player['hp'] <= 0:
         return _handle_defeat(player, enemy, log)
 
     session['battle_log'] = log
     session['battle_enemy'] = enemy
+    session['battle_player_effects'] = player_effects
+    session['battle_enemy_effects'] = enemy_effects
     save_player(player)
     return redirect(url_for('battle'))
 
@@ -1450,28 +1984,59 @@ def battle_attack():
         return redirect(url_for('game'))
 
     log = session.get('battle_log', [])
+    player_effects = session.get('battle_player_effects', {})
+    enemy_effects = session.get('battle_enemy_effects', {})
 
-    p_dmg = max(1, player['attack'] - enemy['defense'] + random.randint(-3, 6))
-    crit = random.random() < 0.10
-    if crit:
-        p_dmg = int(p_dmg * 1.6)
-        log.append(f'CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy["name"]}!')
-    else:
-        log.append(f'You attack the {enemy["name"]} for {p_dmg} damage.')
-    enemy['hp'] = max(0, enemy['hp'] - p_dmg)
-
-    if enemy['hp'] <= 0:
-        return _handle_victory(player, enemy, log)
-
-    e_dmg = max(1, enemy['attack'] - player['defense'] + random.randint(-2, 4))
-    player['hp'] = max(0, player['hp'] - e_dmg)
-    log.append(f'The {enemy["name"]} strikes you for {e_dmg} damage.')
+    # Process effects at start of turn
+    stunned = process_turn_effects(player, player_effects, log, 'You')
+    process_turn_effects(enemy, enemy_effects, log, enemy['name'])
 
     if player['hp'] <= 0:
+        session['battle_player_effects'] = player_effects
+        session['battle_enemy_effects'] = enemy_effects
+        return _handle_defeat(player, enemy, log)
+    if enemy.get('hp', 1) <= 0:
+        session['battle_player_effects'] = player_effects
+        session['battle_enemy_effects'] = enemy_effects
+        return _handle_victory(player, enemy, log)
+
+    if not stunned:
+        p_dmg = max(1, player['attack'] - enemy['defense'] + random.randint(-3, 6))
+        crit = random.random() < 0.10
+        if crit:
+            p_dmg = int(p_dmg * 1.6)
+            log.append(f'CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy["name"]}!')
+        else:
+            log.append(f'You attack the {enemy["name"]} for {p_dmg} damage.')
+        enemy['hp'] = max(0, enemy['hp'] - p_dmg)
+
+        if enemy['hp'] <= 0:
+            session['battle_player_effects'] = player_effects
+            session['battle_enemy_effects'] = enemy_effects
+            return _handle_victory(player, enemy, log)
+
+    e_dmg = max(1, enemy['attack'] - player['defense'] + random.randint(-2, 4))
+    if 'shield' in player_effects:
+        absorb = player_effects['shield'].get('data', {}).get('absorb_amount', 0)
+        reduction = min(absorb, e_dmg)
+        e_dmg = max(0, e_dmg - reduction)
+        if reduction > 0:
+            log.append(f'Your shield absorbs {reduction} damage!')
+    player['hp'] = max(0, player['hp'] - e_dmg)
+    if e_dmg > 0:
+        log.append(f'The {enemy["name"]} strikes you for {e_dmg} damage.')
+    else:
+        log.append(f'The {enemy["name"]} attacks but your shield holds!')
+
+    if player['hp'] <= 0:
+        session['battle_player_effects'] = player_effects
+        session['battle_enemy_effects'] = enemy_effects
         return _handle_defeat(player, enemy, log)
 
     session['battle_enemy'] = enemy
     session['battle_log'] = log
+    session['battle_player_effects'] = player_effects
+    session['battle_enemy_effects'] = enemy_effects
     save_player(player)
     return redirect(url_for('battle'))
 
@@ -1484,6 +2049,22 @@ def battle_defend():
         return redirect(url_for('game'))
 
     log = session.get('battle_log', [])
+    player_effects = session.get('battle_player_effects', {})
+    enemy_effects = session.get('battle_enemy_effects', {})
+
+    # Process effects at start of turn
+    process_turn_effects(player, player_effects, log, 'You')
+    process_turn_effects(enemy, enemy_effects, log, enemy['name'])
+
+    if player['hp'] <= 0:
+        session['battle_player_effects'] = player_effects
+        session['battle_enemy_effects'] = enemy_effects
+        return _handle_defeat(player, enemy, log)
+    if enemy.get('hp', 1) <= 0:
+        session['battle_player_effects'] = player_effects
+        session['battle_enemy_effects'] = enemy_effects
+        return _handle_victory(player, enemy, log)
+
     log.append('You brace yourself, raising your guard.')
     e_dmg = max(0, enemy['attack'] - int(player['defense'] * 2) + random.randint(-2, 2))
     player['hp'] = max(0, player['hp'] - e_dmg)
@@ -1494,10 +2075,14 @@ def battle_defend():
         log.append(f'You block the {enemy["name"]}\'s attack completely!')
 
     if player['hp'] <= 0:
+        session['battle_player_effects'] = player_effects
+        session['battle_enemy_effects'] = enemy_effects
         return _handle_defeat(player, enemy, log)
 
     session['battle_enemy'] = enemy
     session['battle_log'] = log
+    session['battle_player_effects'] = player_effects
+    session['battle_enemy_effects'] = enemy_effects
     save_player(player)
     return redirect(url_for('battle'))
 
@@ -1510,6 +2095,8 @@ def battle_use_item():
         return redirect(url_for('game'))
 
     log = session.get('battle_log', [])
+    player_effects = session.get('battle_player_effects', {})
+    enemy_effects = session.get('battle_enemy_effects', {})
     item_name = request.form.get('item', '')
 
     if item_name not in player['inventory']:
@@ -1535,14 +2122,22 @@ def battle_use_item():
             log.append(f'You use the {item_name}, regaining {heal} HP.')
 
         e_dmg = max(1, enemy['attack'] - player['defense'] + random.randint(-1, 3))
+        if 'shield' in player_effects:
+            absorb = player_effects['shield'].get('data', {}).get('absorb_amount', 0)
+            reduction = min(absorb, e_dmg)
+            e_dmg = max(0, e_dmg - reduction)
         player['hp'] = max(0, player['hp'] - e_dmg)
         log.append(f'The {enemy["name"]} seizes the moment and strikes for {e_dmg} damage.')
 
     if player['hp'] <= 0:
+        session['battle_player_effects'] = player_effects
+        session['battle_enemy_effects'] = enemy_effects
         return _handle_defeat(player, enemy, log)
 
     session['battle_enemy'] = enemy
     session['battle_log'] = log
+    session['battle_player_effects'] = player_effects
+    session['battle_enemy_effects'] = enemy_effects
     save_player(player)
     return redirect(url_for('battle'))
 
@@ -1560,6 +2155,8 @@ def battle_flee():
         log.append('You break away from combat and escape!')
         add_message(f'You fled from the {enemy["name"]}.', 'var(--wood-light)')
         session.pop('battle_enemy', None)
+        session.pop('battle_player_effects', None)
+        session.pop('battle_enemy_effects', None)
         session['battle_log'] = []
         save_player(player)
         return redirect(url_for('game'))
@@ -1581,6 +2178,19 @@ def _handle_victory(player, enemy, log):
     log.append(f'The {enemy["name"]} falls! Victory!')
     exp = enemy.get('exp_reward', enemy.get('experience_reward', 30))
     gold = enemy.get('gold_reward', 10)
+
+    # Apply weather bonuses
+    current_weather = session.get('current_weather', 'sunny')
+    exp_bonus_pct, gold_bonus_pct = get_weather_bonuses(current_weather)
+    if exp_bonus_pct > 0:
+        bonus_exp = int(exp * exp_bonus_pct)
+        exp += bonus_exp
+        log.append(f'Weather bonus: +{bonus_exp} EXP ({current_weather.title()})!')
+    if gold_bonus_pct > 0:
+        bonus_gold = int(gold * gold_bonus_pct)
+        gold += bonus_gold
+        log.append(f'Weather bonus: +{bonus_gold} gold ({current_weather.title()})!')
+
     log.append(f'You gain {exp} experience and {gold} gold.')
 
     player['gold'] += gold
@@ -1604,6 +2214,19 @@ def _handle_victory(player, enemy, log):
     enemy_name = enemy.get('name', '')
     update_quest_kills(enemy_key, enemy_name)
 
+    # Update weekly challenges
+    update_weekly_challenge(player, 'kill_count', 1)
+    if enemy.get('is_boss'):
+        update_weekly_challenge(player, 'boss_kill', 1)
+        # Boss defeat dialogue
+        boss_key = enemy.get('key', '')
+        defeat_dialogue = get_boss_dialogue(boss_key, 'defeat')
+        if defeat_dialogue:
+            log.append(f'"{defeat_dialogue}"')
+
+    # Clear status effects
+    session.pop('battle_player_effects', None)
+    session.pop('battle_enemy_effects', None)
     session['battle_log'] = log
     session['battle_enemy'] = None
     save_player(player)
@@ -1627,6 +2250,8 @@ def _handle_defeat(player, enemy, log):
     add_message(f'You were defeated by the {enemy["name"]}.', 'var(--red)')
     add_message('You recover with a fraction of your health.', 'var(--text-dim)')
 
+    session.pop('battle_player_effects', None)
+    session.pop('battle_enemy_effects', None)
     session['battle_log'] = log
     session['battle_enemy'] = None
     save_player(player)
@@ -1649,7 +2274,9 @@ def api_save():
         'completed_missions': session.get('completed_missions', []),
         'visited_areas': session.get('visited_areas', []),
         'quest_progress': session.get('quest_progress', {}),
-        'save_version': '5.0',
+        'seen_cutscenes': session.get('seen_cutscenes', []),
+        'current_weather': session.get('current_weather', 'sunny'),
+        'save_version': '6.0',
     }
 
     player_name = (player.get('name') or 'save').replace(' ', '_')
@@ -1663,7 +2290,6 @@ def api_save():
 
 @app.route('/api/load', methods=['POST'])
 def api_load():
-    # Accept encrypted .olsave file upload (multipart) or raw binary body
     data = None
     if request.files.get('save_file'):
         raw_bytes = request.files['save_file'].read()
@@ -1678,7 +2304,6 @@ def api_load():
         except Exception as e:
             return jsonify({'error': str(e)}), 400
     else:
-        # Backward compatibility: plain JSON body
         data = request.get_json(force=True, silent=True) or {}
 
     if not data:
@@ -1688,17 +2313,19 @@ def api_load():
     if not player or not player.get('name'):
         return jsonify({'error': 'Invalid save file: missing player data.'}), 400
 
-    # Ensure equipment has all slots
-    if 'equipment' not in player:
-        player['equipment'] = {}
-    for slot in ('weapon', 'armor', 'offhand', 'accessory'):
-        player['equipment'].setdefault(slot, None)
+    _ensure_equipment_slots(player)
+    # Initialize new fields if missing (backward compatibility)
+    player.setdefault('game_ticks', 0)
+    player.setdefault('weekly_challenges_progress', {})
+    player.setdefault('boss_cooldowns', {})
 
     session['player'] = player
     session['current_area'] = data.get('current_area', 'starting_village')
     session['completed_missions'] = data.get('completed_missions', [])
     session['visited_areas'] = data.get('visited_areas', [session['current_area']])
     session['quest_progress'] = data.get('quest_progress', {})
+    session['seen_cutscenes'] = data.get('seen_cutscenes', [])
+    session['current_weather'] = data.get('current_weather', 'sunny')
     session['messages'] = []
     session.modified = True
     return jsonify({'ok': True, 'player_name': player.get('name')})
@@ -1820,7 +2447,6 @@ def dungeon_room():
     dungeon = active.get('dungeon', {})
     current_challenge = active.get('current_challenge')
 
-    # If interactive room and no challenge set yet, generate it
     room_type = room.get('type', 'empty')
     if room_type in ('question', 'multi_choice') and not current_challenge:
         dungeons_data = GAME_DATA.get('dungeons', {})
@@ -1870,6 +2496,8 @@ def dungeon_proceed():
             enemy = result['enemy']
             session['battle_enemy'] = enemy
             session['battle_log'] = [f'A {enemy.get("name", "enemy")} confronts you in the dungeon!']
+            session['battle_player_effects'] = {}
+            session['battle_enemy_effects'] = {}
             active['room_index'] = idx + 1
             active['current_challenge'] = None
             session['active_dungeon'] = active
@@ -1911,7 +2539,6 @@ def dungeon_proceed():
                 'is_boss': True,
             }
         else:
-            # Generic boss
             lvl = player.get('level', 1)
             enemy = {
                 'key': 'dungeon_boss',
@@ -1926,8 +2553,13 @@ def dungeon_proceed():
                 'loot_table': [],
                 'is_boss': True,
             }
+        dialogue = get_boss_dialogue(boss_id, 'start')
         session['battle_enemy'] = enemy
         session['battle_log'] = [f'The guardian {enemy["name"]} awakens! This is the final battle!']
+        if dialogue:
+            session['battle_log'].append(f'"{dialogue}"')
+        session['battle_player_effects'] = {}
+        session['battle_enemy_effects'] = {}
         active['room_index'] = idx + 1
         active['current_challenge'] = None
         session['active_dungeon'] = active
@@ -1935,7 +2567,6 @@ def dungeon_proceed():
         return redirect(url_for('battle'))
 
     elif room_type == 'question':
-        # Question room — redirect back to show it
         add_message('A riddle challenge awaits in the chamber!', 'var(--gold)')
         return redirect(url_for('dungeon_room'))
 
@@ -1972,7 +2603,6 @@ def dungeon_answer():
     for msg in result.get('messages', []):
         add_message(msg['text'], msg.get('color', 'var(--text-light)'))
 
-    # Advance room regardless of success/fail
     active['room_index'] = active.get('room_index', 0) + 1
     active['current_challenge'] = None
     session['active_dungeon'] = active
@@ -2020,6 +2650,8 @@ def dungeon_complete():
         for msg in result.get('messages', []):
             add_message(msg['text'], msg.get('color', 'var(--gold)'))
         session.pop('active_dungeon', None)
+        # Update weekly challenge
+        update_weekly_challenge(player, 'dungeon_complete', 1)
         save_player(player)
 
     return redirect(url_for('game'))

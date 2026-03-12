@@ -43,9 +43,24 @@
 
                 {% if player.pet %}
                 <div style="margin-top:8px;font-size:13px;color:var(--gold);">
-                    Companion: {{ player.pet.replace('_',' ').title() }}
+                    Pet: {{ player.pet.replace('_',' ').title() }}
                 </div>
                 {% endif %}
+
+                <!-- Time & Weather -->
+                <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:10px;font-size:13px;">
+                    <div style="flex:1;text-align:center;">
+                        <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Time</div>
+                        <div style="color:var(--text-light);">{{ game_time_icon }} {{ game_time }}</div>
+                    </div>
+                    <div style="flex:1;text-align:center;">
+                        <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Weather</div>
+                        <div style="color:var(--text-light);">{{ weather_icon }} {{ weather_display }}</div>
+                        {% if weather_bonus_exp > 0 or weather_bonus_gold > 0 %}
+                        <div style="font-size:11px;color:var(--green-bright);">+{{ weather_bonus_exp }}% EXP / +{{ weather_bonus_gold }}% gold</div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -85,7 +100,6 @@
             <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()" style="margin-top:4px;">Load Game</button>
             <div id="load-status" style="font-size:13px;color:var(--text-dim);display:none;margin-top:4px;"></div>
 
-            <!-- Music volume control -->
             <div class="music-control-row" style="margin-top:10px;">
                 <span class="music-label">&#9835; Music</span>
                 <input type="range" id="music-volume-slider" min="0" max="100" value="30"
@@ -122,6 +136,13 @@
                 {% endif %}
             </button>
             <button class="tab-btn" data-tab="missions">Quests ({{ completed_count }})</button>
+            <button class="tab-btn" data-tab="challenges">
+                Challenges
+                {% set ready_count = challenges | selectattr('ready') | list | length %}
+                {% if ready_count > 0 %}
+                <span class="tab-badge" style="background:var(--gold);">{{ ready_count }}</span>
+                {% endif %}
+            </button>
         </nav>
 
         <!-- ── Explore ── -->
@@ -159,6 +180,32 @@
                 </div>
             </div>
 
+            <!-- Manual Boss Challenge -->
+            {% if available_bosses %}
+            <div class="panel" style="margin-bottom:14px;">
+                <div class="panel-title">⚔ Boss Challenges</div>
+                <div class="panel-body">
+                    <p class="panel-note">Challenge a boss directly. Each boss has an 8-hour cooldown after defeat.</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                        {% for boss in available_bosses %}
+                        <div style="background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;padding:12px;min-width:180px;">
+                            <div style="font-size:15px;font-weight:600;color:var(--red);margin-bottom:6px;">{{ boss.name }}</div>
+                            {% if boss.on_cooldown %}
+                            <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">Cooldown: {{ boss.cooldown_str }}</div>
+                            <button class="btn btn-small btn-secondary" disabled>On Cooldown</button>
+                            {% else %}
+                            <form method="post" action="/action/challenge_boss">
+                                <input type="hidden" name="boss_key" value="{{ boss.key }}">
+                                <button type="submit" class="btn btn-small btn-danger">Challenge!</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <div class="panel">
                 <div class="panel-title">Chronicle</div>
                 <div class="panel-body message-log" id="game-log">
@@ -179,9 +226,9 @@
                 <div class="panel-title">Equipment</div>
                 <div class="panel-body">
                     <div class="equip-grid">
-                        {% for slot in ['weapon','armor','offhand','accessory'] %}
+                        {% for slot in ['weapon','armor','offhand','accessory_1','accessory_2','accessory_3'] %}
                         <div class="equip-slot-card">
-                            <div class="equip-slot-label">{{ slot.title() }}</div>
+                            <div class="equip-slot-label">{{ slot.replace('_',' ').title() }}</div>
                             {% if equipped_details.get(slot) %}
                             {% set eq = equipped_details[slot] %}
                             <div class="equip-slot-item rarity-{{ eq.rarity }}">{{ eq.name }}</div>
@@ -273,8 +320,17 @@
                                     {{ conn.name }}
                                     {% if conn.visited %}<span class="visited-badge">Visited</span>{% endif %}
                                 </div>
-                                <div class="conn-danger {% if conn.has_danger %}danger{% else %}safe{% endif %}">
-                                    {% if conn.has_danger %}Dangerous{% else %}Peaceful{% endif %}
+                                <div style="display:flex;gap:10px;align-items:center;margin-top:3px;">
+                                    <div class="conn-danger {% if conn.has_danger %}danger{% else %}safe{% endif %}">
+                                        {% if conn.has_danger %}Dangerous{% else %}Peaceful{% endif %}
+                                    </div>
+                                    {% if conn.difficulty > 0 %}
+                                    <div style="font-size:12px;color:var(--text-dim);">
+                                        Difficulty: <span style="color:{% if conn.difficulty <= 2 %}var(--green-bright){% elif conn.difficulty <= 3 %}var(--gold){% else %}var(--red){% endif %}">
+                                            {% for i in range(conn.difficulty) %}★{% endfor %}{% for i in range(5 - conn.difficulty) %}☆{% endfor %}
+                                        </span>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <form method="post" action="/action/travel">
@@ -334,9 +390,30 @@
                         Comfort Points: <span class="comfort-num">{{ land_data.comfort_points }}</span>
                     </div>
                     <p style="font-size:14px;color:var(--text-dim);margin-top:8px;">
-                        Build structures, plant crops, and care for a companion on your personal plot of land.
-                        Comfort points improve your rest quality.
+                        Build structures, plant crops, train your body, and care for a companion on your personal plot of land.
                     </p>
+                </div>
+            </div>
+
+            <!-- Training -->
+            <div class="panel land-section">
+                <div class="panel-title">🏋 Training Grounds</div>
+                <div class="panel-body">
+                    <p class="panel-note">Train your attributes to grow stronger. Each session costs gold.</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                        {% for tk, opt in land_data.training_options.items() %}
+                        <div style="background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;padding:10px;min-width:160px;">
+                            <div style="font-size:14px;font-weight:600;color:var(--text-light);margin-bottom:4px;">{{ opt.label }}</div>
+                            <div style="font-size:12px;color:var(--green-bright);margin-bottom:6px;">+{{ opt.gain }} {{ opt.stat.replace('max_','').upper() }}</div>
+                            <div style="font-size:12px;color:var(--gold);margin-bottom:8px;">Cost: {{ opt.cost }}g</div>
+                            <form method="post" action="/action/land/train">
+                                <input type="hidden" name="training_key" value="{{ tk }}">
+                                <button type="submit" class="btn btn-xsmall btn-primary"
+                                    {% if player.gold < opt.cost %}disabled{% endif %}>Train</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
 
@@ -553,10 +630,6 @@
                     <span class="panel-subtitle">The Rusty Tankard &bull; Your gold: {{ player.gold }}g</span>
                 </div>
                 <div class="panel-body">
-                    <p class="comp-intro">
-                        Seasoned adventurers await your call. Hire companions to boost your stats and fight at your side.
-                        Your party can hold up to <strong>4</strong> companions.
-                    </p>
                     <div class="companion-grid">
                         {% for comp in companions_available %}
                         <div class="companion-card rank-{{ comp.rank }} {% if comp.already_hired %}comp-hired{% endif %}">
@@ -657,6 +730,89 @@
             </div>
         </div>
 
+        <!-- ── Challenges ── -->
+        <div class="tab-content" id="tab-challenges">
+            <div class="panel">
+                <div class="panel-title">
+                    Weekly Challenges
+                    <span class="panel-subtitle">Complete for bonus EXP &amp; gold</span>
+                </div>
+                <div class="panel-body">
+                    {% if challenges %}
+                    {% for ch in challenges %}
+                    <div class="quest-card {% if ch.claimed %}quest-locked{% elif ch.ready %}quest-ready{% else %}quest-active{% endif %}"
+                         style="{% if ch.claimed %}opacity:0.6;{% endif %}">
+                        <div class="quest-header">
+                            <div class="quest-name">
+                                {% if ch.claimed %}
+                                <span class="quest-locked-badge" style="background:var(--text-dim);">CLAIMED</span>
+                                {% elif ch.ready %}
+                                <span class="quest-ready-badge">READY TO CLAIM</span>
+                                {% endif %}
+                                {{ ch.name }}
+                            </div>
+                            <div class="quest-type-badge quest-type-{{ ch.type }}">{{ ch.type.replace('_',' ') }}</div>
+                        </div>
+                        <div class="quest-desc">{{ ch.description }}</div>
+
+                        {% if not ch.claimed %}
+                        <div class="quest-progress-list">
+                            <div class="quest-progress-item">
+                                <div class="quest-progress-label">Progress: {{ ch.count }}/{{ ch.target }}</div>
+                                <div class="bar-track quest-progress-bar">
+                                    <div class="bar-fill bar-exp" style="width:{{ [(ch.count / ch.target * 100)|int, 100]|min }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="quest-rewards">
+                            <span class="quest-reward-exp">+{{ ch.reward_exp }} EXP</span>
+                            <span class="quest-reward-gold">+{{ ch.reward_gold }}g</span>
+                        </div>
+
+                        {% if ch.ready %}
+                        <form method="post" action="/action/claim_challenge" style="margin-top:8px;">
+                            <input type="hidden" name="challenge_id" value="{{ ch.id }}">
+                            <button type="submit" class="btn btn-small btn-primary">Claim!</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="empty-notice">No challenges available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
     </main>
 </div>
+
+<!-- Cutscene Modal -->
+{% if pending_cutscene %}
+<div id="cutscene-overlay" style="
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.85);z-index:9999;
+    display:flex;align-items:center;justify-content:center;">
+    <div style="
+        background:var(--panel-bg);border:2px solid var(--gold);border-radius:12px;
+        max-width:560px;width:90%;padding:32px;text-align:center;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:12px;">Cutscene</div>
+        <div id="cutscene-text" style="font-size:17px;color:var(--text-light);line-height:1.6;margin-bottom:24px;">
+            {{ pending_cutscene.content.text }}
+        </div>
+        <button onclick="dismissCutscene()" class="btn btn-primary">Continue</button>
+    </div>
+</div>
+<script>
+function dismissCutscene() {
+    fetch('/api/dismiss_cutscene', {method:'POST'})
+        .finally(() => {
+            document.getElementById('cutscene-overlay').style.display = 'none';
+        });
+}
+</script>
+{% endif %}
+
 {% endblock %}

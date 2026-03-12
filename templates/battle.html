@@ -4,12 +4,22 @@
 
     <div class="battle-header">
         <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
-            Combat
+            {% if enemy.is_boss %}⚔ BOSS BATTLE{% else %}Combat{% endif %}
         </div>
-        <div style="font-size:20px;font-weight:600;color:var(--red);">
+        <div style="font-size:20px;font-weight:600;color:{{ 'var(--gold)' if enemy.is_boss else 'var(--red)' }};">
             {{ enemy.name }}
         </div>
     </div>
+
+    <!-- Boss dialogue banner -->
+    {% if boss_dialogue and enemy.is_boss %}
+    <div style="
+        background:rgba(220,50,50,0.10);border:1px solid var(--red);border-radius:8px;
+        padding:12px 18px;margin:0 0 14px 0;text-align:center;
+        font-style:italic;color:var(--red);font-size:15px;">
+        "{{ boss_dialogue }}"
+    </div>
+    {% endif %}
 
     <div class="battle-arena">
         <!-- Player panel -->
@@ -36,6 +46,18 @@
                     <div class="stat-mini"><span>DEF</span><strong>{{ player.defense }}</strong></div>
                     <div class="stat-mini"><span>SPD</span><strong>{{ player.speed }}</strong></div>
                 </div>
+                <!-- Player Status Effects -->
+                {% if player_effects %}
+                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                    {% for eff_key, eff_info in player_effects.items() %}
+                    <div style="
+                        background:rgba(100,200,100,0.15);border:1px solid var(--green-bright);
+                        border-radius:4px;padding:2px 6px;font-size:11px;color:var(--green-bright);">
+                        {{ eff_key.replace('_',' ').title() }} ({{ eff_info.turns }}t)
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -56,6 +78,18 @@
                     <div class="stat-mini"><span>DEF</span><strong>{{ enemy.defense }}</strong></div>
                     <div class="stat-mini"><span>SPD</span><strong>{{ enemy.speed }}</strong></div>
                 </div>
+                <!-- Enemy Status Effects -->
+                {% if enemy_effects %}
+                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                    {% for eff_key, eff_info in enemy_effects.items() %}
+                    <div style="
+                        background:rgba(220,80,80,0.15);border:1px solid var(--red);
+                        border-radius:4px;padding:2px 6px;font-size:11px;color:var(--red);">
+                        {{ eff_key.replace('_',' ').title() }} ({{ eff_info.turns }}t)
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -65,7 +99,7 @@
         <div class="panel-title">Battle Chronicle</div>
         <div class="panel-body message-log battle-log" id="battle-log">
             {% for line in battle_log %}
-            <div class="log-entry {% if 'CRITICAL' in line %}log-crit{% elif 'strikes you' in line or 'cuts you' in line %}log-damage{% else %}log-normal{% endif %}">
+            <div class="log-entry {% if 'CRITICAL' in line %}log-crit{% elif 'strikes you' in line or 'cuts you' in line %}log-damage{% elif 'defeated' in line.lower() or 'falls' in line.lower() %}log-victory{% else %}log-normal{% endif %}">
                 {{ line }}
             </div>
             {% endfor %}
