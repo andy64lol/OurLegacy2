@@ -807,7 +807,21 @@ class Game:
             )
 
     def battle(self, enemy: Enemy):
+        # Check if this is a boss battle
+        is_boss = isinstance(enemy, Boss)
+        
+        # Disable UI during battle
+        from utilities.gui import is_gui_mode, _main_window
+        if is_gui_mode() and _main_window:
+            _main_window.start_battle(is_boss)
+        
+        # Run the battle
         self.battle_system.battle(enemy)
+        
+        # Re-enable UI after battle
+        if is_gui_mode() and _main_window:
+            victory = self.player.is_alive() if self.player else False
+            _main_window.end_battle(victory)
 
     def player_turn(self, enemy: Enemy) -> bool:
         return self.battle_system.player_turn(enemy)
@@ -2334,18 +2348,17 @@ class Game:
             ExploreView, CharacterView, InventoryView, MissionsView, ShopView,
             TavernView, MarketView, DungeonsView, HousingView, FarmView,
             TrainingView, TravelView, BossView, CompanionsView, ChallengesView,
-            load_game_font)
-
-        # Load game font (can be done before window)
-        load_game_font()
+            load_game_font, load_game_title_images)
 
         window = GameWindow(title="Our Legacy", width=1200, height=800)
         window.game = self
         set_main_window(window)
         set_gui_mode(True)
 
+        # Load game font AFTER window creation (requires tkinter root)
+        load_game_font(window)
+        
         # Load game title images AFTER window is created (requires tkinter root)
-        from utilities.gui import load_game_title_images
         load_game_title_images()
 
         # Redirect stdout → GUI message panel (Phase 2.1)
@@ -2403,7 +2416,11 @@ class Game:
                     window.add_message("Create or load a character first.")
                     views["welcome"].show()
                     return
-                views[view_map[action]].show()
+                # Open inventory as separate window
+                if action == "inventory":
+                    window.open_inventory_window()
+                else:
+                    views[view_map[action]].show()
 
             elif action == "alchemy":
                 if self.player:
@@ -2460,6 +2477,14 @@ class Game:
                 _refresh_status()
 
             elif action == "quit":
+                # Autosave before returning to main menu
+                self.save_load_system.save_game()
+                window.add_message("Game saved. Returning to main menu...", "#00cc00")
+                
+                # Close inventory window if open
+                window.close_inventory_window()
+                
+                # Return to welcome screen
                 sys.stdout = _orig_stdout
                 set_gui_mode(False)
                 window.destroy()

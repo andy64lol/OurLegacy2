@@ -10,84 +10,180 @@ from tkinter import messagebox
 import threading
 from datetime import datetime
 
-# Medieval color palette - Enhanced RPG-style colors with slate gray primary
-MEDIEVAL_COLORS = {
-    'bg_dark': '#0f0f14',        # Darker background
-    'bg_darker': '#08080c',      # Even darker for panels
-    'bg_light': '#1e1e28',       # Slightly lighter for cards
-    'bg_hover': '#2a2a38',       # Hover state
-    'primary_slate': '#708090',  # Slate gray - primary accent color
-    'primary_slate_light': '#8a9ba8',  # Lighter slate
-    'primary_slate_dark': '#5a6a7a',  # Darker slate
-    'accent_gold': '#c9a227',    # Rich gold
-    'accent_gold_bright': '#ffd700',  # Bright gold for highlights
-    'accent_red': '#8b1a1a',     # Deep red
-    'accent_red_bright': '#ff3333',  # Bright red for damage
-    'text_light': '#e8dcc8',     # Warm off-white
-    'text_dim': '#7a7a6a',       # Muted text
-    'text_bright': '#fff8e8',    # Bright text
-    'border_gold': '#6b5d47',    # Gold border
-    'border_dim': '#3a3a4a',     # Dim border
-    'border_slate': '#4a5a6a',   # Slate border
-    'health_red': '#cc2222',     # Health bar red
-    'health_green': '#22cc44',   # Health bar green
-    'mana_blue': '#2266cc',      # Mana bar blue
-    'mana_blue_bright': '#4488ff',  # Bright mana
-    'exp_green': '#22cc66',      # Experience green
-    'exp_purple': '#9966cc',     # Experience purple
-    'gold_yellow': '#ffcc00',    # Gold color
-    'silver': '#c0c0c0',         # Silver
-    'warning_yellow': '#ffcc00', # Warning yellow
-    'error_red': '#ff4444',      # Error red
-    'success_green': '#44cc44',  # Success green
-    'info_blue': '#4488cc',      # Info blue
+# Runescape-like Color Palette - Earthy browns, stone grays, warm accents
+PIXEL_COLORS = {
+    # Backgrounds - Earthy dark browns and stone grays (Runescape style)
+    'bg_dark': '#1a1612',        # Main dark background - dark brown
+    'bg_darker': '#0d0a08',      # Deepest background - almost black brown
+    'bg_light': '#2a2420',       # Slightly lighter panels - brown
+    'bg_hover': '#3a3430',       # Hover state - lighter brown
+    'bg_elevated': '#221e1a',    # Elevated elements - medium brown
+    
+    # Primary - Stone/slate gray (Runescape classic)
+    'primary_slate': '#5a5a5a',  # Slate gray - primary
+    'primary_slate_light': '#7a7a7a',  # Lighter slate
+    'primary_slate_dark': '#3a3a3a',  # Darker slate
+    
+    # Secondary - Bronze/gold for accents (Runescape style)
+    'accent_bronze': '#b87333',  # Bronze - secondary accent
+    'accent_bronze_dark': '#8b5a2b',  # Darker bronze
+    'accent_gold': '#ffd700',    # Gold - important items
+    'accent_gold_dark': '#b8960b',  # Darker gold
+    
+    # Classic RPG colors - Muted for Runescape feel
+    'health_red': '#cc3333',     # Red - health (muted)
+    'health_red_dark': '#991111',  # Darker red
+    'health_green': '#33cc33',   # Green - positive (muted)
+    'mana_blue': '#3366cc',      # Blue - mana (muted)
+    'mana_blue_dark': '#224499',  # Darker blue
+    'exp_purple': '#9966cc',     # Purple - experience (muted)
+    'exp_purple_dark': '#664499',  # Darker purple
+    
+    # Text colors - Warm tones
+    'text_light': '#d4c4a8',     # Main light text - warm beige
+    'text_bright': '#f0e6d2',    # Bright text - cream
+    'text_dim': '#8a8070',       # Muted text - gray brown
+    'text_bronze': '#b87333',    # Bronze text
+    'text_gold': '#ffd700',      # Gold text
+    
+    # Borders - Stone look
+    'border_bright': '#6a6050',  # Bright border - brown
+    'border_dim': '#3a342a',     # Dim border - dark brown
+    'border_bronze': '#b87333',  # Bronze border
+    'border_gold': '#ffd700',    # Gold border
+    
+    # UI Elements - Stone/slate
+    'button_bg': '#3a342a',      # Button background - brown
+    'button_hover': '#4a443a',   # Button hover - lighter brown
+    'button_border': '#6a6050',  # Button border - brown
+    'input_bg': '#1a1612',       # Input background - dark brown
+    'input_border': '#5a5040',   # Input border - brown
+    
+    # Status colors - Muted
+    'warning_yellow': '#ccaa33', # Warning yellow - muted
+    'error_red': '#cc4444',      # Error red - muted
+    'success_green': '#44cc44',  # Success green - muted
+    'info_blue': '#4488cc',      # Info blue - muted
+    
+    # Rarity colors - Classic RPG
+    'rarity_common': '#a0a0a0',  # Gray
+    'rarity_uncommon': '#50cc50',  # Green
+    'rarity_rare': '#4088cc',    # Blue
+    'rarity_epic': '#9966cc',    # Purple
+    'rarity_legendary': '#ffdd00',  # Gold
 }
 
-# Rarity colors
+# Keep old name for compatibility
+MEDIEVAL_COLORS = PIXEL_COLORS
+
+# Rarity colors - Updated for pixel theme
 RARITY_COLORS = {
-    'common': '#b0b0b0',
-    'uncommon': '#92D050',
-    'rare': '#4472C4',
-    'epic': '#9B59B6',
-    'legendary': '#FFD700',
+    'common': '#a0a0a0',
+    'uncommon': '#50ff50',
+    'rare': '#4080ff',
+    'epic': '#c040ff',
+    'legendary': '#ffdd00',
 }
 
-# ANSI color code to GUI color mapping
+# ANSI color code to GUI color mapping - Updated for pixel theme
 ANSI_TO_GUI = {
-    '\033[91m': MEDIEVAL_COLORS['accent_red_bright'],   # RED
-    '\033[92m': MEDIEVAL_COLORS['exp_green'],           # GREEN
-    '\033[93m': MEDIEVAL_COLORS['gold_yellow'],         # YELLOW
-    '\033[94m': MEDIEVAL_COLORS['mana_blue'],           # BLUE
-    '\033[95m': MEDIEVAL_COLORS['exp_purple'],          # MAGENTA
-    '\033[96m': MEDIEVAL_COLORS['mana_blue_bright'],    # CYAN
-    '\033[97m': MEDIEVAL_COLORS['text_bright'],         # WHITE
-    '\033[1m': MEDIEVAL_COLORS['text_bright'],          # BOLD
-    '\033[0m': MEDIEVAL_COLORS['text_light'],           # END
+    '\033[91m': PIXEL_COLORS['health_red'],     # RED
+    '\033[92m': PIXEL_COLORS['health_green'],   # GREEN
+    '\033[93m': PIXEL_COLORS['accent_gold'],    # YELLOW
+    '\033[94m': PIXEL_COLORS['mana_blue'],      # BLUE
+    '\033[95m': PIXEL_COLORS['exp_purple'],     # MAGENTA
+    '\033[96m': PIXEL_COLORS['mana_blue'],   # CYAN
+    '\033[97m': PIXEL_COLORS['text_bright'],    # WHITE
+    '\033[1m': PIXEL_COLORS['text_bright'],     # BOLD
+    '\033[0m': PIXEL_COLORS['text_light'],      # END
 }
 
 # Custom font settings
 GAME_FONT = None
 GAME_FONT_BOLD = None
+GAME_FONT_LARGE = None
+GAME_FONT_SMALL = None
+FONT_LOADED = False
 
 # Game title images
 GAME_TITLE_IMAGE = None
 GAME_TITLE_IMAGE_LARGE = None
 
-def load_game_font():
-    """Load the game font from assets if available."""
-    global GAME_FONT, GAME_FONT_BOLD
+def load_game_font(root=None):
+    """Load the game font from assets if available. Requires tkinter root window."""
+    global GAME_FONT, GAME_FONT_BOLD, GAME_FONT_LARGE, GAME_FONT_SMALL, FONT_LOADED
     import os
     
     font_path = 'data/assets/fonts/Game_Font_Main.ttf'
+    
+    # Always start with fallback fonts (tuples work without root)
+    GAME_FONT = ('Courier New', 14)
+    GAME_FONT_BOLD = ('Courier New', 14, 'bold')
+    GAME_FONT_LARGE = ('Courier New', 20, 'bold')
+    GAME_FONT_SMALL = ('Courier New', 11)
+    FONT_LOADED = False
+    
+    if not root:
+        print("No tkinter root provided - using fallback fonts")
+        return False
+    
     if os.path.exists(font_path):
         try:
             from tkinter import font
-            GAME_FONT = font.Font(family="Game Font", size=12)
-            GAME_FONT_BOLD = font.Font(family="Game Font", size=12, weight="bold")
+            # Try to use the font file with root
+            try:
+                GAME_FONT = font.Font(root, family=font_path, size=14)
+                GAME_FONT_BOLD = font.Font(root, family=font_path, size=14, weight="bold")
+                GAME_FONT_LARGE = font.Font(root, family=font_path, size=20, weight="bold")
+                GAME_FONT_SMALL = font.Font(root, family=font_path, size=11)
+                FONT_LOADED = True
+                print("Custom game font loaded successfully")
+                return True
+            except Exception:
+                print("Font file load failed, trying named font...")
+                pass
+            
+            # Try with named font
+            GAME_FONT = font.Font(root, family="Game Font", size=14)
+            GAME_FONT_BOLD = font.Font(root, family="Game Font", size=14, weight="bold")
+            GAME_FONT_LARGE = font.Font(root, family="Game Font", size=20, weight="bold")
+            GAME_FONT_SMALL = font.Font(root, family="Game Font", size=11)
+            FONT_LOADED = True
+            print("Named game font loaded")
             return True
-        except Exception:
+        except Exception as e:
+            print(f"Could not load game font: {e}")
             pass
+    
+    print("No custom font file found - using fallback fonts")
     return False
+
+
+def get_font(size: str = 'normal') -> tuple:
+    """Get the appropriate font - handles both Font objects and tuples."""
+    global GAME_FONT, GAME_FONT_BOLD, GAME_FONT_LARGE, GAME_FONT_SMALL, FONT_LOADED
+    
+    if FONT_LOADED and GAME_FONT is not None:
+        font_map = {
+            'small': GAME_FONT_SMALL,
+            'normal': GAME_FONT,
+            'large': GAME_FONT_LARGE,
+            'bold': GAME_FONT_BOLD,
+        }
+        font = font_map.get(size, GAME_FONT)
+        # Return as tuple for CTk compatibility if it's a Font object
+        if hasattr(font, 'actual'):
+            return (font.actual()['family'], font.actual()['size'])
+        return font
+    else:
+        # Fallback to default fonts
+        font_map = {
+            'small': ('Courier New', 11),
+            'normal': ('Courier New', 14),
+            'large': ('Courier New', 20, 'bold'),
+            'bold': ('Courier New', 14, 'bold'),
+        }
+        return font_map.get(size, ('Courier New', 14))
 
 
 def load_game_title_images():
@@ -207,7 +303,7 @@ class MedievalWindow(ctk.CTk):
 
 class MedievalButton(ctk.CTkButton):
     """
-    Medieval-themed button with ornate styling.
+    Runescape-style button with stone/slate styling.
     """
 
     def __init__(self,
@@ -215,51 +311,63 @@ class MedievalButton(ctk.CTkButton):
                  text: str = "Button",
                  command: Optional[Callable] = None,
                  size: str = "normal",
-                 use_slate: bool = True,
+                 button_type: str = "slate",  # slate, bronze, gold, danger
                  **kwargs):
         """
-        Initialize a medieval-themed button.
+        Initialize a Runescape-style button.
 
         Args:
             master: Parent widget
             text: Button text
             command: Callback function when clicked
             size: Button size ('small', 'normal', 'large')
-            use_slate: Use slate gray as primary color (default True)
+            button_type: Type of button - 'slate' (default), 'bronze', 'gold', 'danger'
         """
         font_sizes = {
-            'small': 12,
-            'normal': 14,
-            'large': 16,
+            'small': 11,
+            'normal': 13,
+            'large': 15,
         }
 
-        font_size = font_sizes.get(size, 14)
+        font_size = font_sizes.get(size, 13)
 
-        # Use slate gray as primary color
-        if use_slate:
-            super().__init__(master,
-                             text=text,
-                             command=command,
-                             fg_color=MEDIEVAL_COLORS['primary_slate'],
-                             hover_color=MEDIEVAL_COLORS['primary_slate_light'],
-                             text_color=MEDIEVAL_COLORS['text_light'],
-                             font=('Arial', font_size, 'bold'),
-                             border_width=2,
-                             border_color=MEDIEVAL_COLORS['border_slate'],
-                             corner_radius=8,
-                             **kwargs)
-        else:
-            super().__init__(master,
-                             text=text,
-                             command=command,
-                             fg_color=MEDIEVAL_COLORS['accent_red'],
-                             hover_color='#a00000',
-                             text_color=MEDIEVAL_COLORS['text_light'],
-                             font=('Arial', font_size, 'bold'),
-                             border_width=2,
-                             border_color=MEDIEVAL_COLORS['accent_gold'],
-                             corner_radius=8,
-                             **kwargs)
+        # Runescape-style button colors
+        button_configs = {
+            'slate': {
+                'fg': MEDIEVAL_COLORS['primary_slate'],
+                'hover': MEDIEVAL_COLORS['primary_slate_light'],
+                'border': MEDIEVAL_COLORS['border_bright'],
+            },
+            'bronze': {
+                'fg': MEDIEVAL_COLORS['accent_bronze'],
+                'hover': '#d4954a',
+                'border': MEDIEVAL_COLORS['accent_bronze_dark'],
+            },
+            'gold': {
+                'fg': MEDIEVAL_COLORS['accent_gold'],
+                'hover': '#ffdd44',
+                'border': MEDIEVAL_COLORS['accent_gold_dark'],
+            },
+            'danger': {
+                'fg': MEDIEVAL_COLORS['health_red'],
+                'hover': '#dd4444',
+                'border': MEDIEVAL_COLORS['health_red_dark'],
+            },
+        }
+
+        config = button_configs.get(button_type, button_configs['slate'])
+
+        super().__init__(master,
+                         text=text,
+                         command=command,
+                         fg_color=config['fg'],
+                         hover_color=config['hover'],
+                         text_color=MEDIEVAL_COLORS['text_bright'],
+                         font=('Arial', font_size, 'bold'),
+                         border_width=2,
+                         border_color=config['border'],
+                         corner_radius=4,
+                         **kwargs)
 
 
 class MedievalLabel(ctk.CTkLabel):
@@ -564,7 +672,8 @@ class TextInputDialog(ctk.CTkToplevel):
 
 class GameWindow(ctk.CTk):
     """
-    Main game window with sidebar, content area, message panel, and status bar.
+    Main game window with Runescape-style sidebar, content area, and status bar.
+    Messages are displayed in a scrollable area within the content.
     """
 
     def __init__(self,
@@ -592,22 +701,31 @@ class GameWindow(ctk.CTk):
         # Message log
         self.message_log: List[str] = []
 
+        # Battle state - when True, sidebar is disabled
+        self.battle_in_progress: bool = False
+        self.is_boss_battle: bool = False
+
         # Callback for menu commands
         self.menu_callback: Optional[Callable] = None
+
+        # Inventory window reference
+        self.inventory_window: Optional[Any] = None
 
         # Setup UI
         self.setup_ui()
 
     def setup_ui(self):
-        """Setup the main UI layout."""
+        """Setup the main UI layout - Runescape style."""
         # Main container
         self.main_container = ctk.CTkFrame(self,
                                            fg_color=MEDIEVAL_COLORS['bg_dark'])
         self.main_container.pack(fill=ctk.BOTH, expand=True)
 
-        # Left sidebar (navigation)
-        self.sidebar = MedievalFrame(self.main_container, width=200)
-        self.sidebar.pack(side=ctk.LEFT, fill=ctk.Y, padx=(0, 5))
+        # Left sidebar (navigation) - Runescape style compact
+        self.sidebar = ctk.CTkFrame(self.main_container,
+                                    width=180,
+                                    fg_color=MEDIEVAL_COLORS['bg_darker'])
+        self.sidebar.pack(side=ctk.LEFT, fill=ctk.Y, padx=(0, 3))
         self.sidebar.pack_propagate(False)
 
         # Main content area
@@ -616,17 +734,26 @@ class GameWindow(ctk.CTk):
         self.content_frame.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True)
 
         # Status bar at bottom
-        self.status_bar = MedievalFrame(self.content_frame, height=60)
-        self.status_bar.pack(side=ctk.BOTTOM, fill=ctk.X, pady=(5, 0))
+        self.status_bar = ctk.CTkFrame(self.content_frame,
+                                       height=50,
+                                       fg_color=MEDIEVAL_COLORS['bg_elevated'])
+        self.status_bar.pack(side=ctk.BOTTOM, fill=ctk.X, pady=(3, 0))
 
-        # Message panel
-        self.message_panel = MedievalScrollableFrame(self.content_frame,
-                                                     height=150)
-        self.message_panel.pack(side=ctk.BOTTOM, fill=ctk.X, pady=(5, 0))
-
-        # Game content area (middle)
-        self.game_content = MedievalFrame(self.content_frame)
+        # Game content area (top) - takes most of the space
+        self.game_content = ctk.CTkFrame(self.content_frame,
+                                         fg_color=MEDIEVAL_COLORS['bg_dark'])
         self.game_content.pack(side=ctk.TOP, fill=ctk.BOTH, expand=True)
+
+        # Message log area (middle) - scrollable, Runescape style
+        self.message_frame = ctk.CTkFrame(self.content_frame,
+                                          height=180,
+                                          fg_color=MEDIEVAL_COLORS['bg_light'])
+        self.message_frame.pack(side=ctk.BOTTOM, fill=ctk.X, pady=(3, 0))
+        
+        # Message panel - scrollable text area
+        self.message_panel = ctk.CTkScrollableFrame(self.message_frame,
+                                                    fg_color=MEDIEVAL_COLORS['bg_light'])
+        self.message_panel.pack(fill=ctk.BOTH, expand=True, padx=3, pady=3)
 
         # Setup sidebar
         self.setup_sidebar()
@@ -635,44 +762,100 @@ class GameWindow(ctk.CTk):
         self.setup_status_bar()
 
     def setup_sidebar(self):
-        """Setup the sidebar navigation."""
-        # Title
+        """Setup the sidebar navigation - Runescape style with grouped buttons."""
+        # Title with bronze color
         title_label = MedievalLabel(self.sidebar,
-                                    text="Our Legacy 2",
+                                    text="Our Legacy",
                                     style='title')
-        title_label.pack(pady=20, padx=10)
+        title_label.pack(pady=(15, 10), padx=10)
 
-        # Navigation buttons
+        # Section: Action (Travel + Explore together)
+        self._add_section_header("Action")
+        
+        # Travel and Explore together
         self.nav_buttons = {}
+        
+        explore_btn = MedievalButton(self.sidebar,
+                                     text="Explore / Travel",
+                                     command=self.on_explore,
+                                     size='normal',
+                                     button_type='bronze')
+        explore_btn.pack(pady=4, padx=8, fill=ctk.X)
+        self.nav_buttons["Explore"] = explore_btn
 
-        nav_items = [
-            ("Explore", self.on_explore),
+        # Section: Character
+        self._add_section_header("Character")
+
+        char_items = [
             ("Character", self.on_character),
-            ("Travel", self.on_travel),
             ("Inventory", self.on_inventory),
             ("Missions", self.on_missions),
-            ("Boss", self.on_boss),
-            ("Tavern", self.on_tavern),
-            ("Shop", self.on_shop),
-            ("Alchemy", self.on_alchemy),
-            ("Market", self.on_market),
-            ("Rest", self.on_rest),
-            ("Companions", self.on_companions),
-            ("Dungeons", self.on_dungeons),
-            ("Challenges", self.on_challenges),
-            ("Settings", self.on_settings),
         ]
 
-        for label, command in nav_items:
+        for label, command in char_items:
             btn = MedievalButton(self.sidebar,
                                  text=label,
                                  command=command,
                                  size='small')
-            btn.pack(pady=3, padx=10, fill=ctk.X)
+            btn.pack(pady=2, padx=8, fill=ctk.X)
+            self.nav_buttons[label] = btn
+
+        # Section: Combat
+        self._add_section_header("Combat")
+
+        combat_items = [
+            ("Boss", self.on_boss),
+            ("Dungeons", self.on_dungeons),
+            ("Companions", self.on_companions),
+        ]
+
+        for label, command in combat_items:
+            btn = MedievalButton(self.sidebar,
+                                 text=label,
+                                 command=command,
+                                 size='small')
+            btn.pack(pady=2, padx=8, fill=ctk.X)
+            self.nav_buttons[label] = btn
+
+        # Section: Social
+        self._add_section_header("Social")
+
+        social_items = [
+            ("Tavern", self.on_tavern),
+            ("Shop", self.on_shop),
+            ("Market", self.on_market),
+        ]
+
+        for label, command in social_items:
+            btn = MedievalButton(self.sidebar,
+                                 text=label,
+                                 command=command,
+                                 size='small')
+            btn.pack(pady=2, padx=8, fill=ctk.X)
+            self.nav_buttons[label] = btn
+
+        # Section: Other (mundane things)
+        self._add_section_header("Other")
+
+        other_items = [
+            ("Rest", self.on_rest),
+            ("Alchemy", self.on_alchemy),
+            ("Challenges", self.on_challenges),
+            ("Settings", self.on_settings),
+        ]
+
+        for label, command in other_items:
+            btn = MedievalButton(self.sidebar,
+                                 text=label,
+                                 command=command,
+                                 size='small')
+            btn.pack(pady=2, padx=8, fill=ctk.X)
             self.nav_buttons[label] = btn
 
         # Land-specific buttons (shown when in your_land)
         self.land_buttons = []
+        self._add_section_header("Your Land")
+        
         land_items = [
             ("Pet Shop", self.on_pet_shop),
             ("Furnish Home", self.on_furnish_home),
@@ -686,37 +869,42 @@ class GameWindow(ctk.CTk):
                                  text=label,
                                  command=command,
                                  size='small')
-            btn.pack(pady=3, padx=10, fill=ctk.X)
+            btn.pack(pady=2, padx=8, fill=ctk.X)
             self.land_buttons.append(btn)
 
-        # Save/Load/Quit
-        ctk.CTkLabel(self.sidebar, text="", height=20).pack()
+        # Save/Claim/Return to Main Menu
+        ctk.CTkLabel(self.sidebar, text="", height=15).pack()
 
         self.save_btn = MedievalButton(self.sidebar,
                                        text="Save Game",
                                        command=self.on_save,
-                                       size='small')
-        self.save_btn.pack(pady=3, padx=10, fill=ctk.X)
-
-        self.load_btn = MedievalButton(self.sidebar,
-                                       text="Load Game",
-                                       command=self.on_load,
-                                       size='small')
-        self.load_btn.pack(pady=3, padx=10, fill=ctk.X)
+                                       size='small',
+                                       button_type='gold')
+        self.save_btn.pack(pady=2, padx=8, fill=ctk.X)
 
         self.claim_btn = MedievalButton(self.sidebar,
                                         text="Claim Rewards",
                                         command=self.on_claim,
                                         size='small')
-        self.claim_btn.pack(pady=3, padx=10, fill=ctk.X)
+        self.claim_btn.pack(pady=2, padx=8, fill=ctk.X)
 
-        ctk.CTkLabel(self.sidebar, text="", height=20).pack()
+        ctk.CTkLabel(self.sidebar, text="", height=10).pack()
 
+        # Return to Main Menu (replaces Quit)
         self.quit_btn = MedievalButton(self.sidebar,
-                                       text="Quit",
+                                       text="Return to Main Menu",
                                        command=self.on_quit,
-                                       size='small')
-        self.quit_btn.pack(pady=3, padx=10, fill=ctk.X)
+                                       size='small',
+                                       button_type='danger')
+        self.quit_btn.pack(pady=2, padx=8, fill=ctk.X)
+
+    def _add_section_header(self, text: str):
+        """Add a section header to the sidebar."""
+        header = ctk.CTkLabel(self.sidebar,
+                              text=text.upper(),
+                              font=('Arial', 10, 'bold'),
+                              text_color=MEDIEVAL_COLORS['text_dim'])
+        header.pack(pady=(12, 4), padx=8, anchor='w')
 
     def setup_status_bar(self):
         """Setup the status bar showing player stats."""
@@ -943,9 +1131,152 @@ class GameWindow(ctk.CTk):
         """Show or hide land-specific buttons."""
         for btn in self.land_buttons:
             if show:
-                btn.pack(pady=3, padx=10, fill=ctk.X)
+                btn.pack(pady=2, padx=8, fill=ctk.X)
             else:
                 btn.pack_forget()
+
+    # ============================================
+    # Battle Control Methods
+    # ============================================
+
+    def start_battle(self, is_boss: bool = False):
+        """Disable the sidebar during battle."""
+        self.battle_in_progress = True
+        self.is_boss_battle = is_boss
+        
+        # Disable all sidebar buttons
+        for btn in self.nav_buttons.values():
+            btn.configure(state='disabled')
+        for btn in self.land_buttons:
+            btn.configure(state='disabled')
+        self.save_btn.configure(state='disabled')
+        self.claim_btn.configure(state='disabled')
+        self.quit_btn.configure(state='disabled')
+        
+        # Show battle message
+        if is_boss:
+            self.add_message("⚔️ BOSS BATTLE STARTED! ⚔️", MEDIEVAL_COLORS['health_red'])
+        else:
+            self.add_message("⚔️ Battle started!", MEDIEVAL_COLORS['warning_yellow'])
+
+    def end_battle(self, victory: bool = True):
+        """Re-enable the sidebar after battle."""
+        self.battle_in_progress = False
+        
+        # Show result message
+        if victory:
+            self.add_message("✅ Battle won! Returning to exploration.", MEDIEVAL_COLORS['health_green'])
+        else:
+            self.add_message("❌ Battle lost! You have respawned.", MEDIEVAL_COLORS['health_red'])
+        
+        # Re-enable all sidebar buttons
+        for btn in self.nav_buttons.values():
+            btn.configure(state='normal')
+        for btn in self.land_buttons:
+            btn.configure(state='normal')
+        self.save_btn.configure(state='normal')
+        self.claim_btn.configure(state='normal')
+        self.quit_btn.configure(state='normal')
+
+    # ============================================
+    # Inventory Window (Separate Window)
+    # ============================================
+
+    def open_inventory_window(self):
+        """Open inventory as a separate modal window."""
+        if not self.game or not self.game.player:
+            return
+
+        # Close existing inventory window if open
+        if self.inventory_window and self.inventory_window.winfo_exists():
+            self.inventory_window.lift()
+            return
+
+        # Create new inventory window
+        self.inventory_window = ctk.CTkToplevel(self)
+        self.inventory_window.title("Inventory")
+        self.inventory_window.geometry("600x500")
+        self.inventory_window.configure(fg_color=MEDIEVAL_COLORS['bg_dark'])
+        self.inventory_window.resizable(False, False)
+        
+        # Make it modal
+        self.inventory_window.transient(self)
+        self.inventory_window.grab_set()
+
+        player = self.game.player
+
+        # Title
+        title_label = MedievalLabel(self.inventory_window,
+                                    text="Inventory",
+                                    style='title')
+        title_label.pack(pady=15)
+
+        # Gold display
+        gold_label = MedievalLabel(self.inventory_window,
+                                   text=f"Gold: {player.gold}",
+                                   style='normal')
+        gold_label.pack(pady=5)
+
+        # Close button
+        close_btn = MedievalButton(self.inventory_window,
+                                   text="Close",
+                                   command=self.close_inventory_window,
+                                   size='normal')
+        close_btn.pack(pady=10)
+
+        # Items frame
+        if not player.inventory:
+            empty_label = MedievalLabel(self.inventory_window,
+                                        text="Inventory is empty",
+                                        style='dim')
+            empty_label.pack(pady=20)
+        else:
+            # Group items by type
+            items_by_type = {}
+            for item in player.inventory:
+                item_type = self.game.items_data.get(item, {}).get("type", "unknown")
+                if item_type not in items_by_type:
+                    items_by_type[item_type] = []
+                items_by_type[item_type].append(item)
+
+            # Create scrollable frame for items
+            items_scroll = ctk.CTkScrollableFrame(self.inventory_window,
+                                                  fg_color=MEDIEVAL_COLORS['bg_light'])
+            items_scroll.pack(pady=10, padx=10, fill=ctk.BOTH, expand=True)
+
+            for item_type, items in items_by_type.items():
+                # Type header
+                type_label = ctk.CTkLabel(items_scroll,
+                                          text=item_type.title(),
+                                          font=('Arial', 14, 'bold'),
+                                          text_color=MEDIEVAL_COLORS['accent_bronze'])
+                type_label.pack(pady=(10, 5), padx=10, anchor='w')
+
+                for item in items:
+                    item_data = self.game.items_data.get(item, {})
+                    rarity = item_data.get('rarity', 'common')
+                    color = RARITY_COLORS.get(rarity, MEDIEVAL_COLORS['text_light'])
+
+                    item_frame = ctk.CTkFrame(items_scroll,
+                                              fg_color=MEDIEVAL_COLORS['bg_dark'])
+                    item_frame.pack(fill=ctk.X, padx=5, pady=2)
+
+                    ctk.CTkLabel(item_frame,
+                                 text=item,
+                                 text_color=color,
+                                 font=('Arial', 12)).pack(side=ctk.LEFT, padx=10, pady=5)
+
+                    if item_data.get('description'):
+                        ctk.CTkLabel(item_frame,
+                                     text=item_data.get('description', '')[:40],
+                                     text_color=MEDIEVAL_COLORS['text_dim'],
+                                     font=('Arial', 10)).pack(side=ctk.RIGHT, padx=10, pady=5)
+
+    def close_inventory_window(self):
+        """Close the inventory window."""
+        if self.inventory_window and self.inventory_window.winfo_exists():
+            self.inventory_window.destroy()
+        self.inventory_window = None
 
 
 class ChoiceDialog(ctk.CTkToplevel):

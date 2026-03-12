@@ -69,15 +69,15 @@ def upgrade_pip():
 
 
 def install_dependencies():
-    """Install required dependencies including customtkinter."""
+    """Install required dependencies for Kivy GUI."""
     pip_executable = get_pip_executable()
     dependencies = [
-        'customtkinter>=5.0.0',
-        'pillow>=9.0.0',  # For image handling in GUI
-        'requests>=2.28.0',  # For HTTP requests
+        'kivy[base]>=2.3.0',  # Kivy with base dependencies for GUI
+        'pillow>=9.0.0',      # For image handling in GUI
+        'requests>=2.28.0',   # For HTTP requests (market API)
     ]
 
-    print("Installing dependencies...")
+    print("Installing Kivy dependencies...")
 
     for package in dependencies:
         print(f"  Installing {package}...")
@@ -88,7 +88,7 @@ def install_dependencies():
             print(f"  ✗ Failed to install {package}: {e}")
             return False
 
-    print("✓ All dependencies installed successfully.")
+    print("✓ All Kivy dependencies installed successfully.")
     return True
 
 
@@ -126,7 +126,10 @@ def setup_venv():
         print("\nTo activate the virtual environment on Linux/macOS:")
         print(f"  source {get_venv_path()}/bin/activate")
 
-    print("\nThen run the game with the GUI:")
+    print("\nActivate the virtual environment, then run:")
+    print("  source venv/bin/activate  # Linux/macOS")
+    print("  venv\\Scripts\\activate   # Windows")
+    print("\nRun the Kivy GUI game:")
     print("  python main.py")
 
     return True
