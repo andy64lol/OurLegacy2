@@ -1,22 +1,56 @@
-# TODO:
+# TODO — TUI vs GUI Feature Parity
 
-- [x] Make save_load.py to save and load by downloading and uploading player's saving file encrypted with salt and using pickles.
-      → Implemented: .olsave binary format (OL2S magic + 16-byte salt + Fernet-encrypted pickle), download on save, upload FormData on load.
+Features that exist in the original TUI (Our_Legacy) but are missing or incomplete in the GUI.
 
-- [ ] Check the differences between gameplay and features between both the TUI and the GUI versions and create a TODO to make them with parity
-      → NOTE: The TUI reference directory (Our_Legacy_1(tui_for_reference)/) is completely empty. No TUI source files are present to compare against. This task is blocked until TUI source files are provided.
+---
 
-- [x] Make that usually the small game title appears if not in main menu and main menu uses the bigger one, make that instead of quit it just sends you back to the main menu.
-      → Main menu uses game_title_main_menu.png (large). In-game sidebar uses game_title_our_legacy_2_720px_300px.png (small). "Abandon Journey" replaced with "Main Menu" linking to /.
+## 🗓 Weekly Challenges
+The TUI has a challenges system (`data/weekly_challenges.json`) with kill count, dungeon complete, boss defeat, level reach, and mission count challenges. Each awards EXP + gold on completion. The GUI has no challenge tracking or challenge screen.
 
-- [x] Also somehow bosses are missing so add them.
-      → 8% boss encounter chance added to /action/explore. Scales boss stats by player level. Redirects to battle screen with is_boss flag.
+## 🌦 Weather System
+Each area has `weather_probabilities` (sunny/rainy/snowy/stormy). The weather updates on every explore and gives EXP/gold bonuses (e.g. stormy = +20% EXP and gold). The GUI has the data file but no weather is ever shown or applied.
 
-- [x] When in game, make that assets are used to the background also
-      → ingame_background_when_playing.png applied as CSS background-image on .main-content with dark overlay.
+## 🕰 Time-of-Day System
+Time advances as you play (Dawn → Morning → Noon → Afternoon → Dusk → Evening → Night → Midnight). The TUI shows the current time period and uses it for immersion. The GUI has `data/times.json` but never uses it.
 
-- [x] Add music looping on background
-      → <audio id="bg-music" loop> element in base.html, JS autoplay with user-interaction fallback.
+## ⚔ Manual Boss Challenge Menu
+The TUI has a dedicated "Fight Boss" option (menu option 6) letting you pick a specific boss in the current area and fight it directly — with an 8-hour cooldown per boss. The GUI only has random boss encounters during exploration, with no way to intentionally challenge a boss.
 
-- [x] You can configure music to be quiet
-      → Music volume slider (0–100%) in sidebar save section, persisted in localStorage (ol2_music_volume, ol2_music_muted).
+## 💬 Boss Dialogue (Start & Defeat)
+Bosses speak when battle begins and when they are defeated (`data/dialogues.json`, 30 entries). The GUI's battle screen never shows boss dialogue lines.
+
+## 🎬 Cutscenes
+Three cutscenes exist: `welcome_cutscene`, `first_area_enter`, `mission_accept_tutorial`. They support text, wait, and branching choices. The GUI never triggers any cutscene.
+
+## 🪙 Claim Rewards (Explicit)
+In the TUI, completing a mission does not automatically give rewards — you must go to the "Claim Rewards" menu option to collect EXP, gold, and items. The GUI auto-completes missions with no separation between completion and reward collection.
+
+## 📊 Active Mission Progress Tracking
+The TUI tracks kill-type and collect-type mission progress in real time (counting kills and collected items toward targets). The GUI only marks missions done all-at-once when the condition is met, with no incremental progress display.
+
+## 🪨 Material Gathering During Exploration
+When an explore action has no combat encounter, the TUI gives a 40% chance to gather crafting materials (1–3 items scaled to the area's difficulty tier). The GUI gives no loot on non-combat explores.
+
+## 🏋 Training (Your Land)
+The TUI has a Training menu option available at Your Land, letting the player train stats. The GUI's Your Land tab has no training system.
+
+## 🏗 Build Structures (Your Land)
+The TUI separates "Build Home" (furniture/housing items) from "Build Structures" (land structures like wells, stables, workshops). The GUI combines everything into one housing section.
+
+## ✨ Status Effects in Battle
+`data/effects.json` defines: poison, stun, blind, slow, defense_boost, speed_boost, shield, reveal, burn, freeze. Companion abilities and spells can apply these. The GUI battle system does not apply or display any status effects.
+
+## 🗣 Language Selection
+The TUI lets you switch between English, Spanish, and Simplified Chinese at any time from the menu (`data/languages/`). The GUI has no language option — it is English-only.
+
+## 🧩 Mod System
+The TUI supports loading JSON mods that extend or replace enemies, areas, items, missions, bosses, spells, and effects. The GUI has no mod support.
+
+## 🔢 Multiple Accessory Slots
+The TUI supports `accessory_1`, `accessory_2`, `accessory_3` — three accessory slots. The GUI only supports a single `accessory` slot.
+
+## 🗺 Area Difficulty Display
+The TUI shows each area's `difficulty` rating during travel, helping players gauge danger. The GUI's travel tab shows connections but not difficulty levels.
+
+## 💰 Gold Finding During Exploration
+On non-combat explores in the TUI, there is a 30% chance to find 5–20 gold on the ground. The GUI gives nothing on non-combat explores.
