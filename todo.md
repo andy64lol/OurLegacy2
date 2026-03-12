@@ -1,6 +1,6 @@
-# TODO — TUI vs GUI Feature Parity
+# TODO — OLD TUI vs GUI Feature Parity
 
-Features that exist in the original TUI (Our_Legacy) but are missing or incomplete in the GUI.
+Features that exist in the original TUI (Our_Legacy) but are missing or incomplete in the GUI. For more use git clone https://github.com/andy64lol/Our_Legacy.git to see the repository.
 
 ---
 
@@ -40,12 +40,6 @@ The TUI separates "Build Home" (furniture/housing items) from "Build Structures"
 ## ✨ Status Effects in Battle
 `data/effects.json` defines: poison, stun, blind, slow, defense_boost, speed_boost, shield, reveal, burn, freeze. Companion abilities and spells can apply these. The GUI battle system does not apply or display any status effects.
 
-## 🗣 Language Selection
-The TUI lets you switch between English, Spanish, and Simplified Chinese at any time from the menu (`data/languages/`). The GUI has no language option — it is English-only.
-
-## 🧩 Mod System
-The TUI supports loading JSON mods that extend or replace enemies, areas, items, missions, bosses, spells, and effects. The GUI has no mod support.
-
 ## 🔢 Multiple Accessory Slots
 The TUI supports `accessory_1`, `accessory_2`, `accessory_3` — three accessory slots. The GUI only supports a single `accessory` slot.
 
@@ -54,3 +48,8 @@ The TUI shows each area's `difficulty` rating during travel, helping players gau
 
 ## 💰 Gold Finding During Exploration
 On non-combat explores in the TUI, there is a 30% chance to find 5–20 gold on the ground. The GUI gives nothing on non-combat explores.
+
+---
+
+## Extra:
+On saving and loading game, the game looks for a locally saved game but notice that we are playing on browser, which means player has to donwload and upload these save files.
