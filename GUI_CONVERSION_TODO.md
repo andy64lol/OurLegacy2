@@ -90,6 +90,3 @@ KeyboardInterrupt```
 - [x] Change how text is displayed
 - [ ] Radically change the UI to make it 100* better and pixelated and also where buttons and functionalities are located
 - [x] Fix that fonts doesn't work (improved font loading with fallback to default fonts)
-
-## Phase 8 New: Swap the gui to use kivy, modify gui.py
-- [ ] Make it use kivy instead so it can load fonts and etc
