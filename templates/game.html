@@ -5,7 +5,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-top">
-            <img src="/static/banner.png" alt="Our Legacy 2" class="sidebar-banner">
+            <img src="/game_assets/game_title_our_legacy_2_720px_300px.png" alt="Our Legacy 2" class="sidebar-banner">
         </div>
 
         <div class="panel sidebar-panel">
@@ -81,15 +81,23 @@
         <div class="sidebar-save-section">
             <button class="btn btn-secondary btn-small" onclick="saveGame()">Save Game</button>
             <div id="save-status" style="font-size:13px;color:var(--text-dim);display:none;margin-top:4px;"></div>
-            <input type="file" id="load-file-input" accept=".json" style="display:none;">
+            <input type="file" id="load-file-input" accept=".olsave,.json" style="display:none;">
             <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()" style="margin-top:4px;">Load Game</button>
             <div id="load-status" style="font-size:13px;color:var(--text-dim);display:none;margin-top:4px;"></div>
+
+            <!-- Music volume control -->
+            <div class="music-control-row" style="margin-top:10px;">
+                <span class="music-label">&#9835; Music</span>
+                <input type="range" id="music-volume-slider" min="0" max="100" value="30"
+                       oninput="setMusicVolume(this.value)" class="music-slider">
+                <span id="music-volume-label" class="music-vol-label">30%</span>
+            </div>
         </div>
 
         <div class="sidebar-nav">
-            <a href="/new_game" class="btn btn-danger btn-small"
-               onclick="return confirm('Return to the title screen? Unsaved progress will be lost.')">
-                Abandon Journey
+            <a href="/" class="btn btn-danger btn-small"
+               onclick="return confirm('Return to the main menu? Unsaved progress will be lost.')">
+                Main Menu
             </a>
         </div>
     </aside>

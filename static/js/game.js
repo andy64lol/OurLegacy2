@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     scrollLogsToBottom();
     checkHashTab();
     initLoadFileInput();
+    initMusic();
 });
 
 function initTabs() {
@@ -41,7 +42,7 @@ function checkHashTab() {
     }
 }
 
-// ─── Save: download JSON file ─────────────────────────────────────────────────
+// ─── Save: download encrypted .olsave file ────────────────────────────────────
 
 async function saveGame() {
     var status = document.getElementById('save-status');
@@ -59,7 +60,7 @@ async function saveGame() {
 
         var disposition = response.headers.get('Content-Disposition') || '';
         var filenameMatch = disposition.match(/filename="([^"]+)"/);
-        var filename = filenameMatch ? filenameMatch[1] : 'our_legacy_save.json';
+        var filename = filenameMatch ? filenameMatch[1] : 'our_legacy_save.olsave';
 
         var blob = await response.blob();
         var url = URL.createObjectURL(blob);
@@ -85,7 +86,7 @@ async function saveGame() {
     }
 }
 
-// ─── Load: upload JSON file ───────────────────────────────────────────────────
+// ─── Load: upload encrypted .olsave file ──────────────────────────────────────
 
 function triggerLoadFile() {
     var input = document.getElementById('load-file-input');
@@ -107,12 +108,12 @@ function initLoadFileInput() {
         }
 
         try {
-            var text = await file.text();
-            var saveData = JSON.parse(text);
+            var formData = new FormData();
+            formData.append('save_file', file);
+
             var res = await fetch('/api/load', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(saveData)
+                body: formData
             });
             var json = await res.json();
             if (json.ok) {
@@ -133,4 +134,75 @@ function initLoadFileInput() {
         }
         this.value = '';
     });
+}
+
+// ─── Music Player ─────────────────────────────────────────────────────────────
+
+var _musicAudio = null;
+var _musicMuted = false;
+
+function initMusic() {
+    _musicAudio = document.getElementById('bg-music');
+    if (!_musicAudio) return;
+
+    var savedVol = parseFloat(localStorage.getItem('ol2_music_volume'));
+    if (!isNaN(savedVol)) {
+        _musicAudio.volume = savedVol;
+    } else {
+        _musicAudio.volume = 0.3;
+    }
+
+    var savedMuted = localStorage.getItem('ol2_music_muted');
+    if (savedMuted === 'true') {
+        _musicAudio.volume = 0;
+        _musicMuted = true;
+    }
+
+    // Update slider to reflect current volume
+    var slider = document.getElementById('music-volume-slider');
+    if (slider) {
+        slider.value = _musicMuted ? 0 : Math.round(_musicAudio.volume * 100);
+    }
+
+    // Attempt autoplay; many browsers require user interaction first
+    var playPromise = _musicAudio.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(function () {
+            // Autoplay blocked; will start on first user interaction
+            document.addEventListener('click', function startMusic() {
+                if (_musicAudio && !_musicMuted) _musicAudio.play();
+                document.removeEventListener('click', startMusic);
+            }, { once: true });
+        });
+    }
+}
+
+function setMusicVolume(val) {
+    var vol = parseInt(val, 10) / 100;
+    _musicMuted = (vol === 0);
+    localStorage.setItem('ol2_music_volume', vol);
+    localStorage.setItem('ol2_music_muted', _musicMuted ? 'true' : 'false');
+    if (_musicAudio) {
+        _musicAudio.volume = vol;
+        if (!_musicMuted && _musicAudio.paused) _musicAudio.play();
+    }
+    var label = document.getElementById('music-volume-label');
+    if (label) label.textContent = val + '%';
+}
+
+function toggleMusicMute() {
+    if (!_musicAudio) return;
+    _musicMuted = !_musicMuted;
+    localStorage.setItem('ol2_music_muted', _musicMuted ? 'true' : 'false');
+    if (_musicMuted) {
+        _musicAudio.volume = 0;
+    } else {
+        var savedVol = parseFloat(localStorage.getItem('ol2_music_volume')) || 0.3;
+        _musicAudio.volume = savedVol;
+        if (_musicAudio.paused) _musicAudio.play();
+    }
+    var slider = document.getElementById('music-volume-slider');
+    if (slider) slider.value = Math.round(_musicAudio.volume * 100);
+    var label = document.getElementById('music-volume-label');
+    if (label) label.textContent = Math.round(_musicAudio.volume * 100) + '%';
 }

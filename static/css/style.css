@@ -415,7 +415,41 @@ strong { font-weight: 600; }
 .sidebar-nav         { padding: 14px 12px; margin-top: auto; }
 .sidebar-save-section{ padding: 10px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
 
-.main-content { padding: 18px; overflow-y: auto; }
+.main-content {
+    padding: 18px;
+    overflow-y: auto;
+    background-image: url('/game_assets/ingame_background_when_playing.png');
+    background-size: cover;
+    background-position: center top;
+    background-attachment: local;
+    position: relative;
+}
+.main-content::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(18,14,8,0.55);
+    pointer-events: none;
+    z-index: 0;
+}
+.main-content > * { position: relative; z-index: 1; }
+
+/* ─── Music Controls ─────────────────────────────────────── */
+.music-control-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.music-label    { font-size: 12px; color: var(--text-dim); flex-shrink: 0; }
+.music-slider   {
+    flex: 1;
+    min-width: 60px;
+    height: 4px;
+    accent-color: var(--gold);
+    cursor: pointer;
+}
+.music-vol-label{ font-size: 12px; color: var(--text-dim); width: 32px; text-align: right; flex-shrink: 0; }
 
 /* ─── Tabs ───────────────────────────────────────────────── */
 .tab-nav {

@@ -1,14 +1,70 @@
 """
 Save/Load System for Our Legacy 2 - Flask Edition
 Functions for serializing/deserializing game state (Flask session dicts).
+Supports encrypted pickle saves (download/upload) and server-side JSON saves.
 """
 import json
 import os
+import pickle
+import hashlib
+import base64
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
+from cryptography.fernet import Fernet, InvalidToken
+
 SAVES_DIR = "data/saves"
 SAVE_VERSION = "3.2"
+
+SAVE_MAGIC = b'OL2S'
+SALT_SIZE = 16
+APP_SAVE_SECRET = "our_legacy_2_eternal_save_secret_v5"
+
+# ─── Encrypted Pickle Helpers ─────────────────────────────────────────────────
+
+
+def _derive_key(salt: bytes) -> bytes:
+    """Derive a Fernet key from a salt using SHA-256."""
+    raw = hashlib.sha256(salt + APP_SAVE_SECRET.encode('utf-8')).digest()
+    return base64.urlsafe_b64encode(raw)
+
+
+def encrypt_save(save_data: Dict[str, Any]) -> bytes:
+    """
+    Serialize and encrypt save_data.
+    Returns binary: MAGIC(4) + SALT(16) + fernet_token(variable).
+    """
+    salt = os.urandom(SALT_SIZE)
+    key = _derive_key(salt)
+    f = Fernet(key)
+    pickled = pickle.dumps(save_data, protocol=4)
+    token = f.encrypt(pickled)
+    return SAVE_MAGIC + salt + token
+
+
+def decrypt_save(data: bytes) -> Dict[str, Any]:
+    """
+    Decrypt and deserialize encrypted save bytes.
+    Returns save_data dict.
+    Raises ValueError on bad format or decryption failure.
+    """
+    if not data.startswith(SAVE_MAGIC):
+        raise ValueError("Not a valid Our Legacy 2 save file.")
+    payload = data[len(SAVE_MAGIC):]
+    if len(payload) < SALT_SIZE:
+        raise ValueError("Save file is too short or corrupted.")
+    salt = payload[:SALT_SIZE]
+    token = payload[SALT_SIZE:]
+    key = _derive_key(salt)
+    f = Fernet(key)
+    try:
+        pickled = f.decrypt(token)
+    except InvalidToken:
+        raise ValueError("Save file is corrupted or was modified.")
+    return pickle.loads(pickled)
+
+
+# ─── Server-Side JSON Helpers (legacy) ───────────────────────────────────────
 
 
 def build_save_data(player: Dict[str, Any],

@@ -3,7 +3,7 @@ Our Legacy 2 - Flask Web Interface
 Medieval fantasy RPG playable in the browser.
 """
 
-from flask import Flask, render_template, request, session, redirect, url_for, jsonify, make_response
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify, make_response, send_from_directory
 from cryptography.fernet import Fernet
 import pickle
 import base64
@@ -34,7 +34,7 @@ from utilities.dungeons import (
     _pick_multi_choice,
 )
 from utilities.market import get_market_api
-from utilities.save_load import save_game, list_saves, load_save
+from utilities.save_load import save_game, list_saves, load_save, encrypt_save, decrypt_save
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -389,6 +389,11 @@ def get_mission_progress_display(mission_id, player):
 # ─── Routes ─────────────────────────────────────────────────────────────────
 
 
+@app.route('/game_assets/<path:filename>')
+def serve_game_asset(filename):
+    return send_from_directory('data/assets', filename)
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -705,9 +710,36 @@ def action_explore():
     area_key = session.get('current_area', 'starting_village')
     area = GAME_DATA['areas'].get(area_key, {})
     possible_enemies = area.get('possible_enemies', [])
+    possible_bosses = area.get('possible_bosses', [])
 
     player['explore_count'] = player.get('explore_count', 0) + 1
     advance_crops(player)
+
+    # Boss encounter: 8% chance if area has bosses
+    if possible_bosses and random.random() < 0.08:
+        boss_key = random.choice(possible_bosses)
+        boss_data = GAME_DATA.get('bosses', {}).get(boss_key, {})
+        if boss_data:
+            lvl = player['level']
+            scale = 1 + (lvl - 1) * 0.12
+            enemy = {
+                'key': boss_key,
+                'name': boss_data.get('name', boss_key.replace('_', ' ').title()),
+                'hp': int(boss_data.get('hp', 200) * scale),
+                'max_hp': int(boss_data.get('hp', 200) * scale),
+                'attack': int(boss_data.get('attack', 20) * scale),
+                'defense': int(boss_data.get('defense', 10) * scale),
+                'speed': boss_data.get('speed', 12),
+                'exp_reward': int(boss_data.get('experience_reward', 200) * scale),
+                'gold_reward': int(boss_data.get('gold_reward', 100) * scale),
+                'loot_table': boss_data.get('unique_loot', []),
+                'is_boss': True,
+            }
+            session['battle_enemy'] = enemy
+            session['battle_log'] = [f'⚠ {enemy["name"]} blocks your path! Prepare for a boss battle! (HP: {enemy["hp"]})']
+            session.modified = True
+            save_player(player)
+            return redirect(url_for('battle'))
 
     roll = random.random()
     if possible_enemies and roll < 0.55:
@@ -1481,17 +1513,37 @@ def api_save():
     }
 
     player_name = (player.get('name') or 'save').replace(' ', '_')
-    filename = f'our_legacy_{player_name}_lv{player.get("level", 1)}.json'
-    raw = json.dumps(save_data, indent=2)
-    response = make_response(raw)
-    response.headers['Content-Type'] = 'application/json'
+    filename = f'our_legacy_{player_name}_lv{player.get("level", 1)}.olsave'
+    encrypted = encrypt_save(save_data)
+    response = make_response(encrypted)
+    response.headers['Content-Type'] = 'application/octet-stream'
     response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
 
 @app.route('/api/load', methods=['POST'])
 def api_load():
-    data = request.get_json(force=True, silent=True) or {}
+    # Accept encrypted .olsave file upload (multipart) or raw binary body
+    data = None
+    if request.files.get('save_file'):
+        raw_bytes = request.files['save_file'].read()
+        try:
+            data = decrypt_save(raw_bytes)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+    elif request.content_type and 'application/octet-stream' in request.content_type:
+        raw_bytes = request.data
+        try:
+            data = decrypt_save(raw_bytes)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+    else:
+        # Backward compatibility: plain JSON body
+        data = request.get_json(force=True, silent=True) or {}
+
+    if not data:
+        return jsonify({'error': 'No save data received.'}), 400
+
     player = data.get('player')
     if not player or not player.get('name'):
         return jsonify({'error': 'Invalid save file: missing player data.'}), 400

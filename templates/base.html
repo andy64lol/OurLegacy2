@@ -10,6 +10,11 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
+    <!-- Background music (loops; volume controlled by user) -->
+    <audio id="bg-music" loop preload="auto" style="display:none;">
+        <source src="/game_assets/main_theme.mp3" type="audio/mpeg">
+    </audio>
+
     {% block content %}{% endblock %}
     <script src="/static/js/game.js"></script>
     {% block extra_scripts %}{% endblock %}
