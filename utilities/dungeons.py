@@ -3,41 +3,138 @@ Dungeon System for Our Legacy 2 - Flask Edition
 Stateless dungeon functions that return result dicts.
 """
 import random
-from datetime import datetime
 from typing import Dict, List, Any, Optional
-from utilities.entities import Enemy
 
 
-def get_available_dungeons(dungeons_data: Dict[str, Any], current_area: str, player_level: int) -> List[Dict[str, Any]]:
-    """Return list of dungeons available in the current area."""
+def get_available_dungeons(dungeons_data: Dict[str, Any], current_area: str,
+                           player_level: int) -> List[Dict[str, Any]]:
+    """Return all dungeons, accessible by player level (not area restricted)."""
     all_dungeons = dungeons_data.get('dungeons', [])
     result = []
     for dungeon in all_dungeons:
-        allowed_areas = dungeon.get('allowed_areas', [])
-        if allowed_areas and current_area not in allowed_areas:
-            continue
         difficulty = dungeon.get('difficulty', [1, 3])
-        min_level = difficulty[0] * 5
+        min_level = max(1, difficulty[0] * 2)
         result.append({
-            'id': dungeon.get('id', dungeon.get('name', '').lower().replace(' ', '_')),
-            'name': dungeon.get('name', 'Unknown Dungeon'),
-            'description': dungeon.get('description', ''),
-            'difficulty': difficulty,
-            'rooms': dungeon.get('rooms', 5),
-            'min_level': min_level,
-            'available': player_level >= min_level,
-            'allowed_areas': allowed_areas,
+            'id':
+            dungeon.get('id',
+                        dungeon.get('name', '').lower().replace(' ', '_')),
+            'name':
+            dungeon.get('name', 'Unknown Dungeon'),
+            'description':
+            dungeon.get('description', ''),
+            'difficulty':
+            difficulty,
+            'rooms':
+            dungeon.get('rooms', 5),
+            'min_level':
+            min_level,
+            'available':
+            player_level >= min_level,
+            'allowed_areas':
+            dungeon.get('allowed_areas', []),
+            'completion_reward':
+            dungeon.get('completion_reward', {}),
+            'boss_id':
+            dungeon.get('boss_id', ''),
         })
+    result.sort(key=lambda d: d['min_level'])
     return result
 
 
-def generate_dungeon_rooms(dungeon: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Generate a list of dungeon rooms based on dungeon definition."""
+def _pick_riddle(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
+    templates = dungeons_data.get('challenge_templates', {})
+    q_types = templates.get('question', {}).get('types', [])
+    if q_types:
+        return random.choice(q_types)
+    return {
+        'question':
+        'What has four legs in the morning, two at noon, and three at night?',
+        'answer': 'human',
+        'hints': ['Think of life stages'],
+        'failure_damage': 15,
+        'success_reward': {
+            'gold': 50,
+            'experience': 100
+        },
+    }
+
+
+def _pick_multi_choice(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
+    templates = dungeons_data.get('challenge_templates', {})
+    s_types = templates.get('selection', {}).get('types', [])
+    if s_types:
+        return random.choice(s_types)
+    return {
+        'question':
+        'Which path do you take?',
+        'options': [
+            {
+                'text': 'Left',
+                'correct': True,
+                'reason': 'Fortune favors the bold!'
+            },
+            {
+                'text': 'Right',
+                'correct': False,
+                'reason': 'A dead end.'
+            },
+        ],
+        'failure_damage':
+        10,
+        'success_reward': {
+            'gold': 75,
+            'experience': 150
+        },
+    }
+
+
+def _pick_trap(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
+    templates = dungeons_data.get('challenge_templates', {})
+    trap_types = templates.get('trap', {}).get('types', [])
+    if trap_types:
+        t = random.choice(trap_types)
+    else:
+        t = {
+            'id': 'generic_trap',
+            'name': 'Pressure Trap',
+            'description': 'The floor shifts!',
+            'base_damage': 20,
+            'difficulty': 'normal'
+        }
+    difficulty_map = {'easy': 8, 'normal': 10, 'hard': 13}
+    threshold = difficulty_map.get(t.get('difficulty', 'normal'), 10)
+    return {
+        'trap_id': t.get('id', 'trap'),
+        'name': t.get('name', 'Trap'),
+        'description': t.get('description', 'A hidden trap activates!'),
+        'base_damage': t.get('base_damage', 20),
+        'threshold': threshold,
+        'success_reward': {
+            'gold': 30,
+            'experience': 75
+        },
+    }
+
+
+def generate_dungeon_rooms(
+        dungeon: Dict[str, Any],
+        dungeons_data: Optional[Dict[str,
+                                     Any]] = None) -> List[Dict[str, Any]]:
+    """Generate dungeon rooms with embedded challenge data."""
     room_weights = dungeon.get('room_weights', {})
     total_rooms = dungeon.get('rooms', 5)
+    if dungeons_data is None:
+        dungeons_data = {}
 
     if not room_weights or sum(room_weights.values()) == 0:
-        room_weights = {'battle': 40, 'question': 20, 'chest': 15, 'empty': 15, 'trap_chest': 5, 'multi_choice': 5}
+        room_weights = {
+            'battle': 40,
+            'question': 20,
+            'chest': 15,
+            'empty': 15,
+            'trap_chest': 5,
+            'multi_choice': 5
+        }
 
     if total_rooms <= 0:
         total_rooms = 5
@@ -51,17 +148,30 @@ def generate_dungeon_rooms(dungeon: Dict[str, Any]) -> List[Dict[str, Any]]:
             room_type = 'boss'
         else:
             room_type = random.choices(room_types, weights=weights, k=1)[0]
-        rooms.append({
+
+        difficulty = dungeon.get('difficulty', [1, 3])[0] + (i * 0.5)
+        room: Dict[str, Any] = {
             'type': room_type,
             'room_number': i + 1,
-            'difficulty': dungeon.get('difficulty', [1, 3])[0] + (i * 0.5),
-        })
+            'difficulty': difficulty,
+        }
+
+        if room_type == 'question':
+            room['challenge'] = _pick_riddle(dungeons_data)
+        elif room_type == 'multi_choice':
+            room['challenge'] = _pick_multi_choice(dungeons_data)
+        elif room_type in ('trap_chest', 'trap'):
+            room['challenge'] = _pick_trap(dungeons_data)
+        elif room_type == 'boss':
+            room['boss_id'] = dungeon.get('boss_id', '')
+
+        rooms.append(room)
     return rooms
 
 
 def process_chest_room(player: Dict[str, Any], room: Dict[str, Any],
-                       dungeons_data: Dict[str, Any], items_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Process a treasure chest room. Modifies player in place."""
+                       dungeons_data: Dict[str, Any],
+                       items_data: Dict[str, Any]) -> Dict[str, Any]:
     messages = []
     difficulty = room.get('difficulty', 1)
 
@@ -75,10 +185,15 @@ def process_chest_room(player: Dict[str, Any], room: Dict[str, Any],
         chest_type = 'small'
 
     chest_templates = dungeons_data.get('chest_templates', {})
-    chest_data = chest_templates.get(chest_type, chest_templates.get('small', {}))
-
+    chest_data = chest_templates.get(chest_type,
+                                     chest_templates.get('small', {}))
     if not chest_data:
-        chest_data = {'gold_range': [20, 60], 'item_count_range': [1, 1], 'experience': 50, 'item_rarity': ['common']}
+        chest_data = {
+            'gold_range': [20, 60],
+            'item_count_range': [1, 1],
+            'experience': 50,
+            'item_rarity': ['common']
+        }
 
     gold_min, gold_max = chest_data.get('gold_range', [50, 150])
     gold_reward = random.randint(gold_min, gold_max)
@@ -87,8 +202,14 @@ def process_chest_room(player: Dict[str, Any], room: Dict[str, Any],
     player['gold'] = player.get('gold', 0) + gold_reward
     player['experience'] = player.get('experience', 0) + exp_reward
 
-    messages.append({'text': f'You found {gold_reward} gold!', 'color': 'var(--gold)'})
-    messages.append({'text': f'You gained {exp_reward} experience!', 'color': 'var(--magenta)'})
+    messages.append({
+        'text': f'You crack open the chest — {gold_reward} gold inside!',
+        'color': 'var(--gold)'
+    })
+    messages.append({
+        'text': f'+{exp_reward} experience!',
+        'color': 'var(--exp-purple)'
+    })
 
     item_count_min, item_count_max = chest_data.get('item_count_range', [1, 2])
     item_count = random.randint(item_count_min, item_count_max)
@@ -97,117 +218,299 @@ def process_chest_room(player: Dict[str, Any], room: Dict[str, Any],
 
     for _ in range(item_count):
         rarity = random.choice(item_rarities)
-        possible = [item for item in items_data.values() if item.get('rarity') == rarity]
+        possible = [(name, item) for name, item in items_data.items()
+                    if isinstance(item, dict) and item.get('rarity') == rarity]
         if possible:
-            item = random.choice(possible)
-            items_found.append(item.get('name', 'Unknown'))
-            player.setdefault('inventory', []).append(item.get('name', 'Unknown'))
+            name, _ = random.choice(possible)
+            items_found.append(name)
+            player.setdefault('inventory', []).append(name)
         else:
             bonus = random.randint(25, 75)
             player['gold'] = player.get('gold', 0) + bonus
 
     if items_found:
-        messages.append({'text': f'Items found: {", ".join(items_found)}', 'color': 'var(--yellow)'})
+        messages.append({
+            'text': f'Items found: {", ".join(items_found)}',
+            'color': 'var(--gold-bright)'
+        })
 
-    return {'type': 'chest', 'messages': messages, 'gold': gold_reward, 'exp': exp_reward, 'items': items_found}
+    return {
+        'type': 'chest',
+        'messages': messages,
+        'gold': gold_reward,
+        'exp': exp_reward,
+        'items': items_found
+    }
+
+
+def process_trap_chest_room(player: Dict[str, Any], room: Dict[str, Any],
+                            dungeons_data: Dict[str,
+                                                Any], items_data: Dict[str,
+                                                                       Any],
+                            roll: int) -> Dict[str, Any]:
+    """Process a trapped chest — roll to disarm, then open it."""
+    trap = room.get('challenge', {})
+    messages = []
+    threshold = trap.get('threshold', 10)
+
+    if roll >= threshold:
+        messages.append({
+            'text': f'You spot the trap and disarm it! (Rolled {roll})',
+            'color': 'var(--green-bright)'
+        })
+        result = process_chest_room(player, room, dungeons_data, items_data)
+        messages.extend(result['messages'])
+    else:
+        dmg = int(trap.get('base_damage', 20) * random.uniform(0.8, 1.2))
+        player['hp'] = max(1, player.get('hp', 0) - dmg)
+        messages.append({
+            'text':
+            f'TRAP! {trap.get("name", "Trap")} — you take {dmg} damage! (Rolled {roll})',
+            'color': 'var(--red)'
+        })
+        if random.random() < 0.5:
+            gold = random.randint(20, 80)
+            player['gold'] = player.get('gold', 0) + gold
+            messages.append({
+                'text': f'Shaken but not broken, you find {gold} gold.',
+                'color': 'var(--gold)'
+            })
+
+    return {'type': 'trap_chest', 'messages': messages}
 
 
 def process_empty_room(room: Dict[str, Any]) -> Dict[str, Any]:
-    """Process an empty room."""
     msgs = [
-        "The room is empty... You rest briefly.",
-        "Nothing here but shadows and silence.",
-        "An empty chamber. You press forward.",
+        'The chamber is silent. You breathe and press on.',
+        'Nothing here but dust and shadow.',
+        'An empty room. You find a moment of quiet.',
+        'The walls carry old carvings but nothing of note.',
     ]
-    return {'type': 'empty', 'messages': [{'text': random.choice(msgs), 'color': 'var(--text-dim)'}]}
+    small_events = [
+        {
+            'text': 'You find a small coin pouch — 10 gold!',
+            'color': 'var(--gold)',
+            'gold': 10
+        },
+        {
+            'text': 'A cracked health vial restores 15 HP.',
+            'color': 'var(--green-bright)',
+            'heal': 15
+        },
+        None,
+    ]
+    event = random.choice(small_events)
+    messages = [{'text': random.choice(msgs), 'color': 'var(--text-dim)'}]
+    if event:
+        if 'gold' in event:
+            messages.append({'text': event['text'], 'color': event['color']})
+        elif 'heal' in event:
+            messages.append({'text': event['text'], 'color': event['color']})
+    return {'type': 'empty', 'messages': messages}
 
 
-def process_battle_room(player: Dict[str, Any], room: Dict[str, Any], enemies_data: Dict[str, Any],
-                        areas_data: Dict[str, Any], current_area: str) -> Dict[str, Any]:
-    """Prepare a battle room encounter. Returns enemy dict to fight."""
+def process_battle_room(player: Dict[str, Any], room: Dict[str, Any],
+                        enemies_data: Dict[str, Any], areas_data: Dict[str,
+                                                                       Any],
+                        current_area: str) -> Dict[str, Any]:
     area = areas_data.get(current_area, {})
     possible = area.get('possible_enemies', [])
     if not possible:
-        possible = [k for k in enemies_data.keys()][:5]
+        possible = [
+            k for k in enemies_data.keys()
+            if isinstance(enemies_data[k], dict)
+        ][:8]
     if not possible:
-        return {'type': 'empty', 'messages': [{'text': 'No enemies found. You proceed safely.', 'color': 'var(--text-dim)'}]}
+        return {
+            'type':
+            'empty',
+            'messages': [{
+                'text': 'The chamber is strangely empty.',
+                'color': 'var(--text-dim)'
+            }]
+        }
 
     enemy_key = random.choice(possible)
-    enemy_data = enemies_data.get(enemy_key)
-    if not enemy_data:
-        return {'type': 'empty', 'messages': [{'text': 'No enemies found. You proceed safely.', 'color': 'var(--text-dim)'}]}
+    enemy_data = enemies_data.get(enemy_key, {})
+    if not isinstance(enemy_data, dict):
+        return {
+            'type':
+            'empty',
+            'messages': [{
+                'text': 'The chamber is clear.',
+                'color': 'var(--text-dim)'
+            }]
+        }
 
     difficulty = room.get('difficulty', 1)
     scaled = dict(enemy_data)
-    scaled['hp'] = int(scaled.get('hp', 50) * (0.8 + difficulty * 0.2))
-    scaled['attack'] = int(scaled.get('attack', 5) * (0.8 + difficulty * 0.2))
-    scaled['defense'] = int(scaled.get('defense', 2) * (0.8 + difficulty * 0.2))
+    scale = 0.8 + difficulty * 0.2
+    scaled['key'] = enemy_key
+    scaled['hp'] = int(scaled.get('hp', 50) * scale)
+    scaled['max_hp'] = scaled['hp']
+    scaled['attack'] = int(scaled.get('attack', 5) * scale)
+    scaled['defense'] = int(scaled.get('defense', 2) * scale)
+    scaled['speed'] = scaled.get('speed', 10)
+    scaled['exp_reward'] = int(scaled.get('experience_reward', 30) * scale)
+    scaled['gold_reward'] = max(
+        1,
+        int(scaled.get('gold_reward', 10)) + random.randint(-2, 8))
+    scaled['loot_table'] = scaled.get('loot_table', [])
 
     return {
-        'type': 'battle',
-        'enemy': scaled,
-        'messages': [{'text': f'A {scaled.get("name", "enemy")} blocks your path!', 'color': 'var(--red)'}],
+        'type':
+        'battle',
+        'enemy':
+        scaled,
+        'messages': [{
+            'text': f'A {scaled.get("name", "foe")} blocks your path!',
+            'color': 'var(--red)'
+        }],
     }
 
 
 def process_question_room(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Return a question room challenge."""
-    templates = dungeons_data.get('challenge_templates', {})
-    q_template = templates.get('question', {})
-    types = q_template.get('types', [])
-    if not types:
-        return {'type': 'empty', 'messages': [{'text': 'The mystical pedestal is silent.', 'color': 'var(--text-dim)'}]}
-
-    question = random.choice(types)
+    riddle = _pick_riddle(dungeons_data)
     return {
-        'type': 'question',
-        'question': question.get('question', ''),
-        'answer': question.get('answer', '').lower(),
-        'hints': question.get('hints', []),
-        'max_attempts': question.get('max_attempts', 3),
-        'success_reward': question.get('success_reward', {}),
-        'failure_damage': question.get('failure_damage', 15),
-        'messages': [{'text': 'A mystical pedestal presents a riddle...', 'color': 'var(--yellow)'}],
+        'type':
+        'question',
+        'question':
+        riddle.get('question', ''),
+        'answer':
+        riddle.get('answer', '').lower().strip(),
+        'hints':
+        riddle.get('hints', []),
+        'success_reward':
+        riddle.get('success_reward', {}),
+        'failure_damage':
+        riddle.get('failure_damage', 15),
+        'messages': [{
+            'text': 'A mystical pedestal presents a riddle...',
+            'color': 'var(--gold)'
+        }],
     }
 
 
-def answer_question(player: Dict[str, Any], question_data: Dict[str, Any], answer: str) -> Dict[str, Any]:
-    """Check a question room answer. Returns result."""
+def answer_question(player: Dict[str, Any], question_data: Dict[str, Any],
+                    answer: str) -> Dict[str, Any]:
     correct = question_data.get('answer', '').lower().strip()
-    if answer.lower().strip() == correct:
+    given = answer.lower().strip()
+    if given == correct or (len(given) > 2 and correct.startswith(given)):
         reward = question_data.get('success_reward', {})
         gold = reward.get('gold', 0)
         exp = reward.get('experience', 0)
         player['gold'] = player.get('gold', 0) + gold
         player['experience'] = player.get('experience', 0) + exp
-        msgs = [{'text': 'Correct! The way forward is revealed!', 'color': 'var(--green-bright)'}]
+        msgs = [{
+            'text': 'Correct! The way forward is revealed!',
+            'color': 'var(--green-bright)'
+        }]
         if gold:
-            msgs.append({'text': f'Gained {gold} gold!', 'color': 'var(--gold)'})
+            msgs.append({'text': f'+{gold} gold!', 'color': 'var(--gold)'})
         if exp:
-            msgs.append({'text': f'Gained {exp} experience!', 'color': 'var(--magenta)'})
+            msgs.append({
+                'text': f'+{exp} experience!',
+                'color': 'var(--exp-purple)'
+            })
         return {'correct': True, 'messages': msgs}
     else:
         dmg = question_data.get('failure_damage', 15)
-        player['hp'] = max(0, player.get('hp', 0) - dmg)
+        player['hp'] = max(1, player.get('hp', 0) - dmg)
         return {
-            'correct': False,
-            'messages': [{'text': f'Wrong! You take {dmg} damage.', 'color': 'var(--red)'}],
-            'player_alive': player['hp'] > 0,
+            'correct':
+            False,
+            'messages': [
+                {
+                    'text': f'Wrong! The rune sears you for {dmg} damage.',
+                    'color': 'var(--red)'
+                },
+                {
+                    'text': f'The answer was: "{correct}"',
+                    'color': 'var(--text-dim)'
+                },
+            ],
+            'player_alive':
+            player['hp'] > 0,
         }
 
 
-def complete_dungeon(player: Dict[str, Any], dungeon: Dict[str, Any]) -> Dict[str, Any]:
-    """Handle dungeon completion rewards."""
+def answer_multi_choice(player: Dict[str, Any], choice_data: Dict[str, Any],
+                        choice_index: int) -> Dict[str, Any]:
+    options = choice_data.get('options', [])
+    if choice_index < 0 or choice_index >= len(options):
+        return {
+            'correct': False,
+            'messages': [{
+                'text': 'Invalid choice.',
+                'color': 'var(--red)'
+            }]
+        }
+
+    chosen = options[choice_index]
+    if chosen.get('correct', False):
+        reward = choice_data.get('success_reward', {})
+        gold = reward.get('gold', 0)
+        exp = reward.get('experience', 0)
+        player['gold'] = player.get('gold', 0) + gold
+        player['experience'] = player.get('experience', 0) + exp
+        msgs = [
+            {
+                'text': chosen.get('reason', 'A good choice!'),
+                'color': 'var(--green-bright)'
+            },
+        ]
+        if gold:
+            msgs.append({'text': f'+{gold} gold!', 'color': 'var(--gold)'})
+        if exp:
+            msgs.append({
+                'text': f'+{exp} experience!',
+                'color': 'var(--exp-purple)'
+            })
+        return {'correct': True, 'messages': msgs}
+    else:
+        dmg = choice_data.get('failure_damage', 10)
+        player['hp'] = max(1, player.get('hp', 0) - dmg)
+        return {
+            'correct':
+            False,
+            'messages': [
+                {
+                    'text': chosen.get('reason', 'A poor choice.'),
+                    'color': 'var(--red)'
+                },
+                {
+                    'text': f'You suffer {dmg} damage for your mistake.',
+                    'color': 'var(--red)'
+                },
+            ],
+        }
+
+
+def complete_dungeon(player: Dict[str, Any],
+                     dungeon: Dict[str, Any]) -> Dict[str, Any]:
     reward = dungeon.get('completion_reward', {})
     gold = reward.get('gold', 100)
     exp = reward.get('experience', 200)
+    items = reward.get('items', [])
     player['gold'] = player.get('gold', 0) + gold
     player['experience'] = player.get('experience', 0) + exp
-    return {
-        'messages': [
-            {'text': f'You completed {dungeon.get("name", "the dungeon")}!', 'color': 'var(--gold)'},
-            {'text': f'Rewards: {gold} gold, {exp} experience.', 'color': 'var(--text-light)'},
-        ],
-        'gold': gold,
-        'exp': exp,
-    }
+    for item in items:
+        player.setdefault('inventory', []).append(item)
+
+    msgs = [
+        {
+            'text': f'Dungeon Cleared: {dungeon.get("name", "the dungeon")}!',
+            'color': 'var(--gold)'
+        },
+        {
+            'text': f'Rewards: {gold} gold, {exp} experience.',
+            'color': 'var(--text-light)'
+        },
+    ]
+    if items:
+        msgs.append({
+            'text': f'Items received: {", ".join(items)}',
+            'color': 'var(--gold-bright)'
+        })
+
+    return {'messages': msgs, 'gold': gold, 'exp': exp, 'items': items}

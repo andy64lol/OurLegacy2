@@ -40,7 +40,11 @@ class MarketAPI:
             if remaining:
                 mins = int(remaining.total_seconds() // 60)
                 secs = int(remaining.total_seconds() % 60)
-                return {"ok": False, "message": f"Market closed. Come back in {mins}m {secs}s.", "cooldown": True}
+                return {
+                    "ok": False,
+                    "message": f"Market closed. Come back in {mins}m {secs}s.",
+                    "cooldown": True
+                }
 
         for url in MARKET_API_URLS:
             try:
@@ -53,7 +57,10 @@ class MarketAPI:
             except Exception:
                 continue
 
-        return {"ok": False, "message": "Failed to reach any market merchants at this time."}
+        return {
+            "ok": False,
+            "message": "Failed to reach any market merchants at this time."
+        }
 
     def get_all_items(self) -> List[Dict[str, Any]]:
         result = self.fetch_market_data()
@@ -61,8 +68,11 @@ class MarketAPI:
             return result["data"].get('items', [])
         return []
 
-    def filter_items(self, item_type: Optional[str] = None, rarity: Optional[str] = None,
-                     class_req: Optional[str] = None, max_price: Optional[int] = None) -> List[Dict[str, Any]]:
+    def filter_items(self,
+                     item_type: Optional[str] = None,
+                     rarity: Optional[str] = None,
+                     class_req: Optional[str] = None,
+                     max_price: Optional[int] = None) -> List[Dict[str, Any]]:
         items = self.get_all_items()
         filtered = []
         for item in items:

@@ -9,7 +9,10 @@ from utilities.dice import Dice
 from utilities.entities import Enemy, Boss
 
 
-def create_hp_mp_bar(current: int, maximum: int, width: int = 15, color: str = None) -> str:
+def create_hp_mp_bar(current: int,
+                     maximum: int,
+                     width: int = 15,
+                     color: Optional[str] = None) -> str:
     if maximum <= 0:
         return "[" + " " * width + "]"
     filled_width = max(0, min(width, int((current / maximum) * width)))
@@ -30,13 +33,17 @@ def create_boss_hp_bar(current: int, maximum: int, width: int = 40) -> str:
 
 def get_effective_attack(player: Dict[str, Any]) -> int:
     base = player.get('attack', 10)
-    bonus = sum(b.get('modifiers', {}).get('attack_bonus', 0) for b in player.get('active_buffs', []))
+    bonus = sum(
+        b.get('modifiers', {}).get('attack_bonus', 0)
+        for b in player.get('active_buffs', []))
     return base + bonus
 
 
 def get_effective_defense(player: Dict[str, Any]) -> int:
     base = player.get('defense', 8)
-    bonus = sum(b.get('modifiers', {}).get('defense_bonus', 0) for b in player.get('active_buffs', []))
+    bonus = sum(
+        b.get('modifiers', {}).get('defense_bonus', 0)
+        for b in player.get('active_buffs', []))
     total = base + bonus
     if player.get('defending'):
         total = int(total * 1.5)
@@ -45,7 +52,9 @@ def get_effective_defense(player: Dict[str, Any]) -> int:
 
 def get_effective_speed(player: Dict[str, Any]) -> int:
     base = player.get('speed', 10)
-    bonus = sum(b.get('modifiers', {}).get('speed_bonus', 0) for b in player.get('active_buffs', []))
+    bonus = sum(
+        b.get('modifiers', {}).get('speed_bonus', 0)
+        for b in player.get('active_buffs', []))
     return base + bonus
 
 
@@ -83,23 +92,35 @@ def tick_buffs(player: Dict[str, Any]) -> bool:
     return changed
 
 
-def battle_round_player_attack(player: Dict[str, Any], enemy_dict: Dict[str, Any],
-                                items_data: Dict[str, Any]) -> Dict[str, Any]:
+def battle_round_player_attack(player: Dict[str, Any], enemy_dict: Dict[str,
+                                                                        Any],
+                               items_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Execute the player's attack portion of a battle round.
     Returns a result dict with messages, damage dealt, etc.
     """
     dice = Dice()
     messages = []
-    result = {"action": "attack", "messages": messages, "enemy_alive": True, "player_alive": True}
+    result = {
+        "action": "attack",
+        "messages": messages,
+        "enemy_alive": True,
+        "player_alive": True
+    }
 
     atk = get_effective_attack(player)
     roll = dice.roll_1d(20)
 
     if roll == 1:
-        messages.append({"text": "Critical miss! Your weapon slips!", "color": "var(--red)"})
+        messages.append({
+            "text": "Critical miss! Your weapon slips!",
+            "color": "var(--red)"
+        })
     elif roll == 20:
-        messages.append({"text": "Critical hit! A perfect strike!", "color": "var(--gold)"})
+        messages.append({
+            "text": "Critical hit! A perfect strike!",
+            "color": "var(--gold)"
+        })
 
     damage = int(atk * roll / 10)
     enemy = Enemy(enemy_dict)
@@ -107,13 +128,19 @@ def battle_round_player_attack(player: Dict[str, Any], enemy_dict: Dict[str, Any
     actual = enemy.take_damage(damage)
     enemy_dict['hp'] = enemy.hp
 
-    messages.append({"text": f"You attack for {actual} damage! (Rolled {roll}/20)", "color": "var(--green-bright)"})
+    messages.append({
+        "text": f"You attack for {actual} damage! (Rolled {roll}/20)",
+        "color": "var(--green-bright)"
+    })
     result["damage_dealt"] = actual
     result["enemy_alive"] = enemy.is_alive()
     result["enemy_hp"] = enemy.hp
 
     if not enemy.is_alive():
-        messages.append({"text": f"You defeated {enemy_dict.get('name', 'the enemy')}!", "color": "var(--gold)"})
+        messages.append({
+            "text": f"You defeated {enemy_dict.get('name', 'the enemy')}!",
+            "color": "var(--gold)"
+        })
 
     return result
 
@@ -122,14 +149,21 @@ def battle_round_player_defend(player: Dict[str, Any]) -> Dict[str, Any]:
     """Player chooses to defend."""
     player['defending'] = True
     return {
-        "action": "defend",
-        "messages": [{"text": "You take a defensive stance, reducing incoming damage!", "color": "var(--blue)"}],
-        "enemy_alive": True,
-        "player_alive": True,
+        "action":
+        "defend",
+        "messages": [{
+            "text": "You take a defensive stance, reducing incoming damage!",
+            "color": "var(--blue)"
+        }],
+        "enemy_alive":
+        True,
+        "player_alive":
+        True,
     }
 
 
-def battle_round_player_flee(player: Dict[str, Any], enemy_dict: Dict[str, Any]) -> Dict[str, Any]:
+def battle_round_player_flee(player: Dict[str, Any],
+                             enemy_dict: Dict[str, Any]) -> Dict[str, Any]:
     """Player attempts to flee."""
     p_speed = get_effective_speed(player)
     e_speed = enemy_dict.get('speed', 5)
@@ -140,13 +174,17 @@ def battle_round_player_flee(player: Dict[str, Any], enemy_dict: Dict[str, Any])
     return {
         "action": "flee",
         "fled": fled,
-        "messages": [{"text": msg, "color": color}],
+        "messages": [{
+            "text": msg,
+            "color": color
+        }],
         "enemy_alive": True,
         "player_alive": True,
     }
 
 
-def battle_round_enemy_attack(player: Dict[str, Any], enemy_dict: Dict[str, Any]) -> Dict[str, Any]:
+def battle_round_enemy_attack(player: Dict[str, Any],
+                              enemy_dict: Dict[str, Any]) -> Dict[str, Any]:
     """Enemy attacks the player. Modifies player dict in place."""
     dice = Dice()
     messages = []
@@ -162,14 +200,23 @@ def battle_round_enemy_attack(player: Dict[str, Any], enemy_dict: Dict[str, Any]
         player['defending'] = False
 
     actual = player_take_damage(player, raw_damage)
-    messages.append({"text": f"{e_name} attacks you for {actual} damage!", "color": "var(--red)"})
+    messages.append({
+        "text": f"{e_name} attacks you for {actual} damage!",
+        "color": "var(--red)"
+    })
 
     if was_defending:
-        messages.append({"text": "Your defensive stance reduced the damage!", "color": "var(--blue)"})
+        messages.append({
+            "text": "Your defensive stance reduced the damage!",
+            "color": "var(--blue)"
+        })
 
     player_alive = player.get('hp', 0) > 0
     if not player_alive:
-        messages.append({"text": "You have been defeated...", "color": "var(--red)"})
+        messages.append({
+            "text": "You have been defeated...",
+            "color": "var(--red)"
+        })
 
     return {
         "action": "enemy_attack",
@@ -185,16 +232,23 @@ def collect_battle_rewards(player: Dict[str, Any], enemy_dict: Dict[str, Any],
     """Collect rewards after defeating an enemy. Modifies player dict in place."""
     messages = []
     e_name = enemy_dict.get('name', 'the enemy')
-    exp_reward = enemy_dict.get('experience_reward', enemy_dict.get('exp_reward', 20))
+    exp_reward = enemy_dict.get('experience_reward',
+                                enemy_dict.get('exp_reward', 20))
     gold_reward = enemy_dict.get('gold_reward', 10)
 
     weather = player.get('current_weather', 'sunny')
     if weather == "sunny":
         exp_reward = int(exp_reward * 1.1)
-        messages.append({"text": "Sunny weather bonus: +10% EXP!", "color": "var(--gold)"})
+        messages.append({
+            "text": "Sunny weather bonus: +10% EXP!",
+            "color": "var(--gold)"
+        })
     elif weather == "stormy":
         gold_reward = int(gold_reward * 1.2)
-        messages.append({"text": "Stormy weather bonus: +20% Gold!", "color": "var(--blue)"})
+        messages.append({
+            "text": "Stormy weather bonus: +20% Gold!",
+            "color": "var(--blue)"
+        })
 
     old_level = player.get('level', 1)
     player['experience'] = player.get('experience', 0) + exp_reward
@@ -202,22 +256,31 @@ def collect_battle_rewards(player: Dict[str, Any], enemy_dict: Dict[str, Any],
     while player['experience'] >= player.get('experience_to_next', 100):
         player['experience'] -= player['experience_to_next']
         player['level'] = player.get('level', 1) + 1
-        player['experience_to_next'] = int(player.get('experience_to_next', 100) * 1.5)
+        player['experience_to_next'] = int(
+            player.get('experience_to_next', 100) * 1.5)
         bonuses = player.get('level_up_bonuses', {})
         player['max_hp'] = player.get('max_hp', 100) + bonuses.get('hp', 10)
         player['max_mp'] = player.get('max_mp', 50) + bonuses.get('mp', 2)
         player['attack'] = player.get('attack', 10) + bonuses.get('attack', 2)
-        player['defense'] = player.get('defense', 8) + bonuses.get('defense', 1)
+        player['defense'] = player.get('defense', 8) + bonuses.get(
+            'defense', 1)
         player['speed'] = player.get('speed', 10) + bonuses.get('speed', 1)
         player['hp'] = player['max_hp']
         player['mp'] = player['max_mp']
         leveled_up = True
 
     player['gold'] = player.get('gold', 0) + gold_reward
-    messages.append({"text": f"Defeated {e_name}! Gained {exp_reward} EXP and {gold_reward} gold.", "color": "var(--gold)"})
+    messages.append({
+        "text":
+        f"Defeated {e_name}! Gained {exp_reward} EXP and {gold_reward} gold.",
+        "color": "var(--gold)"
+    })
 
     if leveled_up:
-        messages.append({"text": f"Level up! You are now level {player['level']}!", "color": "var(--gold)"})
+        messages.append({
+            "text": f"Level up! You are now level {player['level']}!",
+            "color": "var(--gold)"
+        })
 
     loot_gained = None
     loot_table = enemy_dict.get('loot_table', enemy_dict.get('drops', []))
@@ -225,7 +288,10 @@ def collect_battle_rewards(player: Dict[str, Any], enemy_dict: Dict[str, Any],
         loot = random.choice(loot_table)
         player.setdefault('inventory', []).append(loot)
         loot_gained = loot
-        messages.append({"text": f"Loot acquired: {loot}!", "color": "var(--yellow)"})
+        messages.append({
+            "text": f"Loot acquired: {loot}!",
+            "color": "var(--yellow)"
+        })
 
     return {
         "messages": messages,
@@ -243,14 +309,24 @@ def handle_player_defeat(player: Dict[str, Any]) -> Dict[str, Any]:
     player['mp'] = player.get('max_mp', 50) // 2
     return {
         "messages": [
-            {"text": "You were defeated in battle...", "color": "var(--red)"},
-            {"text": "You wake up at the Starting Village, weakened but alive.", "color": "var(--yellow)"},
+            {
+                "text": "You were defeated in battle...",
+                "color": "var(--red)"
+            },
+            {
+                "text":
+                "You wake up at the Starting Village, weakened but alive.",
+                "color": "var(--yellow)"
+            },
         ],
-        "respawn_area": "starting_village",
+        "respawn_area":
+        "starting_village",
     }
 
 
-def build_enemy_from_area(area_key: str, enemies_data: Dict[str, Any], areas_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def build_enemy_from_area(
+        area_key: str, enemies_data: Dict[str, Any],
+        areas_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Pick a random enemy from the current area."""
     area = areas_data.get(area_key, {})
     possible = area.get('possible_enemies', [])
@@ -265,8 +341,9 @@ def build_enemy_from_area(area_key: str, enemies_data: Dict[str, Any], areas_dat
     return dict(enemy_data)
 
 
-def get_spells_for_weapon(weapon_name: Optional[str], items_data: Dict[str, Any],
-                          spells_data: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
+def get_spells_for_weapon(
+        weapon_name: Optional[str], items_data: Dict[str, Any],
+        spells_data: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
     """Return list of (spell_name, spell_data) available for the given weapon."""
     if not weapon_name:
         return []

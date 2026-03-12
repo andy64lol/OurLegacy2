@@ -21,56 +21,94 @@
         </div>
         <div class="panel sidebar-panel">
             <div class="panel-title">Navigation</div>
-            <div class="panel-body">
-                <a href="/game" class="btn btn-secondary" style="width:100%;display:block;">Return to Game</a>
+            <div class="panel-body" style="display:flex;flex-direction:column;gap:6px;">
+                <a href="/game" class="btn btn-secondary btn-small" style="text-align:center;">Back to Game</a>
+                <a href="/crafting" class="btn btn-secondary btn-small" style="text-align:center;">Crafting</a>
+                <a href="/market" class="btn btn-secondary btn-small" style="text-align:center;">Market</a>
             </div>
         </div>
     </aside>
 
-    <main class="main-area">
+    <main class="main-area" style="padding:18px;overflow-y:auto;">
+
+        {% if messages %}
+        <div class="panel" style="margin-bottom:14px;">
+            <div class="panel-body">
+                {% for msg in messages %}
+                <div style="color:{{ msg.color }};">{{ msg.text }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if active_dungeon %}
+        <div class="panel" style="margin-bottom:14px;border-color:var(--gold);">
+            <div class="panel-title" style="background:var(--wood-mid);">Active Dungeon</div>
+            <div class="panel-body">
+                <div style="font-size:16px;color:var(--gold);font-weight:600;margin-bottom:6px;">
+                    {{ active_dungeon.dungeon.name }}
+                </div>
+                <div style="font-size:14px;color:var(--text-dim);margin-bottom:12px;">
+                    Room {{ active_dungeon.room_index + 1 }} / {{ active_dungeon.rooms|length }}
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <a href="/dungeon/room" class="btn btn-primary">Continue</a>
+                    <form method="POST" action="/dungeon/abandon">
+                        <button type="submit" class="btn btn-danger btn-small"
+                            onclick="return confirm('Abandon this dungeon run? All progress lost.')">Abandon</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="panel">
             <div class="panel-title">Dungeon Entrances</div>
             <div class="panel-body">
-                {% if active_dungeon %}
-                <div class="message-row" style="background:var(--panel-bg);padding:12px;margin-bottom:12px;border:1px solid var(--gold);border-radius:6px;">
-                    <strong style="color:var(--gold);">Active Dungeon:</strong> {{ active_dungeon.dungeon.name }}
-                    &mdash; Room {{ active_dungeon.room_index + 1 }} / {{ active_dungeon.rooms|length }}
-                    <a href="/dungeon/room" class="btn btn-primary" style="margin-left:12px;">Continue</a>
-                </div>
-                {% endif %}
-
-                {% if messages %}
-                <div style="margin-bottom:12px;">
-                    {% for msg in messages[:5] %}
-                    <div style="color:{{ msg.color }};">{{ msg.text }}</div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-
+                <p class="panel-note">Dungeons are accessible from anywhere. Your level determines which you can enter.</p>
                 {% if not dungeons %}
-                <div class="text-dim">No dungeons are accessible in your current area at your level. Explore the world to find them.</div>
+                <p class="empty-notice">No dungeons found.</p>
                 {% else %}
-                {% for dungeon in dungeons %}
-                <div class="panel" style="margin-bottom:12px;padding:12px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                        <div>
-                            <div class="panel-title" style="font-size:18px;margin-bottom:4px;">{{ dungeon.name }}</div>
-                            <div class="item-desc">{{ dungeon.description }}</div>
-                            <div style="margin-top:6px;font-size:13px;color:var(--text-dim);">
-                                Rooms: {{ dungeon.rooms }} &bull; Min Level: {{ dungeon.min_level }}
+                <div class="dungeon-list">
+                    {% for d in dungeons %}
+                    <div class="dungeon-entry {% if not d.available %}dungeon-locked{% else %}dungeon-open{% endif %}">
+                        <div class="dungeon-info">
+                            <div class="dungeon-name">
+                                {{ d.name }}
+                                {% if not d.available %}
+                                <span class="dungeon-lock-badge">Lvl {{ d.min_level }} Required</span>
+                                {% endif %}
+                            </div>
+                            <div class="dungeon-desc">{{ d.description }}</div>
+                            <div class="dungeon-meta">
+                                <span class="dungeon-diff">Difficulty {{ d.difficulty[0] }}&ndash;{{ d.difficulty[1] }}</span>
+                                <span class="dungeon-rooms">{{ d.rooms }} rooms</span>
+                                {% if d.completion_reward %}
+                                <span class="dungeon-reward">
+                                    Reward: <span style="color:var(--gold)">{{ d.completion_reward.get('gold',0) }}g</span>,
+                                    {{ d.completion_reward.get('experience',0) }} EXP
+                                    {% if d.completion_reward.get('items') %}
+                                    &mdash; {{ d.completion_reward['items']|join(', ') }}
+                                    {% endif %}
+                                </span>
+                                {% endif %}
                             </div>
                         </div>
-                        {% if dungeon.available %}
-                        <form method="POST" action="/action/dungeon/enter">
-                            <input type="hidden" name="dungeon_id" value="{{ dungeon.id }}">
-                            <button type="submit" class="btn btn-primary">Enter Dungeon</button>
-                        </form>
-                        {% else %}
-                        <div class="text-dim">Requires Level {{ dungeon.min_level }}</div>
-                        {% endif %}
+                        <div class="dungeon-action">
+                            {% if d.available and not active_dungeon %}
+                            <form method="post" action="/action/dungeon/enter">
+                                <input type="hidden" name="dungeon_id" value="{{ d.id }}">
+                                <button type="submit" class="btn btn-primary btn-small">Enter</button>
+                            </form>
+                            {% elif d.available and active_dungeon %}
+                            <span style="font-size:12px;color:var(--text-dim);text-align:center;">Finish active<br>dungeon first</span>
+                            {% else %}
+                            <span class="dungeon-lock-badge">Locked</span>
+                            {% endif %}
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
                 {% endif %}
             </div>
         </div>

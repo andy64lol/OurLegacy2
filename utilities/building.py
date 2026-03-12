@@ -2,21 +2,42 @@
 Building / Housing System for Our Legacy 2 - Flask Edition
 Pure functions that operate on player dicts.
 """
-from typing import Dict, List, Any, Optional
-
+from typing import Dict, List, Any
 
 BUILDING_TYPES = {
-    "house": {"label": "House", "slots": 3},
-    "decoration": {"label": "Decoration", "slots": 10},
-    "fencing": {"label": "Fencing", "slots": 1},
-    "garden": {"label": "Garden", "slots": 3},
-    "farm": {"label": "Farm", "slots": 2},
-    "farming": {"label": "Farming", "slots": 2},
-    "training_place": {"label": "Training Place", "slots": 3},
+    "house": {
+        "label": "House",
+        "slots": 3
+    },
+    "decoration": {
+        "label": "Decoration",
+        "slots": 10
+    },
+    "fencing": {
+        "label": "Fencing",
+        "slots": 1
+    },
+    "garden": {
+        "label": "Garden",
+        "slots": 3
+    },
+    "farm": {
+        "label": "Farm",
+        "slots": 2
+    },
+    "farming": {
+        "label": "Farming",
+        "slots": 2
+    },
+    "training_place": {
+        "label": "Training Place",
+        "slots": 3
+    },
 }
 
 
-def get_building_status(player: Dict[str, Any], housing_data: Dict[str, Any]) -> Dict[str, Any]:
+def get_building_status(player: Dict[str, Any],
+                        housing_data: Dict[str, Any]) -> Dict[str, Any]:
     """Return current building slot status for the player."""
     building_slots = player.get('building_slots', {})
     slots_info = {}
@@ -36,7 +57,11 @@ def get_building_status(player: Dict[str, Any], housing_data: Dict[str, Any]) ->
                     'comfort_points': h.get('comfort_points', 0),
                 }
             type_slots.append({'slot_id': slot_id, 'item': item_info})
-        slots_info[b_type] = {'label': info['label'], 'max_slots': info['slots'], 'slots': type_slots}
+        slots_info[b_type] = {
+            'label': info['label'],
+            'max_slots': info['slots'],
+            'slots': type_slots
+        }
 
     return {
         'building_slots': slots_info,
@@ -45,7 +70,8 @@ def get_building_status(player: Dict[str, Any], housing_data: Dict[str, Any]) ->
     }
 
 
-def get_available_slots_for_type(player: Dict[str, Any], item_type: str) -> List[str]:
+def get_available_slots_for_type(player: Dict[str, Any],
+                                 item_type: str) -> List[str]:
     """Return list of empty slot IDs for the given item type."""
     info = BUILDING_TYPES.get(item_type, {})
     if not info:
@@ -77,7 +103,10 @@ def place_housing_item(player: Dict[str, Any], item_id: str, slot_id: str,
 
     if old_item_id:
         old_data = housing_data.get(old_item_id, {})
-        player['comfort_points'] = max(0, player.get('comfort_points', 0) - old_data.get('comfort_points', 0))
+        player['comfort_points'] = max(
+            0,
+            player.get('comfort_points', 0) -
+            old_data.get('comfort_points', 0))
 
     building_slots[slot_id] = item_id
     comfort = h_data.get('comfort_points', 0)
@@ -85,7 +114,12 @@ def place_housing_item(player: Dict[str, Any], item_id: str, slot_id: str,
     player['building_slots'] = building_slots
 
     name = h_data.get('name', item_id)
-    return {'ok': True, 'message': f'Placed {name} in slot {slot_id}. Comfort: +{comfort}. Total: {player["comfort_points"]}'}
+    return {
+        'ok':
+        True,
+        'message':
+        f'Placed {name} in slot {slot_id}. Comfort: +{comfort}. Total: {player["comfort_points"]}'
+    }
 
 
 def remove_housing_item_slot(player: Dict[str, Any], slot_id: str,
@@ -101,7 +135,8 @@ def remove_housing_item_slot(player: Dict[str, Any], slot_id: str,
 
     h_data = housing_data.get(item_id, {})
     comfort = h_data.get('comfort_points', 0)
-    player['comfort_points'] = max(0, player.get('comfort_points', 0) - comfort)
+    player['comfort_points'] = max(0,
+                                   player.get('comfort_points', 0) - comfort)
     building_slots[slot_id] = None
     player['building_slots'] = building_slots
 
@@ -109,7 +144,8 @@ def remove_housing_item_slot(player: Dict[str, Any], slot_id: str,
     return {'ok': True, 'message': f'Removed {name} from slot {slot_id}.'}
 
 
-def get_home_status(player: Dict[str, Any], housing_data: Dict[str, Any]) -> Dict[str, Any]:
+def get_home_status(player: Dict[str, Any],
+                    housing_data: Dict[str, Any]) -> Dict[str, Any]:
     """Return detailed home status and statistics."""
     building_slots = player.get('building_slots', {})
     placed = [item_id for item_id in building_slots.values() if item_id]
@@ -124,13 +160,18 @@ def get_home_status(player: Dict[str, Any], housing_data: Dict[str, Any]) -> Dic
         item_comforts[name]['count'] += 1
         item_comforts[name]['total_comfort'] += comfort
 
-    sorted_items = sorted(item_comforts.items(), key=lambda x: x[1]['total_comfort'], reverse=True)
+    sorted_items = sorted(item_comforts.items(),
+                          key=lambda x: x[1]['total_comfort'],
+                          reverse=True)
 
     return {
         'comfort_points': player.get('comfort_points', 0),
         'total_placed': len(placed),
         'unique_placed': len(set(placed)),
-        'top_items': [{'name': n, **info} for n, info in sorted_items[:10]],
+        'top_items': [{
+            'name': n,
+            **info
+        } for n, info in sorted_items[:10]],
     }
 
 
@@ -139,13 +180,19 @@ def plant_crop(player: Dict[str, Any], farm_slot_id: str, crop_key: str,
     """Plant a crop in a farm slot. Returns result dict."""
     building_slots = player.get('building_slots', {})
     if not building_slots.get(farm_slot_id):
-        return {'ok': False, 'message': 'You need to build a farm in that slot first.'}
+        return {
+            'ok': False,
+            'message': 'You need to build a farm in that slot first.'
+        }
 
     crops = player.setdefault('crops', {})
     if crops.get(farm_slot_id):
         crop_info = crops[farm_slot_id]
         if crop_info.get('ready'):
-            return {'ok': False, 'message': 'There is a ready crop here. Harvest it first!'}
+            return {
+                'ok': False,
+                'message': 'There is a ready crop here. Harvest it first!'
+            }
         return {'ok': False, 'message': 'A crop is already growing here.'}
 
     crops_data = farming_data.get('crops', {})
@@ -155,7 +202,10 @@ def plant_crop(player: Dict[str, Any], farm_slot_id: str, crop_key: str,
 
     gold_cost = crop_data.get('seed_cost', 10)
     if player.get('gold', 0) < gold_cost:
-        return {'ok': False, 'message': f'Not enough gold. Seeds cost {gold_cost} gold.'}
+        return {
+            'ok': False,
+            'message': f'Not enough gold. Seeds cost {gold_cost} gold.'
+        }
 
     player['gold'] = player.get('gold', 0) - gold_cost
     crops[farm_slot_id] = {
@@ -169,7 +219,11 @@ def plant_crop(player: Dict[str, Any], farm_slot_id: str, crop_key: str,
     }
     player['crops'] = crops
 
-    return {'ok': True, 'message': f'Planted {crop_data.get("name", crop_key)} in {farm_slot_id}.'}
+    return {
+        'ok': True,
+        'message':
+        f'Planted {crop_data.get("name", crop_key)} in {farm_slot_id}.'
+    }
 
 
 def harvest_crop(player: Dict[str, Any], farm_slot_id: str) -> Dict[str, Any]:
@@ -189,4 +243,9 @@ def harvest_crop(player: Dict[str, Any], farm_slot_id: str) -> Dict[str, Any]:
     crops[farm_slot_id] = None
     player['crops'] = crops
 
-    return {'ok': True, 'message': f'Harvested {qty}x {yield_item}!', 'item': yield_item, 'quantity': qty}
+    return {
+        'ok': True,
+        'message': f'Harvested {qty}x {yield_item}!',
+        'item': yield_item,
+        'quantity': qty
+    }

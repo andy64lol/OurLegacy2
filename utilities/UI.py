@@ -1,7 +1,3 @@
-import os
-from typing import Any
-
-
 class Colors:
     RED = '\033[91m'
     GREEN = '\033[92m'
@@ -35,7 +31,10 @@ class Colors:
         return f"{color_code}{text}{cls.END}"
 
 
-def create_progress_bar(current: int, maximum: int, width: int = 20, color: str = Colors.GREEN) -> str:
+def create_progress_bar(current: int,
+                        maximum: int,
+                        width: int = 20,
+                        color: str = Colors.GREEN) -> str:
     if maximum <= 0:
         return "[" + " " * width + "]"
     filled_width = int((current / maximum) * width)

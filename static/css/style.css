@@ -789,3 +789,294 @@ strong { font-weight: 600; }
     border-color: var(--gold);
     color: var(--gold);
 }
+
+/* ─── Equipment Slots ────────────────────────────────────────────────────── */
+.equip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+}
+.equip-slot-card {
+    background: var(--slate-darkest);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    font-size: 14px;
+    min-height: 110px;
+}
+.equip-slot-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
+}
+.equip-slot-item {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+.equip-slot-stats {
+    font-size: 12px;
+    color: var(--green-bright);
+    margin-bottom: 3px;
+}
+.equip-slot-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+.equip-slot-empty {
+    font-size: 13px;
+    color: var(--border-bright);
+    font-style: italic;
+    padding-top: 20px;
+    text-align: center;
+}
+
+/* ─── Inventory Cards ────────────────────────────────────────────────────── */
+.inv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+}
+.inv-card {
+    background: var(--slate-dark);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    font-size: 14px;
+}
+.rarity-border-common    { border-left: 3px solid var(--rarity-common); }
+.rarity-border-uncommon  { border-left: 3px solid var(--rarity-uncommon); }
+.rarity-border-rare      { border-left: 3px solid var(--rarity-rare); }
+.rarity-border-epic      { border-left: 3px solid var(--rarity-epic); }
+.rarity-border-legendary { border-left: 3px solid var(--rarity-legendary); }
+
+.inv-card-name   { font-size: 15px; font-weight: 500; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+.inv-qty         { font-size: 13px; color: var(--text-dim); }
+.inv-card-stats  { font-size: 12px; color: var(--green-bright); margin-bottom: 3px; }
+.inv-card-desc   { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; line-height: 1.4; }
+.inv-card-actions{ display: flex; gap: 5px; flex-wrap: wrap; }
+
+/* ─── Shop Grid ──────────────────────────────────────────────────────────── */
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+.shop-card {
+    background: var(--slate-dark);
+    border: 1px solid var(--border);
+    padding: 11px 14px;
+    font-size: 14px;
+}
+.shop-card.cannot-afford { opacity: 0.55; }
+.shop-card-name  { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+.shop-card-type  { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+.shop-card-stats { font-size: 12px; color: var(--green-bright); margin-bottom: 4px; }
+.shop-card-desc  { font-size: 13px; color: var(--text-dim); margin-bottom: 7px; line-height: 1.4; }
+.shop-card-price { font-size: 15px; color: var(--gold); font-weight: 500; margin-bottom: 8px; }
+
+/* ─── Quest Cards ────────────────────────────────────────────────────────── */
+.quest-card {
+    background: var(--slate-dark);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+.quest-card.quest-ready   { border-color: var(--green-bright); }
+.quest-card.quest-locked  { opacity: 0.6; }
+.quest-card.quest-active  { border-color: var(--wood-mid); }
+
+.quest-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+.quest-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-bright);
+}
+.quest-type-badge {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border: 1px solid;
+    white-space: nowrap;
+}
+.quest-type-kill    { color: var(--red);           border-color: var(--red); }
+.quest-type-collect { color: var(--rarity-uncommon); border-color: var(--rarity-uncommon); }
+
+.quest-desc { font-size: 14px; color: var(--text-dim); margin-bottom: 8px; line-height: 1.55; }
+.quest-req  { font-size: 13px; color: var(--red); margin-bottom: 6px; }
+
+.quest-progress-list { margin-bottom: 8px; display: flex; flex-direction: column; gap: 5px; }
+.quest-progress-item {}
+.quest-progress-label { font-size: 13px; color: var(--text-dim); margin-bottom: 2px; }
+.quest-progress-bar   { height: 8px; }
+
+.quest-rewards {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    font-size: 13px;
+    align-items: center;
+}
+.quest-reward-exp   { color: var(--exp-purple); padding: 2px 6px; border: 1px solid var(--exp-purple); }
+.quest-reward-gold  { color: var(--gold);        padding: 2px 6px; border: 1px solid var(--gold-dim); }
+.quest-reward-item  { color: var(--rarity-uncommon); padding: 2px 6px; border: 1px solid var(--rarity-uncommon); font-size: 12px; }
+
+.quest-ready-badge  {
+    display: inline-block;
+    font-size: 11px;
+    background: var(--green);
+    color: var(--text-bright);
+    padding: 1px 6px;
+    margin-right: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.quest-locked-badge {
+    display: inline-block;
+    font-size: 11px;
+    background: var(--slate-mid);
+    color: var(--text-dim);
+    padding: 1px 6px;
+    margin-right: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ─── Dungeon List ───────────────────────────────────────────────────────── */
+.dungeon-list { display: flex; flex-direction: column; gap: 10px; }
+.dungeon-entry {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--slate-dark);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+}
+.dungeon-open   { border-color: var(--wood-mid); }
+.dungeon-locked { opacity: 0.6; }
+
+.dungeon-info { flex: 1; }
+.dungeon-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+}
+.dungeon-lock-badge {
+    display: inline-block;
+    font-size: 11px;
+    background: var(--red-dark);
+    color: #f8c0a0;
+    padding: 1px 7px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.dungeon-desc { font-size: 14px; color: var(--text-dim); margin-bottom: 6px; line-height: 1.5; }
+.dungeon-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-dim);
+    flex-wrap: wrap;
+}
+.dungeon-diff   { color: var(--red); }
+.dungeon-rooms  { color: var(--text-dim); }
+.dungeon-reward { color: var(--gold-dim); }
+.dungeon-action { flex-shrink: 0; padding-top: 4px; }
+
+/* ─── Dungeon Room UI ────────────────────────────────────────────────────── */
+.dungeon-room-map {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+.dmap-dot {
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--border);
+}
+.dmap-done    { background: var(--green); border-color: var(--green-bright); }
+.dmap-current { background: var(--gold); border-color: var(--gold-bright); }
+.dmap-ahead   { background: var(--slate-darkest); }
+
+.room-boss-banner, .room-battle-banner, .room-chest-banner,
+.room-trap-banner, .room-empty-banner {
+    text-align: center;
+    padding: 24px 16px;
+}
+.room-boss-icon { font-size: 42px; margin-bottom: 10px; }
+.room-boss-text { font-size: 18px; font-weight: 600; color: var(--red); margin-bottom: 6px; }
+.room-boss-sub  { font-size: 14px; color: var(--text-dim); }
+
+.room-riddle-box, .room-choice-box {
+    background: var(--bg-panel-dark);
+    border: 2px solid var(--gold-dim);
+    padding: 20px 22px;
+    margin-bottom: 4px;
+}
+.room-riddle-icon, .room-choice-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+.room-riddle-text, .room-choice-text {
+    font-size: 17px;
+    color: var(--text-bright);
+    font-weight: 500;
+    margin-bottom: 12px;
+    line-height: 1.65;
+}
+.room-riddle-hint {
+    font-size: 14px;
+    color: var(--wood-bright);
+    margin-bottom: 10px;
+    font-style: italic;
+}
+.room-riddle-meta, .room-choice-meta {
+    font-size: 13px;
+    color: var(--text-dim);
+}
+
+.dungeon-text-input {
+    flex: 1;
+    min-width: 200px;
+    background: var(--slate-darkest);
+    border: 2px solid var(--border);
+    color: var(--text-bright);
+    padding: 9px 12px;
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 16px;
+    outline: none;
+}
+.dungeon-text-input:focus { border-color: var(--wood-bright); }
+
+.dungeon-choices { display: flex; flex-direction: column; gap: 8px; }
+.choice-btn {
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 15px;
+}
+
+.btn-battle-large {
+    padding: 15px 32px;
+    font-size: 17px;
+}
+
+/* ─── Main Area (used by dungeon room, etc) ──────────────────────────────── */
+.main-area { padding: 18px; overflow-y: auto; flex: 1; }

@@ -42,7 +42,7 @@
                 </div>
 
                 {% if player.pet %}
-                <div style="margin-top:10px;font-size:13px;color:var(--gold);">
+                <div style="margin-top:8px;font-size:13px;color:var(--gold);">
                     Companion: {{ player.pet.replace('_',' ').title() }}
                 </div>
                 {% endif %}
@@ -61,10 +61,20 @@
                 </div>
                 {% endif %}
                 {% if land_data %}
-                <div style="margin-top:8px;font-size:13px;color:var(--green-bright);">
+                <div style="margin-top:6px;font-size:13px;color:var(--green-bright);">
                     Comfort: <strong>{{ land_data.comfort_points }}</strong>
                 </div>
                 {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Nav -->
+        <div class="panel sidebar-panel" style="margin-top:0;">
+            <div class="panel-title">Navigate</div>
+            <div class="panel-body" style="display:flex;flex-direction:column;gap:6px;">
+                <a href="/dungeons" class="btn btn-secondary btn-small" style="text-align:center;">Dungeons</a>
+                <a href="/crafting" class="btn btn-secondary btn-small" style="text-align:center;">Crafting</a>
+                <a href="/market" class="btn btn-secondary btn-small" style="text-align:center;">Elite Market</a>
             </div>
         </div>
 
@@ -89,17 +99,15 @@
 
         <nav class="tab-nav" id="main-tabs">
             <button class="tab-btn active" data-tab="explore">Explore</button>
-            <button class="tab-btn" data-tab="inventory">Inventory</button>
+            <button class="tab-btn" data-tab="inventory">Equipment</button>
             <button class="tab-btn" data-tab="travel">Travel</button>
             {% if shop_items %}
             <button class="tab-btn" data-tab="shop">{{ shop_name or 'Shop' }}</button>
             {% endif %}
-            <button class="tab-btn" data-tab="store">Store</button>
-            <button class="tab-btn" data-tab="special-store">Special Store</button>
             {% if land_data %}
             <button class="tab-btn" data-tab="land">Your Land</button>
             {% endif %}
-            <button class="tab-btn" data-tab="missions">Missions</button>
+            <button class="tab-btn" data-tab="missions">Quests ({{ completed_count }})</button>
         </nav>
 
         <!-- ── Explore ── -->
@@ -149,50 +157,37 @@
             </div>
         </div>
 
-        <!-- ── Inventory ── -->
+        <!-- ── Equipment & Inventory ── -->
         <div class="tab-content" id="tab-inventory">
-            <div class="panel">
-                <div class="panel-title">
-                    Inventory
-                    <span class="panel-subtitle">({{ player.inventory|length }} items &mdash; {{ player.gold }} gold)</span>
-                </div>
-                <div class="panel-body">
-                    {% if inventory_items %}
-                    <table class="item-table">
-                        <thead>
-                            <tr>
-                                <th>Item</th><th>Qty</th><th>Description</th><th colspan="2">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in inventory_items %}
-                            <tr>
-                                <td class="item-name rarity-{{ item.rarity }}">{{ item.name }}</td>
-                                <td class="item-qty">{{ item.count }}</td>
-                                <td class="item-desc">{{ (item.description or '')[:70] }}</td>
-                                <td>
-                                    <form method="post" action="/action/use_item">
-                                        <input type="hidden" name="item" value="{{ item.name }}">
-                                        <button type="submit" class="btn btn-small btn-primary">Use</button>
-                                    </form>
-                                </td>
-                                <td>
-                                    <form method="post" action="/action/sell">
-                                        <input type="hidden" name="item" value="{{ item.name }}">
-                                        <button type="submit" class="btn btn-small btn-secondary">
-                                            Sell ({{ item.sell_price }}g)
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <p class="empty-notice">Your pack is empty. Explore to find items.</p>
-                    {% endif %}
 
-                    <div class="stat-mini-grid" style="margin-top:20px;">
+            <!-- Equipment Slots -->
+            <div class="panel" style="margin-bottom:14px;">
+                <div class="panel-title">Equipment</div>
+                <div class="panel-body">
+                    <div class="equip-grid">
+                        {% for slot in ['weapon','armor','offhand','accessory'] %}
+                        <div class="equip-slot-card">
+                            <div class="equip-slot-label">{{ slot.title() }}</div>
+                            {% if equipped_details.get(slot) %}
+                            {% set eq = equipped_details[slot] %}
+                            <div class="equip-slot-item rarity-{{ eq.rarity }}">{{ eq.name }}</div>
+                            {% if eq.stats %}
+                            <div class="equip-slot-stats">{{ eq.stats }}</div>
+                            {% endif %}
+                            <div class="equip-slot-desc">{{ eq.description[:60] }}</div>
+                            <form method="post" action="/action/unequip" style="margin-top:6px;">
+                                <input type="hidden" name="slot" value="{{ slot }}">
+                                <button type="submit" class="btn btn-xsmall btn-danger">Unequip</button>
+                            </form>
+                            {% else %}
+                            <div class="equip-slot-empty">— Empty —</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Stat summary -->
+                    <div class="stat-mini-grid" style="margin-top:16px;">
                         <div class="stat-mini"><span>Max HP</span><strong>{{ player.max_hp }}</strong></div>
                         <div class="stat-mini"><span>Max MP</span><strong>{{ player.max_mp }}</strong></div>
                         <div class="stat-mini"><span>Attack</span><strong>{{ player.attack }}</strong></div>
@@ -200,6 +195,51 @@
                         <div class="stat-mini"><span>Speed</span><strong>{{ player.speed }}</strong></div>
                         <div class="stat-mini"><span>Level</span><strong>{{ player.level }}</strong></div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Inventory -->
+            <div class="panel">
+                <div class="panel-title">
+                    Inventory
+                    <span class="panel-subtitle">({{ player.inventory|length }} items &mdash; {{ player.gold }}g)</span>
+                </div>
+                <div class="panel-body">
+                    {% if inventory_items %}
+                    <div class="inv-grid">
+                        {% for item in inventory_items %}
+                        <div class="inv-card rarity-border-{{ item.rarity }}">
+                            <div class="inv-card-name">
+                                <span class="rarity-{{ item.rarity }}">{{ item.name }}</span>
+                                {% if item.count > 1 %}<span class="inv-qty">x{{ item.count }}</span>{% endif %}
+                            </div>
+                            {% if item.stats %}
+                            <div class="inv-card-stats">{{ item.stats }}</div>
+                            {% endif %}
+                            <div class="inv-card-desc">{{ (item.description or '')[:65] }}</div>
+                            <div class="inv-card-actions">
+                                {% if item.equippable %}
+                                <form method="post" action="/action/equip">
+                                    <input type="hidden" name="item" value="{{ item.name }}">
+                                    <button type="submit" class="btn btn-xsmall btn-primary">Equip</button>
+                                </form>
+                                {% else %}
+                                <form method="post" action="/action/use_item">
+                                    <input type="hidden" name="item" value="{{ item.name }}">
+                                    <button type="submit" class="btn btn-xsmall btn-primary">Use</button>
+                                </form>
+                                {% endif %}
+                                <form method="post" action="/action/sell">
+                                    <input type="hidden" name="item" value="{{ item.name }}">
+                                    <button type="submit" class="btn btn-xsmall btn-secondary">Sell ({{ item.sell_price }}g)</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="empty-notice">Your pack is empty. Explore to find items.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -246,27 +286,24 @@
                     <span class="panel-subtitle">({{ player.gold }} gold available)</span>
                 </div>
                 <div class="panel-body">
-                    <table class="item-table">
-                        <thead>
-                            <tr><th>Item</th><th>Price</th><th>Description</th><th>Buy</th></tr>
-                        </thead>
-                        <tbody>
-                            {% for item in shop_items %}
-                            <tr class="{% if not item.can_afford %}cannot-afford{% endif %}">
-                                <td class="item-name rarity-{{ item.rarity }}">{{ item.name }}</td>
-                                <td class="item-price">{{ item.price }}g</td>
-                                <td class="item-desc">{{ (item.description or '')[:70] }}</td>
-                                <td>
-                                    <form method="post" action="/action/buy">
-                                        <input type="hidden" name="item" value="{{ item.name }}">
-                                        <button type="submit" class="btn btn-small btn-primary"
-                                            {% if not item.can_afford %}disabled{% endif %}>Buy</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="shop-grid">
+                        {% for item in shop_items %}
+                        <div class="shop-card {% if not item.can_afford %}cannot-afford{% endif %}">
+                            <div class="shop-card-name rarity-{{ item.rarity }}">{{ item.name }}</div>
+                            <div class="shop-card-type">{{ item.type }}</div>
+                            {% if item.stats %}
+                            <div class="shop-card-stats">{{ item.stats }}</div>
+                            {% endif %}
+                            <div class="shop-card-desc">{{ (item.description or '')[:70] }}</div>
+                            <div class="shop-card-price">{{ item.price }}g</div>
+                            <form method="post" action="/action/buy">
+                                <input type="hidden" name="item" value="{{ item.name }}">
+                                <button type="submit" class="btn btn-xsmall btn-primary"
+                                    {% if not item.can_afford %}disabled{% endif %}>Buy</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -276,21 +313,19 @@
         {% if land_data %}
         <div class="tab-content" id="tab-land">
 
-            <!-- Comfort & overview -->
             <div class="panel land-section">
                 <div class="panel-title">Your Land &mdash; Overview</div>
                 <div class="panel-body">
                     <div class="comfort-display">
                         Comfort Points: <span class="comfort-num">{{ land_data.comfort_points }}</span>
                     </div>
-                    <p style="font-size:15px;color:var(--text-dim);margin-top:8px;">
+                    <p style="font-size:14px;color:var(--text-dim);margin-top:8px;">
                         Build structures, plant crops, and care for a companion on your personal plot of land.
-                        Comfort points are earned by placing housing items and improve your rest quality.
+                        Comfort points improve your rest quality.
                     </p>
                 </div>
             </div>
 
-            <!-- Active builds -->
             {% if land_data.placed_by_type %}
             <div class="panel land-section">
                 <div class="panel-title">Placed Structures</div>
@@ -301,11 +336,8 @@
                         <div class="slots-grid">
                             {% for placed in placed_items %}
                             <div class="slot-card slot-filled">
-                                <div class="slot-id">{{ placed.slot_id }}</div>
                                 <div class="slot-item rarity-common">{{ placed.name }}</div>
-                                <div style="font-size:12px;color:var(--green-bright);margin-bottom:6px;">
-                                    +{{ placed.comfort }} comfort
-                                </div>
+                                <div style="font-size:12px;color:var(--green-bright);margin-bottom:6px;">+{{ placed.comfort }} comfort</div>
                                 <form method="post" action="/action/land/remove_housing">
                                     <input type="hidden" name="slot_id" value="{{ placed.slot_id }}">
                                     <button type="submit" class="btn btn-xsmall btn-danger">Remove</button>
@@ -319,7 +351,6 @@
             </div>
             {% endif %}
 
-            <!-- Housing shop -->
             <div class="panel land-section">
                 <div class="panel-title">Housing Shop</div>
                 <div class="panel-body">
@@ -331,7 +362,7 @@
                             {% for h in land_data.housing_by_type[type_key] %}
                             <div class="housing-card {% if h.owned %}owned-card{% endif %}">
                                 <div class="housing-name rarity-{{ h.rarity }}">{{ h.name }}</div>
-                                <div class="housing-desc">{{ h.description[:80] }}</div>
+                                <div class="housing-desc">{{ h.description[:70] }}</div>
                                 <div class="housing-meta">
                                     <span class="housing-price">{{ h.price }}g</span>
                                     <span class="housing-comfort">+{{ h.comfort }} comfort</span>
@@ -365,14 +396,10 @@
                 </div>
             </div>
 
-            <!-- Farming -->
             <div class="panel land-section">
                 <div class="panel-title">Farming</div>
                 <div class="panel-body">
-                    <p class="panel-note">
-                        Plant crops in your farm slots. Each time you Venture Forth or Rest, crops grow.
-                        Harvest when ready to earn gold.
-                    </p>
+                    <p class="panel-note">Plant crops in your farm slots. Each exploration or rest advances growth. Harvest for gold.</p>
                     <div class="farm-grid">
                         {% for slot in land_data.farm_crops %}
                         <div class="farm-slot {% if slot.crop_key %}{% if slot.ready %}ready{% else %}growing{% endif %}{% endif %}">
@@ -380,30 +407,27 @@
                             {% if slot.crop_key %}
                                 <div class="farm-crop-name">{{ slot.name }}</div>
                                 {% if slot.ready %}
-                                <div class="farm-ready-badge">Ready to harvest!</div>
-                                <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">
-                                    Yields {{ slot.harvest_amount }}x &mdash; sells for {{ slot.sell_price * slot.harvest_amount }}g
+                                <div class="farm-ready-badge">Ready!</div>
+                                <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">
+                                    {{ slot.harvest_amount }}x &mdash; {{ slot.sell_price * slot.harvest_amount }}g
                                 </div>
                                 <form method="post" action="/action/land/harvest">
                                     <input type="hidden" name="slot_id" value="{{ slot.slot_id }}">
                                     <button type="submit" class="btn btn-small btn-primary">Harvest</button>
                                 </form>
                                 {% else %}
-                                <div class="farm-progress">
-                                    Growing: {{ slot.turns }} / {{ slot.growth_time }} turns
+                                <div class="farm-progress">{{ slot.turns }} / {{ slot.growth_time }} turns</div>
+                                <div class="bar-track" style="margin-top:4px;">
+                                    <div class="bar-fill bar-exp" style="width:{{ [(slot.turns / slot.growth_time * 100)|int, 100]|min }}%"></div>
                                 </div>
                                 {% endif %}
                             {% else %}
-                                <div style="font-size:13px;color:var(--text-dim);font-style:italic;margin-bottom:8px;">
-                                    Empty plot
-                                </div>
+                                <div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:6px;">Empty plot</div>
                                 <form method="post" action="/action/land/plant" class="plant-form">
                                     <input type="hidden" name="slot_id" value="{{ slot.slot_id }}">
                                     <select name="crop_key" class="crop-select">
                                         {% for crop_key, crop in land_data.farming_crops.items() %}
-                                        <option value="{{ crop_key }}">
-                                            {{ crop.name }} ({{ crop.growth_time }}t, {{ crop.sell_price * crop.harvest_amount }}g)
-                                        </option>
+                                        <option value="{{ crop_key }}">{{ crop.name }} ({{ crop.growth_time }}t, {{ crop.sell_price * crop.harvest_amount }}g)</option>
                                         {% endfor %}
                                     </select>
                                     <button type="submit" class="btn btn-small btn-secondary">Plant</button>
@@ -415,7 +439,6 @@
                 </div>
             </div>
 
-            <!-- Pets -->
             <div class="panel land-section">
                 <div class="panel-title">Companion Pets</div>
                 <div class="panel-body">
@@ -446,18 +469,14 @@
                                 {% endfor %}
                             </div>
                             {% endif %}
-                            <div class="pet-price">{{ pet.price }} gold</div>
-                            {% if land_data.current_pet and land_data.current_pet.key == pet_key %}
-                                <span style="font-size:13px;color:var(--gold);">Your companion</span>
-                            {% else %}
-                                <form method="post" action="/action/land/buy_pet">
-                                    <input type="hidden" name="pet_key" value="{{ pet_key }}">
-                                    <button type="submit" class="btn btn-small btn-primary"
-                                        {% if not pet.can_afford %}disabled{% endif %}>
-                                        Adopt
-                                    </button>
-                                </form>
-                            {% endif %}
+                            <div class="pet-price">{{ pet.price }}g</div>
+                            <form method="post" action="/action/land/buy_pet">
+                                <input type="hidden" name="pet_key" value="{{ pet_key }}">
+                                <button type="submit" class="btn btn-xsmall btn-primary"
+                                    {% if not pet.can_afford %}disabled{% endif %}>
+                                    {% if land_data.current_pet and land_data.current_pet.key == pet_key %}Active{% else %}Adopt{% endif %}
+                                </button>
+                            </form>
                         </div>
                         {% endfor %}
                     </div>
@@ -467,127 +486,67 @@
         </div>
         {% endif %}
 
-        <!-- ── General Store ── -->
-        <div class="tab-content" id="tab-store">
-            <div class="panel">
-                <div class="panel-title">
-                    General Store
-                    <span class="panel-subtitle">({{ all_store_items|length }} items &mdash; {{ player.gold }} gold available)</span>
-                </div>
-                <div class="panel-body">
-                    {% if all_store_items %}
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
-                        <button class="btn btn-xsmall btn-secondary store-filter active" data-filter="all">All</button>
-                        <button class="btn btn-xsmall btn-secondary store-filter" data-filter="weapon">Weapons</button>
-                        <button class="btn btn-xsmall btn-secondary store-filter" data-filter="armor">Armor</button>
-                        <button class="btn btn-xsmall btn-secondary store-filter" data-filter="consumable">Consumables</button>
-                        <button class="btn btn-xsmall btn-secondary store-filter" data-filter="misc">Misc</button>
-                    </div>
-                    <table class="item-table" id="store-table">
-                        <thead>
-                            <tr><th>Item</th><th>Type</th><th>Price</th><th>Description</th><th>Buy</th></tr>
-                        </thead>
-                        <tbody>
-                            {% for item in all_store_items %}
-                            <tr class="store-row {% if not item.can_afford %}cannot-afford{% endif %}" data-type="{{ item.type }}">
-                                <td class="item-name rarity-{{ item.rarity }}">{{ item.name }}</td>
-                                <td style="font-size:12px;color:var(--text-dim);">{{ item.type|title }}</td>
-                                <td class="item-price">{{ item.price }}g</td>
-                                <td class="item-desc">{{ (item.description or '')[:60] }}</td>
-                                <td>
-                                    <form method="post" action="/action/buy">
-                                        <input type="hidden" name="item" value="{{ item.name }}">
-                                        <button type="submit" class="btn btn-small btn-primary"
-                                            {% if not item.can_afford %}disabled{% endif %}>Buy</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <p class="empty-notice">No items in stock.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- ── Special Store ── -->
-        <div class="tab-content" id="tab-special-store">
-            <div class="panel">
-                <div class="panel-title">
-                    Special Store
-                    <span class="panel-subtitle" style="color:var(--gold);">Rare, Epic &amp; Legendary Items</span>
-                </div>
-                <div class="panel-body">
-                    <p style="font-size:14px;color:var(--text-dim);margin-bottom:14px;">
-                        Exclusive items of uncommon power. Only the wealthiest adventurers can afford these.
-                    </p>
-                    {% if special_store_items %}
-                    <table class="item-table">
-                        <thead>
-                            <tr><th>Item</th><th>Rarity</th><th>Type</th><th>Stats</th><th>Price</th><th>Buy</th></tr>
-                        </thead>
-                        <tbody>
-                            {% for item in special_store_items %}
-                            <tr class="{% if not item.can_afford %}cannot-afford{% endif %}">
-                                <td class="item-name rarity-{{ item.rarity }}">{{ item.name }}</td>
-                                <td class="item-rarity rarity-{{ item.rarity }}" style="font-size:12px;">{{ item.rarity|title }}</td>
-                                <td style="font-size:12px;color:var(--text-dim);">{{ item.type|title }}</td>
-                                <td style="font-size:12px;color:var(--green-bright);">
-                                    {% if item.stats %}
-                                    {% for stat, val in item.stats.items() %}+{{ val }} {{ stat }}{% if not loop.last %}, {% endif %}{% endfor %}
-                                    {% else %}&mdash;{% endif %}
-                                </td>
-                                <td class="item-price rarity-{{ item.rarity }}">{{ item.price }}g</td>
-                                <td>
-                                    <form method="post" action="/action/buy">
-                                        <input type="hidden" name="item" value="{{ item.name }}">
-                                        <button type="submit" class="btn btn-small btn-primary"
-                                            {% if not item.can_afford %}disabled{% endif %}>Buy</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <p class="empty-notice">No special items available at this time.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
         <!-- ── Missions ── -->
         <div class="tab-content" id="tab-missions">
             <div class="panel">
                 <div class="panel-title">
-                    Missions
-                    <span class="panel-subtitle">({{ completed_count }} completed)</span>
+                    Quests
+                    <span class="panel-subtitle">{{ completed_count }} completed</span>
                 </div>
                 <div class="panel-body">
                     {% if missions %}
-                    <div class="mission-list">
-                        {% for mission in missions %}
-                        <div class="mission-card">
-                            <div class="mission-info">
-                                <div class="mission-name">{{ mission.name }}</div>
-                                <div class="mission-desc">
-                                    {{ mission.description[:130] }}{% if mission.description|length > 130 %}...{% endif %}
-                                </div>
-                                <div class="mission-rewards">
-                                    Reward: {{ mission.exp_reward }} EXP &mdash; {{ mission.gold_reward }} gold
+                    {% for mission in missions %}
+                    <div class="quest-card {% if not mission.eligible %}quest-locked{% elif mission.can_complete %}quest-ready{% else %}quest-active{% endif %}">
+                        <div class="quest-header">
+                            <div class="quest-name">
+                                {% if mission.can_complete %}
+                                <span class="quest-ready-badge">READY</span>
+                                {% elif not mission.eligible %}
+                                <span class="quest-locked-badge">LOCKED</span>
+                                {% endif %}
+                                {{ mission.name }}
+                            </div>
+                            <div class="quest-type-badge quest-type-{{ mission.type }}">{{ mission.type }}</div>
+                        </div>
+                        <div class="quest-desc">{{ mission.description }}</div>
+
+                        {% if not mission.level_ok %}
+                        <div class="quest-req">Requires level {{ mission.unlock_level }}</div>
+                        {% elif not mission.prereqs_met %}
+                        <div class="quest-req">{{ mission.status_msg }}</div>
+                        {% endif %}
+
+                        {% if mission.eligible and mission.progress %}
+                        <div class="quest-progress-list">
+                            {% for p in mission.progress %}
+                            <div class="quest-progress-item">
+                                <div class="quest-progress-label">{{ p.label }}: {{ p.have }}/{{ p.need }}</div>
+                                <div class="bar-track quest-progress-bar">
+                                    <div class="bar-fill bar-exp" style="width:{{ [(p.have / p.need * 100)|int, 100]|min }}%"></div>
                                 </div>
                             </div>
-                            <form method="post" action="/action/complete_mission">
-                                <input type="hidden" name="mission_id" value="{{ mission.id }}">
-                                <button type="submit" class="btn btn-primary btn-small">Complete</button>
-                            </form>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
+                        {% endif %}
+
+                        <div class="quest-rewards">
+                            <span class="quest-reward-exp">+{{ mission.exp_reward }} EXP</span>
+                            <span class="quest-reward-gold">+{{ mission.gold_reward }}g</span>
+                            {% for item in mission.item_rewards %}
+                            <span class="quest-reward-item">{{ item }}</span>
+                            {% endfor %}
+                        </div>
+
+                        {% if mission.can_complete %}
+                        <form method="post" action="/action/complete_mission" style="margin-top:8px;">
+                            <input type="hidden" name="mission_id" value="{{ mission.id }}">
+                            <button type="submit" class="btn btn-small btn-primary">Claim Reward</button>
+                        </form>
+                        {% endif %}
                     </div>
+                    {% endfor %}
                     {% else %}
-                    <p class="empty-notice">No missions are currently available.</p>
+                    <p class="empty-notice">No quests available. Level up or complete prerequisites to unlock more.</p>
                     {% endif %}
                 </div>
             </div>
@@ -595,36 +554,4 @@
 
     </main>
 </div>
-
-<!-- Hash-based tab switching for after land actions -->
-<script>
-if (window.location.hash === '#land') {
-    window.addEventListener('DOMContentLoaded', () => {
-        const btn = document.querySelector('[data-tab="land"]');
-        if (btn) btn.click();
-        history.replaceState(null, '', window.location.pathname);
-    });
-}
-</script>
-{% endblock %}
-{% block extra_scripts %}
-<script>
-// Store filter
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.store-filter').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var filter = this.getAttribute('data-filter');
-            document.querySelectorAll('.store-filter').forEach(function(b) { b.classList.remove('active'); });
-            this.classList.add('active');
-            document.querySelectorAll('.store-row').forEach(function(row) {
-                if (filter === 'all' || row.getAttribute('data-type') === filter) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-    });
-});
-</script>
 {% endblock %}

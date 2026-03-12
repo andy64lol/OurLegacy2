@@ -9,7 +9,11 @@ from typing import Dict, List, Any, Optional
 class Character:
     """Player character class - used for building/loading character state."""
 
-    def __init__(self, name: str, character_class: str, classes_data: Optional[Dict] = None, player_uuid: Optional[str] = None):
+    def __init__(self,
+                 name: str,
+                 character_class: str,
+                 classes_data: Optional[Dict] = None,
+                 player_uuid: Optional[str] = None):
         self.name = name
         self.character_class = character_class
         self.uuid = player_uuid or str(uuid.uuid4())
@@ -26,7 +30,13 @@ class Character:
             stats = self.class_data.get("base_stats", {})
             self.level_up_bonuses = self.class_data.get("level_up_bonuses", {})
         else:
-            stats = {"hp": 100, "mp": 50, "attack": 10, "defense": 8, "speed": 10}
+            stats = {
+                "hp": 100,
+                "mp": 50,
+                "attack": 10,
+                "defense": 8,
+                "speed": 10
+            }
 
         self.max_hp = stats.get("hp", 100)
         self.hp = self.max_hp
@@ -38,8 +48,12 @@ class Character:
         self.defending = False
 
         self.equipment: Dict[str, Optional[str]] = {
-            "weapon": None, "armor": None, "offhand": None,
-            "accessory_1": None, "accessory_2": None, "accessory_3": None,
+            "weapon": None,
+            "armor": None,
+            "offhand": None,
+            "accessory_1": None,
+            "accessory_2": None,
+            "accessory_3": None,
         }
 
         self.inventory: List[str] = []
@@ -156,22 +170,31 @@ class Character:
         return base_boost * comfort_multiplier
 
     def get_effective_attack(self) -> int:
-        bonus = sum(b.get('modifiers', {}).get('attack_bonus', 0) for b in self.active_buffs)
+        bonus = sum(
+            b.get('modifiers', {}).get('attack_bonus', 0)
+            for b in self.active_buffs)
         pet_boost = self.get_pet_boost('attack')
         return int((self.attack + bonus) * (1.0 + pet_boost))
 
     def get_effective_defense(self) -> int:
-        bonus = sum(b.get('modifiers', {}).get('defense_bonus', 0) for b in self.active_buffs)
+        bonus = sum(
+            b.get('modifiers', {}).get('defense_bonus', 0)
+            for b in self.active_buffs)
         pet_boost = self.get_pet_boost('defense')
         base_def = (self.defense + bonus) * (1.0 + pet_boost)
         return int(base_def * 1.5) if self.defending else int(base_def)
 
     def get_effective_speed(self) -> int:
-        bonus = sum(b.get('modifiers', {}).get('speed_bonus', 0) for b in self.active_buffs)
+        bonus = sum(
+            b.get('modifiers', {}).get('speed_bonus', 0)
+            for b in self.active_buffs)
         pet_boost = self.get_pet_boost('speed')
         return int((self.speed + bonus) * (1.0 + pet_boost))
 
-    def update_stats_from_equipment(self, items_data: Dict[str, Any], companions_data: Optional[Dict[str, Any]] = None):
+    def update_stats_from_equipment(
+            self,
+            items_data: Dict[str, Any],
+            companions_data: Optional[Dict[str, Any]] = None):
         self.attack = self.base_attack
         self.defense = self.base_defense
         self.speed = self.base_speed
@@ -188,15 +211,21 @@ class Character:
                 self.max_mp += stats.get("mp", 0)
         if companions_data and self.companions:
             for companion in self.companions:
-                comp_name = companion.get('name') if isinstance(companion, dict) else companion
-                comp_data = next((c for c in companions_data.values() if c.get('name') == comp_name), None)
+                comp_name = companion.get('name') if isinstance(
+                    companion, dict) else companion
+                comp_data = next((c for c in companions_data.values()
+                                  if c.get('name') == comp_name), None)
                 if comp_data:
                     self.attack += comp_data.get("attack_bonus", 0)
                     self.defense += comp_data.get("defense_bonus", 0)
                     self.speed += comp_data.get("speed_bonus", 0)
 
     def apply_buff(self, name: str, duration: int, modifiers: Dict[str, Any]):
-        self.active_buffs.append({"name": name, "duration": duration, "modifiers": modifiers})
+        self.active_buffs.append({
+            "name": name,
+            "duration": duration,
+            "modifiers": modifiers
+        })
 
     def tick_buffs(self) -> bool:
         changed = False
@@ -269,7 +298,9 @@ class Character:
         }
 
 
-def build_new_character(name: str, character_class: str, classes_data: Dict[str, Any], items_data: Dict[str, Any]) -> Dict[str, Any]:
+def build_new_character(name: str, character_class: str,
+                        classes_data: Dict[str, Any],
+                        items_data: Dict[str, Any]) -> Dict[str, Any]:
     """Build a new character dict ready for Flask session storage."""
     char = Character(name, character_class, classes_data)
     cls_data = classes_data.get(character_class, {})
@@ -291,7 +322,8 @@ def build_new_character(name: str, character_class: str, classes_data: Dict[str,
     return char.get_stats_dict()
 
 
-def get_available_classes(classes_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+def get_available_classes(
+        classes_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Return list of available classes with their info."""
     result = []
     for class_name, class_data in classes_data.items():

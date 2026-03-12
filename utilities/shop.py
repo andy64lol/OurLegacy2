@@ -2,8 +2,7 @@
 Shop System for Our Legacy 2 - Flask Edition
 Pure functions that operate on player dicts and return result dicts.
 """
-from typing import Dict, List, Any, Optional
-from utilities.UI import get_rarity_color
+from typing import Dict, List, Any
 
 
 def get_shop_items(shop_data: Dict[str, Any], items_data: Dict[str, Any],
@@ -48,7 +47,11 @@ def buy_item(player: Dict[str, Any], item_id: str, items_data: Dict[str, Any],
     Returns {'ok': bool, 'message': str, 'color': str}
     """
     if item_id not in items_data:
-        return {'ok': False, 'message': f'Item {item_id} not found.', 'color': 'var(--red)'}
+        return {
+            'ok': False,
+            'message': f'Item {item_id} not found.',
+            'color': 'var(--red)'
+        }
 
     item = items_data[item_id]
     price = item.get('price', item.get('value', 0))
@@ -56,27 +59,50 @@ def buy_item(player: Dict[str, Any], item_id: str, items_data: Dict[str, Any],
     owned = player.get('inventory', []).count(item_id)
 
     if owned >= max_buy:
-        return {'ok': False, 'message': f'You already own the maximum ({max_buy}) of this item.', 'color': 'var(--red)'}
+        return {
+            'ok': False,
+            'message':
+            f'You already own the maximum ({max_buy}) of this item.',
+            'color': 'var(--red)'
+        }
     if player.get('gold', 0) < price:
-        return {'ok': False, 'message': f'Not enough gold. Need {price}, have {player.get("gold", 0)}.', 'color': 'var(--red)'}
+        return {
+            'ok': False,
+            'message':
+            f'Not enough gold. Need {price}, have {player.get("gold", 0)}.',
+            'color': 'var(--red)'
+        }
 
     player['gold'] = player.get('gold', 0) - price
     player.setdefault('inventory', []).append(item_id)
-    return {'ok': True, 'message': f'Purchased {item.get("name", item_id)} for {price} gold.', 'color': 'var(--green-bright)'}
+    return {
+        'ok': True,
+        'message': f'Purchased {item.get("name", item_id)} for {price} gold.',
+        'color': 'var(--green-bright)'
+    }
 
 
-def sell_item(player: Dict[str, Any], item_id: str, items_data: Dict[str, Any]) -> Dict[str, Any]:
+def sell_item(player: Dict[str, Any], item_id: str,
+              items_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Sell an item from the player's inventory.
     Returns {'ok': bool, 'message': str, 'color': str}
     """
     inventory = player.get('inventory', [])
     if item_id not in inventory:
-        return {'ok': False, 'message': 'You do not have that item.', 'color': 'var(--red)'}
+        return {
+            'ok': False,
+            'message': 'You do not have that item.',
+            'color': 'var(--red)'
+        }
 
     equipment = player.get('equipment', {})
     if item_id in equipment.values():
-        return {'ok': False, 'message': 'Unequip the item before selling it.', 'color': 'var(--red)'}
+        return {
+            'ok': False,
+            'message': 'Unequip the item before selling it.',
+            'color': 'var(--red)'
+        }
 
     item = items_data.get(item_id, {})
     price = item.get('price', item.get('value', 10))
@@ -86,10 +112,15 @@ def sell_item(player: Dict[str, Any], item_id: str, items_data: Dict[str, Any]) 
     player['inventory'] = inventory
     player['gold'] = player.get('gold', 0) + sell_price
 
-    return {'ok': True, 'message': f'Sold {item.get("name", item_id)} for {sell_price} gold.', 'color': 'var(--gold)'}
+    return {
+        'ok': True,
+        'message': f'Sold {item.get("name", item_id)} for {sell_price} gold.',
+        'color': 'var(--gold)'
+    }
 
 
-def get_sellable_inventory(player: Dict[str, Any], items_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+def get_sellable_inventory(player: Dict[str, Any],
+                           items_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Return list of items the player can sell."""
     equipment_items = set(v for v in player.get('equipment', {}).values() if v)
     sellable = []
@@ -107,7 +138,8 @@ def get_sellable_inventory(player: Dict[str, Any], items_data: Dict[str, Any]) -
     return sellable
 
 
-def get_housing_shop_items(shop_data: Dict[str, Any], housing_data: Dict[str, Any],
+def get_housing_shop_items(shop_data: Dict[str, Any], housing_data: Dict[str,
+                                                                         Any],
                            player: Dict[str, Any]) -> Dict[str, Any]:
     """Return housing shop inventory."""
     items = shop_data.get('items', [])

@@ -5,15 +5,17 @@ Functions for serializing/deserializing game state (Flask session dicts).
 import json
 import os
 from datetime import datetime
-from typing import Dict, Any, List, Optional, Tuple
-
+from typing import Dict, Any, List, Optional
 
 SAVES_DIR = "data/saves"
 SAVE_VERSION = "3.2"
 
 
-def build_save_data(player: Dict[str, Any], current_area: str, visited_areas: List[str],
-                    completed_missions: List[str], achievements: Optional[List] = None) -> Dict[str, Any]:
+def build_save_data(player: Dict[str, Any],
+                    current_area: str,
+                    visited_areas: List[str],
+                    completed_missions: List[str],
+                    achievements: Optional[List] = None) -> Dict[str, Any]:
     """Build a save data dict from current game state."""
     return {
         "player": player,
@@ -26,8 +28,11 @@ def build_save_data(player: Dict[str, Any], current_area: str, visited_areas: Li
     }
 
 
-def save_game(player: Dict[str, Any], current_area: str, visited_areas: List[str],
-              completed_missions: List[str], achievements: Optional[List] = None,
+def save_game(player: Dict[str, Any],
+              current_area: str,
+              visited_areas: List[str],
+              completed_missions: List[str],
+              achievements: Optional[List] = None,
               filename_prefix: str = "") -> Dict[str, Any]:
     """
     Save game to a JSON file.
@@ -35,7 +40,8 @@ def save_game(player: Dict[str, Any], current_area: str, visited_areas: List[str
     """
     try:
         os.makedirs(SAVES_DIR, exist_ok=True)
-        save_data = build_save_data(player, current_area, visited_areas, completed_missions, achievements)
+        save_data = build_save_data(player, current_area, visited_areas,
+                                    completed_missions, achievements)
 
         name = player.get('name', 'unknown').replace('/', '_')
         pid = player.get('uuid', 'xxxx')[:8]
@@ -48,9 +54,17 @@ def save_game(player: Dict[str, Any], current_area: str, visited_areas: List[str
         with open(filename, 'w') as f:
             json.dump(save_data, f, indent=2)
 
-        return {'ok': True, 'message': f'Game saved: {os.path.basename(filename)}', 'filename': filename}
+        return {
+            'ok': True,
+            'message': f'Game saved: {os.path.basename(filename)}',
+            'filename': filename
+        }
     except Exception as e:
-        return {'ok': False, 'message': f'Error saving game: {e}', 'filename': ''}
+        return {
+            'ok': False,
+            'message': f'Error saving game: {e}',
+            'filename': ''
+        }
 
 
 def list_saves() -> List[Dict[str, Any]]:
@@ -68,14 +82,22 @@ def list_saves() -> List[Dict[str, Any]]:
                 data = json.load(f)
             player = data.get('player', {})
             saves.append({
-                'filename': fname,
-                'filepath': fpath,
-                'player_name': player.get('name', '?'),
-                'character_class': player.get('class', player.get('character_class', '?')),
-                'level': player.get('level', 1),
-                'save_time': data.get('save_time', ''),
-                'save_version': data.get('save_version', '?'),
-                'current_area': data.get('current_area', ''),
+                'filename':
+                fname,
+                'filepath':
+                fpath,
+                'player_name':
+                player.get('name', '?'),
+                'character_class':
+                player.get('class', player.get('character_class', '?')),
+                'level':
+                player.get('level', 1),
+                'save_time':
+                data.get('save_time', ''),
+                'save_version':
+                data.get('save_version', '?'),
+                'current_area':
+                data.get('current_area', ''),
             })
         except Exception:
             continue
@@ -99,7 +121,10 @@ def load_save(filepath: str) -> Dict[str, Any]:
         achievements = data.get('achievements', [])
 
         if not player or not player.get('name'):
-            return {'ok': False, 'message': 'Invalid save file: missing player data.'}
+            return {
+                'ok': False,
+                'message': 'Invalid save file: missing player data.'
+            }
 
         return {
             'ok': True,
