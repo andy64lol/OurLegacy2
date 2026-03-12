@@ -31,7 +31,6 @@ scripts/activities.json
 .zenflow/
 .replit
 .env
-mods/
 .vercel/
 node_modules/
 server.py
