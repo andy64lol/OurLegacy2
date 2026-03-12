@@ -70,7 +70,10 @@
 
         <div class="sidebar-save-section">
             <button class="btn btn-secondary btn-small" onclick="saveGame()">Save Game</button>
-            <div id="save-status" style="font-size:13px;color:var(--text-dim);display:none;"></div>
+            <div id="save-status" style="font-size:13px;color:var(--text-dim);display:none;margin-top:4px;"></div>
+            <input type="file" id="load-file-input" accept=".json" style="display:none;">
+            <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()" style="margin-top:4px;">Load Game</button>
+            <div id="load-status" style="font-size:13px;color:var(--text-dim);display:none;margin-top:4px;"></div>
         </div>
 
         <div class="sidebar-nav">
@@ -91,6 +94,8 @@
             {% if shop_items %}
             <button class="tab-btn" data-tab="shop">{{ shop_name or 'Shop' }}</button>
             {% endif %}
+            <button class="tab-btn" data-tab="store">Store</button>
+            <button class="tab-btn" data-tab="special-store">Special Store</button>
             {% if land_data %}
             <button class="tab-btn" data-tab="land">Your Land</button>
             {% endif %}
@@ -462,6 +467,97 @@
         </div>
         {% endif %}
 
+        <!-- ── General Store ── -->
+        <div class="tab-content" id="tab-store">
+            <div class="panel">
+                <div class="panel-title">
+                    General Store
+                    <span class="panel-subtitle">({{ all_store_items|length }} items &mdash; {{ player.gold }} gold available)</span>
+                </div>
+                <div class="panel-body">
+                    {% if all_store_items %}
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+                        <button class="btn btn-xsmall btn-secondary store-filter active" data-filter="all">All</button>
+                        <button class="btn btn-xsmall btn-secondary store-filter" data-filter="weapon">Weapons</button>
+                        <button class="btn btn-xsmall btn-secondary store-filter" data-filter="armor">Armor</button>
+                        <button class="btn btn-xsmall btn-secondary store-filter" data-filter="consumable">Consumables</button>
+                        <button class="btn btn-xsmall btn-secondary store-filter" data-filter="misc">Misc</button>
+                    </div>
+                    <table class="item-table" id="store-table">
+                        <thead>
+                            <tr><th>Item</th><th>Type</th><th>Price</th><th>Description</th><th>Buy</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for item in all_store_items %}
+                            <tr class="store-row {% if not item.can_afford %}cannot-afford{% endif %}" data-type="{{ item.type }}">
+                                <td class="item-name rarity-{{ item.rarity }}">{{ item.name }}</td>
+                                <td style="font-size:12px;color:var(--text-dim);">{{ item.type|title }}</td>
+                                <td class="item-price">{{ item.price }}g</td>
+                                <td class="item-desc">{{ (item.description or '')[:60] }}</td>
+                                <td>
+                                    <form method="post" action="/action/buy">
+                                        <input type="hidden" name="item" value="{{ item.name }}">
+                                        <button type="submit" class="btn btn-small btn-primary"
+                                            {% if not item.can_afford %}disabled{% endif %}>Buy</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="empty-notice">No items in stock.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Special Store ── -->
+        <div class="tab-content" id="tab-special-store">
+            <div class="panel">
+                <div class="panel-title">
+                    Special Store
+                    <span class="panel-subtitle" style="color:var(--gold);">Rare, Epic &amp; Legendary Items</span>
+                </div>
+                <div class="panel-body">
+                    <p style="font-size:14px;color:var(--text-dim);margin-bottom:14px;">
+                        Exclusive items of uncommon power. Only the wealthiest adventurers can afford these.
+                    </p>
+                    {% if special_store_items %}
+                    <table class="item-table">
+                        <thead>
+                            <tr><th>Item</th><th>Rarity</th><th>Type</th><th>Stats</th><th>Price</th><th>Buy</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for item in special_store_items %}
+                            <tr class="{% if not item.can_afford %}cannot-afford{% endif %}">
+                                <td class="item-name rarity-{{ item.rarity }}">{{ item.name }}</td>
+                                <td class="item-rarity rarity-{{ item.rarity }}" style="font-size:12px;">{{ item.rarity|title }}</td>
+                                <td style="font-size:12px;color:var(--text-dim);">{{ item.type|title }}</td>
+                                <td style="font-size:12px;color:var(--green-bright);">
+                                    {% if item.stats %}
+                                    {% for stat, val in item.stats.items() %}+{{ val }} {{ stat }}{% if not loop.last %}, {% endif %}{% endfor %}
+                                    {% else %}&mdash;{% endif %}
+                                </td>
+                                <td class="item-price rarity-{{ item.rarity }}">{{ item.price }}g</td>
+                                <td>
+                                    <form method="post" action="/action/buy">
+                                        <input type="hidden" name="item" value="{{ item.name }}">
+                                        <button type="submit" class="btn btn-small btn-primary"
+                                            {% if not item.can_afford %}disabled{% endif %}>Buy</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="empty-notice">No special items available at this time.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
         <!-- ── Missions ── -->
         <div class="tab-content" id="tab-missions">
             <div class="panel">
@@ -513,40 +609,22 @@ if (window.location.hash === '#land') {
 {% endblock %}
 {% block extra_scripts %}
 <script>
-async function saveGame() {
-    const status = document.getElementById('save-status');
-    status.style.display = 'block';
-    status.style.color = 'var(--text-dim)';
-    status.textContent = 'Saving...';
-    try {
-        // Get or generate key
-        let key = localStorage.getItem('our_legacy_key');
-        if (!key) {
-            const keyRes = await fetch('/api/generate_key', {method:'POST'});
-            const keyJson = await keyRes.json();
-            key = keyJson.key;
-            localStorage.setItem('our_legacy_key', key);
-        }
-        // Encrypt and save
-        const saveRes = await fetch('/api/save', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({key})
+// Store filter
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.store-filter').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var filter = this.getAttribute('data-filter');
+            document.querySelectorAll('.store-filter').forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            document.querySelectorAll('.store-row').forEach(function(row) {
+                if (filter === 'all' || row.getAttribute('data-type') === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         });
-        const saveJson = await saveRes.json();
-        if (saveJson.data) {
-            localStorage.setItem('our_legacy_save', saveJson.data);
-            status.style.color = 'var(--green-bright)';
-            status.textContent = 'Saved!';
-        } else {
-            status.style.color = 'var(--red)';
-            status.textContent = 'Save failed.';
-        }
-    } catch(e) {
-        status.style.color = 'var(--red)';
-        status.textContent = 'Error: ' + e.message;
-    }
-    setTimeout(() => { status.style.display = 'none'; }, 3000);
-}
+    });
+});
 </script>
 {% endblock %}

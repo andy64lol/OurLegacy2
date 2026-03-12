@@ -3,7 +3,7 @@ Our Legacy 2 - Flask Web Interface
 Medieval fantasy RPG playable in the browser.
 """
 
-from flask import Flask, render_template, request, session, redirect, url_for, jsonify
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify, make_response
 from cryptography.fernet import Fernet
 import pickle
 import base64
@@ -290,7 +290,7 @@ def game():
             conn_key in session.get('visited_areas', []),
         })
 
-    # Shop items
+    # Shop items for current area
     shop_items = []
     shop_name = ''
     for shop_key in area.get('shops', []):
@@ -308,6 +308,44 @@ def game():
                 'description': item_data.get('description', ''),
                 'can_afford': player['gold'] >= price,
             })
+
+    # All store items (from every shop) for the Land tab store
+    seen_store_items = set()
+    all_store_items = []
+    for sk, sd in GAME_DATA['shops'].items():
+        if sk == 'pet_shop':
+            continue
+        for item_name in sd.get('items', []):
+            if item_name in seen_store_items:
+                continue
+            seen_store_items.add(item_name)
+            item_data = GAME_DATA['items'].get(item_name, {})
+            price = item_data.get('price', item_data.get('value', 20))
+            all_store_items.append({
+                'name': item_name,
+                'price': price,
+                'rarity': item_data.get('rarity', 'common'),
+                'description': item_data.get('description', ''),
+                'type': item_data.get('type', 'misc'),
+                'can_afford': player['gold'] >= price,
+            })
+    all_store_items.sort(key=lambda x: x['price'])
+
+    # Special store: epic/legendary/rare items from all items
+    special_store_items = []
+    for item_name, item_data in GAME_DATA['items'].items():
+        if isinstance(item_data, dict) and item_data.get('rarity') in ('epic', 'legendary', 'rare'):
+            price = item_data.get('price', item_data.get('value', 200))
+            special_store_items.append({
+                'name': item_name,
+                'price': price,
+                'rarity': item_data.get('rarity', 'rare'),
+                'description': item_data.get('description', ''),
+                'type': item_data.get('type', 'misc'),
+                'stats': item_data.get('stats', {}),
+                'can_afford': player['gold'] >= price,
+            })
+    special_store_items.sort(key=lambda x: (x['rarity'] != 'legendary', x['rarity'] != 'epic', x['price']))
 
     # Inventory
     inventory_items = []
@@ -473,6 +511,8 @@ def game():
         messages=list(reversed(get_messages()))[:25],
         completed_count=len(completed),
         land_data=land_data,
+        all_store_items=all_store_items,
+        special_store_items=special_store_items,
     )
 
 
@@ -990,6 +1030,8 @@ def battle():
         i for i in player.get('inventory', [])
         if any(x in i.lower() for x in ['potion', 'elixir', 'tears', 'tonic'])
     ]
+    weapon = player.get('equipment', {}).get('weapon')
+    available_spells = get_available_spells(weapon, GAME_DATA['items'], GAME_DATA['spells'])
 
     return render_template(
         'battle.html',
@@ -997,7 +1039,58 @@ def battle():
         enemy=enemy,
         battle_log=battle_log[-14:],
         usable_items=usable_items,
+        available_spells=available_spells,
     )
+
+
+@app.route('/battle/spell', methods=['POST'])
+def battle_spell():
+    player = get_player()
+    enemy = session.get('battle_enemy')
+    if not player or not enemy:
+        return redirect(url_for('game'))
+
+    spell_name = request.form.get('spell', '')
+    spells_data = GAME_DATA['spells']
+    items_data = GAME_DATA['items']
+    weapon = player.get('equipment', {}).get('weapon')
+    available_spells = get_available_spells(weapon, items_data, spells_data)
+    available_names = [s['name'] for s in available_spells]
+    log = session.get('battle_log', [])
+
+    if spell_name not in available_names:
+        log.append('That spell is unavailable with your current weapon.')
+        session['battle_log'] = log
+        return redirect(url_for('battle'))
+
+    spell_data = spells_data.get(spell_name, {})
+    effects_data = spell_data.get('effects_data', {})
+    result = cast_spell(player, enemy, spell_name, spell_data, effects_data)
+
+    for msg in result.get('messages', []):
+        log.append(msg['text'])
+
+    if not result.get('ok', True):
+        session['battle_log'] = log
+        save_player(player)
+        return redirect(url_for('battle'))
+
+    session['battle_enemy'] = enemy
+
+    if enemy.get('hp', 1) <= 0:
+        return _handle_victory(player, enemy, log)
+
+    e_dmg = max(1, enemy['attack'] - player['defense'] + random.randint(-2, 4))
+    player['hp'] = max(0, player['hp'] - e_dmg)
+    log.append(f'The {enemy["name"]} strikes back for {e_dmg} damage!')
+
+    if player['hp'] <= 0:
+        return _handle_defeat(player, enemy, log)
+
+    session['battle_log'] = log
+    session['battle_enemy'] = enemy
+    save_player(player)
+    return redirect(url_for('battle'))
 
 
 @app.route('/battle/attack', methods=['POST'])
@@ -1203,60 +1296,46 @@ def _handle_defeat(player, enemy, log):
     return render_template('defeat.html', player=player, enemy=enemy, log=log)
 
 
-# ─── Save / Load (client-side encrypted) ────────────────────────────────────
-
-
-@app.route('/api/generate_key', methods=['POST'])
-def api_generate_key():
-    key = Fernet.generate_key()
-    return jsonify({'key': key.decode('utf-8')})
+# ─── Save / Load (file download / file upload) ───────────────────────────────
 
 
 @app.route('/api/save', methods=['POST'])
 def api_save():
-    data = request.get_json()
-    key_b64 = data.get('key', '')
-    try:
-        fernet = Fernet(key_b64.encode('utf-8'))
-    except Exception:
-        return jsonify({'error': 'Invalid key'}), 400
+    player = session.get('player')
+    if not player:
+        return jsonify({'error': 'No active character.'}), 400
 
     save_data = {
-        'player': session.get('player'),
-        'messages': session.get('messages', []),
+        'player': player,
         'current_area': session.get('current_area', 'starting_village'),
         'completed_missions': session.get('completed_missions', []),
         'visited_areas': session.get('visited_areas', []),
+        'save_version': '4.0',
     }
 
-    raw = pickle.dumps(save_data)
-    encrypted = fernet.encrypt(raw)
-    encoded = base64.b64encode(encrypted).decode('utf-8')
-    return jsonify({'data': encoded})
+    player_name = (player.get('name') or 'save').replace(' ', '_')
+    filename = f'our_legacy_{player_name}_lv{player.get("level", 1)}.json'
+    raw = json.dumps(save_data, indent=2)
+    response = make_response(raw)
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
 
 
 @app.route('/api/load', methods=['POST'])
 def api_load():
-    data = request.get_json()
-    key_b64 = data.get('key', '')
-    encoded_data = data.get('data', '')
+    data = request.get_json(force=True, silent=True) or {}
+    player = data.get('player')
+    if not player or not player.get('name'):
+        return jsonify({'error': 'Invalid save file: missing player data.'}), 400
 
-    try:
-        fernet = Fernet(key_b64.encode('utf-8'))
-        encrypted = base64.b64decode(encoded_data.encode('utf-8'))
-        raw = fernet.decrypt(encrypted)
-        save_data = pickle.loads(raw)
-    except Exception as e:
-        return jsonify({'error': f'Failed to load: {str(e)}'}), 400
-
-    session['player'] = save_data.get('player')
-    session['messages'] = save_data.get('messages', [])
-    session['current_area'] = save_data.get('current_area', 'starting_village')
-    session['completed_missions'] = save_data.get('completed_missions', [])
-    session['visited_areas'] = save_data.get('visited_areas', [])
+    session['player'] = player
+    session['current_area'] = data.get('current_area', 'starting_village')
+    session['completed_missions'] = data.get('completed_missions', [])
+    session['visited_areas'] = data.get('visited_areas', [session['current_area']])
+    session['messages'] = []
     session.modified = True
-
-    return jsonify({'ok': True})
+    return jsonify({'ok': True, 'player_name': player.get('name')})
 
 
 # ─── Crafting Routes ──────────────────────────────────────────────────────────

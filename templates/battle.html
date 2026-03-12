@@ -102,5 +102,41 @@
         </form>
     </div>
 
+    <!-- Spellcasting -->
+    {% if available_spells %}
+    <div class="panel" style="margin-top:16px;">
+        <div class="panel-title" style="color:var(--mana-bright);">&#10024; Spellbook</div>
+        <div class="panel-body">
+            <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
+                MP: <strong style="color:var(--mana-bright);">{{ player.mp }} / {{ player.max_mp }}</strong>
+            </div>
+            <div class="spell-grid">
+                {% for spell in available_spells %}
+                <form method="post" action="/battle/spell">
+                    <input type="hidden" name="spell" value="{{ spell.name }}">
+                    <button type="submit"
+                        class="btn btn-spell {% if player.mp < spell.mp_cost %}btn-disabled{% endif %}"
+                        {% if player.mp < spell.mp_cost %}disabled title="Not enough MP"{% endif %}>
+                        <div class="spell-name">{{ spell.name }}</div>
+                        <div class="spell-meta">
+                            <span class="spell-cost">{{ spell.mp_cost }} MP</span>
+                            <span class="spell-type">{{ spell.type|title }}</span>
+                            {% if spell.power %}<span class="spell-power">Pwr {{ spell.power }}</span>{% endif %}
+                        </div>
+                        <div class="spell-desc">{{ spell.description[:50] }}</div>
+                    </button>
+                </form>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="panel" style="margin-top:16px;opacity:0.5;">
+        <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;">
+            No spells available. Equip a magic weapon to access your spellbook.
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}
