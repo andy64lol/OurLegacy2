@@ -27,7 +27,6 @@
 - **Grinding System**: Level up through combat, gaining stats and unlocking new equipment.
 - **Mission System**: Complete main story and side quests for gold and experience rewards.
 - **Boss Battles**: Face legendary bosses like the **Ancient Fire Dragon** with multi-phase mechanics and HP thresholds.
-- **Scripting Engine**: Extend and automate your journey using JavaScript (Node.js).
 
 ### Advanced Systems
 - **Companions**: Hire unique companions at the Tavern with active abilities and passive party bonuses.
