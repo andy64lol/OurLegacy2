@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="result-screen">
+    <div class="result-inner">
+        <img src="/static/banner.png" alt="Our Legacy 2" class="title-banner-small">
+
+        <div class="panel result-panel result-victory">
+            <div class="panel-title panel-title-victory">Victory</div>
+            <div class="panel-body">
+                <p class="result-summary">The <strong>{{ enemy.name }}</strong> has been slain.</p>
+
+                <div class="reward-list">
+                    <div class="reward-row"><span>Experience</span><span class="reward-val">+{{ exp }} EXP</span></div>
+                    <div class="reward-row"><span>Gold</span><span class="reward-val reward-gold">+{{ gold }} coins</span></div>
+                    {% if loot_item %}
+                    <div class="reward-row"><span>Loot</span><span class="reward-val">{{ loot_item }}</span></div>
+                    {% endif %}
+                    {% if leveled %}
+                    <div class="reward-row"><span>Level Up!</span><span class="reward-val reward-gold">Now Level {{ player.level }}</span></div>
+                    {% endif %}
+                </div>
+
+                <div class="battle-log-recap">
+                    {% for entry in log[-6:] %}
+                    <div class="log-entry {% if 'CRITICAL' in entry %}log-crit{% elif 'Victory' in entry %}log-victory{% else %}log-normal{% endif %}">{{ entry }}</div>
+                    {% endfor %}
+                </div>
+
+                <a href="/game" class="btn btn-primary btn-large" style="margin-top:20px;display:block;text-align:center;">
+                    Continue
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

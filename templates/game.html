@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="game-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <img src="/static/banner.png" alt="Our Legacy 2" class="sidebar-banner">
+        </div>
+
+        <div class="panel sidebar-panel">
+            <div class="panel-title">{{ player.name }}</div>
+            <div class="panel-body">
+                <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
+                <div class="char-level">Level {{ player.level }}</div>
+
+                <div class="bar-group">
+                    <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
+                    </div>
+                </div>
+
+                <div class="bar-group">
+                    <div class="bar-label">MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
+                    </div>
+                </div>
+
+                <div class="bar-group">
+                    <div class="bar-label">EXP <span class="bar-nums">{{ player.experience }} / {{ player.experience_to_next }}</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-exp" style="width:{{ [(player.experience / player.experience_to_next * 100)|int, 100]|min }}%"></div>
+                    </div>
+                </div>
+
+                <div class="gold-display">Gold: <span class="gold-amount">{{ player.gold }}</span></div>
+
+                <div class="stat-mini-grid">
+                    <div class="stat-mini"><span>ATK</span><strong>{{ player.attack }}</strong></div>
+                    <div class="stat-mini"><span>DEF</span><strong>{{ player.defense }}</strong></div>
+                    <div class="stat-mini"><span>SPD</span><strong>{{ player.speed }}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel sidebar-panel" style="margin-top:8px;">
+            <div class="panel-title">Location</div>
+            <div class="panel-body">
+                <div class="location-name">{{ area_name }}</div>
+                <div class="location-desc">{{ (area.description or '')[:100] }}{% if (area.description or '')|length > 100 %}...{% endif %}</div>
+                {% if area.can_rest %}
+                <div class="rest-notice">Inn available ({{ area.rest_cost or 10 }} gold)</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="sidebar-nav">
+            <a href="/new_game" class="btn btn-secondary btn-small" onclick="return confirm('Return to the title screen?')">Abandon Journey</a>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+        <!-- Tabs -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="explore">Explore</button>
+            <button class="tab-btn" data-tab="inventory">Inventory</button>
+            <button class="tab-btn" data-tab="travel">Travel</button>
+            {% if shop_items %}
+            <button class="tab-btn" data-tab="shop">{{ shop_name or 'Shop' }}</button>
+            {% endif %}
+            <button class="tab-btn" data-tab="missions">Missions</button>
+        </nav>
+
+        <!-- Explore Tab -->
+        <div class="tab-content active" id="tab-explore">
+            <div class="panel" style="margin-bottom:12px;">
+                <div class="panel-title">{{ area_name }}</div>
+                <div class="panel-body">
+                    <p class="area-description">{{ area.description or 'A place of mystery and danger.' }}</p>
+
+                    {% if area.possible_enemies %}
+                    <div class="danger-notice">Known threats: {{ area.possible_enemies | map('replace', '_', ' ') | map('title') | join(', ') }}</div>
+                    {% endif %}
+
+                    <div class="action-row">
+                        <form method="post" action="/action/explore" style="display:inline;">
+                            <button type="submit" class="btn btn-primary">Venture Forth</button>
+                        </form>
+
+                        {% if area.can_rest %}
+                        <form method="post" action="/action/rest" style="display:inline;">
+                            <button type="submit" class="btn btn-secondary"
+                                {% if player.gold < (area.rest_cost or 10) %}disabled title="Not enough gold"{% endif %}>
+                                Rest at Inn ({{ area.rest_cost or 10 }} gold)
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Chronicle</div>
+                <div class="panel-body message-log" id="game-log">
+                    {% for msg in messages %}
+                    <div class="log-entry" style="color:{{ msg.color }}">{{ msg.text }}</div>
+                    {% else %}
+                    <div class="log-entry log-dim">Your journey has only just begun...</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div class="tab-content" id="tab-inventory">
+            <div class="panel">
+                <div class="panel-title">Inventory <span class="panel-subtitle">({{ player.inventory|length }} items &mdash; {{ player.gold }} gold)</span></div>
+                <div class="panel-body">
+                    {% if inventory_items %}
+                    <table class="item-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Qty</th>
+                                <th>Description</th>
+                                <th colspan="2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in inventory_items %}
+                            <tr>
+                                <td class="item-name rarity-{{ item.rarity }}">{{ item.name }}</td>
+                                <td class="item-qty">{{ item.count }}</td>
+                                <td class="item-desc">{{ (item.description or '')[:60] }}</td>
+                                <td>
+                                    <form method="post" action="/action/use_item" style="display:inline;">
+                                        <input type="hidden" name="item" value="{{ item.name }}">
+                                        <button type="submit" class="btn btn-small btn-primary">Use</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form method="post" action="/action/sell" style="display:inline;">
+                                        <input type="hidden" name="item" value="{{ item.name }}">
+                                        <button type="submit" class="btn btn-small btn-secondary">Sell ({{ item.sell_price }}g)</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="empty-notice">Your pack is empty. Explore to find items.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Travel Tab -->
+        <div class="tab-content" id="tab-travel">
+            <div class="panel">
+                <div class="panel-title">Travel</div>
+                <div class="panel-body">
+                    {% if connections %}
+                    <p class="panel-note">Select a destination reachable from {{ area_name }}.</p>
+                    <div class="connection-list">
+                        {% for conn in connections %}
+                        <div class="connection-card {% if conn.visited %}visited{% endif %}">
+                            <div class="conn-info">
+                                <div class="conn-name">{{ conn.name }} {% if conn.visited %}<span class="visited-badge">Visited</span>{% endif %}</div>
+                                <div class="conn-danger {% if conn.has_danger %}danger{% else %}safe{% endif %}">
+                                    {% if conn.has_danger %}Dangerous{% else %}Peaceful{% endif %}
+                                </div>
+                            </div>
+                            <form method="post" action="/action/travel">
+                                <input type="hidden" name="dest" value="{{ conn.key }}">
+                                <button type="submit" class="btn btn-secondary btn-small">Travel</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="empty-notice">No paths lead onward from here.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Shop Tab -->
+        {% if shop_items %}
+        <div class="tab-content" id="tab-shop">
+            <div class="panel">
+                <div class="panel-title">{{ shop_name }} <span class="panel-subtitle">({{ player.gold }} gold available)</span></div>
+                <div class="panel-body">
+                    <table class="item-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Price</th>
+                                <th>Description</th>
+                                <th>Buy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in shop_items %}
+                            <tr class="{% if not item.can_afford %}cannot-afford{% endif %}">
+                                <td class="item-name rarity-{{ item.rarity }}">{{ item.name }}</td>
+                                <td class="item-price">{{ item.price }}g</td>
+                                <td class="item-desc">{{ (item.description or '')[:60] }}</td>
+                                <td>
+                                    <form method="post" action="/action/buy">
+                                        <input type="hidden" name="item" value="{{ item.name }}">
+                                        <button type="submit" class="btn btn-small btn-primary" {% if not item.can_afford %}disabled{% endif %}>
+                                            Buy
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Missions Tab -->
+        <div class="tab-content" id="tab-missions">
+            <div class="panel">
+                <div class="panel-title">Missions <span class="panel-subtitle">({{ completed_count }} completed)</span></div>
+                <div class="panel-body">
+                    {% if missions %}
+                    <div class="mission-list">
+                        {% for mission in missions %}
+                        <div class="mission-card">
+                            <div class="mission-info">
+                                <div class="mission-name">{{ mission.name }}</div>
+                                <div class="mission-desc">{{ mission.description[:120] }}{% if mission.description|length > 120 %}...{% endif %}</div>
+                                <div class="mission-rewards">Reward: {{ mission.exp_reward }} EXP &mdash; {{ mission.gold_reward }} gold</div>
+                            </div>
+                            <form method="post" action="/action/complete_mission">
+                                <input type="hidden" name="mission_id" value="{{ mission.id }}">
+                                <button type="submit" class="btn btn-primary btn-small">Complete</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="empty-notice">No missions are currently available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+{% endblock %}

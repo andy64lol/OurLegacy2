@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<script>
+const classData = {{ data.classes | tojson }};
+</script>
+{% endblock %}
+{% block content %}
+<div class="page-wrap">
+    <div class="page-header">
+        <img src="/static/banner.png" alt="Our Legacy 2" class="title-banner-small">
+        <h1 class="page-title">Create Your Character</h1>
+    </div>
+
+    {% if error %}
+    <div class="alert-box">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/create" class="create-form">
+        <div class="create-layout">
+            <div class="create-left">
+                <div class="panel">
+                    <div class="panel-title">Identity</div>
+                    <div class="panel-body">
+                        <label class="field-label">Character Name</label>
+                        <input type="text" name="name" class="text-input" placeholder="Enter your name..." maxlength="24" autocomplete="off" required>
+
+                        <label class="field-label" style="margin-top:16px;">Choose Your Class</label>
+                        <div class="class-grid">
+                            {% for cls_name, cls_data in data.classes.items() %}
+                            <label class="class-card">
+                                <input type="radio" name="class" value="{{ cls_name }}" {% if loop.first %}checked{% endif %}
+                                       onchange="updateClassInfo('{{ cls_name }}')">
+                                <div class="class-card-inner">
+                                    <div class="class-name">{{ cls_name }}</div>
+                                    <div class="class-desc-short">{{ cls_data.description[:40] }}...</div>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large" style="width:100%;margin-top:16px;">
+                    Begin Adventure
+                </button>
+                <a href="/" class="btn btn-secondary" style="width:100%;margin-top:8px;display:block;text-align:center;">
+                    Back
+                </a>
+            </div>
+
+            <div class="create-right">
+                <div class="panel" id="class-info-panel">
+                    <div class="panel-title" id="ci-name">Warrior</div>
+                    <div class="panel-body">
+                        <p class="class-full-desc" id="ci-desc"></p>
+
+                        <div class="stats-grid" id="ci-stats">
+                            <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val" id="ci-hp">-</span></div>
+                            <div class="stat-row"><span class="stat-name">MP</span><span class="stat-val" id="ci-mp">-</span></div>
+                            <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val" id="ci-atk">-</span></div>
+                            <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val" id="ci-def">-</span></div>
+                            <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val" id="ci-spd">-</span></div>
+                            <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val" id="ci-gold">-</span></div>
+                        </div>
+
+                        <div class="stat-label" style="margin-top:12px;">Starting Equipment</div>
+                        <ul class="item-list" id="ci-items"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+function updateClassInfo(cls) {
+    const d = classData[cls];
+    if (!d) return;
+    document.getElementById('ci-name').textContent = cls;
+    document.getElementById('ci-desc').textContent = d.description || '';
+    const s = d.base_stats || {};
+    document.getElementById('ci-hp').textContent = s.hp || '-';
+    document.getElementById('ci-mp').textContent = s.mp || '-';
+    document.getElementById('ci-atk').textContent = s.attack || '-';
+    document.getElementById('ci-def').textContent = s.defense || '-';
+    document.getElementById('ci-spd').textContent = s.speed || '-';
+    document.getElementById('ci-gold').textContent = d.starting_gold || '-';
+    const items = d.starting_items || [];
+    const ul = document.getElementById('ci-items');
+    ul.innerHTML = items.map(i => `<li>${i}</li>`).join('');
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const checked = document.querySelector('input[name="class"]:checked');
+    if (checked) updateClassInfo(checked.value);
+});
+</script>
+{% endblock %}

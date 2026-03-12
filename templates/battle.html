@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="battle-layout">
+
+    <div class="battle-header">
+        <img src="/static/banner.png" alt="Our Legacy 2" class="title-banner-small">
+    </div>
+
+    <div class="battle-arena">
+
+        <!-- Player panel -->
+        <div class="combatant-panel player-panel">
+            <div class="panel">
+                <div class="panel-title">{{ player.name }}</div>
+                <div class="panel-body">
+                    <div class="combatant-class">{{ player['class'] }} &mdash; Level {{ player.level }}</div>
+
+                    <div class="bar-group">
+                        <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bar-group">
+                        <div class="bar-label">MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-mini-grid">
+                        <div class="stat-mini"><span>ATK</span><strong>{{ player.attack }}</strong></div>
+                        <div class="stat-mini"><span>DEF</span><strong>{{ player.defense }}</strong></div>
+                        <div class="stat-mini"><span>SPD</span><strong>{{ player.speed }}</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VS divider -->
+        <div class="battle-vs">VS</div>
+
+        <!-- Enemy panel -->
+        <div class="combatant-panel enemy-panel">
+            <div class="panel">
+                <div class="panel-title panel-title-enemy">{{ enemy.name }}</div>
+                <div class="panel-body">
+                    <div class="combatant-class">Foe</div>
+
+                    <div class="bar-group">
+                        <div class="bar-label">HP <span class="bar-nums">{{ enemy.hp }} / {{ enemy.max_hp }}</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill bar-hp" style="width:{{ [(enemy.hp / enemy.max_hp * 100)|int, 100]|min }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-mini-grid">
+                        <div class="stat-mini"><span>ATK</span><strong>{{ enemy.attack }}</strong></div>
+                        <div class="stat-mini"><span>DEF</span><strong>{{ enemy.defense }}</strong></div>
+                        <div class="stat-mini"><span>SPD</span><strong>{{ enemy.speed }}</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Battle log -->
+    <div class="panel battle-log-panel">
+        <div class="panel-title">Battle Log</div>
+        <div class="panel-body message-log battle-log">
+            {% for entry in battle_log %}
+            <div class="log-entry {% if 'CRITICAL' in entry %}log-crit{% elif 'Victory' in entry or 'victory' in entry %}log-victory{% elif 'fall' in entry or 'strike' in entry or 'damage' in entry %}log-damage{% else %}log-normal{% endif %}">
+                {{ entry }}
+            </div>
+            {% else %}
+            <div class="log-entry log-dim">The battle begins...</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="panel battle-actions-panel">
+        <div class="panel-title">Choose Your Action</div>
+        <div class="panel-body">
+            <div class="battle-action-grid">
+
+                <form method="post" action="/battle/attack">
+                    <button type="submit" class="btn btn-battle btn-attack">Attack</button>
+                </form>
+
+                <form method="post" action="/battle/defend">
+                    <button type="submit" class="btn btn-battle btn-defend">Defend</button>
+                </form>
+
+                {% if usable_items %}
+                <form method="post" action="/battle/use_item" class="item-use-form">
+                    <select name="item" class="item-select">
+                        {% for item in usable_items %}
+                        <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-battle btn-item">Use Item</button>
+                </form>
+                {% else %}
+                <div class="btn btn-battle btn-item btn-disabled" title="No usable items">Use Item</div>
+                {% endif %}
+
+                <form method="post" action="/battle/flee">
+                    <button type="submit" class="btn btn-battle btn-flee">Flee</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

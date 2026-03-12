@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="result-screen">
+    <div class="result-inner">
+        <img src="/static/banner.png" alt="Our Legacy 2" class="title-banner-small">
+
+        <div class="panel result-panel result-defeat">
+            <div class="panel-title panel-title-defeat">Defeated</div>
+            <div class="panel-body">
+                <p class="result-summary">You fell before the <strong>{{ enemy.name }}</strong>.</p>
+                <p class="result-desc">You awaken battered and bruised, but alive. The world does not give up on you so easily.</p>
+
+                <div class="stat-row" style="margin:12px 0;">
+                    <span>Current HP</span>
+                    <span class="reward-val">{{ player.hp }} / {{ player.max_hp }}</span>
+                </div>
+
+                <div class="battle-log-recap">
+                    {% for entry in log[-6:] %}
+                    <div class="log-entry log-damage">{{ entry }}</div>
+                    {% endfor %}
+                </div>
+
+                <a href="/game" class="btn btn-primary btn-large" style="margin-top:20px;display:block;text-align:center;">
+                    Rise Again
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

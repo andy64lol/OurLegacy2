@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="welcome-screen">
+    <div class="welcome-inner">
+        <img src="/static/banner.png" alt="Our Legacy 2" class="title-banner">
+
+        <div class="scroll-panel welcome-scroll">
+            <h2 class="welcome-heading">Welcome, Adventurer</h2>
+            <p class="welcome-lore">
+                The realm of Eldenmoor teeters on the edge of ruin. Ancient evils stir in the deep places of the world,
+                and the old kingdoms crumble beneath the weight of war and shadow.
+                You are but one soul in a sea of thousands &mdash; yet destiny has a way of finding those who seek it.
+            </p>
+            <p class="welcome-lore">
+                Forge your path. Choose your class. Carve your legacy.
+            </p>
+
+            <div class="welcome-actions">
+                <a href="/create" class="btn btn-primary btn-large">Begin Your Journey</a>
+            </div>
+        </div>
+
+        <div class="welcome-features">
+            <div class="feature-tile">
+                <div class="feature-title">8 Classes</div>
+                <div class="feature-desc">Warrior, Mage, Rogue, Hunter, Bard, Paladin, Druid, Priest</div>
+            </div>
+            <div class="feature-tile">
+                <div class="feature-title">Deep World</div>
+                <div class="feature-desc">Dozens of areas, dungeons, and hidden places to discover</div>
+            </div>
+            <div class="feature-tile">
+                <div class="feature-title">Rich Combat</div>
+                <div class="feature-desc">Tactical battles, spells, companions, and boss encounters</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
