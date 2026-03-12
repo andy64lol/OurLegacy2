@@ -20,14 +20,12 @@
                         <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
                     </div>
                 </div>
-
                 <div class="bar-group">
                     <div class="bar-label">MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
                     <div class="bar-track">
                         <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
                     </div>
                 </div>
-
                 <div class="bar-group">
                     <div class="bar-label">EXP <span class="bar-nums">{{ player.experience }} / {{ player.experience_to_next }}</span></div>
                     <div class="bar-track">
@@ -42,60 +40,91 @@
                     <div class="stat-mini"><span>DEF</span><strong>{{ player.defense }}</strong></div>
                     <div class="stat-mini"><span>SPD</span><strong>{{ player.speed }}</strong></div>
                 </div>
-            </div>
-        </div>
 
-        <div class="panel sidebar-panel" style="margin-top:8px;">
-            <div class="panel-title">Location</div>
-            <div class="panel-body">
-                <div class="location-name">{{ area_name }}</div>
-                <div class="location-desc">{{ (area.description or '')[:100] }}{% if (area.description or '')|length > 100 %}...{% endif %}</div>
-                {% if area.can_rest %}
-                <div class="rest-notice">Inn available ({{ area.rest_cost or 10 }} gold)</div>
+                {% if player.pet %}
+                <div style="margin-top:10px;font-size:13px;color:var(--gold);">
+                    Companion: {{ player.pet.replace('_',' ').title() }}
+                </div>
                 {% endif %}
             </div>
         </div>
 
+        <div class="panel sidebar-panel" style="margin-top:0;">
+            <div class="panel-title">Location</div>
+            <div class="panel-body">
+                <div class="location-name">{{ area_name }}</div>
+                <div class="location-desc">{{ (area.description or '')[:110] }}{% if (area.description or '')|length > 110 %}...{% endif %}</div>
+                {% if area.can_rest %}
+                <div class="rest-notice">
+                    {% if (area.rest_cost or 0) > 0 %}Inn available ({{ area.rest_cost }} gold)
+                    {% else %}Rest freely on your land{% endif %}
+                </div>
+                {% endif %}
+                {% if land_data %}
+                <div style="margin-top:8px;font-size:13px;color:var(--green-bright);">
+                    Comfort: <strong>{{ land_data.comfort_points }}</strong>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="sidebar-save-section">
+            <button class="btn btn-secondary btn-small" onclick="saveGame()">Save Game</button>
+            <div id="save-status" style="font-size:13px;color:var(--text-dim);display:none;"></div>
+        </div>
+
         <div class="sidebar-nav">
-            <a href="/new_game" class="btn btn-secondary btn-small" onclick="return confirm('Return to the title screen?')">Abandon Journey</a>
+            <a href="/new_game" class="btn btn-danger btn-small"
+               onclick="return confirm('Return to the title screen? Unsaved progress will be lost.')">
+                Abandon Journey
+            </a>
         </div>
     </aside>
 
     <!-- Main content -->
     <main class="main-content">
 
-        <!-- Tabs -->
-        <nav class="tab-nav">
+        <nav class="tab-nav" id="main-tabs">
             <button class="tab-btn active" data-tab="explore">Explore</button>
             <button class="tab-btn" data-tab="inventory">Inventory</button>
             <button class="tab-btn" data-tab="travel">Travel</button>
             {% if shop_items %}
             <button class="tab-btn" data-tab="shop">{{ shop_name or 'Shop' }}</button>
             {% endif %}
+            {% if land_data %}
+            <button class="tab-btn" data-tab="land">Your Land</button>
+            {% endif %}
             <button class="tab-btn" data-tab="missions">Missions</button>
         </nav>
 
-        <!-- Explore Tab -->
+        <!-- ── Explore ── -->
         <div class="tab-content active" id="tab-explore">
-            <div class="panel" style="margin-bottom:12px;">
+            <div class="panel" style="margin-bottom:14px;">
                 <div class="panel-title">{{ area_name }}</div>
                 <div class="panel-body">
                     <p class="area-description">{{ area.description or 'A place of mystery and danger.' }}</p>
 
                     {% if area.possible_enemies %}
-                    <div class="danger-notice">Known threats: {{ area.possible_enemies | map('replace', '_', ' ') | map('title') | join(', ') }}</div>
+                    <div class="danger-notice">
+                        Known threats: {{ area.possible_enemies | map('replace','_',' ') | map('title') | join(', ') }}
+                    </div>
                     {% endif %}
 
                     <div class="action-row">
-                        <form method="post" action="/action/explore" style="display:inline;">
+                        <form method="post" action="/action/explore">
                             <button type="submit" class="btn btn-primary">Venture Forth</button>
                         </form>
-
                         {% if area.can_rest %}
-                        <form method="post" action="/action/rest" style="display:inline;">
+                        <form method="post" action="/action/rest">
                             <button type="submit" class="btn btn-secondary"
-                                {% if player.gold < (area.rest_cost or 10) %}disabled title="Not enough gold"{% endif %}>
-                                Rest at Inn ({{ area.rest_cost or 10 }} gold)
+                                {% if (area.rest_cost or 0) > 0 and player.gold < (area.rest_cost or 0) %}
+                                disabled title="Not enough gold"
+                                {% endif %}>
+                                {% if (area.rest_cost or 0) > 0 %}
+                                    Rest at Inn ({{ area.rest_cost }} gold)
+                                {% else %}
+                                    Rest on Your Land
+                                {% endif %}
                             </button>
                         </form>
                         {% endif %}
@@ -115,19 +144,19 @@
             </div>
         </div>
 
-        <!-- Inventory Tab -->
+        <!-- ── Inventory ── -->
         <div class="tab-content" id="tab-inventory">
             <div class="panel">
-                <div class="panel-title">Inventory <span class="panel-subtitle">({{ player.inventory|length }} items &mdash; {{ player.gold }} gold)</span></div>
+                <div class="panel-title">
+                    Inventory
+                    <span class="panel-subtitle">({{ player.inventory|length }} items &mdash; {{ player.gold }} gold)</span>
+                </div>
                 <div class="panel-body">
                     {% if inventory_items %}
                     <table class="item-table">
                         <thead>
                             <tr>
-                                <th>Item</th>
-                                <th>Qty</th>
-                                <th>Description</th>
-                                <th colspan="2">Actions</th>
+                                <th>Item</th><th>Qty</th><th>Description</th><th colspan="2">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -135,17 +164,19 @@
                             <tr>
                                 <td class="item-name rarity-{{ item.rarity }}">{{ item.name }}</td>
                                 <td class="item-qty">{{ item.count }}</td>
-                                <td class="item-desc">{{ (item.description or '')[:60] }}</td>
+                                <td class="item-desc">{{ (item.description or '')[:70] }}</td>
                                 <td>
-                                    <form method="post" action="/action/use_item" style="display:inline;">
+                                    <form method="post" action="/action/use_item">
                                         <input type="hidden" name="item" value="{{ item.name }}">
                                         <button type="submit" class="btn btn-small btn-primary">Use</button>
                                     </form>
                                 </td>
                                 <td>
-                                    <form method="post" action="/action/sell" style="display:inline;">
+                                    <form method="post" action="/action/sell">
                                         <input type="hidden" name="item" value="{{ item.name }}">
-                                        <button type="submit" class="btn btn-small btn-secondary">Sell ({{ item.sell_price }}g)</button>
+                                        <button type="submit" class="btn btn-small btn-secondary">
+                                            Sell ({{ item.sell_price }}g)
+                                        </button>
                                     </form>
                                 </td>
                             </tr>
@@ -155,22 +186,34 @@
                     {% else %}
                     <p class="empty-notice">Your pack is empty. Explore to find items.</p>
                     {% endif %}
+
+                    <div class="stat-mini-grid" style="margin-top:20px;">
+                        <div class="stat-mini"><span>Max HP</span><strong>{{ player.max_hp }}</strong></div>
+                        <div class="stat-mini"><span>Max MP</span><strong>{{ player.max_mp }}</strong></div>
+                        <div class="stat-mini"><span>Attack</span><strong>{{ player.attack }}</strong></div>
+                        <div class="stat-mini"><span>Defense</span><strong>{{ player.defense }}</strong></div>
+                        <div class="stat-mini"><span>Speed</span><strong>{{ player.speed }}</strong></div>
+                        <div class="stat-mini"><span>Level</span><strong>{{ player.level }}</strong></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Travel Tab -->
+        <!-- ── Travel ── -->
         <div class="tab-content" id="tab-travel">
             <div class="panel">
                 <div class="panel-title">Travel</div>
                 <div class="panel-body">
                     {% if connections %}
-                    <p class="panel-note">Select a destination reachable from {{ area_name }}.</p>
+                    <p class="panel-note">Destinations reachable from {{ area_name }}.</p>
                     <div class="connection-list">
                         {% for conn in connections %}
                         <div class="connection-card {% if conn.visited %}visited{% endif %}">
                             <div class="conn-info">
-                                <div class="conn-name">{{ conn.name }} {% if conn.visited %}<span class="visited-badge">Visited</span>{% endif %}</div>
+                                <div class="conn-name">
+                                    {{ conn.name }}
+                                    {% if conn.visited %}<span class="visited-badge">Visited</span>{% endif %}
+                                </div>
                                 <div class="conn-danger {% if conn.has_danger %}danger{% else %}safe{% endif %}">
                                     {% if conn.has_danger %}Dangerous{% else %}Peaceful{% endif %}
                                 </div>
@@ -189,33 +232,30 @@
             </div>
         </div>
 
-        <!-- Shop Tab -->
+        <!-- ── Shop ── -->
         {% if shop_items %}
         <div class="tab-content" id="tab-shop">
             <div class="panel">
-                <div class="panel-title">{{ shop_name }} <span class="panel-subtitle">({{ player.gold }} gold available)</span></div>
+                <div class="panel-title">
+                    {{ shop_name }}
+                    <span class="panel-subtitle">({{ player.gold }} gold available)</span>
+                </div>
                 <div class="panel-body">
                     <table class="item-table">
                         <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th>Price</th>
-                                <th>Description</th>
-                                <th>Buy</th>
-                            </tr>
+                            <tr><th>Item</th><th>Price</th><th>Description</th><th>Buy</th></tr>
                         </thead>
                         <tbody>
                             {% for item in shop_items %}
                             <tr class="{% if not item.can_afford %}cannot-afford{% endif %}">
                                 <td class="item-name rarity-{{ item.rarity }}">{{ item.name }}</td>
                                 <td class="item-price">{{ item.price }}g</td>
-                                <td class="item-desc">{{ (item.description or '')[:60] }}</td>
+                                <td class="item-desc">{{ (item.description or '')[:70] }}</td>
                                 <td>
                                     <form method="post" action="/action/buy">
                                         <input type="hidden" name="item" value="{{ item.name }}">
-                                        <button type="submit" class="btn btn-small btn-primary" {% if not item.can_afford %}disabled{% endif %}>
-                                            Buy
-                                        </button>
+                                        <button type="submit" class="btn btn-small btn-primary"
+                                            {% if not item.can_afford %}disabled{% endif %}>Buy</button>
                                     </form>
                                 </td>
                             </tr>
@@ -227,10 +267,208 @@
         </div>
         {% endif %}
 
-        <!-- Missions Tab -->
+        <!-- ── Your Land ── -->
+        {% if land_data %}
+        <div class="tab-content" id="tab-land">
+
+            <!-- Comfort & overview -->
+            <div class="panel land-section">
+                <div class="panel-title">Your Land &mdash; Overview</div>
+                <div class="panel-body">
+                    <div class="comfort-display">
+                        Comfort Points: <span class="comfort-num">{{ land_data.comfort_points }}</span>
+                    </div>
+                    <p style="font-size:15px;color:var(--text-dim);margin-top:8px;">
+                        Build structures, plant crops, and care for a companion on your personal plot of land.
+                        Comfort points are earned by placing housing items and improve your rest quality.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Active builds -->
+            {% if land_data.placed_by_type %}
+            <div class="panel land-section">
+                <div class="panel-title">Placed Structures</div>
+                <div class="panel-body">
+                    {% for slot_type, placed_items in land_data.placed_by_type.items() %}
+                    <div class="building-type-block">
+                        <div class="building-type-label">{{ slot_type.replace('_',' ').title() }}</div>
+                        <div class="slots-grid">
+                            {% for placed in placed_items %}
+                            <div class="slot-card slot-filled">
+                                <div class="slot-id">{{ placed.slot_id }}</div>
+                                <div class="slot-item rarity-common">{{ placed.name }}</div>
+                                <div style="font-size:12px;color:var(--green-bright);margin-bottom:6px;">
+                                    +{{ placed.comfort }} comfort
+                                </div>
+                                <form method="post" action="/action/land/remove_housing">
+                                    <input type="hidden" name="slot_id" value="{{ placed.slot_id }}">
+                                    <button type="submit" class="btn btn-xsmall btn-danger">Remove</button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Housing shop -->
+            <div class="panel land-section">
+                <div class="panel-title">Housing Shop</div>
+                <div class="panel-body">
+                    {% for type_key, type_info in land_data.building_types.items() %}
+                    {% if land_data.housing_by_type.get(type_key) %}
+                    <div class="building-type-block">
+                        <div class="building-type-label">{{ type_info.label }} ({{ type_info.slots }} slot{{ 's' if type_info.slots != 1 }})</div>
+                        <div class="housing-shop-grid">
+                            {% for h in land_data.housing_by_type[type_key] %}
+                            <div class="housing-card {% if h.owned %}owned-card{% endif %}">
+                                <div class="housing-name rarity-{{ h.rarity }}">{{ h.name }}</div>
+                                <div class="housing-desc">{{ h.description[:80] }}</div>
+                                <div class="housing-meta">
+                                    <span class="housing-price">{{ h.price }}g</span>
+                                    <span class="housing-comfort">+{{ h.comfort }} comfort</span>
+                                </div>
+                                <div class="housing-actions">
+                                    {% if not h.owned %}
+                                    <form method="post" action="/action/land/buy_housing">
+                                        <input type="hidden" name="housing_key" value="{{ h.key }}">
+                                        <button type="submit" class="btn btn-xsmall btn-primary"
+                                            {% if not h.can_afford %}disabled{% endif %}>Buy</button>
+                                    </form>
+                                    {% else %}
+                                    <span style="font-size:12px;color:var(--green-bright);">Owned</span>
+                                    <form method="post" action="/action/land/place_housing" class="place-form">
+                                        <input type="hidden" name="housing_key" value="{{ h.key }}">
+                                        <select name="slot_id" class="slot-select">
+                                            {% for i in range(1, type_info.slots + 1) %}
+                                            <option value="{{ type_key }}_{{ i }}">Slot {{ i }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn btn-xsmall btn-secondary">Place</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Farming -->
+            <div class="panel land-section">
+                <div class="panel-title">Farming</div>
+                <div class="panel-body">
+                    <p class="panel-note">
+                        Plant crops in your farm slots. Each time you Venture Forth or Rest, crops grow.
+                        Harvest when ready to earn gold.
+                    </p>
+                    <div class="farm-grid">
+                        {% for slot in land_data.farm_crops %}
+                        <div class="farm-slot {% if slot.crop_key %}{% if slot.ready %}ready{% else %}growing{% endif %}{% endif %}">
+                            <div class="farm-slot-id">{{ slot.slot_id }}</div>
+                            {% if slot.crop_key %}
+                                <div class="farm-crop-name">{{ slot.name }}</div>
+                                {% if slot.ready %}
+                                <div class="farm-ready-badge">Ready to harvest!</div>
+                                <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">
+                                    Yields {{ slot.harvest_amount }}x &mdash; sells for {{ slot.sell_price * slot.harvest_amount }}g
+                                </div>
+                                <form method="post" action="/action/land/harvest">
+                                    <input type="hidden" name="slot_id" value="{{ slot.slot_id }}">
+                                    <button type="submit" class="btn btn-small btn-primary">Harvest</button>
+                                </form>
+                                {% else %}
+                                <div class="farm-progress">
+                                    Growing: {{ slot.turns }} / {{ slot.growth_time }} turns
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <div style="font-size:13px;color:var(--text-dim);font-style:italic;margin-bottom:8px;">
+                                    Empty plot
+                                </div>
+                                <form method="post" action="/action/land/plant" class="plant-form">
+                                    <input type="hidden" name="slot_id" value="{{ slot.slot_id }}">
+                                    <select name="crop_key" class="crop-select">
+                                        {% for crop_key, crop in land_data.farming_crops.items() %}
+                                        <option value="{{ crop_key }}">
+                                            {{ crop.name }} ({{ crop.growth_time }}t, {{ crop.sell_price * crop.harvest_amount }}g)
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-small btn-secondary">Plant</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pets -->
+            <div class="panel land-section">
+                <div class="panel-title">Companion Pets</div>
+                <div class="panel-body">
+                    {% if land_data.current_pet %}
+                    <div class="current-pet-box">
+                        <div class="current-pet-label">Current Companion</div>
+                        <div class="current-pet-name">{{ land_data.current_pet.name }}</div>
+                        {% if land_data.current_pet.boosts %}
+                        <div class="current-pet-boosts">
+                            Bonuses:
+                            {% for stat, val in land_data.current_pet.boosts.items() %}
+                            +{{ val }} {{ stat.replace('_',' ') }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="pet-grid">
+                        {% for pet_key, pet in land_data.pets.items() %}
+                        <div class="pet-card {% if land_data.current_pet and land_data.current_pet.key == pet_key %}active-pet{% endif %}">
+                            <div class="pet-name">{{ pet.name }}</div>
+                            <div class="pet-desc">{{ pet.description }}</div>
+                            {% if pet.boosts %}
+                            <div class="pet-boosts">
+                                {% for stat, val in pet.boosts.items() %}
+                                +{{ val }} {{ stat.replace('_',' ') }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="pet-price">{{ pet.price }} gold</div>
+                            {% if land_data.current_pet and land_data.current_pet.key == pet_key %}
+                                <span style="font-size:13px;color:var(--gold);">Your companion</span>
+                            {% else %}
+                                <form method="post" action="/action/land/buy_pet">
+                                    <input type="hidden" name="pet_key" value="{{ pet_key }}">
+                                    <button type="submit" class="btn btn-small btn-primary"
+                                        {% if not pet.can_afford %}disabled{% endif %}>
+                                        Adopt
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        {% endif %}
+
+        <!-- ── Missions ── -->
         <div class="tab-content" id="tab-missions">
             <div class="panel">
-                <div class="panel-title">Missions <span class="panel-subtitle">({{ completed_count }} completed)</span></div>
+                <div class="panel-title">
+                    Missions
+                    <span class="panel-subtitle">({{ completed_count }} completed)</span>
+                </div>
                 <div class="panel-body">
                     {% if missions %}
                     <div class="mission-list">
@@ -238,8 +476,12 @@
                         <div class="mission-card">
                             <div class="mission-info">
                                 <div class="mission-name">{{ mission.name }}</div>
-                                <div class="mission-desc">{{ mission.description[:120] }}{% if mission.description|length > 120 %}...{% endif %}</div>
-                                <div class="mission-rewards">Reward: {{ mission.exp_reward }} EXP &mdash; {{ mission.gold_reward }} gold</div>
+                                <div class="mission-desc">
+                                    {{ mission.description[:130] }}{% if mission.description|length > 130 %}...{% endif %}
+                                </div>
+                                <div class="mission-rewards">
+                                    Reward: {{ mission.exp_reward }} EXP &mdash; {{ mission.gold_reward }} gold
+                                </div>
                             </div>
                             <form method="post" action="/action/complete_mission">
                                 <input type="hidden" name="mission_id" value="{{ mission.id }}">
@@ -257,4 +499,54 @@
 
     </main>
 </div>
+
+<!-- Hash-based tab switching for after land actions -->
+<script>
+if (window.location.hash === '#land') {
+    window.addEventListener('DOMContentLoaded', () => {
+        const btn = document.querySelector('[data-tab="land"]');
+        if (btn) btn.click();
+        history.replaceState(null, '', window.location.pathname);
+    });
+}
+</script>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+async function saveGame() {
+    const status = document.getElementById('save-status');
+    status.style.display = 'block';
+    status.style.color = 'var(--text-dim)';
+    status.textContent = 'Saving...';
+    try {
+        // Get or generate key
+        let key = localStorage.getItem('our_legacy_key');
+        if (!key) {
+            const keyRes = await fetch('/api/generate_key', {method:'POST'});
+            const keyJson = await keyRes.json();
+            key = keyJson.key;
+            localStorage.setItem('our_legacy_key', key);
+        }
+        // Encrypt and save
+        const saveRes = await fetch('/api/save', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({key})
+        });
+        const saveJson = await saveRes.json();
+        if (saveJson.data) {
+            localStorage.setItem('our_legacy_save', saveJson.data);
+            status.style.color = 'var(--green-bright)';
+            status.textContent = 'Saved!';
+        } else {
+            status.style.color = 'var(--red)';
+            status.textContent = 'Save failed.';
+        }
+    } catch(e) {
+        status.style.color = 'var(--red)';
+        status.textContent = 'Error: ' + e.message;
+    }
+    setTimeout(() => { status.style.display = 'none'; }, 3000);
+}
+</script>
 {% endblock %}

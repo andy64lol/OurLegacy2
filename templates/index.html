@@ -18,6 +18,11 @@
             <div class="welcome-actions">
                 <a href="/create" class="btn btn-primary btn-large">Begin Your Journey</a>
             </div>
+
+            <div class="save-load-bar" style="margin-top:18px;">
+                <button class="btn btn-secondary" onclick="loadGame()">Load Saved Game</button>
+            </div>
+            <div id="save-status" class="save-notice" style="display:none;"></div>
         </div>
 
         <div class="welcome-features">
@@ -30,10 +35,57 @@
                 <div class="feature-desc">Dozens of areas, dungeons, and hidden places to discover</div>
             </div>
             <div class="feature-tile">
-                <div class="feature-title">Rich Combat</div>
-                <div class="feature-desc">Tactical battles, spells, companions, and boss encounters</div>
+                <div class="feature-title">Your Land</div>
+                <div class="feature-desc">Build a home, farm crops, and adopt a companion pet</div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+async function loadGame() {
+    const key  = localStorage.getItem('our_legacy_key');
+    const data = localStorage.getItem('our_legacy_save');
+    const status = document.getElementById('save-status');
+    if (!key || !data) {
+        status.style.display = 'block';
+        status.style.color = 'var(--red)';
+        status.textContent = 'No saved game found on this device.';
+        return;
+    }
+    try {
+        const res = await fetch('/api/load', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({key, data})
+        });
+        const json = await res.json();
+        if (json.ok) {
+            status.style.display = 'block';
+            status.style.color = 'var(--green-bright)';
+            status.textContent = 'Save loaded! Returning to your journey...';
+            setTimeout(() => { window.location.href = '/game'; }, 800);
+        } else {
+            status.style.display = 'block';
+            status.style.color = 'var(--red)';
+            status.textContent = 'Failed to load: ' + (json.error || 'unknown error');
+        }
+    } catch(e) {
+        status.style.display = 'block';
+        status.style.color = 'var(--red)';
+        status.textContent = 'Load error: ' + e.message;
+    }
+}
+// Auto-check if save exists
+window.addEventListener('DOMContentLoaded', () => {
+    const key  = localStorage.getItem('our_legacy_key');
+    const data = localStorage.getItem('our_legacy_save');
+    if (key && data) {
+        document.getElementById('save-status').style.display = 'block';
+        document.getElementById('save-status').style.color = 'var(--text-dim)';
+        document.getElementById('save-status').textContent = 'A saved game was found on this device.';
+    }
+});
+</script>
 {% endblock %}

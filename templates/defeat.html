@@ -4,28 +4,29 @@
     <div class="result-inner">
         <img src="/static/banner.png" alt="Our Legacy 2" class="title-banner-small">
 
-        <div class="panel result-panel result-defeat">
+        <div class="panel result-panel result-defeat" style="margin-bottom:18px;">
             <div class="panel-title panel-title-defeat">Defeated</div>
             <div class="panel-body">
-                <p class="result-summary">You fell before the <strong>{{ enemy.name }}</strong>.</p>
-                <p class="result-desc">You awaken battered and bruised, but alive. The world does not give up on you so easily.</p>
+                <p class="result-summary">You have fallen before the {{ enemy.name }}.</p>
+                <p class="result-desc">
+                    The darkness closes in around you. You awaken battered and bruised,
+                    dragged to safety by a passing traveler. Your journey is not yet over,
+                    but the enemy still prowls.
+                </p>
+                <p style="font-size:15px;color:var(--red);margin-bottom:18px;">
+                    HP recovered to {{ player.hp }} / {{ player.max_hp }}
+                </p>
 
-                <div class="stat-row" style="margin:12px 0;">
-                    <span>Current HP</span>
-                    <span class="reward-val">{{ player.hp }} / {{ player.max_hp }}</span>
-                </div>
-
+                <div class="panel-title" style="margin-bottom:8px;font-size:13px;">Battle Record</div>
                 <div class="battle-log-recap">
-                    {% for entry in log[-6:] %}
-                    <div class="log-entry log-damage">{{ entry }}</div>
+                    {% for line in log %}
+                    <div>{{ line }}</div>
                     {% endfor %}
                 </div>
-
-                <a href="/game" class="btn btn-primary btn-large" style="margin-top:20px;display:block;text-align:center;">
-                    Rise Again
-                </a>
             </div>
         </div>
+
+        <a href="/game" class="btn btn-primary btn-large">Rise Again</a>
     </div>
 </div>
 {% endblock %}

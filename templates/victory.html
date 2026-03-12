@@ -4,33 +4,44 @@
     <div class="result-inner">
         <img src="/static/banner.png" alt="Our Legacy 2" class="title-banner-small">
 
-        <div class="panel result-panel result-victory">
+        <div class="panel result-panel result-victory" style="margin-bottom:18px;">
             <div class="panel-title panel-title-victory">Victory</div>
             <div class="panel-body">
-                <p class="result-summary">The <strong>{{ enemy.name }}</strong> has been slain.</p>
+                <p class="result-summary">The {{ enemy.name }} has been defeated.</p>
 
                 <div class="reward-list">
-                    <div class="reward-row"><span>Experience</span><span class="reward-val">+{{ exp }} EXP</span></div>
-                    <div class="reward-row"><span>Gold</span><span class="reward-val reward-gold">+{{ gold }} coins</span></div>
+                    <div class="reward-row">
+                        <span>Experience Gained</span>
+                        <span class="reward-val">+{{ exp }}</span>
+                    </div>
+                    <div class="reward-row">
+                        <span>Gold Earned</span>
+                        <span class="reward-gold">+{{ gold }}g</span>
+                    </div>
                     {% if loot_item %}
-                    <div class="reward-row"><span>Loot</span><span class="reward-val">{{ loot_item }}</span></div>
+                    <div class="reward-row">
+                        <span>Item Found</span>
+                        <span class="reward-val">{{ loot_item }}</span>
+                    </div>
                     {% endif %}
                     {% if leveled %}
-                    <div class="reward-row"><span>Level Up!</span><span class="reward-val reward-gold">Now Level {{ player.level }}</span></div>
+                    <div class="reward-row">
+                        <span>Level Up</span>
+                        <span class="reward-val">Now Level {{ player.level }}</span>
+                    </div>
                     {% endif %}
                 </div>
 
+                <div class="panel-title" style="margin-bottom:8px;font-size:13px;">Battle Record</div>
                 <div class="battle-log-recap">
-                    {% for entry in log[-6:] %}
-                    <div class="log-entry {% if 'CRITICAL' in entry %}log-crit{% elif 'Victory' in entry %}log-victory{% else %}log-normal{% endif %}">{{ entry }}</div>
+                    {% for line in log %}
+                    <div>{{ line }}</div>
                     {% endfor %}
                 </div>
-
-                <a href="/game" class="btn btn-primary btn-large" style="margin-top:20px;display:block;text-align:center;">
-                    Continue
-                </a>
             </div>
         </div>
+
+        <a href="/game" class="btn btn-primary btn-large">Return to the World</a>
     </div>
 </div>
 {% endblock %}
