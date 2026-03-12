@@ -1,0 +1,40 @@
+{
+    "sunny": {
+        "description": "weather_sunny_desc",
+        "bonuses": {
+            "exp_bonus": 0.1,
+            "gold_bonus": 0.1
+        }
+    },
+    "rainy": {
+        "description": "weather_rainy_desc",
+        "bonuses": {
+            "exp_bonus": 0.05,
+            "gold_bonus": 0.05
+        }
+    },
+    "snowy": {
+        "description": "weather_snowy_desc",
+        "bonuses": {
+            "exp_bonus": 0.15,
+            "gold_bonus": 0.15
+        }
+    },
+    "stormy": {
+        "description": "weather_stormy_desc",
+        "bonuses": {
+            "exp_bonus": 0.2,
+            "gold_bonus": 0.2
+        }
+    },
+    "null": {
+        "description": "weather_null_desc",
+        "bonuses": {
+            "exp_bonus": 0.0,
+            "gold_bonus": 0.0
+        },
+        "areas_exclusives": [
+            "underground_tombs"
+        ]
+    }
+}

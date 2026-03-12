@@ -115,6 +115,12 @@
             {% if land_data %}
             <button class="tab-btn" data-tab="land">Your Land</button>
             {% endif %}
+            <button class="tab-btn" data-tab="companions">
+                Party
+                {% if active_companions %}
+                <span class="tab-badge">{{ active_companions|length }}</span>
+                {% endif %}
+            </button>
             <button class="tab-btn" data-tab="missions">Quests ({{ completed_count }})</button>
         </nav>
 
@@ -493,6 +499,97 @@
 
         </div>
         {% endif %}
+
+        <!-- ── Companions ── -->
+        <div class="tab-content" id="tab-companions">
+
+            <!-- Active party -->
+            <div class="panel" style="margin-bottom:14px;">
+                <div class="panel-title">
+                    Your Party
+                    <span class="panel-subtitle">{{ active_companions|length }}/4 companions</span>
+                </div>
+                <div class="panel-body">
+                    {% if active_companions %}
+                    <div class="companion-grid">
+                        {% for comp in active_companions %}
+                        <div class="companion-card active-comp rank-{{ comp.rank }}">
+                            <div class="comp-header">
+                                <span class="comp-name">{{ comp.name }}</span>
+                                <span class="comp-class rank-badge rank-{{ comp.rank }}">{{ comp.rank|title }}</span>
+                            </div>
+                            <div class="comp-class-label">{{ comp.class }}</div>
+                            {% if comp.description %}
+                            <div class="comp-desc">{{ comp.description }}</div>
+                            {% endif %}
+                            {% if comp.stat_summary %}
+                            <div class="comp-stats">{{ comp.stat_summary }}</div>
+                            {% endif %}
+                            <form method="post" action="/action/dismiss_companion" style="margin-top:8px;">
+                                <input type="hidden" name="companion_id" value="{{ comp.id }}">
+                                <button type="submit" class="btn btn-xsmall btn-danger"
+                                    onclick="return confirm('Dismiss {{ comp.name }} from your party?')">
+                                    Dismiss
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="dim-notice">You have no companions yet.
+                        {% if area_key != 'tavern' %}
+                        Travel to <strong>The Rusty Tankard</strong> to hire companions.
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Hire companions (only when at the tavern) -->
+            {% if companions_available %}
+            <div class="panel">
+                <div class="panel-title">
+                    Hire Companions
+                    <span class="panel-subtitle">The Rusty Tankard &bull; Your gold: {{ player.gold }}g</span>
+                </div>
+                <div class="panel-body">
+                    <p class="comp-intro">
+                        Seasoned adventurers await your call. Hire companions to boost your stats and fight at your side.
+                        Your party can hold up to <strong>4</strong> companions.
+                    </p>
+                    <div class="companion-grid">
+                        {% for comp in companions_available %}
+                        <div class="companion-card rank-{{ comp.rank }} {% if comp.already_hired %}comp-hired{% endif %}">
+                            <div class="comp-header">
+                                <span class="comp-name">{{ comp.name }}</span>
+                                <span class="rank-badge rank-{{ comp.rank }}">{{ comp.rank|title }}</span>
+                            </div>
+                            <div class="comp-class-label">{{ comp.class }}</div>
+                            {% if comp.description %}
+                            <div class="comp-desc">{{ comp.description }}</div>
+                            {% endif %}
+                            {% if comp.stat_summary %}
+                            <div class="comp-stats">{{ comp.stat_summary }}</div>
+                            {% endif %}
+                            <div class="comp-price">{{ comp.price }}g</div>
+                            <form method="post" action="/action/hire_companion" style="margin-top:8px;">
+                                <input type="hidden" name="companion_id" value="{{ comp.id }}">
+                                <button type="submit" class="btn btn-xsmall btn-primary"
+                                    {% if comp.already_hired or not comp.can_afford or active_companions|length >= 4 %}disabled{% endif %}>
+                                    {% if comp.already_hired %}In Party
+                                    {% elif not comp.can_afford %}Need {{ comp.price }}g
+                                    {% elif active_companions|length >= 4 %}Party Full
+                                    {% else %}Hire{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
 
         <!-- ── Missions ── -->
         <div class="tab-content" id="tab-missions">

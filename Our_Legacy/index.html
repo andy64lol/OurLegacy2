@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Legacy - Text-Based CLI Fantasy RPG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #eaeaea;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 3px solid #e94560;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: #e94560;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: #a0a0a0;
+            font-style: italic;
+        }
+
+        .download-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #e94560 0%, #c73e54 100%);
+            color: white;
+            padding: 20px 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(233, 69, 96, 0.6);
+        }
+
+        .download-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #e94560;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #e94560;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .feature-card p {
+            color: #b0b0b0;
+            font-size: 0.95rem;
+        }
+
+        .readme-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 40px;
+            margin-top: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .readme-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e94560;
+        }
+
+        .readme-header h2 {
+            color: #e94560;
+            font-size: 2rem;
+        }
+
+        .readme-content {
+            color: #d0d0d0;
+            line-height: 1.8;
+        }
+
+        .readme-content h1, .readme-content h2, .readme-content h3 {
+            color: #e94560;
+            margin: 25px 0 15px 0;
+        }
+
+        .readme-content h1 { font-size: 2rem; border-bottom: 2px solid #e94560; padding-bottom: 10px; }
+        .readme-content h2 { font-size: 1.6rem; }
+        .readme-content h3 { font-size: 1.3rem; }
+
+        .readme-content p { margin-bottom: 15px; }
+
+        .readme-content code {
+            background: rgba(233, 69, 96, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #ff6b6b;
+        }
+
+        .readme-content pre {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #e94560;
+        }
+
+        .readme-content pre code {
+            background: none;
+            padding: 0;
+            color: #a0d2eb;
+        }
+
+        .readme-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .readme-content th, .readme-content td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+        }
+
+        .readme-content th {
+            background: rgba(233, 69, 96, 0.2);
+            color: #e94560;
+            font-weight: bold;
+        }
+
+        .readme-content ul, .readme-content ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        .readme-content li {
+            margin-bottom: 8px;
+        }
+
+        .readme-content a {
+            color: #e94560;
+            text-decoration: none;
+        }
+
+        .readme-content a:hover {
+            text-decoration: underline;
+        }
+
+        .readme-content blockquote {
+            border-left: 4px solid #e94560;
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #a0a0a0;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            border-top: 2px solid rgba(233, 69, 96, 0.3);
+            color: #808080;
+        }
+
+        .tech-badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .badge {
+            background: rgba(233, 69, 96, 0.2);
+            color: #e94560;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(233, 69, 96, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .tagline { font-size: 1.1rem; }
+            .download-btn { padding: 15px 35px; font-size: 1.1rem; }
+            .readme-section { padding: 20px; }
+            .readme-header { flex-direction: column; gap: 15px; }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #e94560;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>⚔️ Our Legacy</h1>
+        <p class="tagline">Forge your destiny in this epic text-based CLI fantasy RPG</p>
+        <div class="tech-badges">
+            <span class="badge">Python 3.11+</span>
+            <span class="badge">Node.js</span>
+            <span class="badge">JSON Modding</span>
+            <span class="badge">Open Source</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="download-section">
+            <button class="download-btn" onclick="downloadProject()">
+                📥 Download Our Legacy (ZIP)
+            </button>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Preparing your download...</p>
+            </div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎮</div>
+                <h3>8 Character Classes</h3>
+                <p>Choose from Warrior, Mage, Rogue, Hunter, Bard, Paladin, Druid, or Priest. Each with unique stats, skills, and starting equipment.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🗺️</div>
+                <h3>7 Diverse Areas</h3>
+                <p>Explore the Starting Village, Dark Forest, Ancient Ruins, Crystal Caves, and more dangerous territories.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚗️</div>
+                <h3>Alchemy & Crafting</h3>
+                <p>Collect materials from monsters and environment to brew potions, forge equipment, and create powerful items.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👹</div>
+                <h3>Epic Boss Battles</h3>
+                <p>Face legendary bosses like the Ancient Fire Dragon with multi-phase mechanics and real-time cooldowns.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧙</div>
+                <h3>Companions System</h3>
+                <p>Hire unique companions at the Tavern with active abilities and passive party bonuses.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📜</div>
+                <h3>JavaScript Scripting</h3>
+                <p>Extend and automate your journey using the powerful JavaScript Scripting Engine powered by Node.js.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏰</div>
+                <h3>Procedural Dungeons</h3>
+                <p>Challenge yourself with dungeons featuring puzzles, traps, battles, and treasure chests.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔧</div>
+                <h3>Mod Support</h3>
+                <p>Create and share mods with the community. Easy JSON-based modding system with full documentation.</p>
+            </div>
+        </div>
+
+        <div class="readme-section">
+            <div class="readme-header">
+                <h2>📖 Documentation</h2>
+                <span style="color: #808080;">Complete Guide & Reference</span>
+            </div>
+            <div class="readme-content" id="readme-content">
+                <p>Loading README...</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Our Legacy - Open Source Text-Based RPG</p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">Built with ❤️ using Python & Node.js</p>
+    </footer>
+
+    <script>
+        // README Content (embedded for standalone functionality)
+        const readmeContent = `# Our Legacy - Text-Based CLI Fantasy RPG Game
+
+## Overview
+
+"Our Legacy" is a comprehensive text-based CLI fantasy RPG game focused on exploration, grinding, and adventure. Built with Python and driven by modular JSON data, the game offers a rich, extensible experience for players and modders alike. Now featuring a powerful **JavaScript Scripting Engine** powered by Node.js and a new **Alchemy & Crafting** system.
+
+## 🚀 Quick Start
+
+### Prerequisites
+- **Python 3.11+**
+- **Node.js** (for scripting features)
+
+### Installation
+\`\`\`bash
+# Clone or download the repository
+# Navigate to the project directory
+cd Our_Legacy
+
+# Run the game
+python3 main.py
+
+# Or use the launcher
+python3 launcher.py
+\`\`\`
+
+## ✨ Features
+
+### Core Gameplay
+- **Character Classes**: Choose from **Warrior**, **Mage**, **Rogue**, **Hunter**, **Bard**, **Paladin**, **Druid**, or **Priest** classes.
+- **Exploration**: 7 diverse areas including the Starting Village, Dark Forest, Ancient Ruins, and more.
+- **Alchemy & Crafting**: Collect materials from monsters and the environment to brew potent potions or forge powerful equipment.
+- **Grinding System**: Level up through combat, gaining stats and unlocking new equipment.
+- **Mission System**: Complete main story and side quests for gold and experience rewards.
+- **Boss Battles**: Face legendary bosses like the **Ancient Fire Dragon** with multi-phase mechanics and HP thresholds.
+- **Online Chat**: Connect with other players using the integrated chat system powered by Node.js.
+
+### Advanced Systems
+- **Companions**: Hire unique companions at the Tavern with active abilities and passive party bonuses.
+- **Buff & Effect System**: Manage temporary status effects, magical shields, and per-turn HP/MP regeneration.
+- **Offhand & Accessories**: Deep equipment customization with dedicated offhand slots and up to 3 accessory slots.
+- **Real-time Cooldowns**: Bosses feature an 8-hour real-time cooldown after defeat.
+
+## 🎮 Game Controls
+
+### Main Menu
+- **Explore**: Engage in random encounters and collect crafting materials.
+- **Inventory**: Manage items and access the **Crafting** menu.
+- **View Character**: Check stats, equipment, and active buffs.
+- **Travel**: Move between connected world areas.
+- **Missions**: Track and accept quests.
+- **Tavern**: Hire and manage your party members.
+- **Shop**: Browse multiple specialized shops in each area.
+- **Save/Load**: Persist your progress to JSON save files.
+
+## 📁 File Structure
+
+| File/Directory | Purpose |
+|----------------|---------|
+| \`main.py\` | Core game engine |
+| \`launcher.py\` | Unified launcher for all tools |
+| \`storyland.py\` | Download and manage mods from GitHub |
+| \`storywrite.py\` | Submit mods to the community |
+| \`data/\` | Base game content (JSON files) |
+| \`mods/\` | Installed mods directory |
+| \`api/\` | API modules for marketplace |
+| \`documentation.md\` | Complete modding guide |
+
+## 🔧 Mod System
+
+### Creating a Mod
+1. Create a folder in \`mods/\` with your mod name
+2. Create \`mod.json\` with metadata:
+\`\`\`json
+{
+  "name": "Your Mod Name",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "description": "What your mod adds",
+  "enabled": true
+}
+\`\`\`
+3. Add any data files you want to modify (bosses.json, areas.json, items.json, etc.)
+
+### How Mods Load
+- Base game data loads first from \`data/\`
+- Enabled mods load sequentially, merging data
+- Arrays (dungeons) are extended with new entries
+- Objects (items, bosses) are updated/overridden
+- Mod data takes precedence over base data for same IDs
+
+## 🌐 Web Download
+
+Download the complete game as a ZIP file from the web interface:
+- Visit the project page
+- Click the **Download** button
+- Extract and run \`python3 main.py\`
+
+## 🤝 Contributing
+
+Contributions are welcome! Whether it's:
+- Bug fixes
+- New features
+- Mod creation
+- Documentation improvements
+- Translation support
+
+Please ensure your code follows the existing style and includes appropriate documentation.
+
+## 📄 License
+
+This project is open source. See the LICENSE file for details.
+
+---
+
+**Forge your destiny and leave behind a legend that will never be forgotten!**`;
+
+        // Simple markdown parser
+        function parseMarkdown(text) {
+            let html = text
+                // Headers
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                // Bold and Italic
+                .replace(/\*\*\*(.*)\*\*\*/gim, '<strong><em>$1</em></strong>')
+                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                // Code blocks
+                .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
+                // Inline code
+                .replace(/`([^`]+)`/gim, '<code>$1</code>')
+                // Tables (simple parsing)
+                .replace(/\|(.+)\|/gim, (match, content) => {
+                    const cells = content.split('|').map(c => c.trim()).filter(c => c);
+                    if (cells.length === 0) return '';
+                    const isHeader = cells[0].includes('---') || cells[0].includes('File');
+                    if (isHeader && cells[0].includes('---')) return '';
+                    return '<tr>' + cells.map(c => '<td>' + c + '</td>').join('') + '</tr>';
+                })
+                // Lists
+                .replace(/^- (.*$)/gim, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>\n)+/gim, '<ul>$&</ul>')
+                // Links
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank">$1</a>')
+                // Line breaks
+                .replace(/\n/gim, '<br>')
+                // Fix table structure
+                .replace(/<br>(<tr>)/gim, '<table>$1')
+                .replace(/<\/tr><br>/gim, '</tr></table><br>')
+                // Blockquotes
+                .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+            
+            return html;
+        }
+
+        // Display README
+        document.getElementById('readme-content').innerHTML = parseMarkdown(readmeContent);
+
+        // Download function
+        async function downloadProject() {
+            const loading = document.getElementById('loading');
+            const btn = document.querySelector('.download-btn');
+            
+            loading.classList.add('active');
+            btn.style.display = 'none';
+
+            try {
+                // Create a list of files to include in the ZIP
+                const filesToInclude = [
+                    'README.md',
+                    'documentation.md',
+                    'LICENSE',
+                    'package.json',
+                    'main.py',
+                    'launcher.py',
+                    'storyland.py',
+                    'storywrite.py',
+                    'gui_all.py',
+                    'chat.py',
+                    'py2gui.py',
+                    '.gitignore'
+                ];
+
+                // Create ZIP using JSZip library loaded dynamically
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+                
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+
+                const zip = new JSZip();
+                const folder = zip.folder("Our_Legacy");
+
+                // Add files
+                for (const file of filesToInclude) {
+                    try {
+                        const response = await fetch(file);
+                        if (response.ok) {
+                            const content = await response.text();
+                            folder.file(file, content);
+                        }
+                    } catch (e) {
+                        console.log('Could not fetch:', file);
+                    }
+                }
+
+                // Add directories structure (we'll add representative files)
+                // Note: In a real scenario, you'd need a server-side solution to zip entire directories
+                // This is a client-side approximation
+                
+                // Add placeholder info about directories
+                folder.file("DATA_DIRECTORY_INFO.txt", 
+                    "DATA DIRECTORY CONTENTS:\\n\\n" +
+                    "data/\\n" +
+                    "- classes.json (Character classes)\\n" +
+                    "- items.json (Equipment & items)\\n" +
+                    "- enemies.json (Regular enemies)\\n" +
+                    "- bosses.json (Boss encounters)\\n" +
+                    "- areas.json (World locations)\\n" +
+                    "- missions.json (Quests)\\n" +
+                    "- spells.json (Magic abilities)\\n" +
+                    "- effects.json (Status effects)\\n" +
+                    "- companions.json (Hireable companions)\\n" +
+                    "- crafting.json (Alchemy recipes)\\n" +
+                    "- dialogues.json (NPC dialogue)\\n" +
+                    "- dungeons.json (Procedural dungeons)\\n" +
+                    "- weekly_challenges.json (Weekly challenges)\\n" +
+                    "- housing.json (Housing items)\\n" +
+                    "- farming.json (Crop definitions)\\n" +
+                    "- cutscenes.json (Story sequences)\\n" +
+                    "- languages/ (Localization files)\\n" +
+                    "- saves/ (Player save files)\\n\\n" +
+                    "api/\\n" +
+                    "- market.js (Marketplace API)\\n" +
+                    "- ping.js (Ping API)\\n" +
+                    "- create_user.js (User creation)\\n" +
+                    "- send_message.js (Messaging)\\n" +
+                    "- upload_test.js (Upload testing)\\n" +
+                    "- data/items.json (API data)\\n\\n" +
+                    "mods/ (Mod directory - empty by default)\\n\\n" +
+                    "Please download the complete repository from GitHub for all data files."
+                );
+
+                // Generate and download ZIP
+                const content = await zip.generateAsync({type: "blob"});
+                const url = URL.createObjectURL(content);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "Our_Legacy.zip";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Download failed. Please try again or download from the repository directly.');
+            } finally {
+                loading.classList.remove('active');
+                btn.style.display = 'inline-block';
+            }
+        }
+    </script>
+</body>
+</html>

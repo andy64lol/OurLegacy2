@@ -664,6 +664,37 @@ def game():
             'owned_housing': owned_set,
         }
 
+    # ── Companion system ──────────────────────────────────────────────────
+    active_companions = []
+    for comp in player.get('companions', []):
+        if isinstance(comp, dict):
+            comp_id = comp.get('id')
+            comp_data = GAME_DATA['companions'].get(comp_id, {})
+            active_companions.append({
+                'id': comp_id,
+                'name': comp.get('name', comp_id or ''),
+                'class': comp_data.get('class', ''),
+                'rank': comp_data.get('rank', 'common'),
+                'description': comp_data.get('description', ''),
+                'stat_summary': _companion_stat_summary(comp_data),
+            })
+
+    companions_available = []
+    if area_key == 'tavern':
+        hired_ids = {c.get('id') for c in player.get('companions', []) if isinstance(c, dict)}
+        for comp_id, comp_data in GAME_DATA['companions'].items():
+            companions_available.append({
+                'id': comp_id,
+                'name': comp_data.get('name', comp_id),
+                'class': comp_data.get('class', ''),
+                'rank': comp_data.get('rank', 'common'),
+                'description': comp_data.get('description', ''),
+                'price': comp_data.get('price', 100),
+                'can_afford': player['gold'] >= comp_data.get('price', 100),
+                'already_hired': comp_id in hired_ids,
+                'stat_summary': _companion_stat_summary(comp_data),
+            })
+
     save_player(player)
     return render_template(
         'game.html',
@@ -680,6 +711,8 @@ def game():
         completed_count=len(completed),
         messages=list(reversed(get_messages()))[:25],
         land_data=land_data,
+        active_companions=active_companions,
+        companions_available=companions_available,
     )
 
 
@@ -695,6 +728,21 @@ def _item_stat_summary(item_data):
         if val:
             sign = '+' if 'penalty' not in bonus_key else '-'
             parts.append(f'{sign}{abs(int(val))} {label}')
+    return ', '.join(parts)
+
+
+def _companion_stat_summary(comp_data):
+    if not isinstance(comp_data, dict):
+        return ''
+    parts = []
+    for bonus_key, label in [
+        ('attack_bonus', 'ATK'), ('defense_bonus', 'DEF'), ('speed_bonus', 'SPD'),
+        ('hp_bonus', 'HP'), ('mp_bonus', 'MP'), ('spell_power_bonus', 'SP'),
+        ('crit_chance', 'Crit%'), ('healing_bonus', 'Heal'),
+    ]:
+        val = comp_data.get(bonus_key)
+        if val:
+            parts.append(f'+{int(val)} {label}')
     return ', '.join(parts)
 
 
@@ -884,6 +932,98 @@ def action_sell():
     else:
         add_message('You do not have that item.', 'var(--red)')
 
+    save_player(player)
+    return redirect(url_for('game'))
+
+
+# ─── Companion System ────────────────────────────────────────────────────────
+
+
+@app.route('/action/hire_companion', methods=['POST'])
+def action_hire_companion():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    if session.get('current_area') != 'tavern':
+        add_message('You must be at The Rusty Tankard to hire companions.', 'var(--red)')
+        return redirect(url_for('game'))
+
+    comp_id = request.form.get('companion_id', '')
+    comp_data = GAME_DATA['companions'].get(comp_id)
+    if not comp_data:
+        add_message('Unknown companion.', 'var(--red)')
+        return redirect(url_for('game'))
+
+    companions = player.setdefault('companions', [])
+    if len(companions) >= 4:
+        add_message('Your party is full (max 4 companions).', 'var(--red)')
+        return redirect(url_for('game'))
+
+    if any(c.get('id') == comp_id for c in companions if isinstance(c, dict)):
+        add_message(f'{comp_data.get("name")} is already in your party.', 'var(--text-dim)')
+        return redirect(url_for('game'))
+
+    price = comp_data.get('price', 100)
+    if player['gold'] < price:
+        add_message(f'Not enough gold. Need {price}g to hire {comp_data.get("name")}.', 'var(--red)')
+        return redirect(url_for('game'))
+
+    player['gold'] -= price
+
+    # Apply stat bonuses
+    for stat_key in ('attack_bonus', 'defense_bonus', 'speed_bonus'):
+        bonus = comp_data.get(stat_key, 0)
+        if bonus:
+            stat = stat_key.replace('_bonus', '')
+            player[stat] = player.get(stat, 0) + bonus
+    for stat_key in ('hp_bonus', 'mp_bonus'):
+        bonus = comp_data.get(stat_key, 0)
+        if bonus:
+            stat = stat_key.replace('_bonus', '')
+            player[stat] = player.get(stat, 0) + bonus
+            player[f'max_{stat}'] = player.get(f'max_{stat}', 0) + bonus
+
+    companions.append({'id': comp_id, 'name': comp_data.get('name', comp_id)})
+    add_message(f'{comp_data.get("name")} joins your party!', 'var(--gold)')
+    save_player(player)
+    return redirect(url_for('game'))
+
+
+@app.route('/action/dismiss_companion', methods=['POST'])
+def action_dismiss_companion():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+
+    comp_id = request.form.get('companion_id', '')
+    companions = player.get('companions', [])
+    to_remove = next((c for c in companions if isinstance(c, dict) and c.get('id') == comp_id), None)
+
+    if not to_remove:
+        add_message('Companion not found in your party.', 'var(--red)')
+        return redirect(url_for('game'))
+
+    comp_data = GAME_DATA['companions'].get(comp_id, {})
+
+    # Reverse stat bonuses
+    for stat_key in ('attack_bonus', 'defense_bonus', 'speed_bonus'):
+        bonus = comp_data.get(stat_key, 0)
+        if bonus:
+            stat = stat_key.replace('_bonus', '')
+            player[stat] = max(0, player.get(stat, 0) - bonus)
+    for stat_key in ('hp_bonus', 'mp_bonus'):
+        bonus = comp_data.get(stat_key, 0)
+        if bonus:
+            stat = stat_key.replace('_bonus', '')
+            player[stat] = max(1, player.get(stat, 0) - bonus)
+            player[f'max_{stat}'] = max(1, player.get(f'max_{stat}', 1) - bonus)
+
+    companions.remove(to_remove)
+    player['companions'] = companions
+
+    name = comp_data.get('name', comp_id)
+    add_message(f'{name} has left your party.', 'var(--text-dim)')
     save_player(player)
     return redirect(url_for('game'))
 
