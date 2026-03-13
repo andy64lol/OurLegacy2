@@ -33,18 +33,18 @@ def create_boss_hp_bar(current: int, maximum: int, width: int = 40) -> str:
 
 def get_effective_attack(player: Dict[str, Any]) -> int:
     base = player.get('attack', 10)
-    bonus = sum(
+    buff_bonus = sum(
         b.get('modifiers', {}).get('attack_bonus', 0)
         for b in player.get('active_buffs', []))
-    return base + bonus
+    return base + buff_bonus
 
 
 def get_effective_defense(player: Dict[str, Any]) -> int:
     base = player.get('defense', 8)
-    bonus = sum(
+    buff_bonus = sum(
         b.get('modifiers', {}).get('defense_bonus', 0)
         for b in player.get('active_buffs', []))
-    total = base + bonus
+    total = base + buff_bonus
     if player.get('defending'):
         total = int(total * 1.5)
     return total
@@ -52,10 +52,10 @@ def get_effective_defense(player: Dict[str, Any]) -> int:
 
 def get_effective_speed(player: Dict[str, Any]) -> int:
     base = player.get('speed', 10)
-    bonus = sum(
+    buff_bonus = sum(
         b.get('modifiers', {}).get('speed_bonus', 0)
         for b in player.get('active_buffs', []))
-    return base + bonus
+    return base + buff_bonus
 
 
 def player_take_damage(player: Dict[str, Any], raw_damage: int) -> int:

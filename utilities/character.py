@@ -264,6 +264,7 @@ class Character:
 
     def get_stats_dict(self) -> Dict[str, Any]:
         """Return character stats as a JSON-serializable dict."""
+        from utilities.stats import get_default_attributes
         return {
             "name": self.name,
             "character_class": self.character_class,
@@ -282,6 +283,8 @@ class Character:
             "base_attack": self.base_attack,
             "base_defense": self.base_defense,
             "base_speed": self.base_speed,
+            "base_max_hp": self.base_max_hp,
+            "base_max_mp": self.base_max_mp,
             "gold": self.gold,
             "inventory": self.inventory,
             "equipment": self.equipment,
@@ -295,6 +298,10 @@ class Character:
             "day": self.day,
             "hour": self.hour,
             "current_weather": self.current_weather,
+            "attributes": get_default_attributes(),
+            "attr_spell_power": 0,
+            "attr_gold_discount": 0.0,
+            "attr_discovery": 0.0,
         }
 
 
