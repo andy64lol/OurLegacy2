@@ -866,11 +866,14 @@ def index():
 
 @app.route('/create', methods=['GET', 'POST'])
 def create():
+    if request.method == 'GET':
+        return redirect(url_for('game'))
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         cls = request.form.get('class', 'Warrior')
         if not name:
-            return render_template('create.html', data=GAME_DATA, error='Please enter a character name.')
+            session['create_error'] = 'Please enter a character name.'
+            return redirect(url_for('game'))
 
         cls_data = GAME_DATA['classes'].get(cls, {})
         stats = cls_data.get('base_stats', {
@@ -925,14 +928,70 @@ def create():
         add_message('You stand at the gates of the Starting Village. Adventure awaits.', 'var(--text-light)')
         return redirect(url_for('game'))
 
-    return render_template('create.html', data=GAME_DATA)
-
 
 @app.route('/game')
 def game():
     player = get_player()
     if not player:
-        return redirect(url_for('index'))
+        create_error = session.pop('create_error', None)
+        session.modified = True
+        return render_template('game.html', show_create=True, data=GAME_DATA, create_error=create_error)
+
+    # ── Battle state: show battle view inline ──────────────────────────────
+    enemy = session.get('battle_enemy')
+    if enemy:
+        battle_log = session.get('battle_log', [])
+        usable_items = [
+            i for i in player.get('inventory', [])
+            if any(x in i.lower() for x in ['potion', 'elixir', 'tears', 'tonic'])
+        ]
+        weapon = player.get('equipment', {}).get('weapon')
+        available_spells = get_available_spells(weapon, GAME_DATA['items'], GAME_DATA['spells'])
+        weapon_data = GAME_DATA['items'].get(weapon, {}) if weapon else {}
+        has_magic_weapon = bool(weapon and isinstance(weapon_data, dict) and weapon_data.get('magic_weapon'))
+        player_effects = session.get('battle_player_effects', {})
+        enemy_effects = session.get('battle_enemy_effects', {})
+        boss_dialogue = None
+        boss_phase_info = None
+        boss_abilities_info = []
+        if enemy.get('is_boss'):
+            boss_key = enemy.get('key', '')
+            boss_dialogue = get_boss_dialogue(boss_key, 'start')
+            boss_data = GAME_DATA['bosses'].get(boss_key, {})
+            phases = boss_data.get('phases', [])
+            if phases:
+                hp_pct = enemy['hp'] / max(1, enemy['max_hp'])
+                phase_idx, phase_data = get_boss_phase(phases, hp_pct)
+                total_phases = len(phases)
+                boss_phase_info = {
+                    'index': phase_idx + 1,
+                    'total': total_phases,
+                    'description': phase_data.get('description', ''),
+                    'attack_multiplier': phase_data.get('attack_multiplier', 1.0),
+                }
+            abilities = boss_data.get('special_abilities', [])
+            cooldowns = enemy.get('_ability_cooldowns', {})
+            for ab in abilities:
+                boss_abilities_info.append({
+                    'name': ab['name'],
+                    'description': ab.get('description', ''),
+                    'cooldown_left': cooldowns.get(ab['name'], 0),
+                })
+        return render_template(
+            'game.html',
+            in_battle=True,
+            player=player,
+            enemy=enemy,
+            battle_log=battle_log[-14:],
+            usable_items=usable_items,
+            available_spells=available_spells,
+            has_magic_weapon=has_magic_weapon,
+            player_effects=player_effects,
+            enemy_effects=enemy_effects,
+            boss_dialogue=boss_dialogue,
+            boss_phase_info=boss_phase_info,
+            boss_abilities_info=boss_abilities_info,
+        )
 
     _ensure_equipment_slots(player)
 
@@ -1387,7 +1446,7 @@ def action_explore():
             session['battle_enemy_effects'] = {}
             session.modified = True
             save_player(player)
-            return redirect(url_for('battle'))
+            return redirect(url_for('game'))
 
     roll = random.random()
     if possible_enemies and roll < 0.55:
@@ -1415,7 +1474,7 @@ def action_explore():
         session['battle_enemy_effects'] = {}
         session.modified = True
         save_player(player)
-        return redirect(url_for('battle'))
+        return redirect(url_for('game'))
 
     # Non-combat exploration outcomes
     # 30% chance to find gold (5-20)
@@ -1580,7 +1639,7 @@ def action_challenge_boss():
     session['battle_enemy_effects'] = {}
     session.modified = True
     save_player(player)
-    return redirect(url_for('battle'))
+    return redirect(url_for('game'))
 
 
 @app.route('/action/buy', methods=['POST'])
@@ -2160,67 +2219,7 @@ def land_train():
 
 @app.route('/battle')
 def battle():
-    player = get_player()
-    enemy = session.get('battle_enemy')
-    if not player or not enemy:
-        return redirect(url_for('game'))
-
-    battle_log = session.get('battle_log', [])
-    usable_items = [
-        i for i in player.get('inventory', [])
-        if any(x in i.lower() for x in ['potion', 'elixir', 'tears', 'tonic'])
-    ]
-    weapon = player.get('equipment', {}).get('weapon')
-    available_spells = get_available_spells(weapon, GAME_DATA['items'], GAME_DATA['spells'])
-    weapon_data = GAME_DATA['items'].get(weapon, {}) if weapon else {}
-    has_magic_weapon = bool(weapon and isinstance(weapon_data, dict) and weapon_data.get('magic_weapon'))
-
-    # Status effects
-    player_effects = session.get('battle_player_effects', {})
-    enemy_effects = session.get('battle_enemy_effects', {})
-
-    # Boss start dialogue (shown once)
-    boss_dialogue = None
-    boss_phase_info = None
-    boss_abilities_info = []
-    if enemy.get('is_boss'):
-        boss_key = enemy.get('key', '')
-        boss_dialogue = get_boss_dialogue(boss_key, 'start')
-        boss_data = GAME_DATA['bosses'].get(boss_key, {})
-        phases = boss_data.get('phases', [])
-        if phases:
-            hp_pct = enemy['hp'] / max(1, enemy['max_hp'])
-            phase_idx, phase_data = get_boss_phase(phases, hp_pct)
-            total_phases = len(phases)
-            boss_phase_info = {
-                'index': phase_idx + 1,
-                'total': total_phases,
-                'description': phase_data.get('description', ''),
-                'attack_multiplier': phase_data.get('attack_multiplier', 1.0),
-            }
-        abilities = boss_data.get('special_abilities', [])
-        cooldowns = enemy.get('_ability_cooldowns', {})
-        for ab in abilities:
-            boss_abilities_info.append({
-                'name': ab['name'],
-                'description': ab.get('description', ''),
-                'cooldown_left': cooldowns.get(ab['name'], 0),
-            })
-
-    return render_template(
-        'battle.html',
-        player=player,
-        enemy=enemy,
-        battle_log=battle_log[-14:],
-        usable_items=usable_items,
-        available_spells=available_spells,
-        has_magic_weapon=has_magic_weapon,
-        player_effects=player_effects,
-        enemy_effects=enemy_effects,
-        boss_dialogue=boss_dialogue,
-        boss_phase_info=boss_phase_info,
-        boss_abilities_info=boss_abilities_info,
-    )
+    return redirect(url_for('game'))
 
 
 @app.route('/battle/spell', methods=['POST'])
@@ -2255,12 +2254,12 @@ def battle_spell():
         session['battle_log'] = log
         session['battle_enemy'] = enemy
         save_player(player)
-        return redirect(url_for('battle'))
+        return redirect(url_for('game'))
 
     if spell_name not in available_names:
         log.append('That spell is unavailable with your current weapon.')
         session['battle_log'] = log
-        return redirect(url_for('battle'))
+        return redirect(url_for('game'))
 
     spell_data = spells_data.get(spell_name, {})
     effects_data = spell_data.get('effects_data', {})
@@ -2272,7 +2271,7 @@ def battle_spell():
     if not result.get('ok', True):
         session['battle_log'] = log
         save_player(player)
-        return redirect(url_for('battle'))
+        return redirect(url_for('game'))
 
     session['battle_enemy'] = enemy
 
@@ -2289,7 +2288,7 @@ def battle_spell():
     session['battle_player_effects'] = player_effects
     session['battle_enemy_effects'] = enemy_effects
     save_player(player)
-    return redirect(url_for('battle'))
+    return redirect(url_for('game'))
 
 
 @app.route('/battle/attack', methods=['POST'])
@@ -2343,7 +2342,7 @@ def battle_attack():
     session['battle_player_effects'] = player_effects
     session['battle_enemy_effects'] = enemy_effects
     save_player(player)
-    return redirect(url_for('battle'))
+    return redirect(url_for('game'))
 
 
 @app.route('/battle/defend', methods=['POST'])
@@ -2387,7 +2386,7 @@ def battle_defend():
     session['battle_player_effects'] = player_effects
     session['battle_enemy_effects'] = enemy_effects
     save_player(player)
-    return redirect(url_for('battle'))
+    return redirect(url_for('game'))
 
 
 @app.route('/battle/use_item', methods=['POST'])
@@ -2436,7 +2435,7 @@ def battle_use_item():
     session['battle_player_effects'] = player_effects
     session['battle_enemy_effects'] = enemy_effects
     save_player(player)
-    return redirect(url_for('battle'))
+    return redirect(url_for('game'))
 
 
 @app.route('/battle/flee', methods=['POST'])
@@ -2468,7 +2467,7 @@ def battle_flee():
     session['battle_enemy'] = enemy
     session['battle_log'] = log
     save_player(player)
-    return redirect(url_for('battle'))
+    return redirect(url_for('game'))
 
 
 def _handle_victory(player, enemy, log):
@@ -2796,7 +2795,7 @@ def dungeon_proceed():
             active['current_challenge'] = None
             session['active_dungeon'] = active
             save_player(player)
-            return redirect(url_for('battle'))
+            return redirect(url_for('game'))
         else:
             for msg in result.get('messages', []):
                 add_message(msg['text'], msg.get('color', 'var(--text-light)'))
@@ -2858,7 +2857,7 @@ def dungeon_proceed():
         active['current_challenge'] = None
         session['active_dungeon'] = active
         save_player(player)
-        return redirect(url_for('battle'))
+        return redirect(url_for('game'))
 
     elif room_type == 'question':
         add_message('A riddle challenge awaits in the chamber!', 'var(--gold)')

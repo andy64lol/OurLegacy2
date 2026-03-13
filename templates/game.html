@@ -1,5 +1,348 @@
 {% extends "base.html" %}
+{% block extra_head %}
+{% if show_create %}
+<script>const classData = {{ data.classes | tojson }};</script>
+{% endif %}
+{% endblock %}
 {% block content %}
+
+{# ════════════════════════════════════════════════════════════
+   CHARACTER CREATION VIEW
+   ════════════════════════════════════════════════════════════ #}
+{% if show_create %}
+<div class="page-wrap">
+    <div class="page-header">
+        <img src="/static/banner.png" alt="Our Legacy 2" class="title-banner-small">
+        <h1 class="page-title">Create Your Character</h1>
+    </div>
+
+    {% if create_error %}
+    <div class="alert-box">{{ create_error }}</div>
+    {% endif %}
+
+    <form method="post" action="/create" class="create-form">
+        <div class="create-layout">
+            <div class="create-left">
+                <div class="panel">
+                    <div class="panel-title">Identity</div>
+                    <div class="panel-body">
+                        <label class="field-label">Character Name</label>
+                        <input type="text" name="name" class="text-input" placeholder="Enter your name..." maxlength="24" autocomplete="off" required>
+
+                        <label class="field-label" style="margin-top:16px;">Choose Your Class</label>
+                        <div class="class-grid">
+                            {% for cls_name, cls_data in data.classes.items() %}
+                            <label class="class-card">
+                                <input type="radio" name="class" value="{{ cls_name }}" {% if loop.first %}checked{% endif %}
+                                       onchange="updateClassInfo('{{ cls_name }}')">
+                                <div class="class-card-inner">
+                                    <div class="class-name">{{ cls_name }}</div>
+                                    <div class="class-desc-short">{{ cls_data.description[:40] }}...</div>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large" style="width:100%;margin-top:16px;">
+                    Begin Adventure
+                </button>
+                <a href="/" class="btn btn-secondary" style="width:100%;margin-top:8px;display:block;text-align:center;">
+                    Back
+                </a>
+            </div>
+
+            <div class="create-right">
+                <div class="panel" id="class-info-panel">
+                    <div class="panel-title" id="ci-name">Warrior</div>
+                    <div class="panel-body">
+                        <p class="class-full-desc" id="ci-desc"></p>
+
+                        <div class="stats-grid" id="ci-stats">
+                            <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val" id="ci-hp">-</span></div>
+                            <div class="stat-row"><span class="stat-name">MP</span><span class="stat-val" id="ci-mp">-</span></div>
+                            <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val" id="ci-atk">-</span></div>
+                            <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val" id="ci-def">-</span></div>
+                            <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val" id="ci-spd">-</span></div>
+                            <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val" id="ci-gold">-</span></div>
+                        </div>
+
+                        <div class="stat-label" style="margin-top:12px;">Starting Equipment</div>
+                        <ul class="item-list" id="ci-items"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+{# ════════════════════════════════════════════════════════════
+   BATTLE VIEW
+   ════════════════════════════════════════════════════════════ #}
+{% elif in_battle %}
+<div class="battle-layout">
+
+    <div class="battle-header">
+        <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
+            {% if enemy.is_boss %}⚔ BOSS BATTLE{% else %}Combat{% endif %}
+        </div>
+        <div style="font-size:20px;font-weight:600;color:{{ 'var(--gold)' if enemy.is_boss else 'var(--red)' }};">
+            {{ enemy.name }}
+        </div>
+    </div>
+
+    {% if boss_dialogue and enemy.is_boss %}
+    <div style="
+        background:rgba(220,50,50,0.10);border:1px solid var(--red);border-radius:8px;
+        padding:12px 18px;margin:0 0 14px 0;text-align:center;
+        font-style:italic;color:var(--red);font-size:15px;">
+        "{{ boss_dialogue }}"
+    </div>
+    {% endif %}
+
+    {% if boss_phase_info %}
+    <div style="
+        background:linear-gradient(135deg,rgba(180,30,30,0.18),rgba(120,10,10,0.10));
+        border:1px solid rgba(200,50,50,0.5);border-radius:8px;
+        padding:10px 16px;margin:0 0 12px 0;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">Phase</span>
+            <div style="display:flex;gap:4px;">
+                {% for i in range(boss_phase_info.total) %}
+                <div style="
+                    width:18px;height:8px;border-radius:3px;
+                    background:{{ 'var(--red)' if i < boss_phase_info.index else 'rgba(255,255,255,0.12)' }};
+                    border:1px solid {{ 'var(--red)' if i < boss_phase_info.index else 'rgba(255,255,255,0.2)' }};
+                "></div>
+                {% endfor %}
+            </div>
+            <span style="font-size:12px;font-weight:600;color:var(--gold);">{{ boss_phase_info.index }} / {{ boss_phase_info.total }}</span>
+            {% if boss_phase_info.attack_multiplier > 1.0 %}
+            <span style="font-size:11px;color:var(--red);background:rgba(200,50,50,0.15);border:1px solid rgba(200,50,50,0.3);border-radius:4px;padding:1px 6px;">
+                ATK ×{{ '%.1f'|format(boss_phase_info.attack_multiplier) }}
+            </span>
+            {% endif %}
+        </div>
+        {% if boss_phase_info.description %}
+        <div style="font-size:12px;color:var(--text-dim);margin-top:5px;font-style:italic;">
+            {{ boss_phase_info.description }}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="battle-arena">
+        <div class="panel">
+            <div class="panel-title">{{ player.name }}</div>
+            <div class="panel-body">
+                <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
+                    {{ player['class'] }} &mdash; Lv.{{ player.level }}
+                </div>
+                <div class="bar-group">
+                    <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="bar-group">
+                    <div class="bar-label">MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="stat-mini-grid">
+                    <div class="stat-mini"><span>ATK</span><strong>{{ player.attack }}</strong></div>
+                    <div class="stat-mini"><span>DEF</span><strong>{{ player.defense }}</strong></div>
+                    <div class="stat-mini"><span>SPD</span><strong>{{ player.speed }}</strong></div>
+                </div>
+                {% if player_effects %}
+                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                    {% for eff_key, eff_info in player_effects.items() %}
+                    <div style="
+                        background:rgba(100,200,100,0.15);border:1px solid var(--green-bright);
+                        border-radius:4px;padding:2px 6px;font-size:11px;color:var(--green-bright);">
+                        {{ eff_key.replace('_',' ').title() }} ({{ eff_info.turns }}t)
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="battle-vs">VS</div>
+
+        <div class="panel">
+            <div class="panel-title panel-title-enemy">{{ enemy.name }}</div>
+            <div class="panel-body">
+                <div class="bar-group">
+                    <div class="bar-label">HP <span class="bar-nums">{{ enemy.hp }} / {{ enemy.max_hp }}</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-hp" style="width:{{ [(enemy.hp / enemy.max_hp * 100)|int, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="stat-mini-grid">
+                    <div class="stat-mini"><span>ATK</span><strong>{{ enemy.attack }}</strong></div>
+                    <div class="stat-mini"><span>DEF</span><strong>{{ enemy.defense }}</strong></div>
+                    <div class="stat-mini"><span>SPD</span><strong>{{ enemy.speed }}</strong></div>
+                </div>
+                {% if enemy_effects %}
+                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                    {% for eff_key, eff_info in enemy_effects.items() %}
+                    <div style="
+                        background:rgba(220,80,80,0.15);border:1px solid var(--red);
+                        border-radius:4px;padding:2px 6px;font-size:11px;color:var(--red);">
+                        {{ eff_key.replace('_',' ').title() }} ({{ eff_info.turns }}t)
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="panel battle-log-panel">
+        <div class="panel-title">Battle Chronicle</div>
+        <div class="panel-body message-log battle-log" id="battle-log">
+            {% for line in battle_log %}
+            <div class="log-entry
+                {%- if 'CRITICAL' in line %} log-crit
+                {%- elif '⚠' in line or 'enters a new phase' in line %} log-phase
+                {%- elif '💥' in line or '⚡' in line or 'uses ' in line %} log-ability
+                {%- elif 'strikes you' in line or 'cuts you' in line %} log-damage
+                {%- elif 'defeated' in line.lower() or 'falls' in line.lower() %} log-victory
+                {%- else %} log-normal
+                {%- endif %}">
+                {{ line }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="battle-action-grid">
+        <form method="post" action="/battle/attack">
+            <button type="submit" class="btn btn-battle btn-attack">Strike</button>
+        </form>
+
+        <form method="post" action="/battle/defend">
+            <button type="submit" class="btn btn-battle btn-defend">Defend</button>
+        </form>
+
+        <form method="post" action="/battle/use_item">
+            <div class="item-use-form">
+                {% if usable_items %}
+                <select name="item" class="item-select">
+                    {% for item in usable_items %}
+                    <option value="{{ item }}">{{ item }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-battle btn-item">Use Item</button>
+                {% else %}
+                <button type="button" class="btn btn-battle btn-item btn-disabled" disabled>No Items</button>
+                {% endif %}
+            </div>
+        </form>
+
+        <form method="post" action="/battle/flee">
+            <button type="submit" class="btn btn-battle btn-flee">{% if enemy.is_boss %}Retreat{% else %}Flee{% endif %}</button>
+        </form>
+    </div>
+
+    {% if boss_abilities_info %}
+    <div class="panel" style="margin-top:16px;">
+        <div class="panel-title" style="color:var(--red);">⚔ Boss Abilities</div>
+        <div class="panel-body">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">
+                {% for ab in boss_abilities_info %}
+                <div style="
+                    background:{{ 'rgba(200,50,50,0.15)' if ab.cooldown_left == 0 else 'rgba(80,80,80,0.10)' }};
+                    border:1px solid {{ 'rgba(200,50,50,0.5)' if ab.cooldown_left == 0 else 'rgba(120,120,120,0.3)' }};
+                    border-radius:6px;padding:8px 10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                        <span style="font-size:12px;font-weight:600;color:{{ 'var(--red)' if ab.cooldown_left == 0 else 'var(--text-dim)' }};">
+                            {{ ab.name }}
+                        </span>
+                        {% if ab.cooldown_left > 0 %}
+                        <span style="font-size:10px;color:var(--text-dim);background:rgba(0,0,0,0.2);border-radius:3px;padding:1px 5px;">
+                            {{ ab.cooldown_left }}t
+                        </span>
+                        {% else %}
+                        <span style="font-size:10px;color:var(--red);font-weight:600;">READY</span>
+                        {% endif %}
+                    </div>
+                    {% if ab.description %}
+                    <div style="font-size:11px;color:var(--text-dim);">{{ ab.description[:60] }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if available_spells %}
+    <div class="panel" style="margin-top:16px;">
+        <div class="panel-title" style="color:var(--mana-bright);">Spellbook</div>
+        <div class="panel-body">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+                <div style="font-size:13px;color:var(--text-dim);">
+                    MP: <strong style="color:var(--mana-bright);">{{ player.mp }} / {{ player.max_mp }}</strong>
+                </div>
+                <div class="bar-track" style="flex:1;height:8px;">
+                    <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
+                </div>
+            </div>
+            <div class="spell-grid">
+                {% for spell in available_spells %}
+                {% set can_cast = player.mp >= spell.mp_cost %}
+                {% set stype = spell.type | lower %}
+                <form method="post" action="/battle/spell">
+                    <input type="hidden" name="spell" value="{{ spell.name }}">
+                    <button type="submit"
+                        class="btn-spell spell-{{ stype }} {% if not can_cast %}btn-disabled{% endif %}"
+                        {% if not can_cast %}disabled{% endif %}>
+                        <div class="spell-header">
+                            <span class="spell-name">{{ spell.name }}</span>
+                            <span class="spell-cost-badge">{{ spell.mp_cost }} MP</span>
+                        </div>
+                        <div class="spell-tags">
+                            <span class="spell-tag spell-tag-{{ stype }}">{{ spell.type | title }}</span>
+                            {% if spell.power %}
+                            <span class="spell-tag" style="color:var(--red);border-color:var(--red-dark);">Pwr {{ spell.power }}</span>
+                            {% endif %}
+                        </div>
+                        {% if spell.description %}
+                        <div class="spell-desc">{{ spell.description[:65] }}</div>
+                        {% endif %}
+                        {% if not can_cast %}
+                        <div class="spell-no-mp">Not enough MP</div>
+                        {% endif %}
+                    </button>
+                </form>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% elif has_magic_weapon %}
+    <div class="panel" style="margin-top:16px;">
+        <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;opacity:0.6;">
+            No spells are mapped to your current weapon yet.
+        </div>
+    </div>
+    {% else %}
+    <div class="panel" style="margin-top:16px;">
+        <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;opacity:0.6;">
+            Equip a magic weapon to access your spellbook.
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+{# ════════════════════════════════════════════════════════════
+   MAIN GAME VIEW
+   ════════════════════════════════════════════════════════════ #}
+{% else %}
 <div class="game-layout">
 
     <!-- Sidebar -->
@@ -47,7 +390,6 @@
                 </div>
                 {% endif %}
 
-                <!-- Time & Weather -->
                 <div class="sidebar-status-row">
                     <div class="sidebar-status-item">
                         <span class="sidebar-status-key">Time</span>
@@ -86,7 +428,6 @@
             </div>
         </div>
 
-        <!-- Quick Nav -->
         <div class="panel sidebar-panel" style="margin-top:0;">
             <div class="panel-title">Navigate</div>
             <div class="panel-body" style="display:flex;flex-direction:column;gap:6px;">
@@ -191,7 +532,6 @@
                 </div>
             </div>
 
-            <!-- Manual Boss Challenge -->
             {% if available_bosses %}
             <div class="panel" style="margin-bottom:14px;">
                 <div class="panel-title">Boss Challenges</div>
@@ -232,7 +572,6 @@
         <!-- ── Equipment & Inventory ── -->
         <div class="tab-content" id="tab-inventory">
 
-            <!-- Equipment Slots -->
             <div class="panel" style="margin-bottom:14px;">
                 <div class="panel-title">Equipment</div>
                 <div class="panel-body">
@@ -258,14 +597,12 @@
                         {% endfor %}
                     </div>
 
-                    <!-- Auto-equip -->
                     <form method="post" action="/action/auto_equip" style="margin-top:12px;">
                         <button type="submit" class="btn btn-primary" style="width:100%;">
                             Auto-Equip Best Items
                         </button>
                     </form>
 
-                    <!-- Stat summary -->
                     <div class="stat-mini-grid" style="margin-top:16px;">
                         <div class="stat-mini"><span>Max HP</span><strong>{{ player.max_hp }}</strong></div>
                         <div class="stat-mini"><span>Max MP</span><strong>{{ player.max_mp }}</strong></div>
@@ -277,7 +614,6 @@
                 </div>
             </div>
 
-            <!-- Inventory -->
             <div class="panel">
                 <div class="panel-title">
                     Inventory
@@ -432,11 +768,10 @@
                                 {% endif %}
                                 <div style="margin-top:6px;font-size:13px;">
                                     <strong>Materials:</strong>
-                                    {% for mat, qty in recipe.materials.items() %}
-                                    {% set player_has = player.inventory.count(mat) %}
-                                    <span style="color:{% if player_has >= qty %}var(--green-bright){% else %}var(--red){% endif %};margin-right:8px;">
-                                        {{ mat }} x{{ qty }} (have {{ player_has }})
-                                    </span>
+                                    {% for item, qty in recipe.materials.items() %}
+                                    <span style="color:{% if recipe.missing and item in recipe.missing %}var(--red){% else %}var(--text-light){% endif %}">
+                                        {{ item }} x{{ qty }}
+                                    </span>{% if not loop.last %}, {% endif %}
                                     {% endfor %}
                                 </div>
                                 <div style="margin-top:4px;font-size:13px;color:var(--gold);">
@@ -573,7 +908,6 @@
                 </div>
             </div>
 
-            <!-- Training -->
             <div class="panel land-section">
                 <div class="panel-title">Training Grounds</div>
                 <div class="panel-body">
@@ -758,7 +1092,6 @@
         <!-- ── Companions ── -->
         <div class="tab-content" id="tab-companions">
 
-            <!-- Active party -->
             <div class="panel" style="margin-bottom:14px;">
                 <div class="panel-title">
                     Your Party
@@ -800,7 +1133,6 @@
                 </div>
             </div>
 
-            <!-- Hire companions (only when at the tavern) -->
             {% if companions_available %}
             <div class="panel">
                 <div class="panel-title">
@@ -850,119 +1182,106 @@
                     <span class="panel-subtitle">{{ completed_count }} completed</span>
                 </div>
                 <div class="panel-body">
-                    {% if missions %}
+                    {% if not missions %}
+                    <p class="empty-notice">No quests available at your current level.</p>
+                    {% else %}
                     <div class="pageable-list" data-page-size="8">
-                    {% for mission in missions %}
-                    <div class="quest-card pageable-item {% if not mission.eligible %}quest-locked{% elif mission.can_complete %}quest-ready{% else %}quest-active{% endif %}">
-                        <div class="quest-header">
-                            <div class="quest-name">
-                                {% if mission.can_complete %}
-                                <span class="quest-ready-badge">READY</span>
-                                {% elif not mission.eligible %}
-                                <span class="quest-locked-badge">LOCKED</span>
-                                {% endif %}
-                                {{ mission.name }}
-                            </div>
-                            <div class="quest-type-badge quest-type-{{ mission.type }}">{{ mission.type }}</div>
+                    {% for m in missions %}
+                    <div class="pageable-item mission-card {% if not m.eligible %}mission-locked{% endif %}" style="margin-bottom:12px;">
+                        <div class="mission-header">
+                            <span class="mission-name {% if not m.eligible %}text-dim{% endif %}">{{ m.name }}</span>
+                            <span class="mission-type-badge type-{{ m.type }}">{{ m.type|title }}</span>
                         </div>
-                        <div class="quest-desc">{{ mission.description }}</div>
-
-                        {% if not mission.level_ok %}
-                        <div class="quest-req">Requires level {{ mission.unlock_level }}</div>
-                        {% elif not mission.prereqs_met %}
-                        <div class="quest-req">{{ mission.status_msg }}</div>
+                        <div class="mission-desc">{{ m.description }}</div>
+                        {% if not m.level_ok %}
+                        <div class="mission-lock-reason">Requires Level {{ m.unlock_level }}</div>
+                        {% elif not m.prereqs_met %}
+                        <div class="mission-lock-reason">Prerequisites not met</div>
                         {% endif %}
-
-                        {% if mission.eligible and mission.progress %}
-                        <div class="quest-progress-list">
-                            {% for p in mission.progress %}
-                            <div class="quest-progress-item">
-                                <div class="quest-progress-label">{{ p.label }}: {{ p.have }}/{{ p.need }}</div>
-                                <div class="bar-track quest-progress-bar">
-                                    <div class="bar-fill bar-exp" style="width:{{ [(p.have / p.need * 100)|int, 100]|min }}%"></div>
-                                </div>
+                        {% if m.progress %}
+                        <div style="margin-top:6px;">
+                            {% for prog in m.progress %}
+                            <div class="mission-progress-row">
+                                <span class="mission-progress-label">{{ prog.label }}</span>
+                                <span class="mission-progress-val {% if prog.done %}done{% endif %}">
+                                    {{ prog.current }} / {{ prog.target }}
+                                    {% if prog.done %} ✓{% endif %}
+                                </span>
                             </div>
                             {% endfor %}
                         </div>
                         {% endif %}
-
-                        <div class="quest-rewards">
-                            <span class="quest-reward-exp">+{{ mission.exp_reward }} EXP</span>
-                            <span class="quest-reward-gold">+{{ mission.gold_reward }}g</span>
-                            {% for item in mission.item_rewards %}
-                            <span class="quest-reward-item">{{ item }}</span>
-                            {% endfor %}
+                        <div class="mission-reward">
+                            Reward: <span class="reward-exp">+{{ m.exp_reward }} EXP</span>
+                            <span class="reward-gold">+{{ m.gold_reward }}g</span>
+                            {% if m.item_rewards %}
+                            <span class="reward-items">+{{ m.item_rewards|join(', ') }}</span>
+                            {% endif %}
                         </div>
-
-                        {% if mission.can_complete %}
+                        {% if m.eligible %}
                         <form method="post" action="/action/complete_mission" style="margin-top:8px;">
-                            <input type="hidden" name="mission_id" value="{{ mission.id }}">
-                            <button type="submit" class="btn btn-small btn-primary">Claim Reward</button>
+                            <input type="hidden" name="mission_id" value="{{ m.id }}">
+                            <button type="submit" class="btn btn-xsmall {% if m.can_complete %}btn-primary{% else %}btn-secondary{% endif %}"
+                                {% if not m.can_complete %}disabled title="{{ m.status_msg }}"{% endif %}>
+                                {% if m.can_complete %}Complete{% else %}In Progress{% endif %}
+                            </button>
                         </form>
                         {% endif %}
                     </div>
                     {% endfor %}
                     </div>
-                    {% else %}
-                    <p class="empty-notice">No quests available. Level up or complete prerequisites to unlock more.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- ── Challenges ── -->
+        <!-- ── Weekly Challenges ── -->
         <div class="tab-content" id="tab-challenges">
             <div class="panel">
-                <div class="panel-title">
-                    Weekly Challenges
-                    <span class="panel-subtitle">Complete for bonus EXP &amp; gold</span>
-                </div>
+                <div class="panel-title">Weekly Challenges</div>
                 <div class="panel-body">
-                    {% if challenges %}
+                    {% if not challenges %}
+                    <p class="empty-notice">No weekly challenges available.</p>
+                    {% else %}
                     <div class="pageable-list" data-page-size="8">
                     {% for ch in challenges %}
-                    <div class="quest-card pageable-item {% if ch.claimed %}quest-locked{% elif ch.ready %}quest-ready{% else %}quest-active{% endif %}"
-                         style="{% if ch.claimed %}opacity:0.6;{% endif %}">
-                        <div class="quest-header">
-                            <div class="quest-name">
-                                {% if ch.claimed %}
-                                <span class="quest-locked-badge" style="background:var(--text-dim);">CLAIMED</span>
-                                {% elif ch.ready %}
-                                <span class="quest-ready-badge">READY TO CLAIM</span>
-                                {% endif %}
-                                {{ ch.name }}
-                            </div>
-                            <div class="quest-type-badge quest-type-{{ ch.type }}">{{ ch.type.replace('_',' ') }}</div>
-                        </div>
-                        <div class="quest-desc">{{ ch.description }}</div>
-
-                        {% if not ch.claimed %}
-                        <div class="quest-progress-list">
-                            <div class="quest-progress-item">
-                                <div class="quest-progress-label">Progress: {{ ch.count }}/{{ ch.target }}</div>
-                                <div class="bar-track quest-progress-bar">
-                                    <div class="bar-fill bar-exp" style="width:{{ [(ch.count / ch.target * 100)|int, 100]|min }}%"></div>
+                    <div class="pageable-item challenge-card {% if ch.claimed %}challenge-claimed{% elif ch.ready %}challenge-ready{% endif %}"
+                         style="margin-bottom:12px;padding:12px;background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+                            <div style="flex:1;min-width:180px;">
+                                <div style="font-size:15px;font-weight:600;color:{% if ch.claimed %}var(--text-dim){% elif ch.ready %}var(--gold){% else %}var(--text-light){% endif %};">
+                                    {{ ch.name }}
+                                    {% if ch.claimed %}<span style="font-size:12px;color:var(--green-bright);font-weight:normal;"> ✓ Claimed</span>{% endif %}
+                                </div>
+                                <div style="font-size:13px;color:var(--text-dim);margin-top:3px;">{{ ch.description }}</div>
+                                <div style="margin-top:8px;">
+                                    <div class="bar-track" style="height:8px;">
+                                        <div class="bar-fill bar-exp" style="width:{{ [(ch.count / ch.target * 100)|int, 100]|min }}%;"></div>
+                                    </div>
+                                    <div style="font-size:12px;color:var(--text-dim);margin-top:3px;">
+                                        {{ ch.count }} / {{ ch.target }}
+                                    </div>
+                                </div>
+                                <div style="font-size:12px;color:var(--gold);margin-top:6px;">
+                                    Reward: +{{ ch.reward_exp }} EXP, +{{ ch.reward_gold }}g
                                 </div>
                             </div>
+                            <div>
+                                {% if ch.ready and not ch.claimed %}
+                                <form method="post" action="/action/claim_challenge">
+                                    <input type="hidden" name="challenge_id" value="{{ ch.id }}">
+                                    <button type="submit" class="btn btn-primary btn-small">Claim!</button>
+                                </form>
+                                {% elif ch.claimed %}
+                                <span style="font-size:12px;color:var(--text-dim);">Done</span>
+                                {% else %}
+                                <span style="font-size:12px;color:var(--text-dim);">In Progress</span>
+                                {% endif %}
+                            </div>
                         </div>
-                        {% endif %}
-
-                        <div class="quest-rewards">
-                            <span class="quest-reward-exp">+{{ ch.reward_exp }} EXP</span>
-                            <span class="quest-reward-gold">+{{ ch.reward_gold }}g</span>
-                        </div>
-
-                        {% if ch.ready %}
-                        <form method="post" action="/action/claim_challenge" style="margin-top:8px;">
-                            <input type="hidden" name="challenge_id" value="{{ ch.id }}">
-                            <button type="submit" class="btn btn-small btn-primary">Claim!</button>
-                        </form>
-                        {% endif %}
                     </div>
                     {% endfor %}
                     </div>
-                    {% else %}
-                    <p class="empty-notice">No challenges available.</p>
                     {% endif %}
                 </div>
             </div>
@@ -971,30 +1290,52 @@
     </main>
 </div>
 
-<!-- Cutscene Modal -->
 {% if pending_cutscene %}
-<div id="cutscene-overlay" style="
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    background:rgba(0,0,0,0.85);z-index:9999;
-    display:flex;align-items:center;justify-content:center;">
-    <div style="
-        background:var(--panel-bg);border:2px solid var(--gold);border-radius:12px;
-        max-width:560px;width:90%;padding:32px;text-align:center;">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:12px;">Cutscene</div>
-        <div id="cutscene-text" style="font-size:17px;color:var(--text-light);line-height:1.6;margin-bottom:24px;">
-            {{ pending_cutscene.content.text }}
-        </div>
-        <button onclick="dismissCutscene()" class="btn btn-primary">Continue</button>
+<div id="cutscene-overlay" class="cutscene-overlay" style="display:flex;">
+    <div class="cutscene-box">
+        {% set cs = pending_cutscene.content %}
+        {% if cs.title %}<div class="cutscene-title">{{ cs.title }}</div>{% endif %}
+        {% if cs.image_url %}<img src="{{ cs.image_url }}" class="cutscene-img" alt="Cutscene">{% endif %}
+        <div class="cutscene-text">{{ cs.text or '' }}</div>
+        <button class="btn btn-primary" onclick="dismissCutscene('{{ pending_cutscene.id }}')">Continue</button>
     </div>
 </div>
-<script>
-function dismissCutscene() {
-    fetch('/api/dismiss_cutscene', {method:'POST'})
-        .finally(() => {
-            document.getElementById('cutscene-overlay').style.display = 'none';
-        });
-}
-</script>
 {% endif %}
 
+{% endif %}
+
+{% endblock %}
+{% block extra_scripts %}
+{% if show_create %}
+<script>
+function updateClassInfo(cls) {
+    const d = classData[cls];
+    if (!d) return;
+    document.getElementById('ci-name').textContent = cls;
+    document.getElementById('ci-desc').textContent = d.description || '';
+    const s = d.base_stats || {};
+    document.getElementById('ci-hp').textContent = s.hp || '-';
+    document.getElementById('ci-mp').textContent = s.mp || '-';
+    document.getElementById('ci-atk').textContent = s.attack || '-';
+    document.getElementById('ci-def').textContent = s.defense || '-';
+    document.getElementById('ci-spd').textContent = s.speed || '-';
+    document.getElementById('ci-gold').textContent = d.starting_gold || '-';
+    const items = d.starting_items || [];
+    const ul = document.getElementById('ci-items');
+    ul.innerHTML = items.map(i => `<li>${i}</li>`).join('');
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const checked = document.querySelector('input[name="class"]:checked');
+    if (checked) updateClassInfo(checked.value);
+});
+</script>
+{% endif %}
+{% if in_battle %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const log = document.getElementById('battle-log');
+    if (log) log.scrollTop = log.scrollHeight;
+});
+</script>
+{% endif %}
 {% endblock %}
