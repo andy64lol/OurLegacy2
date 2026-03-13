@@ -431,8 +431,24 @@ strong { font-weight: 600; }
     background: rgba(18,14,8,0.55);
     pointer-events: none;
     z-index: 0;
+    transition: opacity 0.3s;
+}
+.main-content.no-bg {
+    background-image: none;
+}
+.main-content.no-bg::before {
+    opacity: 0;
 }
 .main-content > * { position: relative; z-index: 1; }
+
+/* ─── Low HP Pulse ───────────────────────────────────────── */
+@keyframes hpPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.45; }
+}
+.bar-fill.bar-hp.low-hp {
+    animation: hpPulse 1.1s ease-in-out infinite;
+}
 
 /* ─── Music Controls ─────────────────────────────────────── */
 .music-control-row {

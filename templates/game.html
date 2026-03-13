@@ -224,11 +224,11 @@
 
         <div class="battle-action-grid">
             <form method="post" action="/battle/attack">
-                <button type="submit" class="btn btn-battle btn-attack">Strike</button>
+                <button type="submit" class="btn btn-battle btn-attack" title="Keyboard: 1">Strike</button>
             </form>
 
             <form method="post" action="/battle/defend">
-                <button type="submit" class="btn btn-battle btn-defend">Defend</button>
+                <button type="submit" class="btn btn-battle btn-defend" title="Keyboard: 2">Defend</button>
             </form>
 
             <form method="post" action="/battle/use_item">
@@ -239,7 +239,7 @@
                         <option value="{{ item }}">{{ item }}</option>
                         {% endfor %}
                     </select>
-                    <button type="submit" class="btn btn-battle btn-item">Use Item</button>
+                    <button type="submit" class="btn btn-battle btn-item" title="Keyboard: 3">Use Item</button>
                     {% else %}
                     <button type="button" class="btn btn-battle btn-item btn-disabled" disabled>No Items</button>
                     {% endif %}
@@ -247,7 +247,7 @@
             </form>
 
             <form method="post" action="/battle/flee">
-                <button type="submit" class="btn btn-battle btn-flee">{% if enemy.is_boss %}Retreat{% else %}Flee{% endif %}</button>
+                <button type="submit" class="btn btn-battle btn-flee" title="Keyboard: 4">{% if enemy.is_boss %}Retreat{% else %}Flee{% endif %}</button>
             </form>
         </div>
 
@@ -468,6 +468,11 @@
                 <input type="range" id="music-volume-slider" min="0" max="100" value="30"
                        oninput="setMusicVolume(this.value)" class="music-slider">
                 <span id="music-volume-label" class="music-vol-label">30%</span>
+            </div>
+
+            <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:6px;">
+                <span class="music-label">&#9728; Background</span>
+                <button id="bg-toggle-btn" class="btn btn-secondary btn-xsmall" onclick="toggleBackground()" style="min-width:46px;font-size:12px;">On</button>
             </div>
         </div>
 

@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', function () {
     initLoadFileInput();
     initMusic();
     initPageTransitions();
+    initBackground();
+    initLowHpWarning();
+    initBattleKeys();
 });
 
 function switchTab(tabName, instant) {
@@ -42,6 +45,8 @@ function switchTab(tabName, instant) {
             if (tabName === 'market') loadMarketTab();
         }
     }
+    var mainContent = document.querySelector('.main-content');
+    if (mainContent) mainContent.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function initTabs() {
@@ -393,5 +398,59 @@ function initPagination() {
         prevBtn.addEventListener('click', function () { showPage(currentPage - 1); });
         nextBtn.addEventListener('click', function () { showPage(currentPage + 1); });
         showPage(0);
+    });
+}
+
+// ─── Background Toggle ─────────────────────────────────────────────────────────
+
+function initBackground() {
+    var main = document.querySelector('.main-content');
+    var btn  = document.getElementById('bg-toggle-btn');
+    if (!main || !btn) return;
+    var bgOff = localStorage.getItem('ol2_bg_off') === 'true';
+    if (bgOff) {
+        main.classList.add('no-bg');
+        btn.textContent = 'Off';
+    } else {
+        btn.textContent = 'On';
+    }
+}
+
+function toggleBackground() {
+    var main = document.querySelector('.main-content');
+    var btn  = document.getElementById('bg-toggle-btn');
+    if (!main || !btn) return;
+    var isOff = main.classList.toggle('no-bg');
+    btn.textContent = isOff ? 'Off' : 'On';
+    localStorage.setItem('ol2_bg_off', isOff ? 'true' : 'false');
+}
+
+// ─── Low HP Warning ────────────────────────────────────────────────────────────
+
+function initLowHpWarning() {
+    document.querySelectorAll('.bar-fill.bar-hp').forEach(function (bar) {
+        var widthStr = bar.style.width || '100%';
+        var pct = parseFloat(widthStr);
+        if (!isNaN(pct) && pct <= 25) {
+            bar.classList.add('low-hp');
+        }
+    });
+}
+
+// ─── Battle Keyboard Shortcuts ─────────────────────────────────────────────────
+// 1 = Strike, 2 = Defend, 3 = Use Item, 4 = Flee/Retreat
+
+function initBattleKeys() {
+    var actionGrid = document.querySelector('.battle-action-grid');
+    if (!actionGrid) return;
+    var forms = actionGrid.querySelectorAll('form');
+    document.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+        var idx = parseInt(e.key, 10);
+        if (idx >= 1 && idx <= forms.length) {
+            var form = forms[idx - 1];
+            var btn = form.querySelector('button:not([disabled])');
+            if (btn) form.submit();
+        }
     });
 }
