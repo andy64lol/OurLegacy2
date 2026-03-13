@@ -288,6 +288,165 @@ def get_boss_dialogue(boss_key, timing):
     return GAME_DATA['dialogues'].get(f'{boss_key}.boss.{timing}', '')
 
 
+# ─── Boss Battle Mechanics ────────────────────────────────────────────────────
+
+
+def get_boss_phase(phases, hp_pct):
+    """
+    Return (phase_index, phase_dict) for the given HP percentage.
+    Phases are ordered so that the highest threshold applies first (full health),
+    and later phases kick in as HP drops.
+    """
+    if not phases:
+        return 0, {}
+    sorted_desc = sorted(phases, key=lambda p: -p.get('hp_threshold', 1.0))
+    for i, phase in enumerate(sorted_desc):
+        if hp_pct >= phase.get('hp_threshold', 1.0):
+            return i, phase
+    return len(sorted_desc) - 1, sorted_desc[-1]
+
+
+def _enemy_take_turn(enemy, player, player_effects, log):
+    """Dispatch enemy turn — boss uses full mechanic, regular enemy does plain attack."""
+    if enemy.get('is_boss'):
+        boss_take_turn(enemy, player, player_effects, log)
+    else:
+        e_dmg = max(1, enemy['attack'] - player['defense'] + random.randint(-2, 4))
+        if 'shield' in player_effects:
+            absorb = player_effects['shield'].get('data', {}).get('absorb_amount', 0)
+            reduction = min(absorb, e_dmg)
+            e_dmg = max(0, e_dmg - reduction)
+            if reduction > 0:
+                log.append(f'Your shield absorbs {reduction} damage!')
+        player['hp'] = max(0, player['hp'] - e_dmg)
+        if e_dmg > 0:
+            log.append(f'The {enemy["name"]} strikes you for {e_dmg} damage.')
+        else:
+            log.append(f'The {enemy["name"]} attacks but your shield holds!')
+
+
+def boss_take_turn(enemy, player, player_effects, log):
+    """
+    Resolve the boss's turn: may use a special ability or do a regular attack.
+    Handles phase transitions, ability cooldowns, and effect application.
+    Modifies enemy/player dicts and log in place.
+    Returns dict with keys: used_ability (name or None), phase_changed (bool),
+    new_phase_desc (str or None).
+    """
+    result = {'used_ability': None, 'phase_changed': False, 'new_phase_desc': None}
+
+    boss_key = enemy.get('key', '')
+    boss_data = GAME_DATA['bosses'].get(boss_key, {}) if boss_key else {}
+    phases = boss_data.get('phases', [])
+    abilities = boss_data.get('special_abilities', [])
+
+    hp_pct = enemy['hp'] / max(1, enemy['max_hp'])
+    phase_idx, phase_data = get_boss_phase(phases, hp_pct)
+
+    # Detect phase transition
+    prev_phase_idx = enemy.get('_phase_idx', 0)
+    if phase_idx != prev_phase_idx and phases:
+        enemy['_phase_idx'] = phase_idx
+        desc = phase_data.get('description', '')
+        result['phase_changed'] = True
+        result['new_phase_desc'] = desc
+        log.append(f'⚠ {enemy["name"]} enters a new phase! {desc}')
+
+    # Apply phase multipliers to current combat stats (snapshot every turn)
+    base_atk = boss_data.get('attack', enemy.get('_base_attack', enemy['attack']))
+    base_def = boss_data.get('defense', enemy.get('_base_defense', enemy['defense']))
+    if '_base_attack' not in enemy:
+        enemy['_base_attack'] = enemy['attack']
+        enemy['_base_defense'] = enemy['defense']
+
+    atk_mult = phase_data.get('attack_multiplier', 1.0)
+    def_mult = phase_data.get('defense_multiplier', 1.0)
+    enemy['attack'] = max(1, int(enemy['_base_attack'] * atk_mult))
+    enemy['defense'] = max(0, int(enemy['_base_defense'] * def_mult))
+
+    # Tick ability cooldowns
+    cooldowns = enemy.get('_ability_cooldowns', {})
+    for ab_name in list(cooldowns.keys()):
+        if cooldowns[ab_name] > 0:
+            cooldowns[ab_name] -= 1
+    enemy['_ability_cooldowns'] = cooldowns
+
+    # Determine which abilities are unlocked for this phase
+    unlocked = set()
+    if phases and phase_data.get('special_abilities_unlocked'):
+        unlocked = set(phase_data['special_abilities_unlocked'])
+    if not unlocked and abilities:
+        unlocked = {ab['name'] for ab in abilities}
+
+    # Filter eligible abilities (off cooldown and unlocked)
+    eligible = [
+        ab for ab in abilities
+        if ab['name'] in unlocked and cooldowns.get(ab['name'], 0) == 0
+    ]
+
+    used_ability = False
+    ability_chance = 0.40 if phase_idx >= 1 else 0.25
+    if eligible and random.random() < ability_chance:
+        ability = random.choice(eligible)
+        ab_name = ability['name']
+        result['used_ability'] = ab_name
+        used_ability = True
+        cooldowns[ab_name] = ability.get('cooldown', 3)
+        enemy['_ability_cooldowns'] = cooldowns
+
+        dmg = ability.get('damage', 0)
+        effect = ability.get('effect', '')
+        stun_chance = ability.get('stun_chance', 0.0)
+
+        if dmg > 0:
+            # Ability damage ignores some defense
+            raw = max(1, dmg - player['defense'] // 2 + random.randint(-3, 5))
+            if 'shield' in player_effects:
+                absorb = player_effects['shield'].get('data', {}).get('absorb_amount', 0)
+                red = min(absorb, raw)
+                raw = max(0, raw - red)
+                if red:
+                    log.append(f'Your shield absorbs {red} damage!')
+            player['hp'] = max(0, player['hp'] - raw)
+            log.append(f'💥 {enemy["name"]} uses {ab_name}! You take {raw} damage!')
+        else:
+            log.append(f'⚡ {enemy["name"]} uses {ab_name}!')
+
+        if effect == 'debuff':
+            atk_red = ability.get('attack_reduction', 0)
+            def_red = ability.get('defense_reduction', 0)
+            if atk_red:
+                player['attack'] = max(1, player['attack'] - atk_red)
+                log.append(f'  Your attack is reduced by {atk_red}!')
+            if def_red:
+                player['defense'] = max(0, player['defense'] - def_red)
+                log.append(f'  Your defense is reduced by {def_red}!')
+
+        if stun_chance and random.random() < stun_chance:
+            log.append(f'  You are stunned and will lose your next turn!')
+            player_effects['stunned'] = {'turns': 1, 'data': {}}
+
+        if ability.get('description'):
+            log.append(f'  ({ability["description"]})')
+
+    if not used_ability:
+        # Regular attack
+        e_dmg = max(1, enemy['attack'] - player['defense'] + random.randint(-2, 4))
+        if 'shield' in player_effects:
+            absorb = player_effects['shield'].get('data', {}).get('absorb_amount', 0)
+            reduction = min(absorb, e_dmg)
+            e_dmg = max(0, e_dmg - reduction)
+            if reduction > 0:
+                log.append(f'Your shield absorbs {reduction} damage!')
+        player['hp'] = max(0, player['hp'] - e_dmg)
+        if e_dmg > 0:
+            log.append(f'The {enemy["name"]} strikes you for {e_dmg} damage.')
+        else:
+            log.append(f'The {enemy["name"]} attacks but your shield holds!')
+
+    return result
+
+
 # ─── Cutscenes ────────────────────────────────────────────────────────────────
 
 
@@ -1977,9 +2136,31 @@ def battle():
 
     # Boss start dialogue (shown once)
     boss_dialogue = None
+    boss_phase_info = None
+    boss_abilities_info = []
     if enemy.get('is_boss'):
         boss_key = enemy.get('key', '')
         boss_dialogue = get_boss_dialogue(boss_key, 'start')
+        boss_data = GAME_DATA['bosses'].get(boss_key, {})
+        phases = boss_data.get('phases', [])
+        if phases:
+            hp_pct = enemy['hp'] / max(1, enemy['max_hp'])
+            phase_idx, phase_data = get_boss_phase(phases, hp_pct)
+            total_phases = len(phases)
+            boss_phase_info = {
+                'index': phase_idx + 1,
+                'total': total_phases,
+                'description': phase_data.get('description', ''),
+                'attack_multiplier': phase_data.get('attack_multiplier', 1.0),
+            }
+        abilities = boss_data.get('special_abilities', [])
+        cooldowns = enemy.get('_ability_cooldowns', {})
+        for ab in abilities:
+            boss_abilities_info.append({
+                'name': ab['name'],
+                'description': ab.get('description', ''),
+                'cooldown_left': cooldowns.get(ab['name'], 0),
+            })
 
     return render_template(
         'battle.html',
@@ -1992,6 +2173,8 @@ def battle():
         player_effects=player_effects,
         enemy_effects=enemy_effects,
         boss_dialogue=boss_dialogue,
+        boss_phase_info=boss_phase_info,
+        boss_abilities_info=boss_abilities_info,
     )
 
 
@@ -2051,19 +2234,7 @@ def battle_spell():
     if enemy.get('hp', 1) <= 0:
         return _handle_victory(player, enemy, log)
 
-    e_dmg = max(1, enemy['attack'] - player['defense'] + random.randint(-2, 4))
-    # Apply shield effect
-    if 'shield' in player_effects:
-        absorb = player_effects['shield'].get('data', {}).get('absorb_amount', 0)
-        reduction = min(absorb, e_dmg)
-        e_dmg = max(0, e_dmg - reduction)
-        if reduction > 0:
-            log.append(f'Your shield absorbs {reduction} damage!')
-    player['hp'] = max(0, player['hp'] - e_dmg)
-    if e_dmg > 0:
-        log.append(f'The {enemy["name"]} strikes back for {e_dmg} damage!')
-    else:
-        log.append(f'The {enemy["name"]} attacks but your shield holds!')
+    _enemy_take_turn(enemy, player, player_effects, log)
 
     if player['hp'] <= 0:
         return _handle_defeat(player, enemy, log)
@@ -2115,18 +2286,7 @@ def battle_attack():
             session['battle_enemy_effects'] = enemy_effects
             return _handle_victory(player, enemy, log)
 
-    e_dmg = max(1, enemy['attack'] - player['defense'] + random.randint(-2, 4))
-    if 'shield' in player_effects:
-        absorb = player_effects['shield'].get('data', {}).get('absorb_amount', 0)
-        reduction = min(absorb, e_dmg)
-        e_dmg = max(0, e_dmg - reduction)
-        if reduction > 0:
-            log.append(f'Your shield absorbs {reduction} damage!')
-    player['hp'] = max(0, player['hp'] - e_dmg)
-    if e_dmg > 0:
-        log.append(f'The {enemy["name"]} strikes you for {e_dmg} damage.')
-    else:
-        log.append(f'The {enemy["name"]} attacks but your shield holds!')
+    _enemy_take_turn(enemy, player, player_effects, log)
 
     if player['hp'] <= 0:
         session['battle_player_effects'] = player_effects
@@ -2166,13 +2326,11 @@ def battle_defend():
         return _handle_victory(player, enemy, log)
 
     log.append('You brace yourself, raising your guard.')
-    e_dmg = max(0, enemy['attack'] - int(player['defense'] * 2) + random.randint(-2, 2))
-    player['hp'] = max(0, player['hp'] - e_dmg)
-
-    if e_dmg > 0:
-        log.append(f'The {enemy["name"]} attacks, but you reduce the blow to {e_dmg} damage.')
-    else:
-        log.append(f'You block the {enemy["name"]}\'s attack completely!')
+    # Temporarily double defense for the defend action
+    real_defense = player['defense']
+    player['defense'] = real_defense * 2
+    _enemy_take_turn(enemy, player, player_effects, log)
+    player['defense'] = real_defense
 
     if player['hp'] <= 0:
         session['battle_player_effects'] = player_effects
@@ -2221,13 +2379,7 @@ def battle_use_item():
             player['inventory'].remove(item_name)
             log.append(f'You use the {item_name}, regaining {heal} HP.')
 
-        e_dmg = max(1, enemy['attack'] - player['defense'] + random.randint(-1, 3))
-        if 'shield' in player_effects:
-            absorb = player_effects['shield'].get('data', {}).get('absorb_amount', 0)
-            reduction = min(absorb, e_dmg)
-            e_dmg = max(0, e_dmg - reduction)
-        player['hp'] = max(0, player['hp'] - e_dmg)
-        log.append(f'The {enemy["name"]} seizes the moment and strikes for {e_dmg} damage.')
+        _enemy_take_turn(enemy, player, player_effects, log)
 
     if player['hp'] <= 0:
         session['battle_player_effects'] = player_effects

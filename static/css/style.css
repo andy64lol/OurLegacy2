@@ -498,6 +498,8 @@ strong { font-weight: 600; }
 .log-crit    { color: var(--gold-bright); font-weight: 500; }
 .log-victory { color: var(--green-bright); }
 .log-damage  { color: #f09080; }
+.log-phase   { color: var(--gold); font-weight: 600; border-left: 3px solid var(--red); padding-left: 6px; }
+.log-ability { color: #e8a0ff; font-weight: 500; }
 
 /* ─── Area & Actions ─────────────────────────────────────── */
 .area-description { font-size: 15px; color: var(--text-light); line-height: 1.65; margin-bottom: 14px; }

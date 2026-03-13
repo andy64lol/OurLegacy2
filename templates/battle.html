@@ -4,7 +4,7 @@
 
     <div class="battle-header">
         <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
-            {% if enemy.is_boss %}BOSS BATTLE{% else %}Combat{% endif %}
+            {% if enemy.is_boss %}⚔ BOSS BATTLE{% else %}Combat{% endif %}
         </div>
         <div style="font-size:20px;font-weight:600;color:{{ 'var(--gold)' if enemy.is_boss else 'var(--red)' }};">
             {{ enemy.name }}
@@ -18,6 +18,38 @@
         padding:12px 18px;margin:0 0 14px 0;text-align:center;
         font-style:italic;color:var(--red);font-size:15px;">
         "{{ boss_dialogue }}"
+    </div>
+    {% endif %}
+
+    <!-- Boss phase indicator -->
+    {% if boss_phase_info %}
+    <div style="
+        background:linear-gradient(135deg,rgba(180,30,30,0.18),rgba(120,10,10,0.10));
+        border:1px solid rgba(200,50,50,0.5);border-radius:8px;
+        padding:10px 16px;margin:0 0 12px 0;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">Phase</span>
+            <div style="display:flex;gap:4px;">
+                {% for i in range(boss_phase_info.total) %}
+                <div style="
+                    width:18px;height:8px;border-radius:3px;
+                    background:{{ 'var(--red)' if i < boss_phase_info.index else 'rgba(255,255,255,0.12)' }};
+                    border:1px solid {{ 'var(--red)' if i < boss_phase_info.index else 'rgba(255,255,255,0.2)' }};
+                "></div>
+                {% endfor %}
+            </div>
+            <span style="font-size:12px;font-weight:600;color:var(--gold);">{{ boss_phase_info.index }} / {{ boss_phase_info.total }}</span>
+            {% if boss_phase_info.attack_multiplier > 1.0 %}
+            <span style="font-size:11px;color:var(--red);background:rgba(200,50,50,0.15);border:1px solid rgba(200,50,50,0.3);border-radius:4px;padding:1px 6px;">
+                ATK ×{{ '%.1f'|format(boss_phase_info.attack_multiplier) }}
+            </span>
+            {% endif %}
+        </div>
+        {% if boss_phase_info.description %}
+        <div style="font-size:12px;color:var(--text-dim);margin-top:5px;font-style:italic;">
+            {{ boss_phase_info.description }}
+        </div>
+        {% endif %}
     </div>
     {% endif %}
 
@@ -99,7 +131,14 @@
         <div class="panel-title">Battle Chronicle</div>
         <div class="panel-body message-log battle-log" id="battle-log">
             {% for line in battle_log %}
-            <div class="log-entry {% if 'CRITICAL' in line %}log-crit{% elif 'strikes you' in line or 'cuts you' in line %}log-damage{% elif 'defeated' in line.lower() or 'falls' in line.lower() %}log-victory{% else %}log-normal{% endif %}">
+            <div class="log-entry
+                {%- if 'CRITICAL' in line %} log-crit
+                {%- elif '⚠' in line or 'enters a new phase' in line %} log-phase
+                {%- elif '💥' in line or '⚡' in line or 'uses ' in line %} log-ability
+                {%- elif 'strikes you' in line or 'cuts you' in line %} log-damage
+                {%- elif 'defeated' in line.lower() or 'falls' in line.lower() %} log-victory
+                {%- else %} log-normal
+                {%- endif %}">
                 {{ line }}
             </div>
             {% endfor %}
@@ -132,9 +171,42 @@
         </form>
 
         <form method="post" action="/battle/flee">
-            <button type="submit" class="btn btn-battle btn-flee">Flee</button>
+            <button type="submit" class="btn btn-battle btn-flee">{% if enemy.is_boss %}Retreat{% else %}Flee{% endif %}</button>
         </form>
     </div>
+
+    <!-- Boss abilities panel -->
+    {% if boss_abilities_info %}
+    <div class="panel" style="margin-top:16px;">
+        <div class="panel-title" style="color:var(--red);">⚔ Boss Abilities</div>
+        <div class="panel-body">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">
+                {% for ab in boss_abilities_info %}
+                <div style="
+                    background:{{ 'rgba(200,50,50,0.15)' if ab.cooldown_left == 0 else 'rgba(80,80,80,0.10)' }};
+                    border:1px solid {{ 'rgba(200,50,50,0.5)' if ab.cooldown_left == 0 else 'rgba(120,120,120,0.3)' }};
+                    border-radius:6px;padding:8px 10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                        <span style="font-size:12px;font-weight:600;color:{{ 'var(--red)' if ab.cooldown_left == 0 else 'var(--text-dim)' }};">
+                            {{ ab.name }}
+                        </span>
+                        {% if ab.cooldown_left > 0 %}
+                        <span style="font-size:10px;color:var(--text-dim);background:rgba(0,0,0,0.2);border-radius:3px;padding:1px 5px;">
+                            {{ ab.cooldown_left }}t
+                        </span>
+                        {% else %}
+                        <span style="font-size:10px;color:var(--red);font-weight:600;">READY</span>
+                        {% endif %}
+                    </div>
+                    {% if ab.description %}
+                    <div style="font-size:11px;color:var(--text-dim);">{{ ab.description[:60] }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Spellcasting -->
     {% if available_spells %}
