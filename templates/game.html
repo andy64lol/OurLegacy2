@@ -48,18 +48,21 @@
                 {% endif %}
 
                 <!-- Time & Weather -->
-                <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:10px;font-size:13px;">
-                    <div style="flex:1;text-align:center;">
-                        <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Time</div>
-                        <div style="color:var(--text-light);">{{ game_time_icon }} {{ game_time }}</div>
+                <div class="sidebar-status-row">
+                    <div class="sidebar-status-item">
+                        <span class="sidebar-status-key">Time</span>
+                        <span class="sidebar-status-val">{{ game_time }}</span>
                     </div>
-                    <div style="flex:1;text-align:center;">
-                        <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em;">Weather</div>
-                        <div style="color:var(--text-light);">{{ weather_icon }} {{ weather_display }}</div>
-                        {% if weather_bonus_exp > 0 or weather_bonus_gold > 0 %}
-                        <div style="font-size:11px;color:var(--green-bright);">+{{ weather_bonus_exp }}% EXP / +{{ weather_bonus_gold }}% gold</div>
-                        {% endif %}
+                    <div class="sidebar-status-item">
+                        <span class="sidebar-status-key">Weather</span>
+                        <span class="sidebar-status-val">{{ weather_display }}</span>
                     </div>
+                    {% if weather_bonus_exp > 0 or weather_bonus_gold > 0 %}
+                    <div class="sidebar-status-item">
+                        <span class="sidebar-status-key"></span>
+                        <span style="font-size:11px;color:var(--green-bright);">+{{ weather_bonus_exp }}% EXP / +{{ weather_bonus_gold }}% gold</span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -183,7 +186,7 @@
             <!-- Manual Boss Challenge -->
             {% if available_bosses %}
             <div class="panel" style="margin-bottom:14px;">
-                <div class="panel-title">⚔ Boss Challenges</div>
+                <div class="panel-title">Boss Challenges</div>
                 <div class="panel-body">
                     <p class="panel-note">Challenge a boss directly. Each boss has an 8-hour cooldown after defeat.</p>
                     <div style="display:flex;flex-wrap:wrap;gap:10px;">
@@ -267,9 +270,9 @@
                 </div>
                 <div class="panel-body">
                     {% if inventory_items %}
-                    <div class="inv-grid">
+                    <div class="inv-grid pageable-list" data-page-size="12">
                         {% for item in inventory_items %}
-                        <div class="inv-card rarity-border-{{ item.rarity }}">
+                        <div class="inv-card rarity-border-{{ item.rarity }} pageable-item">
                             <div class="inv-card-name">
                                 <span class="rarity-{{ item.rarity }}">{{ item.name }}</span>
                                 {% if item.count > 1 %}<span class="inv-qty">x{{ item.count }}</span>{% endif %}
@@ -356,9 +359,9 @@
                     <span class="panel-subtitle">({{ player.gold }} gold available)</span>
                 </div>
                 <div class="panel-body">
-                    <div class="shop-grid">
+                    <div class="shop-grid pageable-list" data-page-size="12">
                         {% for item in shop_items %}
-                        <div class="shop-card {% if not item.can_afford %}cannot-afford{% endif %}">
+                        <div class="shop-card pageable-item {% if not item.can_afford %}cannot-afford{% endif %}">
                             <div class="shop-card-name rarity-{{ item.rarity }}">{{ item.name }}</div>
                             <div class="shop-card-type">{{ item.type }}</div>
                             {% if item.stats %}
@@ -397,7 +400,7 @@
 
             <!-- Training -->
             <div class="panel land-section">
-                <div class="panel-title">🏋 Training Grounds</div>
+                <div class="panel-title">Training Grounds</div>
                 <div class="panel-body">
                     <p class="panel-note">Train your attributes to grow stronger. Each session costs gold.</p>
                     <div style="display:flex;flex-wrap:wrap;gap:10px;">
@@ -630,9 +633,9 @@
                     <span class="panel-subtitle">The Rusty Tankard &bull; Your gold: {{ player.gold }}g</span>
                 </div>
                 <div class="panel-body">
-                    <div class="companion-grid">
+                    <div class="companion-grid pageable-list" data-page-size="8">
                         {% for comp in companions_available %}
-                        <div class="companion-card rank-{{ comp.rank }} {% if comp.already_hired %}comp-hired{% endif %}">
+                        <div class="companion-card pageable-item rank-{{ comp.rank }} {% if comp.already_hired %}comp-hired{% endif %}">
                             <div class="comp-header">
                                 <span class="comp-name">{{ comp.name }}</span>
                                 <span class="rank-badge rank-{{ comp.rank }}">{{ comp.rank|title }}</span>
@@ -673,8 +676,9 @@
                 </div>
                 <div class="panel-body">
                     {% if missions %}
+                    <div class="pageable-list" data-page-size="8">
                     {% for mission in missions %}
-                    <div class="quest-card {% if not mission.eligible %}quest-locked{% elif mission.can_complete %}quest-ready{% else %}quest-active{% endif %}">
+                    <div class="quest-card pageable-item {% if not mission.eligible %}quest-locked{% elif mission.can_complete %}quest-ready{% else %}quest-active{% endif %}">
                         <div class="quest-header">
                             <div class="quest-name">
                                 {% if mission.can_complete %}
@@ -723,6 +727,7 @@
                         {% endif %}
                     </div>
                     {% endfor %}
+                    </div>
                     {% else %}
                     <p class="empty-notice">No quests available. Level up or complete prerequisites to unlock more.</p>
                     {% endif %}
@@ -739,8 +744,9 @@
                 </div>
                 <div class="panel-body">
                     {% if challenges %}
+                    <div class="pageable-list" data-page-size="8">
                     {% for ch in challenges %}
-                    <div class="quest-card {% if ch.claimed %}quest-locked{% elif ch.ready %}quest-ready{% else %}quest-active{% endif %}"
+                    <div class="quest-card pageable-item {% if ch.claimed %}quest-locked{% elif ch.ready %}quest-ready{% else %}quest-active{% endif %}"
                          style="{% if ch.claimed %}opacity:0.6;{% endif %}">
                         <div class="quest-header">
                             <div class="quest-name">
@@ -779,6 +785,7 @@
                         {% endif %}
                     </div>
                     {% endfor %}
+                    </div>
                     {% else %}
                     <p class="empty-notice">No challenges available.</p>
                     {% endif %}

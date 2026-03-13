@@ -4,7 +4,7 @@
 
     <div class="battle-header">
         <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
-            {% if enemy.is_boss %}⚔ BOSS BATTLE{% else %}Combat{% endif %}
+            {% if enemy.is_boss %}BOSS BATTLE{% else %}Combat{% endif %}
         </div>
         <div style="font-size:20px;font-weight:600;color:{{ 'var(--gold)' if enemy.is_boss else 'var(--red)' }};">
             {{ enemy.name }}
@@ -139,25 +139,41 @@
     <!-- Spellcasting -->
     {% if available_spells %}
     <div class="panel" style="margin-top:16px;">
-        <div class="panel-title" style="color:var(--mana-bright);">&#10024; Spellbook</div>
+        <div class="panel-title" style="color:var(--mana-bright);">Spellbook</div>
         <div class="panel-body">
-            <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
-                MP: <strong style="color:var(--mana-bright);">{{ player.mp }} / {{ player.max_mp }}</strong>
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+                <div style="font-size:13px;color:var(--text-dim);">
+                    MP: <strong style="color:var(--mana-bright);">{{ player.mp }} / {{ player.max_mp }}</strong>
+                </div>
+                <div class="bar-track" style="flex:1;height:8px;">
+                    <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
+                </div>
             </div>
             <div class="spell-grid">
                 {% for spell in available_spells %}
+                {% set can_cast = player.mp >= spell.mp_cost %}
+                {% set stype = spell.type | lower %}
                 <form method="post" action="/battle/spell">
                     <input type="hidden" name="spell" value="{{ spell.name }}">
                     <button type="submit"
-                        class="btn btn-spell {% if player.mp < spell.mp_cost %}btn-disabled{% endif %}"
-                        {% if player.mp < spell.mp_cost %}disabled title="Not enough MP"{% endif %}>
-                        <div class="spell-name">{{ spell.name }}</div>
-                        <div class="spell-meta">
-                            <span class="spell-cost">{{ spell.mp_cost }} MP</span>
-                            <span class="spell-type">{{ spell.type|title }}</span>
-                            {% if spell.power %}<span class="spell-power">Pwr {{ spell.power }}</span>{% endif %}
+                        class="btn-spell spell-{{ stype }} {% if not can_cast %}btn-disabled{% endif %}"
+                        {% if not can_cast %}disabled{% endif %}>
+                        <div class="spell-header">
+                            <span class="spell-name">{{ spell.name }}</span>
+                            <span class="spell-cost-badge">{{ spell.mp_cost }} MP</span>
                         </div>
-                        <div class="spell-desc">{{ spell.description[:50] }}</div>
+                        <div class="spell-tags">
+                            <span class="spell-tag spell-tag-{{ stype }}">{{ spell.type | title }}</span>
+                            {% if spell.power %}
+                            <span class="spell-tag" style="color:var(--red);border-color:var(--red-dark);">Pwr {{ spell.power }}</span>
+                            {% endif %}
+                        </div>
+                        {% if spell.description %}
+                        <div class="spell-desc">{{ spell.description[:65] }}</div>
+                        {% endif %}
+                        {% if not can_cast %}
+                        <div class="spell-no-mp">Not enough MP</div>
+                        {% endif %}
                     </button>
                 </form>
                 {% endfor %}
@@ -165,8 +181,8 @@
         </div>
     </div>
     {% else %}
-    <div class="panel" style="margin-top:16px;opacity:0.5;">
-        <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;">
+    <div class="panel" style="margin-top:16px;">
+        <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;opacity:0.6;">
             No spells available. Equip a magic weapon to access your spellbook.
         </div>
     </div>

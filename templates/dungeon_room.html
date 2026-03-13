@@ -76,7 +76,7 @@
                 <!-- ── BOSS ROOM ── -->
                 {% if room.type == 'boss' %}
                 <div class="room-boss-banner">
-                    <div class="room-boss-icon">☠</div>
+                    <div class="room-boss-icon" style="font-size:15px;letter-spacing:0.12em;border:2px solid var(--red);padding:6px 18px;display:inline-block;color:var(--red);">BOSS</div>
                     <div class="room-boss-text">The final guardian stirs in the darkness...</div>
                     <div class="room-boss-sub">Prepare for battle. There is no retreat.</div>
                 </div>
@@ -114,7 +114,7 @@
                 <!-- ── MULTI-CHOICE ROOM ── -->
                 {% elif room.type == 'multi_choice' and current_challenge %}
                 <div class="room-choice-box">
-                    <div class="room-choice-icon">⚔</div>
+                    <div class="room-choice-icon" style="font-size:13px;letter-spacing:0.1em;border:1px solid var(--gold-dim);padding:3px 12px;display:inline-block;color:var(--gold-dim);">CHOICE</div>
                     <div class="room-choice-text">{{ current_challenge.question }}</div>
                     <div class="room-choice-meta">
                         Correct: +{{ current_challenge.success_reward.get('gold', 0) }}g, +{{ current_challenge.success_reward.get('experience', 0) }} EXP
@@ -133,7 +133,7 @@
                 <!-- ── BATTLE ROOM ── -->
                 {% elif room.type == 'battle' %}
                 <div class="room-battle-banner">
-                    <div style="font-size:30px;">⚔</div>
+                    <div style="font-size:13px;letter-spacing:0.12em;border:2px solid var(--red);padding:5px 18px;display:inline-block;color:var(--red);margin-bottom:10px;">ENCOUNTER</div>
                     <div style="color:var(--red);font-weight:600;font-size:16px;">An enemy blocks your path!</div>
                     <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">You will be taken to the battle screen.</div>
                 </div>
@@ -144,7 +144,7 @@
                 <!-- ── CHEST ROOM ── -->
                 {% elif room.type == 'chest' %}
                 <div class="room-chest-banner">
-                    <div style="font-size:30px;">📦</div>
+                    <div style="font-size:13px;letter-spacing:0.12em;border:2px solid var(--gold-dim);padding:5px 18px;display:inline-block;color:var(--gold);margin-bottom:10px;">TREASURE</div>
                     <div style="color:var(--gold);font-weight:600;font-size:16px;">A treasure chest awaits!</div>
                 </div>
                 <form method="POST" action="/action/dungeon/proceed">
@@ -155,7 +155,7 @@
                 {% elif room.type == 'trap_chest' %}
                 {% set trap = room.challenge or {} %}
                 <div class="room-trap-banner">
-                    <div style="font-size:30px;">⚠</div>
+                    <div style="font-size:13px;letter-spacing:0.12em;border:2px solid var(--red);padding:5px 18px;display:inline-block;color:var(--red);margin-bottom:10px;">TRAP</div>
                     <div style="color:var(--gold);font-weight:600;font-size:16px;">
                         {{ trap.name or 'Trapped Chest' }}
                     </div>

@@ -2,6 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', function () {
     initTabs();
+    initPagination();
     scrollLogsToBottom();
     checkHashTab();
     initLoadFileInput();
@@ -205,4 +206,55 @@ function toggleMusicMute() {
     if (slider) slider.value = Math.round(_musicAudio.volume * 100);
     var label = document.getElementById('music-volume-label');
     if (label) label.textContent = Math.round(_musicAudio.volume * 100) + '%';
+}
+
+// ─── Pagination ────────────────────────────────────────────────────────────
+
+function initPagination() {
+    document.querySelectorAll('.pageable-list').forEach(function (list) {
+        var items = Array.from(list.querySelectorAll(':scope > .pageable-item'));
+        if (items.length === 0) return;
+        var pageSize = parseInt(list.getAttribute('data-page-size') || '12', 10);
+        if (items.length <= pageSize) return;
+
+        var currentPage = 0;
+        var totalPages = Math.ceil(items.length / pageSize);
+
+        var pager = document.createElement('div');
+        pager.className = 'pager';
+
+        var prevBtn = document.createElement('button');
+        prevBtn.className = 'pager-btn';
+        prevBtn.textContent = '< Prev';
+
+        var infoSpan = document.createElement('span');
+        infoSpan.className = 'pager-info';
+
+        var nextBtn = document.createElement('button');
+        nextBtn.className = 'pager-btn';
+        nextBtn.textContent = 'Next >';
+
+        pager.appendChild(prevBtn);
+        pager.appendChild(infoSpan);
+        pager.appendChild(nextBtn);
+
+        var wrapper = list.parentNode;
+        wrapper.insertBefore(pager, list.nextSibling);
+
+        function showPage(page) {
+            currentPage = Math.max(0, Math.min(page, totalPages - 1));
+            var start = currentPage * pageSize;
+            var end = start + pageSize;
+            items.forEach(function (item, idx) {
+                item.style.display = (idx >= start && idx < end) ? '' : 'none';
+            });
+            infoSpan.textContent = 'Page ' + (currentPage + 1) + ' of ' + totalPages;
+            prevBtn.disabled = (currentPage === 0);
+            nextBtn.disabled = (currentPage === totalPages - 1);
+        }
+
+        prevBtn.addEventListener('click', function () { showPage(currentPage - 1); });
+        nextBtn.addEventListener('click', function () { showPage(currentPage + 1); });
+        showPage(0);
+    });
 }

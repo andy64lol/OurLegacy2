@@ -95,8 +95,8 @@ MATERIALS_BY_TIER = {
 
 TIME_PERIODS = ['Dawn', 'Morning', 'Noon', 'Afternoon', 'Dusk', 'Evening', 'Night', 'Midnight']
 TIME_ICONS = {
-    'Dawn': '🌅', 'Morning': '☀️', 'Noon': '🌤️', 'Afternoon': '🌥️',
-    'Dusk': '🌆', 'Evening': '🌙', 'Night': '🌑', 'Midnight': '⭐',
+    'Dawn': '', 'Morning': '', 'Noon': '', 'Afternoon': '',
+    'Dusk': '', 'Evening': '', 'Night': '', 'Midnight': '',
 }
 
 # Training options at Your Land
@@ -929,8 +929,7 @@ def game():
     current_weather = session.get('current_weather', 'sunny')
     weather_def = GAME_DATA['weather'].get(current_weather, {})
     weather_display = current_weather.title()
-    weather_icons = {'sunny': '☀️', 'rainy': '🌧️', 'snowy': '❄️', 'stormy': '⛈️', 'null': '🌑'}
-    weather_icon = weather_icons.get(current_weather, '')
+    weather_icon = ''
     weather_bonus_exp = int(weather_def.get('bonuses', {}).get('exp_bonus', 0) * 100)
     weather_bonus_gold = int(weather_def.get('bonuses', {}).get('gold_bonus', 0) * 100)
 
@@ -1063,9 +1062,8 @@ def action_explore():
     new_weather = roll_area_weather(area)
     session['current_weather'] = new_weather
     weather_def = GAME_DATA['weather'].get(new_weather, {})
-    weather_icons = {'sunny': '☀️', 'rainy': '🌧️', 'snowy': '❄️', 'stormy': '⛈️', 'null': '🌑'}
     add_message(
-        f'{weather_icons.get(new_weather, "")} The weather is {new_weather.title()}.',
+        f'Weather: {new_weather.title()}.',
         'var(--text-dim)'
     )
 
@@ -1284,7 +1282,7 @@ def action_challenge_boss():
     }
     dialogue = get_boss_dialogue(boss_key, 'start')
     session['battle_enemy'] = enemy
-    session['battle_log'] = [f'⚔ You challenge {enemy["name"]}! Prepare yourself! (HP: {enemy["hp"]})']
+    session['battle_log'] = [f'You challenge {enemy["name"]}! Prepare yourself! (HP: {enemy["hp"]})']
     if dialogue:
         session['battle_log'].append(f'"{dialogue}"')
     session['battle_player_effects'] = {}
