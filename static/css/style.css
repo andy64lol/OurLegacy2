@@ -1460,3 +1460,116 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     color: var(--gold);
     font-weight: 700;
 }
+
+/* ─── Quest Card Additions ────────────────────────────────────────────────── */
+.quest-lock-reason {
+    font-size: 12px;
+    color: var(--red);
+    margin-bottom: 6px;
+    font-style: italic;
+}
+.quest-reward {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    font-size: 13px;
+    align-items: center;
+}
+.quest-progress-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 2px 0;
+}
+.quest-progress-label { color: var(--text-dim); }
+.quest-progress-val   { color: var(--text-light); font-weight: 600; }
+.quest-progress-val.done { color: var(--green-bright); }
+
+/* ─── Land Section: Locked Notice ─────────────────────────────────────────── */
+.land-locked-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--slate-darkest);
+    border: 1px dashed var(--border);
+    padding: 16px;
+    border-radius: 6px;
+}
+.land-locked-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+.land-locked-text strong {
+    display: block;
+    font-size: 15px;
+    color: var(--text-light);
+    margin-bottom: 4px;
+}
+.land-locked-text p {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0;
+}
+
+/* ─── Training Grounds ─────────────────────────────────────────────────────── */
+.training-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+.training-card {
+    background: var(--slate-dark);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.training-card-label { font-size: 14px; font-weight: 600; color: var(--text-bright); }
+.training-card-gain  { font-size: 12px; color: var(--green-bright); }
+.training-card-cost  { font-size: 12px; color: var(--gold); margin-bottom: 4px; }
+
+/* ─── Attribute Panel ──────────────────────────────────────────────────────── */
+.attr-points-badge {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    background: var(--gold);
+    color: #111;
+    border-radius: 4px;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+    animation: pulse-gold 1.5s ease-in-out infinite;
+}
+@keyframes pulse-gold {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.65; }
+}
+.attr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+.attr-card {
+    background: var(--slate-dark);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+}
+.attr-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.attr-name  { font-size: 13px; font-weight: 700; color: var(--text-bright); text-transform: uppercase; letter-spacing: 0.04em; }
+.attr-value { font-size: 22px; font-weight: 700; color: var(--gold); line-height: 1; }
+.attr-desc  { font-size: 11px; color: var(--text-dim); flex: 1; margin-bottom: 8px; }

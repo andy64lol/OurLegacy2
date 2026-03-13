@@ -638,6 +638,39 @@
                 </div>
             </div>
 
+            <!-- Attributes Panel -->
+            <div class="panel" style="margin-bottom:14px;" id="attr-panel">
+                <div class="panel-title">
+                    🎯 Attributes
+                    {% if attr_summary.unspent_points > 0 %}
+                    <span class="attr-points-badge">{{ attr_summary.unspent_points }} point{{ 's' if attr_summary.unspent_points != 1 }} available</span>
+                    {% endif %}
+                </div>
+                <div class="panel-body">
+                    {% if attr_summary.unspent_points > 0 %}
+                    <p class="panel-note" style="color:var(--gold);">You have unspent attribute points! Spend them to grow stronger.</p>
+                    {% else %}
+                    <p class="panel-note">Gain attribute points by leveling up (3 per level). Each attribute permanently boosts your stats.</p>
+                    {% endif %}
+                    <div class="attr-grid" id="attr-grid">
+                        {% for attr_key, attr_info in attr_summary.attributes.items() %}
+                        <div class="attr-card" id="attr-{{ attr_key }}">
+                            <div class="attr-top">
+                                <div class="attr-name">{{ attr_info.name }}</div>
+                                <div class="attr-value" id="attr-val-{{ attr_key }}">{{ attr_info.value }}</div>
+                            </div>
+                            <div class="attr-desc">{{ attr_info.description }}</div>
+                            {% if attr_summary.unspent_points > 0 %}
+                            <button class="btn btn-xsmall btn-primary attr-spend-btn"
+                                    data-attr="{{ attr_key }}" style="margin-top:6px;">+ Spend Point</button>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div id="attr-message" style="margin-top:10px;font-size:13px;color:var(--green-bright);display:none;"></div>
+                </div>
+            </div>
+
             <div class="panel">
                 <div class="panel-title">
                     Inventory
@@ -933,15 +966,24 @@
             </div>
 
             <div class="panel land-section">
-                <div class="panel-title">Training Grounds</div>
+                <div class="panel-title">⚔️ Training Grounds</div>
                 <div class="panel-body">
-                    <p class="panel-note">Train your attributes to grow stronger. Each session costs gold.</p>
-                    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                    {% if not land_data.has_training_place %}
+                    <div class="land-locked-notice">
+                        <div class="land-locked-icon">🔒</div>
+                        <div class="land-locked-text">
+                            <strong>Training Place Required</strong>
+                            <p>Build a Training Place on your land to unlock physical training sessions.</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="panel-note">Train your body to grow stronger. Each session costs gold.</p>
+                    <div class="training-grid">
                         {% for tk, opt in land_data.training_options.items() %}
-                        <div style="background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;padding:10px;min-width:160px;">
-                            <div style="font-size:14px;font-weight:600;color:var(--text-light);margin-bottom:4px;">{{ opt.label }}</div>
-                            <div style="font-size:12px;color:var(--green-bright);margin-bottom:6px;">+{{ opt.gain }} {{ opt.stat.replace('max_','').upper() }}</div>
-                            <div style="font-size:12px;color:var(--gold);margin-bottom:8px;">Cost: {{ opt.cost }}g</div>
+                        <div class="training-card">
+                            <div class="training-card-label">{{ opt.label }}</div>
+                            <div class="training-card-gain">+{{ opt.gain }} {{ opt.stat.replace('max_','').upper() }}</div>
+                            <div class="training-card-cost">{{ opt.cost }}g</div>
                             <form method="post" action="/action/land/train">
                                 <input type="hidden" name="training_key" value="{{ tk }}">
                                 <button type="submit" class="btn btn-xsmall btn-primary"
@@ -950,6 +992,7 @@
                         </div>
                         {% endfor %}
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -1024,8 +1067,17 @@
             </div>
 
             <div class="panel land-section">
-                <div class="panel-title">Farming</div>
+                <div class="panel-title">🌱 Farming</div>
                 <div class="panel-body">
+                    {% if not land_data.has_garden %}
+                    <div class="land-locked-notice">
+                        <div class="land-locked-icon">🔒</div>
+                        <div class="land-locked-text">
+                            <strong>Garden Required</strong>
+                            <p>Build a Garden on your land to unlock farming and crop cultivation.</p>
+                        </div>
+                    </div>
+                    {% else %}
                     <p class="panel-note">Plant crops in your farm slots. Each exploration or rest advances growth. Harvest for gold.</p>
                     <div class="farm-grid">
                         {% for slot in land_data.farm_crops %}
@@ -1063,11 +1115,12 @@
                         </div>
                         {% endfor %}
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="panel land-section">
-                <div class="panel-title">Companion Pets</div>
+                <div class="panel-title">🐾 Companion Pets</div>
                 <div class="panel-body">
                     {% if land_data.current_pet %}
                     <div class="current-pet-box">
@@ -1202,7 +1255,7 @@
         <div class="tab-content" id="tab-missions">
             <div class="panel">
                 <div class="panel-title">
-                    Quests
+                    📜 Quests
                     <span class="panel-subtitle">{{ completed_count }} completed</span>
                 </div>
                 <div class="panel-body">
@@ -1211,23 +1264,23 @@
                     {% else %}
                     <div class="pageable-list" data-page-size="8">
                     {% for m in missions %}
-                    <div class="pageable-item mission-card {% if not m.eligible %}mission-locked{% endif %}" style="margin-bottom:12px;">
-                        <div class="mission-header">
-                            <span class="mission-name {% if not m.eligible %}text-dim{% endif %}">{{ m.name }}</span>
-                            <span class="mission-type-badge type-{{ m.type }}">{{ m.type|title }}</span>
+                    <div class="pageable-item quest-card {% if not m.eligible %}quest-locked{% endif %}">
+                        <div class="quest-header">
+                            <span class="quest-name {% if not m.eligible %}text-dim{% endif %}">{{ m.name }}</span>
+                            <span class="quest-type-badge quest-type-{{ m.type }}">{{ m.type|title }}</span>
                         </div>
-                        <div class="mission-desc">{{ m.description }}</div>
+                        <div class="quest-desc">{{ m.description }}</div>
                         {% if not m.level_ok %}
-                        <div class="mission-lock-reason">Requires Level {{ m.unlock_level }}</div>
+                        <div class="quest-lock-reason">🔒 Requires Level {{ m.unlock_level }}</div>
                         {% elif not m.prereqs_met %}
-                        <div class="mission-lock-reason">Prerequisites not met</div>
+                        <div class="quest-lock-reason">🔒 Prerequisites not met</div>
                         {% endif %}
                         {% if m.progress %}
-                        <div style="margin-top:6px;">
+                        <div class="quest-progress-list">
                             {% for prog in m.progress %}
-                            <div class="mission-progress-row">
-                                <span class="mission-progress-label">{{ prog.label }}</span>
-                                <span class="mission-progress-val {% if prog.done %}done{% endif %}">
+                            <div class="quest-progress-row">
+                                <span class="quest-progress-label">{{ prog.label }}</span>
+                                <span class="quest-progress-val {% if prog.done %}done{% endif %}">
                                     {{ prog.current }} / {{ prog.target }}
                                     {% if prog.done %} ✓{% endif %}
                                 </span>
@@ -1235,8 +1288,8 @@
                             {% endfor %}
                         </div>
                         {% endif %}
-                        <div class="mission-reward">
-                            Reward: <span class="reward-exp">+{{ m.exp_reward }} EXP</span>
+                        <div class="quest-reward">
+                            <span class="reward-exp">+{{ m.exp_reward }} EXP</span>
                             <span class="reward-gold">+{{ m.gold_reward }}g</span>
                             {% if m.item_rewards %}
                             <span class="reward-items">+{{ m.item_rewards|join(', ') }}</span>
@@ -1247,7 +1300,7 @@
                             <input type="hidden" name="mission_id" value="{{ m.id }}">
                             <button type="submit" class="btn btn-xsmall {% if m.can_complete %}btn-primary{% else %}btn-secondary{% endif %}"
                                 {% if not m.can_complete %}disabled title="{{ m.status_msg }}"{% endif %}>
-                                {% if m.can_complete %}Complete{% else %}In Progress{% endif %}
+                                {% if m.can_complete %}Complete Quest{% else %}In Progress{% endif %}
                             </button>
                         </form>
                         {% endif %}
@@ -1330,6 +1383,53 @@
 
 {% endblock %}
 {% block extra_scripts %}
+{% if not show_create and not in_battle %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.attr-spend-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const attr = btn.dataset.attr;
+            btn.disabled = true;
+            fetch('/api/spend_attr_point', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({attr: attr})
+            })
+            .then(r => r.json())
+            .then(function(data) {
+                const msgEl = document.getElementById('attr-message');
+                if (msgEl) {
+                    msgEl.textContent = data.message;
+                    msgEl.style.display = 'block';
+                    msgEl.style.color = data.ok ? 'var(--green-bright)' : 'var(--red)';
+                    setTimeout(() => { msgEl.style.display = 'none'; }, 3000);
+                }
+                if (data.ok && data.attr_summary) {
+                    const s = data.attr_summary;
+                    const valEl = document.getElementById('attr-val-' + attr);
+                    if (valEl) valEl.textContent = s.attributes[attr].value;
+                    if (s.unspent_points <= 0) {
+                        document.querySelectorAll('.attr-spend-btn').forEach(function(b) {
+                            b.style.display = 'none';
+                        });
+                    }
+                    if (data.player_stats) {
+                        const ps = data.player_stats;
+                        ['attack','defense','speed','max_hp','max_mp'].forEach(function(stat) {
+                            const el = document.querySelector('.stat-mini span');
+                        });
+                    }
+                } else {
+                    btn.disabled = false;
+                }
+            })
+            .catch(function() { btn.disabled = false; });
+        });
+    });
+
+});
+</script>
+{% endif %}
 {% if show_create %}
 <script>
 function updateClassInfo(cls) {

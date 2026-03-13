@@ -16,6 +16,10 @@ from utilities.UI import Colors, get_rarity_color, create_progress_bar
 from utilities.dice import Dice
 from utilities.entities import Enemy, Boss
 from utilities.character import build_new_character, get_available_classes
+from utilities.stats import (
+    ensure_attributes, get_unspent_points, spend_attribute_point,
+    get_attribute_summary,
+)
 from utilities.battle import (
     battle_round_player_attack, battle_round_enemy_attack,
     battle_round_player_flee, battle_round_player_defend,
@@ -1199,6 +1203,15 @@ def game():
             pd = pets_data.get(player['pet'], {})
             pet_data_current = {'key': player['pet'], 'name': pd.get('name', player['pet']), 'boosts': pd.get('boosts', {})}
 
+        has_training_place = any(
+            k.startswith('training_place') and v
+            for k, v in building_slots.items()
+        )
+        has_garden = any(
+            k.startswith('garden') and v
+            for k, v in building_slots.items()
+        )
+
         land_data = {
             'housing_by_type': housing_by_type,
             'placed_by_type': placed_by_type,
@@ -1221,6 +1234,8 @@ def game():
             'current_pet': pet_data_current,
             'owned_housing': owned_set,
             'training_options': TRAINING_OPTIONS,
+            'has_training_place': has_training_place,
+            'has_garden': has_garden,
         }
 
     # Companion system
@@ -1311,6 +1326,8 @@ def game():
         d['completed'] = d.get('id', '') in completed_dungeons_set
     active_dungeon = session.get('active_dungeon')
 
+    ensure_attributes(player)
+    attr_summary = get_attribute_summary(player)
     save_player(player)
     return render_template(
         'game.html',
@@ -1342,6 +1359,7 @@ def game():
         crafting_recipes=crafting_recipes,
         dungeon_list=dungeon_list,
         active_dungeon=active_dungeon,
+        attr_summary=attr_summary,
     )
 
 
@@ -1388,6 +1406,32 @@ def dismiss_cutscene():
         session['seen_cutscenes'] = seen
         session.modified = True
     return jsonify({'ok': True})
+
+
+@app.route('/api/spend_attr_point', methods=['POST'])
+def api_spend_attr_point():
+    player = get_player()
+    if not player:
+        return jsonify({'ok': False, 'message': 'No active character.'})
+    ensure_attributes(player)
+    data = request.get_json(force=True, silent=True) or {}
+    attr = data.get('attr', '')
+    result = spend_attribute_point(player, attr)
+    if result['ok']:
+        save_player(player)
+    attr_summary = get_attribute_summary(player)
+    return jsonify({
+        'ok': result['ok'],
+        'message': result['message'],
+        'attr_summary': attr_summary,
+        'player_stats': {
+            'attack': player.get('attack', 0),
+            'defense': player.get('defense', 0),
+            'speed': player.get('speed', 0),
+            'max_hp': player.get('max_hp', 0),
+            'max_mp': player.get('max_mp', 0),
+        }
+    })
 
 
 # ─── Exploration ─────────────────────────────────────────────────────────────
@@ -1907,7 +1951,7 @@ def action_complete_mission():
     if item_rewards:
         add_message(f'Items received: {", ".join(item_rewards)}', 'var(--gold-bright)')
     if leveled:
-        add_message(f'Level Up! You are now level {player["level"]}!', 'var(--gold)')
+        add_message(f'Level Up! You are now level {player["level"]}! You gained 3 attribute points (Equipment tab).', 'var(--gold)')
 
     # Update weekly challenge
     update_weekly_challenge(player, 'mission_count', 1)
@@ -1957,7 +2001,7 @@ def action_claim_challenge():
     add_message(f'Challenge Complete: {ch_def["name"]}!', 'var(--gold)')
     add_message(f'Reward: +{exp} EXP, +{gold} gold.', 'var(--text-light)')
     if leveled:
-        add_message(f'Level Up! You are now level {player["level"]}!', 'var(--gold)')
+        add_message(f'Level Up! You are now level {player["level"]}! You gained 3 attribute points (Equipment tab).', 'var(--gold)')
 
     save_player(player)
     return redirect(url_for('game') + '#challenges')
@@ -1990,7 +2034,7 @@ def land_buy_housing():
     player['housing_owned'] = owned
     add_message(f'You purchase {h_data["name"]} for {price} gold.', 'var(--gold)')
     save_player(player)
-    return redirect(url_for('game') + '#land')
+    return redirect(url_for('game') + '?tab=land')
 
 
 @app.route('/action/land/place_housing', methods=['POST'])
@@ -2005,7 +2049,7 @@ def land_place_housing():
     if h_key not in player.get('housing_owned', []):
         add_message('You do not own that structure.', 'var(--red)')
         save_player(player)
-        return redirect(url_for('game') + '#land')
+        return redirect(url_for('game') + '?tab=land')
 
     h_data = GAME_DATA['housing'].get(h_key, {})
     comfort = h_data.get('comfort_points', 0)
@@ -2021,7 +2065,7 @@ def land_place_housing():
     player['comfort_points'] = player.get('comfort_points', 0) + comfort
     add_message(f'You place {h_data.get("name", h_key)} at {slot_id}. +{comfort} comfort', 'var(--green-bright)')
     save_player(player)
-    return redirect(url_for('game') + '#land')
+    return redirect(url_for('game') + '?tab=land')
 
 
 @app.route('/action/land/remove_housing', methods=['POST'])
@@ -2045,7 +2089,7 @@ def land_remove_housing():
         add_message('That slot is already empty.', 'var(--text-dim)')
 
     save_player(player)
-    return redirect(url_for('game') + '#land')
+    return redirect(url_for('game') + '?tab=land')
 
 
 @app.route('/action/land/plant', methods=['POST'])
@@ -2053,6 +2097,17 @@ def land_plant():
     player = get_player()
     if not player:
         return redirect(url_for('index'))
+
+    # Require a garden to be built
+    building_slots = player.get('building_slots', {})
+    has_garden = any(
+        k.startswith('garden') and v
+        for k, v in building_slots.items()
+    )
+    if not has_garden:
+        add_message('You need to build a Garden on your land before you can farm!', 'var(--red)')
+        save_player(player)
+        return redirect(url_for('game') + '?tab=land')
 
     crop_key = request.form.get('crop_key', '')
     slot_id = request.form.get('slot_id', '')
@@ -2062,13 +2117,13 @@ def land_plant():
     if not crop_def:
         add_message('Unknown crop.', 'var(--red)')
         save_player(player)
-        return redirect(url_for('game') + '#land')
+        return redirect(url_for('game') + '?tab=land')
 
     crops = player.get('crops', {})
     if crops.get(slot_id, {}).get('crop_key'):
         add_message(f'Slot {slot_id} is already occupied. Harvest or clear it first.', 'var(--red)')
         save_player(player)
-        return redirect(url_for('game') + '#land')
+        return redirect(url_for('game') + '?tab=land')
 
     crops[slot_id] = {
         'crop_key': crop_key,
@@ -2079,7 +2134,7 @@ def land_plant():
     player['crops'] = crops
     add_message(f'You plant {crop_def["name"]} in {slot_id}. Ready in {crop_def["growth_time"]} turns.', 'var(--green-bright)')
     save_player(player)
-    return redirect(url_for('game') + '#land')
+    return redirect(url_for('game') + '?tab=land')
 
 
 @app.route('/action/land/harvest', methods=['POST'])
@@ -2095,13 +2150,13 @@ def land_harvest():
     if not crop_info or not crop_info.get('crop_key'):
         add_message('Nothing planted in that slot.', 'var(--red)')
         save_player(player)
-        return redirect(url_for('game') + '#land')
+        return redirect(url_for('game') + '?tab=land')
 
     if not crop_info.get('ready', False):
         turns_left = crop_info.get('growth_time', 5) - crop_info.get('turns', 0)
         add_message(f'Crop is not ready yet. About {turns_left} turns remaining.', 'var(--text-dim)')
         save_player(player)
-        return redirect(url_for('game') + '#land')
+        return redirect(url_for('game') + '?tab=land')
 
     crops_db = GAME_DATA['farming'].get('crops', {})
     crop_def = crops_db.get(crop_info['crop_key'], {})
@@ -2114,7 +2169,7 @@ def land_harvest():
     player['crops'] = crops
     add_message(f'You harvest {amount}x {crop_def.get("name", crop_info["crop_key"])} and earn {gold_earned} gold!', 'var(--gold)')
     save_player(player)
-    return redirect(url_for('game') + '#land')
+    return redirect(url_for('game') + '?tab=land')
 
 
 @app.route('/action/land/buy_pet', methods=['POST'])
@@ -2129,13 +2184,13 @@ def land_buy_pet():
     if not pet_data:
         add_message('Unknown pet.', 'var(--red)')
         save_player(player)
-        return redirect(url_for('game') + '#land')
+        return redirect(url_for('game') + '?tab=land')
 
     price = pet_data.get('price', 500)
     if player['gold'] < price:
         add_message(f'Not enough gold. {pet_data["name"]} costs {price} gold.', 'var(--red)')
         save_player(player)
-        return redirect(url_for('game') + '#land')
+        return redirect(url_for('game') + '?tab=land')
 
     if player.get('pet'):
         old_pet = GAME_DATA['pets'].get(player['pet'], {})
@@ -2171,7 +2226,7 @@ def land_buy_pet():
             add_message(f'Pet bonus: {boost_str}', 'var(--green-bright)')
 
     save_player(player)
-    return redirect(url_for('game') + '#land')
+    return redirect(url_for('game') + '?tab=land')
 
 
 # ─── Training (Your Land) ─────────────────────────────────────────────────────
@@ -2187,17 +2242,28 @@ def land_train():
         add_message('You can only train at Your Land.', 'var(--red)')
         return redirect(url_for('game'))
 
+    # Require a training place to be built
+    building_slots = player.get('building_slots', {})
+    has_training_place = any(
+        k.startswith('training_place') and v
+        for k, v in building_slots.items()
+    )
+    if not has_training_place:
+        add_message('You need to build a Training Place on your land first!', 'var(--red)')
+        save_player(player)
+        return redirect(url_for('game') + '?tab=land')
+
     training_key = request.form.get('training_key', '')
     option = TRAINING_OPTIONS.get(training_key)
     if not option:
         add_message('Unknown training option.', 'var(--red)')
-        return redirect(url_for('game') + '#land')
+        return redirect(url_for('game') + '?tab=land')
 
     cost = option['cost']
     if player['gold'] < cost:
         add_message(f'Not enough gold. Training costs {cost} gold.', 'var(--red)')
         save_player(player)
-        return redirect(url_for('game') + '#land')
+        return redirect(url_for('game') + '?tab=land')
 
     player['gold'] -= cost
     stat = option['stat']
@@ -2211,7 +2277,7 @@ def land_train():
 
     add_message(f'{option["label"]} complete! +{gain} {stat.replace("max_","").upper()} (cost: {cost}g)', 'var(--green-bright)')
     save_player(player)
-    return redirect(url_for('game') + '#land')
+    return redirect(url_for('game') + '?tab=land')
 
 
 # ─── Battle Routes ────────────────────────────────────────────────────────────
@@ -2501,7 +2567,7 @@ def _handle_victory(player, enemy, log):
 
     if leveled:
         log.append(f'You have reached level {player["level"]}! Your strength grows.')
-        add_message(f'Level Up! You are now level {player["level"]}.', 'var(--gold)')
+        add_message(f'Level Up! You are now level {player["level"]}! You gained 3 attribute points (Equipment tab).', 'var(--gold)')
 
     add_message(f'Defeated the {enemy["name"]}. +{exp} EXP, +{gold} gold.', 'var(--green-bright)')
     if loot_item:
@@ -2595,6 +2661,7 @@ def api_save():
     if not player:
         return jsonify({'error': 'No active character.'}), 400
 
+    ensure_attributes(player)
     save_data = {
         'player': player,
         'current_area': session.get('current_area', 'starting_village'),
@@ -2603,7 +2670,8 @@ def api_save():
         'quest_progress': session.get('quest_progress', {}),
         'seen_cutscenes': session.get('seen_cutscenes', []),
         'current_weather': session.get('current_weather', 'sunny'),
-        'save_version': '6.0',
+        'messages': session.get('messages', [])[-20:],
+        'save_version': '7.0',
     }
 
     player_name = (player.get('name') or 'save').replace(' ', '_')
@@ -2645,6 +2713,7 @@ def api_load():
     player.setdefault('game_ticks', 0)
     player.setdefault('weekly_challenges_progress', {})
     player.setdefault('boss_cooldowns', {})
+    ensure_attributes(player)
 
     session['player'] = player
     session['current_area'] = data.get('current_area', 'starting_village')
@@ -2653,7 +2722,7 @@ def api_load():
     session['quest_progress'] = data.get('quest_progress', {})
     session['seen_cutscenes'] = data.get('seen_cutscenes', [])
     session['current_weather'] = data.get('current_weather', 'sunny')
-    session['messages'] = []
+    session['messages'] = data.get('messages', [])
     session.modified = True
     return jsonify({'ok': True, 'player_name': player.get('name')})
 
