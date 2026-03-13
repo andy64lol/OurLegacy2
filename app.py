@@ -1246,7 +1246,10 @@ def game():
 
     # Dungeon data for inline tab
     dungeons_data = GAME_DATA.get('dungeons', {})
+    completed_dungeons_set = set(player.get('completed_dungeons', []))
     dungeon_list = get_available_dungeons(dungeons_data, area_key, player.get('level', 1))
+    for d in dungeon_list:
+        d['completed'] = d.get('id', '') in completed_dungeons_set
     active_dungeon = session.get('active_dungeon')
 
     save_player(player)
@@ -2502,6 +2505,8 @@ def _handle_victory(player, enemy, log):
         add_message(f'Level Up! You are now level {player["level"]}.', 'var(--gold)')
 
     add_message(f'Defeated the {enemy["name"]}. +{exp} EXP, +{gold} gold.', 'var(--green-bright)')
+    if loot_item:
+        add_message(f'Found: {loot_item}', 'var(--gold)')
 
     # Update quest kill progress
     enemy_key = enemy.get('key', enemy.get('name', '').lower().replace(' ', '_'))
@@ -2525,6 +2530,15 @@ def _handle_victory(player, enemy, log):
     session['battle_enemy'] = None
     save_player(player)
 
+    # If inside a dungeon, return there instead of showing victory screen
+    active_dungeon = session.get('active_dungeon')
+    if active_dungeon:
+        rooms = active_dungeon.get('rooms', [])
+        idx = active_dungeon.get('room_index', 0)
+        if idx >= len(rooms):
+            return redirect(url_for('dungeon_complete'))
+        return redirect(url_for('dungeon_room'))
+
     return render_template(
         'victory.html',
         player=player,
@@ -2539,6 +2553,26 @@ def _handle_victory(player, enemy, log):
 
 def _handle_defeat(player, enemy, log):
     log.append('You fall in battle...')
+
+    # If inside a dungeon, restart the dungeon from the beginning
+    active_dungeon = session.get('active_dungeon')
+    if active_dungeon:
+        player['hp'] = max(1, int(player['max_hp'] * 0.40))
+        log.append(f'You are dragged out of the dungeon, battered. HP: {player["hp"]}')
+        add_message(f'Defeated by {enemy["name"]}! The dungeon resets — try again.', 'var(--red)')
+        add_message('You recover some health at the entrance.', 'var(--text-dim)')
+        session.pop('battle_player_effects', None)
+        session.pop('battle_enemy_effects', None)
+        session['battle_log'] = log
+        session['battle_enemy'] = None
+        # Restart dungeon from room 1
+        active_dungeon['room_index'] = 0
+        active_dungeon['current_challenge'] = None
+        active_dungeon['challenge_answered'] = False
+        session['active_dungeon'] = active_dungeon
+        save_player(player)
+        return redirect(url_for('dungeon_room'))
+
     player['hp'] = max(1, int(player['max_hp'] * 0.25))
     log.append(f'You awaken later, battered. HP: {player["hp"]}')
     add_message(f'You were defeated by the {enemy["name"]}.', 'var(--red)')
@@ -2909,12 +2943,18 @@ def dungeon_complete():
         result = complete_dungeon(player, dungeon)
         for msg in result.get('messages', []):
             add_message(msg['text'], msg.get('color', 'var(--gold)'))
+        # Mark dungeon as completed in player data
+        dungeon_id = dungeon.get('id', '')
+        if dungeon_id:
+            completed_dungeons = player.setdefault('completed_dungeons', [])
+            if dungeon_id not in completed_dungeons:
+                completed_dungeons.append(dungeon_id)
         session.pop('active_dungeon', None)
         # Update weekly challenge
         update_weekly_challenge(player, 'dungeon_complete', 1)
         save_player(player)
 
-    return redirect(url_for('game'))
+    return redirect(url_for('game') + '?tab=dungeons')
 
 
 @app.route('/dungeon/abandon', methods=['POST'])

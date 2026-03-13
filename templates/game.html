@@ -493,12 +493,14 @@
                     {% else %}
                     <div class="dungeon-list">
                         {% for d in dungeon_list %}
-                        <div class="dungeon-entry {% if not d.available %}dungeon-locked{% else %}dungeon-open{% endif %}">
+                        <div class="dungeon-entry {% if not d.available %}dungeon-locked{% elif d.completed %}dungeon-completed{% else %}dungeon-open{% endif %}">
                             <div class="dungeon-info">
                                 <div class="dungeon-name">
                                     {{ d.name }}
                                     {% if not d.available %}
                                     <span class="dungeon-lock-badge">Lvl {{ d.min_level }} Required</span>
+                                    {% elif d.completed %}
+                                    <span class="dungeon-complete-badge">&#10003; Completed</span>
                                     {% endif %}
                                 </div>
                                 <div class="dungeon-desc">{{ d.description }}</div>
@@ -520,7 +522,9 @@
                                 {% if d.available and not active_dungeon %}
                                 <form method="post" action="/action/dungeon/enter">
                                     <input type="hidden" name="dungeon_id" value="{{ d.id }}">
-                                    <button type="submit" class="btn btn-primary btn-small">Enter</button>
+                                    <button type="submit" class="btn {% if d.completed %}btn-secondary{% else %}btn-primary{% endif %} btn-small">
+                                        {% if d.completed %}Run Again{% else %}Enter{% endif %}
+                                    </button>
                                 </form>
                                 {% elif d.available and active_dungeon %}
                                 <span style="font-size:12px;color:var(--text-dim);text-align:center;">Finish active<br>dungeon first</span>
