@@ -81,263 +81,282 @@
    BATTLE VIEW
    ════════════════════════════════════════════════════════════ #}
 {% elif in_battle %}
-<div class="battle-layout">
+<div class="battle-outer">
 
-    <div class="battle-header">
-        <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
-            {% if enemy.is_boss %}⚔ BOSS BATTLE{% else %}Combat{% endif %}
-        </div>
-        <div style="font-size:20px;font-weight:600;color:{{ 'var(--gold)' if enemy.is_boss else 'var(--red)' }};">
-            {{ enemy.name }}
-        </div>
-    </div>
+    <!-- ── Main battle column ── -->
+    <div class="battle-main">
 
-    {% if boss_dialogue and enemy.is_boss %}
-    <div style="
-        background:rgba(220,50,50,0.10);border:1px solid var(--red);border-radius:8px;
-        padding:12px 18px;margin:0 0 14px 0;text-align:center;
-        font-style:italic;color:var(--red);font-size:15px;">
-        "{{ boss_dialogue }}"
-    </div>
-    {% endif %}
-
-    {% if boss_phase_info %}
-    <div style="
-        background:linear-gradient(135deg,rgba(180,30,30,0.18),rgba(120,10,10,0.10));
-        border:1px solid rgba(200,50,50,0.5);border-radius:8px;
-        padding:10px 16px;margin:0 0 12px 0;">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">Phase</span>
-            <div style="display:flex;gap:4px;">
-                {% for i in range(boss_phase_info.total) %}
-                <div style="
-                    width:18px;height:8px;border-radius:3px;
-                    background:{{ 'var(--red)' if i < boss_phase_info.index else 'rgba(255,255,255,0.12)' }};
-                    border:1px solid {{ 'var(--red)' if i < boss_phase_info.index else 'rgba(255,255,255,0.2)' }};
-                "></div>
-                {% endfor %}
+        <div class="battle-header">
+            <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
+                {% if enemy.is_boss %}⚔ BOSS BATTLE{% else %}Combat{% endif %}
             </div>
-            <span style="font-size:12px;font-weight:600;color:var(--gold);">{{ boss_phase_info.index }} / {{ boss_phase_info.total }}</span>
-            {% if boss_phase_info.attack_multiplier > 1.0 %}
-            <span style="font-size:11px;color:var(--red);background:rgba(200,50,50,0.15);border:1px solid rgba(200,50,50,0.3);border-radius:4px;padding:1px 6px;">
-                ATK ×{{ '%.1f'|format(boss_phase_info.attack_multiplier) }}
-            </span>
-            {% endif %}
+            <div style="font-size:20px;font-weight:600;color:{{ 'var(--gold)' if enemy.is_boss else 'var(--red)' }};">
+                {{ enemy.name }}
+            </div>
         </div>
-        {% if boss_phase_info.description %}
-        <div style="font-size:12px;color:var(--text-dim);margin-top:5px;font-style:italic;">
-            {{ boss_phase_info.description }}
+
+        {% if boss_dialogue and enemy.is_boss %}
+        <div style="
+            background:rgba(220,50,50,0.10);border:1px solid var(--red);border-radius:8px;
+            padding:12px 18px;margin:0 0 14px 0;text-align:center;
+            font-style:italic;color:var(--red);font-size:15px;">
+            "{{ boss_dialogue }}"
         </div>
         {% endif %}
-    </div>
-    {% endif %}
 
-    <div class="battle-arena">
-        <div class="panel">
-            <div class="panel-title">{{ player.name }}</div>
-            <div class="panel-body">
-                <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
-                    {{ player['class'] }} &mdash; Lv.{{ player.level }}
+        {% if boss_phase_info %}
+        <div style="
+            background:linear-gradient(135deg,rgba(180,30,30,0.18),rgba(120,10,10,0.10));
+            border:1px solid rgba(200,50,50,0.5);border-radius:8px;
+            padding:10px 16px;margin:0 0 12px 0;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">Phase</span>
+                <div style="display:flex;gap:4px;">
+                    {% for i in range(boss_phase_info.total) %}
+                    <div style="
+                        width:18px;height:8px;border-radius:3px;
+                        background:{{ 'var(--red)' if i < boss_phase_info.index else 'rgba(255,255,255,0.12)' }};
+                        border:1px solid {{ 'var(--red)' if i < boss_phase_info.index else 'rgba(255,255,255,0.2)' }};
+                    "></div>
+                    {% endfor %}
                 </div>
-                <div class="bar-group">
-                    <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
-                    <div class="bar-track">
-                        <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
+                <span style="font-size:12px;font-weight:600;color:var(--gold);">{{ boss_phase_info.index }} / {{ boss_phase_info.total }}</span>
+                {% if boss_phase_info.attack_multiplier > 1.0 %}
+                <span style="font-size:11px;color:var(--red);background:rgba(200,50,50,0.15);border:1px solid rgba(200,50,50,0.3);border-radius:4px;padding:1px 6px;">
+                    ATK ×{{ '%.1f'|format(boss_phase_info.attack_multiplier) }}
+                </span>
+                {% endif %}
+            </div>
+            {% if boss_phase_info.description %}
+            <div style="font-size:12px;color:var(--text-dim);margin-top:5px;font-style:italic;">
+                {{ boss_phase_info.description }}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="battle-arena">
+            <div class="panel">
+                <div class="panel-title">{{ player.name }}</div>
+                <div class="panel-body">
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
+                        {{ player['class'] }} &mdash; Lv.{{ player.level }}
                     </div>
+                    <div class="bar-group">
+                        <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
+                        </div>
+                    </div>
+                    <div class="bar-group">
+                        <div class="bar-label">MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-mini-grid">
+                        <div class="stat-mini"><span>ATK</span><strong>{{ player.attack }}</strong></div>
+                        <div class="stat-mini"><span>DEF</span><strong>{{ player.defense }}</strong></div>
+                        <div class="stat-mini"><span>SPD</span><strong>{{ player.speed }}</strong></div>
+                    </div>
+                    {% if player_effects %}
+                    <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                        {% for eff_key, eff_info in player_effects.items() %}
+                        <div style="
+                            background:rgba(100,200,100,0.15);border:1px solid var(--green-bright);
+                            border-radius:4px;padding:2px 6px;font-size:11px;color:var(--green-bright);">
+                            {{ eff_key.replace('_',' ').title() }} ({{ eff_info.turns }}t)
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-                <div class="bar-group">
-                    <div class="bar-label">MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
-                    <div class="bar-track">
+            </div>
+
+            <div class="battle-vs">VS</div>
+
+            <div class="panel">
+                <div class="panel-title panel-title-enemy">{{ enemy.name }}</div>
+                <div class="panel-body">
+                    <div class="bar-group">
+                        <div class="bar-label">HP <span class="bar-nums">{{ enemy.hp }} / {{ enemy.max_hp }}</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill bar-hp" style="width:{{ [(enemy.hp / enemy.max_hp * 100)|int, 100]|min }}%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-mini-grid">
+                        <div class="stat-mini"><span>ATK</span><strong>{{ enemy.attack }}</strong></div>
+                        <div class="stat-mini"><span>DEF</span><strong>{{ enemy.defense }}</strong></div>
+                        <div class="stat-mini"><span>SPD</span><strong>{{ enemy.speed }}</strong></div>
+                    </div>
+                    {% if enemy_effects %}
+                    <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                        {% for eff_key, eff_info in enemy_effects.items() %}
+                        <div style="
+                            background:rgba(220,80,80,0.15);border:1px solid var(--red);
+                            border-radius:4px;padding:2px 6px;font-size:11px;color:var(--red);">
+                            {{ eff_key.replace('_',' ').title() }} ({{ eff_info.turns }}t)
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="panel battle-log-panel">
+            <div class="panel-title">Battle Chronicle</div>
+            <div class="panel-body message-log battle-log" id="battle-log">
+                {% for line in battle_log %}
+                <div class="log-entry
+                    {%- if 'CRITICAL' in line %} log-crit
+                    {%- elif '⚠' in line or 'enters a new phase' in line %} log-phase
+                    {%- elif '💥' in line or '⚡' in line or 'uses ' in line %} log-ability
+                    {%- elif 'strikes you' in line or 'cuts you' in line %} log-damage
+                    {%- elif 'defeated' in line.lower() or 'falls' in line.lower() %} log-victory
+                    {%- else %} log-normal
+                    {%- endif %}">
+                    {{ line }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="battle-action-grid">
+            <form method="post" action="/battle/attack">
+                <button type="submit" class="btn btn-battle btn-attack">Strike</button>
+            </form>
+
+            <form method="post" action="/battle/defend">
+                <button type="submit" class="btn btn-battle btn-defend">Defend</button>
+            </form>
+
+            <form method="post" action="/battle/use_item">
+                <div class="item-use-form">
+                    {% if usable_items %}
+                    <select name="item" class="item-select">
+                        {% for item in usable_items %}
+                        <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-battle btn-item">Use Item</button>
+                    {% else %}
+                    <button type="button" class="btn btn-battle btn-item btn-disabled" disabled>No Items</button>
+                    {% endif %}
+                </div>
+            </form>
+
+            <form method="post" action="/battle/flee">
+                <button type="submit" class="btn btn-battle btn-flee">{% if enemy.is_boss %}Retreat{% else %}Flee{% endif %}</button>
+            </form>
+        </div>
+
+        {% if boss_abilities_info %}
+        <div class="panel" style="margin-top:16px;">
+            <div class="panel-title" style="color:var(--red);">⚔ Boss Abilities</div>
+            <div class="panel-body">
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;">
+                    {% for ab in boss_abilities_info %}
+                    <div style="
+                        background:{{ 'rgba(200,50,50,0.15)' if ab.cooldown_left == 0 else 'rgba(80,80,80,0.10)' }};
+                        border:1px solid {{ 'rgba(200,50,50,0.5)' if ab.cooldown_left == 0 else 'rgba(120,120,120,0.3)' }};
+                        border-radius:6px;padding:8px 10px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                            <span style="font-size:12px;font-weight:600;color:{{ 'var(--red)' if ab.cooldown_left == 0 else 'var(--text-dim)' }};">
+                                {{ ab.name }}
+                            </span>
+                            {% if ab.cooldown_left > 0 %}
+                            <span style="font-size:10px;color:var(--text-dim);background:rgba(0,0,0,0.2);border-radius:3px;padding:1px 5px;">
+                                {{ ab.cooldown_left }}t
+                            </span>
+                            {% else %}
+                            <span style="font-size:10px;color:var(--red);font-weight:600;">READY</span>
+                            {% endif %}
+                        </div>
+                        {% if ab.description %}
+                        <div style="font-size:11px;color:var(--text-dim);">{{ ab.description[:60] }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div><!-- end .battle-main -->
+
+    <!-- ── Spellbook sidebar ── -->
+    <div class="battle-spell-sidebar">
+        <div class="panel battle-spellbook-panel">
+            <div class="panel-title" style="color:var(--mana-bright);">&#10024; Spellbook</div>
+            <div class="panel-body">
+
+                <!-- MP bar -->
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">
+                        MP: <strong style="color:var(--mana-bright);">{{ player.mp }} / {{ player.max_mp }}</strong>
+                    </div>
+                    <div class="bar-track" style="height:7px;">
                         <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
                     </div>
                 </div>
-                <div class="stat-mini-grid">
-                    <div class="stat-mini"><span>ATK</span><strong>{{ player.attack }}</strong></div>
-                    <div class="stat-mini"><span>DEF</span><strong>{{ player.defense }}</strong></div>
-                    <div class="stat-mini"><span>SPD</span><strong>{{ player.speed }}</strong></div>
-                </div>
-                {% if player_effects %}
-                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
-                    {% for eff_key, eff_info in player_effects.items() %}
-                    <div style="
-                        background:rgba(100,200,100,0.15);border:1px solid var(--green-bright);
-                        border-radius:4px;padding:2px 6px;font-size:11px;color:var(--green-bright);">
-                        {{ eff_key.replace('_',' ').title() }} ({{ eff_info.turns }}t)
+
+                {% if available_spells %}
+                <!-- Spell list with JS pagination -->
+                <div id="spell-pages-container">
+                    {% for spell in available_spells %}
+                    {% set can_cast = player.mp >= spell.mp_cost %}
+                    {% set stype = spell.type | lower %}
+                    <div class="spell-sidebar-item" data-spell-index="{{ loop.index0 }}">
+                        <form method="post" action="/battle/spell">
+                            <input type="hidden" name="spell" value="{{ spell.name }}">
+                            <button type="submit"
+                                class="btn-spell spell-{{ stype }} {% if not can_cast %}btn-disabled{% endif %}"
+                                {% if not can_cast %}disabled{% endif %}>
+                                <div class="spell-header">
+                                    <span class="spell-name">{{ spell.name }}</span>
+                                    <span class="spell-cost-badge">{{ spell.mp_cost }} MP</span>
+                                </div>
+                                <div class="spell-tags">
+                                    <span class="spell-tag spell-tag-{{ stype }}">{{ spell.type | title }}</span>
+                                    {% if spell.power %}
+                                    <span class="spell-tag" style="color:var(--red);border-color:var(--red-dark);">Pwr {{ spell.power }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if spell.description %}
+                                <div class="spell-desc">{{ spell.description[:70] }}</div>
+                                {% endif %}
+                                {% if not can_cast %}
+                                <div class="spell-no-mp">Not enough MP</div>
+                                {% endif %}
+                            </button>
+                        </form>
                     </div>
                     {% endfor %}
                 </div>
-                {% endif %}
-            </div>
-        </div>
 
-        <div class="battle-vs">VS</div>
-
-        <div class="panel">
-            <div class="panel-title panel-title-enemy">{{ enemy.name }}</div>
-            <div class="panel-body">
-                <div class="bar-group">
-                    <div class="bar-label">HP <span class="bar-nums">{{ enemy.hp }} / {{ enemy.max_hp }}</span></div>
-                    <div class="bar-track">
-                        <div class="bar-fill bar-hp" style="width:{{ [(enemy.hp / enemy.max_hp * 100)|int, 100]|min }}%"></div>
-                    </div>
+                <!-- Pagination controls -->
+                <div class="spell-pagination" id="spell-pagination">
+                    <button class="spell-page-btn" id="spell-prev" onclick="spellPagePrev()" disabled>&#8249;</button>
+                    <span id="spell-page-info" style="font-size:12px;color:var(--text-dim);min-width:60px;text-align:center;"></span>
+                    <button class="spell-page-btn" id="spell-next" onclick="spellPageNext()">&#8250;</button>
                 </div>
-                <div class="stat-mini-grid">
-                    <div class="stat-mini"><span>ATK</span><strong>{{ enemy.attack }}</strong></div>
-                    <div class="stat-mini"><span>DEF</span><strong>{{ enemy.defense }}</strong></div>
-                    <div class="stat-mini"><span>SPD</span><strong>{{ enemy.speed }}</strong></div>
+
+                {% elif has_magic_weapon %}
+                <div style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px 0;opacity:0.7;">
+                    No spells mapped to your weapon yet.
                 </div>
-                {% if enemy_effects %}
-                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
-                    {% for eff_key, eff_info in enemy_effects.items() %}
-                    <div style="
-                        background:rgba(220,80,80,0.15);border:1px solid var(--red);
-                        border-radius:4px;padding:2px 6px;font-size:11px;color:var(--red);">
-                        {{ eff_key.replace('_',' ').title() }} ({{ eff_info.turns }}t)
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <div class="panel battle-log-panel">
-        <div class="panel-title">Battle Chronicle</div>
-        <div class="panel-body message-log battle-log" id="battle-log">
-            {% for line in battle_log %}
-            <div class="log-entry
-                {%- if 'CRITICAL' in line %} log-crit
-                {%- elif '⚠' in line or 'enters a new phase' in line %} log-phase
-                {%- elif '💥' in line or '⚡' in line or 'uses ' in line %} log-ability
-                {%- elif 'strikes you' in line or 'cuts you' in line %} log-damage
-                {%- elif 'defeated' in line.lower() or 'falls' in line.lower() %} log-victory
-                {%- else %} log-normal
-                {%- endif %}">
-                {{ line }}
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="battle-action-grid">
-        <form method="post" action="/battle/attack">
-            <button type="submit" class="btn btn-battle btn-attack">Strike</button>
-        </form>
-
-        <form method="post" action="/battle/defend">
-            <button type="submit" class="btn btn-battle btn-defend">Defend</button>
-        </form>
-
-        <form method="post" action="/battle/use_item">
-            <div class="item-use-form">
-                {% if usable_items %}
-                <select name="item" class="item-select">
-                    {% for item in usable_items %}
-                    <option value="{{ item }}">{{ item }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-battle btn-item">Use Item</button>
                 {% else %}
-                <button type="button" class="btn btn-battle btn-item btn-disabled" disabled>No Items</button>
+                <div style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px 0;opacity:0.7;">
+                    Equip a magic weapon to unlock spells.
+                </div>
                 {% endif %}
-            </div>
-        </form>
 
-        <form method="post" action="/battle/flee">
-            <button type="submit" class="btn btn-battle btn-flee">{% if enemy.is_boss %}Retreat{% else %}Flee{% endif %}</button>
-        </form>
-    </div>
-
-    {% if boss_abilities_info %}
-    <div class="panel" style="margin-top:16px;">
-        <div class="panel-title" style="color:var(--red);">⚔ Boss Abilities</div>
-        <div class="panel-body">
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">
-                {% for ab in boss_abilities_info %}
-                <div style="
-                    background:{{ 'rgba(200,50,50,0.15)' if ab.cooldown_left == 0 else 'rgba(80,80,80,0.10)' }};
-                    border:1px solid {{ 'rgba(200,50,50,0.5)' if ab.cooldown_left == 0 else 'rgba(120,120,120,0.3)' }};
-                    border-radius:6px;padding:8px 10px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
-                        <span style="font-size:12px;font-weight:600;color:{{ 'var(--red)' if ab.cooldown_left == 0 else 'var(--text-dim)' }};">
-                            {{ ab.name }}
-                        </span>
-                        {% if ab.cooldown_left > 0 %}
-                        <span style="font-size:10px;color:var(--text-dim);background:rgba(0,0,0,0.2);border-radius:3px;padding:1px 5px;">
-                            {{ ab.cooldown_left }}t
-                        </span>
-                        {% else %}
-                        <span style="font-size:10px;color:var(--red);font-weight:600;">READY</span>
-                        {% endif %}
-                    </div>
-                    {% if ab.description %}
-                    <div style="font-size:11px;color:var(--text-dim);">{{ ab.description[:60] }}</div>
-                    {% endif %}
-                </div>
-                {% endfor %}
             </div>
         </div>
-    </div>
-    {% endif %}
+    </div><!-- end .battle-spell-sidebar -->
 
-    {% if available_spells %}
-    <div class="panel" style="margin-top:16px;">
-        <div class="panel-title" style="color:var(--mana-bright);">Spellbook</div>
-        <div class="panel-body">
-            <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
-                <div style="font-size:13px;color:var(--text-dim);">
-                    MP: <strong style="color:var(--mana-bright);">{{ player.mp }} / {{ player.max_mp }}</strong>
-                </div>
-                <div class="bar-track" style="flex:1;height:8px;">
-                    <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
-                </div>
-            </div>
-            <div class="spell-grid">
-                {% for spell in available_spells %}
-                {% set can_cast = player.mp >= spell.mp_cost %}
-                {% set stype = spell.type | lower %}
-                <form method="post" action="/battle/spell">
-                    <input type="hidden" name="spell" value="{{ spell.name }}">
-                    <button type="submit"
-                        class="btn-spell spell-{{ stype }} {% if not can_cast %}btn-disabled{% endif %}"
-                        {% if not can_cast %}disabled{% endif %}>
-                        <div class="spell-header">
-                            <span class="spell-name">{{ spell.name }}</span>
-                            <span class="spell-cost-badge">{{ spell.mp_cost }} MP</span>
-                        </div>
-                        <div class="spell-tags">
-                            <span class="spell-tag spell-tag-{{ stype }}">{{ spell.type | title }}</span>
-                            {% if spell.power %}
-                            <span class="spell-tag" style="color:var(--red);border-color:var(--red-dark);">Pwr {{ spell.power }}</span>
-                            {% endif %}
-                        </div>
-                        {% if spell.description %}
-                        <div class="spell-desc">{{ spell.description[:65] }}</div>
-                        {% endif %}
-                        {% if not can_cast %}
-                        <div class="spell-no-mp">Not enough MP</div>
-                        {% endif %}
-                    </button>
-                </form>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% elif has_magic_weapon %}
-    <div class="panel" style="margin-top:16px;">
-        <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;opacity:0.6;">
-            No spells are mapped to your current weapon yet.
-        </div>
-    </div>
-    {% else %}
-    <div class="panel" style="margin-top:16px;">
-        <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;opacity:0.6;">
-            Equip a magic weapon to access your spellbook.
-        </div>
-    </div>
-    {% endif %}
-
-</div>
+</div><!-- end .battle-outer -->
 
 {# ════════════════════════════════════════════════════════════
    MAIN GAME VIEW
@@ -1332,10 +1351,50 @@ document.addEventListener('DOMContentLoaded', () => {
 {% endif %}
 {% if in_battle %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const log = document.getElementById('battle-log');
-    if (log) log.scrollTop = log.scrollHeight;
-});
+(function() {
+    const PAGE_SIZE = 4;
+    let currentPage = 0;
+
+    function getSpells() {
+        return document.querySelectorAll('#spell-pages-container .spell-sidebar-item');
+    }
+
+    function totalPages() {
+        return Math.max(1, Math.ceil(getSpells().length / PAGE_SIZE));
+    }
+
+    function renderPage(page) {
+        const spells = getSpells();
+        const total = totalPages();
+        if (page < 0) page = 0;
+        if (page >= total) page = total - 1;
+        currentPage = page;
+
+        spells.forEach((el, i) => {
+            el.style.display = (i >= page * PAGE_SIZE && i < (page + 1) * PAGE_SIZE) ? '' : 'none';
+        });
+
+        const info = document.getElementById('spell-page-info');
+        if (info) info.textContent = `${page + 1} / ${total}`;
+
+        const prev = document.getElementById('spell-prev');
+        const next = document.getElementById('spell-next');
+        if (prev) prev.disabled = (page === 0);
+        if (next) next.disabled = (page >= total - 1);
+
+        const pagination = document.getElementById('spell-pagination');
+        if (pagination) pagination.style.display = total <= 1 ? 'none' : '';
+    }
+
+    window.spellPagePrev = function() { renderPage(currentPage - 1); };
+    window.spellPageNext = function() { renderPage(currentPage + 1); };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderPage(0);
+        const log = document.getElementById('battle-log');
+        if (log) log.scrollTop = log.scrollHeight;
+    });
+})();
 </script>
 {% endif %}
 {% endblock %}

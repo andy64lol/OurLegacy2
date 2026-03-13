@@ -639,6 +639,63 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
 .empty-notice { font-size: 15px; color: var(--text-dim); font-style: italic; }
 
 /* ─── Battle ─────────────────────────────────────────────── */
+
+/* Outer two-column wrapper */
+.battle-outer {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 22px 18px;
+    align-items: start;
+}
+
+/* Main battle column */
+.battle-main { min-width: 0; }
+
+/* Spellbook sidebar */
+.battle-spell-sidebar {
+    position: sticky;
+    top: 18px;
+    align-self: start;
+}
+.battle-spellbook-panel { margin-bottom: 0; }
+
+/* Spell sidebar items stack vertically */
+.spell-sidebar-item { margin-bottom: 8px; }
+.spell-sidebar-item:last-child { margin-bottom: 0; }
+
+/* Spell sidebar uses single-column layout */
+.battle-spell-sidebar .btn-spell {
+    border-radius: 4px;
+}
+
+/* Pagination controls */
+.spell-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+.spell-page-btn {
+    background: var(--slate-dark);
+    border: 1px solid var(--border);
+    color: var(--text-light);
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-family: 'Pixelify Sans', monospace;
+    transition: background 0.12s;
+}
+.spell-page-btn:hover:not(:disabled) { background: var(--slate-mid); }
+.spell-page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Existing battle layout pieces */
 .battle-layout { max-width: 920px; margin: 0 auto; padding: 22px 18px; }
 .battle-header { text-align: center; margin-bottom: 14px; }
 .battle-arena {
@@ -659,6 +716,10 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
 .battle-log-panel    { margin-bottom: 16px; }
 .battle-log          { max-height: 220px; }
 .battle-action-grid  { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+@media (max-width: 900px) {
+    .battle-outer { grid-template-columns: 1fr; }
+    .battle-spell-sidebar { position: static; }
+}
 @media (max-width: 600px) {
     .battle-arena { grid-template-columns: 1fr; }
     .battle-vs    { padding: 0; }
