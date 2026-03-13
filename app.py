@@ -467,6 +467,92 @@ def unequip_item(player, slot):
     return True, f'You unequip {item_name}.'
 
 
+def _item_score(item_data):
+    """Score an item by total stat contribution (higher = better)."""
+    if not isinstance(item_data, dict):
+        return 0
+    score = 0
+    score += item_data.get('attack_bonus', 0) * 2
+    score += item_data.get('defense_bonus', 0) * 2
+    score += item_data.get('speed_bonus', 0) * 1.5
+    score += item_data.get('hp_bonus', 0) * 0.3
+    score += item_data.get('mp_bonus', 0) * 0.3
+    score += item_data.get('spell_power_bonus', 0) * 1.5
+    score -= item_data.get('defense_penalty', 0) * 2
+    score -= item_data.get('speed_penalty', 0) * 1.5
+    return score
+
+
+def auto_equip_best(player):
+    """
+    Auto-equip the best items from inventory for each slot.
+    Only swaps if the inventory item is better than what is equipped.
+    Returns list of messages about what was equipped.
+    """
+    items_data = GAME_DATA['items']
+    player_level = player.get('level', 1)
+    player_class = player.get('class', '')
+    _ensure_equipment_slots(player)
+    equipment = player['equipment']
+
+    # Put all currently equipped items back in inventory for fair comparison
+    for slot in list(equipment.keys()):
+        current = equipment.get(slot)
+        if current:
+            equipment[slot] = None
+            player['inventory'].append(current)
+            item_d = items_data.get(current, {})
+            if isinstance(item_d, dict):
+                apply_item_bonuses(player, item_d, direction=-1)
+
+    # Group inventory items by their equip slot
+    slot_candidates = {
+        'weapon': [], 'armor': [], 'offhand': [], 'accessory': []
+    }
+    for item_name in list(player.get('inventory', [])):
+        item_data = items_data.get(item_name, {})
+        if not isinstance(item_data, dict):
+            continue
+        item_type = item_data.get('type', '')
+        if item_type not in EQUIPPABLE_TYPES:
+            continue
+        req = item_data.get('requirements', {})
+        if req.get('level', 1) > player_level:
+            continue
+        if req.get('class') and req['class'] != player_class:
+            continue
+        group = 'accessory' if item_type == 'accessory' else item_type
+        if group in slot_candidates:
+            slot_candidates[group].append(item_name)
+
+    messages = []
+
+    # Equip best weapon, armor, offhand
+    for slot in ('weapon', 'armor', 'offhand'):
+        candidates = slot_candidates.get(slot, [])
+        if not candidates:
+            continue
+        best = max(candidates, key=lambda n: _item_score(items_data.get(n, {})))
+        ok, msg = equip_item(player, best)
+        if ok:
+            messages.append(msg)
+
+    # Equip best accessories (up to 3)
+    acc_candidates = sorted(
+        slot_candidates.get('accessory', []),
+        key=lambda n: _item_score(items_data.get(n, {})),
+        reverse=True
+    )
+    for item_name in acc_candidates[:3]:
+        ok, msg = equip_item(player, item_name)
+        if ok:
+            messages.append(msg)
+
+    if not messages:
+        messages.append('No better items found to equip.')
+    return messages
+
+
 # ─── Quest Helpers ───────────────────────────────────────────────────────────
 
 
@@ -666,6 +752,7 @@ def create():
             'weekly_challenges_progress': {},
             'boss_cooldowns': {},
         }
+        auto_equip_best(player)
         save_player(player)
         session['messages'] = []
         session['current_area'] = 'starting_village'
@@ -1497,6 +1584,18 @@ def action_unequip():
     add_message(msg, 'var(--text-dim)' if ok else 'var(--red)')
     save_player(player)
     return redirect(url_for('game'))
+
+
+@app.route('/action/auto_equip', methods=['POST'])
+def action_auto_equip():
+    player = get_player()
+    if not player:
+        return redirect(url_for('index'))
+    msgs = auto_equip_best(player)
+    for msg in msgs:
+        add_message(msg, 'var(--green-bright)')
+    save_player(player)
+    return redirect(url_for('game') + '#inventory')
 
 
 # ─── Missions ─────────────────────────────────────────────────────────────────

@@ -250,6 +250,13 @@
                         {% endfor %}
                     </div>
 
+                    <!-- Auto-equip -->
+                    <form method="post" action="/action/auto_equip" style="margin-top:12px;">
+                        <button type="submit" class="btn btn-primary" style="width:100%;">
+                            Auto-Equip Best Items
+                        </button>
+                    </form>
+
                     <!-- Stat summary -->
                     <div class="stat-mini-grid" style="margin-top:16px;">
                         <div class="stat-mini"><span>Max HP</span><strong>{{ player.max_hp }}</strong></div>
