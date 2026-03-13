@@ -180,10 +180,16 @@
             </div>
         </div>
     </div>
+    {% elif has_magic_weapon %}
+    <div class="panel" style="margin-top:16px;">
+        <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;opacity:0.6;">
+            No spells are mapped to your current weapon yet.
+        </div>
+    </div>
     {% else %}
     <div class="panel" style="margin-top:16px;">
         <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;opacity:0.6;">
-            No spells available. Equip a magic weapon to access your spellbook.
+            Equip a magic weapon to access your spellbook.
         </div>
     </div>
     {% endif %}

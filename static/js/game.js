@@ -165,17 +165,42 @@ function initMusic() {
         slider.value = _musicMuted ? 0 : Math.round(_musicAudio.volume * 100);
     }
 
-    // Attempt autoplay; many browsers require user interaction first
-    var playPromise = _musicAudio.play();
-    if (playPromise !== undefined) {
-        playPromise.catch(function () {
-            // Autoplay blocked; will start on first user interaction
-            document.addEventListener('click', function startMusic() {
-                if (_musicAudio && !_musicMuted) _musicAudio.play();
-                document.removeEventListener('click', startMusic);
-            }, { once: true });
-        });
+    // Restore playback position so music doesn't restart on every page action
+    var savedTime = parseFloat(localStorage.getItem('ol2_music_time'));
+    function startPlayback() {
+        if (!isNaN(savedTime) && savedTime > 0) {
+            _musicAudio.currentTime = savedTime;
+        }
+        var playPromise = _musicAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(function () {
+                document.addEventListener('click', function startMusic() {
+                    if (_musicAudio && !_musicMuted) _musicAudio.play();
+                    document.removeEventListener('click', startMusic);
+                }, { once: true });
+            });
+        }
     }
+
+    if (_musicAudio.readyState >= 1) {
+        startPlayback();
+    } else {
+        _musicAudio.addEventListener('loadedmetadata', startPlayback, { once: true });
+    }
+
+    // Save playback position before the page navigates away
+    window.addEventListener('beforeunload', function () {
+        if (_musicAudio) {
+            localStorage.setItem('ol2_music_time', _musicAudio.currentTime);
+        }
+    });
+
+    // Keep saving position periodically in case beforeunload doesn't fire
+    setInterval(function () {
+        if (_musicAudio && !_musicAudio.paused) {
+            localStorage.setItem('ol2_music_time', _musicAudio.currentTime);
+        }
+    }, 1000);
 }
 
 function setMusicVolume(val) {

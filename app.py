@@ -1869,6 +1869,8 @@ def battle():
     ]
     weapon = player.get('equipment', {}).get('weapon')
     available_spells = get_available_spells(weapon, GAME_DATA['items'], GAME_DATA['spells'])
+    weapon_data = GAME_DATA['items'].get(weapon, {}) if weapon else {}
+    has_magic_weapon = bool(weapon and isinstance(weapon_data, dict) and weapon_data.get('magic_weapon'))
 
     # Status effects
     player_effects = session.get('battle_player_effects', {})
@@ -1887,6 +1889,7 @@ def battle():
         battle_log=battle_log[-14:],
         usable_items=usable_items,
         available_spells=available_spells,
+        has_magic_weapon=has_magic_weapon,
         player_effects=player_effects,
         enemy_effects=enemy_effects,
         boss_dialogue=boss_dialogue,
