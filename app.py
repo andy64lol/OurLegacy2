@@ -986,6 +986,29 @@ def game():
             item_data = {}
         sell_price = max(1, int(item_data.get('price', item_data.get('value', 10)) * 0.5))
         item_type = item_data.get('type', '')
+        is_equippable = item_type in EQUIPPABLE_TYPES
+        req = item_data.get('requirements', {})
+        level_req = req.get('level', 1)
+        class_req = req.get('class', None)
+        player_level = player.get('level', 1)
+        player_class = player.get('class', '')
+        can_equip = True
+        equip_block_reason = None
+        if is_equippable:
+            if player_level < level_req:
+                can_equip = False
+                equip_block_reason = f'Requires Level {level_req}'
+            elif class_req and player_class != class_req:
+                can_equip = False
+                equip_block_reason = f'{class_req} only'
+        req_label = None
+        if level_req > 1 or class_req:
+            parts = []
+            if level_req > 1:
+                parts.append(f'Lv.{level_req}')
+            if class_req:
+                parts.append(class_req)
+            req_label = ' · '.join(parts)
         inventory_items.append({
             'name': item_name,
             'count': count,
@@ -993,7 +1016,10 @@ def game():
             'description': item_data.get('description', ''),
             'sell_price': sell_price,
             'type': item_type,
-            'equippable': item_type in EQUIPPABLE_TYPES,
+            'equippable': is_equippable,
+            'can_equip': can_equip,
+            'equip_block_reason': equip_block_reason,
+            'req_label': req_label,
             'stats': _item_stat_summary(item_data),
         })
 
@@ -1210,6 +1236,19 @@ def game():
         if cs:
             pending_cutscene = {'id': pending_cutscene_id, 'content': cs.get('content', {})}
 
+    # Crafting data for inline tab
+    crafting_data = GAME_DATA.get('crafting', {})
+    raw_recipes = get_recipes(crafting_data)
+    crafting_recipes = []
+    for recipe in raw_recipes:
+        check = check_recipe_craftable(player, recipe)
+        crafting_recipes.append({**recipe, 'can_craft': check['ok'], 'missing': check.get('missing', [])})
+
+    # Dungeon data for inline tab
+    dungeons_data = GAME_DATA.get('dungeons', {})
+    dungeon_list = get_available_dungeons(dungeons_data, area_key, player.get('level', 1))
+    active_dungeon = session.get('active_dungeon')
+
     save_player(player)
     return render_template(
         'game.html',
@@ -1238,6 +1277,9 @@ def game():
         challenges=challenges_display,
         available_bosses=available_bosses,
         pending_cutscene=pending_cutscene,
+        crafting_recipes=crafting_recipes,
+        dungeon_list=dungeon_list,
+        active_dungeon=active_dungeon,
     )
 
 
@@ -1730,7 +1772,7 @@ def action_equip():
     ok, msg = equip_item(player, item_name)
     add_message(msg, 'var(--green-bright)' if ok else 'var(--red)')
     save_player(player)
-    return redirect(url_for('game'))
+    return redirect(url_for('game') + '?tab=inventory')
 
 
 @app.route('/action/unequip', methods=['POST'])
@@ -1742,7 +1784,7 @@ def action_unequip():
     ok, msg = unequip_item(player, slot)
     add_message(msg, 'var(--text-dim)' if ok else 'var(--red)')
     save_player(player)
-    return redirect(url_for('game'))
+    return redirect(url_for('game') + '?tab=inventory')
 
 
 @app.route('/action/auto_equip', methods=['POST'])
@@ -1754,7 +1796,7 @@ def action_auto_equip():
     for msg in msgs:
         add_message(msg, 'var(--green-bright)')
     save_player(player)
-    return redirect(url_for('game') + '#inventory')
+    return redirect(url_for('game') + '?tab=inventory')
 
 
 # ─── Missions ─────────────────────────────────────────────────────────────────
@@ -2588,26 +2630,7 @@ def api_load():
 
 @app.route('/crafting')
 def crafting():
-    player = get_player()
-    if not player:
-        return redirect(url_for('index'))
-
-    crafting_data = GAME_DATA.get('crafting', {})
-    recipes = get_recipes(crafting_data)
-    categories = get_recipe_categories(crafting_data)
-
-    enriched = []
-    for recipe in recipes:
-        check = check_recipe_craftable(player, recipe)
-        enriched.append({**recipe, 'can_craft': check['ok'], 'missing': check.get('missing', [])})
-
-    return render_template(
-        'crafting.html',
-        player=player,
-        recipes=enriched,
-        categories=categories,
-        messages=list(reversed(get_messages()))[:15],
-    )
+    return redirect(url_for('game') + '?tab=crafting')
 
 
 @app.route('/action/craft', methods=['POST'])
@@ -2622,7 +2645,7 @@ def action_craft():
     color = 'var(--green-bright)' if result['ok'] else 'var(--red)'
     add_message(result['message'], color)
     save_player(player)
-    return redirect(url_for('crafting'))
+    return redirect(url_for('game') + '?tab=crafting')
 
 
 # ─── Dungeon Routes ────────────────────────────────────────────────────────────
@@ -2630,22 +2653,7 @@ def action_craft():
 
 @app.route('/dungeons')
 def dungeons():
-    player = get_player()
-    if not player:
-        return redirect(url_for('index'))
-
-    area_key = session.get('current_area', 'starting_village')
-    dungeons_data = GAME_DATA.get('dungeons', {})
-    available = get_available_dungeons(dungeons_data, area_key, player.get('level', 1))
-    active = session.get('active_dungeon')
-
-    return render_template(
-        'dungeons.html',
-        player=player,
-        dungeons=available,
-        active_dungeon=active,
-        messages=list(reversed(get_messages()))[:15],
-    )
+    return redirect(url_for('game') + '?tab=dungeons')
 
 
 @app.route('/action/dungeon/enter', methods=['POST'])
@@ -2661,13 +2669,13 @@ def dungeon_enter():
 
     if not dungeon:
         add_message('Unknown dungeon.', 'var(--red)')
-        return redirect(url_for('dungeons'))
+        return redirect(url_for('game') + '?tab=dungeons')
 
     difficulty = dungeon.get('difficulty', [1, 3])
     min_level = max(1, difficulty[0] * 2)
     if player.get('level', 1) < min_level:
         add_message(f'You need to be level {min_level} to enter this dungeon.', 'var(--red)')
-        return redirect(url_for('dungeons'))
+        return redirect(url_for('game') + '?tab=dungeons')
 
     rooms = generate_dungeon_rooms(dungeon, dungeons_data)
     session['active_dungeon'] = {
@@ -2688,7 +2696,7 @@ def dungeon_room():
     player = get_player()
     active = session.get('active_dungeon')
     if not player or not active:
-        return redirect(url_for('dungeons'))
+        return redirect(url_for('game') + '?tab=dungeons')
 
     rooms = active['rooms']
     idx = active['room_index']
@@ -2726,7 +2734,7 @@ def dungeon_proceed():
     player = get_player()
     active = session.get('active_dungeon')
     if not player or not active:
-        return redirect(url_for('dungeons'))
+        return redirect(url_for('game') + '?tab=dungeons')
 
     rooms = active['rooms']
     idx = active['room_index']
@@ -2846,7 +2854,7 @@ def dungeon_answer():
     player = get_player()
     active = session.get('active_dungeon')
     if not player or not active:
-        return redirect(url_for('dungeons'))
+        return redirect(url_for('game') + '?tab=dungeons')
 
     answer_text = request.form.get('answer', '').strip()
     challenge = active.get('current_challenge', {})
@@ -2870,7 +2878,7 @@ def dungeon_choose():
     player = get_player()
     active = session.get('active_dungeon')
     if not player or not active:
-        return redirect(url_for('dungeons'))
+        return redirect(url_for('game') + '?tab=dungeons')
 
     choice_idx = int(request.form.get('choice', 0))
     challenge = active.get('current_challenge', {})
@@ -2913,7 +2921,7 @@ def dungeon_complete():
 def dungeon_abandon():
     session.pop('active_dungeon', None)
     add_message('You retreat from the dungeon.', 'var(--text-dim)')
-    return redirect(url_for('dungeons'))
+    return redirect(url_for('game') + '?tab=dungeons')
 
 
 # ─── Elite Market Routes ───────────────────────────────────────────────────────
@@ -2921,29 +2929,30 @@ def dungeon_abandon():
 
 @app.route('/market')
 def market():
+    return redirect(url_for('game') + '?tab=market')
+
+
+@app.route('/api/market_data')
+def api_market_data():
     player = get_player()
     if not player:
-        return redirect(url_for('index'))
-
+        return jsonify({'ok': False, 'error': 'Not logged in'})
     market_api = get_market_api()
     result = market_api.fetch_market_data()
     market_items = []
     cooldown_msg = None
-
     if result.get('ok') and result.get('data', {}).get('ok'):
         market_items = result['data'].get('items', [])
     elif result.get('cooldown'):
         cooldown_msg = result.get('message', 'Market is closed.')
     elif not result.get('ok'):
         cooldown_msg = result.get('message', 'Could not reach the market.')
-
-    return render_template(
-        'market.html',
-        player=player,
-        market_items=market_items,
-        cooldown_msg=cooldown_msg,
-        messages=list(reversed(get_messages()))[:15],
-    )
+    return jsonify({
+        'ok': True,
+        'market_items': market_items,
+        'cooldown_msg': cooldown_msg,
+        'player_gold': player.get('gold', 0),
+    })
 
 
 @app.route('/action/market/buy', methods=['POST'])
@@ -2963,7 +2972,7 @@ def market_buy():
         add_message(f'Purchased {item_name} from the Elite Market for {item_price} gold!', 'var(--gold)')
 
     save_player(player)
-    return redirect(url_for('market'))
+    return redirect(url_for('game') + '?tab=market')
 
 
 # ─── Server-side Save / Load ──────────────────────────────────────────────────

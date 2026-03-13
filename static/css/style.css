@@ -481,6 +481,52 @@ strong { font-weight: 600; }
 }
 .tab-content        { display: none; }
 .tab-content.active { display: block; }
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes tabFadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-4px); }
+}
+.tab-fade-in  { animation: tabFadeIn  0.26s ease both; }
+.tab-fade-out { animation: tabFadeOut 0.14s ease both; pointer-events: none; }
+
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pageFadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+body { animation: pageFadeIn 0.22s ease both; }
+body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
+
+.item-req-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--gold-dim, #8a7030);
+    color: var(--gold, #c9a84c);
+    margin-left: 4px;
+    vertical-align: middle;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+.item-req-block {
+    font-size: 11px;
+    color: var(--red, #c0392b);
+    margin-top: 3px;
+    font-style: italic;
+}
+.item-can-use {
+    font-size: 11px;
+    color: var(--green-bright, #2ecc71);
+    margin-top: 3px;
+}
+.inv-card.cannot-equip .btn-primary { opacity: 0.5; cursor: not-allowed; }
 
 /* ─── Message Log ────────────────────────────────────────── */
 .message-log {

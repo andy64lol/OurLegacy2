@@ -90,9 +90,9 @@
         <div class="panel sidebar-panel" style="margin-top:0;">
             <div class="panel-title">Navigate</div>
             <div class="panel-body" style="display:flex;flex-direction:column;gap:6px;">
-                <a href="/dungeons" class="btn btn-secondary btn-small" style="text-align:center;">Dungeons</a>
-                <a href="/crafting" class="btn btn-secondary btn-small" style="text-align:center;">Crafting</a>
-                <a href="/market" class="btn btn-secondary btn-small" style="text-align:center;">Elite Market</a>
+                <button onclick="switchTab('dungeons',false)" class="btn btn-secondary btn-small" style="text-align:center;">Dungeons</button>
+                <button onclick="switchTab('crafting',false)" class="btn btn-secondary btn-small" style="text-align:center;">Crafting</button>
+                <button onclick="switchTab('market',false)" class="btn btn-secondary btn-small" style="text-align:center;">Elite Market</button>
             </div>
         </div>
 
@@ -129,6 +129,14 @@
             {% if shop_items %}
             <button class="tab-btn" data-tab="shop">{{ shop_name or 'Shop' }}</button>
             {% endif %}
+            <button class="tab-btn" data-tab="crafting">Crafting</button>
+            <button class="tab-btn" data-tab="dungeons">
+                Dungeons
+                {% if active_dungeon %}
+                <span class="tab-badge" style="background:var(--gold);">!</span>
+                {% endif %}
+            </button>
+            <button class="tab-btn" data-tab="market">Market</button>
             {% if land_data %}
             <button class="tab-btn" data-tab="land">Your Land</button>
             {% endif %}
@@ -279,20 +287,33 @@
                     {% if inventory_items %}
                     <div class="inv-grid pageable-list" data-page-size="12">
                         {% for item in inventory_items %}
-                        <div class="inv-card rarity-border-{{ item.rarity }} pageable-item">
+                        <div class="inv-card rarity-border-{{ item.rarity }} pageable-item{% if item.equippable and not item.can_equip %} cannot-equip{% endif %}">
                             <div class="inv-card-name">
                                 <span class="rarity-{{ item.rarity }}">{{ item.name }}</span>
                                 {% if item.count > 1 %}<span class="inv-qty">x{{ item.count }}</span>{% endif %}
+                                {% if item.req_label %}
+                                <span class="item-req-badge">{{ item.req_label }}</span>
+                                {% endif %}
                             </div>
                             {% if item.stats %}
                             <div class="inv-card-stats">{{ item.stats }}</div>
                             {% endif %}
                             <div class="inv-card-desc">{{ (item.description or '')[:65] }}</div>
+                            {% if item.equippable %}
+                                {% if item.can_equip %}
+                                <div class="item-can-use">&#10003; Can equip ({{ item.type }})</div>
+                                {% else %}
+                                <div class="item-req-block">&#10007; {{ item.equip_block_reason }}</div>
+                                {% endif %}
+                            {% else %}
+                                <div class="item-can-use" style="color:var(--mana-bright,#7eb8f7);">&#10003; Usable ({{ item.type }})</div>
+                            {% endif %}
                             <div class="inv-card-actions">
                                 {% if item.equippable %}
                                 <form method="post" action="/action/equip">
                                     <input type="hidden" name="item" value="{{ item.name }}">
-                                    <button type="submit" class="btn btn-xsmall btn-primary">Equip</button>
+                                    <button type="submit" class="btn btn-xsmall btn-primary"
+                                        {% if not item.can_equip %}disabled title="{{ item.equip_block_reason }}"{% endif %}>Equip</button>
                                 </form>
                                 {% else %}
                                 <form method="post" action="/action/use_item">
@@ -388,6 +409,149 @@
             </div>
         </div>
         {% endif %}
+
+        <!-- ── Crafting ── -->
+        <div class="tab-content" id="tab-crafting">
+            <div class="panel">
+                <div class="panel-title">Crafting Workshop</div>
+                <div class="panel-body">
+                    {% if not crafting_recipes %}
+                    <p class="empty-notice">No crafting recipes are known yet. Explore the world to discover them.</p>
+                    {% else %}
+                    <div class="pageable-list" data-page-size="10">
+                    {% for recipe in crafting_recipes %}
+                    <div class="pageable-item shop-item-row {% if not recipe.can_craft %}disabled-row{% endif %}"
+                         style="margin-bottom:10px;padding:12px;background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                            <div>
+                                <span class="item-name rarity-{{ recipe.rarity }}">{{ recipe.name }}</span>
+                                <span class="item-rarity"> ({{ recipe.rarity|title }})</span>
+                                {% if recipe.category %}<span class="text-dim"> &mdash; {{ recipe.category }}</span>{% endif %}
+                                {% if recipe.description %}
+                                <div class="item-desc" style="margin-top:4px;">{{ recipe.description }}</div>
+                                {% endif %}
+                                <div style="margin-top:6px;font-size:13px;">
+                                    <strong>Materials:</strong>
+                                    {% for mat, qty in recipe.materials.items() %}
+                                    {% set player_has = player.inventory.count(mat) %}
+                                    <span style="color:{% if player_has >= qty %}var(--green-bright){% else %}var(--red){% endif %};margin-right:8px;">
+                                        {{ mat }} x{{ qty }} (have {{ player_has }})
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                <div style="margin-top:4px;font-size:13px;color:var(--gold);">
+                                    <strong>Produces:</strong>
+                                    {% for item, qty in recipe.output.items() %}{{ item }} x{{ qty }}{% endfor %}
+                                </div>
+                            </div>
+                            <form method="POST" action="/action/craft">
+                                <input type="hidden" name="recipe_id" value="{{ recipe.id }}">
+                                <button type="submit" class="btn {% if recipe.can_craft %}btn-primary{% else %}btn-disabled{% endif %}"
+                                    {% if not recipe.can_craft %}disabled{% endif %}>
+                                    {% if recipe.can_craft %}Craft{% else %}Missing Materials{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Dungeons ── -->
+        <div class="tab-content" id="tab-dungeons">
+
+            {% if active_dungeon %}
+            <div class="panel" style="margin-bottom:14px;border-color:var(--gold);">
+                <div class="panel-title" style="background:var(--wood-mid);">Active Dungeon</div>
+                <div class="panel-body">
+                    <div style="font-size:16px;color:var(--gold);font-weight:600;margin-bottom:6px;">
+                        {{ active_dungeon.dungeon.name }}
+                    </div>
+                    <div style="font-size:14px;color:var(--text-dim);margin-bottom:12px;">
+                        Room {{ active_dungeon.room_index + 1 }} / {{ active_dungeon.rooms|length }}
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <a href="/dungeon/room" class="btn btn-primary">Continue</a>
+                        <form method="POST" action="/dungeon/abandon">
+                            <button type="submit" class="btn btn-danger btn-small"
+                                onclick="return confirm('Abandon this dungeon run? All progress lost.')">Abandon</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="panel">
+                <div class="panel-title">Dungeon Entrances</div>
+                <div class="panel-body">
+                    <p class="panel-note">Your level determines which dungeons you can enter.</p>
+                    {% if not dungeon_list %}
+                    <p class="empty-notice">No dungeons found.</p>
+                    {% else %}
+                    <div class="dungeon-list">
+                        {% for d in dungeon_list %}
+                        <div class="dungeon-entry {% if not d.available %}dungeon-locked{% else %}dungeon-open{% endif %}">
+                            <div class="dungeon-info">
+                                <div class="dungeon-name">
+                                    {{ d.name }}
+                                    {% if not d.available %}
+                                    <span class="dungeon-lock-badge">Lvl {{ d.min_level }} Required</span>
+                                    {% endif %}
+                                </div>
+                                <div class="dungeon-desc">{{ d.description }}</div>
+                                <div class="dungeon-meta">
+                                    <span class="dungeon-diff">Difficulty {{ d.difficulty[0] }}&ndash;{{ d.difficulty[1] }}</span>
+                                    <span class="dungeon-rooms">{{ d.rooms }} rooms</span>
+                                    {% if d.completion_reward %}
+                                    <span class="dungeon-reward">
+                                        Reward: <span style="color:var(--gold)">{{ d.completion_reward.get('gold',0) }}g</span>,
+                                        {{ d.completion_reward.get('experience',0) }} EXP
+                                        {% if d.completion_reward.get('items') %}
+                                        &mdash; {{ d.completion_reward['items']|join(', ') }}
+                                        {% endif %}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="dungeon-action">
+                                {% if d.available and not active_dungeon %}
+                                <form method="post" action="/action/dungeon/enter">
+                                    <input type="hidden" name="dungeon_id" value="{{ d.id }}">
+                                    <button type="submit" class="btn btn-primary btn-small">Enter</button>
+                                </form>
+                                {% elif d.available and active_dungeon %}
+                                <span style="font-size:12px;color:var(--text-dim);text-align:center;">Finish active<br>dungeon first</span>
+                                {% else %}
+                                <span class="dungeon-lock-badge">Locked</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Elite Market ── -->
+        <div class="tab-content" id="tab-market">
+            <div class="panel">
+                <div class="panel-title">
+                    Elite Market
+                    <span class="panel-subtitle">({{ player.gold }}g available)</span>
+                </div>
+                <div class="panel-body">
+                    <div id="market-ajax-container">
+                        <div style="padding:20px;text-align:center;color:var(--text-dim);">
+                            <button class="btn btn-secondary" onclick="loadMarketTab()">Load Market Listings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- ── Your Land ── -->
         {% if land_data %}

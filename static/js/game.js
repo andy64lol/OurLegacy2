@@ -4,23 +4,52 @@ document.addEventListener('DOMContentLoaded', function () {
     initTabs();
     initPagination();
     scrollLogsToBottom();
-    checkHashTab();
+    checkUrlTab();
     initLoadFileInput();
     initMusic();
+    initPageTransitions();
 });
 
-function initTabs() {
+function switchTab(tabName, instant) {
     var tabBtns     = document.querySelectorAll('.tab-btn');
     var tabContents = document.querySelectorAll('.tab-content');
+    var targetBtn   = document.querySelector('[data-tab="' + tabName + '"]');
+    var targetContent = document.getElementById('tab-' + tabName);
+    if (!targetBtn || !targetContent) return;
 
+    tabBtns.forEach(function (b) { b.classList.remove('active'); });
+    targetBtn.classList.add('active');
+
+    if (instant) {
+        tabContents.forEach(function (tc) {
+            tc.classList.remove('active', 'tab-fade-in');
+        });
+        targetContent.classList.add('active', 'tab-fade-in');
+    } else {
+        var current = document.querySelector('.tab-content.active');
+        if (current && current !== targetContent) {
+            current.classList.add('tab-fade-out');
+            setTimeout(function () {
+                current.classList.remove('active', 'tab-fade-out');
+                targetContent.classList.add('active', 'tab-fade-in');
+                setTimeout(function () { targetContent.classList.remove('tab-fade-in'); }, 280);
+                if (tabName === 'market') loadMarketTab();
+            }, 140);
+        } else {
+            tabContents.forEach(function (tc) { tc.classList.remove('active', 'tab-fade-in'); });
+            targetContent.classList.add('active', 'tab-fade-in');
+            setTimeout(function () { targetContent.classList.remove('tab-fade-in'); }, 280);
+            if (tabName === 'market') loadMarketTab();
+        }
+    }
+}
+
+function initTabs() {
+    var tabBtns = document.querySelectorAll('.tab-btn');
     tabBtns.forEach(function (btn) {
         btn.addEventListener('click', function () {
             var target = btn.getAttribute('data-tab');
-            tabBtns.forEach(function (b) { b.classList.remove('active'); });
-            tabContents.forEach(function (tc) { tc.classList.remove('active'); });
-            btn.classList.add('active');
-            var content = document.getElementById('tab-' + target);
-            if (content) content.classList.add('active');
+            switchTab(target, false);
         });
     });
 }
@@ -32,15 +61,98 @@ function scrollLogsToBottom() {
     if (battleLog) battleLog.scrollTop = battleLog.scrollHeight;
 }
 
-function checkHashTab() {
-    var hash = window.location.hash;
-    if (!hash) return;
-    var tabName = hash.replace('#', '');
-    var btn = document.querySelector('[data-tab="' + tabName + '"]');
-    if (btn) {
-        btn.click();
+function checkUrlTab() {
+    var params = new URLSearchParams(window.location.search);
+    var tabName = params.get('tab') || window.location.hash.replace('#', '');
+    if (tabName) {
+        switchTab(tabName, true);
         history.replaceState(null, '', window.location.pathname);
     }
+}
+
+function initPageTransitions() {
+    document.querySelectorAll('a[href]:not([onclick]):not([target])').forEach(function (link) {
+        var href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript') || href.startsWith('mailto')) return;
+        link.addEventListener('click', function (e) {
+            if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+            e.preventDefault();
+            document.body.classList.add('page-fade-out');
+            setTimeout(function () { window.location.href = href; }, 220);
+        });
+    });
+    document.querySelectorAll('form[method="post"],form[method="POST"]').forEach(function (form) {
+        form.addEventListener('submit', function () {
+            document.body.classList.add('page-fade-out');
+        });
+    });
+}
+
+// ─── Elite Market AJAX loader ─────────────────────────────────────────────────
+
+var _marketLoaded = false;
+
+function loadMarketTab() {
+    if (_marketLoaded) return;
+    var container = document.getElementById('market-ajax-container');
+    if (!container) return;
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim);">Loading market data...</div>';
+    fetch('/api/market_data')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            _marketLoaded = true;
+            renderMarket(data, container);
+        })
+        .catch(function (e) {
+            container.innerHTML = '<div style="color:var(--red);padding:12px;">Could not load market: ' + e.message + '</div>';
+        });
+}
+
+function renderMarket(data, container) {
+    if (data.cooldown_msg) {
+        container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-dim);">' +
+            '<div style="font-size:28px;margin-bottom:10px;">&#128274;</div>' +
+            '<div>' + data.cooldown_msg + '</div>' +
+            '<div style="margin-top:10px;font-size:12px;">The Elite Market refreshes every 10 minutes.</div></div>';
+        return;
+    }
+    if (!data.market_items || data.market_items.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-dim);">No items listed right now. Check back shortly.</p>';
+        return;
+    }
+    var gold = data.player_gold;
+    var html = '<div style="margin-bottom:10px;font-size:13px;color:var(--text-dim);">' +
+        data.market_items.length + ' elite items available. Market refreshes every 10 minutes.</div>';
+    data.market_items.forEach(function (item) {
+        var price = item.marketPrice || item.price || 0;
+        var rarity = (item.rarity || 'common').toLowerCase();
+        var canAfford = gold >= price;
+        html += '<div class="shop-item-row" style="margin-bottom:10px;padding:12px;background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">';
+        html += '<div>';
+        html += '<span class="item-name rarity-' + rarity + '">' + (item.name || item.itemName || '?') + '</span>';
+        html += '<span class="item-rarity"> &mdash; ' + rarity.charAt(0).toUpperCase() + rarity.slice(1) + '</span>';
+        if (item.type) html += '<span class="text-dim"> (' + item.type + ')</span>';
+        if (item.description) html += '<div class="item-desc" style="margin-top:4px;">' + item.description + '</div>';
+        if (item.stats) {
+            html += '<div style="margin-top:4px;font-size:12px;color:var(--green-bright);">';
+            for (var k in item.stats) { html += '+' + item.stats[k] + ' ' + k + ' '; }
+            html += '</div>';
+        }
+        html += '</div>';
+        html += '<div style="display:flex;align-items:center;gap:8px;">';
+        html += '<span class="gold-amount">' + price + ' gold</span>';
+        if (canAfford) {
+            html += '<form method="POST" action="/action/market/buy" onsubmit="document.body.classList.add(\'page-fade-out\')">' +
+                '<input type="hidden" name="item_name" value="' + (item.name || item.itemName) + '">' +
+                '<input type="hidden" name="item_price" value="' + price + '">' +
+                '<button type="submit" class="btn btn-primary">Buy</button></form>';
+        } else {
+            html += '<button class="btn btn-disabled" disabled>Not enough gold</button>';
+        }
+        html += '</div></div></div>';
+    });
+    container.innerHTML = html;
 }
 
 // ─── Save: download encrypted .olsave file ────────────────────────────────────
