@@ -476,6 +476,18 @@
             </div>
         </div>
 
+        <!-- Language Settings -->
+        <div class="sidebar-lang-section">
+            <div class="sidebar-lang-label">&#127760; Language</div>
+            <select id="ol2-lang-select" class="lang-select-dropdown"
+                    onchange="ol2SetLanguage(this.value)">
+                <!-- options populated by translate.js -->
+            </select>
+        </div>
+
+        <!-- Hidden Google Translate element (GTX endpoint bridge) -->
+        <div id="google_translate_element" style="display:none;visibility:hidden;position:absolute;left:-9999px;"></div>
+
         <div class="sidebar-nav">
             <a href="/" class="btn btn-danger btn-small"
                onclick="return confirm('Return to the main menu? Unsaved progress will be lost.')">

@@ -1573,3 +1573,46 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
 .attr-name  { font-size: 13px; font-weight: 700; color: var(--text-bright); text-transform: uppercase; letter-spacing: 0.04em; }
 .attr-value { font-size: 22px; font-weight: 700; color: var(--gold); line-height: 1; }
 .attr-desc  { font-size: 11px; color: var(--text-dim); flex: 1; margin-bottom: 8px; }
+
+/* ─── Language Settings (Sidebar) ────────────────────────────────────────── */
+.sidebar-lang-section {
+    padding: 8px 12px 10px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+}
+.sidebar-lang-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+}
+.lang-select-dropdown {
+    width: 100%;
+    background: var(--slate-dark);
+    color: var(--text-bright);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23e8c460'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 24px;
+}
+.lang-select-dropdown:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+.lang-select-dropdown:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+.lang-select-dropdown option {
+    background: var(--slate-dark);
+    color: var(--text-bright);
+}
