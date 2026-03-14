@@ -1,6 +1,7 @@
 // Our Legacy 2 - Client-Side Game Script
 
 document.addEventListener('DOMContentLoaded', function () {
+    initToastContainer();
     initTabs();
     initPagination();
     scrollLogsToBottom();
@@ -11,7 +12,67 @@ document.addEventListener('DOMContentLoaded', function () {
     initBackground();
     initLowHpWarning();
     initBattleKeys();
+    checkMobile();
+    showPendingToasts();
 });
+
+// ─── Toast Notifications ───────────────────────────────────────────────────────
+
+function initToastContainer() {
+    if (!document.getElementById('toast-container')) {
+        var c = document.createElement('div');
+        c.id = 'toast-container';
+        document.body.appendChild(c);
+    }
+}
+
+function showToast(text, color, duration) {
+    duration = duration || 4000;
+    var container = document.getElementById('toast-container');
+    if (!container) return;
+
+    var toast = document.createElement('div');
+    toast.className = 'toast';
+    if (color) toast.style.color = color;
+    toast.textContent = text;
+
+    container.appendChild(toast);
+
+    var timer = setTimeout(function () {
+        toast.classList.add('toast-hide');
+        setTimeout(function () {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 320);
+    }, duration);
+
+    toast.addEventListener('click', function () {
+        clearTimeout(timer);
+        toast.classList.add('toast-hide');
+        setTimeout(function () {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 320);
+    });
+}
+
+function showPendingToasts() {
+    if (typeof window._gameMessages !== 'undefined' && Array.isArray(window._gameMessages)) {
+        window._gameMessages.forEach(function (msg, i) {
+            setTimeout(function () {
+                showToast(msg.text, msg.color, 5000);
+            }, i * 350);
+        });
+    }
+}
+
+function checkMobile() {
+    var isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        || window.innerWidth < 768;
+    if (isMobile) {
+        setTimeout(function () {
+            showToast('Mobile detected — some UI elements may look a bit off. Desktop is recommended for the best experience.', '#c8a84b', 8000);
+        }, 600);
+    }
+}
 
 function switchTab(tabName, instant) {
     var tabBtns     = document.querySelectorAll('.tab-btn');
@@ -163,12 +224,7 @@ function renderMarket(data, container) {
 // ─── Save: download encrypted .olsave file ────────────────────────────────────
 
 async function saveGame() {
-    var status = document.getElementById('save-status');
-    if (status) {
-        status.style.display = 'block';
-        status.style.color = 'var(--text-dim)';
-        status.textContent = 'Saving...';
-    }
+    showToast('Saving game...', 'var(--text-dim)', 2000);
     try {
         var response = await fetch('/api/save', { method: 'POST' });
         if (!response.ok) {
@@ -190,17 +246,9 @@ async function saveGame() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        if (status) {
-            status.style.color = 'var(--green-bright)';
-            status.textContent = 'Saved! File downloaded.';
-            setTimeout(function () { status.style.display = 'none'; }, 3000);
-        }
+        showToast('Saved! File downloaded.', 'var(--green-bright)', 3500);
     } catch (e) {
-        if (status) {
-            status.style.color = 'var(--red)';
-            status.textContent = 'Error: ' + e.message;
-            setTimeout(function () { status.style.display = 'none'; }, 4000);
-        }
+        showToast('Save error: ' + e.message, 'var(--red)', 5000);
     }
 }
 
@@ -218,12 +266,7 @@ function initLoadFileInput() {
         var file = this.files[0];
         if (!file) return;
 
-        var status = document.getElementById('load-status');
-        if (status) {
-            status.style.display = 'block';
-            status.style.color = 'var(--text-dim)';
-            status.textContent = 'Loading save...';
-        }
+        showToast('Loading save...', 'var(--text-dim)', 2000);
 
         try {
             var formData = new FormData();
@@ -235,20 +278,13 @@ function initLoadFileInput() {
             });
             var json = await res.json();
             if (json.ok) {
-                if (status) {
-                    status.style.color = 'var(--green-bright)';
-                    status.textContent = 'Loaded! Welcome back, ' + (json.player_name || '') + '!';
-                }
+                showToast('Loaded! Welcome back, ' + (json.player_name || '') + '!', 'var(--green-bright)', 3000);
                 setTimeout(function () { window.location.href = '/game'; }, 800);
             } else {
                 throw new Error(json.error || 'Load failed');
             }
         } catch (e) {
-            if (status) {
-                status.style.color = 'var(--red)';
-                status.textContent = 'Error: ' + e.message;
-                setTimeout(function () { status.style.display = 'none'; }, 4000);
-            }
+            showToast('Load error: ' + e.message, 'var(--red)', 5000);
         }
         this.value = '';
     });

@@ -458,10 +458,8 @@
 
         <div class="sidebar-save-section">
             <button class="btn btn-secondary btn-small" onclick="saveGame()">Save Game</button>
-            <div id="save-status" style="font-size:13px;color:var(--text-dim);display:none;margin-top:4px;"></div>
             <input type="file" id="load-file-input" accept=".olsave,.json" style="display:none;">
             <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()" style="margin-top:4px;">Load Game</button>
-            <div id="load-status" style="font-size:13px;color:var(--text-dim);display:none;margin-top:4px;"></div>
 
             <div class="music-control-row" style="margin-top:10px;">
                 <span class="music-label">&#9835; Music</span>
@@ -593,17 +591,10 @@
             </div>
             {% endif %}
 
-            <div class="panel">
-                <div class="panel-title">Chronicle</div>
-                <div class="panel-body message-log" id="game-log">
-                    {% for msg in messages %}
-                    <div class="log-entry" style="color:{{ msg.color }}">{{ msg.text }}</div>
-                    {% else %}
-                    <div class="log-entry log-dim">Your journey has only just begun...</div>
-                    {% endfor %}
-                </div>
-            </div>
         </div>
+        <script>
+        window._gameMessages = {{ messages | tojson }};
+        </script>
 
         <!-- ── Equipment & Inventory ── -->
         <div class="tab-content" id="tab-inventory">
