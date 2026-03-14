@@ -14,7 +14,8 @@ from typing import Dict, Any, List, Optional
 from cryptography.fernet import Fernet, InvalidToken
 
 SAVES_DIR = "data/saves"
-SAVE_VERSION = "3.2"
+SAVE_VERSION = "4.0"
+GAME_VERSION = "1.0.0"
 
 SAVE_MAGIC = b'OL2S'
 SALT_SIZE = 16
@@ -80,6 +81,7 @@ def build_save_data(player: Dict[str, Any],
         "completed_missions": completed_missions,
         "achievements": achievements or [],
         "save_version": SAVE_VERSION,
+        "game_version": GAME_VERSION,
         "save_time": datetime.now().isoformat(),
     }
 

@@ -1,0 +1,62 @@
+{
+  "Human": {
+    "str": 5, "dex": 5, "con": 5, "int": 5, "wis": 5, "cha": 5,
+    "description": "Balanced and adaptable. No particular strengths or weaknesses — masters of their own fate.",
+    "notes": "Balanced, no modifiers",
+    "stat_modifiers": { "hp": 0, "mp": 0, "attack": 0, "defense": 0, "speed": 0, "gold": 0 }
+  },
+  "Elf": {
+    "str": 4, "dex": 7, "con": 4, "int": 6, "wis": 4, "cha": 5,
+    "description": "Agile and keen-minded, yet less hardy than most. Elves favour speed and intellect over brute force.",
+    "notes": "Agile, smart, less hardy",
+    "stat_modifiers": { "hp": -20, "mp": 5, "attack": -2, "defense": -2, "speed": 4, "gold": 0 }
+  },
+  "Dwarf": {
+    "str": 7, "dex": 4, "con": 7, "int": 4, "wis": 4, "cha": 4,
+    "description": "Stout and resilient warriors forged in mountain halls. Tough and strong, though slower and less social.",
+    "notes": "Tough and strong, slower & less social",
+    "stat_modifiers": { "hp": 40, "mp": -15, "attack": 4, "defense": 4, "speed": -2, "gold": -15 }
+  },
+  "Lycanthrope": {
+    "str": 7, "dex": 6, "con": 6, "int": 3, "wis": 3, "cha": 5,
+    "description": "Cursed with beast blood, Lycanthropes are powerful and fast — but their primal nature dulls mind and foresight.",
+    "notes": "Beastly instincts: strong & fast, low INT/WIS",
+    "stat_modifiers": { "hp": 25, "mp": -30, "attack": 4, "defense": 2, "speed": 2, "gold": 0 }
+  },
+  "Orc": {
+    "str": 8, "dex": 4, "con": 7, "int": 3, "wis": 3, "cha": 5,
+    "description": "Bred for war, Orcs are raw power embodied. Formidable warriors, but wisdom and wit are not their forte.",
+    "notes": "Strong & tough, low smarts & wisdom",
+    "stat_modifiers": { "hp": 45, "mp": -30, "attack": 6, "defense": 4, "speed": -2, "gold": 0 }
+  },
+  "Gnome": {
+    "str": 3, "dex": 5, "con": 4, "int": 8, "wis": 5, "cha": 5,
+    "description": "Brilliant tinkerers and scholars, Gnomes excel at magic and puzzles — though their frail frames make battle perilous.",
+    "notes": "Smart, clever, frail",
+    "stat_modifiers": { "hp": -25, "mp": 30, "attack": -4, "defense": -2, "speed": 0, "gold": 0 }
+  },
+  "Tiefling": {
+    "str": 4, "dex": 5, "con": 4, "int": 5, "wis": 5, "cha": 7,
+    "description": "Born of infernal heritage, Tieflings weave charm and dark magic with ease. Their cursed blood, however, makes them less durable.",
+    "notes": "Charismatic & magical, less durable",
+    "stat_modifiers": { "hp": -20, "mp": 0, "attack": -2, "defense": -2, "speed": 0, "gold": 30 }
+  },
+  "Dragonborn": {
+    "str": 7, "dex": 5, "con": 6, "int": 3, "wis": 4, "cha": 5,
+    "description": "Proud descendants of ancient dragons, Dragonborn are strong and honourable — formidable warriors though not the sharpest minds.",
+    "notes": "Strong and honourable, not super bright",
+    "stat_modifiers": { "hp": 25, "mp": -25, "attack": 4, "defense": 2, "speed": 0, "gold": 0 }
+  },
+  "Goblin": {
+    "str": 3, "dex": 8, "con": 4, "int": 5, "wis": 3, "cha": 7,
+    "description": "Cunning and lightning-quick, Goblins use wit and speed to outwit foes — though their scrawny frames leave them fragile.",
+    "notes": "Sneaky, quick, but fragile",
+    "stat_modifiers": { "hp": -25, "mp": -10, "attack": -4, "defense": -2, "speed": 6, "gold": 30 }
+  },
+  "Troll": {
+    "str": 9, "dex": 3, "con": 8, "int": 3, "wis": 2, "cha": 5,
+    "description": "Massive and near-unkillable, Trolls boast tremendous strength and endurance. In exchange, intellect and speed are far behind.",
+    "notes": "Big, strong, regenerative, but dumb & slow",
+    "stat_modifiers": { "hp": 65, "mp": -35, "attack": 8, "defense": 6, "speed": -4, "gold": 0 }
+  }
+}

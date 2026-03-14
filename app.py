@@ -68,6 +68,7 @@ def load_json(filename):
 
 GAME_DATA = {
     "classes": load_json("classes.json"),
+    "races": load_json("races.json"),
     "areas": load_json("areas.json"),
     "enemies": load_json("enemies.json"),
     "items": load_json("items.json"),
@@ -87,6 +88,8 @@ GAME_DATA = {
     "dialogues": load_json("dialogues.json"),
     "cutscenes": load_json("cutscenes.json"),
 }
+
+GAME_VERSION = "1.0.0"
 
 BUILDING_TYPES = {
     "house": {"label": "House", "slots": 3},
@@ -964,29 +967,44 @@ def create():
     else:
         name = request.form.get("name", "").strip()
         cls = request.form.get("class", "Warrior")
+        race = request.form.get("race", "Human")
         if not name:
             session["create_error"] = "Please enter a character name."
             return redirect(url_for("game"))
+
+        if race not in GAME_DATA["races"]:
+            race = "Human"
 
         cls_data = GAME_DATA["classes"].get(cls, {})
         stats = cls_data.get(
             "base_stats", {"hp": 100, "mp": 50, "attack": 10, "defense": 8, "speed": 10}
         )
 
+        race_data = GAME_DATA["races"].get(race, {})
+        race_mods = race_data.get("stat_modifiers", {})
+
+        base_hp = max(10, stats["hp"] + race_mods.get("hp", 0))
+        base_mp = max(0, stats["mp"] + race_mods.get("mp", 0))
+        base_atk = max(1, stats["attack"] + race_mods.get("attack", 0))
+        base_def = max(1, stats["defense"] + race_mods.get("defense", 0))
+        base_spd = max(1, stats["speed"] + race_mods.get("speed", 0))
+        base_gold = max(0, cls_data.get("starting_gold", 100) + race_mods.get("gold", 0))
+
         player = {
             "name": name,
             "class": cls,
+            "race": race,
             "level": 1,
             "experience": 0,
             "experience_to_next": 100,
-            "hp": stats["hp"],
-            "max_hp": stats["hp"],
-            "mp": stats["mp"],
-            "max_mp": stats["mp"],
-            "attack": stats["attack"],
-            "defense": stats["defense"],
-            "speed": stats["speed"],
-            "gold": cls_data.get("starting_gold", 100),
+            "hp": base_hp,
+            "max_hp": base_hp,
+            "mp": base_mp,
+            "max_mp": base_mp,
+            "attack": base_atk,
+            "defense": base_def,
+            "speed": base_spd,
+            "gold": base_gold,
             "inventory": list(cls_data.get("starting_items", ["Health Potion"])),
             "equipment": {
                 "weapon": None,
@@ -1023,7 +1041,7 @@ def create():
         session["seen_cutscenes"] = []
         session["current_weather"] = "sunny"
         trigger_cutscene("welcome_cutscene")
-        add_message(f"Welcome, {name} the {cls}! Your legend begins.", "var(--gold)")
+        add_message(f"Welcome, {name} the {race} {cls}! Your legend begins.", "var(--gold)")
         add_message(
             "You stand at the gates of the Starting Village. Adventure awaits.",
             "var(--text-light)",
@@ -2927,7 +2945,8 @@ def api_save():
         "current_weather": session.get("current_weather", "sunny"),
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
-        "save_version": "7.0",
+        "save_version": "7.1",
+        "game_version": GAME_VERSION,
     }
 
     player_name = (player.get("name") or "save").replace(" ", "_")
@@ -2969,6 +2988,7 @@ def api_load():
     player.setdefault("game_ticks", 0)
     player.setdefault("weekly_challenges_progress", {})
     player.setdefault("boss_cooldowns", {})
+    player.setdefault("race", "Descendants from another world")
     ensure_attributes(player)
 
     session["player"] = player

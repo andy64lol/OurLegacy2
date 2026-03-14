@@ -358,6 +358,25 @@ strong { font-weight: 600; }
 .class-desc-short{ font-size: 13px; color: var(--text-dim); margin-top: 2px; }
 .class-full-desc { font-size: 15px; color: var(--text-light); margin-bottom: 16px; line-height: 1.6; }
 
+.race-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 7px; }
+.race-card { display: block; cursor: pointer; }
+.race-card input[type="radio"] { display: none; }
+.race-card-inner {
+    padding: 7px 10px;
+    border: 2px solid var(--border);
+    background: var(--slate-dark);
+    border-radius: 4px;
+    transition: background 0.1s, border-color 0.1s;
+}
+.race-card input:checked + .race-card-inner {
+    border-color: var(--wood-bright);
+    background: var(--wood-dark);
+    color: var(--gold);
+}
+.race-card:hover .race-card-inner { border-color: var(--slate-bright); }
+.race-name      { font-size: 14px; font-weight: 600; color: var(--text-bright); }
+.race-desc-short{ font-size: 11px; color: var(--text-dim); margin-top: 2px; line-height: 1.4; }
+
 .stat-label  { font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px; }
 .stats-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 .stat-row {

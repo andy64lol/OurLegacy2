@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block extra_head %}
 {% if show_create %}
-<script>const classData = {{ data.classes | tojson }};</script>
+<script>
+const classData = {{ data.classes | tojson }};
+const raceData  = {{ data.races  | tojson }};
+</script>
 {% endif %}
 {% endblock %}
 {% block content %}
@@ -94,6 +97,20 @@
                             </label>
                             {% endfor %}
                         </div>
+
+                        <label class="field-label" style="margin-top:20px;">Choose Your Race</label>
+                        <div class="race-grid">
+                            {% for race_name, race_info in data.races.items() %}
+                            <label class="race-card">
+                                <input type="radio" name="race" value="{{ race_name }}" {% if loop.first %}checked{% endif %}
+                                       onchange="updateRaceInfo('{{ race_name }}')">
+                                <div class="race-card-inner">
+                                    <div class="race-name">{{ race_name }}</div>
+                                    <div class="race-desc-short">{{ race_info.notes }}</div>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
 
@@ -122,6 +139,22 @@
 
                         <div class="stat-label" style="margin-top:12px;">Starting Equipment</div>
                         <ul class="item-list" id="ci-items"></ul>
+                    </div>
+                </div>
+
+                <div class="panel" id="race-info-panel" style="margin-top:14px;">
+                    <div class="panel-title" id="ri-name">Human</div>
+                    <div class="panel-body">
+                        <p class="class-full-desc" id="ri-desc" style="margin-bottom:10px;"></p>
+                        <div class="stat-label" style="margin-bottom:6px;">Racial Stat Modifiers</div>
+                        <div class="stats-grid" id="ri-stats">
+                            <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val" id="ri-hp">—</span></div>
+                            <div class="stat-row"><span class="stat-name">MP</span><span class="stat-val" id="ri-mp">—</span></div>
+                            <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val" id="ri-atk">—</span></div>
+                            <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val" id="ri-def">—</span></div>
+                            <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val" id="ri-spd">—</span></div>
+                            <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val" id="ri-gold">—</span></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -427,6 +460,7 @@
             <div class="panel-body">
                 <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
                 <div class="char-level">Level {{ player.level }}</div>
+                <div style="font-size:12px;color:var(--text-dim);margin-top:2px;margin-bottom:4px;">{{ player.get('race', 'Unknown') }}</div>
 
                 <div class="bar-group">
                     <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
@@ -1555,6 +1589,22 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endif %}
 {% if show_create %}
 <script>
+function fmtMod(v) {
+    if (v === 0) return '—';
+    return (v > 0 ? '+' : '') + v;
+}
+function modColor(v) {
+    if (v > 0) return 'var(--green-bright)';
+    if (v < 0) return 'var(--red)';
+    return 'var(--text-dim)';
+}
+function setModEl(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = fmtMod(val);
+    el.style.color = modColor(val);
+}
+
 function updateClassInfo(cls) {
     const d = classData[cls];
     if (!d) return;
@@ -1571,9 +1621,26 @@ function updateClassInfo(cls) {
     const ul = document.getElementById('ci-items');
     ul.innerHTML = items.map(i => `<li>${i}</li>`).join('');
 }
+
+function updateRaceInfo(race) {
+    const r = raceData[race];
+    if (!r) return;
+    document.getElementById('ri-name').textContent = race;
+    document.getElementById('ri-desc').textContent = r.description || '';
+    const m = r.stat_modifiers || {};
+    setModEl('ri-hp',   m.hp   || 0);
+    setModEl('ri-mp',   m.mp   || 0);
+    setModEl('ri-atk',  m.attack  || 0);
+    setModEl('ri-def',  m.defense || 0);
+    setModEl('ri-spd',  m.speed   || 0);
+    setModEl('ri-gold', m.gold    || 0);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    const checked = document.querySelector('input[name="class"]:checked');
-    if (checked) updateClassInfo(checked.value);
+    const checkedCls = document.querySelector('input[name="class"]:checked');
+    if (checkedCls) updateClassInfo(checkedCls.value);
+    const checkedRace = document.querySelector('input[name="race"]:checked');
+    if (checkedRace) updateRaceInfo(checkedRace.value);
 });
 </script>
 {% endif %}
