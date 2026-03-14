@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
     initLowHpWarning();
     initBattleKeys();
     checkMobile();
-    showPendingToasts();
 });
 
 // ─── Toast Notifications ───────────────────────────────────────────────────────

@@ -509,7 +509,9 @@ strong { font-weight: 600; }
     flex-wrap: wrap;
 }
 .tab-btn {
-    padding: 9px 18px;
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 9px 12px;
     background: var(--slate-dark);
     border: none;
     border-right: 1px solid var(--border);
@@ -608,6 +610,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     padding-left: 10px;
 }
 .action-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.action-row .btn { flex: 1 1 auto; text-align: center; }
 
 /* ─── Item Table ─────────────────────────────────────────── */
 .item-table { width: 100%; border-collapse: collapse; font-size: 14px; }
