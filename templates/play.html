@@ -9,16 +9,19 @@
         justify-content: center;
         padding: 40px 20px;
     }
+
     .play-page {
         max-width: 660px;
         width: 100%;
         text-align: center;
     }
+
     .play-title-img {
         max-width: 380px;
         width: 100%;
         margin-bottom: 28px;
     }
+
     .play-scroll {
         background: var(--panel-bg);
         border: 1px dashed var(--gold);
@@ -26,6 +29,7 @@
         padding: 24px 28px;
         margin-bottom: 28px;
     }
+
     .play-heading {
         font-size: 20px;
         font-weight: 600;
@@ -34,27 +38,34 @@
         letter-spacing: 0.05em;
         text-transform: uppercase;
     }
+
     .play-sub {
         font-size: 14px;
         color: var(--text-dim);
         line-height: 1.6;
         margin: 0;
     }
+
     .play-notice {
         font-size: 13px;
         color: var(--green-bright);
         margin-top: 8px;
         font-style: italic;
     }
+
     .server-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 16px;
         margin-bottom: 24px;
     }
+
     @media (max-width: 480px) {
-        .server-grid { grid-template-columns: 1fr; }
+        .server-grid {
+            grid-template-columns: 1fr;
+        }
     }
+
     .server-card {
         background: var(--panel-bg);
         border: 1px solid var(--border);
@@ -66,16 +77,19 @@
         gap: 12px;
         transition: border-color 0.2s, transform 0.15s;
     }
+
     .server-card:hover {
         border-color: var(--gold);
         transform: translateY(-2px);
     }
+
     .server-name {
         font-size: 17px;
         font-weight: 700;
         color: var(--text-light);
         letter-spacing: 0.04em;
     }
+
     .server-badge {
         font-size: 11px;
         text-transform: uppercase;
@@ -84,14 +98,17 @@
         border-radius: 20px;
         border: 1px solid;
     }
+
     .server-badge.replit {
         border-color: #e8822a;
         color: #e8822a;
     }
+
     .server-badge.render {
         border-color: #d8d0c4;
         color: #d8d0c4;
     }
+
     .server-warning {
         font-size: 11px;
         color: #c0784a;
@@ -99,6 +116,7 @@
         margin-top: 2px;
         font-style: italic;
     }
+
     .server-recommend {
         font-size: 11px;
         color: var(--green-bright);
@@ -106,6 +124,7 @@
         margin-top: 2px;
         font-style: italic;
     }
+
     .btn-play-server {
         display: inline-block;
         padding: 9px 26px;
@@ -119,9 +138,11 @@
         transition: background 0.2s;
         font-family: inherit;
     }
+
     .btn-play-server:hover {
         background: #e0c060;
     }
+
     .back-link {
         display: inline-block;
         font-size: 13px;
@@ -129,7 +150,10 @@
         text-decoration: none;
         transition: color 0.15s;
     }
-    .back-link:hover { color: var(--text-light); }
+
+    .back-link:hover {
+        color: var(--text-light);
+    }
 </style>
 
 <div class="play-wrap">
@@ -150,19 +174,29 @@
                 <div class="server-name">Replit 1</div>
                 <div class="server-badge replit">Replit</div>
                 <div class="server-warning">May disconnect every ~30 days &amp; could be a version behind.</div>
-                <a href="https://our-legacy-2--andy64lolxd1.replit.app/" target="_blank" rel="noopener" class="btn-play-server">Play Now</a>
+                <a href="https://our-legacy-2--andy64lolxd1.replit.app/" target="_blank" rel="noopener"
+                    class="btn-play-server">Play Now</a>
             </div>
             <div class="server-card">
                 <div class="server-name">Render 1</div>
                 <div class="server-badge render">Render</div>
                 <div class="server-recommend">Recommended &mdash; most stable &amp; up to date.</div>
-                <a href="https://ourlegacy2.onrender.com/" target="_blank" rel="noopener" class="btn-play-server">Play Now</a>
+                <a href="https://ourlegacy2.onrender.com/" target="_blank" rel="noopener" class="btn-play-server">Play
+                    Now</a>
             </div>
             <div class="server-card">
                 <div class="server-name">Replit 2</div>
                 <div class="server-badge replit">Replit</div>
                 <div class="server-warning">May disconnect every ~30 days &amp; could be a version behind.</div>
-                <a href="https://ourlegacy-2--yuidesu1.replit.app" target="_blank" rel="noopener" class="btn-play-server">Play Now</a>
+                <a href="https://ourlegacy-2--yuidesu1.replit.app" target="_blank" rel="noopener"
+                    class="btn-play-server">Play Now</a>
+            </div>
+            <div class="server-card">
+                <div class="server-name">Replit 3</div>
+                <div class="server-badge replit">Replit</div>
+                <div class="server-warning">May disconnect every ~30 days &amp; could be a version behind.</div>
+                <a href="https://ourlegacy-2--Yhij.replit.app" target="_blank" rel="noopener"
+                    class="btn-play-server">Play Now</a>
             </div>
         </div>
 
