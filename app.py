@@ -3418,6 +3418,44 @@ def new_game():
     return redirect(url_for("index"))
 
 
+import argostranslate.translate as _argos_translate
+
+@app.route("/api/translate", methods=["POST"])
+def api_translate():
+    data = request.get_json(silent=True) or {}
+    q = data.get("q")
+    source = data.get("source", "en")
+    target = data.get("target", "en")
+
+    if not q or target == source:
+        if isinstance(q, list):
+            return jsonify([{"translatedText": s} for s in q])
+        return jsonify({"translatedText": q or ""})
+
+    batch = q if isinstance(q, list) else [q]
+
+    installed = _argos_translate.get_installed_languages()
+    src_lang = next((l for l in installed if l.code == source), None)
+    tgt_lang = next((l for l in installed if l.code == target), None)
+
+    if not src_lang or not tgt_lang:
+        if isinstance(q, list):
+            return jsonify([{"translatedText": s} for s in batch])
+        return jsonify({"translatedText": q})
+
+    translation = src_lang.get_translation(tgt_lang)
+    if not translation:
+        if isinstance(q, list):
+            return jsonify([{"translatedText": s} for s in batch])
+        return jsonify({"translatedText": q})
+
+    results = [{"translatedText": translation.translate(s)} for s in batch]
+
+    if isinstance(q, list):
+        return jsonify(results)
+    return jsonify(results[0])
+
+
 port = int(os.environ.get("PORT", 5000))
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=port, debug=False)
