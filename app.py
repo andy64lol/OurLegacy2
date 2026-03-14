@@ -174,6 +174,13 @@ def add_message(text, color="var(--text-light)"):
     if len(msgs) > 80:
         msgs = msgs[-80:]
     session["messages"] = msgs
+
+    diary = session.get("diary", [])
+    diary.append({"text": text, "color": color})
+    if len(diary) > 500:
+        diary = diary[-500:]
+    session["diary"] = diary
+
     session.modified = True
 
 
@@ -1004,6 +1011,7 @@ def create():
         auto_equip_best(player)
         save_player(player)
         session["messages"] = []
+        session["diary"] = []
         session["current_area"] = "starting_village"
         session["completed_missions"] = []
         session["visited_areas"] = ["starting_village"]
@@ -1475,6 +1483,7 @@ def game():
         missions=available_missions[:20],
         completed_count=len(completed),
         messages=list(reversed(get_messages()))[:25],
+        diary=list(reversed(session.get("diary", []))),
         land_data=land_data,
         active_companions=active_companions,
         companions_available=companions_available,
@@ -2913,6 +2922,7 @@ def api_save():
         "seen_cutscenes": session.get("seen_cutscenes", []),
         "current_weather": session.get("current_weather", "sunny"),
         "messages": session.get("messages", [])[-20:],
+        "diary": session.get("diary", []),
         "save_version": "7.0",
     }
 
@@ -2965,6 +2975,7 @@ def api_load():
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
     session["current_weather"] = data.get("current_weather", "sunny")
     session["messages"] = data.get("messages", [])
+    session["diary"] = data.get("diary", [])
     session.modified = True
     return jsonify({"ok": True, "player_name": player.get("name")})
 

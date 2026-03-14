@@ -529,6 +529,7 @@
                 <span class="tab-badge" style="background:var(--gold);">{{ ready_count }}</span>
                 {% endif %}
             </button>
+            <button class="tab-btn" data-tab="diary">Diary</button>
         </nav>
 
         <!-- ── Explore ── -->
@@ -1378,6 +1379,25 @@
                     </div>
                     {% endfor %}
                     </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Diary ── -->
+        <div class="tab-content" id="tab-diary">
+            <div class="panel">
+                <div class="panel-title">Diary</div>
+                <div class="panel-body">
+                    {% if diary %}
+                    <p class="panel-note" style="margin-bottom:12px;">A full record of your adventure, saved with your file.</p>
+                    <div class="message-log diary-log" style="max-height:520px;overflow-y:auto;">
+                        {% for entry in diary %}
+                        <div class="log-entry" style="color:{{ entry.color }};">{{ entry.text }}</div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="log-entry log-dim">Your diary is empty. Begin your adventure to fill these pages.</p>
                     {% endif %}
                 </div>
             </div>
