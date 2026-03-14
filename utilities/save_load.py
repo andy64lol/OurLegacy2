@@ -18,14 +18,19 @@ SAVE_VERSION = "3.2"
 
 SAVE_MAGIC = b'OL2S'
 SALT_SIZE = 16
-APP_SAVE_SECRET = "our_legacy_2_eternal_save_secret_v5"
+
+def _get_secret() -> str:
+    secret = os.environ.get('SECRET_SALT')
+    if not secret:
+        raise RuntimeError("SECRET_SALT environment variable is not set.")
+    return secret
 
 # ─── Encrypted Pickle Helpers ─────────────────────────────────────────────────
 
 
 def _derive_key(salt: bytes) -> bytes:
     """Derive a Fernet key from a salt using SHA-256."""
-    raw = hashlib.sha256(salt + APP_SAVE_SECRET.encode('utf-8')).digest()
+    raw = hashlib.sha256(salt + _get_secret().encode('utf-8')).digest()
     return base64.urlsafe_b64encode(raw)
 
 
