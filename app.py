@@ -950,7 +950,11 @@ def serve_game_asset(filename):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("game.html", show_welcome=True)
+
+@app.route("/play")
+def play():
+    return render_template("play.html")
 
 
 @app.route("/create", methods=["GET", "POST"])
