@@ -1,3 +1,3 @@
-flask
-cryptography
-gunicorn
+flask==3.1.3
+cryptography==46.0.5
+gunicorn==25.1.0
