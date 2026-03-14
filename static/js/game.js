@@ -320,24 +320,24 @@ function initMusic() {
     // Restore playback position so music doesn't restart on every page action
     var savedTime = parseFloat(localStorage.getItem('ol2_music_time'));
     function startPlayback() {
-        if (!isNaN(savedTime) && savedTime > 0) {
-            _musicAudio.currentTime = savedTime;
+        if (!isNaN(savedTime) && savedTime > 0 && savedTime < _musicAudio.duration) {
+            try { _musicAudio.currentTime = savedTime; } catch (e) { /* ignore */ }
         }
+        if (_musicMuted) return;
         var playPromise = _musicAudio.play();
         if (playPromise !== undefined) {
             playPromise.catch(function () {
                 document.addEventListener('click', function startMusic() {
                     if (_musicAudio && !_musicMuted) _musicAudio.play();
-                    document.removeEventListener('click', startMusic);
                 }, { once: true });
             });
         }
     }
 
-    if (_musicAudio.readyState >= 1) {
+    if (_musicAudio.readyState >= 2) {
         startPlayback();
     } else {
-        _musicAudio.addEventListener('loadedmetadata', startPlayback, { once: true });
+        _musicAudio.addEventListener('canplay', startPlayback, { once: true });
     }
 
     // Save playback position before the page navigates away

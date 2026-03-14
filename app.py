@@ -3441,7 +3441,10 @@ def new_game():
     return redirect(url_for("index"))
 
 
-import argostranslate.translate as _argos_translate
+try:
+    import argostranslate.translate as _argos_translate
+except ImportError:
+    _argos_translate = None
 
 @app.route("/api/translate", methods=["POST"])
 def api_translate():
@@ -3456,6 +3459,11 @@ def api_translate():
         return jsonify({"translatedText": q or ""})
 
     batch = q if isinstance(q, list) else [q]
+
+    if _argos_translate is None:
+        if isinstance(q, list):
+            return jsonify([{"translatedText": s} for s in batch])
+        return jsonify({"translatedText": q})
 
     installed = _argos_translate.get_installed_languages()
     src_lang = next((l for l in installed if l.code == source), None)
