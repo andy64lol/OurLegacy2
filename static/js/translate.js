@@ -1,116 +1,156 @@
 /**
  * Our Legacy 2 — Language Settings
- * Uses Google Translate (GTX endpoint) for full-page translation.
+ * Uses LibreTranslate (via /api/translate proxy) for full-page translation.
  * Language preference persisted in localStorage.
  */
 
 const OL2_LANG_KEY = 'ol2_language';
-const OL2_LANG_COOKIE = 'googtrans';
+const OL2_ORIG_ATTR = 'data-ol2-orig';
+const OL2_CACHE_PREFIX = 'ol2_tr_';
 
 const OL2_LANGUAGES = [
-    { code: 'en',    name: 'English' },
-    { code: 'es',    name: 'Español' },
-    { code: 'fr',    name: 'Français' },
-    { code: 'de',    name: 'Deutsch' },
-    { code: 'pt',    name: 'Português' },
-    { code: 'it',    name: 'Italiano' },
-    { code: 'ru',    name: 'Русский' },
-    { code: 'zh-CN', name: '中文 (简体)' },
-    { code: 'zh-TW', name: '中文 (繁體)' },
-    { code: 'ja',    name: '日本語' },
-    { code: 'ko',    name: '한국어' },
-    { code: 'ar',    name: 'العربية' },
-    { code: 'nl',    name: 'Nederlands' },
-    { code: 'pl',    name: 'Polski' },
-    { code: 'sv',    name: 'Svenska' },
-    { code: 'tr',    name: 'Türkçe' },
-    { code: 'uk',    name: 'Українська' },
-    { code: 'cs',    name: 'Čeština' },
-    { code: 'ro',    name: 'Română' },
-    { code: 'hu',    name: 'Magyar' },
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Español' },
+    { code: 'fr', name: 'Français' },
+    { code: 'de', name: 'Deutsch' },
+    { code: 'pt', name: 'Português' },
+    { code: 'it', name: 'Italiano' },
+    { code: 'ru', name: 'Русский' },
+    { code: 'zh', name: '中文' },
+    { code: 'ja', name: '日本語' },
+    { code: 'ko', name: '한국어' },
+    { code: 'ar', name: 'العربية' },
+    { code: 'nl', name: 'Nederlands' },
+    { code: 'pl', name: 'Polski' },
+    { code: 'sv', name: 'Svenska' },
+    { code: 'tr', name: 'Türkçe' },
+    { code: 'uk', name: 'Українська' },
+    { code: 'cs', name: 'Čeština' },
 ];
 
-function ol2GetCookie(name) {
-    const match = document.cookie.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'));
-    return match ? decodeURIComponent(match[1]) : '';
-}
-
-function ol2SetCookie(name, value, path) {
-    const p = path || '/';
-    document.cookie = `${name}=${encodeURIComponent(value)}; path=${p}; SameSite=Lax`;
-    // Also set without path-prefix for the hostname
-    const host = window.location.hostname;
-    if (host) {
-        document.cookie = `${name}=${encodeURIComponent(value)}; path=${p}; domain=${host}; SameSite=Lax`;
-    }
-}
-
-function ol2ClearCookie(name) {
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
-    const host = window.location.hostname;
-    if (host) {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${host}; SameSite=Lax`;
-    }
-}
-
 function ol2GetCurrentLang() {
-    // Check googtrans cookie first (the GTX endpoint cookie)
-    const cookie = ol2GetCookie(OL2_LANG_COOKIE);
-    if (cookie && cookie.startsWith('/en/')) {
-        return cookie.replace('/en/', '');
-    }
     return localStorage.getItem(OL2_LANG_KEY) || 'en';
 }
 
-function ol2SetLanguage(langCode) {
-    if (!langCode || langCode === 'en') {
-        // Reset to English — clear the googtrans cookie and reload
-        ol2ClearCookie(OL2_LANG_COOKIE);
-        localStorage.setItem(OL2_LANG_KEY, 'en');
-        // Trigger Google Translate reset
-        const select = document.querySelector('.goog-te-combo');
-        if (select) {
-            select.value = '';
-            select.dispatchEvent(new Event('change'));
+const _ol2_SKIP_TAGS = new Set([
+    'SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT',
+    'SELECT', 'OPTION', 'CODE', 'PRE', 'KBD',
+]);
+
+function ol2CollectTextNodes(root) {
+    const nodes = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+            const parent = node.parentElement;
+            if (!parent) return NodeFilter.FILTER_REJECT;
+            if (_ol2_SKIP_TAGS.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
+            const text = node.textContent.trim();
+            if (!text || /^\d+(\s*\/\s*\d+)?$/.test(text)) return NodeFilter.FILTER_SKIP;
+            return NodeFilter.FILTER_ACCEPT;
+        },
+    });
+    let n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    return nodes;
+}
+
+function ol2SaveOriginals(nodes) {
+    nodes.forEach(node => {
+        const el = node.parentElement;
+        if (el && !el.hasAttribute(OL2_ORIG_ATTR)) {
+            el.setAttribute(OL2_ORIG_ATTR, node.textContent);
         }
-        // Reload after a short delay so the cookie clears
-        setTimeout(() => window.location.reload(), 80);
+    });
+}
+
+function ol2RestoreOriginals() {
+    document.querySelectorAll(`[${OL2_ORIG_ATTR}]`).forEach(el => {
+        const orig = el.getAttribute(OL2_ORIG_ATTR);
+        if (el.childNodes.length === 1 && el.childNodes[0].nodeType === Node.TEXT_NODE) {
+            el.childNodes[0].textContent = orig;
+        } else {
+            for (const child of el.childNodes) {
+                if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
+                    child.textContent = orig;
+                    break;
+                }
+            }
+        }
+    });
+}
+
+async function ol2BatchTranslate(texts, targetLang) {
+    const cacheKey = OL2_CACHE_PREFIX + targetLang;
+    let cache = {};
+    try {
+        cache = JSON.parse(sessionStorage.getItem(cacheKey) || '{}');
+    } catch (_) {}
+
+    const missing = [...new Set(texts)].filter(t => !(t in cache));
+
+    if (missing.length > 0) {
+        const BATCH = 40;
+        for (let i = 0; i < missing.length; i += BATCH) {
+            const chunk = missing.slice(i, i + BATCH);
+            try {
+                const resp = await fetch('/api/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ q: chunk, source: 'en', target: targetLang, format: 'text' }),
+                });
+                if (!resp.ok) continue;
+                const data = await resp.json();
+                if (Array.isArray(data)) {
+                    data.forEach((item, idx) => {
+                        if (item && item.translatedText) cache[chunk[idx]] = item.translatedText;
+                    });
+                } else if (data.translatedText && chunk.length === 1) {
+                    cache[chunk[0]] = data.translatedText;
+                }
+            } catch (_) {}
+        }
+        try { sessionStorage.setItem(cacheKey, JSON.stringify(cache)); } catch (_) {}
+    }
+
+    return cache;
+}
+
+async function ol2ApplyTranslation(langCode) {
+    const nodes = ol2CollectTextNodes(document.body);
+    ol2SaveOriginals(nodes);
+
+    const texts = nodes.map(n => n.textContent.trim()).filter(Boolean);
+    const map = await ol2BatchTranslate(texts, langCode);
+
+    nodes.forEach(node => {
+        const orig = node.textContent.trim();
+        if (orig && map[orig]) {
+            node.textContent = node.textContent.replace(orig, map[orig]);
+        }
+    });
+}
+
+async function ol2SetLanguage(langCode) {
+    const mySelect = document.getElementById('ol2-lang-select');
+    if (mySelect) mySelect.disabled = true;
+
+    if (!langCode || langCode === 'en') {
+        ol2RestoreOriginals();
+        localStorage.setItem(OL2_LANG_KEY, 'en');
+        if (mySelect) { mySelect.value = 'en'; mySelect.disabled = false; }
         return;
     }
 
     localStorage.setItem(OL2_LANG_KEY, langCode);
+    ol2RestoreOriginals();
+    await ol2ApplyTranslation(langCode);
 
-    // Try to use the live Google Translate widget first (no reload needed)
-    const select = document.querySelector('.goog-te-combo');
-    if (select) {
-        select.value = langCode;
-        select.dispatchEvent(new Event('change'));
-        // Update our UI to match
-        const mySelect = document.getElementById('ol2-lang-select');
-        if (mySelect) mySelect.value = langCode;
-        return;
-    }
-
-    // Fallback: set the googtrans cookie and reload
-    // The GTX endpoint uses this cookie format: /sourceLang/targetLang
-    ol2SetCookie(OL2_LANG_COOKIE, `/en/${langCode}`);
-    setTimeout(() => window.location.reload(), 80);
-}
-
-function googleTranslateElementInit() {
-    if (typeof google === 'undefined' || !google.translate) return;
-    new google.translate.TranslateElement({
-        pageLanguage: 'en',
-        includedLanguages: OL2_LANGUAGES.filter(l => l.code !== 'en').map(l => l.code).join(','),
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-        autoDisplay: false,
-    }, 'google_translate_element');
+    if (mySelect) { mySelect.value = langCode; mySelect.disabled = false; }
 }
 
 function ol2BuildLanguageSelect() {
     const el = document.getElementById('ol2-lang-select');
     if (!el) return;
-
     el.innerHTML = '';
     OL2_LANGUAGES.forEach(lang => {
         const opt = document.createElement('option');
@@ -118,24 +158,13 @@ function ol2BuildLanguageSelect() {
         opt.textContent = lang.name;
         el.appendChild(opt);
     });
-
-    const current = ol2GetCurrentLang();
-    el.value = current;
+    el.value = ol2GetCurrentLang();
 }
 
-// Suppress the Google Translate iframe banner (cosmetic fix)
-function ol2SuppressGoogleBanner() {
-    const style = document.createElement('style');
-    style.id = 'ol2-translate-style';
-    style.textContent = `
-        .goog-te-banner-frame, #goog-gt-tt { display: none !important; }
-        body { top: 0 !important; }
-        .skiptranslate > iframe { display: none !important; }
-    `;
-    document.head.appendChild(style);
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    ol2SuppressGoogleBanner();
+document.addEventListener('DOMContentLoaded', async function () {
     ol2BuildLanguageSelect();
+    const savedLang = ol2GetCurrentLang();
+    if (savedLang && savedLang !== 'en') {
+        await ol2ApplyTranslation(savedLang);
+    }
 });
