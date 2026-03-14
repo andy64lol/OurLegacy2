@@ -10,7 +10,6 @@
 - [Installation](#installation)
 - [Game Controls](#game-controls)
 - [File Structure](#file-structure)
-- [Mod System](#mod-system)
 - [Contributing](#contributing)
 
 ## Overview
@@ -121,37 +120,6 @@ our_legacy_2/
 │   └── ...
 └── README.md
 ```
-
-## Mod System
-
-### Creating a Mod
-1. Create a folder in `mods/` with your mod name
-2. Create `mod.json` with metadata:
-```json
-{
-  "name": "Your Mod Name",
-  "version": "1.0.0",
-  "author": "Your Name",
-  "description": "What your mod adds",
-  "enabled": true
-}
-```
-3. Add any data files you want to modify:
-   - `bosses.json` - New or override bosses
-   - `areas.json` - New areas or area changes
-   - `items.json` - New items
-   - `dungeons.json` - New dungeons
-   - `dialogues.json` - Dialogue text
-   - Any other data files from `data/`
-
-### How Mods Load
-- Base game data loads first from `data/`
-- Enabled mods load sequentially, merging data
-- Arrays (dungeons) are extended with new entries
-- Objects (items, bosses) are updated/overridden
-- Mod data takes precedence over base data for same IDs
-
----
 
 ## Data File Overview
 

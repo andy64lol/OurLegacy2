@@ -54,7 +54,7 @@ class MarketAPI:
                     self.cache = data
                     self.last_fetch = datetime.now()
                     return {"ok": True, "data": data, "cached": False}
-            except Exception:
+            except requests.RequestException:
                 continue
 
         return {

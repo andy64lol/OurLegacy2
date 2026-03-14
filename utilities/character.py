@@ -86,7 +86,7 @@ class Character:
         try:
             with open('data/pets.json', 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except Exception:
+        except (OSError, ValueError, KeyError):
             return {}
 
     def _update_rank(self):
@@ -200,7 +200,7 @@ class Character:
         self.speed = self.base_speed
         self.max_hp = self.base_max_hp
         self.max_mp = self.base_max_mp
-        for slot, item_name in self.equipment.items():
+        for _slot, item_name in self.equipment.items():
             if item_name and item_name in items_data:
                 item = items_data[item_name]
                 stats = item.get("stats", {})
@@ -302,6 +302,7 @@ class Character:
             "attr_spell_power": 0,
             "attr_gold_discount": 0.0,
             "attr_discovery": 0.0,
+            "dodge_chance": 0.0,
         }
 
 

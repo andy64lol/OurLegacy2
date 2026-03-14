@@ -48,6 +48,14 @@ def ensure_attributes(player: Dict[str, Any]) -> None:
         for attr in ATTRIBUTE_NAMES:
             if attr not in player['attributes']:
                 player['attributes'][attr] = BASE_ATTRIBUTE
+    for field, default in (
+        ('attr_spell_power', 0),
+        ('attr_gold_discount', 0.0),
+        ('attr_discovery', 0.0),
+        ('dodge_chance', 0.0),
+    ):
+        if field not in player:
+            player[field] = default
 
 
 def get_unspent_points(player: Dict[str, Any]) -> int:
@@ -73,7 +81,7 @@ def spend_attribute_point(player: Dict[str, Any], attr: str) -> Dict[str, Any]:
     ensure_attributes(player)
     player['attributes'][attr] = player['attributes'].get(attr, BASE_ATTRIBUTE) + 1
     new_val = player['attributes'][attr]
-    delta = new_val - BASE_ATTRIBUTE
+    _delta = new_val - BASE_ATTRIBUTE
 
     if attr == 'str':
         player['base_attack'] = player.get('base_attack', player.get('attack', 10)) + 2
@@ -81,18 +89,19 @@ def spend_attribute_point(player: Dict[str, Any], attr: str) -> Dict[str, Any]:
     elif attr == 'dex':
         player['base_speed'] = player.get('base_speed', player.get('speed', 10)) + 1
         player['speed'] = player.get('speed', 10) + 1
+        player['dodge_chance'] = player.get('dodge_chance', 0.0) + 0.01
     elif attr == 'con':
         player['base_defense'] = player.get('base_defense', player.get('defense', 8)) + 1
         player['defense'] = player.get('defense', 8) + 1
+        player['base_max_hp'] = player.get('base_max_hp', player.get('max_hp', 100)) + 5
         player['max_hp'] = player.get('max_hp', 100) + 5
-        player['base_max_hp'] = player.get('base_max_hp', player.get('max_hp', 100))
     elif attr == 'int':
+        player['base_max_mp'] = player.get('base_max_mp', player.get('max_mp', 50)) + 3
         player['max_mp'] = player.get('max_mp', 50) + 3
-        player['base_max_mp'] = player.get('base_max_mp', player.get('max_mp', 50))
         player['attr_spell_power'] = player.get('attr_spell_power', 0) + 2
     elif attr == 'wis':
+        player['base_max_mp'] = player.get('base_max_mp', player.get('max_mp', 50)) + 2
         player['max_mp'] = player.get('max_mp', 50) + 2
-        player['base_max_mp'] = player.get('base_max_mp', player.get('max_mp', 50))
         player['attr_discovery'] = player.get('attr_discovery', 0.0) + 0.02
     elif attr == 'cha':
         player['attr_gold_discount'] = player.get('attr_gold_discount', 0.0) + 0.01

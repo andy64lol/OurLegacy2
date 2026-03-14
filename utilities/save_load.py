@@ -18,19 +18,14 @@ SAVE_VERSION = "3.2"
 
 SAVE_MAGIC = b'OL2S'
 SALT_SIZE = 16
-
-def _get_secret() -> str:
-    secret = os.environ.get('SECRET_SALT')
-    if not secret:
-        raise RuntimeError("SECRET_SALT environment variable is not set.")
-    return secret
+APP_SAVE_SECRET = "our_legacy_2_eternal_save_secret_v5"
 
 # ─── Encrypted Pickle Helpers ─────────────────────────────────────────────────
 
 
 def _derive_key(salt: bytes) -> bytes:
     """Derive a Fernet key from a salt using SHA-256."""
-    raw = hashlib.sha256(salt + _get_secret().encode('utf-8')).digest()
+    raw = hashlib.sha256(salt + APP_SAVE_SECRET.encode('utf-8')).digest()
     return base64.urlsafe_b64encode(raw)
 
 
@@ -64,8 +59,8 @@ def decrypt_save(data: bytes) -> Dict[str, Any]:
     f = Fernet(key)
     try:
         pickled = f.decrypt(token)
-    except InvalidToken:
-        raise ValueError("Save file is corrupted or was modified.")
+    except InvalidToken as exc:
+        raise ValueError("Save file is corrupted or was modified.") from exc
     return pickle.loads(pickled)
 
 
@@ -112,7 +107,7 @@ def save_game(player: Dict[str, Any],
         safe_prefix = (filename_prefix or "").replace('/', '_')
         filename = f"{SAVES_DIR}/{safe_prefix}{name}_{pid}_save_{timestamp}_{cls}_{level}.json"
 
-        with open(filename, 'w') as f:
+        with open(filename, 'w', encoding='utf-8') as f:
             json.dump(save_data, f, indent=2)
 
         return {
@@ -120,7 +115,7 @@ def save_game(player: Dict[str, Any],
             'message': f'Game saved: {os.path.basename(filename)}',
             'filename': filename
         }
-    except Exception as e:
+    except (OSError, TypeError, ValueError) as e:
         return {
             'ok': False,
             'message': f'Error saving game: {e}',
@@ -139,7 +134,7 @@ def list_saves() -> List[Dict[str, Any]]:
             continue
         fpath = os.path.join(SAVES_DIR, fname)
         try:
-            with open(fpath, 'r') as f:
+            with open(fpath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             player = data.get('player', {})
             saves.append({
@@ -160,7 +155,7 @@ def list_saves() -> List[Dict[str, Any]]:
                 'current_area':
                 data.get('current_area', ''),
             })
-        except Exception:
+        except (OSError, ValueError):
             continue
     return saves
 
@@ -172,7 +167,7 @@ def load_save(filepath: str) -> Dict[str, Any]:
      'visited_areas': list, 'completed_missions': list, 'achievements': list}
     """
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
         player = data.get('player', {})
@@ -198,7 +193,7 @@ def load_save(filepath: str) -> Dict[str, Any]:
         }
     except FileNotFoundError:
         return {'ok': False, 'message': 'Save file not found.'}
-    except Exception as e:
+    except (OSError, ValueError, KeyError) as e:
         return {'ok': False, 'message': f'Error loading save: {e}'}
 
 
@@ -215,5 +210,5 @@ def delete_save(filepath: str) -> Dict[str, Any]:
     try:
         os.remove(filepath)
         return {'ok': True, 'message': 'Save file deleted.'}
-    except Exception as e:
+    except OSError as e:
         return {'ok': False, 'message': f'Error deleting save: {e}'}

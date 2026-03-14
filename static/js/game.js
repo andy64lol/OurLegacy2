@@ -454,3 +454,14 @@ function initBattleKeys() {
         }
     });
 }
+
+function dismissCutscene(cutsceneId) {
+    fetch('/api/dismiss_cutscene', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cutscene_id: cutsceneId })
+    }).then(function () {
+        var overlay = document.getElementById('cutscene-overlay');
+        if (overlay) overlay.style.display = 'none';
+    });
+}

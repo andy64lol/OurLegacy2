@@ -646,6 +646,18 @@
                         <div class="stat-mini"><span>Defense</span><strong>{{ player.defense }}</strong></div>
                         <div class="stat-mini"><span>Speed</span><strong>{{ player.speed }}</strong></div>
                         <div class="stat-mini"><span>Level</span><strong>{{ player.level }}</strong></div>
+                        {% if player.attr_spell_power %}
+                        <div class="stat-mini"><span>Spell Power</span><strong>+{{ player.attr_spell_power }}</strong></div>
+                        {% endif %}
+                        {% if player.dodge_chance %}
+                        <div class="stat-mini"><span>Dodge</span><strong>{{ (player.dodge_chance * 100) | int }}%</strong></div>
+                        {% endif %}
+                        {% if player.attr_gold_discount %}
+                        <div class="stat-mini"><span>Shop Discount</span><strong>{{ (player.attr_gold_discount * 100) | int }}%</strong></div>
+                        {% endif %}
+                        {% if player.attr_discovery %}
+                        <div class="stat-mini"><span>Item Discovery</span><strong>+{{ (player.attr_discovery * 100) | int }}%</strong></div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -801,7 +813,11 @@
                             <div class="shop-card-stats">{{ item.stats }}</div>
                             {% endif %}
                             <div class="shop-card-desc">{{ (item.description or '')[:70] }}</div>
+                            {% if item.discounted %}
+                            <div class="shop-card-price"><s style="color:var(--text-dim);font-size:11px;">{{ item.base_price }}g</s> <span style="color:var(--gold);">{{ item.price }}g</span></div>
+                            {% else %}
                             <div class="shop-card-price">{{ item.price }}g</div>
+                            {% endif %}
                             <form method="post" action="/action/buy">
                                 <input type="hidden" name="item" value="{{ item.name }}">
                                 <button type="submit" class="btn btn-xsmall btn-primary"

@@ -6,7 +6,7 @@ import random
 from typing import Dict, List, Any, Optional
 
 
-def get_available_dungeons(dungeons_data: Dict[str, Any], current_area: str,
+def get_available_dungeons(dungeons_data: Dict[str, Any], _current_area: str,
                            player_level: int) -> List[Dict[str, Any]]:
     """Return all dungeons, accessible by player level (not area restricted)."""
     all_dungeons = dungeons_data.get('dungeons', [])
@@ -279,7 +279,7 @@ def process_trap_chest_room(player: Dict[str, Any], room: Dict[str, Any],
     return {'type': 'trap_chest', 'messages': messages}
 
 
-def process_empty_room(room: Dict[str, Any]) -> Dict[str, Any]:
+def process_empty_room(_room: Dict[str, Any]) -> Dict[str, Any]:
     msgs = [
         'The chamber is silent. You breathe and press on.',
         'Nothing here but dust and shadow.',
@@ -309,7 +309,7 @@ def process_empty_room(room: Dict[str, Any]) -> Dict[str, Any]:
     return {'type': 'empty', 'messages': messages}
 
 
-def process_battle_room(player: Dict[str, Any], room: Dict[str, Any],
+def process_battle_room(_player: Dict[str, Any], room: Dict[str, Any],
                         enemies_data: Dict[str, Any], areas_data: Dict[str,
                                                                        Any],
                         current_area: str) -> Dict[str, Any]:

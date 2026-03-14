@@ -3,16 +3,15 @@ Battle System for Our Legacy 2 - Flask Edition
 Stateless battle functions that return result dicts.
 """
 import random
-from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
 from utilities.dice import Dice
-from utilities.entities import Enemy, Boss
+from utilities.entities import Enemy
 
 
 def create_hp_mp_bar(current: int,
                      maximum: int,
                      width: int = 15,
-                     color: Optional[str] = None) -> str:
+                     _color: Optional[str] = None) -> str:
     if maximum <= 0:
         return "[" + " " * width + "]"
     filled_width = max(0, min(width, int((current / maximum) * width)))
@@ -94,7 +93,7 @@ def tick_buffs(player: Dict[str, Any]) -> bool:
 
 def battle_round_player_attack(player: Dict[str, Any], enemy_dict: Dict[str,
                                                                         Any],
-                               items_data: Dict[str, Any]) -> Dict[str, Any]:
+                               _items_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Execute the player's attack portion of a battle round.
     Returns a result dict with messages, damage dealt, etc.
@@ -228,7 +227,7 @@ def battle_round_enemy_attack(player: Dict[str, Any],
 
 
 def collect_battle_rewards(player: Dict[str, Any], enemy_dict: Dict[str, Any],
-                           items_data: Dict[str, Any]) -> Dict[str, Any]:
+                           _items_data: Dict[str, Any]) -> Dict[str, Any]:
     """Collect rewards after defeating an enemy. Modifies player dict in place."""
     messages = []
     e_name = enemy_dict.get('name', 'the enemy')
@@ -250,7 +249,7 @@ def collect_battle_rewards(player: Dict[str, Any], enemy_dict: Dict[str, Any],
             "color": "var(--blue)"
         })
 
-    old_level = player.get('level', 1)
+    _old_level = player.get('level', 1)
     player['experience'] = player.get('experience', 0) + exp_reward
     leveled_up = False
     while player['experience'] >= player.get('experience_to_next', 100):
