@@ -950,7 +950,7 @@ def serve_game_asset(filename):
 
 @app.route("/")
 def index():
-    return render_template("game.html", show_welcome=True)
+    return render_template("index.html", show_welcome=True)
 
 @app.route("/play")
 def play():
@@ -1038,7 +1038,7 @@ def game():
         create_error = session.pop("create_error", None)
         session.modified = True
         return render_template(
-            "game.html", show_create=True, data=GAME_DATA, create_error=create_error
+            "index.html", show_create=True, data=GAME_DATA, create_error=create_error
         )
 
     # ── Battle state: show battle view inline ──────────────────────────────
@@ -1089,7 +1089,7 @@ def game():
                     }
                 )
         return render_template(
-            "game.html",
+            "index.html",
             in_battle=True,
             player=player,
             enemy=enemy,
@@ -1474,7 +1474,7 @@ def game():
     attr_summary = get_attribute_summary(player)
     save_player(player)
     return render_template(
-        "game.html",
+        "index.html",
         player=player,
         area=area,
         area_key=area_key,
