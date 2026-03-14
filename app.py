@@ -2564,9 +2564,10 @@ def battle_spell():
     enemy_effects = session.get("battle_enemy_effects", {})
 
     # Process effects at start of turn
+    enemy_name = enemy.get("name", "Enemy")
     stunned = process_turn_effects(player, player_effects, log, "You")
     session["battle_player_effects"] = player_effects
-    process_turn_effects(enemy, enemy_effects, log, enemy["name"])
+    process_turn_effects(enemy, enemy_effects, log, enemy_name)
     session["battle_enemy_effects"] = enemy_effects
 
     if player["hp"] <= 0:
@@ -2627,8 +2628,9 @@ def battle_attack():
     enemy_effects = session.get("battle_enemy_effects", {})
 
     # Process effects at start of turn
+    enemy_name = enemy.get("name", "Enemy")
     stunned = process_turn_effects(player, player_effects, log, "You")
-    process_turn_effects(enemy, enemy_effects, log, enemy["name"])
+    process_turn_effects(enemy, enemy_effects, log, enemy_name)
 
     if player["hp"] <= 0:
         session["battle_player_effects"] = player_effects
@@ -2645,10 +2647,10 @@ def battle_attack():
         if crit:
             p_dmg = int(p_dmg * 1.6)
             log.append(
-                f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy['name']}!"
+                f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy_name}!"
             )
         else:
-            log.append(f"You attack the {enemy['name']} for {p_dmg} damage.")
+            log.append(f"You attack the {enemy_name} for {p_dmg} damage.")
         enemy["hp"] = max(0, enemy["hp"] - p_dmg)
 
         if enemy["hp"] <= 0:
@@ -2683,8 +2685,9 @@ def battle_defend():
     enemy_effects = session.get("battle_enemy_effects", {})
 
     # Process effects at start of turn
+    enemy_name = enemy.get("name", "Enemy")
     process_turn_effects(player, player_effects, log, "You")
-    process_turn_effects(enemy, enemy_effects, log, enemy["name"])
+    process_turn_effects(enemy, enemy_effects, log, enemy_name)
 
     if player["hp"] <= 0:
         session["battle_player_effects"] = player_effects
