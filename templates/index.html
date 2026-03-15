@@ -67,196 +67,40 @@ const raceData  = {{ data.races  | tojson }};
 </div>
 
 {# ════════════════════════════════════════════════════════════
-   CHARACTER CREATION VIEW
+   CHARACTER CREATION VIEW — WIZARD
    ════════════════════════════════════════════════════════════ #}
 {% elif show_create %}
-<div class="page-wrap">
-    <div class="page-header">
-        <img src="/static/banner.png" alt="Our Legacy 2" class="title-banner-small">
-        <h1 class="page-title">Create Your Character</h1>
-    </div>
-
-    {% if create_error %}
-    <div class="alert-box">{{ create_error }}</div>
-    {% endif %}
-
-    <form method="post" action="/create" class="create-form">
-        <div class="create-layout">
-            <div class="create-left">
-                <div class="panel">
-                    <div class="panel-title">Identity</div>
-                    <div class="panel-body">
-                        <label class="field-label">Character Name</label>
-                        <input type="text" name="name" class="text-input" placeholder="Enter your name..." maxlength="24" autocomplete="off" required>
-
-                        <label class="field-label" style="margin-top:16px;">Gender</label>
-                        <div class="gender-grid">
-                            <label class="gender-card">
-                                <input type="radio" name="gender" value="male" checked onchange="updateGenderInfo('male')">
-                                <div class="gender-card-inner">
-                                    <div class="gender-name">Male</div>
-                                    <div class="gender-bonus">+STR &middot; +WIS &middot; +CON</div>
-                                </div>
-                            </label>
-                            <label class="gender-card">
-                                <input type="radio" name="gender" value="female" onchange="updateGenderInfo('female')">
-                                <div class="gender-card-inner">
-                                    <div class="gender-name">Female</div>
-                                    <div class="gender-bonus">+DEX &middot; +CHA &middot; +INT</div>
-                                </div>
-                            </label>
-                            <label class="gender-card">
-                                <input type="radio" name="gender" value="nonbinary" onchange="updateGenderInfo('nonbinary')">
-                                <div class="gender-card-inner">
-                                    <div class="gender-name">Non-Binary</div>
-                                    <div class="gender-bonus">+STR &middot; +DEX &middot; +CON</div>
-                                </div>
-                            </label>
-                        </div>
-                        <div id="gender-bonus-note" style="font-size:12px;color:var(--green-bright);margin-top:6px;font-style:italic;">
-                            Male: +4 Attack, +3 Max MP, +15 Max HP
-                        </div>
-
-                        <label class="field-label" style="margin-top:16px;">Choose Your Class</label>
-                        <div class="class-grid">
-                            {% for cls_name, cls_data in data.classes.items() %}
-                            <label class="class-card">
-                                <input type="radio" name="class" value="{{ cls_name }}" {% if loop.first %}checked{% endif %}
-                                       onchange="updateClassInfo('{{ cls_name }}')">
-                                <div class="class-card-inner">
-                                    <div class="class-name">{{ cls_name }}</div>
-                                    <div class="class-desc-short">{{ cls_data.description[:40] }}...</div>
-                                </div>
-                            </label>
-                            {% endfor %}
-                        </div>
-
-                        <label class="field-label" style="margin-top:20px;">Choose Your Race</label>
-                        <div class="race-grid">
-                            {% for race_name, race_info in data.races.items() %}
-                            <label class="race-card">
-                                <input type="radio" name="race" value="{{ race_name }}" {% if loop.first %}checked{% endif %}
-                                       onchange="updateRaceInfo('{{ race_name }}')">
-                                <div class="race-card-inner">
-                                    <div class="race-name">{{ race_name }}</div>
-                                    <div class="race-desc-short">{{ race_info.notes }}</div>
-                                </div>
-                            </label>
-                            {% endfor %}
-                        </div>
-
-                        <label class="field-label" style="margin-top:20px;">Starting Background</label>
-                        <div class="background-grid">
-                            <label class="background-card">
-                                <input type="radio" name="background" value="soldier" checked onchange="updateFinalStats()">
-                                <div class="background-card-inner">
-                                    <div class="background-name">Soldier</div>
-                                    <div class="background-bonus">+5 ATK &middot; +5 DEF</div>
-                                </div>
-                            </label>
-                            <label class="background-card">
-                                <input type="radio" name="background" value="scholar" onchange="updateFinalStats()">
-                                <div class="background-card-inner">
-                                    <div class="background-name">Scholar</div>
-                                    <div class="background-bonus">+8 MP &middot; +2 Spell Power</div>
-                                </div>
-                            </label>
-                            <label class="background-card">
-                                <input type="radio" name="background" value="street_rat" onchange="updateFinalStats()">
-                                <div class="background-card-inner">
-                                    <div class="background-name">Street Rat</div>
-                                    <div class="background-bonus">+3 SPD &middot; +30 Gold</div>
-                                </div>
-                            </label>
-                            <label class="background-card">
-                                <input type="radio" name="background" value="farmer" onchange="updateFinalStats()">
-                                <div class="background-card-inner">
-                                    <div class="background-name">Farmer</div>
-                                    <div class="background-bonus">+20 HP &middot; +2 DEF</div>
-                                </div>
-                            </label>
-                            <label class="background-card">
-                                <input type="radio" name="background" value="noble" onchange="updateFinalStats()">
-                                <div class="background-card-inner">
-                                    <div class="background-name">Noble</div>
-                                    <div class="background-bonus">+60 Gold &middot; 5% Shop Discount</div>
-                                </div>
-                            </label>
-                            <label class="background-card">
-                                <input type="radio" name="background" value="wanderer" onchange="updateFinalStats()">
-                                <div class="background-card-inner">
-                                    <div class="background-name">Wanderer</div>
-                                    <div class="background-bonus">+2 SPD &middot; +10% EXP</div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-large" style="width:100%;margin-top:16px;">
-                    Begin Adventure
-                </button>
-                <a href="/" class="btn btn-secondary" style="width:100%;margin-top:8px;display:block;text-align:center;">
-                    Back
-                </a>
-            </div>
-
-            <div class="create-right">
-                <div class="panel" id="class-info-panel">
-                    <div class="panel-title" id="ci-name">Warrior</div>
-                    <div class="panel-body">
-                        <p class="class-full-desc" id="ci-desc"></p>
-
-                        <div class="stats-grid" id="ci-stats">
-                            <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val" id="ci-hp">-</span></div>
-                            <div class="stat-row"><span class="stat-name">MP</span><span class="stat-val" id="ci-mp">-</span></div>
-                            <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val" id="ci-atk">-</span></div>
-                            <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val" id="ci-def">-</span></div>
-                            <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val" id="ci-spd">-</span></div>
-                            <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val" id="ci-gold">-</span></div>
-                        </div>
-
-                        <div class="stat-label" style="margin-top:12px;">Starting Equipment</div>
-                        <ul class="item-list" id="ci-items"></ul>
-                    </div>
-                </div>
-
-                <div class="panel" id="race-info-panel" style="margin-top:14px;">
-                    <div class="panel-title" id="ri-name">Human</div>
-                    <div class="panel-body">
-                        <p class="class-full-desc" id="ri-desc" style="margin-bottom:10px;"></p>
-                        <div class="stat-label" style="margin-bottom:6px;">Racial Stat Modifiers</div>
-                        <div class="stats-grid" id="ri-stats">
-                            <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val" id="ri-hp">—</span></div>
-                            <div class="stat-row"><span class="stat-name">MP</span><span class="stat-val" id="ri-mp">—</span></div>
-                            <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val" id="ri-atk">—</span></div>
-                            <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val" id="ri-def">—</span></div>
-                            <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val" id="ri-spd">—</span></div>
-                            <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val" id="ri-gold">—</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Final Character Summary -->
-                <div class="panel" style="margin-top:14px;border-color:var(--gold);">
-                    <div class="panel-title" style="color:var(--gold);">&#9733; Your Character Summary</div>
-                    <div class="panel-body">
-                        <p class="panel-note" style="margin-bottom:10px;">Combined totals from your class, race, gender, and background.</p>
-                        <div class="stats-grid">
-                            <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val" style="color:var(--hp-bright);" id="fs-hp">—</span></div>
-                            <div class="stat-row"><span class="stat-name">MP</span><span class="stat-val" style="color:var(--mana-bright);" id="fs-mp">—</span></div>
-                            <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val" style="color:var(--red);" id="fs-atk">—</span></div>
-                            <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val" id="fs-def">—</span></div>
-                            <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val" id="fs-spd">—</span></div>
-                            <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val" style="color:var(--gold);" id="fs-gold">—</span></div>
-                        </div>
-                        <div id="fs-extras" style="margin-top:8px;font-size:12px;color:var(--green-bright);"></div>
-                    </div>
-                </div>
+<div class="wizard-outer" id="wizard-outer">
+    <div class="wizard-npc-row">
+        <div class="wizard-portrait">
+            <div class="wizard-portrait-face">
+                <div class="wiz-eye wiz-eye-l"></div>
+                <div class="wiz-eye wiz-eye-r"></div>
+                <div class="wiz-mouth"></div>
             </div>
         </div>
-    </form>
+        <div class="wizard-bubble">
+            <p id="npc-text"></p>
+            <span class="wizard-cursor" id="wizard-cursor">▌</span>
+        </div>
+    </div>
+    <div class="wizard-player-area" id="wizard-player-area"></div>
+    <div class="wizard-cutscene" id="wizard-cutscene">
+        <div class="portal-glow"></div>
+        <div class="portal-ring pr1"></div>
+        <div class="portal-ring pr2"></div>
+        <div class="portal-ring pr3"></div>
+        <div class="portal-particles" id="portal-particles"></div>
+        <div class="portal-label" id="portal-label">Stepping through the portal...</div>
+    </div>
 </div>
+<form id="create-form" method="post" action="/create" style="display:none;">
+    <input type="hidden" name="name"       id="h-name">
+    <input type="hidden" name="gender"     id="h-gender">
+    <input type="hidden" name="class"      id="h-class">
+    <input type="hidden" name="race"       id="h-race">
+    <input type="hidden" name="background" id="h-background">
+</form>
 
 {# ════════════════════════════════════════════════════════════
    BATTLE VIEW
@@ -1755,127 +1599,298 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endif %}
 {% if show_create %}
 <script>
-function fmtMod(v) {
-    if (v === 0) return '—';
-    return (v > 0 ? '+' : '') + v;
+
+
+/* ── Wizard Data ── */
+const WIZ_BACKGROUNDS = {
+    soldier:    { label: 'Soldier',    desc: '+5 ATK · +5 DEF',           lore: 'You served in the king\'s army, your body honed by years of drill.' },
+    scholar:    { label: 'Scholar',    desc: '+8 MP · +2 Spell Power',     lore: 'Books were your weapons. Knowledge, your shield.' },
+    street_rat: { label: 'Street Rat', desc: '+3 SPD · +30 Gold',          lore: 'You grew up in the alleys, quick fingers and quicker feet.' },
+    farmer:     { label: 'Farmer',     desc: '+20 HP · +2 DEF',            lore: 'Hard soil and harder days made your body sturdy.' },
+    noble:      { label: 'Noble',      desc: '+60 Gold · 5% Discount',     lore: 'Silver spoons and silk curtains — and a will to prove yourself.' },
+    wanderer:   { label: 'Wanderer',   desc: '+2 SPD · +10% EXP',         lore: 'The road is your home. Every mile a lesson.' },
+    herbalist:  { label: 'Herbalist',  desc: '+12 HP · +5 MP',             lore: 'You know which leaves heal and which ones kill.' },
+    sailor:     { label: 'Sailor',     desc: '+3 ATK · +3 SPD',            lore: 'Salt air and storm waves forged your reflexes.' },
+    mercenary:  { label: 'Mercenary',  desc: '+7 ATK',                     lore: 'You sold your sword to whoever paid most — and survived.' },
+    acolyte:    { label: 'Acolyte',    desc: '+10 MP · +1 Spell Power',    lore: 'Temple bells and midnight prayers left their mark on your soul.' },
+    blacksmith: { label: 'Blacksmith', desc: '+2 ATK · +4 DEF',            lore: 'Hammer and anvil shaped both steel and your spirit.' },
+};
+
+const WIZ_GENDER = {
+    male:      { label: 'Male',       desc: '+4 ATK · +3 MP · +15 HP' },
+    female:    { label: 'Female',     desc: '+3 SPD · +25 Gold · +5 MP' },
+    nonbinary: { label: 'Non-Binary', desc: '+2 ATK · +2 SPD · +10 HP' },
+};
+
+/* ── Wizard State ── */
+let wizData = { name: '', gender: 'male', cls: '', race: '', background: '' };
+let typingTimer = null;
+let wizReady = false;
+
+function cap(str) {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, ' ') : '';
 }
-function modColor(v) {
-    if (v > 0) return 'var(--green-bright)';
-    if (v < 0) return 'var(--red)';
-    return 'var(--text-dim)';
-}
-function setModEl(id, val) {
-    const el = document.getElementById(id);
+
+function typeText(text, callback) {
+    if (typingTimer) clearTimeout(typingTimer);
+    const el = document.getElementById('npc-text');
+    const cur = document.getElementById('wizard-cursor');
     if (!el) return;
-    el.textContent = fmtMod(val);
-    el.style.color = modColor(val);
-}
-
-const BACKGROUND_BONUSES = {
-    soldier:   { attack: 5, defense: 5 },
-    scholar:   { mp: 8, spell_power: 2 },
-    street_rat:{ speed: 3, gold: 30 },
-    farmer:    { hp: 20, defense: 2 },
-    noble:     { gold: 60, gold_discount: 5 },
-    wanderer:  { speed: 2, exp_bonus: 10 },
-};
-
-const GENDER_BONUSES = {
-    male:      { attack: 4, mp: 3, hp: 15 },
-    female:    { speed: 3, gold: 25, mp: 5 },
-    nonbinary: { attack: 2, speed: 2, hp: 10 },
-};
-
-function updateGenderInfo(gender) {
-    const note = document.getElementById('gender-bonus-note');
-    if (!note) return;
-    if (gender === 'male') {
-        note.textContent = 'Male: +4 Attack (STR), +3 Max MP (WIS), +15 Max HP (CON)';
-    } else if (gender === 'female') {
-        note.textContent = 'Female: +3 Speed (DEX), +25 Starting Gold (CHA), +5 Max MP (INT)';
-    } else {
-        note.textContent = 'Non-Binary: +2 Attack (STR), +2 Speed (DEX), +10 Max HP (CON)';
+    el.textContent = '';
+    if (cur) cur.style.display = 'inline';
+    wizReady = false;
+    let i = 0;
+    const speed = 28;
+    function tick() {
+        if (i < text.length) {
+            el.textContent += text[i++];
+            typingTimer = setTimeout(tick, speed);
+        } else {
+            if (cur) cur.style.display = 'none';
+            wizReady = true;
+            if (callback) callback();
+        }
     }
-    updateFinalStats();
+    tick();
 }
 
-function updateClassInfo(cls) {
-    const d = classData[cls];
-    if (!d) return;
-    document.getElementById('ci-name').textContent = cls;
-    document.getElementById('ci-desc').textContent = d.description || '';
-    const s = d.base_stats || {};
-    document.getElementById('ci-hp').textContent = s.hp || '-';
-    document.getElementById('ci-mp').textContent = s.mp || '-';
-    document.getElementById('ci-atk').textContent = s.attack || '-';
-    document.getElementById('ci-def').textContent = s.defense || '-';
-    document.getElementById('ci-spd').textContent = s.speed || '-';
-    document.getElementById('ci-gold').textContent = d.starting_gold || '-';
-    const items = d.starting_items || [];
-    const ul = document.getElementById('ci-items');
-    ul.innerHTML = items.map(i => `<li>${i}</li>`).join('');
-    updateFinalStats();
+function showArea(html) {
+    const area = document.getElementById('wizard-player-area');
+    if (!area) return;
+    area.style.opacity = '0';
+    area.innerHTML = html;
+    setTimeout(() => { area.style.opacity = '1'; }, 80);
 }
 
-function updateRaceInfo(race) {
-    const r = raceData[race];
-    if (!r) return;
-    document.getElementById('ri-name').textContent = race;
-    document.getElementById('ri-desc').textContent = r.description || '';
-    const m = r.stat_modifiers || {};
-    setModEl('ri-hp',   m.hp   || 0);
-    setModEl('ri-mp',   m.mp   || 0);
-    setModEl('ri-atk',  m.attack  || 0);
-    setModEl('ri-def',  m.defense || 0);
-    setModEl('ri-spd',  m.speed   || 0);
-    setModEl('ri-gold', m.gold    || 0);
-    updateFinalStats();
+function makeWizCard(group, value, label, sub) {
+    return `<label class="wiz-card" id="wcard-${group}-${value.replace(/[^a-z0-9]/g,'_')}">
+        <input type="radio" name="wiz-${group}" value="${value}" onchange="wizCardChanged('${group}','${value}')">
+        <div class="wiz-card-inner">
+            <div class="wiz-card-label">${label}</div>
+            <div class="wiz-card-sub">${sub}</div>
+        </div>
+    </label>`;
 }
 
-function updateFinalStats() {
-    const clsEl = document.querySelector('input[name="class"]:checked');
-    const raceEl = document.querySelector('input[name="race"]:checked');
-    const genderEl = document.querySelector('input[name="gender"]:checked');
-    const bgEl = document.querySelector('input[name="background"]:checked');
+function wizCardChanged(group, value) {
+    document.querySelectorAll(`[id^="wcard-${group}-"]`).forEach(el => {
+        el.querySelector('.wiz-card-inner').classList.remove('wiz-selected');
+    });
+    const card = document.getElementById(`wcard-${group}-${value.replace(/[^a-z0-9]/g,'_')}`);
+    if (card) card.querySelector('.wiz-card-inner').classList.add('wiz-selected');
+    const loreEl = document.getElementById('wiz-lore-' + group);
+    if (loreEl) {
+        if (group === 'bg') loreEl.textContent = (WIZ_BACKGROUNDS[value] || {}).lore || '';
+        if (group === 'race') loreEl.textContent = (raceData[value] || {}).description || '';
+        if (group === 'class') loreEl.textContent = (classData[value] || {}).description || '';
+    }
+}
 
-    const cls = clsEl ? classData[clsEl.value] : null;
-    const race = raceEl ? (raceData[raceEl.value] || {}) : {};
-    const gender = genderEl ? genderEl.value : 'male';
-    const bg = bgEl ? (BACKGROUND_BONUSES[bgEl.value] || {}) : {};
-    const genderBonus = GENDER_BONUSES[gender] || {};
+/* ── Steps ── */
+function wizStep(step) {
+    const area = document.getElementById('wizard-player-area');
 
-    const s = cls ? (cls.base_stats || {}) : {};
-    const rm = race.stat_modifiers || {};
+    if (step === 'greeting') {
+        showArea('');
+        typeText('Hi there, wandering soul... I am the Keeper of Fates. I shall guide you into your new life.', () => {
+            showArea(`<button class="btn btn-primary" onclick="wizStep('name')">I am ready...</button>`);
+        });
 
-    const hp  = (s.hp  || 0) + (rm.hp  || 0) + (genderBonus.hp  || 0) + (bg.hp  || 0);
-    const mp  = (s.mp  || 0) + (rm.mp  || 0) + (genderBonus.mp  || 0) + (bg.mp  || 0);
-    const atk = (s.attack  || 0) + (rm.attack  || 0) + (genderBonus.attack  || 0) + (bg.attack  || 0);
-    const def = (s.defense || 0) + (rm.defense || 0) + (genderBonus.defense || 0) + (bg.defense || 0);
-    const spd = (s.speed   || 0) + (rm.speed   || 0) + (genderBonus.speed   || 0) + (bg.speed   || 0);
-    const gold = (cls ? (cls.starting_gold || 0) : 0) + (rm.gold || 0) + (genderBonus.gold || 0) + (bg.gold || 0);
+    } else if (step === 'name') {
+        typeText('May I know what is your name?', () => {
+            showArea(`
+                <div class="wiz-input-row">
+                    <input type="text" id="wiz-name-input" class="text-input wiz-text-input"
+                           placeholder="Your name..." maxlength="24" autocomplete="off"
+                           onkeydown="if(event.key==='Enter') wizConfirmName()">
+                    <button class="btn btn-primary" onclick="wizConfirmName()">Done</button>
+                </div>`);
+            setTimeout(() => { const n = document.getElementById('wiz-name-input'); if (n) n.focus(); }, 150);
+        });
 
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
-    set('fs-hp',  hp  || '—');
-    set('fs-mp',  mp  || '—');
-    set('fs-atk', atk || '—');
-    set('fs-def', def || '—');
-    set('fs-spd', spd || '—');
-    set('fs-gold', gold || '—');
+    } else if (step === 'name_confirm') {
+        const name = wizData.name;
+        typeText(`Hmm... ${name}, correct?`, () => {
+            showArea(`
+                <div class="wiz-choices">
+                    <button class="btn btn-primary" onclick="wizStep('name_yes')">Yes, that is my name.</button>
+                    <button class="btn btn-secondary" onclick="wizStep('name')">Actually, no...</button>
+                </div>`);
+        });
 
-    const extras = [];
-    if (bg.spell_power)    extras.push(`+${bg.spell_power} Spell Power`);
-    if (bg.gold_discount)  extras.push(`${bg.gold_discount}% Shop Discount`);
-    if (bg.exp_bonus)      extras.push(`+${bg.exp_bonus}% EXP Gain`);
-    const extEl = document.getElementById('fs-extras');
-    if (extEl) extEl.textContent = extras.join(' · ');
+    } else if (step === 'name_yes') {
+        const phrases = [
+            'That\'s a great name...',
+            'A name worthy of legend!',
+            'A fine name indeed.',
+            'It suits you well.',
+        ];
+        const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+        typeText(phrase, () => {
+            setTimeout(() => wizStep('gender'), 1000);
+        });
+
+    } else if (step === 'gender') {
+        typeText('What is your gender?', () => {
+            const cards = Object.entries(WIZ_GENDER).map(([k, v]) => makeWizCard('gender', k, v.label, v.desc)).join('');
+            showArea(`
+                <div class="wiz-grid-3">${cards}</div>
+                <button class="btn btn-primary wiz-continue-btn" onclick="wizSelectGender()">Continue</button>`);
+            wizData.gender = 'male';
+            wizCardChanged('gender', 'male');
+            const first = document.querySelector('input[name="wiz-gender"]');
+            if (first) first.checked = true;
+        });
+
+    } else if (step === 'class') {
+        typeText('What is your calling in life?', () => {
+            const cards = Object.keys(classData).map(cn =>
+                makeWizCard('class', cn, cn, (classData[cn].description || '').slice(0, 42) + '...')
+            ).join('');
+            showArea(`
+                <div class="wiz-grid-4">${cards}</div>
+                <div class="wiz-lore" id="wiz-lore-class"></div>
+                <button class="btn btn-primary wiz-continue-btn" onclick="wizSelectClass()">Continue</button>`);
+            const first = Object.keys(classData)[0];
+            if (first) { wizData.cls = first; wizCardChanged('class', first); document.querySelector('input[name="wiz-class"]').checked = true; }
+        });
+
+    } else if (step === 'race') {
+        typeText('May I know your race?', () => {
+            const cards = Object.keys(raceData).map(rn =>
+                makeWizCard('race', rn, rn, (raceData[rn].notes || '').slice(0, 40))
+            ).join('');
+            showArea(`
+                <div class="wiz-grid-4">${cards}</div>
+                <div class="wiz-lore" id="wiz-lore-race"></div>
+                <button class="btn btn-primary wiz-continue-btn" onclick="wizSelectRace()">Continue</button>`);
+            const first = Object.keys(raceData)[0];
+            if (first) { wizData.race = first; wizCardChanged('race', first); document.querySelector('input[name="wiz-race"]').checked = true; }
+        });
+
+    } else if (step === 'background') {
+        typeText('Hmm... what about your background? What have you done before all this?', () => {
+            const cards = Object.entries(WIZ_BACKGROUNDS).map(([k, v]) => makeWizCard('bg', k, v.label, v.desc)).join('');
+            showArea(`
+                <div class="wiz-grid-3">${cards}</div>
+                <div class="wiz-lore" id="wiz-lore-bg"></div>
+                <button class="btn btn-primary wiz-continue-btn" onclick="wizSelectBg()">Continue</button>`);
+            wizData.background = 'soldier';
+            wizCardChanged('bg', 'soldier');
+            const first = document.querySelector('input[name="wiz-bg"]');
+            if (first) first.checked = true;
+        });
+
+    } else if (step === 'confirm') {
+        typeText('Is all you said correct?', () => {
+            showArea(`
+                <div class="wiz-summary">
+                    <div class="wiz-sum-row"><span class="wiz-sum-key">Name</span><span class="wiz-sum-val">${wizData.name}</span></div>
+                    <div class="wiz-sum-row"><span class="wiz-sum-key">Gender</span><span class="wiz-sum-val">${cap(wizData.gender)}</span></div>
+                    <div class="wiz-sum-row"><span class="wiz-sum-key">Class</span><span class="wiz-sum-val">${wizData.cls}</span></div>
+                    <div class="wiz-sum-row"><span class="wiz-sum-key">Race</span><span class="wiz-sum-val">${wizData.race}</span></div>
+                    <div class="wiz-sum-row"><span class="wiz-sum-key">Background</span><span class="wiz-sum-val">${cap(wizData.background)}</span></div>
+                </div>
+                <div class="wiz-choices" style="margin-top:16px;">
+                    <button class="btn btn-primary" onclick="wizStep('final_yes')">Yes, this is me.</button>
+                    <button class="btn btn-secondary" onclick="wizStep('final_no')">No, let me change.</button>
+                </div>`);
+        });
+
+    } else if (step === 'final_yes') {
+        typeText('Well, take a step into the portal that will carry you to your new body...', () => {
+            showArea('');
+            setTimeout(() => wizStartCutscene(), 900);
+        });
+
+    } else if (step === 'final_no') {
+        typeText('Ok, so let\'s go back again...', () => {
+            setTimeout(() => {
+                wizData = { name: '', gender: 'male', cls: '', race: '', background: '' };
+                wizStep('greeting');
+            }, 1200);
+        });
+    }
+}
+
+function wizConfirmName() {
+    const inp = document.getElementById('wiz-name-input');
+    if (!inp) return;
+    const name = inp.value.trim();
+    if (!name) { inp.classList.add('wiz-error'); setTimeout(() => inp.classList.remove('wiz-error'), 600); return; }
+    wizData.name = name;
+    wizStep('name_confirm');
+}
+
+function wizSelectGender() {
+    const el = document.querySelector('input[name="wiz-gender"]:checked');
+    if (el) wizData.gender = el.value;
+    wizStep('class');
+}
+
+function wizSelectClass() {
+    const el = document.querySelector('input[name="wiz-class"]:checked');
+    if (el) wizData.cls = el.value;
+    wizStep('race');
+}
+
+function wizSelectRace() {
+    const el = document.querySelector('input[name="wiz-race"]:checked');
+    if (el) wizData.race = el.value;
+    wizStep('background');
+}
+
+function wizSelectBg() {
+    const el = document.querySelector('input[name="wiz-bg"]:checked');
+    if (el) wizData.background = el.value;
+    wizStep('confirm');
+}
+
+/* ── Cutscene ── */
+function wizStartCutscene() {
+    const outer = document.getElementById('wizard-outer');
+    const scene = document.getElementById('wizard-cutscene');
+    if (!scene) return;
+    outer.classList.add('wizard-fading');
+    setTimeout(() => {
+        scene.classList.add('cutscene-active');
+        spawnParticles();
+        setTimeout(() => {
+            const lbl = document.getElementById('portal-label');
+            if (lbl) lbl.textContent = 'Your fate has been sealed...';
+        }, 2000);
+        setTimeout(() => {
+            document.getElementById('h-name').value       = wizData.name;
+            document.getElementById('h-gender').value     = wizData.gender;
+            document.getElementById('h-class').value      = wizData.cls;
+            document.getElementById('h-race').value       = wizData.race;
+            document.getElementById('h-background').value = wizData.background;
+            document.getElementById('create-form').submit();
+        }, 3800);
+    }, 500);
+}
+
+function spawnParticles() {
+    const container = document.getElementById('portal-particles');
+    if (!container) return;
+    for (let i = 0; i < 24; i++) {
+        const p = document.createElement('div');
+        p.className = 'portal-particle';
+        const angle = Math.random() * 360;
+        const dist  = 60 + Math.random() * 80;
+        const delay = Math.random() * 1.5;
+        const size  = 4 + Math.random() * 6;
+        p.style.cssText = `
+            left:50%; top:50%;
+            width:${size}px; height:${size}px;
+            animation-delay:${delay}s;
+            --angle:${angle}deg; --dist:${dist}px;`;
+        container.appendChild(p);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const checkedCls = document.querySelector('input[name="class"]:checked');
-    if (checkedCls) updateClassInfo(checkedCls.value);
-    const checkedRace = document.querySelector('input[name="race"]:checked');
-    if (checkedRace) updateRaceInfo(checkedRace.value);
-    updateFinalStats();
+    wizStep('greeting');
 });
 </script>
 {% endif %}

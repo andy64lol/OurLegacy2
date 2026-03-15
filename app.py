@@ -975,7 +975,8 @@ def create():
         if gender not in ("male", "female", "nonbinary"):
             gender = "male"
         background = request.form.get("background", "soldier")
-        valid_backgrounds = {"soldier", "scholar", "street_rat", "farmer", "noble", "wanderer"}
+        valid_backgrounds = {"soldier", "scholar", "street_rat", "farmer", "noble", "wanderer",
+                             "herbalist", "sailor", "mercenary", "acolyte", "blacksmith"}
         if background not in valid_backgrounds:
             background = "soldier"
         if not name:
@@ -1020,6 +1021,11 @@ def create():
             "farmer":     {"hp": 20, "defense": 2},
             "noble":      {"gold": 60, "gold_discount": 0.05},
             "wanderer":   {"speed": 2, "exp_bonus": 0.10},
+            "herbalist":  {"hp": 12, "mp": 5},
+            "sailor":     {"attack": 3, "speed": 3},
+            "mercenary":  {"attack": 7},
+            "acolyte":    {"mp": 10, "spell_power": 1},
+            "blacksmith": {"defense": 4, "attack": 2},
         }
         bg = background_bonuses.get(background, {})
         base_atk  += bg.get("attack", 0)
