@@ -39,7 +39,8 @@ const raceData  = {{ data.races  | tojson }};
 
             <div class="save-load-bar" style="margin-top:18px;">
                 <label for="load-file-input-main" class="btn btn-secondary" style="cursor:pointer;">Load Saved Game</label>
-                <input type="file" id="load-file-input-main" accept=".olsave,.json" style="display:none;">
+                <input type="file" id="load-file-input-main" accept=".olsave" style="display:none;">
+                <div style="font-size:11px;color:var(--text-dim);margin-top:6px;text-align:center;">Only supports the custom <strong>.olsave</strong> format</div>
             </div>
             <div id="save-status" class="save-notice" style="display:none;"></div>
         </div>
@@ -83,6 +84,27 @@ const raceData  = {{ data.races  | tojson }};
                     <div class="panel-body">
                         <label class="field-label">Character Name</label>
                         <input type="text" name="name" class="text-input" placeholder="Enter your name..." maxlength="24" autocomplete="off" required>
+
+                        <label class="field-label" style="margin-top:16px;">Gender</label>
+                        <div class="gender-grid">
+                            <label class="gender-card">
+                                <input type="radio" name="gender" value="male" checked onchange="updateGenderInfo('male')">
+                                <div class="gender-card-inner">
+                                    <div class="gender-name">Male</div>
+                                    <div class="gender-bonus">+STR &middot; +WIS &middot; +CON</div>
+                                </div>
+                            </label>
+                            <label class="gender-card">
+                                <input type="radio" name="gender" value="female" onchange="updateGenderInfo('female')">
+                                <div class="gender-card-inner">
+                                    <div class="gender-name">Female</div>
+                                    <div class="gender-bonus">+DEX &middot; +CHA &middot; +INT</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="gender-bonus-note" style="font-size:12px;color:var(--green-bright);margin-top:6px;font-style:italic;">
+                            Male: +4 Attack, +3 Max MP, +15 Max HP
+                        </div>
 
                         <label class="field-label" style="margin-top:16px;">Choose Your Class</label>
                         <div class="class-grid">
@@ -544,7 +566,7 @@ const raceData  = {{ data.races  | tojson }};
 
         <div class="sidebar-save-section">
             <button class="btn btn-secondary btn-small" onclick="saveGame()">Save Game</button>
-            <input type="file" id="load-file-input" accept=".olsave,.json" style="display:none;">
+            <input type="file" id="load-file-input" accept=".olsave" style="display:none;">
             <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()" style="margin-top:4px;">Load Game</button>
 
             <div class="music-control-row" style="margin-top:10px;">
@@ -559,16 +581,6 @@ const raceData  = {{ data.races  | tojson }};
                 <button id="bg-toggle-btn" class="btn btn-secondary btn-xsmall" onclick="toggleBackground()" style="min-width:46px;font-size:12px;">On</button>
             </div>
         </div>
-
-        <!-- Language Settings -->
-        <div class="sidebar-lang-section">
-            <div class="sidebar-lang-label">&#127760; Language</div>
-            <select id="ol2-lang-select" class="lang-select-dropdown"
-                    onchange="ol2SetLanguage(this.value)">
-                <!-- options populated by translate.js -->
-            </select>
-        </div>
-
 
         <div class="sidebar-nav">
             <a href="/" class="btn btn-danger btn-small"
@@ -614,6 +626,7 @@ const raceData  = {{ data.races  | tojson }};
                 {% endif %}
             </button>
             <button class="tab-btn" data-tab="diary">Diary</button>
+            <button class="tab-btn" data-tab="character">Character</button>
         </nav>
 
         <!-- ── Explore ── -->
@@ -1487,6 +1500,81 @@ const raceData  = {{ data.races  | tojson }};
             </div>
         </div>
 
+        <!-- ── Character Sheet ── -->
+        <div class="tab-content" id="tab-character">
+            <div class="panel" style="margin-bottom:14px;">
+                <div class="panel-title">Character Sheet</div>
+                <div class="panel-body">
+
+                    <!-- Identity -->
+                    <div class="stat-label" style="margin-bottom:8px;">Identity</div>
+                    <div class="cs-identity-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-bottom:18px;">
+                        <div class="cs-row"><span class="stat-name">Name</span><span class="stat-val">{{ player.name }}</span></div>
+                        <div class="cs-row"><span class="stat-name">Gender</span><span class="stat-val">{{ player.get('gender','—').title() }}</span></div>
+                        <div class="cs-row"><span class="stat-name">Class</span><span class="stat-val">{{ player['class'] }}</span></div>
+                        <div class="cs-row"><span class="stat-name">Race</span><span class="stat-val">{{ player.get('race','—') }}</span></div>
+                        <div class="cs-row"><span class="stat-name">Level</span><span class="stat-val">{{ player.level }}</span></div>
+                        <div class="cs-row"><span class="stat-name">Rank</span><span class="stat-val">{{ player.rank }}</span></div>
+                    </div>
+
+                    <!-- Combat Stats -->
+                    <div class="stat-label" style="margin-bottom:8px;">Combat Stats</div>
+                    <div class="stats-grid" style="margin-bottom:18px;">
+                        <div class="stat-row"><span class="stat-name">Max HP</span><span class="stat-val">{{ player.max_hp }}</span></div>
+                        <div class="stat-row"><span class="stat-name">Current HP</span><span class="stat-val">{{ player.hp }}</span></div>
+                        <div class="stat-row"><span class="stat-name">Max MP</span><span class="stat-val">{{ player.max_mp }}</span></div>
+                        <div class="stat-row"><span class="stat-name">Current MP</span><span class="stat-val">{{ player.mp }}</span></div>
+                        <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val">{{ player.attack }}</span></div>
+                        <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val">{{ player.defense }}</span></div>
+                        <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val">{{ player.speed }}</span></div>
+                        <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val">{{ player.gold }}</span></div>
+                        <div class="stat-row"><span class="stat-name">Experience</span><span class="stat-val">{{ player.experience }} / {{ player.experience_to_next }}</span></div>
+                    </div>
+
+                    <!-- Attributes & Modifiers -->
+                    <div class="stat-label" style="margin-bottom:8px;">Attributes &amp; Modifiers</div>
+                    {% if attr_summary %}
+                    <div class="stats-grid" style="margin-bottom:18px;">
+                        {% for attr_key, attr_info in attr_summary.attributes.items() %}
+                        {% set val = attr_info.value %}
+                        {% set modifier = ((val - 10) // 2) %}
+                        <div class="stat-row">
+                            <span class="stat-name">{{ attr_info.name }} ({{ attr_key | upper }})</span>
+                            <span class="stat-val">
+                                {{ val }}
+                                <span style="font-size:12px;color:{{ 'var(--green-bright)' if modifier >= 0 else 'var(--red)' }};margin-left:6px;">
+                                    [{{ '+' if modifier >= 0 else '' }}{{ modifier }}]
+                                </span>
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Bonus Modifiers -->
+                    <div class="stat-label" style="margin-bottom:8px;">Bonus Modifiers</div>
+                    <div class="stats-grid">
+                        {% if player.attr_spell_power %}
+                        <div class="stat-row"><span class="stat-name">Spell Power</span><span class="stat-val" style="color:var(--mana-bright);">+{{ player.attr_spell_power }}</span></div>
+                        {% endif %}
+                        {% if player.dodge_chance %}
+                        <div class="stat-row"><span class="stat-name">Dodge Chance</span><span class="stat-val" style="color:var(--green-bright);">{{ (player.dodge_chance * 100) | int }}%</span></div>
+                        {% endif %}
+                        {% if player.attr_gold_discount %}
+                        <div class="stat-row"><span class="stat-name">Shop Discount</span><span class="stat-val" style="color:var(--gold);">{{ (player.attr_gold_discount * 100) | int }}%</span></div>
+                        {% endif %}
+                        {% if player.attr_discovery %}
+                        <div class="stat-row"><span class="stat-name">Item Discovery</span><span class="stat-val" style="color:var(--green-bright);">+{{ (player.attr_discovery * 100) | int }}%</span></div>
+                        {% endif %}
+                        {% if not player.attr_spell_power and not player.dodge_chance and not player.attr_gold_discount and not player.attr_discovery %}
+                        <div class="stat-row"><span class="stat-name" style="color:var(--text-dim);">No bonus modifiers yet. Spend attribute points to unlock them.</span></div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
     </main>
 </div>
 
@@ -1603,6 +1691,16 @@ function setModEl(id, val) {
     if (!el) return;
     el.textContent = fmtMod(val);
     el.style.color = modColor(val);
+}
+
+function updateGenderInfo(gender) {
+    const note = document.getElementById('gender-bonus-note');
+    if (!note) return;
+    if (gender === 'male') {
+        note.textContent = 'Male: +4 Attack (STR), +3 Max MP (WIS), +15 Max HP (CON)';
+    } else {
+        note.textContent = 'Female: +3 Speed (DEX), +25 Starting Gold (CHA), +5 Max MP (INT)';
+    }
 }
 
 function updateClassInfo(cls) {

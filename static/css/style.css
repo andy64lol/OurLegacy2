@@ -377,6 +377,27 @@ strong { font-weight: 600; }
 .race-name      { font-size: 14px; font-weight: 600; color: var(--text-bright); }
 .race-desc-short{ font-size: 11px; color: var(--text-dim); margin-top: 2px; line-height: 1.4; }
 
+.gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 7px; }
+.gender-card { display: block; cursor: pointer; }
+.gender-card input[type="radio"] { display: none; }
+.gender-card-inner {
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    background: var(--slate-dark);
+    border-radius: 4px;
+    text-align: center;
+    transition: background 0.1s, border-color 0.1s;
+}
+.gender-card input:checked + .gender-card-inner {
+    border-color: var(--gold);
+    background: rgba(212,175,55,0.10);
+    color: var(--gold);
+}
+.gender-card:hover .gender-card-inner { border-color: var(--slate-bright); }
+.gender-name  { font-size: 15px; font-weight: 700; color: var(--text-bright); }
+.gender-bonus { font-size: 11px; color: var(--green-bright); margin-top: 3px; }
+.cs-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+
 .stat-label  { font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px; }
 .stats-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 .stat-row {
