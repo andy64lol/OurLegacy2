@@ -105,6 +105,13 @@ const raceData  = {{ data.races  | tojson }};
                                     <div class="gender-bonus">+DEX &middot; +CHA &middot; +INT</div>
                                 </div>
                             </label>
+                            <label class="gender-card">
+                                <input type="radio" name="gender" value="nonbinary" onchange="updateGenderInfo('nonbinary')">
+                                <div class="gender-card-inner">
+                                    <div class="gender-name">Non-Binary</div>
+                                    <div class="gender-bonus">+STR &middot; +DEX &middot; +CON</div>
+                                </div>
+                            </label>
                         </div>
                         <div id="gender-bonus-note" style="font-size:12px;color:var(--green-bright);margin-top:6px;font-style:italic;">
                             Male: +4 Attack, +3 Max MP, +15 Max HP
@@ -1774,8 +1781,9 @@ const BACKGROUND_BONUSES = {
 };
 
 const GENDER_BONUSES = {
-    male:   { attack: 4, mp: 3, hp: 15 },
-    female: { speed: 3, gold: 25, mp: 5 },
+    male:      { attack: 4, mp: 3, hp: 15 },
+    female:    { speed: 3, gold: 25, mp: 5 },
+    nonbinary: { attack: 2, speed: 2, hp: 10 },
 };
 
 function updateGenderInfo(gender) {
@@ -1783,8 +1791,10 @@ function updateGenderInfo(gender) {
     if (!note) return;
     if (gender === 'male') {
         note.textContent = 'Male: +4 Attack (STR), +3 Max MP (WIS), +15 Max HP (CON)';
-    } else {
+    } else if (gender === 'female') {
         note.textContent = 'Female: +3 Speed (DEX), +25 Starting Gold (CHA), +5 Max MP (INT)';
+    } else {
+        note.textContent = 'Non-Binary: +2 Attack (STR), +2 Speed (DEX), +10 Max HP (CON)';
     }
     updateFinalStats();
 }

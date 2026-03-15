@@ -1,9 +1,9 @@
 /* ============================================================
    Our Legacy 2 — Medieval Pixel RPG Stylesheet
-   Pixelify Sans + Slate Gray & Wood Brown palette
+   Tiny5 + Slate Gray & Wood Brown palette
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tiny5&display=swap');
 
 /* ─── CSS Variables ──────────────────────────────────────── */
 :root {
@@ -63,7 +63,7 @@ html, body {
     height: 100%;
     background: var(--bg-main);
     color: var(--text-light);
-    font-family: 'Pixelify Sans', 'GameFont', monospace;
+    font-family: 'Tiny5', monospace;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.55;
@@ -91,7 +91,7 @@ strong { font-weight: 600; }
 .btn {
     display: inline-block;
     padding: 9px 20px;
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
@@ -143,7 +143,7 @@ strong { font-weight: 600; }
     width: 100%;
     padding: 15px 12px;
     font-size: 15px;
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
 }
 .btn-attack { background: var(--red-dark);      color: #f8c0a0; border-color: var(--red); }
 .btn-attack:hover  { background: var(--red); }
@@ -332,7 +332,7 @@ strong { font-weight: 600; }
     border: 2px solid var(--border);
     color: var(--text-bright);
     padding: 9px 12px;
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
     font-size: 16px;
     font-weight: 400;
     outline: none;
@@ -377,7 +377,7 @@ strong { font-weight: 600; }
 .race-name      { font-size: 14px; font-weight: 600; color: var(--text-bright); }
 .race-desc-short{ font-size: 11px; color: var(--text-dim); margin-top: 2px; line-height: 1.4; }
 
-.gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 7px; }
+.gender-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 7px; }
 .gender-card { display: block; cursor: pointer; }
 .gender-card input[type="radio"] { display: none; }
 .gender-card-inner {
@@ -575,7 +575,7 @@ strong { font-weight: 600; }
     border: none;
     border-right: 1px solid var(--border);
     color: var(--text-dim);
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
     font-size: 14px;
     font-weight: 500;
     text-transform: uppercase;
@@ -800,7 +800,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     line-height: 1;
     padding: 4px 10px;
     cursor: pointer;
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
     transition: background 0.12s;
 }
 .spell-page-btn:hover:not(:disabled) { background: var(--slate-mid); }
@@ -841,7 +841,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     background: var(--slate-darkest);
     border: 1px solid var(--border);
     color: var(--text-light);
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
     font-size: 13px;
     padding: 5px 8px;
     width: 100%;
@@ -947,7 +947,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     background: var(--slate-darkest);
     border: 1px solid var(--border);
     color: var(--text-light);
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
     font-size: 13px;
     padding: 4px 7px;
 }
@@ -970,7 +970,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     background: var(--slate-darkest);
     border: 1px solid var(--border);
     color: var(--text-light);
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
     font-size: 13px;
     padding: 4px 7px;
     flex: 1;
@@ -1015,7 +1015,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     color: var(--text-light);
     padding: 11px 13px;
     cursor: pointer;
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
     font-size: 13px;
     text-align: left;
     transition: background 0.12s, transform 0.08s;
@@ -1381,7 +1381,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     border: 2px solid var(--border);
     color: var(--text-bright);
     padding: 9px 12px;
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
     font-size: 16px;
     outline: none;
 }
@@ -1473,7 +1473,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     background: var(--slate-dark);
     border: 1px solid var(--border);
     color: var(--text-dim);
-    font-family: 'Pixelify Sans', monospace;
+    font-family: 'Tiny5', monospace;
     font-size: 13px;
     font-weight: 500;
     text-transform: uppercase;

@@ -972,7 +972,7 @@ def create():
         cls = request.form.get("class", "Warrior")
         race = request.form.get("race", "Human")
         gender = request.form.get("gender", "male")
-        if gender not in ("male", "female"):
+        if gender not in ("male", "female", "nonbinary"):
             gender = "male"
         background = request.form.get("background", "soldier")
         valid_backgrounds = {"soldier", "scholar", "street_rat", "farmer", "noble", "wanderer"}
@@ -1004,10 +1004,14 @@ def create():
             base_atk += 4
             base_mp += 3
             base_hp += 15
-        else:
+        elif gender == "female":
             base_spd += 3
             base_gold += 25
             base_mp += 5
+        elif gender == "nonbinary":
+            base_atk += 2
+            base_spd += 2
+            base_hp += 10
 
         background_bonuses = {
             "soldier":    {"attack": 5, "defense": 5},
