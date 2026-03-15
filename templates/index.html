@@ -16,7 +16,12 @@ const raceData  = {{ data.races  | tojson }};
 <div class="welcome-screen">
     <div class="welcome-inner">
         <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="title-banner">
-        <div style="text-align:center;margin-top:-10px;margin-bottom:14px;font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">v1.0.0 Release</div>
+        <div style="text-align:center;margin-top:-10px;margin-bottom:4px;font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">v1.0.0 Release</div>
+        {% if splash_text %}
+        <div style="text-align:center;margin-bottom:14px;font-size:13px;color:var(--gold);font-style:italic;padding:0 20px;line-height:1.4;">
+            {{ splash_text }}
+        </div>
+        {% endif %}
 
         <div class="scroll-panel welcome-scroll">
             <h2 class="welcome-heading">Welcome, Adventurer</h2>
@@ -40,7 +45,6 @@ const raceData  = {{ data.races  | tojson }};
             <div class="save-load-bar" style="margin-top:18px;">
                 <label for="load-file-input-main" class="btn btn-secondary" style="cursor:pointer;">Load Saved Game</label>
                 <input type="file" id="load-file-input-main" accept=".olsave" style="display:none;">
-                <div style="font-size:11px;color:var(--text-dim);margin-top:6px;text-align:center;">Only supports the custom <strong>.olsave</strong> format</div>
             </div>
             <div id="save-status" class="save-notice" style="display:none;"></div>
         </div>
@@ -133,6 +137,52 @@ const raceData  = {{ data.races  | tojson }};
                             </label>
                             {% endfor %}
                         </div>
+
+                        <label class="field-label" style="margin-top:20px;">Starting Background</label>
+                        <div class="background-grid">
+                            <label class="background-card">
+                                <input type="radio" name="background" value="soldier" checked onchange="updateFinalStats()">
+                                <div class="background-card-inner">
+                                    <div class="background-name">Soldier</div>
+                                    <div class="background-bonus">+5 ATK &middot; +5 DEF</div>
+                                </div>
+                            </label>
+                            <label class="background-card">
+                                <input type="radio" name="background" value="scholar" onchange="updateFinalStats()">
+                                <div class="background-card-inner">
+                                    <div class="background-name">Scholar</div>
+                                    <div class="background-bonus">+8 MP &middot; +2 Spell Power</div>
+                                </div>
+                            </label>
+                            <label class="background-card">
+                                <input type="radio" name="background" value="street_rat" onchange="updateFinalStats()">
+                                <div class="background-card-inner">
+                                    <div class="background-name">Street Rat</div>
+                                    <div class="background-bonus">+3 SPD &middot; +30 Gold</div>
+                                </div>
+                            </label>
+                            <label class="background-card">
+                                <input type="radio" name="background" value="farmer" onchange="updateFinalStats()">
+                                <div class="background-card-inner">
+                                    <div class="background-name">Farmer</div>
+                                    <div class="background-bonus">+20 HP &middot; +2 DEF</div>
+                                </div>
+                            </label>
+                            <label class="background-card">
+                                <input type="radio" name="background" value="noble" onchange="updateFinalStats()">
+                                <div class="background-card-inner">
+                                    <div class="background-name">Noble</div>
+                                    <div class="background-bonus">+60 Gold &middot; 5% Shop Discount</div>
+                                </div>
+                            </label>
+                            <label class="background-card">
+                                <input type="radio" name="background" value="wanderer" onchange="updateFinalStats()">
+                                <div class="background-card-inner">
+                                    <div class="background-name">Wanderer</div>
+                                    <div class="background-bonus">+2 SPD &middot; +10% EXP</div>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -177,6 +227,23 @@ const raceData  = {{ data.races  | tojson }};
                             <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val" id="ri-spd">—</span></div>
                             <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val" id="ri-gold">—</span></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Final Character Summary -->
+                <div class="panel" style="margin-top:14px;border-color:var(--gold);">
+                    <div class="panel-title" style="color:var(--gold);">&#9733; Your Character Summary</div>
+                    <div class="panel-body">
+                        <p class="panel-note" style="margin-bottom:10px;">Combined totals from your class, race, gender, and background.</p>
+                        <div class="stats-grid">
+                            <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val" style="color:var(--hp-bright);" id="fs-hp">—</span></div>
+                            <div class="stat-row"><span class="stat-name">MP</span><span class="stat-val" style="color:var(--mana-bright);" id="fs-mp">—</span></div>
+                            <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val" style="color:var(--red);" id="fs-atk">—</span></div>
+                            <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val" id="fs-def">—</span></div>
+                            <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val" id="fs-spd">—</span></div>
+                            <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val" style="color:var(--gold);" id="fs-gold">—</span></div>
+                        </div>
+                        <div id="fs-extras" style="margin-top:8px;font-size:12px;color:var(--green-bright);"></div>
                     </div>
                 </div>
             </div>
@@ -1513,6 +1580,7 @@ const raceData  = {{ data.races  | tojson }};
                         <div class="cs-row"><span class="stat-name">Gender</span><span class="stat-val">{{ player.get('gender','—').title() }}</span></div>
                         <div class="cs-row"><span class="stat-name">Class</span><span class="stat-val">{{ player['class'] }}</span></div>
                         <div class="cs-row"><span class="stat-name">Race</span><span class="stat-val">{{ player.get('race','—') }}</span></div>
+                        <div class="cs-row"><span class="stat-name">Background</span><span class="stat-val">{{ player.get('background','—').replace('_',' ').title() }}</span></div>
                         <div class="cs-row"><span class="stat-name">Level</span><span class="stat-val">{{ player.level }}</span></div>
                         <div class="cs-row"><span class="stat-name">Rank</span><span class="stat-val">{{ player.rank }}</span></div>
                     </div>
@@ -1566,7 +1634,10 @@ const raceData  = {{ data.races  | tojson }};
                         {% if player.attr_discovery %}
                         <div class="stat-row"><span class="stat-name">Item Discovery</span><span class="stat-val" style="color:var(--green-bright);">+{{ (player.attr_discovery * 100) | int }}%</span></div>
                         {% endif %}
-                        {% if not player.attr_spell_power and not player.dodge_chance and not player.attr_gold_discount and not player.attr_discovery %}
+                        {% if player.get('attr_exp_bonus') %}
+                        <div class="stat-row"><span class="stat-name">EXP Bonus</span><span class="stat-val" style="color:var(--exp-bright);">+{{ (player.attr_exp_bonus * 100) | int }}%</span></div>
+                        {% endif %}
+                        {% if not player.attr_spell_power and not player.dodge_chance and not player.attr_gold_discount and not player.attr_discovery and not player.get('attr_exp_bonus') %}
                         <div class="stat-row"><span class="stat-name" style="color:var(--text-dim);">No bonus modifiers yet. Spend attribute points to unlock them.</span></div>
                         {% endif %}
                     </div>
@@ -1693,6 +1764,20 @@ function setModEl(id, val) {
     el.style.color = modColor(val);
 }
 
+const BACKGROUND_BONUSES = {
+    soldier:   { attack: 5, defense: 5 },
+    scholar:   { mp: 8, spell_power: 2 },
+    street_rat:{ speed: 3, gold: 30 },
+    farmer:    { hp: 20, defense: 2 },
+    noble:     { gold: 60, gold_discount: 5 },
+    wanderer:  { speed: 2, exp_bonus: 10 },
+};
+
+const GENDER_BONUSES = {
+    male:   { attack: 4, mp: 3, hp: 15 },
+    female: { speed: 3, gold: 25, mp: 5 },
+};
+
 function updateGenderInfo(gender) {
     const note = document.getElementById('gender-bonus-note');
     if (!note) return;
@@ -1701,6 +1786,7 @@ function updateGenderInfo(gender) {
     } else {
         note.textContent = 'Female: +3 Speed (DEX), +25 Starting Gold (CHA), +5 Max MP (INT)';
     }
+    updateFinalStats();
 }
 
 function updateClassInfo(cls) {
@@ -1718,6 +1804,7 @@ function updateClassInfo(cls) {
     const items = d.starting_items || [];
     const ul = document.getElementById('ci-items');
     ul.innerHTML = items.map(i => `<li>${i}</li>`).join('');
+    updateFinalStats();
 }
 
 function updateRaceInfo(race) {
@@ -1732,6 +1819,45 @@ function updateRaceInfo(race) {
     setModEl('ri-def',  m.defense || 0);
     setModEl('ri-spd',  m.speed   || 0);
     setModEl('ri-gold', m.gold    || 0);
+    updateFinalStats();
+}
+
+function updateFinalStats() {
+    const clsEl = document.querySelector('input[name="class"]:checked');
+    const raceEl = document.querySelector('input[name="race"]:checked');
+    const genderEl = document.querySelector('input[name="gender"]:checked');
+    const bgEl = document.querySelector('input[name="background"]:checked');
+
+    const cls = clsEl ? classData[clsEl.value] : null;
+    const race = raceEl ? (raceData[raceEl.value] || {}) : {};
+    const gender = genderEl ? genderEl.value : 'male';
+    const bg = bgEl ? (BACKGROUND_BONUSES[bgEl.value] || {}) : {};
+    const genderBonus = GENDER_BONUSES[gender] || {};
+
+    const s = cls ? (cls.base_stats || {}) : {};
+    const rm = race.stat_modifiers || {};
+
+    const hp  = (s.hp  || 0) + (rm.hp  || 0) + (genderBonus.hp  || 0) + (bg.hp  || 0);
+    const mp  = (s.mp  || 0) + (rm.mp  || 0) + (genderBonus.mp  || 0) + (bg.mp  || 0);
+    const atk = (s.attack  || 0) + (rm.attack  || 0) + (genderBonus.attack  || 0) + (bg.attack  || 0);
+    const def = (s.defense || 0) + (rm.defense || 0) + (genderBonus.defense || 0) + (bg.defense || 0);
+    const spd = (s.speed   || 0) + (rm.speed   || 0) + (genderBonus.speed   || 0) + (bg.speed   || 0);
+    const gold = (cls ? (cls.starting_gold || 0) : 0) + (rm.gold || 0) + (genderBonus.gold || 0) + (bg.gold || 0);
+
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+    set('fs-hp',  hp  || '—');
+    set('fs-mp',  mp  || '—');
+    set('fs-atk', atk || '—');
+    set('fs-def', def || '—');
+    set('fs-spd', spd || '—');
+    set('fs-gold', gold || '—');
+
+    const extras = [];
+    if (bg.spell_power)    extras.push(`+${bg.spell_power} Spell Power`);
+    if (bg.gold_discount)  extras.push(`${bg.gold_discount}% Shop Discount`);
+    if (bg.exp_bonus)      extras.push(`+${bg.exp_bonus}% EXP Gain`);
+    const extEl = document.getElementById('fs-extras');
+    if (extEl) extEl.textContent = extras.join(' · ');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1739,6 +1865,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (checkedCls) updateClassInfo(checkedCls.value);
     const checkedRace = document.querySelector('input[name="race"]:checked');
     if (checkedRace) updateRaceInfo(checkedRace.value);
+    updateFinalStats();
 });
 </script>
 {% endif %}

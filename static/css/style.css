@@ -398,6 +398,25 @@ strong { font-weight: 600; }
 .gender-bonus { font-size: 11px; color: var(--green-bright); margin-top: 3px; }
 .cs-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
 
+.background-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 7px; }
+.background-card { display: block; cursor: pointer; }
+.background-card input[type="radio"] { display: none; }
+.background-card-inner {
+    padding: 8px 10px;
+    border: 2px solid var(--border);
+    background: var(--slate-dark);
+    border-radius: 4px;
+    text-align: center;
+    transition: background 0.1s, border-color 0.1s;
+}
+.background-card input:checked + .background-card-inner {
+    border-color: var(--wood-bright);
+    background: var(--wood-dark);
+}
+.background-card:hover .background-card-inner { border-color: var(--slate-bright); }
+.background-name  { font-size: 13px; font-weight: 700; color: var(--text-bright); }
+.background-bonus { font-size: 11px; color: var(--gold); margin-top: 2px; }
+
 .stat-label  { font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px; }
 .stats-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 .stat-row {

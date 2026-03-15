@@ -87,6 +87,7 @@ GAME_DATA = {
     "times": load_json("times.json"),
     "dialogues": load_json("dialogues.json"),
     "cutscenes": load_json("cutscenes.json"),
+    "splash_texts": load_json("splash_text.json") if isinstance(load_json("splash_text.json"), list) else [],
 }
 
 GAME_VERSION = "1.0.0"
@@ -953,7 +954,9 @@ def serve_game_asset(filename):
 
 @app.route("/")
 def index():
-    return render_template("index.html", show_welcome=True)
+    splash_texts = GAME_DATA.get("splash_texts", [])
+    splash = random.choice(splash_texts) if splash_texts else ""
+    return render_template("index.html", show_welcome=True, splash_text=splash)
 
 @app.route("/play")
 def play():
@@ -971,6 +974,10 @@ def create():
         gender = request.form.get("gender", "male")
         if gender not in ("male", "female"):
             gender = "male"
+        background = request.form.get("background", "soldier")
+        valid_backgrounds = {"soldier", "scholar", "street_rat", "farmer", "noble", "wanderer"}
+        if background not in valid_backgrounds:
+            background = "soldier"
         if not name:
             session["create_error"] = "Please enter a character name."
             return redirect(url_for("game"))
@@ -1002,11 +1009,28 @@ def create():
             base_gold += 25
             base_mp += 5
 
+        background_bonuses = {
+            "soldier":    {"attack": 5, "defense": 5},
+            "scholar":    {"mp": 8, "spell_power": 2},
+            "street_rat": {"speed": 3, "gold": 30},
+            "farmer":     {"hp": 20, "defense": 2},
+            "noble":      {"gold": 60, "gold_discount": 0.05},
+            "wanderer":   {"speed": 2, "exp_bonus": 0.10},
+        }
+        bg = background_bonuses.get(background, {})
+        base_atk  += bg.get("attack", 0)
+        base_def  += bg.get("defense", 0)
+        base_mp   += bg.get("mp", 0)
+        base_spd  += bg.get("speed", 0)
+        base_gold += bg.get("gold", 0)
+        base_hp   += bg.get("hp", 0)
+
         player = {
             "name": name,
             "class": cls,
             "race": race,
             "gender": gender,
+            "background": background,
             "level": 1,
             "experience": 0,
             "experience_to_next": 100,
@@ -1043,6 +1067,12 @@ def create():
             "weekly_challenges_progress": {},
             "boss_cooldowns": {},
         }
+        if bg.get("spell_power"):
+            player["attr_spell_power"] = player.get("attr_spell_power", 0) + bg["spell_power"]
+        if bg.get("gold_discount"):
+            player["attr_gold_discount"] = player.get("attr_gold_discount", 0.0) + bg["gold_discount"]
+        if bg.get("exp_bonus"):
+            player["attr_exp_bonus"] = player.get("attr_exp_bonus", 0.0) + bg["exp_bonus"]
         auto_equip_best(player)
         save_player(player)
         session["messages"] = []
