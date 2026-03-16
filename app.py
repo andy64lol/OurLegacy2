@@ -87,7 +87,9 @@ GAME_DATA = {
     "times": load_json("times.json"),
     "dialogues": load_json("dialogues.json"),
     "cutscenes": load_json("cutscenes.json"),
-    "splash_texts": load_json("splash_text.json") if isinstance(load_json("splash_text.json"), list) else [],
+    "splash_texts": load_json("splash_text.json")
+    if isinstance(load_json("splash_text.json"), list)
+    else [],
 }
 
 GAME_VERSION = "1.0.0"
@@ -958,6 +960,7 @@ def index():
     splash = random.choice(splash_texts) if splash_texts else ""
     return render_template("index.html", show_welcome=True, splash_text=splash)
 
+
 @app.route("/play")
 def play():
     return render_template("play.html")
@@ -975,8 +978,19 @@ def create():
         if gender not in ("male", "female", "nonbinary"):
             gender = "male"
         background = request.form.get("background", "soldier")
-        valid_backgrounds = {"soldier", "scholar", "street_rat", "farmer", "noble", "wanderer",
-                             "herbalist", "sailor", "mercenary", "acolyte", "blacksmith"}
+        valid_backgrounds = {
+            "soldier",
+            "scholar",
+            "street_rat",
+            "farmer",
+            "noble",
+            "wanderer",
+            "herbalist",
+            "sailor",
+            "mercenary",
+            "acolyte",
+            "blacksmith",
+        }
         if background not in valid_backgrounds:
             background = "soldier"
         if not name:
@@ -999,7 +1013,9 @@ def create():
         base_atk = max(1, stats["attack"] + race_mods.get("attack", 0))
         base_def = max(1, stats["defense"] + race_mods.get("defense", 0))
         base_spd = max(1, stats["speed"] + race_mods.get("speed", 0))
-        base_gold = max(0, cls_data.get("starting_gold", 100) + race_mods.get("gold", 0))
+        base_gold = max(
+            0, cls_data.get("starting_gold", 100) + race_mods.get("gold", 0)
+        )
 
         if gender == "male":
             base_atk += 4
@@ -1015,25 +1031,25 @@ def create():
             base_hp += 10
 
         background_bonuses = {
-            "soldier":    {"attack": 5, "defense": 5},
-            "scholar":    {"mp": 8, "spell_power": 2},
+            "soldier": {"attack": 5, "defense": 5},
+            "scholar": {"mp": 8, "spell_power": 2},
             "street_rat": {"speed": 3, "gold": 30},
-            "farmer":     {"hp": 20, "defense": 2},
-            "noble":      {"gold": 60, "gold_discount": 0.05},
-            "wanderer":   {"speed": 2, "exp_bonus": 0.10},
-            "herbalist":  {"hp": 12, "mp": 5},
-            "sailor":     {"attack": 3, "speed": 3},
-            "mercenary":  {"attack": 7},
-            "acolyte":    {"mp": 10, "spell_power": 1},
+            "farmer": {"hp": 20, "defense": 2},
+            "noble": {"gold": 60, "gold_discount": 0.05},
+            "wanderer": {"speed": 2, "exp_bonus": 0.10},
+            "herbalist": {"hp": 12, "mp": 5},
+            "sailor": {"attack": 3, "speed": 3},
+            "mercenary": {"attack": 7},
+            "acolyte": {"mp": 10, "spell_power": 1},
             "blacksmith": {"defense": 4, "attack": 2},
         }
         bg = background_bonuses.get(background, {})
-        base_atk  += bg.get("attack", 0)
-        base_def  += bg.get("defense", 0)
-        base_mp   += bg.get("mp", 0)
-        base_spd  += bg.get("speed", 0)
+        base_atk += bg.get("attack", 0)
+        base_def += bg.get("defense", 0)
+        base_mp += bg.get("mp", 0)
+        base_spd += bg.get("speed", 0)
         base_gold += bg.get("gold", 0)
-        base_hp   += bg.get("hp", 0)
+        base_hp += bg.get("hp", 0)
 
         player = {
             "name": name,
@@ -1078,11 +1094,17 @@ def create():
             "boss_cooldowns": {},
         }
         if bg.get("spell_power"):
-            player["attr_spell_power"] = player.get("attr_spell_power", 0) + bg["spell_power"]
+            player["attr_spell_power"] = (
+                player.get("attr_spell_power", 0) + bg["spell_power"]
+            )
         if bg.get("gold_discount"):
-            player["attr_gold_discount"] = player.get("attr_gold_discount", 0.0) + bg["gold_discount"]
+            player["attr_gold_discount"] = (
+                player.get("attr_gold_discount", 0.0) + bg["gold_discount"]
+            )
         if bg.get("exp_bonus"):
-            player["attr_exp_bonus"] = player.get("attr_exp_bonus", 0.0) + bg["exp_bonus"]
+            player["attr_exp_bonus"] = (
+                player.get("attr_exp_bonus", 0.0) + bg["exp_bonus"]
+            )
         auto_equip_best(player)
         save_player(player)
         session["messages"] = []
@@ -1094,7 +1116,9 @@ def create():
         session["seen_cutscenes"] = []
         session["current_weather"] = "sunny"
         trigger_cutscene("welcome_cutscene")
-        add_message(f"Welcome, {name} the {race} {cls}! Your legend begins.", "var(--gold)")
+        add_message(
+            f"Welcome, {name} the {race} {cls}! Your legend begins.", "var(--gold)"
+        )
         add_message(
             "You stand at the gates of the Starting Village. Adventure awaits.",
             "var(--text-light)",
@@ -1760,7 +1784,7 @@ def action_explore():
         npc = random.choice(area_npcs)
         npc_name = npc.get("name", "Stranger")
         dialogue = random.choice(npc.get("dialogues", ["..."]))
-        add_message(f'You encounter {npc_name}.', "var(--gold)")
+        add_message(f"You encounter {npc_name}.", "var(--gold)")
         add_message(f'"{dialogue}"', "var(--text-light)")
 
         # Quest unlock via NPC dialogue
@@ -1769,11 +1793,17 @@ def action_explore():
             completed_missions = session.get("completed_missions", [])
             npc_unlocked = session.get("npc_unlocked_quests", [])
             mission_info = GAME_DATA["missions"].get(quest_unlock, {})
-            if quest_unlock not in completed_missions and quest_unlock not in npc_unlocked and mission_info:
+            if (
+                quest_unlock not in completed_missions
+                and quest_unlock not in npc_unlocked
+                and mission_info
+            ):
                 npc_unlocked.append(quest_unlock)
                 session["npc_unlocked_quests"] = npc_unlocked
                 mission_name = mission_info.get("name", quest_unlock)
-                add_message(f'New quest unlocked: {mission_name}!', "var(--green-bright)")
+                add_message(
+                    f"New quest unlocked: {mission_name}!", "var(--green-bright)"
+                )
         npc_talked = True
 
     # ── Random Explore Events (one event per explore)
@@ -1783,23 +1813,41 @@ def action_explore():
             # Trap!
             dmg = random.randint(5, max(6, player.get("level", 1) * 3))
             player["hp"] = max(1, player["hp"] - dmg)
-            add_message(f"You trigger a hidden trap! You take {dmg} damage.", "var(--red)")
+            add_message(
+                f"You trigger a hidden trap! You take {dmg} damage.", "var(--red)"
+            )
         elif explore_event_roll < 0.14:
             # Ancient shrine — restore MP
             mp_restore = random.randint(10, 30)
             player["mp"] = min(player["max_mp"], player["mp"] + mp_restore)
-            add_message(f"You find an ancient shrine and meditate. +{mp_restore} MP restored.", "var(--mana-bright,#7eb8f7)")
+            add_message(
+                f"You find an ancient shrine and meditate. +{mp_restore} MP restored.",
+                "var(--mana-bright,#7eb8f7)",
+            )
         elif explore_event_roll < 0.19:
             # Mysterious tome — bonus EXP
             exp_bonus = random.randint(15, 40)
             player["exp"] = player.get("exp", 0) + exp_bonus
-            add_message(f"You discover a worn tome. Studying it grants you +{exp_bonus} EXP.", "var(--gold)")
+            add_message(
+                f"You discover a worn tome. Studying it grants you +{exp_bonus} EXP.",
+                "var(--gold)",
+            )
         elif explore_event_roll < 0.23:
             # Abandoned camp — find multiple items
-            finds = random.choice([["Health Potion"], ["Mana Potion"], ["Health Potion", "Rope"], ["Iron Arrow", "Iron Arrow"]])
+            finds = random.choice(
+                [
+                    ["Health Potion"],
+                    ["Mana Potion"],
+                    ["Health Potion", "Rope"],
+                    ["Iron Arrow", "Iron Arrow"],
+                ]
+            )
             for item in finds:
                 player["inventory"].append(item)
-            add_message(f"You find an abandoned camp with supplies: {', '.join(finds)}.", "var(--text-light)")
+            add_message(
+                f"You find an abandoned camp with supplies: {', '.join(finds)}.",
+                "var(--text-light)",
+            )
 
     # ── Non-combat exploration outcomes
     # 30% chance to find gold (5-20)
@@ -2007,7 +2055,10 @@ def action_buy():
         player["gold"] -= price
         player["inventory"].append(item_name)
         if discount > 0:
-            add_message(f"You purchase {item_name} for {price} gold (discount: {int(discount*100)}%).", "var(--gold)")
+            add_message(
+                f"You purchase {item_name} for {price} gold (discount: {int(discount * 100)}%).",
+                "var(--gold)",
+            )
         else:
             add_message(f"You purchase {item_name} for {price} gold.", "var(--gold)")
 
@@ -2750,9 +2801,7 @@ def battle_attack():
         crit = random.random() < 0.10
         if crit:
             p_dmg = int(p_dmg * 1.6)
-            log.append(
-                f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy_name}!"
-            )
+            log.append(f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy_name}!")
         else:
             log.append(f"You attack the {enemy_name} for {p_dmg} damage.")
         enemy["hp"] = max(0, enemy["hp"] - p_dmg)
