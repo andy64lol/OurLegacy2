@@ -1144,7 +1144,7 @@ def game():
         )
 
     # ── Battle state: show battle view inline ──────────────────────────────
-    enemy = session.get("battle_enemy")
+    enemy: dict[str, Any] = session.get("battle_enemy") or {}
     if enemy:
         battle_log = session.get("battle_log", [])
         usable_items = [
@@ -1160,8 +1160,8 @@ def game():
         has_magic_weapon = bool(
             weapon and isinstance(weapon_data, dict) and weapon_data.get("magic_weapon")
         )
-        player_effects = session.get("battle_player_effects", {})
-        enemy_effects = session.get("battle_enemy_effects", {})
+        player_effects: dict[str, Any] = session.get("battle_player_effects") or {}
+        enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
         boss_dialogue = None
         boss_phase_info = None
         boss_abilities_info = []
@@ -1573,7 +1573,7 @@ def game():
     )
     for d in dungeon_list:
         d["completed"] = d.get("id", "") in completed_dungeons_set
-    active_dungeon = session.get("active_dungeon")
+    active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}
 
     ensure_attributes(player)
     attr_summary = get_attribute_summary(player)
@@ -2711,7 +2711,7 @@ def battle():
 @app.route("/battle/spell", methods=["POST"])
 def battle_spell():
     player = get_player()
-    enemy = session.get("battle_enemy")
+    enemy: dict[str, Any] = session.get("battle_enemy") or {}
     if not player or not enemy:
         return redirect(url_for("game"))
 
@@ -2722,8 +2722,8 @@ def battle_spell():
     available_spells = get_available_spells(weapon, items_data, spells_data)
     available_names = [s["name"] for s in available_spells]
     log = session.get("battle_log", [])
-    player_effects = session.get("battle_player_effects", {})
-    enemy_effects = session.get("battle_enemy_effects", {})
+    player_effects: dict[str, Any] = session.get("battle_player_effects") or {}
+    enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
 
     # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
@@ -2781,13 +2781,13 @@ def battle_spell():
 @app.route("/battle/attack", methods=["POST"])
 def battle_attack():
     player = get_player()
-    enemy = session.get("battle_enemy")
+    enemy: dict[str, Any] = session.get("battle_enemy") or {}
     if not player or not enemy:
         return redirect(url_for("game"))
 
     log = session.get("battle_log", [])
-    player_effects = session.get("battle_player_effects", {})
-    enemy_effects = session.get("battle_enemy_effects", {})
+    player_effects: dict[str, Any] = session.get("battle_player_effects") or {}
+    enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
 
     # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
@@ -2836,13 +2836,13 @@ def battle_attack():
 @app.route("/battle/defend", methods=["POST"])
 def battle_defend():
     player = get_player()
-    enemy = session.get("battle_enemy")
+    enemy: dict[str, Any] = session.get("battle_enemy") or {}
     if not player or not enemy:
         return redirect(url_for("game"))
 
     log = session.get("battle_log", [])
-    player_effects = session.get("battle_player_effects", {})
-    enemy_effects = session.get("battle_enemy_effects", {})
+    player_effects: dict[str, Any] = session.get("battle_player_effects") or {}
+    enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
 
     # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
@@ -2881,13 +2881,13 @@ def battle_defend():
 @app.route("/battle/use_item", methods=["POST"])
 def battle_use_item():
     player = get_player()
-    enemy = session.get("battle_enemy")
+    enemy: dict[str, Any] = session.get("battle_enemy") or {}
     if not player or not enemy:
         return redirect(url_for("game"))
 
     log = session.get("battle_log", [])
-    player_effects = session.get("battle_player_effects", {})
-    enemy_effects = session.get("battle_enemy_effects", {})
+    player_effects: dict[str, Any] = session.get("battle_player_effects") or {}
+    enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
     item_name = request.form.get("item", "")
 
     if item_name not in player["inventory"]:
@@ -2930,7 +2930,7 @@ def battle_use_item():
 @app.route("/battle/flee", methods=["POST"])
 def battle_flee():
     player = get_player()
-    enemy = session.get("battle_enemy")
+    enemy: dict[str, Any] = session.get("battle_enemy") or {}
     if not player or not enemy:
         return redirect(url_for("game"))
 
@@ -3029,7 +3029,7 @@ def _handle_victory(player, enemy, log):
     save_player(player)
 
     # If inside a dungeon, return there instead of showing victory screen
-    active_dungeon = session.get("active_dungeon")
+    active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}
     if active_dungeon:
         rooms = active_dungeon.get("rooms", [])
         idx = active_dungeon.get("room_index", 0)
@@ -3053,7 +3053,7 @@ def _handle_defeat(player, enemy, log):
     log.append("You fall in battle...")
 
     # If inside a dungeon, restart the dungeon from the beginning
-    active_dungeon = session.get("active_dungeon")
+    active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}
     if active_dungeon:
         player["hp"] = max(1, int(player["max_hp"] * 0.40))
         log.append(f"You are dragged out of the dungeon, battered. HP: {player['hp']}")
@@ -3243,7 +3243,7 @@ def dungeon_enter():
 @app.route("/dungeon/room")
 def dungeon_room():
     player = get_player()
-    active = session.get("active_dungeon")
+    active: dict[str, Any] = session.get("active_dungeon") or {}
     if not player or not active:
         return redirect(url_for("game") + "?tab=dungeons")
 
@@ -3252,7 +3252,7 @@ def dungeon_room():
     if idx >= len(rooms):
         return redirect(url_for("dungeon_complete"))
 
-    room = rooms[idx]
+    room: dict[str, Any] = rooms[idx]
     dungeon = active.get("dungeon", {})
     current_challenge = active.get("current_challenge")
 
@@ -3285,7 +3285,7 @@ def dungeon_room():
 @app.route("/action/dungeon/proceed", methods=["POST"])
 def dungeon_proceed():
     player = get_player()
-    active = session.get("active_dungeon")
+    active: dict[str, Any] = session.get("active_dungeon") or {}
     if not player or not active:
         return redirect(url_for("game") + "?tab=dungeons")
 
@@ -3409,7 +3409,7 @@ def dungeon_proceed():
 @app.route("/dungeon/answer", methods=["POST"])
 def dungeon_answer():
     player = get_player()
-    active = session.get("active_dungeon")
+    active: dict[str, Any] = session.get("active_dungeon") or {}
     if not player or not active:
         return redirect(url_for("game") + "?tab=dungeons")
 
@@ -3433,7 +3433,7 @@ def dungeon_answer():
 @app.route("/dungeon/choose", methods=["POST"])
 def dungeon_choose():
     player = get_player()
-    active = session.get("active_dungeon")
+    active: dict[str, Any] = session.get("active_dungeon") or {}
     if not player or not active:
         return redirect(url_for("game") + "?tab=dungeons")
 
@@ -3457,7 +3457,7 @@ def dungeon_choose():
 @app.route("/dungeon/complete")
 def dungeon_complete():
     player = get_player()
-    active = session.get("active_dungeon")
+    active: dict[str, Any] = session.get("active_dungeon") or {}
     if not player:
         return redirect(url_for("index"))
 
