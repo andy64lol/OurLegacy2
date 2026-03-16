@@ -68,7 +68,7 @@ def load_json(filename) -> dict[str, Any]:
         return {}
 
 
-GAME_DATA = {
+GAME_DATA: dict[str, Any] = {
     "classes": load_json("classes.json"),
     "races": load_json("races.json"),
     "areas": load_json("areas.json"),
