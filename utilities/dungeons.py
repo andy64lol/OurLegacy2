@@ -303,9 +303,9 @@ def process_empty_room(_room: Dict[str, Any]) -> Dict[str, Any]:
     messages = [{'text': random.choice(msgs), 'color': 'var(--text-dim)'}]
     if event:
         if 'gold' in event:
-            messages.append({'text': event['text'], 'color': event['color']})
+            messages.append({'text': str(event['text']), 'color': str(event['color'])})
         elif 'heal' in event:
-            messages.append({'text': event['text'], 'color': event['color']})
+            messages.append({'text': str(event['text']), 'color': str(event['color'])})
     return {'type': 'empty', 'messages': messages}
 
 

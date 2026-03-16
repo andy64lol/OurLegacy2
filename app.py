@@ -18,6 +18,7 @@ import json
 import random
 import os
 import time as _time_module
+from typing import Any
 
 from utilities.stats import (
     ensure_attributes,
@@ -738,7 +739,12 @@ def auto_equip_best(player):
                 apply_item_bonuses(player, item_d, direction=-1)
 
     # Group inventory items by their equip slot
-    slot_candidates = {"weapon": [], "armor": [], "offhand": [], "accessory": []}
+    slot_candidates: dict[str, list[str]] = {
+        "weapon": [],
+        "armor": [],
+        "offhand": [],
+        "accessory": [],
+    }
     for item_name in list(player.get("inventory", [])):
         item_data = items_data.get(item_name, {})
         if not isinstance(item_data, dict):
@@ -881,7 +887,7 @@ def check_mission_completable(mission_id, player):
 
     elif mission_type == "collect":
         if isinstance(target_count, dict):
-            inv_counts = {}
+            inv_counts: dict[str, int] = {}
             for item in player.get("inventory", []):
                 inv_counts[item] = inv_counts.get(item, 0) + 1
             for item_name, needed in target_count.items():
@@ -932,7 +938,7 @@ def get_mission_progress_display(mission_id, player):
             )
 
     elif mission_type == "collect":
-        inv_counts = {}
+        inv_counts: dict[str, int] = {}
         for item in player.get("inventory", []):
             inv_counts[item] = inv_counts.get(item, 0) + 1
         if isinstance(target_count, dict):
@@ -1030,7 +1036,7 @@ def create():
             base_spd += 2
             base_hp += 10
 
-        background_bonuses = {
+        background_bonuses: dict[str, dict[str, Any]] = {
             "soldier": {"attack": 5, "defense": 5},
             "scholar": {"mp": 8, "spell_power": 2},
             "street_rat": {"speed": 3, "gold": 30},
@@ -1043,7 +1049,7 @@ def create():
             "acolyte": {"mp": 10, "spell_power": 1},
             "blacksmith": {"defense": 4, "attack": 2},
         }
-        bg = background_bonuses.get(background, {})
+        bg: dict[str, Any] = background_bonuses.get(background, {})
         base_atk += bg.get("attack", 0)
         base_def += bg.get("defense", 0)
         base_mp += bg.get("mp", 0)
@@ -1250,7 +1256,7 @@ def game():
 
     # Inventory
     inventory_items = []
-    counts = {}
+    counts: dict[str, int] = {}
     for item_name in player.get("inventory", []):
         counts[item_name] = counts.get(item_name, 0) + 1
     for item_name, count in counts.items():
@@ -1368,7 +1374,7 @@ def game():
         building_slots = player.get("building_slots", {})
         crops = player.get("crops", {})
 
-        housing_by_type = {}
+        housing_by_type: dict[str, list[Any]] = {}
         for h_key, h_item in housing_data.items():
             h_type = h_item.get("type", "decoration")
             if h_type not in housing_by_type:
@@ -1386,7 +1392,7 @@ def game():
                 }
             )
 
-        placed_by_type = {}
+        placed_by_type: dict[str, list[Any]] = {}
         for slot_id, h_key in building_slots.items():
             if h_key:
                 slot_type = slot_id.rsplit("_", 1)[0]
@@ -2676,7 +2682,7 @@ def land_train():
         return redirect(url_for("game") + "?tab=land")
 
     player["gold"] -= cost
-    stat = option["stat"]
+    stat = str(option["stat"])
     gain = option["gain"]
     player[stat] = player.get(stat, 0) + gain
     # If training max_hp, also restore current hp a bit

@@ -57,7 +57,7 @@ def cast_spell(
     Cast a spell. Modifies player dict in place (MP cost).
     Returns a result dict with messages and outcome data.
     """
-    messages = []
+    messages: List[Dict[str, Any]] = []
     cost = spell_data.get("mp_cost", 0)
     check = can_cast_spell(player, spell_data)
     if not check["ok"]:
