@@ -518,9 +518,9 @@
          "class": "Bard"
       }
    },
-   "H\u00e4mmelson's Legendary Flute": {
+   "Hämmelson's Legendary Flute": {
       "type": "weapon",
-      "description": "The masterpiece of the legendary bard H\u00e4mmelson, each note carries the power to move mountains.",
+      "description": "The masterpiece of the legendary bard Hämmelson, each note carries the power to move mountains.",
       "attack_bonus": 175,
       "mp_bonus": 50,
       "speed_bonus": 3,
@@ -532,9 +532,9 @@
          "class": "Bard"
       }
    },
-   "War Drum of The god of Thunder Z\u00e2esltral": {
+   "War Drum of The god of Thunder Zâesltral": {
       "type": "weapon",
-      "description": "The sacred war drum of the storm god Z\u00e2esltral, its beating shakes the very foundations of reality.",
+      "description": "The sacred war drum of the storm god Zâesltral, its beating shakes the very foundations of reality.",
       "attack_bonus": 195,
       "mp_bonus": 35,
       "magic_weapon": true,
@@ -727,9 +727,9 @@
          "class": "Bard"
       }
    },
-   "The Poetry god \u00c4epleollo's Robe": {
+   "The Poetry god Äepleollo's Robe": {
       "type": "armor",
-      "description": "The divine robes of the Poetry god \u00c4epleollo, woven from verses of pure inspiration. Wearing it grants the power to turn words into reality.",
+      "description": "The divine robes of the Poetry god Äepleollo, woven from verses of pure inspiration. Wearing it grants the power to turn words into reality.",
       "defense_bonus": 15,
       "mp_bonus": 55,
       "attack_bonus": 8,
@@ -2450,9 +2450,9 @@
          "class": "Mage"
       }
    },
-   "D\u00e4lokurg's Warhammer": {
+   "Dälokurg's Warhammer": {
       "type": "weapon",
-      "description": "A huge warhammer that once belonged to the infamous bandit leader of Br\u00efgadrak Oblast.",
+      "description": "A huge warhammer that once belonged to the infamous bandit leader of Brïgadrak Oblast.",
       "attack_bonus": 192,
       "price": 320,
       "rarity": "legendary",
@@ -2463,7 +2463,7 @@
    },
    "Bandit Leader's Cloak": {
       "type": "armor",
-      "description": "A cloak worn by D\u00e4lokurg, providing stealth and agility.",
+      "description": "A cloak worn by Dälokurg, providing stealth and agility.",
       "defense_bonus": 120,
       "speed_bonus": 140,
       "price": 280,
@@ -3358,7 +3358,7 @@
    },
    "Sultan's Signet Ring": {
       "type": "accessory",
-      "description": "A heavy gold ring bearing the seal of the Ottoman Sultan. Commands respect \u2014 and fear.",
+      "description": "A heavy gold ring bearing the seal of the Ottoman Sultan. Commands respect — and fear.",
       "attack_bonus": 5,
       "defense_bonus": 5,
       "gold_bonus": 0,
@@ -3415,7 +3415,7 @@
    },
    "Janissary Badge": {
       "type": "material",
-      "description": "The insignia badge of a Janissary soldier \u2014 proof of a hard-won fight.",
+      "description": "The insignia badge of a Janissary soldier — proof of a hard-won fight.",
       "price": 30,
       "rarity": "common"
    },
@@ -3480,17 +3480,10 @@
       "price": 80,
       "rarity": "rare"
    },
-   "Origins of the Osman People": {
-      "type": "book",
-      "book_key": "origins_of_the_osmans",
-      "description": "A scholarly history tracing the Osman people from the steppes north of Yixuan to empire. By Archivist Palaiologos.",
-      "price": 45,
-      "rarity": "uncommon"
-   },
    "The New Order: Life in Kostantora": {
       "type": "book",
       "book_key": "new_order_of_kostantora",
-      "description": "A personal account of Kostantora fifteen years after the conquest \u2014 the slave markets, faith, and survival. By Miriam of the Lower City.",
+      "description": "A personal account of Kostantora fifteen years after the conquest — the slave markets, faith, and survival. By Miriam of the Lower City.",
       "price": 70,
       "rarity": "rare"
    },
@@ -3501,11 +3494,60 @@
       "price": 50,
       "rarity": "uncommon"
    },
-   "The Faith and Law of the Osmano\u011flu Empire": {
+   "Origins of the Kalovar People": {
       "type": "book",
-      "book_key": "osman_faith_and_law",
-      "description": "An official Osman guide for travellers. Informative, one-sided, and useful in its own way.",
+      "book_key": "origins_of_the_kalovars",
+      "description": "A scholarly history tracing the Kalovar people from the steppes north of Yixuan to empire. By Archivist Palaiologos.",
+      "price": 45,
+      "rarity": "uncommon"
+   },
+   "The Faith and Law of the Kalovanim Empire": {
+      "type": "book",
+      "book_key": "kalovar_faith_and_law",
+      "description": "An official Kalovar guide for travellers. Informative, one-sided, and useful in its own way.",
       "price": 20,
       "rarity": "common"
+   },
+   "The Warrior's Code of Byzantra": {
+      "type": "book",
+      "book_key": "warriors_code_of_byzantra",
+      "description": "A field manual and philosophical treatise on warfare by General Andronikos Doukas. Practical and unexpectedly moving.",
+      "price": 55,
+      "rarity": "uncommon"
+   },
+   "Voices from the Steppes": {
+      "type": "book",
+      "book_key": "voices_from_the_steppes",
+      "description": "A collection of Kalovar oral poems and tales gathered by Scholar Erasimos. Strange and illuminating.",
+      "price": 75,
+      "rarity": "rare"
+   },
+   "The Merchant's Road": {
+      "type": "book",
+      "book_key": "the_merchants_road",
+      "description": "A practical traveller's guide to trade routes and city markets across the known world. Annotated extensively.",
+      "price": 30,
+      "rarity": "common"
+   },
+   "The Last Basileus": {
+      "type": "book",
+      "book_key": "last_basileus",
+      "description": "A biography of Konstantinos IX, last emperor of Byzantra. Written in exile by Lady Eudokia Asanina.",
+      "price": 85,
+      "rarity": "rare"
+   },
+   "Talisman of Andŕëo": {
+      "type": "weapon",
+      "description": "A sacred talisman forged in the heart of the Eternal Flame, blessed by ancient spirits. Wielded only by those chosen by destiny itself. Gifted freely on the day of its creator’s birth.",
+      "attack_bonus": 99,
+      "magic_weapon": true,
+      "mp_bonus": 50,
+      "speed_bonus": 10,
+      "hp_bonus": 50,
+      "price": 9999,
+      "rarity": "legendary",
+      "requirements": {
+         "level": 1
+      }
    }
 }

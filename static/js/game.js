@@ -192,7 +192,11 @@ function renderMarket(data, container) {
         var price = item.marketPrice || item.price || 0;
         var rarity = (item.rarity || 'common').toLowerCase();
         var canAfford = gold >= price;
-        html += '<div class="shop-item-row" style="margin-bottom:10px;padding:12px;background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;">';
+        var isBirthday = !!item.birthday_special;
+        var rowStyle = 'margin-bottom:10px;padding:12px;background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;';
+        if (isBirthday) rowStyle = 'margin-bottom:10px;padding:12px;background:linear-gradient(135deg,#1a0a2e,#0a1a2e);border:2px solid var(--gold);border-radius:6px;box-shadow:0 0 14px rgba(255,200,50,0.25);';
+        html += '<div class="shop-item-row" style="' + rowStyle + '">';
+        if (isBirthday) html += '<div style="font-size:11px;color:var(--gold);margin-bottom:6px;letter-spacing:1px;">&#9733; BIRTHDAY SPECIAL &mdash; FREE TODAY ONLY &#9733;</div>';
         html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">';
         html += '<div>';
         html += '<span class="item-name rarity-' + rarity + '">' + (item.name || item.itemName || '?') + '</span>';
@@ -206,12 +210,16 @@ function renderMarket(data, container) {
         }
         html += '</div>';
         html += '<div style="display:flex;align-items:center;gap:8px;">';
-        html += '<span class="gold-amount">' + price + ' gold</span>';
+        if (isBirthday) {
+            html += '<span style="color:var(--gold);font-weight:bold;">FREE</span>';
+        } else {
+            html += '<span class="gold-amount">' + price + ' gold</span>';
+        }
         if (canAfford) {
             html += '<form method="POST" action="/action/market/buy" onsubmit="document.body.classList.add(\'page-fade-out\')">' +
                 '<input type="hidden" name="item_name" value="' + (item.name || item.itemName) + '">' +
                 '<input type="hidden" name="item_price" value="' + price + '">' +
-                '<button type="submit" class="btn btn-primary">Buy</button></form>';
+                '<button type="submit" class="btn btn-primary">' + (isBirthday ? 'Claim Free' : 'Buy') + '</button></form>';
         } else {
             html += '<button class="btn btn-disabled" disabled>Not enough gold</button>';
         }
