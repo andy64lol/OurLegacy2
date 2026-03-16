@@ -81,6 +81,94 @@
       "harvest_amount": 3,
       "sell_price": 80,
       "rarity": "epic"
+    },
+    "rice": {
+      "name": "Rice",
+      "description": "A staple grain from the eastern wetlands of Yixuan, needs flooded soil to thrive",
+      "growth_time": 6,
+      "harvest_amount": 5,
+      "sell_price": 20,
+      "rarity": "common"
+    },
+    "bamboo_shoots": {
+      "name": "Bamboo Shoots",
+      "description": "Tender young bamboo shoots, prized in eastern cooking",
+      "growth_time": 5,
+      "harvest_amount": 4,
+      "sell_price": 25,
+      "rarity": "uncommon"
+    },
+    "soybeans": {
+      "name": "Soybeans",
+      "description": "Versatile eastern legumes used in countless preparations",
+      "growth_time": 5,
+      "harvest_amount": 6,
+      "sell_price": 18,
+      "rarity": "common"
+    },
+    "sugarcane": {
+      "name": "Sugarcane",
+      "description": "Tall sweet stalks from southern climates, pressed for their precious juice",
+      "growth_time": 10,
+      "harvest_amount": 4,
+      "sell_price": 40,
+      "rarity": "uncommon"
+    },
+    "black_pepper": {
+      "name": "Black Pepper",
+      "description": "Prized spice from the southern wetlands, worth its weight in silver on northern markets",
+      "growth_time": 8,
+      "harvest_amount": 3,
+      "sell_price": 55,
+      "rarity": "rare"
+    },
+    "mushroom": {
+      "name": "Mushroom",
+      "description": "Earthy fungi that thrive in shade and damp — good eating, some are medicinal",
+      "growth_time": 3,
+      "harvest_amount": 5,
+      "sell_price": 22,
+      "rarity": "common"
+    },
+    "barley": {
+      "name": "Barley",
+      "description": "Hardy grain that survives cold climates — staple of northern clans and border towns",
+      "growth_time": 4,
+      "harvest_amount": 4,
+      "sell_price": 16,
+      "rarity": "common"
+    },
+    "sunflower": {
+      "name": "Sunflower",
+      "description": "Tall golden flowers with oil-rich seeds, beloved by northern farmers",
+      "growth_time": 6,
+      "harvest_amount": 3,
+      "sell_price": 28,
+      "rarity": "common"
+    },
+    "melon": {
+      "name": "Melon",
+      "description": "A large and sweet summer fruit, cool and refreshing in hot weather",
+      "growth_time": 8,
+      "harvest_amount": 2,
+      "sell_price": 35,
+      "rarity": "uncommon"
+    },
+    "pumpkin": {
+      "name": "Pumpkin",
+      "description": "A hearty autumn gourd, good for soups, pies, and keeping through winter",
+      "growth_time": 10,
+      "harvest_amount": 3,
+      "sell_price": 30,
+      "rarity": "uncommon"
+    },
+    "jade_lotus": {
+      "name": "Jade Lotus",
+      "description": "A rare eastern water flower with potent medicinal properties, grown in still ponds",
+      "growth_time": 14,
+      "harvest_amount": 2,
+      "sell_price": 90,
+      "rarity": "epic"
     }
   },
   "foods": {
@@ -131,6 +219,78 @@
       "value": 100,
       "sell_price": 120,
       "rarity": "epic"
+    },
+    "rice_bowl": {
+      "name": "Rice Bowl",
+      "description": "A simple but filling bowl of steamed rice, a staple across Yixuan",
+      "effect": "heal",
+      "value": 35,
+      "sell_price": 28,
+      "rarity": "common"
+    },
+    "stir_fry": {
+      "name": "Stir Fry",
+      "description": "Bamboo shoots, soybeans and vegetables cooked swiftly over high flame — an eastern classic",
+      "effect": "heal",
+      "value": 55,
+      "sell_price": 48,
+      "rarity": "uncommon"
+    },
+    "mushroom_stew": {
+      "name": "Mushroom Stew",
+      "description": "A rich and earthy northern stew, warming in cold weather",
+      "effect": "heal",
+      "value": 50,
+      "sell_price": 42,
+      "rarity": "uncommon"
+    },
+    "barley_bread": {
+      "name": "Barley Bread",
+      "description": "Dense and nourishing bread from northern grain, long-lasting on the road",
+      "effect": "heal",
+      "value": 40,
+      "sell_price": 32,
+      "rarity": "common"
+    },
+    "pumpkin_soup": {
+      "name": "Pumpkin Soup",
+      "description": "A thick autumn soup, warming and sweet — a harvest favourite",
+      "effect": "heal",
+      "value": 45,
+      "sell_price": 38,
+      "rarity": "uncommon"
+    },
+    "sweet_melon_slice": {
+      "name": "Sweet Melon Slice",
+      "description": "A cool and refreshing slice of summer melon, perfect after a long march",
+      "effect": "heal",
+      "value": 30,
+      "sell_price": 25,
+      "rarity": "common"
+    },
+    "jade_lotus_tea": {
+      "name": "Jade Lotus Tea",
+      "description": "A rare medicinal brew from the eastern jade lotus flower. Restores vitality and clears the mind.",
+      "effect": "heal",
+      "value": 120,
+      "sell_price": 140,
+      "rarity": "epic"
+    },
+    "warriors_grain": {
+      "name": "Warrior's Grain",
+      "description": "A dense cake of barley, honey, and rendered fat, eaten by Varak clan warriors before battle",
+      "effect": "heal",
+      "value": 60,
+      "sell_price": 55,
+      "rarity": "rare"
+    },
+    "pepper_broth": {
+      "name": "Pepper Broth",
+      "description": "A fiery soup brewed with black pepper and root vegetables, clears the lungs and warms the blood",
+      "effect": "heal",
+      "value": 48,
+      "sell_price": 44,
+      "rarity": "uncommon"
     }
   }
 }

@@ -524,17 +524,347 @@
       "skill_requirement": 5,
       "craft_time": 3,
       "rarity": "epic"
+    },
+    "rice_bowl": {
+      "name": "Rice Bowl",
+      "description": "A simple steamed rice bowl — filling and restorative",
+      "category": "Consumables",
+      "output": {
+        "Rice Bowl": 1
+      },
+      "materials": {
+        "Rice Bundle": 2
+      },
+      "skill_requirement": 1,
+      "craft_time": 1,
+      "rarity": "common"
+    },
+    "stir_fry": {
+      "name": "Stir Fry",
+      "description": "Bamboo shoots and soybeans cooked quickly over high heat in the eastern style",
+      "category": "Consumables",
+      "output": {
+        "Stir Fry": 1
+      },
+      "materials": {
+        "Bamboo Fiber": 2,
+        "Fermented Soybean Paste": 1,
+        "Eastern Spice Bundle": 1
+      },
+      "skill_requirement": 2,
+      "craft_time": 1,
+      "rarity": "uncommon"
+    },
+    "mushroom_stew": {
+      "name": "Mushroom Stew",
+      "description": "A hearty northern stew brewed from foraged mushrooms and root vegetables",
+      "category": "Consumables",
+      "output": {
+        "Mushroom Stew": 1
+      },
+      "materials": {
+        "Herb": 3,
+        "Spring Water": 1
+      },
+      "skill_requirement": 2,
+      "craft_time": 1,
+      "rarity": "uncommon"
+    },
+    "barley_bread": {
+      "name": "Barley Bread",
+      "description": "Dense northern bread — long-lasting and nourishing on the road",
+      "category": "Consumables",
+      "output": {
+        "Barley Bread": 2
+      },
+      "materials": {
+        "Rice Bundle": 1,
+        "Spring Water": 1
+      },
+      "skill_requirement": 1,
+      "craft_time": 1,
+      "rarity": "common"
+    },
+    "pumpkin_soup": {
+      "name": "Pumpkin Soup",
+      "description": "A thick, warming autumn soup — a harvest-season favourite",
+      "category": "Consumables",
+      "output": {
+        "Pumpkin Soup": 1
+      },
+      "materials": {
+        "Herb": 2,
+        "Spring Water": 2
+      },
+      "skill_requirement": 2,
+      "craft_time": 1,
+      "rarity": "uncommon"
+    },
+    "jade_lotus_tea": {
+      "name": "Jade Lotus Tea",
+      "description": "A rare medicinal tea brewed from the prized jade lotus flower",
+      "category": "Potions",
+      "output": {
+        "Jade Lotus Tea": 1
+      },
+      "materials": {
+        "Lotus Root": 2,
+        "Spring Water": 2,
+        "Jade Fragment": 1
+      },
+      "skill_requirement": 5,
+      "craft_time": 3,
+      "rarity": "epic"
+    },
+    "warriors_grain_cake": {
+      "name": "Warrior's Grain Cake",
+      "description": "A dense battle-cake of barley and fat, eaten by Varak warriors before combat",
+      "category": "Consumables",
+      "output": {
+        "Warrior's Grain": 2
+      },
+      "materials": {
+        "Rice Bundle": 3,
+        "Barbarian Iron Chunk": 1
+      },
+      "skill_requirement": 3,
+      "craft_time": 2,
+      "rarity": "rare"
+    },
+    "dao_blade_forge": {
+      "name": "Dao Blade",
+      "description": "A gracefully curved eastern sword, forged in the Yixuan tradition",
+      "category": "Enchantments",
+      "output": {
+        "Dao Blade": 1
+      },
+      "materials": {
+        "Steel Ingot": 3,
+        "Yixuan Silk": 1,
+        "Leather Strip": 1
+      },
+      "skill_requirement": 4,
+      "craft_time": 3,
+      "rarity": "uncommon"
+    },
+    "bamboo_staff_craft": {
+      "name": "Bamboo Staff",
+      "description": "A seasoned bamboo staff reinforced with iron bands",
+      "category": "Enchantments",
+      "output": {
+        "Bamboo Staff": 1
+      },
+      "materials": {
+        "Bamboo Fiber": 4,
+        "Iron Ore": 2
+      },
+      "skill_requirement": 2,
+      "craft_time": 2,
+      "rarity": "common"
+    },
+    "clan_greataxe_forge": {
+      "name": "Clan Greataxe",
+      "description": "A double-headed greataxe in the northern clan tradition",
+      "category": "Enchantments",
+      "output": {
+        "Clan Greataxe": 1
+      },
+      "materials": {
+        "Barbarian Iron Chunk": 5,
+        "Northern Fur Pelt": 1,
+        "Leather Strip": 2
+      },
+      "skill_requirement": 5,
+      "craft_time": 4,
+      "rarity": "uncommon"
+    },
+    "warbrand_forge": {
+      "name": "Warbrand",
+      "description": "A long heavy two-handed clan blade — the weapon of Varak champions",
+      "category": "Enchantments",
+      "output": {
+        "Warbrand": 1
+      },
+      "materials": {
+        "Steel Ingot": 4,
+        "Barbarian Iron Chunk": 3,
+        "Barbarian Totem Shard": 1
+      },
+      "skill_requirement": 7,
+      "craft_time": 5,
+      "rarity": "rare"
+    },
+    "silk_robe_craft": {
+      "name": "Yixuan Silk Robe",
+      "description": "A flowing eastern robe woven from finest silk",
+      "category": "Enchantments",
+      "output": {
+        "Yixuan Silk Robe": 1
+      },
+      "materials": {
+        "Yixuan Silk": 5,
+        "Jade Fragment": 1,
+        "Crystal Shard": 2
+      },
+      "skill_requirement": 5,
+      "craft_time": 4,
+      "rarity": "rare"
+    },
+    "war_paint_leather_craft": {
+      "name": "Barbarian War-Paint Leather",
+      "description": "Northern leather armour daubed with clan war-paint and old blessings",
+      "category": "Enchantments",
+      "output": {
+        "Barbarian War-Paint Leather": 1
+      },
+      "materials": {
+        "Leather Strip": 4,
+        "Clan War-Paint Pigment": 2,
+        "Barbarian Totem Shard": 1
+      },
+      "skill_requirement": 4,
+      "craft_time": 3,
+      "rarity": "uncommon"
+    },
+    "fur_cloak_craft": {
+      "name": "Fur-Lined Clan Cloak",
+      "description": "A thick northern cloak of layered clan furs",
+      "category": "Enchantments",
+      "output": {
+        "Fur-Lined Clan Cloak": 1
+      },
+      "materials": {
+        "Northern Fur Pelt": 3,
+        "Leather Strip": 2
+      },
+      "skill_requirement": 3,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "jade_tea_brew": {
+      "name": "Jade Tea",
+      "description": "A calming eastern tea that restores MP",
+      "category": "Potions",
+      "output": {
+        "Jade Tea": 2
+      },
+      "materials": {
+        "Herb": 2,
+        "Spring Water": 1,
+        "Jade Fragment": 1
+      },
+      "skill_requirement": 3,
+      "craft_time": 1,
+      "rarity": "uncommon"
+    },
+    "warriors_brew": {
+      "name": "Warrior's Brew",
+      "description": "A Varak clan battle-drink brewed from fermented barley",
+      "category": "Elixirs",
+      "output": {
+        "Warrior's Brew": 1
+      },
+      "materials": {
+        "Rice Bundle": 2,
+        "Orc Tooth": 1,
+        "Spring Water": 2
+      },
+      "skill_requirement": 4,
+      "craft_time": 2,
+      "rarity": "rare"
+    },
+    "eastern_herb_medicine": {
+      "name": "Eastern Herb Medicine",
+      "description": "A dark medicinal paste from Yixuan herbal tradition",
+      "category": "Potions",
+      "output": {
+        "Eastern Herb Medicine": 1
+      },
+      "materials": {
+        "Herb": 4,
+        "Lotus Root": 1,
+        "Spring Water": 1
+      },
+      "skill_requirement": 3,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "jade_lotus_draught": {
+      "name": "Jade Lotus Draught",
+      "description": "A powerful distillation of jade lotus — rare and highly restorative",
+      "category": "Potions",
+      "output": {
+        "Jade Lotus Draught": 1
+      },
+      "materials": {
+        "Lotus Root": 3,
+        "Jade Fragment": 2,
+        "Crystal Shard": 3,
+        "Spring Water": 2
+      },
+      "skill_requirement": 7,
+      "craft_time": 4,
+      "rarity": "rare"
     }
   },
   "material_categories": {
-    "ores": ["Iron Ore", "Coal", "Steel Ingot", "Gold Nugget"],
-    "herbs": ["Herb", "Mana Herb", "Spring Water"],
-    "crystals": ["Crystal Shard", "Dark Crystal", "Ice Crystal", "Void Crystal", "Fire Gem"],
-    "monster_parts": ["Goblin Ear", "Orc Tooth", "Bone Fragment", "Wolf Fang", "Venom Sac", "Serpent Tail", "Swamp Scale", "Troll Hide"],
-    "magical": ["Phoenix Feather", "Dragon Scale", "Ancient Relic", "Eternal Essence", "Soul Fragment", "Shadow Essence", "Fire Essence", "Ice Essence"],
-    "leather": ["Leather", "Leather Strip"],
-    "wood": ["Hardwood", "Stone Block"],
-    "crops": ["Wheat", "Corn", "Tomato", "Potato", "Carrot", "Apple", "Grape", "Strawberry", "Lettuce", "Dragon Fruit"]
+    "ores": [
+      "Iron Ore",
+      "Coal",
+      "Steel Ingot",
+      "Gold Nugget"
+    ],
+    "herbs": [
+      "Herb",
+      "Mana Herb",
+      "Spring Water"
+    ],
+    "crystals": [
+      "Crystal Shard",
+      "Dark Crystal",
+      "Ice Crystal",
+      "Void Crystal",
+      "Fire Gem"
+    ],
+    "monster_parts": [
+      "Goblin Ear",
+      "Orc Tooth",
+      "Bone Fragment",
+      "Wolf Fang",
+      "Venom Sac",
+      "Serpent Tail",
+      "Swamp Scale",
+      "Troll Hide"
+    ],
+    "magical": [
+      "Phoenix Feather",
+      "Dragon Scale",
+      "Ancient Relic",
+      "Eternal Essence",
+      "Soul Fragment",
+      "Shadow Essence",
+      "Fire Essence",
+      "Ice Essence"
+    ],
+    "leather": [
+      "Leather",
+      "Leather Strip"
+    ],
+    "wood": [
+      "Hardwood",
+      "Stone Block"
+    ],
+    "crops": [
+      "Wheat",
+      "Corn",
+      "Tomato",
+      "Potato",
+      "Carrot",
+      "Apple",
+      "Grape",
+      "Strawberry",
+      "Lettuce",
+      "Dragon Fruit"
+    ]
   }
 }
-

@@ -3037,12 +3037,13 @@
    },
    "Bone Hatchet": {
       "type": "weapon",
-      "description": "A crude but effective hatchet fashioned from large animal bones.",
-      "attack_bonus": 10,
-      "price": 55,
+      "description": "A small hatchet with a bone-inlaid handle, quickly thrown or drawn in close quarters",
+      "attack_bonus": 12,
+      "speed_bonus": 4,
+      "price": 65,
       "rarity": "common",
       "requirements": {
-         "level": 1
+         "level": 2
       }
    },
    "Taiga Hunter's Bow": {
@@ -3549,5 +3550,330 @@
       "requirements": {
          "level": 1
       }
+   },
+   "The River Kingdoms of Yixuan": {
+      "type": "book",
+      "book_key": "river_kingdoms_of_yixuan",
+      "description": "A geographic survey of the eastern continent and its river kingdoms, by Scholar Periandros.",
+      "price": 45,
+      "rarity": "uncommon"
+   },
+   "Tales of the Jade Court": {
+      "type": "book",
+      "book_key": "tales_of_the_jade_court",
+      "description": "Stories and parables from the eastern Jade Court. Clever, strange, and illuminating.",
+      "price": 70,
+      "rarity": "rare"
+   },
+   "Songs of the Northern Clans": {
+      "type": "book",
+      "book_key": "songs_of_the_northern_clans",
+      "description": "Barbarian sagas and hearth songs of the Varak Confederation, collected by a border scholar.",
+      "price": 65,
+      "rarity": "rare"
+   },
+   "The Iron Horde": {
+      "type": "book",
+      "book_key": "the_iron_horde",
+      "description": "A military history of the northern incursions, told from both sides of the border.",
+      "price": 50,
+      "rarity": "uncommon"
+   },
+   "The Eastern Alchemist's Compendium": {
+      "type": "book",
+      "book_key": "eastern_alchemists_compendium",
+      "description": "Yixuan medicines and healing philosophy, translated by a sceptical western physician who became less sceptical.",
+      "price": 80,
+      "rarity": "rare"
+   },
+   "Yixuan Silk": {
+      "type": "material",
+      "description": "Lustrous silk from the eastern kingdoms, lighter than linen and stronger than you'd expect",
+      "price": 35,
+      "rarity": "uncommon"
+   },
+   "Bamboo Fiber": {
+      "type": "material",
+      "description": "Stripped and cured bamboo fibre, surprisingly tough and flexible",
+      "price": 12,
+      "rarity": "common"
+   },
+   "Jade Fragment": {
+      "type": "material",
+      "description": "A chip of genuine eastern jade, prized for both its beauty and its alleged protective properties",
+      "price": 60,
+      "rarity": "rare"
+   },
+   "Eastern Spice Bundle": {
+      "type": "material",
+      "description": "A wrapped bundle of black pepper, star anise, and dried ginger from Yixuan markets",
+      "price": 40,
+      "rarity": "uncommon"
+   },
+   "Barbarian Iron Chunk": {
+      "type": "material",
+      "description": "Crudely smelted iron from the northern clans — impure, but their smiths know tricks with it",
+      "price": 18,
+      "rarity": "common"
+   },
+   "Clan War-Paint Pigment": {
+      "type": "material",
+      "description": "Thick pigment used by the Varak clans in battle rituals. Said to carry old blessing",
+      "price": 25,
+      "rarity": "uncommon"
+   },
+   "Lotus Root": {
+      "type": "material",
+      "description": "The starchy root of the jade lotus plant, used in eastern medicines and cooking",
+      "price": 30,
+      "rarity": "uncommon"
+   },
+   "Rice Bundle": {
+      "type": "material",
+      "description": "A tied sheaf of harvested rice, ready for milling or trade",
+      "price": 10,
+      "rarity": "common"
+   },
+   "Fermented Soybean Paste": {
+      "type": "material",
+      "description": "A pungent eastern ingredient made from aged soybeans. Essential for many Yixuan preparations",
+      "price": 22,
+      "rarity": "common"
+   },
+   "Northern Fur Pelt": {
+      "type": "material",
+      "description": "A thick pelt from the northern wilderness, warm enough for any winter",
+      "price": 45,
+      "rarity": "uncommon"
+   },
+   "Barbarian Totem Shard": {
+      "type": "material",
+      "description": "A broken fragment of a clan totem pole, carved with northern spirit-marks",
+      "price": 55,
+      "rarity": "rare"
+   },
+   "Dao Blade": {
+      "type": "weapon",
+      "description": "A gracefully curved eastern sword with a single cutting edge, fast and precise",
+      "attack_bonus": 18,
+      "speed_bonus": 3,
+      "price": 120,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 3
+      }
+   },
+   "Jade Spear": {
+      "type": "weapon",
+      "description": "A long thrusting spear tipped with hardened jade, its shaft wrapped in silk cord",
+      "attack_bonus": 22,
+      "defense_bonus": 3,
+      "price": 160,
+      "rarity": "rare",
+      "requirements": {
+         "level": 5
+      }
+   },
+   "Bamboo Staff": {
+      "type": "weapon",
+      "description": "A seasoned bamboo staff reinforced with iron bands — light, fast, and deceptively powerful",
+      "attack_bonus": 14,
+      "speed_bonus": 5,
+      "mp_bonus": 10,
+      "price": 85,
+      "rarity": "common",
+      "requirements": {
+         "level": 2
+      }
+   },
+   "Serpent Fang Dagger": {
+      "type": "weapon",
+      "description": "A curved dagger shaped like a serpent's fang, favoured by Yixuan river-clan assassins",
+      "attack_bonus": 16,
+      "speed_bonus": 6,
+      "price": 140,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 4
+      }
+   },
+   "Silk-Wrapped Yari": {
+      "type": "weapon",
+      "description": "An elegant eastern polearm with a cross-guard, its grip wrapped in layered silk",
+      "attack_bonus": 28,
+      "defense_bonus": 2,
+      "price": 220,
+      "rarity": "rare",
+      "requirements": {
+         "level": 6
+      }
+   },
+   "Jade Dragon Sword": {
+      "type": "weapon",
+      "description": "A masterwork blade from the forges of River's Crown, with a jade-inlaid dragon hilt. Legendary in the east.",
+      "attack_bonus": 65,
+      "speed_bonus": 8,
+      "mp_bonus": 25,
+      "magic_weapon": true,
+      "price": 800,
+      "rarity": "legendary",
+      "requirements": {
+         "level": 10
+      }
+   },
+   "Clan Greataxe": {
+      "type": "weapon",
+      "description": "A massive double-headed axe from the northern clans — brutal, heavy, and extraordinarily effective",
+      "attack_bonus": 30,
+      "speed_bonus": -2,
+      "price": 180,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 5
+      }
+   },
+   "Warbrand": {
+      "type": "weapon",
+      "description": "A long, heavy two-handed sword used by Varak clan champions — massive reach, devastating power",
+      "attack_bonus": 38,
+      "speed_bonus": -1,
+      "price": 250,
+      "rarity": "rare",
+      "requirements": {
+         "level": 7
+      }
+   },
+   "Skull-Crusher Maul": {
+      "type": "weapon",
+      "description": "An iron-shod wooden war-maul. Not elegant. Very effective.",
+      "attack_bonus": 35,
+      "speed_bonus": -3,
+      "price": 200,
+      "rarity": "rare",
+      "requirements": {
+         "level": 6
+      }
+   },
+   "Iron Horde Axe": {
+      "type": "weapon",
+      "description": "A ceremonial war-axe of the Iron Horde confederation, marked with clan-binding runes",
+      "attack_bonus": 55,
+      "defense_bonus": 5,
+      "fear_factor": 0.08,
+      "price": 600,
+      "rarity": "legendary",
+      "requirements": {
+         "level": 9
+      }
+   },
+   "Bear-Claw Gauntlet": {
+      "type": "weapon",
+      "description": "Iron gauntlets ending in sharpened bear-claw blades, worn by the Varak Bear Warrior order",
+      "attack_bonus": 20,
+      "defense_bonus": 8,
+      "speed_bonus": 2,
+      "price": 320,
+      "rarity": "rare",
+      "requirements": {
+         "level": 7
+      }
+   },
+   "Yixuan Silk Robe": {
+      "type": "armor",
+      "description": "A flowing robe of finest eastern silk, light as air yet resistant to blades. Favoured by eastern scholars and mages.",
+      "defense_bonus": 8,
+      "mp_bonus": 30,
+      "speed_bonus": 3,
+      "price": 350,
+      "rarity": "rare",
+      "requirements": {
+         "level": 5
+      }
+   },
+   "Lacquered Eastern Plate": {
+      "type": "armor",
+      "description": "Overlapping lacquered iron plates in the Yixuan style, lighter than western plate and equally protective",
+      "defense_bonus": 22,
+      "speed_bonus": -1,
+      "price": 480,
+      "rarity": "rare",
+      "requirements": {
+         "level": 8
+      }
+   },
+   "Barbarian War-Paint Leather": {
+      "type": "armor",
+      "description": "Heavy northern leather daubed with clan war-paint. The pigment carries old blessings that actually seem to help.",
+      "defense_bonus": 14,
+      "attack_bonus": 5,
+      "price": 260,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 4
+      }
+   },
+   "Fur-Lined Clan Cloak": {
+      "type": "armor",
+      "description": "A thick northern cloak lined with layered furs, worn by Varak clan warriors through brutal winters",
+      "defense_bonus": 10,
+      "hp_bonus": 20,
+      "price": 180,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 3
+      }
+   },
+   "Jade-Threaded Vest": {
+      "type": "armor",
+      "description": "A lightly armoured eastern vest with jade beads woven through the fabric for protection and focus",
+      "defense_bonus": 12,
+      "mp_bonus": 20,
+      "price": 290,
+      "rarity": "rare",
+      "requirements": {
+         "level": 6
+      }
+   },
+   "Jade Tea": {
+      "type": "consumable",
+      "description": "A calming eastern tea brewed from chrysanthemum and wolfberry — restores MP and steadies the mind",
+      "effect": "mp_restore",
+      "value": 45,
+      "price": 55,
+      "rarity": "uncommon"
+   },
+   "Eastern Herb Medicine": {
+      "type": "consumable",
+      "description": "A dark paste of eastern medicinal herbs, bitter to taste and remarkably effective",
+      "effect": "heal",
+      "value": 75,
+      "price": 65,
+      "rarity": "uncommon"
+   },
+   "Warrior's Brew": {
+      "type": "consumable",
+      "description": "A Varak clan drink brewed from fermented barley and northern roots. Tastes terrible. Works.",
+      "effect": "attack_boost",
+      "value": 8,
+      "duration": 8,
+      "price": 80,
+      "rarity": "rare"
+   },
+   "Jade Lotus Draught": {
+      "type": "consumable",
+      "description": "A distillation of jade lotus petals with profound restorative properties. Rare and revered in Yixuan.",
+      "effect": "heal",
+      "value": 150,
+      "price": 180,
+      "rarity": "rare"
+   },
+   "Pepper Tonic": {
+      "type": "consumable",
+      "description": "A concentrated dose of eastern black pepper in tonic water — improves circulation and speed",
+      "effect": "speed_boost",
+      "value": 5,
+      "duration": 6,
+      "price": 70,
+      "rarity": "uncommon"
    }
 }

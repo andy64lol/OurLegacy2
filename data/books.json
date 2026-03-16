@@ -61,5 +61,40 @@
     "description": "A biography of Byzantra's final emperor — his campaigns, his impossible choices, and his death on the walls of Constanplea.",
     "file": "books/last_basileus.txt",
     "rarity": "rare"
+  },
+  "river_kingdoms_of_yixuan": {
+    "title": "The River Kingdoms of Yixuan",
+    "author": "Scholar Periandros of Nikomedeia",
+    "description": "A geographic and cultural survey of the eastern continent — its river kingdoms, peoples, trade goods, and everything a western traveller gets wrong before going.",
+    "file": "books/river_kingdoms_of_yixuan.txt",
+    "rarity": "uncommon"
+  },
+  "tales_of_the_jade_court": {
+    "title": "Tales of the Jade Court",
+    "author": "Scholar-Merchant Alexandros Katakalon",
+    "description": "Stories, parables, and histories from the eastern kingdoms — clever ministers, ghostly rivers, the secret of silk, and the art of the great examination.",
+    "file": "books/tales_of_the_jade_court.txt",
+    "rarity": "rare"
+  },
+  "songs_of_the_northern_clans": {
+    "title": "Songs of the Northern Clans",
+    "author": "Borderman Dmitrios Ouroumenos",
+    "description": "Barbarian sagas, battle chants, and hearth tales of the Varak Confederation — collected by a scholar raised on both sides of the border.",
+    "file": "books/songs_of_the_northern_clans.txt",
+    "rarity": "rare"
+  },
+  "the_iron_horde": {
+    "title": "The Iron Horde: Rise of the Barbarian Chieftains",
+    "author": "Archivist Nikephoros of the Byzantra Military Academy",
+    "description": "A military history of the Varak Confederation Wars — the northern incursions, the Bardanes disaster, and the treaty that finally held. History from both sides of the border.",
+    "file": "books/the_iron_horde.txt",
+    "rarity": "uncommon"
+  },
+  "eastern_alchemists_compendium": {
+    "title": "The Eastern Alchemist's Compendium",
+    "author": "Scholar-Physician Kallikrates, translated from Master Shén Wúxiǎo",
+    "description": "Medicines, preparations, and philosophy of Yixuan healing arts — a western physician's honest account of an eastern tradition that works better than he expected.",
+    "file": "books/eastern_alchemists_compendium.txt",
+    "rarity": "rare"
   }
 }
