@@ -786,5 +786,187 @@
       "Frost Blade",
       "Large Health Potion"
     ]
+  },
+  "ottoman_corsair": {
+    "name": "Ottoman Corsair",
+    "hp": 55,
+    "attack": 17,
+    "defense": 5,
+    "speed": 14,
+    "experience_reward": 45,
+    "gold_reward": 28,
+    "loot_table": [
+      "Corsair Cutlass",
+      "Ottoman Gold Coin",
+      "Corsair Flag"
+    ]
+  },
+  "slave_trader": {
+    "name": "Slave Trader",
+    "hp": 48,
+    "attack": 14,
+    "defense": 6,
+    "speed": 10,
+    "experience_reward": 40,
+    "gold_reward": 35,
+    "loot_table": [
+      "Slave Chain",
+      "Ottoman Gold Coin",
+      "Health Potion"
+    ]
+  },
+  "bazaar_thief": {
+    "name": "Bazaar Thief",
+    "hp": 35,
+    "attack": 13,
+    "defense": 3,
+    "speed": 19,
+    "experience_reward": 28,
+    "gold_reward": 22,
+    "loot_table": [
+      "Ottoman Gold Coin",
+      "Spice Bundle",
+      "Steel Dagger"
+    ]
+  },
+  "ottoman_janissary": {
+    "name": "Janissary Soldier",
+    "hp": 75,
+    "attack": 20,
+    "defense": 12,
+    "speed": 10,
+    "experience_reward": 65,
+    "gold_reward": 38,
+    "loot_table": [
+      "Janissary Badge",
+      "Ottoman Chainmail",
+      "Ottoman Scimitar"
+    ]
+  },
+  "desert_raider": {
+    "name": "Desert Raider",
+    "hp": 60,
+    "attack": 18,
+    "defense": 7,
+    "speed": 15,
+    "experience_reward": 50,
+    "gold_reward": 30,
+    "loot_table": [
+      "Desert Jewel",
+      "Ottoman Bow",
+      "Spice Bundle"
+    ]
+  },
+  "anatolian_lion": {
+    "name": "Anatolian Lion",
+    "hp": 85,
+    "attack": 26,
+    "defense": 6,
+    "speed": 18,
+    "experience_reward": 75,
+    "gold_reward": 35,
+    "loot_table": [
+      "Lion's Mane Trophy",
+      "Health Potion",
+      "Large Health Potion"
+    ]
+  },
+  "desert_serpent": {
+    "name": "Desert Serpent",
+    "hp": 65,
+    "attack": 22,
+    "defense": 4,
+    "speed": 16,
+    "experience_reward": 58,
+    "gold_reward": 28,
+    "loot_table": [
+      "Desert Serpent Fang",
+      "Venom Sac",
+      "Desert Serpent Blade"
+    ]
+  },
+  "ottoman_court_mage": {
+    "name": "Ottoman Court Mage",
+    "hp": 65,
+    "attack": 24,
+    "defense": 5,
+    "speed": 10,
+    "experience_reward": 70,
+    "gold_reward": 40,
+    "loot_table": [
+      "Vizier Staff",
+      "Mana Potion",
+      "Spice Bundle"
+    ]
+  },
+  "janissary_captain": {
+    "name": "Janissary Captain",
+    "hp": 100,
+    "attack": 28,
+    "defense": 16,
+    "speed": 11,
+    "experience_reward": 110,
+    "gold_reward": 60,
+    "loot_table": [
+      "Janissary Plate Armor",
+      "Janissary Badge",
+      "Ottoman Scimitar"
+    ]
+  },
+  "palace_guard": {
+    "name": "Palace Guard",
+    "hp": 120,
+    "attack": 30,
+    "defense": 20,
+    "speed": 9,
+    "experience_reward": 130,
+    "gold_reward": 70,
+    "loot_table": [
+      "Sultan's Blade",
+      "Janissary Plate Armor",
+      "Ottoman Gold Coin"
+    ]
+  },
+  "shadow_dervish": {
+    "name": "Shadow Dervish",
+    "hp": 70,
+    "attack": 25,
+    "defense": 8,
+    "speed": 22,
+    "experience_reward": 80,
+    "gold_reward": 45,
+    "loot_table": [
+      "Yatagan",
+      "Desert Jewel",
+      "Mana Potion"
+    ]
+  },
+  "ottoman_war_elephant": {
+    "name": "War Elephant",
+    "hp": 200,
+    "attack": 35,
+    "defense": 18,
+    "speed": 5,
+    "experience_reward": 180,
+    "gold_reward": 90,
+    "loot_table": [
+      "Elephant Tusk",
+      "Ottoman Gold Coin",
+      "Large Health Potion"
+    ]
+  },
+  "pirate_lord_captain": {
+    "name": "Pirate Captain",
+    "hp": 90,
+    "attack": 22,
+    "defense": 10,
+    "speed": 13,
+    "experience_reward": 95,
+    "gold_reward": 55,
+    "loot_table": [
+      "Corsair Cutlass",
+      "Corsair Coat",
+      "Ottoman Gold Coin"
+    ]
   }
 }

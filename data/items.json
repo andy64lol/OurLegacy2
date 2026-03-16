@@ -3186,5 +3186,291 @@
       "description": "The legendary frozen heart of the Snowbinable. Pulsates with ancient permafrost energy.",
       "price": 500,
       "rarity": "legendary"
+   },
+   "Ottoman Scimitar": {
+      "type": "weapon",
+      "description": "A elegantly curved blade forged in the Ottoman tradition. Light and brutally sharp.",
+      "attack_bonus": 16,
+      "speed_bonus": 3,
+      "price": 120,
+      "rarity": "common",
+      "requirements": {
+         "level": 3
+      }
+   },
+   "Yatagan": {
+      "type": "weapon",
+      "description": "A short Ottoman sword with an inward-curved blade, favoured by the Janissaries.",
+      "attack_bonus": 14,
+      "speed_bonus": 5,
+      "price": 105,
+      "rarity": "common",
+      "requirements": {
+         "level": 2
+      }
+   },
+   "Ottoman Bow": {
+      "type": "weapon",
+      "description": "A powerful recurve bow used by Ottoman cavalry and desert raiders alike.",
+      "attack_bonus": 19,
+      "speed_bonus": 3,
+      "price": 140,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 4
+      }
+   },
+   "Ottoman Lance": {
+      "type": "weapon",
+      "description": "A long cavalry lance used in Ottoman charges. Devastating on the first strike.",
+      "attack_bonus": 26,
+      "speed_bonus": 1,
+      "price": 190,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 5
+      }
+   },
+   "Corsair Cutlass": {
+      "type": "weapon",
+      "description": "A curved sabre used by Ottoman corsairs. The blade is notched from countless sea battles.",
+      "attack_bonus": 18,
+      "speed_bonus": 4,
+      "price": 130,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 3
+      }
+   },
+   "Desert Serpent Blade": {
+      "type": "weapon",
+      "description": "A sinuous blade shaped like a coiled serpent. Its tip is coated in desert venom.",
+      "attack_bonus": 23,
+      "speed_bonus": 3,
+      "price": 200,
+      "rarity": "rare",
+      "requirements": {
+         "level": 6
+      }
+   },
+   "Vizier Staff": {
+      "type": "weapon",
+      "description": "The ornate staff of an Ottoman court mage, set with sapphires and gilded in gold leaf.",
+      "attack_bonus": 22,
+      "magic_weapon": true,
+      "mp_bonus": 30,
+      "price": 250,
+      "rarity": "rare",
+      "requirements": {
+         "level": 6
+      }
+   },
+   "Janissary Carbine": {
+      "type": "weapon",
+      "description": "An early firearm used by elite Janissary troops. Loud, dangerous, and slow to reload.",
+      "attack_bonus": 35,
+      "speed_penalty": 3,
+      "price": 320,
+      "rarity": "rare",
+      "requirements": {
+         "level": 7
+      }
+   },
+   "Sultan's Blade": {
+      "type": "weapon",
+      "description": "The ceremonial sword of the Sultan. Its golden hilt is encrusted with rubies and its edge never dulls.",
+      "attack_bonus": 42,
+      "speed_bonus": 4,
+      "mp_bonus": 15,
+      "price": 750,
+      "rarity": "legendary",
+      "requirements": {
+         "level": 10
+      }
+   },
+   "Blade of Yildirim": {
+      "type": "weapon",
+      "description": "Sultan Yildirim's personal war sword, said to have tasted a thousand victories. Radiates commanding energy.",
+      "attack_bonus": 55,
+      "speed_bonus": 6,
+      "hp_bonus": 30,
+      "price": 1200,
+      "rarity": "legendary",
+      "requirements": {
+         "level": 14
+      }
+   },
+   "Ottoman Chainmail": {
+      "type": "armor",
+      "description": "Finely-linked chainmail forged by Ottoman armorers. Flexible yet strong.",
+      "defense_bonus": 10,
+      "speed_penalty": 1,
+      "price": 130,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 3
+      }
+   },
+   "Corsair Coat": {
+      "type": "armor",
+      "description": "A thick leather coat worn by Ottoman sea pirates. Reinforced at the shoulders and chest.",
+      "defense_bonus": 7,
+      "speed_bonus": 2,
+      "price": 95,
+      "rarity": "common",
+      "requirements": {
+         "level": 2
+      }
+   },
+   "Janissary Plate Armor": {
+      "type": "armor",
+      "description": "Heavy plate armor worn by the Ottoman Empire's elite Janissary corps. Imposing and near-impenetrable.",
+      "defense_bonus": 18,
+      "speed_penalty": 3,
+      "price": 320,
+      "rarity": "rare",
+      "requirements": {
+         "level": 7
+      }
+   },
+   "Vizier's Silken Robes": {
+      "type": "armor",
+      "description": "Luxurious robes of the Grand Vizier, threaded with protective enchantments woven by court mages.",
+      "defense_bonus": 8,
+      "mp_bonus": 35,
+      "price": 280,
+      "rarity": "rare",
+      "requirements": {
+         "level": 6
+      }
+   },
+   "Sultan's Gilded Plate": {
+      "type": "armor",
+      "description": "Ceremonial plate armor of the Sultan himself, covered in gold filigree and empire symbols.",
+      "defense_bonus": 25,
+      "hp_bonus": 40,
+      "speed_penalty": 2,
+      "price": 1100,
+      "rarity": "legendary",
+      "requirements": {
+         "level": 13
+      }
+   },
+   "Sultan's Signet Ring": {
+      "type": "accessory",
+      "description": "A heavy gold ring bearing the seal of the Ottoman Sultan. Commands respect \u2014 and fear.",
+      "attack_bonus": 5,
+      "defense_bonus": 5,
+      "gold_bonus": 0,
+      "price": 350,
+      "rarity": "rare",
+      "requirements": {
+         "level": 8
+      }
+   },
+   "Corsair's Amulet": {
+      "type": "accessory",
+      "description": "A sea-stone amulet worn by Ottoman pirates for luck on dangerous waters.",
+      "defense_bonus": 3,
+      "speed_bonus": 4,
+      "price": 120,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 3
+      }
+   },
+   "Janissary Medallion": {
+      "type": "accessory",
+      "description": "A brass medallion awarded to elite Janissary soldiers. Increases combat focus.",
+      "attack_bonus": 4,
+      "defense_bonus": 4,
+      "price": 200,
+      "rarity": "rare",
+      "requirements": {
+         "level": 6
+      }
+   },
+   "Ottoman Turban of Wisdom": {
+      "type": "accessory",
+      "description": "An elaborately wrapped turban imbued with the wisdom of Ottoman scholars.",
+      "mp_bonus": 40,
+      "attack_bonus": 3,
+      "price": 260,
+      "rarity": "rare",
+      "requirements": {
+         "level": 7
+      }
+   },
+   "Ottoman Gold Coin": {
+      "type": "material",
+      "description": "A gold coin bearing the Sultan's tughra. Valuable anywhere in the world.",
+      "price": 25,
+      "rarity": "common"
+   },
+   "Spice Bundle": {
+      "type": "material",
+      "description": "A bundle of rare spices from the eastern trade routes. Worth a handsome sum.",
+      "price": 40,
+      "rarity": "common"
+   },
+   "Janissary Badge": {
+      "type": "material",
+      "description": "The insignia badge of a Janissary soldier \u2014 proof of a hard-won fight.",
+      "price": 30,
+      "rarity": "common"
+   },
+   "Desert Jewel": {
+      "type": "material",
+      "description": "A gemstone mined from the Anatolian plains, prized for its deep amber colour.",
+      "price": 65,
+      "rarity": "uncommon"
+   },
+   "Corsair Flag": {
+      "type": "material",
+      "description": "The battle flag of an Ottoman corsair ship. Collectors pay well for these.",
+      "price": 35,
+      "rarity": "common"
+   },
+   "Slave Chain": {
+      "type": "material",
+      "description": "A rusted chain from Port Kostantora's slave market. A grim reminder of the cost of empire.",
+      "price": 5,
+      "rarity": "junk"
+   },
+   "Lion's Mane Trophy": {
+      "type": "material",
+      "description": "The magnificent mane of an Anatolian lion. A prized hunting trophy.",
+      "price": 70,
+      "rarity": "rare"
+   },
+   "Desert Serpent Fang": {
+      "type": "material",
+      "description": "The hollow venom fang of a desert serpent. Used in exotic poison-craft.",
+      "price": 45,
+      "rarity": "uncommon"
+   },
+   "Elephant Tusk": {
+      "type": "material",
+      "description": "An ivory tusk from an Ottoman war elephant. Immensely valuable.",
+      "price": 150,
+      "rarity": "rare"
+   },
+   "Sultan's Seal": {
+      "type": "material",
+      "description": "The personal wax seal of Sultan Yildirim. An extremely rare prize.",
+      "price": 500,
+      "rarity": "legendary"
+   },
+   "Grand Vizier's Grimoire": {
+      "type": "material",
+      "description": "The spell-tome of Grand Vizier Karamanli, filled with forbidden Ottoman court magic.",
+      "price": 400,
+      "rarity": "legendary"
+   },
+   "Ottoman Silk": {
+      "type": "material",
+      "description": "Exquisite silk from Ottoman looms. Merchants will pay a fortune.",
+      "price": 55,
+      "rarity": "uncommon"
    }
 }

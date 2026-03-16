@@ -1558,5 +1558,233 @@
     "unlock_conditions": {
       "level": 12
     }
+  },
+  "ottoman_pirate_lord": {
+    "name": "Pirate Lord Barbaros",
+    "hp": 280,
+    "attack": 30,
+    "defense": 14,
+    "speed": 15,
+    "description": "The legendary commander of the Ottoman corsair fleet, Barbaros has plundered a hundred ports. His scarred face and booming laugh are the last things most men ever see.",
+    "special_abilities": [
+      {
+        "name": "Boarding Strike",
+        "description": "Leaps forward with a ferocious cutting attack",
+        "damage": 45,
+        "cooldown": 3
+      },
+      {
+        "name": "Corsair's Roar",
+        "description": "A battle cry that reduces the enemy's will to fight",
+        "effect": "debuff",
+        "attack_reduction": 10,
+        "defense_reduction": 6,
+        "cooldown": 4
+      },
+      {
+        "name": "Cannon Volley",
+        "description": "Calls in ship cannons \u2014 devastating ranged bombardment",
+        "damage": 55,
+        "stun_chance": 0.25,
+        "cooldown": 5
+      }
+    ],
+    "phases": [
+      {
+        "hp_threshold": 0.6,
+        "description": "Barbaros fights with swaggering confidence",
+        "attack_multiplier": 1.0,
+        "defense_multiplier": 1.0,
+        "special_abilities_unlocked": [
+          "Boarding Strike",
+          "Corsair's Roar"
+        ]
+      },
+      {
+        "hp_threshold": 0.25,
+        "description": "Wounded, Barbaros fights with desperate savagery",
+        "attack_multiplier": 1.4,
+        "defense_multiplier": 0.85,
+        "special_abilities_unlocked": [
+          "Boarding Strike",
+          "Corsair's Roar",
+          "Cannon Volley"
+        ]
+      }
+    ],
+    "experience_reward": 900,
+    "gold_reward": 450,
+    "unique_loot": [
+      "Corsair Cutlass",
+      "Corsair Flag",
+      "Corsair's Amulet"
+    ],
+    "unlock_conditions": {
+      "level": 8
+    }
+  },
+  "grand_vizier_karamanli": {
+    "name": "Grand Vizier Karamanli",
+    "hp": 380,
+    "attack": 36,
+    "defense": 18,
+    "speed": 13,
+    "description": "The cunning Grand Vizier of the Osmano\u011flu Empire, Karamanli controls the Sultan's court through manipulation, sorcery, and iron will. He fights with a forbidden blend of court magic and political ruthlessness.",
+    "special_abilities": [
+      {
+        "name": "Court Sorcery",
+        "description": "Channels dark Ottoman court magic into a devastating blast",
+        "damage": 50,
+        "cooldown": 3
+      },
+      {
+        "name": "Political Decree",
+        "description": "Issues a binding decree that saps the enemy's strength and resolve",
+        "effect": "debuff",
+        "attack_reduction": 14,
+        "defense_reduction": 10,
+        "cooldown": 4
+      },
+      {
+        "name": "Shadow Edict",
+        "description": "Summons shadow agents that strike from all sides",
+        "damage": 40,
+        "stun_chance": 0.35,
+        "cooldown": 4
+      },
+      {
+        "name": "Grand Seal",
+        "description": "Channels the full power of the empire through his seal \u2014 an overwhelming magical surge",
+        "damage": 70,
+        "cooldown": 6
+      }
+    ],
+    "phases": [
+      {
+        "hp_threshold": 0.65,
+        "description": "The Vizier fights with cold, calculated precision",
+        "attack_multiplier": 1.0,
+        "defense_multiplier": 1.0,
+        "special_abilities_unlocked": [
+          "Court Sorcery",
+          "Political Decree"
+        ]
+      },
+      {
+        "hp_threshold": 0.35,
+        "description": "The Vizier drops his composure and unleashes forbidden magic",
+        "attack_multiplier": 1.3,
+        "defense_multiplier": 0.85,
+        "special_abilities_unlocked": [
+          "Court Sorcery",
+          "Political Decree",
+          "Shadow Edict"
+        ]
+      },
+      {
+        "hp_threshold": 0.15,
+        "description": "In desperation, Karamanli pours everything into one final ritual",
+        "attack_multiplier": 1.6,
+        "defense_multiplier": 0.65,
+        "special_abilities_unlocked": [
+          "Court Sorcery",
+          "Shadow Edict",
+          "Grand Seal"
+        ]
+      }
+    ],
+    "experience_reward": 1200,
+    "gold_reward": 650,
+    "unique_loot": [
+      "Grand Vizier's Grimoire",
+      "Vizier Staff",
+      "Vizier's Silken Robes"
+    ],
+    "unlock_conditions": {
+      "level": 11
+    }
+  },
+  "sultan_yildirim": {
+    "name": "Sultan Yildirim",
+    "hp": 550,
+    "attack": 48,
+    "defense": 30,
+    "speed": 14,
+    "description": "The thunderous Sultan of the Osmano\u011flu Empire \u2014 Yildirim, The Lightning. He has conquered thirty kingdoms and his empire stretches to the horizon in every direction. He does not merely fight; he annihilates.",
+    "special_abilities": [
+      {
+        "name": "Lightning Decree",
+        "description": "Calls down a bolt of divine power granted by the heavens \u2014 punishment for those who defy the Sultan",
+        "damage": 65,
+        "cooldown": 3
+      },
+      {
+        "name": "Imperial Wrath",
+        "description": "The Sultan's fury given form \u2014 a brutal barrage of strikes",
+        "damage": 50,
+        "stun_chance": 0.4,
+        "cooldown": 4
+      },
+      {
+        "name": "Sultan's Condemnation",
+        "description": "Declares the enemy an enemy of the empire, drastically weakening them",
+        "effect": "debuff",
+        "attack_reduction": 18,
+        "defense_reduction": 15,
+        "cooldown": 5
+      },
+      {
+        "name": "Thunderstrike of Yildirim",
+        "description": "The Sultan's legendary finishing strike \u2014 strikes with the force of a lightning bolt",
+        "damage": 90,
+        "stun_chance": 0.5,
+        "cooldown": 6
+      }
+    ],
+    "phases": [
+      {
+        "hp_threshold": 0.7,
+        "description": "The Sultan tests his challenger, fighting with restrained imperial might",
+        "attack_multiplier": 1.0,
+        "defense_multiplier": 1.0,
+        "special_abilities_unlocked": [
+          "Lightning Decree",
+          "Sultan's Condemnation"
+        ]
+      },
+      {
+        "hp_threshold": 0.4,
+        "description": "Impressed by your survival, the Sultan fights in earnest",
+        "attack_multiplier": 1.35,
+        "defense_multiplier": 0.9,
+        "special_abilities_unlocked": [
+          "Lightning Decree",
+          "Imperial Wrath",
+          "Sultan's Condemnation"
+        ]
+      },
+      {
+        "hp_threshold": 0.2,
+        "description": "The Sultan rises to his full, terrifying power \u2014 the storm made flesh",
+        "attack_multiplier": 1.65,
+        "defense_multiplier": 0.75,
+        "special_abilities_unlocked": [
+          "Lightning Decree",
+          "Imperial Wrath",
+          "Sultan's Condemnation",
+          "Thunderstrike of Yildirim"
+        ]
+      }
+    ],
+    "experience_reward": 2500,
+    "gold_reward": 1500,
+    "unique_loot": [
+      "Blade of Yildirim",
+      "Sultan's Gilded Plate",
+      "Sultan's Seal"
+    ],
+    "unlock_conditions": {
+      "level": 14
+    }
   }
 }

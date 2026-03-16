@@ -245,5 +245,50 @@
       "Permafrost Spear"
     ],
     "max_buy": 10
+  },
+  "kostantora_market": {
+    "name": "Kostantora Dockside Market",
+    "welcome_message": "Watch your purse here, traveller. The docks attract all manner of rogues.",
+    "items": [
+      "Health Potion",
+      "Large Health Potion",
+      "Mana Potion",
+      "Ottoman Scimitar",
+      "Yatagan",
+      "Corsair Cutlass",
+      "Corsair Coat",
+      "Ottoman Chainmail",
+      "Corsair's Amulet"
+    ],
+    "max_buy": 10
+  },
+  "grand_bazaar_shop": {
+    "name": "The Grand Bazaar",
+    "welcome_message": "Welcome to the heart of the empire! We trade in everything \u2014 for the right price.",
+    "items": [
+      "Health Potion",
+      "Large Health Potion",
+      "Mana Potion",
+      "Ottoman Scimitar",
+      "Yatagan",
+      "Ottoman Bow",
+      "Ottoman Lance",
+      "Corsair Cutlass",
+      "Desert Serpent Blade",
+      "Janissary Carbine",
+      "Ottoman Chainmail",
+      "Janissary Plate Armor",
+      "Corsair Coat",
+      "Vizier's Silken Robes",
+      "Sultan's Signet Ring",
+      "Corsair's Amulet",
+      "Janissary Medallion",
+      "Ottoman Turban of Wisdom",
+      "Ottoman Gold Coin",
+      "Spice Bundle",
+      "Ottoman Silk",
+      "Desert Jewel"
+    ],
+    "max_buy": 15
   }
 }

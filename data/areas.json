@@ -587,7 +587,8 @@
     "missions_available": true,
     "connections": [
       "mountain_base",
-      "port_urkilsh"
+      "port_urkilsh",
+      "port_kostantora"
     ],
     "difficulty": 2,
     "rest_cost": 15,
@@ -1499,6 +1500,385 @@
     "can_rest": false,
     "weather_probabilities": {
       "null": 100
+    }
+  },
+  "port_kostantora": {
+    "name": "Port Kostantora",
+    "description": "The great gateway port of the Osmano\u011flu Empire \u2014 and one of the most infamous places on earth. The docks reek of salt, tar, and desperation. Slave traders barter openly in the market squares while corsair ships bristle in the harbour. Chains rattle in the alleys. Ottoman soldiers patrol with cold indifference. This is the empire's dark beating heart \u2014 everything flows through here.",
+    "possible_enemies": [
+      "ottoman_corsair",
+      "slave_trader",
+      "bazaar_thief",
+      "pirate_lord_captain"
+    ],
+    "possible_bosses": [
+      "ottoman_pirate_lord"
+    ],
+    "shops": [
+      "kostantora_market"
+    ],
+    "missions_available": false,
+    "connections": [
+      "port_lesben",
+      "kostantora_city",
+      "kostantora_docks"
+    ],
+    "difficulty": 4,
+    "rest_cost": 15,
+    "can_rest": true,
+    "weather_probabilities": {
+      "sunny": 40,
+      "rainy": 35,
+      "stormy": 20,
+      "snowy": 5
+    },
+    "npcs": [
+      {
+        "id": "freed_slave_mirza",
+        "name": "Mirza the Freed",
+        "dialogues": [
+          "I bought my freedom with twenty years of service. Don't let anyone here sell yours.",
+          "The slavers here answer to the Grand Vizier. Be very careful who you anger.",
+          "There is a resistance growing in the lower city. Some of us have not forgotten what freedom tastes like."
+        ]
+      },
+      {
+        "id": "dockmaster_halil",
+        "name": "Dockmaster Halil",
+        "dialogues": [
+          "Keep your head down, your purse close, and your name off the Vizier's list. That's my advice.",
+          "The corsair fleet is the Sultan's fist. Barbaros commands it. Don't get on his wrong side.",
+          "Ships come and go, but the chains here are permanent for most. Welcome to Kostantora."
+        ]
+      }
+    ]
+  },
+  "kostantora_docks": {
+    "name": "Kostantora Docks",
+    "description": "The sprawling dockside district of Port Kostantora. Corsair galleys sit three-deep in the harbour. The air smells of gunpowder and salt water. Sailors brawl in taverns and the slave auctioneers call their prices from raised platforms. The Pirate Lord Barbaros holds court somewhere in here.",
+    "possible_enemies": [
+      "ottoman_corsair",
+      "pirate_lord_captain",
+      "bazaar_thief"
+    ],
+    "possible_bosses": [
+      "ottoman_pirate_lord"
+    ],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "port_kostantora"
+    ],
+    "difficulty": 5,
+    "can_rest": false,
+    "weather_probabilities": {
+      "sunny": 35,
+      "rainy": 35,
+      "stormy": 30
+    },
+    "npcs": [
+      {
+        "id": "corsair_veteran",
+        "name": "Old Corsair Yusuf",
+        "dialogues": [
+          "Forty years at sea under the crescent flag. I've seen things that'd bleach your hair white.",
+          "Barbaros took this port from three rival lords in a single night. Don't underestimate him.",
+          "The best ships in the world are right here in this harbour. None of them are mine anymore."
+        ]
+      }
+    ]
+  },
+  "kostantora_city": {
+    "name": "Kostantora \u2014 The Imperial City",
+    "description": "Beyond the docks lies the true Kostantora \u2014 a city of domes, minarets, and marble. Grand bazaars overflow with goods from every corner of the known world. Janissary soldiers patrol every street. Ottoman architecture rises in breathtaking curves and arches. At the city's centre, the palace of Grand Vizier Karamanli dominates the skyline.",
+    "possible_enemies": [
+      "ottoman_janissary",
+      "bazaar_thief",
+      "shadow_dervish",
+      "ottoman_court_mage"
+    ],
+    "possible_bosses": [],
+    "shops": [
+      "grand_bazaar_shop"
+    ],
+    "missions_available": false,
+    "connections": [
+      "port_kostantora",
+      "grand_bazaar_district",
+      "janissary_quarter",
+      "vizier_palace"
+    ],
+    "difficulty": 5,
+    "rest_cost": 20,
+    "can_rest": true,
+    "weather_probabilities": {
+      "sunny": 50,
+      "rainy": 30,
+      "stormy": 15,
+      "snowy": 5
+    },
+    "npcs": [
+      {
+        "id": "ottoman_scholar",
+        "name": "Scholar Ibn Rashid",
+        "dialogues": [
+          "The empire has stood for three hundred years. Knowledge \u2014 not swords \u2014 built it.",
+          "The Grand Vizier is the true power here. The Sultan is his symbol.",
+          "I have maps of every district in this city. For the right price, they are yours."
+        ]
+      },
+      {
+        "id": "janissary_deserter",
+        "name": "Deserter Selim",
+        "dialogues": [
+          "I served the Janissary corps for twelve years. I'd rather die poor than serve another day.",
+          "The palace guards are different from us soldiers. Fanatical. Loyal unto death.",
+          "If you're heading to the Sultan's throne room, you're either the bravest person alive or the most foolish."
+        ]
+      }
+    ]
+  },
+  "grand_bazaar_district": {
+    "name": "The Grand Bazaar",
+    "description": "A labyrinth of covered markets so vast you could spend a week and still not see every stall. Merchants from every nation haggle in a dozen languages. Silks, spices, weapons, and stolen goods trade hands constantly. Thieves move through the crowds like ghosts. The Grand Bazaar is the economic heart of the entire empire.",
+    "possible_enemies": [
+      "bazaar_thief",
+      "desert_raider",
+      "slave_trader",
+      "ottoman_corsair"
+    ],
+    "possible_bosses": [],
+    "shops": [
+      "grand_bazaar_shop"
+    ],
+    "missions_available": false,
+    "connections": [
+      "kostantora_city",
+      "anatolian_plains"
+    ],
+    "difficulty": 4,
+    "rest_cost": 18,
+    "can_rest": true,
+    "weather_probabilities": {
+      "sunny": 60,
+      "rainy": 25,
+      "stormy": 10,
+      "snowy": 5
+    },
+    "npcs": [
+      {
+        "id": "spice_merchant_omar",
+        "name": "Merchant Omar",
+        "dialogues": [
+          "The finest spices in the known world! Better than gold \u2014 at least you can eat spices.",
+          "I trade with every port from here to the far east. The empire's reach is endless.",
+          "Word is the Sultan has closed the eastern gates. Bad for business. Very bad."
+        ]
+      }
+    ]
+  },
+  "janissary_quarter": {
+    "name": "The Janissary Quarter",
+    "description": "The barracks district of the legendary Janissary corps \u2014 the Sultan's elite standing army. Drill yards echo with the clash of steel and the bark of sergeants. These are no ordinary soldiers. Taken as children, trained for decades, loyal to the empire above all else. Trespassers are treated as spies.",
+    "possible_enemies": [
+      "ottoman_janissary",
+      "janissary_captain",
+      "ottoman_court_mage"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "kostantora_city"
+    ],
+    "difficulty": 6,
+    "can_rest": false,
+    "weather_probabilities": {
+      "sunny": 55,
+      "rainy": 25,
+      "stormy": 20
+    },
+    "npcs": [
+      {
+        "id": "retired_janissary",
+        "name": "Retired Janissary Mehmed",
+        "dialogues": [
+          "I earned my retirement with forty years of blood. Don't think you can just walk in here.",
+          "The corps is the spine of this empire. Without the Janissaries, the Sultan is just a man in robes.",
+          "If you're going to the palace, the captain knows you're here. They always do."
+        ]
+      }
+    ]
+  },
+  "vizier_palace": {
+    "name": "The Grand Vizier's Palace",
+    "description": "The opulent palace of Grand Vizier Karamanli dominates an entire hill in Kostantora. Its walls are inlaid with lapis lazuli and gold. Palace guards stand at every doorway. Shadow dervishes patrol the corridors silently. At its heart, the Grand Vizier schemes within his private chambers.",
+    "possible_enemies": [
+      "palace_guard",
+      "shadow_dervish",
+      "ottoman_court_mage",
+      "janissary_captain"
+    ],
+    "possible_bosses": [
+      "grand_vizier_karamanli"
+    ],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "kostantora_city",
+      "sultan_palace"
+    ],
+    "difficulty": 7,
+    "can_rest": false,
+    "weather_probabilities": {
+      "sunny": 60,
+      "rainy": 30,
+      "stormy": 10
+    },
+    "npcs": [
+      {
+        "id": "palace_servant",
+        "name": "Servant Girl Leyla",
+        "dialogues": [
+          "Please, don't make trouble here. They'd punish all of us for your actions.",
+          "The Vizier never sleeps. He reads his scrolls through every hour of the night.",
+          "There is a passage behind the tapestry in the east hall. I never told you that."
+        ]
+      }
+    ]
+  },
+  "anatolian_plains": {
+    "name": "The Anatolian Plains",
+    "description": "Vast golden plains stretching to the horizon, dotted with ancient ruins and grazing war horses. Desert raiders roam in packs on horseback and Anatolian lions stalk the tall grasses. Ottoman cavalry patrols pass in perfect formation. This land has been conquered and reconquered a hundred times \u2014 every hill hides the memory of a battle.",
+    "possible_enemies": [
+      "desert_raider",
+      "anatolian_lion",
+      "ottoman_janissary",
+      "ottoman_war_elephant"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "grand_bazaar_district",
+      "kapali_mountains",
+      "desert_of_ankhara"
+    ],
+    "difficulty": 5,
+    "can_rest": false,
+    "weather_probabilities": {
+      "sunny": 55,
+      "rainy": 25,
+      "stormy": 15,
+      "snowy": 5
+    },
+    "npcs": [
+      {
+        "id": "nomad_elder_ayse",
+        "name": "Nomad Elder Ayse",
+        "dialogues": [
+          "These plains have been free land since before the empire existed. It will be free again.",
+          "The war elephants are brought from the far south. Terrifying in battle, gentle in peace.",
+          "The desert beyond the mountains hides ruins older than any empire. Strange things live there."
+        ]
+      }
+    ]
+  },
+  "kapali_mountains": {
+    "name": "The Kapali Mountains",
+    "description": "A rugged, cloud-wreathed mountain range forming the empire's eastern spine. Desert serpents nest in the rocky passes and shadow dervishes have established hidden mountain shrines. The mountain fortresses of the Janissaries command every valley. Few cross these mountains without permission \u2014 or without a fight.",
+    "possible_enemies": [
+      "desert_serpent",
+      "shadow_dervish",
+      "ottoman_janissary",
+      "janissary_captain"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "anatolian_plains",
+      "desert_of_ankhara"
+    ],
+    "difficulty": 6,
+    "can_rest": false,
+    "weather_probabilities": {
+      "sunny": 35,
+      "rainy": 30,
+      "stormy": 25,
+      "snowy": 10
+    }
+  },
+  "desert_of_ankhara": {
+    "name": "The Desert of Ankhara",
+    "description": "An endless sea of burning sand beyond the mountains. The heat is absolute. Desert serpents grow enormous in these wastes and war elephants are herded through in great caravans. Ancient Ottoman fortresses half-buried in sand hold secrets the empire would prefer forgotten. At its far edge, the Sultan's private hunting grounds begin.",
+    "possible_enemies": [
+      "desert_serpent",
+      "desert_raider",
+      "ottoman_war_elephant",
+      "anatolian_lion"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "kapali_mountains",
+      "sultan_hunting_grounds"
+    ],
+    "difficulty": 7,
+    "can_rest": false,
+    "weather_probabilities": {
+      "sunny": 80,
+      "stormy": 15,
+      "rainy": 5
+    }
+  },
+  "sultan_hunting_grounds": {
+    "name": "The Sultan's Hunting Grounds",
+    "description": "A vast enclosed wilderness maintained for the Sultan's pleasure. Only the finest \u2014 and most dangerous \u2014 creatures roam here: Anatolian lions, enormous desert serpents, and war elephants trained for battle. The Sultan himself hunts here when affairs of state permit. Trespassers are executed on sight.",
+    "possible_enemies": [
+      "anatolian_lion",
+      "desert_serpent",
+      "ottoman_war_elephant",
+      "palace_guard"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "desert_of_ankhara",
+      "sultan_palace"
+    ],
+    "difficulty": 7,
+    "can_rest": false,
+    "weather_probabilities": {
+      "sunny": 65,
+      "rainy": 20,
+      "stormy": 15
+    }
+  },
+  "sultan_palace": {
+    "name": "The Sultan's Throne Room",
+    "description": "The most forbidden chamber in the Osmano\u011flu Empire. Walls of white marble rise forty feet above a floor inlaid with the empire's map in gold. The Sultan's throne is carved from a single block of onyx. Sultanate banners hang from every column. Palace guards line every wall in perfect silence. Sultan Yildirim waits at the far end. He has known you were coming for some time.",
+    "possible_enemies": [
+      "palace_guard",
+      "janissary_captain"
+    ],
+    "possible_bosses": [
+      "sultan_yildirim"
+    ],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "vizier_palace",
+      "sultan_hunting_grounds"
+    ],
+    "difficulty": 8,
+    "can_rest": false,
+    "weather_probabilities": {
+      "sunny": 70,
+      "rainy": 20,
+      "stormy": 10
     }
   }
 }
