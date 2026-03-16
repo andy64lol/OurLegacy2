@@ -3294,7 +3294,7 @@ def dungeon_proceed():
     if idx >= len(rooms):
         return redirect(url_for("dungeon_complete"))
 
-    room = rooms[idx]
+    room: dict[str, Any] = rooms[idx]
     room_type = room.get("type", "empty")
 
     dungeons_data = GAME_DATA.get("dungeons", {})
