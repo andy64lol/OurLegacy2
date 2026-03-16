@@ -18,7 +18,7 @@ import json
 import random
 import os
 import time as _time_module
-from typing import Any
+from typing import Any, Union
 
 from utilities.stats import (
     ensure_attributes,
@@ -162,11 +162,11 @@ BOSS_CHALLENGE_COOLDOWN = 8 * 3600
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
 
-def get_player():
+def get_player() -> dict[str, Any] | None:
     return session.get("player")
 
 
-def save_player(player):
+def save_player(player: dict[str, Any]) -> None:
     session["player"] = player
     session.modified = True
 
