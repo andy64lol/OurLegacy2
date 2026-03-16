@@ -72,7 +72,6 @@
       "speed": 3
     }
   },
-
   "iron_tortoise": {
     "name": "Iron Tortoise",
     "description": "A heavily armored tortoise that strengthens your defenses.",
@@ -82,7 +81,6 @@
       "hp": 30
     }
   },
-
   "arcane_fairy": {
     "name": "Arcane Fairy",
     "description": "A glowing fairy that enhances magical energy.",
@@ -92,7 +90,6 @@
       "crit_chance": 0.05
     }
   },
-
   "battle_boar": {
     "name": "Battle Boar",
     "description": "A fierce boar that charges into combat with you.",
@@ -102,7 +99,6 @@
       "hp": 40
     }
   },
-
   "wind_fox": {
     "name": "Wind Fox",
     "description": "A swift fox that increases movement and strike precision.",
@@ -112,7 +108,6 @@
       "crit_chance": 0.07
     }
   },
-
   "holy_lamb": {
     "name": "Holy Lamb",
     "description": "A blessed creature that passively restores vitality.",
@@ -122,7 +117,6 @@
       "defense": 5
     }
   },
-
   "treasure_mimic": {
     "name": "Treasure Mimic",
     "description": "A mischievous chest-creature that multiplies your gold gains.",
@@ -132,7 +126,6 @@
       "item_find_chance": 0.05
     }
   },
-
   "storm_hawk": {
     "name": "Storm Hawk",
     "description": "A lightning-fast predator that enhances speed and power.",
@@ -169,6 +162,197 @@
     "boosts": {
       "gold_gain": 0.25,
       "item_find_chance": 0.15
+    }
+  },
+  "bamboo_panda": {
+    "name": "Bamboo Panda",
+    "description": "A round and absurdly calm cub from the Yixuan highlands. Merchants claim it brings good fortune. They are right.",
+    "price": 2200,
+    "boosts": {
+      "gold_gain": 0.18,
+      "item_find_chance": 0.06
+    }
+  },
+  "jade_serpent": {
+    "name": "Jade Serpent",
+    "description": "A small serpent with scales of genuine jade, raised in the temple pools of River's Crown. Enhances magical attunement.",
+    "price": 3200,
+    "boosts": {
+      "mp": 45,
+      "spell_power": 8,
+      "crit_chance": 0.04
+    }
+  },
+  "river_eel": {
+    "name": "Yi Xuan River Eel",
+    "description": "A sleek silver eel from the eastern rivers, quick as thought and twice as slippery. Improves your reaction speed.",
+    "price": 1800,
+    "boosts": {
+      "speed": 10,
+      "crit_chance": 0.06
+    }
+  },
+  "lotus_frog": {
+    "name": "Lotus Frog",
+    "description": "A fat jade-green frog that sits on lotus leaves and occasionally does something useful for your mana.",
+    "price": 1400,
+    "boosts": {
+      "mp": 25,
+      "hp_regen": 2
+    }
+  },
+  "silkworm": {
+    "name": "Golden Silkworm",
+    "description": "A fist-sized silkworm that produces shimmering thread worth considerable coin. Lucky merchants keep one.",
+    "price": 1600,
+    "boosts": {
+      "gold_gain": 0.22,
+      "item_find_chance": 0.04
+    }
+  },
+  "celestial_crane": {
+    "name": "Celestial Crane",
+    "description": "A tall white crane from the sacred marshes of Yixuan, regarded as a divine omen. Its presence improves clarity and magical focus.",
+    "price": 4200,
+    "boosts": {
+      "mp": 55,
+      "spell_power": 10,
+      "hp_regen": 2
+    }
+  },
+  "clan_bear_cub": {
+    "name": "Clan Bear Cub",
+    "description": "A cub of the great northern bear, raised by the Varak Bear Warrior order. Loyal, ferocious, and always hungry.",
+    "price": 2800,
+    "boosts": {
+      "attack": 9,
+      "hp": 50
+    }
+  },
+  "steppe_fox": {
+    "name": "Steppe Fox",
+    "description": "A lean amber fox from the Varak Iron Steppe. Impossible to catch and twice as quick as it looks.",
+    "price": 2000,
+    "boosts": {
+      "speed": 13,
+      "item_find_chance": 0.07
+    }
+  },
+  "northern_snowhare": {
+    "name": "Northern Snowhare",
+    "description": "A white hare from the frozen north, unnervingly fast. The Varak say it brings clarity before battle.",
+    "price": 1200,
+    "boosts": {
+      "speed": 8,
+      "defense": 4
+    }
+  },
+  "tundra_wolf": {
+    "name": "Tundra Wolf",
+    "description": "A pale, half-grown wolf from the deep northern tundra, larger than most full-grown southern wolves. A natural hunter.",
+    "price": 3400,
+    "boosts": {
+      "attack": 12,
+      "speed": 7,
+      "crit_chance": 0.05
+    }
+  },
+  "kalovar_falcon": {
+    "name": "Kalovar War Falcon",
+    "description": "A trained falcon of the Kalovar military, hooded and disciplined. Scouts ahead for items and enhances strike precision.",
+    "price": 2600,
+    "boosts": {
+      "attack": 7,
+      "crit_chance": 0.08,
+      "item_find_chance": 0.05
+    }
+  },
+  "bazaar_monkey": {
+    "name": "Bazaar Monkey",
+    "description": "A quick-fingered monkey from the Grand Bazaar markets, extremely adept at finding — or obtaining — gold.",
+    "price": 2400,
+    "boosts": {
+      "gold_gain": 0.28,
+      "item_find_chance": 0.08
+    }
+  },
+  "corsair_parrot": {
+    "name": "Corsair Parrot",
+    "description": "A sharp-beaked parrot from the Kalovar corsair fleets, fluent in four languages and none of them polite. Brings luck at sea.",
+    "price": 1600,
+    "boosts": {
+      "gold_gain": 0.15,
+      "speed": 4
+    }
+  },
+  "ghost_cat": {
+    "name": "Ghost Cat",
+    "description": "A semi-translucent cat that wanders the ruins of Constanplea. It is unclear whether it is alive. It doesn't seem concerned.",
+    "price": 3800,
+    "boosts": {
+      "speed": 14,
+      "crit_chance": 0.09,
+      "defense": 3
+    }
+  },
+  "constanplea_raven": {
+    "name": "Constanplea Raven",
+    "description": "A large black raven that nests in the ruins of the old imperial library. Old enough to have seen the fall of the city.",
+    "price": 3000,
+    "boosts": {
+      "mp": 30,
+      "item_find_chance": 0.1,
+      "gold_gain": 0.08
+    }
+  },
+  "crystal_crab": {
+    "name": "Crystal Cave Crab",
+    "description": "A crab grown entirely from crystalline mineral deposits in the deep caves. Its shell is harder than iron.",
+    "price": 3600,
+    "boosts": {
+      "defense": 12,
+      "hp": 60
+    }
+  },
+  "verdant_drake": {
+    "name": "Verdant Drake",
+    "description": "A young green drake from the eastern mountain passes. Not large enough to ride, but large enough to intimidate.",
+    "price": 8000,
+    "boosts": {
+      "attack": 14,
+      "defense": 8,
+      "speed": 6,
+      "hp": 70
+    }
+  },
+  "ink_spirit": {
+    "name": "Ink Spirit",
+    "description": "A small spirit that takes the form of a calligraphy brush stroke. Scholars of Yixuan claim it improves magical aptitude considerably.",
+    "price": 4800,
+    "boosts": {
+      "mp": 70,
+      "spell_power": 15,
+      "crit_chance": 0.06
+    }
+  },
+  "ancient_tortoise": {
+    "name": "Ancient Tortoise",
+    "description": "A tortoise of genuinely unknowable age. The scholars of the Jade Examination Hall believe it predates the current dynasty. It is very slow and extremely durable.",
+    "price": 9000,
+    "boosts": {
+      "defense": 20,
+      "hp": 120,
+      "hp_regen": 5
+    }
+  },
+  "void_firefly": {
+    "name": "Void Firefly",
+    "description": "A firefly from the Echoing Void that pulses with dark light. Impossible to catch normally. Improves critical strikes and evasion.",
+    "price": 6500,
+    "boosts": {
+      "crit_chance": 0.14,
+      "speed": 12,
+      "mp": 20
     }
   }
 }
