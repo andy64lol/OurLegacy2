@@ -3472,5 +3472,40 @@
       "description": "Exquisite silk from Ottoman looms. Merchants will pay a fortune.",
       "price": 55,
       "rarity": "uncommon"
+   },
+   "The Fall of Constanplea": {
+      "type": "book",
+      "book_key": "fall_of_constanplea",
+      "description": "A survivor's account of the siege and fall of Constanplea. Written by Scholar Theophanes in exile.",
+      "price": 80,
+      "rarity": "rare"
+   },
+   "Origins of the Osman People": {
+      "type": "book",
+      "book_key": "origins_of_the_osmans",
+      "description": "A scholarly history tracing the Osman people from the steppes north of Yixuan to empire. By Archivist Palaiologos.",
+      "price": 45,
+      "rarity": "uncommon"
+   },
+   "The New Order: Life in Kostantora": {
+      "type": "book",
+      "book_key": "new_order_of_kostantora",
+      "description": "A personal account of Kostantora fifteen years after the conquest \u2014 the slave markets, faith, and survival. By Miriam of the Lower City.",
+      "price": 70,
+      "rarity": "rare"
+   },
+   "Chronicles of Byzantra": {
+      "type": "book",
+      "book_key": "chronicles_of_byzantra",
+      "description": "A concise history of the Byzantra Empire from founding to fall. Compiled by the Byzantra Academy of History.",
+      "price": 50,
+      "rarity": "uncommon"
+   },
+   "The Faith and Law of the Osmano\u011flu Empire": {
+      "type": "book",
+      "book_key": "osman_faith_and_law",
+      "description": "An official Osman guide for travellers. Informative, one-sided, and useful in its own way.",
+      "price": 20,
+      "rarity": "common"
    }
 }

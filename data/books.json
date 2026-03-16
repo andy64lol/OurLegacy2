@@ -1,0 +1,37 @@
+{
+  "fall_of_constanplea": {
+    "title": "The Fall of Constanplea",
+    "author": "Scholar Theophanes of Byzantra",
+    "description": "A firsthand account of the final siege and fall of Constanplea, written by a survivor of the Osman conquest.",
+    "file": "books/fall_of_constanplea.txt",
+    "rarity": "rare"
+  },
+  "origins_of_the_osmans": {
+    "title": "Origins of the Osman People",
+    "author": "Archivist Demetrios Palaiologos",
+    "description": "A scholarly history of the Osman people \u2014 from nomadic clans on the steppes north of Yixuan to the rulers of a world empire.",
+    "file": "books/origins_of_the_osmans.txt",
+    "rarity": "uncommon"
+  },
+  "new_order_of_kostantora": {
+    "title": "The New Order: Life in Kostantora",
+    "author": "Miriam of the Lower City",
+    "description": "A personal account of life in Kostantora fifteen years after the conquest \u2014 the slave markets, religious imposition, and daily survival.",
+    "file": "books/new_order_of_kostantora.txt",
+    "rarity": "rare"
+  },
+  "chronicles_of_byzantra": {
+    "title": "Chronicles of Byzantra",
+    "author": "The Byzantra Academy of History",
+    "description": "A concise history of the Byzantra Empire, from the first Basileus Konrad the Unifier to the fall of Basileus Konstantinos IX.",
+    "file": "books/chronicles_of_byzantra.txt",
+    "rarity": "uncommon"
+  },
+  "osman_faith_and_law": {
+    "title": "The Faith and Law of the Osmano\u011flu Empire",
+    "author": "Imperial Office of Trade and Foreign Relations",
+    "description": "An official Osman guide for foreign visitors \u2014 customs, laws, and strongly-worded advice on not discussing the city's prior history.",
+    "file": "books/osman_faith_and_law.txt",
+    "rarity": "common"
+  }
+}

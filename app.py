@@ -92,6 +92,7 @@ GAME_DATA: dict[str, Any] = {
     "times": load_json("times.json"),
     "dialogues": load_json("dialogues.json"),
     "cutscenes": load_json("cutscenes.json"),
+    "books": load_json("books.json"),
     "splash_texts": load_json("splash_text.json")
     if isinstance(load_json("splash_text.json"), list)
     else [],
@@ -1299,6 +1300,7 @@ def game():
             if class_req:
                 parts.append(class_req)
             req_label = " · ".join(parts)
+        _book_key = item_data.get("book_key", "") if item_type == "book" else ""
         inventory_items.append(
             {
                 "name": item_name,
@@ -1312,6 +1314,9 @@ def game():
                 "equip_block_reason": equip_block_reason,
                 "req_label": req_label,
                 "stats": _item_stat_summary(item_data),
+                "is_book": item_type == "book",
+                "book_key": _book_key,
+                "already_read": _book_key in player.get("read_books", []),
             }
         )
 
@@ -1618,6 +1623,7 @@ def game():
         dungeon_list=dungeon_list,
         active_dungeon=active_dungeon,
         attr_summary=attr_summary,
+        read_books=player.get("read_books", []),
     )
 
 
@@ -2253,11 +2259,59 @@ def action_use_item():
         add_message(
             f"You use the {item_name} and feel its power (+{heal} HP).", "var(--gold)"
         )
+    elif item_type == "book":
+        return redirect(url_for("action_read_book") + f"?item={item_name}")
     else:
         add_message(f"You cannot use {item_name} outside of battle.", "var(--text-dim)")
 
     save_player(player)
     return redirect(url_for("game"))
+
+
+@app.route("/action/read_book", methods=["GET", "POST"])
+def action_read_book():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+
+    item_name = request.values.get("item", "")
+    if item_name not in player.get("inventory", []):
+        add_message("You do not have that book.", "var(--red)")
+        return redirect(url_for("game"))
+
+    item_data = GAME_DATA["items"].get(item_name, {})
+    if not isinstance(item_data, dict) or item_data.get("type") != "book":
+        add_message("That item cannot be read.", "var(--red)")
+        return redirect(url_for("game"))
+
+    book_key = item_data.get("book_key", "")
+    book_meta = GAME_DATA["books"].get(book_key, {})
+    book_file = book_meta.get("file", "")
+
+    content = "(The pages of this book are damaged beyond reading.)"
+    if book_file:
+        try:
+            with open(os.path.join(DATA_DIR, book_file), "r", encoding="utf-8") as bf:
+                content = bf.read()
+        except OSError:
+            pass
+
+    read_books = player.setdefault("read_books", [])
+    already_read = book_key and book_key in read_books
+    if book_key and not already_read:
+        read_books.append(book_key)
+        add_message(f"You read \"{item_name}\" and add it to your library.", "var(--gold)")
+
+    save_player(player)
+    return render_template(
+        "book.html",
+        book_title=book_meta.get("title", item_name),
+        book_author=book_meta.get("author", "Unknown"),
+        book_description=book_meta.get("description", ""),
+        book_content=content,
+        already_read=already_read,
+        item_name=item_name,
+    )
 
 
 @app.route("/action/equip", methods=["POST"])

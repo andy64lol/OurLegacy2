@@ -700,7 +700,8 @@
     "loot_table": [
       "Shaman's Bone Totem",
       "Permafrost Shard",
-      "Mana Potion"
+      "Mana Potion",
+      "Chronicles of Byzantra"
     ]
   },
   "taiga_bandit": {
@@ -812,7 +813,8 @@
     "loot_table": [
       "Slave Chain",
       "Ottoman Gold Coin",
-      "Health Potion"
+      "Health Potion",
+      "The New Order: Life in Kostantora"
     ]
   },
   "bazaar_thief": {
@@ -896,7 +898,8 @@
     "loot_table": [
       "Vizier Staff",
       "Mana Potion",
-      "Spice Bundle"
+      "Spice Bundle",
+      "The Faith and Law of the Osmano\u011flu Empire"
     ]
   },
   "janissary_captain": {
@@ -924,7 +927,8 @@
     "loot_table": [
       "Sultan's Blade",
       "Janissary Plate Armor",
-      "Ottoman Gold Coin"
+      "Ottoman Gold Coin",
+      "Origins of the Osman People"
     ]
   },
   "shadow_dervish": {

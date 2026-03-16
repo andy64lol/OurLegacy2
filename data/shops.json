@@ -258,7 +258,9 @@
       "Corsair Cutlass",
       "Corsair Coat",
       "Ottoman Chainmail",
-      "Corsair's Amulet"
+      "Corsair's Amulet",
+      "The Faith and Law of the Osmano\u011flu Empire",
+      "Origins of the Osman People"
     ],
     "max_buy": 10
   },
@@ -287,7 +289,12 @@
       "Ottoman Gold Coin",
       "Spice Bundle",
       "Ottoman Silk",
-      "Desert Jewel"
+      "Desert Jewel",
+      "The Faith and Law of the Osmano\u011flu Empire",
+      "Origins of the Osman People",
+      "Chronicles of Byzantra",
+      "The Fall of Constanplea",
+      "The New Order: Life in Kostantora"
     ],
     "max_buy": 15
   }

@@ -733,6 +733,9 @@ const raceData  = {{ data.races  | tojson }};
                                 {% if item.req_label %}
                                 <span class="item-req-badge">{{ item.req_label }}</span>
                                 {% endif %}
+                                {% if item.is_book and item.already_read %}
+                                <span class="item-req-badge" style="color:var(--gold);border-color:var(--gold);">Read</span>
+                                {% endif %}
                             </div>
                             {% if item.stats %}
                             <div class="inv-card-stats">{{ item.stats }}</div>
@@ -744,6 +747,8 @@ const raceData  = {{ data.races  | tojson }};
                                 {% else %}
                                 <div class="item-req-block">&#10007; {{ item.equip_block_reason }}</div>
                                 {% endif %}
+                            {% elif item.is_book %}
+                                <div class="item-can-use" style="color:var(--gold);">&#128218; Readable book{% if item.already_read %} &mdash; already read{% endif %}</div>
                             {% else %}
                                 <div class="item-can-use" style="color:var(--mana-bright,#7eb8f7);">&#10003; Usable ({{ item.type }})</div>
                             {% endif %}
@@ -754,6 +759,10 @@ const raceData  = {{ data.races  | tojson }};
                                     <button type="submit" class="btn btn-xsmall btn-primary"
                                         {% if not item.can_equip %}disabled title="{{ item.equip_block_reason }}"{% endif %}>Equip</button>
                                 </form>
+                                {% elif item.is_book %}
+                                <a href="/action/read_book?item={{ item.name | urlencode }}" class="btn btn-xsmall btn-primary" style="text-decoration:none;display:inline-block;">
+                                    {% if item.already_read %}Read Again{% else %}Read{% endif %}
+                                </a>
                                 {% else %}
                                 <form method="post" action="/action/use_item">
                                     <input type="hidden" name="item" value="{{ item.name }}">
