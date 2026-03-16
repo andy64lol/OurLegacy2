@@ -45,8 +45,8 @@
       "Enchanting Lute",
       "Dragonbone Lute",
       "Skyfall Lyre",
-      "Hämmelson's Legendary Flute",
-      "War Drum of The god of Thunder Zâesltral",
+      "H\u00e4mmelson's Legendary Flute",
+      "War Drum of The god of Thunder Z\u00e2esltral",
       "Wooden Flute",
       "Silver Lyre",
       "Oak Harp",
@@ -105,7 +105,7 @@
       "Phyla's Root Longbow",
       "Boreas",
       "Staff of Power",
-      "Dälokurg's Warhammer",
+      "D\u00e4lokurg's Warhammer",
       "Ninja's Shuriken",
       "Ninjato",
       "Paladin's Sword",
@@ -128,7 +128,7 @@
       "Harmonist's Vestments",
       "Melodist's Coat",
       "Virtuoso's Attire",
-      "The Poetry god Äepleollo's Robe",
+      "The Poetry god \u00c4epleollo's Robe",
       "Leather Helm",
       "Nightshade Armor",
       "Archmage's Vestments",
@@ -228,5 +228,22 @@
       "Resurrection Scroll"
     ],
     "max_buy": 5
+  },
+  "taiga_traders": {
+    "name": "Taiga Trading Post",
+    "welcome_message": "Welcome, traveller. Cold wares for cold lands. Watch your back out there.",
+    "items": [
+      "Health Potion",
+      "Large Health Potion",
+      "Mana Potion",
+      "Taiga Herb",
+      "Bone Hatchet",
+      "Birch Staff",
+      "Taiga Hunter's Bow",
+      "Frost Blade",
+      "Siberian War Axe",
+      "Permafrost Spear"
+    ],
+    "max_buy": 10
   }
 }

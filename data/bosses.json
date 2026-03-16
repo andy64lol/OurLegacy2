@@ -50,7 +50,10 @@
         "description": "In its final moments, the dragon unleashes all its power",
         "attack_multiplier": 1.5,
         "defense_multiplier": 0.6,
-        "special_abilities_unlocked": ["Fire Breath", "Dragon Roar"]
+        "special_abilities_unlocked": [
+          "Fire Breath",
+          "Dragon Roar"
+        ]
       }
     ],
     "experience_reward": 1000,
@@ -63,7 +66,10 @@
     ],
     "unlock_conditions": {
       "level": 8,
-      "missions_required": ["crystal_guardian", "troll_slayer"]
+      "missions_required": [
+        "crystal_guardian",
+        "troll_slayer"
+      ]
     },
     "dialogues": {
       "on_start_battle": "dragon.boss.start",
@@ -111,7 +117,9 @@
     ],
     "unlock_conditions": {
       "level": 6,
-      "missions_required": ["undead_horde"]
+      "missions_required": [
+        "undead_horde"
+      ]
     }
   },
   "shadow_lord": {
@@ -152,13 +160,19 @@
         "hp_threshold": 0.6,
         "description": "The Shadow Lord reveals its true power",
         "attack_multiplier": 1.1,
-        "special_abilities_unlocked": ["Shadow Strike"]
+        "special_abilities_unlocked": [
+          "Shadow Strike"
+        ]
       },
       {
         "hp_threshold": 0.3,
         "description": "Desperate and dangerous, the Shadow Lord uses all its dark powers",
         "attack_multiplier": 1.4,
-        "special_abilities_unlocked": ["Shadow Strike", "Dark Portal", "Soul Drain"]
+        "special_abilities_unlocked": [
+          "Shadow Strike",
+          "Dark Portal",
+          "Soul Drain"
+        ]
       }
     ],
     "experience_reward": 350,
@@ -171,7 +185,9 @@
     ],
     "unlock_conditions": {
       "level": 7,
-      "missions_required": ["ancient_artifact"]
+      "missions_required": [
+        "ancient_artifact"
+      ]
     }
   },
   "ice_queen": {
@@ -213,13 +229,19 @@
         "hp_threshold": 0.5,
         "description": "The Ice Queen becomes more aggressive in defense of her domain",
         "attack_multiplier": 1.2,
-        "special_abilities_unlocked": ["Ice Shield"]
+        "special_abilities_unlocked": [
+          "Ice Shield"
+        ]
       },
       {
         "hp_threshold": 0.25,
         "description": "Desperation fuels her magical abilities",
         "attack_multiplier": 1.3,
-        "special_abilities_unlocked": ["Blizzard", "Ice Shield", "Frost Nova"]
+        "special_abilities_unlocked": [
+          "Blizzard",
+          "Ice Shield",
+          "Frost Nova"
+        ]
       }
     ],
     "experience_reward": 300,
@@ -231,7 +253,9 @@
     ],
     "unlock_conditions": {
       "level": 5,
-      "missions_required": ["crystal_guardian"]
+      "missions_required": [
+        "crystal_guardian"
+      ]
     }
   },
   "orc_chieftain": {
@@ -265,7 +289,10 @@
         "hp_threshold": 0.4,
         "description": "Wounded but still fierce, the Chieftain fights with increased desperation",
         "attack_multiplier": 1.3,
-        "special_abilities_unlocked": ["War Cry", "Heavy Strike"]
+        "special_abilities_unlocked": [
+          "War Cry",
+          "Heavy Strike"
+        ]
       }
     ],
     "experience_reward": 200,
@@ -277,7 +304,9 @@
     ],
     "unlock_conditions": {
       "level": 3,
-      "missions_required": ["orc_invasion"]
+      "missions_required": [
+        "orc_invasion"
+      ]
     }
   },
   "void_tyrant": {
@@ -297,7 +326,10 @@
     ],
     "unlock_conditions": {
       "level": 8,
-      "missions_required": ["void_walker", "dragon_slayer"]
+      "missions_required": [
+        "void_walker",
+        "dragon_slayer"
+      ]
     }
   },
   "swamp_hydra": {
@@ -347,14 +379,19 @@
         "description": "The hydra grows more heads as it takes damage",
         "attack_multiplier": 1.2,
         "head_count": 4,
-        "special_abilities_unlocked": ["Toxic Cloud"]
+        "special_abilities_unlocked": [
+          "Toxic Cloud"
+        ]
       },
       {
         "hp_threshold": 0.2,
         "description": "The final heads of the hydra unleash devastating attacks",
         "attack_multiplier": 1.4,
         "head_count": 5,
-        "special_abilities_unlocked": ["Multi-Head Attack", "Toxic Cloud"]
+        "special_abilities_unlocked": [
+          "Multi-Head Attack",
+          "Toxic Cloud"
+        ]
       }
     ],
     "experience_reward": 350,
@@ -367,7 +404,10 @@
     ],
     "unlock_conditions": {
       "level": 4,
-      "missions_required": ["orc_invasion", "forest_cleaning"]
+      "missions_required": [
+        "orc_invasion",
+        "forest_cleaning"
+      ]
     }
   },
   "necromancer_lord": {
@@ -417,13 +457,19 @@
         "hp_threshold": 0.6,
         "description": "The necromancer begins to summon his undead army",
         "attack_multiplier": 1.0,
-        "special_abilities_unlocked": ["Death Curse"]
+        "special_abilities_unlocked": [
+          "Death Curse"
+        ]
       },
       {
         "hp_threshold": 0.3,
         "description": "Desperate, Vorthak unleashes his full dark power",
         "attack_multiplier": 1.3,
-        "special_abilities_unlocked": ["Army of the Dead", "Soul Harvest", "Bone Shield"]
+        "special_abilities_unlocked": [
+          "Army of the Dead",
+          "Soul Harvest",
+          "Bone Shield"
+        ]
       }
     ],
     "experience_reward": 400,
@@ -437,7 +483,10 @@
     ],
     "unlock_conditions": {
       "level": 6,
-      "missions_required": ["undead_horde", "temple_protector"]
+      "missions_required": [
+        "undead_horde",
+        "temple_protector"
+      ]
     }
   },
   "storm_giant": {
@@ -484,13 +533,19 @@
         "hp_threshold": 0.6,
         "description": "Thorigar fights with thunderous might",
         "attack_multiplier": 1.0,
-        "special_abilities_unlocked": ["Lightning Strike"]
+        "special_abilities_unlocked": [
+          "Lightning Strike"
+        ]
       },
       {
         "hp_threshold": 0.3,
         "description": "Enraged, the giant calls upon the full fury of the storm",
         "attack_multiplier": 1.4,
-        "special_abilities_unlocked": ["Thunder Clap", "Storm Shield", "Meteor Smash"]
+        "special_abilities_unlocked": [
+          "Thunder Clap",
+          "Storm Shield",
+          "Meteor Smash"
+        ]
       }
     ],
     "experience_reward": 450,
@@ -504,7 +559,10 @@
     ],
     "unlock_conditions": {
       "level": 7,
-      "missions_required": ["crystal_guardian", "inferno_slayer"]
+      "missions_required": [
+        "crystal_guardian",
+        "inferno_slayer"
+      ]
     }
   },
   "lich_king": {
@@ -564,19 +622,27 @@
         "hp_threshold": 0.7,
         "description": "The Lich King tests his power against intruders",
         "attack_multiplier": 1.0,
-        "special_abilities_unlocked": ["Frost Blast"]
+        "special_abilities_unlocked": [
+          "Frost Blast"
+        ]
       },
       {
         "hp_threshold": 0.4,
         "description": "Malachar summons his elite undead guardians",
         "attack_multiplier": 1.2,
-        "special_abilities_unlocked": ["Death's Embrace", "Army of Eternity"]
+        "special_abilities_unlocked": [
+          "Death's Embrace",
+          "Army of Eternity"
+        ]
       },
       {
         "hp_threshold": 0.15,
         "description": "The Lich King reveals his ultimate power and immortality",
         "attack_multiplier": 1.5,
-        "special_abilities_unlocked": ["Soul Shackles", "Resurrection"]
+        "special_abilities_unlocked": [
+          "Soul Shackles",
+          "Resurrection"
+        ]
       }
     ],
     "experience_reward": 550,
@@ -591,7 +657,11 @@
     ],
     "unlock_conditions": {
       "level": 8,
-      "missions_required": ["necromancer_defeat", "shadow_plague", "troll_slayer"]
+      "missions_required": [
+        "necromancer_defeat",
+        "shadow_plague",
+        "troll_slayer"
+      ]
     }
   },
   "demon_prince": {
@@ -651,19 +721,27 @@
         "hp_threshold": 0.7,
         "description": "Azgorath fights with his demonic minions",
         "attack_multiplier": 1.0,
-        "special_abilities_unlocked": ["Hellfire Inferno"]
+        "special_abilities_unlocked": [
+          "Hellfire Inferno"
+        ]
       },
       {
         "hp_threshold": 0.4,
         "description": "The Demon Prince shows his true power",
         "attack_multiplier": 1.3,
-        "special_abilities_unlocked": ["Demon Summoning", "Soul Cleave"]
+        "special_abilities_unlocked": [
+          "Demon Summoning",
+          "Soul Cleave"
+        ]
       },
       {
         "hp_threshold": 0.2,
         "description": "Azgorath enters his ultimate Demon Form",
         "attack_multiplier": 1.6,
-        "special_abilities_unlocked": ["Demon Form", "Chaos Portal"]
+        "special_abilities_unlocked": [
+          "Demon Form",
+          "Chaos Portal"
+        ]
       }
     ],
     "experience_reward": 600,
@@ -679,7 +757,10 @@
     ],
     "unlock_conditions": {
       "level": 9,
-      "missions_required": ["demon_gate", "lich_king_defeat"]
+      "missions_required": [
+        "demon_gate",
+        "lich_king_defeat"
+      ]
     }
   },
   "elder_dragon": {
@@ -746,25 +827,35 @@
         "hp_threshold": 0.75,
         "description": "Zephyr surveys his domain with regal calm",
         "attack_multiplier": 1.0,
-        "special_abilities_unlocked": ["Cyclone Breath"]
+        "special_abilities_unlocked": [
+          "Cyclone Breath"
+        ]
       },
       {
         "hp_threshold": 0.5,
         "description": "The elder dragon becomes more aggressive",
         "attack_multiplier": 1.2,
-        "special_abilities_unlocked": ["Sky Dash", "Tempest Shield"]
+        "special_abilities_unlocked": [
+          "Sky Dash",
+          "Tempest Shield"
+        ]
       },
       {
         "hp_threshold": 0.25,
         "description": "Zephyr unleashes the full fury of the skies",
         "attack_multiplier": 1.5,
-        "special_abilities_unlocked": ["Wind Slash", "Ancient Dragon's Roar"]
+        "special_abilities_unlocked": [
+          "Wind Slash",
+          "Ancient Dragon's Roar"
+        ]
       },
       {
         "hp_threshold": 0.1,
         "description": "The dragon's final stand with all powers unleashed",
         "attack_multiplier": 1.8,
-        "special_abilities_unlocked": ["Divine Regeneration"]
+        "special_abilities_unlocked": [
+          "Divine Regeneration"
+        ]
       }
     ],
     "experience_reward": 700,
@@ -781,20 +872,23 @@
     ],
     "unlock_conditions": {
       "level": 9,
-      "missions_required": ["storm_giant_defeat", "demon_prince_defeat"]
+      "missions_required": [
+        "storm_giant_defeat",
+        "demon_prince_defeat"
+      ]
     }
   },
-  "Dalokurg":{
-    "name": "The infamous bandit leader, Dälokurg",
+  "Dalokurg": {
+    "name": "The infamous bandit leader, D\u00e4lokurg",
     "hp": 170,
     "attack": 40,
     "defense": 32,
     "speed": 28,
-    "description": "Dälokurg, the notorious bandit leader known for his cunning and ruthlessness. He commands a large group of bandits and has a reputation for ambushing travelers on the roads.",
+    "description": "D\u00e4lokurg, the notorious bandit leader known for his cunning and ruthlessness. He commands a large group of bandits and has a reputation for ambushing travelers on the roads.",
     "special_abilities": [
       {
         "name": "Ambush Strike",
-        "description": "A surprise attack that deals extra damage when Dälokurg is at full health",
+        "description": "A surprise attack that deals extra damage when D\u00e4lokurg is at full health",
         "damage": 50,
         "mp_cost": 15,
         "cooldown": 3
@@ -819,11 +913,11 @@
     "experience_reward": 100,
     "gold_reward": 50,
     "unique_loot": [
-      "Dälokurg's Warhammer",
+      "D\u00e4lokurg's Warhammer",
       "Bandit Leader's Cloak"
     ]
   },
-  "purple_sandworm":{
+  "purple_sandworm": {
     "name": "Purple Sandworm",
     "hp": 650,
     "attack": 90,
@@ -860,7 +954,9 @@
         "hp_threshold": 0.5,
         "description": "The sandworm becomes more aggressive as it takes damage",
         "attack_multiplier": 1.2,
-        "special_abilities_unlocked": ["Sandstorm"]
+        "special_abilities_unlocked": [
+          "Sandstorm"
+        ]
       }
     ],
     "experience_reward": 300,
@@ -910,13 +1006,18 @@
         "hp_threshold": 0.5,
         "description": "The Goblin King becomes desperate and calls for help",
         "attack_multiplier": 1.1,
-        "special_abilities_unlocked": ["Summon Minions"]
+        "special_abilities_unlocked": [
+          "Summon Minions"
+        ]
       },
       {
         "hp_threshold": 0.25,
         "description": "Cornered and furious, the King fights with all his cunning",
         "attack_multiplier": 1.3,
-        "special_abilities_unlocked": ["Backstab", "Gold Toss"]
+        "special_abilities_unlocked": [
+          "Backstab",
+          "Gold Toss"
+        ]
       }
     ],
     "experience_reward": 250,
@@ -928,7 +1029,9 @@
     ],
     "unlock_conditions": {
       "level": 4,
-      "missions_required": ["goblin_hunt"]
+      "missions_required": [
+        "goblin_hunt"
+      ]
     }
   },
   "fire_elemental_lord": {
@@ -979,19 +1082,26 @@
         "hp_threshold": 0.7,
         "description": "Ignaros tests intruders with controlled flames",
         "attack_multiplier": 1.0,
-        "special_abilities_unlocked": ["Inferno Wave"]
+        "special_abilities_unlocked": [
+          "Inferno Wave"
+        ]
       },
       {
         "hp_threshold": 0.4,
         "description": "The Lord's flames intensify with anger",
         "attack_multiplier": 1.3,
-        "special_abilities_unlocked": ["Magma Armor", "Eruption"]
+        "special_abilities_unlocked": [
+          "Magma Armor",
+          "Eruption"
+        ]
       },
       {
         "hp_threshold": 0.2,
         "description": "Ignaros becomes a being of pure destructive flame",
         "attack_multiplier": 1.5,
-        "special_abilities_unlocked": ["Flame Dash"]
+        "special_abilities_unlocked": [
+          "Flame Dash"
+        ]
       }
     ],
     "experience_reward": 500,
@@ -1004,7 +1114,10 @@
     ],
     "unlock_conditions": {
       "level": 7,
-      "missions_required": ["fire_dragon_defeat", "crystal_caves_clear"]
+      "missions_required": [
+        "fire_dragon_defeat",
+        "crystal_caves_clear"
+      ]
     }
   },
   "ice_giant_king": {
@@ -1054,19 +1167,26 @@
         "hp_threshold": 0.6,
         "description": "Thrym fights with the cold fury of his kingdom",
         "attack_multiplier": 1.0,
-        "special_abilities_unlocked": ["Frost Slam"]
+        "special_abilities_unlocked": [
+          "Frost Slam"
+        ]
       },
       {
         "hp_threshold": 0.35,
         "description": "The King calls upon the full power of winter",
         "attack_multiplier": 1.25,
-        "special_abilities_unlocked": ["Blizzard Breath", "Ice Armor"]
+        "special_abilities_unlocked": [
+          "Blizzard Breath",
+          "Ice Armor"
+        ]
       },
       {
         "hp_threshold": 0.15,
         "description": "Thrym unleashes the eternal winter's wrath",
         "attack_multiplier": 1.5,
-        "special_abilities_unlocked": ["Avalanche Call"]
+        "special_abilities_unlocked": [
+          "Avalanche Call"
+        ]
       }
     ],
     "experience_reward": 550,
@@ -1079,7 +1199,10 @@
     ],
     "unlock_conditions": {
       "level": 7,
-      "missions_required": ["ice_queen_defeat", "frozen_peaks_explore"]
+      "missions_required": [
+        "ice_queen_defeat",
+        "frozen_peaks_explore"
+      ]
     }
   },
   "celestial_guardian": {
@@ -1136,19 +1259,27 @@
         "hp_threshold": 0.75,
         "description": "Auriel tests the worthiness of challengers",
         "attack_multiplier": 1.0,
-        "special_abilities_unlocked": ["Holy Smite"]
+        "special_abilities_unlocked": [
+          "Holy Smite"
+        ]
       },
       {
         "hp_threshold": 0.5,
         "description": "The Guardian reveals more divine power",
         "attack_multiplier": 1.2,
-        "special_abilities_unlocked": ["Divine Shield", "Light of Judgment"]
+        "special_abilities_unlocked": [
+          "Divine Shield",
+          "Light of Judgment"
+        ]
       },
       {
         "hp_threshold": 0.25,
         "description": "Auriel fights with the full fury of the heavens",
         "attack_multiplier": 1.4,
-        "special_abilities_unlocked": ["Celestial Regeneration", "Wings of Fury"]
+        "special_abilities_unlocked": [
+          "Celestial Regeneration",
+          "Wings of Fury"
+        ]
       }
     ],
     "experience_reward": 650,
@@ -1162,7 +1293,10 @@
     ],
     "unlock_conditions": {
       "level": 9,
-      "missions_required": ["void_tyrant_defeat", "dragon_slayer_master"]
+      "missions_required": [
+        "void_tyrant_defeat",
+        "dragon_slayer_master"
+      ]
     }
   },
   "supreme_being": {
@@ -1227,31 +1361,47 @@
         "hp_threshold": 0.8,
         "description": "Eternus observes the challenger with minimal effort",
         "attack_multiplier": 1.0,
-        "special_abilities_unlocked": ["Cosmic Blast"]
+        "special_abilities_unlocked": [
+          "Cosmic Blast"
+        ]
       },
       {
         "hp_threshold": 0.6,
         "description": "The Being begins to take the battle seriously",
         "attack_multiplier": 1.2,
-        "special_abilities_unlocked": ["Time Stop", "Reality Warp"]
+        "special_abilities_unlocked": [
+          "Time Stop",
+          "Reality Warp"
+        ]
       },
       {
         "hp_threshold": 0.4,
         "description": "Eternus unleashes more cosmic power",
         "attack_multiplier": 1.4,
-        "special_abilities_unlocked": ["Eternal Flames"]
+        "special_abilities_unlocked": [
+          "Eternal Flames"
+        ]
       },
       {
         "hp_threshold": 0.2,
         "description": "The Supreme Being fights at full power",
         "attack_multiplier": 1.6,
-        "special_abilities_unlocked": ["Supreme Judgment", "Cosmic Regeneration"]
+        "special_abilities_unlocked": [
+          "Supreme Judgment",
+          "Cosmic Regeneration"
+        ]
       },
       {
         "hp_threshold": 0.1,
         "description": "Eternus reveals its true, ultimate form",
         "attack_multiplier": 2.0,
-        "special_abilities_unlocked": ["Cosmic Blast", "Time Stop", "Reality Warp", "Eternal Flames", "Supreme Judgment"]
+        "special_abilities_unlocked": [
+          "Cosmic Blast",
+          "Time Stop",
+          "Reality Warp",
+          "Eternal Flames",
+          "Supreme Judgment"
+        ]
       }
     ],
     "experience_reward": 1000,
@@ -1266,7 +1416,11 @@
     ],
     "unlock_conditions": {
       "level": 10,
-      "missions_required": ["celestial_guardian_defeat", "all_dungeons_clear", "legend_achieved"]
+      "missions_required": [
+        "celestial_guardian_defeat",
+        "all_dungeons_clear",
+        "legend_achieved"
+      ]
     }
   },
   "archdruid_malfurion": {
@@ -1278,8 +1432,14 @@
     "description": "A legendary druid fallen to the nightmare. He commands the very soul of the forest to crush intruders.",
     "experience_reward": 800,
     "gold_reward": 400,
-    "unique_loot": ["Gaea's Wrath", "Elder Grove Vestments", "Nature Stone"],
-    "unlock_conditions": {"level": 6}
+    "unique_loot": [
+      "Gaea's Wrath",
+      "Elder Grove Vestments",
+      "Nature Stone"
+    ],
+    "unlock_conditions": {
+      "level": 6
+    }
   },
   "high_inquisitor_whitemane": {
     "name": "High Inquisitor Whitemane",
@@ -1290,8 +1450,14 @@
     "description": "The leader of a fanatical sect, she uses her divine powers to judge and purify all who cross her path.",
     "experience_reward": 750,
     "gold_reward": 350,
-    "unique_loot": ["Relic of the First Saint", "High Oracle's Regalia", "Divine Focus"],
-    "unlock_conditions": {"level": 6}
+    "unique_loot": [
+      "Relic of the First Saint",
+      "High Oracle's Regalia",
+      "Divine Focus"
+    ],
+    "unlock_conditions": {
+      "level": 6
+    }
   },
   "uther_the_fallen": {
     "name": "Uther the Fallen",
@@ -1302,7 +1468,95 @@
     "description": "A once-great paladin whose light has been extinguished. He remains a formidable guardian of the sacred halls.",
     "experience_reward": 900,
     "gold_reward": 500,
-    "unique_loot": ["Aegis of the Eternal Light", "Champion's Holy Bulwark", "Divine Essence"],
-    "unlock_conditions": {"level": 7}
+    "unique_loot": [
+      "Aegis of the Eternal Light",
+      "Champion's Holy Bulwark",
+      "Divine Essence"
+    ],
+    "unlock_conditions": {
+      "level": 7
+    }
+  },
+  "snowbinable": {
+    "name": "Snowbinable",
+    "hp": 450,
+    "attack": 40,
+    "defense": 25,
+    "speed": 12,
+    "description": "A colossus born from the soul of the taiga itself. Part beast, part blizzard \u2014 it has haunted the permafrost for a thousand years. No hunter who tracked it ever returned.",
+    "special_abilities": [
+      {
+        "name": "Blizzard Breath",
+        "description": "Exhales a torrent of ice shards, dealing massive frost damage",
+        "damage": 55,
+        "cooldown": 3
+      },
+      {
+        "name": "Permafrost Slam",
+        "description": "Slams the frozen ground, sending shockwaves that can stun enemies",
+        "damage": 40,
+        "stun_chance": 0.4,
+        "cooldown": 4
+      },
+      {
+        "name": "Frozen Roar",
+        "description": "A terrifying roar that chills the blood, reducing attack and defense",
+        "effect": "debuff",
+        "attack_reduction": 12,
+        "defense_reduction": 8,
+        "cooldown": 3
+      },
+      {
+        "name": "Ice Burial",
+        "description": "Buries the enemy in a surge of permafrost, dealing severe damage",
+        "damage": 65,
+        "cooldown": 5
+      }
+    ],
+    "phases": [
+      {
+        "hp_threshold": 0.7,
+        "description": "The Snowbinable prowls cautiously, sizing up its prey",
+        "attack_multiplier": 1.0,
+        "defense_multiplier": 1.0,
+        "special_abilities_unlocked": [
+          "Blizzard Breath",
+          "Frozen Roar"
+        ]
+      },
+      {
+        "hp_threshold": 0.4,
+        "description": "Wounded and furious, the Snowbinable unleashes its full blizzard power",
+        "attack_multiplier": 1.35,
+        "defense_multiplier": 0.9,
+        "special_abilities_unlocked": [
+          "Blizzard Breath",
+          "Permafrost Slam",
+          "Frozen Roar"
+        ]
+      },
+      {
+        "hp_threshold": 0.15,
+        "description": "At the edge of death, the Snowbinable becomes a living blizzard",
+        "attack_multiplier": 1.6,
+        "defense_multiplier": 0.7,
+        "special_abilities_unlocked": [
+          "Blizzard Breath",
+          "Permafrost Slam",
+          "Frozen Roar",
+          "Ice Burial"
+        ]
+      }
+    ],
+    "experience_reward": 1500,
+    "gold_reward": 750,
+    "unique_loot": [
+      "Snowbinable Heart",
+      "Snowbinable Fang Sword",
+      "Permafrost Core"
+    ],
+    "unlock_conditions": {
+      "level": 12
+    }
   }
 }

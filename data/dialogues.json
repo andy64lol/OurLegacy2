@@ -1,47 +1,34 @@
 {
     "dragon.boss.start": "The Ancient Fire Dragon roars as it emerges from the mountain peak, its eyes glowing with ancient fury.",
     "dragon.boss.defeat": "With a final, thunderous roar, the Ancient Fire Dragon collapses, its fiery breath extinguished. The land begins to heal from its scorched wrath.",
-
     "orc_chieftain.boss.start": "The Orc Chieftain grips his massive war axe and lets out a blood-curdling war cry. 'None shall pass my domain!'",
     "orc_chieftain.boss.defeat": "The Orc Chieftain falls to one knee, his war banner striking the ground. 'The forest... remembers... warriors...' he mutters before collapsing.",
-
     "goblin_king.boss.start": "The Goblin King sits upon a throne of stolen treasures, his eyes gleaming with cunning. 'Another adventurer to add to my collection!'",
     "goblin_king.boss.defeat": "The Goblin King's crown clatters to the ground as he falls. His goblin minions scatter in terror, their leader's reign ended.",
-
     "troll_king.boss.start": "The Troll King roars, shaking the very foundations of the ruins. 'WHO DISTURBS MY SLUMBER?'",
     "troll_king.boss.defeat": "The massive Troll King crashes to the ground, his regenerative powers failing. The ancient ruins seem to sigh with relief.",
-
     "swamp_hydra.boss.start": "The Swamp Hydra rises from the poisonous waters, its multiple heads hissing menacingly. 'FOOLISH MORTALS... DINNER TIME...'",
     "swamp_hydra.boss.defeat": "The final head of the Swamp Hydra slithers into the murky depths, the creature's reign of terror finally ended.",
-
     "ice_queen.boss.start": "The Ice Queen appears, her form ethereal and cold. 'You dare enter my domain? Prepare to join the eternal winter!'",
     "ice_queen.boss.defeat": "The Ice Queen's form shatters like fragile ice, her eternal winter retreating as her power fades away.",
-
     "shadow_lord.boss.start": "The Shadow Lord materializes from the darkness, his voice echoing from all directions. 'You cannot defeat what you cannot see!'",
     "shadow_lord.boss.defeat": "The Shadow Lord dissolves into wisps of dark energy, the light returning to the fortress as his influence wanes.",
-
     "fire_elemental_lord.boss.start": "The Fire Elemental Lord blazes into existence, the temperature soaring. 'YOUR FLESH SHALL FEED MY ETERNAL FLAME!'",
     "fire_elemental_lord.boss.defeat": "The Fire Elemental Lord collapses into a pile of cooling embers, the temple's heat slowly dissipating.",
-
     "ice_giant_king.boss.start": "The Ice Giant King rises to his full height, frost covering his massive form. 'LITTLE SPARK... YOU ARE NOTHING!'",
     "ice_giant_king.boss.defeat": "The Ice Giant King shatters into a thousand frozen fragments, the citadel's eternal winter beginning to thaw.",
-
     "thunder_lord.boss.start": "Thunder Lord Thorigar slams his lightning hammer to the ground, bolts of lightning crackling around him. 'THE SKIES OBEY ME!'",
     "thunder_lord.boss.defeat": "The Thunder Lord collapses, his hammer sparking one final time before falling silent. The storms on the peak begin to calm.",
-
     "necromancer_lord.boss.start": "Necromancer Lord Vorthak raises his staff, undead minions rising around him. 'WELCOME, TRAVELERS... TO YOUR ETERNAL REST!'",
     "necromancer_lord.boss.defeat": "The Necromancer Lord falls, his magical barrier shattering. The undead minions collapse as their master's power is broken.",
-
     "demon_prince.boss.start": "Demon Prince Azgorath emerges from the chaotic portal, flames dancing around him. 'MORTAL FOOLS! YOU HAVE SUMMONED YOUR OWN DOOM!'",
     "demon_prince.boss.defeat": "The Demon Prince's form wavers as the portal destabilizes. With a final scream of rage, he is pulled back into the void.",
-
     "void_tyrant.boss.start": "Void Tyrant Kael'dor manifests from nothingness, reality warping around him. 'YOUR EXISTENCE ENDS... HERE.'",
     "void_tyrant.boss.defeat": "The Void Tyrant's form unravels as reality reasserts itself. The terrible void recedes, leaving only silence.",
-
     "celestial_guardian.boss.start": "The Celestial Guardian descends, radiant light illuminating the tower. 'PROVE YOUR WORTHINESS, SEEKER. DEFEAT ME TO ASCEND!'",
     "celestial_guardian.boss.defeat": "The Celestial Guardian bows his head in respect. 'You have proven yourself worthy. The path to ascension is open.'",
-
     "supreme_being.boss.start": "The Supreme Being regards you with ancient eyes. 'YOU HAVE COME FAR, HERO. BUT YOUR LEGACY ENDS HERE!'",
-    "supreme_being.boss.defeat": "The Supreme Being acknowledges your victory. 'IMPRESSIVE... YOUR LEGACY TRULY BEGINS NOW.'"
+    "supreme_being.boss.defeat": "The Supreme Being acknowledges your victory. 'IMPRESSIVE... YOUR LEGACY TRULY BEGINS NOW.'",
+    "snowbinable.boss.start": "The Snowbinable erupts from the permafrost, its colossal form blotting out the cavern light. A sound like shattering glaciers fills the lair as it turns its pale, frost-rimmed eyes upon you. It does not roar. It simply exhales \u2014 and the air turns to ice.",
+    "snowbinable.boss.defeat": "With a sound like a glacier calving, the Snowbinable crashes down. The howling winds fall silent. A strange warmth creeps into the air for the first time in a thousand years. The taiga holds its breath \u2014 the ancient terror is finally at rest."
 }
-

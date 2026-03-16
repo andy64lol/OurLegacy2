@@ -14,7 +14,8 @@
       "forest_path",
       "ancient_ruins",
       "tavern",
-      "your_land"
+      "your_land",
+      "taiga_outskirts"
     ],
     "rest_cost": 5,
     "can_rest": true,
@@ -1339,5 +1340,165 @@
     "difficulty": 7,
     "can_rest": true,
     "rest_cost": 30
+  },
+  "taiga_outskirts": {
+    "name": "Taiga Outskirts",
+    "description": "The frigid outer edge of the Siberian taiga. Frost-covered pines stretch endlessly into the grey horizon. Siberian wolves howl in the distance and the ground crunches underfoot with permafrost. The air smells of pine resin and ice.",
+    "possible_enemies": [
+      "siberian_wolf",
+      "taiga_lynx",
+      "taiga_bandit"
+    ],
+    "possible_bosses": [],
+    "shops": [
+      "taiga_traders"
+    ],
+    "missions_available": false,
+    "connections": [
+      "starting_village",
+      "frozen_river"
+    ],
+    "difficulty": 3,
+    "rest_cost": 10,
+    "can_rest": true,
+    "weather_probabilities": {
+      "snowy": 45,
+      "stormy": 20,
+      "sunny": 20,
+      "rainy": 15
+    },
+    "npcs": [
+      {
+        "id": "taiga_trapper",
+        "name": "Old Trapper Voronov",
+        "dialogues": [
+          "Forty winters I've walked this taiga. It gets colder every year \u2014 and meaner.",
+          "Stay on the marked paths. Off-trail, the wolves travel in packs of twelve.",
+          "I've seen tracks in the deep snow. Prints big as wagon wheels. Something lives out there."
+        ]
+      },
+      {
+        "id": "taiga_merchant",
+        "name": "Merchant Anya",
+        "dialogues": [
+          "Good furs and sharp steel \u2014 that's what keeps you alive out here.",
+          "The shamans in the deep taiga don't take kindly to outsiders. Tread carefully.",
+          "Heard a rumour of a great beast in the permafrost caverns. The Snowbinable, they call it."
+        ]
+      }
+    ]
+  },
+  "frozen_river": {
+    "name": "Frozen River",
+    "description": "A vast river locked beneath thick, ancient ice. The banks are stalked by bears and wolverines. Strange runes are carved into the ice \u2014 warnings left by the taiga shamans of old. The ice groans beneath your feet.",
+    "possible_enemies": [
+      "siberian_wolf",
+      "brown_bear",
+      "wolverine_beast"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "taiga_outskirts",
+      "deep_taiga"
+    ],
+    "difficulty": 4,
+    "rest_cost": 12,
+    "can_rest": true,
+    "weather_probabilities": {
+      "snowy": 55,
+      "stormy": 25,
+      "sunny": 15,
+      "rainy": 5
+    },
+    "npcs": [
+      {
+        "id": "ice_fisher",
+        "name": "Ice Fisher Petrov",
+        "dialogues": [
+          "I fish where no one else dares. The fish under this ice are unlike any other.",
+          "Three nights ago something large walked across the ice north of here. Left craters.",
+          "The river flows to the caverns eventually. I'd not follow it if I were you."
+        ]
+      }
+    ]
+  },
+  "deep_taiga": {
+    "name": "Deep Taiga",
+    "description": "The ancient heart of the Siberian forest. Twisted pines block out the sky and silence reigns except for the distant chanting of frost shamans. Snow leopards stalk the shadows between trees that have stood since before the first kingdoms.",
+    "possible_enemies": [
+      "frost_shaman",
+      "snow_leopard",
+      "taiga_spirit",
+      "taiga_bandit"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "frozen_river",
+      "permafrost_cavern"
+    ],
+    "difficulty": 5,
+    "can_rest": false,
+    "weather_probabilities": {
+      "snowy": 60,
+      "stormy": 30,
+      "sunny": 10
+    },
+    "npcs": [
+      {
+        "id": "frost_elder",
+        "name": "Frost Elder Nadia",
+        "dialogues": [
+          "You carry a strange warmth about you, outsider. The spirits notice.",
+          "The Snowbinable is not merely a beast. It is the taiga's wrath given form.",
+          "To face it, you must first survive the permafrost caverns. Few have."
+        ]
+      }
+    ]
+  },
+  "permafrost_cavern": {
+    "name": "Permafrost Cavern",
+    "description": "A vast underground cavern carved from permafrost that has been frozen since the world was young. Ice trolls roam the crystalline halls and colossal golems of frozen earth guard the deeper passages. The cold here is absolute \u2014 even fire seems reluctant.",
+    "possible_enemies": [
+      "ice_troll_taiga",
+      "permafrost_golem",
+      "frost_shaman"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "deep_taiga",
+      "snowbinable_lair"
+    ],
+    "difficulty": 6,
+    "can_rest": false,
+    "weather_probabilities": {
+      "null": 100
+    }
+  },
+  "snowbinable_lair": {
+    "name": "Snowbinable's Lair",
+    "description": "A colossal ice cavern at the heart of the taiga. Every surface is coated in hoarfrost and the bones of those who came before. The air itself vibrates with ancient cold. Somewhere in the darkness, something enormous breathes. This is the domain of the Snowbinable.",
+    "possible_enemies": [
+      "ice_troll_taiga",
+      "permafrost_golem"
+    ],
+    "possible_bosses": [
+      "snowbinable"
+    ],
+    "shops": [],
+    "missions_available": false,
+    "connections": [
+      "permafrost_cavern"
+    ],
+    "difficulty": 7,
+    "can_rest": false,
+    "weather_probabilities": {
+      "null": 100
+    }
   }
 }
