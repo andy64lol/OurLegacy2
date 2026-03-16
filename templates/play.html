@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <style>
     .play-wrap {
         min-height: 100vh;
@@ -75,7 +74,9 @@
         flex-direction: column;
         align-items: center;
         gap: 12px;
-        transition: border-color 0.2s, transform 0.15s;
+        transition:
+            border-color 0.2s,
+            transform 0.15s;
     }
 
     .server-card:hover {
@@ -158,13 +159,18 @@
 
 <div class="play-wrap">
     <div class="play-page">
-        <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="play-title-img">
+        <img
+            src="/game_assets/game_title_main_menu.png"
+            alt="Our Legacy 2"
+            class="play-title-img"
+        />
 
         <div class="play-scroll">
             <div class="play-heading">Choose Your Server</div>
             <p class="play-sub">
-                Pick any server below to start playing. Save files are downloaded to your device
-                and can be loaded on any server &mdash; so if one is down, simply switch to another.
+                Pick any server below to start playing. Save files are
+                downloaded to your device and can be loaded on any server
+                &mdash; so if one is down, simply switch to another.
             </p>
             <p class="play-notice">Your save file works on all servers.</p>
         </div>
@@ -173,29 +179,57 @@
             <div class="server-card">
                 <div class="server-name">Replit 1</div>
                 <div class="server-badge replit">Replit</div>
-                <div class="server-warning">May disconnect every ~30 days &amp; could be a version behind.</div>
-                <a href="https://our-legacy-2--andy64lolxd1.replit.app/"
-                    class="btn-play-server">Play Now</a>
+                <div class="server-warning">
+                    May disconnect every ~30 days &amp; could be a version
+                    behind.
+                </div>
+                <a
+                    href="https://our-legacy-2--andy64lolxd1.replit.app/"
+                    target="_self"
+                    class="btn-play-server"
+                    >Play Now</a
+                >
             </div>
             <div class="server-card">
                 <div class="server-name">Render 1</div>
                 <div class="server-badge render">Render</div>
-                <div class="server-recommend">Recommended &mdash; most stable &amp; up to date.</div>
-                <a href="https://ourlegacy2.onrender.com/" class="btn-play-server">Play Now</a>
+                <div class="server-recommend">
+                    Recommended &mdash; most stable &amp; up to date.
+                </div>
+                <a
+                    href="https://ourlegacy2.onrender.com/"
+                    target="_self"
+                    class="btn-play-server"
+                    >Play Now</a
+                >
             </div>
             <div class="server-card">
                 <div class="server-name">Replit 2</div>
                 <div class="server-badge replit">Replit</div>
-                <div class="server-warning">May disconnect every ~30 days &amp; could be a version behind.</div>
-                <a href="https://ourlegacy-2--yuidesu1.replit.app"
-                    class="btn-play-server">Play Now</a>
+                <div class="server-warning">
+                    May disconnect every ~30 days &amp; could be a version
+                    behind.
+                </div>
+                <a
+                    href="https://ourlegacy-2--yuidesu1.replit.app"
+                    target="_self"
+                    class="btn-play-server"
+                    >Play Now</a
+                >
             </div>
             <div class="server-card">
                 <div class="server-name">Replit 3</div>
                 <div class="server-badge replit">Replit</div>
-                <div class="server-warning">May disconnect every ~30 days &amp; could be a version behind.</div>
-                <a href="https://ourlegacy-2--Yhij.replit.app"
-                    class="btn-play-server">Play Now</a>
+                <div class="server-warning">
+                    May disconnect every ~30 days &amp; could be a version
+                    behind.
+                </div>
+                <a
+                    href="https://ourlegacy-2--Yhij.replit.app"
+                    target="_self"
+                    class="btn-play-server"
+                    >Play Now</a
+                >
             </div>
         </div>
 
