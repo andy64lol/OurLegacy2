@@ -2,9 +2,13 @@
   "starting_village": {
     "name": "Starting Village",
     "description": "A peaceful village where new adventurers begin their journey. The innkeeper serves warm meals and merchants offer basic equipment.",
-    "possible_enemies": ["thief"],
+    "possible_enemies": [
+      "thief"
+    ],
     "possible_bosses": [],
-    "shops": ["general_store"],
+    "shops": [
+      "general_store"
+    ],
     "missions_available": true,
     "connections": [
       "forest_path",
@@ -43,20 +47,31 @@
     "description": "A personal plot of land where you can build and customize your home. The possibilities are endless.",
     "possible_enemies": [],
     "possible_bosses": [],
-    "shops": ["pet_shop"],
+    "shops": [
+      "pet_shop"
+    ],
     "missions_available": false,
-    "connections": ["starting_village"],
+    "connections": [
+      "starting_village"
+    ],
     "rest_cost": 0,
     "can_rest": true
   },
   "forest_path": {
     "name": "Dark Forest",
     "description": "A dense forest filled with twisted trees and mysterious shadows. Strange sounds echo through the undergrowth.",
-    "possible_enemies": ["goblin", "goblin_archer", "wolf"],
+    "possible_enemies": [
+      "goblin",
+      "goblin_archer",
+      "wolf"
+    ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["starting_village", "deep_woods"],
+    "connections": [
+      "starting_village",
+      "deep_woods"
+    ],
     "difficulty": 1,
     "rest_cost": 7,
     "can_rest": true,
@@ -77,11 +92,23 @@
   "deep_woods": {
     "name": "Deep Woods",
     "description": "The heart of the forest where ancient magic still lingers. Dangerous creatures prowl these shadows.",
-    "possible_enemies": ["goblin", "orc", "dark_mage", "wolf", "Bandit"],
-    "possible_bosses": ["orc_chieftain"],
+    "possible_enemies": [
+      "goblin",
+      "orc",
+      "dark_mage",
+      "wolf",
+      "Bandit"
+    ],
+    "possible_bosses": [
+      "orc_chieftain"
+    ],
     "shops": [],
     "missions_available": false,
-    "connections": ["forest_path", "crystal_caves", "moonlit_glade"],
+    "connections": [
+      "forest_path",
+      "crystal_caves",
+      "moonlit_glade"
+    ],
     "difficulty": 2,
     "can_rest": false,
     "npcs": [
@@ -106,10 +133,18 @@
       "shadow_knight",
       "ancient_golem"
     ],
-    "possible_bosses": ["shadow_lord"],
-    "shops": ["equipment_shop"],
+    "possible_bosses": [
+      "shadow_lord"
+    ],
+    "shops": [
+      "equipment_shop"
+    ],
     "missions_available": false,
-    "connections": ["starting_village", "underground_tombs", "obsidian_temple"],
+    "connections": [
+      "starting_village",
+      "underground_tombs",
+      "obsidian_temple"
+    ],
     "difficulty": 2,
     "rest_cost": 8,
     "can_rest": true,
@@ -120,7 +155,7 @@
         "dialogues": [
           "Incredible! These ruins predate the kingdom by at least 800 years.",
           "I found a sealed chamber but dare not open it alone. Would you help?",
-          "The inscriptions speak of a power locked beneath \u2014 the Shadow Seal."
+          "The inscriptions speak of a power locked beneath — the Shadow Seal."
         ],
         "quest_unlock": "shadow_seal"
       }
@@ -129,22 +164,40 @@
   "underground_tombs": {
     "name": "Underground Tombs",
     "description": "Hidden beneath the ruins, ancient burial chambers guarded by undead warriors.",
-    "possible_enemies": ["skeleton", "troll", "shadow_knight"],
-    "possible_bosses": ["troll_king"],
+    "possible_enemies": [
+      "skeleton",
+      "troll",
+      "shadow_knight"
+    ],
+    "possible_bosses": [
+      "troll_king"
+    ],
     "shops": [],
     "missions_available": false,
-    "connections": ["ancient_ruins", "void_cavern"],
+    "connections": [
+      "ancient_ruins",
+      "void_cavern"
+    ],
     "difficulty": 3,
     "can_rest": false
   },
   "crystal_caves": {
     "name": "Crystal Caves",
     "description": "Glowing crystals illuminate these caverns, but dangerous elementals guard their secrets.",
-    "possible_enemies": ["ice_elemental", "orc", "fire_wraith"],
-    "possible_bosses": ["ice_queen"],
+    "possible_enemies": [
+      "ice_elemental",
+      "orc",
+      "fire_wraith"
+    ],
+    "possible_bosses": [
+      "ice_queen"
+    ],
     "shops": [],
     "missions_available": false,
-    "connections": ["deep_woods", "dragon_lair"],
+    "connections": [
+      "deep_woods",
+      "dragon_lair"
+    ],
     "difficulty": 3,
     "can_rest": false,
     "npcs": [
@@ -154,7 +207,7 @@
         "dialogues": [
           "The crystals sing down here, if you listen close enough.",
           "Lost three of my crew to the Crystal Guardian last week. We need backup.",
-          "There's a vein of void crystal deeper in. Worth a fortune \u2014 if you survive reaching it."
+          "There's a vein of void crystal deeper in. Worth a fortune — if you survive reaching it."
         ],
         "quest_unlock": "crystal_bounty"
       }
@@ -163,11 +216,17 @@
   "dragon_lair": {
     "name": "Dragon's Lair",
     "description": "The ultimate challenge awaits. A mighty Fire Dragon has made these mountains its home.",
-    "possible_enemies": ["fire_wraith"],
-    "possible_bosses": ["fire_dragon_boss"],
+    "possible_enemies": [
+      "fire_wraith"
+    ],
+    "possible_bosses": [
+      "fire_dragon_boss"
+    ],
     "shops": [],
     "missions_available": false,
-    "connections": ["crystal_caves"],
+    "connections": [
+      "crystal_caves"
+    ],
     "difficulty": 5,
     "boss_area": true,
     "can_rest": false
@@ -175,11 +234,18 @@
   "moonlit_glade": {
     "name": "Moonlit Glade",
     "description": "A serene clearing bathed in silvery moonlight. Strange magic permeates the air here.",
-    "possible_enemies": ["bandit", "fire_wraith", "shadow_knight"],
+    "possible_enemies": [
+      "bandit",
+      "fire_wraith",
+      "shadow_knight"
+    ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["deep_woods", "spire_of_sorcery"],
+    "connections": [
+      "deep_woods",
+      "spire_of_sorcery"
+    ],
     "difficulty": 2,
     "rest_cost": 6,
     "can_rest": true,
@@ -199,44 +265,72 @@
   "spire_of_sorcery": {
     "name": "Spire of Sorcery",
     "description": "An arcane tower crackling with magical energy. Only the most skilled mages can survive here.",
-    "possible_enemies": ["dark_mage", "ice_elemental", "fire_wraith"],
+    "possible_enemies": [
+      "dark_mage",
+      "ice_elemental",
+      "fire_wraith"
+    ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["moonlit_glade"],
+    "connections": [
+      "moonlit_glade"
+    ],
     "difficulty": 4,
     "can_rest": false
   },
   "obsidian_temple": {
     "name": "Obsidian Temple",
     "description": "A dark temple of unknown purpose, hewn from black obsidian stone.",
-    "possible_enemies": ["skeleton", "shadow_knight", "troll"],
+    "possible_enemies": [
+      "skeleton",
+      "shadow_knight",
+      "troll"
+    ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["ancient_ruins", "void_cavern"],
+    "connections": [
+      "ancient_ruins",
+      "void_cavern"
+    ],
     "difficulty": 3,
     "can_rest": false
   },
   "void_cavern": {
     "name": "Void Cavern",
     "description": "A cavernous expanse where light itself seems to bend. Ancient power dwells here.",
-    "possible_enemies": ["shadow_knight", "dark_mage", "fire_wraith"],
+    "possible_enemies": [
+      "shadow_knight",
+      "dark_mage",
+      "fire_wraith"
+    ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["underground_tombs", "obsidian_temple", "abyss_gate"],
+    "connections": [
+      "underground_tombs",
+      "obsidian_temple",
+      "abyss_gate"
+    ],
     "difficulty": 4,
     "can_rest": false
   },
   "abyss_gate": {
     "name": "Abyss Gate",
     "description": "A gateway to the void itself. The very fabric of reality feels unstable.",
-    "possible_enemies": ["shadow_knight"],
-    "possible_bosses": ["void_tyrant"],
+    "possible_enemies": [
+      "shadow_knight"
+    ],
+    "possible_bosses": [
+      "void_tyrant"
+    ],
     "shops": [],
     "missions_available": false,
-    "connections": ["void_cavern", "echoing_void"],
+    "connections": [
+      "void_cavern",
+      "echoing_void"
+    ],
     "difficulty": 5,
     "rest_cost": 25,
     "can_rest": false,
@@ -245,11 +339,19 @@
   "echoing_void": {
     "name": "Echoing Void",
     "description": "A silent dimension where shadows move on their own.",
-    "possible_enemies": ["shadow_wraith", "void_spirit"],
-    "possible_bosses": ["shadow_overlord"],
+    "possible_enemies": [
+      "shadow_wraith",
+      "void_spirit"
+    ],
+    "possible_bosses": [
+      "shadow_overlord"
+    ],
     "shops": [],
     "missions_available": false,
-    "connections": ["abyss_gate", "void_gateway"],
+    "connections": [
+      "abyss_gate",
+      "void_gateway"
+    ],
     "difficulty": 6,
     "rest_cost": 40,
     "can_rest": false,
@@ -258,11 +360,19 @@
   "crystal_peaks": {
     "name": "Crystal Peaks",
     "description": "Snow-capped mountains gleaming with magical resonance. The air is thin and cold.",
-    "possible_enemies": ["ice_elemental", "mountain_goat"],
-    "possible_bosses": ["ice_queen"],
+    "possible_enemies": [
+      "ice_elemental",
+      "mountain_goat"
+    ],
+    "possible_bosses": [
+      "ice_queen"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["thunder_peak", "sky_sanctuary"],
+    "connections": [
+      "thunder_peak",
+      "sky_sanctuary"
+    ],
     "difficulty": 4,
     "rest_cost": 20,
     "can_rest": true,
@@ -273,9 +383,13 @@
     "description": "A warm tavern in the heart of the town. Adventurers meet here to swap stories and hire companions.",
     "possible_enemies": [],
     "possible_bosses": [],
-    "shops": ["tavern_keeper"],
+    "shops": [
+      "tavern_keeper"
+    ],
     "missions_available": false,
-    "connections": ["starting_village"],
+    "connections": [
+      "starting_village"
+    ],
     "rest_cost": 10,
     "can_rest": true,
     "npcs": [
@@ -284,7 +398,7 @@
         "name": "Old Bard Fenwick",
         "dialogues": [
           "Sit down, traveler! Let me sing you a tale of the Crystal Caves... and its many victims.",
-          "Gold flows like ale in this town \u2014 but only for those brave enough to earn it.",
+          "Gold flows like ale in this town — but only for those brave enough to earn it.",
           "They say a ghost haunts the ancient ruins at midnight. A spirit seeking vengeance."
         ],
         "quest_unlock": "haunted_melody"
@@ -303,11 +417,22 @@
   "swamp_of_shadows": {
     "name": "Swamp of Shadows",
     "description": "A treacherous marsh shrouded in perpetual mist. The foul waters hide many dangerous creatures.",
-    "possible_enemies": ["giant_spider", "swamp_rat", "poison_elemental"],
-    "possible_bosses": ["swamp_hydra"],
-    "shops": ["general_store"],
+    "possible_enemies": [
+      "giant_spider",
+      "swamp_rat",
+      "poison_elemental"
+    ],
+    "possible_bosses": [
+      "swamp_hydra"
+    ],
+    "shops": [
+      "general_store"
+    ],
     "missions_available": true,
-    "connections": ["deep_woods", "haunted_cemetery"],
+    "connections": [
+      "deep_woods",
+      "haunted_cemetery"
+    ],
     "difficulty": 3,
     "rest_cost": 8,
     "can_rest": true,
@@ -326,11 +451,20 @@
   "haunted_cemetery": {
     "name": "Haunted Cemetery",
     "description": "An ancient burial ground where restless spirits roam among crumbling tombstones.",
-    "possible_enemies": ["ghost", "skeleton", "wraith"],
-    "possible_bosses": ["necromancer_lord"],
+    "possible_enemies": [
+      "ghost",
+      "skeleton",
+      "wraith"
+    ],
+    "possible_bosses": [
+      "necromancer_lord"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["swamp_of_shadows", "crypt_of_eternity"],
+    "connections": [
+      "swamp_of_shadows",
+      "crypt_of_eternity"
+    ],
     "difficulty": 4,
     "rest_cost": 10,
     "can_rest": true
@@ -338,22 +472,40 @@
   "thunder_peak": {
     "name": "Thunder Peak",
     "description": "A towering mountain peak perpetually shrouded in storm clouds. Lightning strikes constantly.",
-    "possible_enemies": ["storm_elemental", "thunder_bird", "lightning_golem"],
-    "possible_bosses": ["storm_giant"],
+    "possible_enemies": [
+      "storm_elemental",
+      "thunder_bird",
+      "lightning_golem"
+    ],
+    "possible_bosses": [
+      "storm_giant"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["mountain_base", "sky_sanctuary"],
+    "connections": [
+      "mountain_base",
+      "sky_sanctuary"
+    ],
     "difficulty": 4,
     "can_rest": false
   },
   "crypt_of_eternity": {
     "name": "Crypt of Eternity",
     "description": "A vast underground necropolis where the most powerful undead dwell in eternal darkness.",
-    "possible_enemies": ["death_knight", "lich", "spectral_wyrm"],
-    "possible_bosses": ["lich_king"],
+    "possible_enemies": [
+      "death_knight",
+      "lich",
+      "spectral_wyrm"
+    ],
+    "possible_bosses": [
+      "lich_king"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["haunted_cemetery", "hellfire_citadel"],
+    "connections": [
+      "haunted_cemetery",
+      "hellfire_citadel"
+    ],
     "difficulty": 5,
     "boss_area": true,
     "can_rest": false
@@ -361,11 +513,20 @@
   "hellfire_citadel": {
     "name": "Hellfire Citadel",
     "description": "A fortress of black stone floating in a sea of flames. Demons patrol its corridors.",
-    "possible_enemies": ["infernal_imp", "hell_knight", "fire_demon"],
-    "possible_bosses": ["demon_prince"],
+    "possible_enemies": [
+      "infernal_imp",
+      "hell_knight",
+      "fire_demon"
+    ],
+    "possible_bosses": [
+      "demon_prince"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["crypt_of_eternity", "abyss_gate"],
+    "connections": [
+      "crypt_of_eternity",
+      "abyss_gate"
+    ],
     "difficulty": 5,
     "boss_area": true,
     "can_rest": false
@@ -373,11 +534,18 @@
   "sky_sanctuary": {
     "name": "Sky Sanctuary",
     "description": "A mystical floating island in the heavens, home to the most ancient and powerful creatures.",
-    "possible_enemies": ["wind_elemental", "storm_dragon"],
-    "possible_bosses": ["elder_dragon"],
+    "possible_enemies": [
+      "wind_elemental",
+      "storm_dragon"
+    ],
+    "possible_bosses": [
+      "elder_dragon"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["thunder_peak"],
+    "connections": [
+      "thunder_peak"
+    ],
     "difficulty": 6,
     "boss_area": true,
     "can_rest": false
@@ -385,9 +553,15 @@
   "mountain_base": {
     "name": "Mountain Base",
     "description": "The foot of the great mountain where adventurers prepare for the ascent.",
-    "possible_enemies": ["mountain_goat", "rock_golem", "cave_bear"],
+    "possible_enemies": [
+      "mountain_goat",
+      "rock_golem",
+      "cave_bear"
+    ],
     "possible_bosses": [],
-    "shops": ["equipment_shop"],
+    "shops": [
+      "equipment_shop"
+    ],
     "missions_available": true,
     "connections": [
       "starting_village",
@@ -400,13 +574,22 @@
     "can_rest": true
   },
   "port_lesben": {
-    "name": "Port Lesb\u00e8n",
+    "name": "Port Lesbèn",
     "description": "A bustling port town where ships set sail for distant lands. The salt air is thick with the cries of gulls and sailors.",
-    "possible_enemies": ["bandit", "thief"],
+    "possible_enemies": [
+      "bandit",
+      "thief"
+    ],
     "possible_bosses": [],
-    "shops": ["general_store"],
+    "shops": [
+      "general_store"
+    ],
     "missions_available": true,
-    "connections": ["mountain_base", "port_urkilsh", "port_kostantora"],
+    "connections": [
+      "mountain_base",
+      "port_urkilsh",
+      "port_kostantora"
+    ],
     "difficulty": 2,
     "rest_cost": 15,
     "can_rest": true,
@@ -424,72 +607,119 @@
     ]
   },
   "port_urkilsh": {
-    "name": "Port \u00dbrk'ilsh",
+    "name": "Port Ûrk'ilsh",
     "description": "A rugged northern port, the gateway to the frozen reaches of the continent.",
-    "possible_enemies": ["orc", "wolf"],
+    "possible_enemies": [
+      "orc",
+      "wolf"
+    ],
     "possible_bosses": [],
-    "shops": ["equipment_shop"],
+    "shops": [
+      "equipment_shop"
+    ],
     "missions_available": true,
-    "connections": ["port_lesben", "elmenburg"],
+    "connections": [
+      "port_lesben",
+      "elmenburg"
+    ],
     "difficulty": 3,
     "rest_cost": 20,
     "can_rest": true
   },
   "elmenburg": {
-    "name": "\u00cblmenburg",
+    "name": "Ëlmenburg",
     "description": "A majestic city built into the side of a mountain, known for its fine craftsmanship and ancient history.",
-    "possible_enemies": ["shadow_knight"],
+    "possible_enemies": [
+      "shadow_knight"
+    ],
     "possible_bosses": [],
-    "shops": ["general_store", "equipment_shop"],
+    "shops": [
+      "general_store",
+      "equipment_shop"
+    ],
     "missions_available": true,
-    "connections": ["port_urkilsh", "lenbenburg"],
+    "connections": [
+      "port_urkilsh",
+      "lenbenburg"
+    ],
     "difficulty": 3,
     "rest_cost": 25,
     "can_rest": true
   },
   "lenbenburg": {
-    "name": "Lenb\u00ebnburg",
+    "name": "Lenbënburg",
     "description": "The capital of the northern provinces, a fortress city that has never fallen to any foe.",
-    "possible_enemies": ["shadow_knight", "dark_mage"],
+    "possible_enemies": [
+      "shadow_knight",
+      "dark_mage"
+    ],
     "possible_bosses": [],
-    "shops": ["general_store", "equipment_shop", "tavern_keeper"],
+    "shops": [
+      "general_store",
+      "equipment_shop",
+      "tavern_keeper"
+    ],
     "missions_available": true,
-    "connections": ["elmenburg", "outskirts_lenbenburg"],
+    "connections": [
+      "elmenburg",
+      "outskirts_lenbenburg"
+    ],
     "difficulty": 4,
     "rest_cost": 30,
     "can_rest": true
   },
   "outskirts_lenbenburg": {
-    "name": "Outskirts of Lenb\u00ebnburg",
+    "name": "Outskirts of Lenbënburg",
     "description": "The rolling hills and farmlands surrounding the capital, currently plagued by roaming monsters.",
-    "possible_enemies": ["wolf", "orc", "bandit"],
+    "possible_enemies": [
+      "wolf",
+      "orc",
+      "bandit"
+    ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": true,
-    "connections": ["lenbenburg", "albeitirt_peak", "windswept_flower_valley"],
+    "connections": [
+      "lenbenburg",
+      "albeitirt_peak",
+      "windswept_flower_valley"
+    ],
     "difficulty": 3,
     "rest_cost": 15,
     "can_rest": true
   },
   "albeitirt_peak": {
-    "name": "Alb\u00e9itirt Peak",
+    "name": "Albéitirt Peak",
     "description": "A jagged peak that pierces the clouds. Legend says an ancient power rests at its summit.",
-    "possible_enemies": ["ice_elemental", "spectral_wyrm"],
-    "possible_bosses": ["ice_queen"],
+    "possible_enemies": [
+      "ice_elemental",
+      "spectral_wyrm"
+    ],
+    "possible_bosses": [
+      "ice_queen"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["outskirts_lenbenburg"],
+    "connections": [
+      "outskirts_lenbenburg"
+    ],
     "difficulty": 5,
     "can_rest": false
   },
   "windswept_flower_valley": {
     "name": "Windswept flower valley",
     "description": "A beautiful valley filled with vibrant flowers that dance in the constant, gentle breeze.",
-    "possible_enemies": ["wind_elemental", "giant_spider"],
+    "possible_enemies": [
+      "wind_elemental",
+      "giant_spider"
+    ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": true,
-    "connections": ["outskirts_lenbenburg", "whispering_canyon"],
+    "connections": [
+      "outskirts_lenbenburg",
+      "whispering_canyon"
+    ],
     "difficulty": 3,
     "rest_cost": 10,
     "can_rest": true
@@ -497,11 +727,18 @@
   "whispering_canyon": {
     "name": "Whispering Canyon",
     "description": "A narrow canyon where the wind creates eerie, whisper-like sounds against the stone walls.",
-    "possible_enemies": ["rock_golem", "wind_elemental", "bandit"],
+    "possible_enemies": [
+      "rock_golem",
+      "wind_elemental",
+      "bandit"
+    ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": true,
-    "connections": ["windswept_flower_valley", "forgotten_oasis"],
+    "connections": [
+      "windswept_flower_valley",
+      "forgotten_oasis"
+    ],
     "difficulty": 4,
     "rest_cost": 18,
     "can_rest": true
@@ -518,9 +755,13 @@
       "dragon"
     ],
     "possible_bosses": [],
-    "shops": ["general_store"],
+    "shops": [
+      "general_store"
+    ],
     "missions_available": true,
-    "connections": ["whispering_canyon"],
+    "connections": [
+      "whispering_canyon"
+    ],
     "difficulty": 3,
     "rest_cost": 5,
     "can_rest": true
@@ -528,11 +769,19 @@
   "desert_of_aukrahama": {
     "name": "Desert of Aukrahama",
     "description": "A vast, arid desert where scorching winds and shifting sands make travel perilous.",
-    "possible_enemies": ["sand_viper", "bandit", "thief"],
-    "possible_bosses": ["purple_sandworm"],
+    "possible_enemies": [
+      "sand_viper",
+      "bandit",
+      "thief"
+    ],
+    "possible_bosses": [
+      "purple_sandworm"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["forgotten_oasis"],
+    "connections": [
+      "forgotten_oasis"
+    ],
     "difficulty": 4,
     "rest_cost": 15,
     "can_rest": true
@@ -540,11 +789,17 @@
   "outlaw_lands_of_bridagrak_oblast": {
     "name": "Outlaw Lands of Brîdagrak Oblast",
     "description": "A lawless region where bandits and mercenaries vie for control. Danger lurks around every corner.",
-    "possible_enemies": ["thief"],
-    "possible_bosses": ["Dalokurg"],
+    "possible_enemies": [
+      "thief"
+    ],
+    "possible_bosses": [
+      "Dalokurg"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["lenbenburg"],
+    "connections": [
+      "lenbenburg"
+    ],
     "difficulty": 4,
     "rest_cost": 20,
     "can_rest": true
@@ -552,11 +807,19 @@
   "port_nova_terrabla": {
     "name": "Port Nova Terrabla",
     "description": "A vibrant port city known for its exotic goods and diverse population. Adventurers gather here before setting sail towards the continent of Yixuan.",
-    "possible_enemies": ["bandit", "thief"],
+    "possible_enemies": [
+      "bandit",
+      "thief"
+    ],
     "possible_bosses": [],
-    "shops": ["general_store"],
+    "shops": [
+      "general_store"
+    ],
     "missions_available": true,
-    "connections": ["desert_of_aukrahama", "port_lianghai"],
+    "connections": [
+      "desert_of_aukrahama",
+      "port_lianghai"
+    ],
     "difficulty": 3,
     "rest_cost": 15,
     "can_rest": true
@@ -564,11 +827,20 @@
   "port_lianghai": {
     "name": "Port LiangHai",
     "description": "A bustling harbor city on the eastern coast of the continent of Yixuan, known for its seafood markets and skilled shipbuilders. From here, adventurers can embark on voyages to distant lands across the sea.",
-    "possible_enemies": ["bandit", "thief"],
+    "possible_enemies": [
+      "bandit",
+      "thief"
+    ],
     "possible_bosses": [],
-    "shops": ["general_store"],
+    "shops": [
+      "general_store"
+    ],
     "missions_available": true,
-    "connections": ["port_nova_terrabla", "temple_of_eternity"],
+    "connections": [
+      "port_nova_terrabla",
+      "temple_of_eternity",
+      "rivers_crown"
+    ],
     "difficulty": 3,
     "rest_cost": 15,
     "can_rest": true
@@ -576,11 +848,21 @@
   "temple_of_eternity": {
     "name": "Temple of Eternity",
     "description": "An ancient temple dedicated to the gods of old, filled with puzzles and guardians protecting sacred treasures.",
-    "possible_enemies": ["temple_guardian", "ancient_sentinel", "spirit_monk"],
-    "possible_bosses": ["eternal_guardian"],
+    "possible_enemies": [
+      "temple_guardian",
+      "ancient_sentinel",
+      "spirit_monk"
+    ],
+    "possible_bosses": [
+      "eternal_guardian"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["port_lianghai", "bamboo_forest", "sacred_lake"],
+    "connections": [
+      "port_lianghai",
+      "bamboo_forest",
+      "sacred_lake"
+    ],
     "difficulty": 4,
     "rest_cost": 20,
     "can_rest": true,
@@ -590,11 +872,22 @@
   "bamboo_forest": {
     "name": "Misty Bamboo Forest",
     "description": "A serene forest of towering bamboo where ancient martial artists train. The mist conceals many secrets.",
-    "possible_enemies": ["bandit", "forest_spirit", "wild_tiger"],
-    "possible_bosses": ["bamboo_master"],
+    "possible_enemies": [
+      "bandit",
+      "forest_spirit",
+      "wild_tiger"
+    ],
+    "possible_bosses": [
+      "bamboo_master"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["temple_of_eternity", "dragon_temple", "thunder_mountain"],
+    "connections": [
+      "temple_of_eternity",
+      "dragon_temple",
+      "thunder_mountain",
+      "spine_of_heaven_pass"
+    ],
     "difficulty": 4,
     "rest_cost": 18,
     "can_rest": true,
@@ -604,11 +897,23 @@
   "sacred_lake": {
     "name": "Lake of Reflection",
     "description": "A mystical lake with crystal-clear waters said to hold visions of the future. Ancient dragon turtles inhabit its depths.",
-    "possible_enemies": ["water_elemental", "turtle_warrior", "lotus_spirit"],
-    "possible_bosses": ["dragon_turtle_king"],
-    "shops": ["mystic_shop"],
+    "possible_enemies": [
+      "water_elemental",
+      "turtle_warrior",
+      "lotus_spirit"
+    ],
+    "possible_bosses": [
+      "dragon_turtle_king"
+    ],
+    "shops": [
+      "mystic_shop"
+    ],
     "missions_available": true,
-    "connections": ["temple_of_eternity", "crystal_palace", "floating_islands"],
+    "connections": [
+      "temple_of_eternity",
+      "crystal_palace",
+      "floating_islands"
+    ],
     "difficulty": 4,
     "rest_cost": 22,
     "can_rest": true,
@@ -618,11 +923,21 @@
   "dragon_temple": {
     "name": "Celestial Dragon Temple",
     "description": "A magnificent temple floating among the clouds, home to celestial dragons and their disciples.",
-    "possible_enemies": ["cloud_spirit", "dragon_disciple", "thunder_guardian"],
-    "possible_bosses": ["celestial_dragon"],
+    "possible_enemies": [
+      "cloud_spirit",
+      "dragon_disciple",
+      "thunder_guardian"
+    ],
+    "possible_bosses": [
+      "celestial_dragon"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["bamboo_forest", "thunder_mountain", "sky_palace"],
+    "connections": [
+      "bamboo_forest",
+      "thunder_mountain",
+      "sky_palace"
+    ],
     "difficulty": 5,
     "rest_cost": 25,
     "can_rest": false,
@@ -632,11 +947,21 @@
   "thunder_mountain": {
     "name": "Shattered Peaks",
     "description": "A range of jagged mountains constantly shrouded in thunderstorms. Lightning elementals roam freely.",
-    "possible_enemies": ["thunder_elemental", "storm_spirit", "rock_avenger"],
-    "possible_bosses": ["thunder_lord"],
+    "possible_enemies": [
+      "thunder_elemental",
+      "storm_spirit",
+      "rock_avenger"
+    ],
+    "possible_bosses": [
+      "thunder_lord"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["bamboo_forest", "dragon_temple", "ancient_battlefield"],
+    "connections": [
+      "bamboo_forest",
+      "dragon_temple",
+      "ancient_battlefield"
+    ],
     "difficulty": 5,
     "rest_cost": 20,
     "can_rest": false,
@@ -646,11 +971,24 @@
   "crystal_palace": {
     "name": "Crystal Palace of Yixuan",
     "description": "A magnificent palace made entirely of crystal, where the emperor holds court. Glittering treasures abound.",
-    "possible_enemies": ["crystal_guard", "imperial_guard", "shadow_assassin"],
-    "possible_bosses": ["imperial_guardian"],
-    "shops": ["imperial_shop", "equipment_shop"],
+    "possible_enemies": [
+      "crystal_guard",
+      "imperial_guard",
+      "shadow_assassin"
+    ],
+    "possible_bosses": [
+      "imperial_guardian"
+    ],
+    "shops": [
+      "imperial_shop",
+      "equipment_shop"
+    ],
     "missions_available": true,
-    "connections": ["sacred_lake", "floating_islands", "forbidden_city"],
+    "connections": [
+      "sacred_lake",
+      "floating_islands",
+      "forbidden_city"
+    ],
     "difficulty": 5,
     "rest_cost": 30,
     "can_rest": true,
@@ -660,11 +998,23 @@
   "floating_islands": {
     "name": "Floating Isles of Paradise",
     "description": "Magical islands that float in the sky, connected by bridges of light. Home to wise sages and celestial beings.",
-    "possible_enemies": ["sky_warrior", "light_elemental", "wisps"],
-    "possible_bosses": ["celestial_sage"],
-    "shops": ["mystic_shop"],
+    "possible_enemies": [
+      "sky_warrior",
+      "light_elemental",
+      "wisps"
+    ],
+    "possible_bosses": [
+      "celestial_sage"
+    ],
+    "shops": [
+      "mystic_shop"
+    ],
     "missions_available": true,
-    "connections": ["sacred_lake", "crystal_palace", "paradise_garden"],
+    "connections": [
+      "sacred_lake",
+      "crystal_palace",
+      "paradise_garden"
+    ],
     "difficulty": 5,
     "rest_cost": 25,
     "can_rest": true,
@@ -674,11 +1024,21 @@
   "ancient_battlefield": {
     "name": "Fields of Eternal Battle",
     "description": "A ancient battlefield where spirits of fallen warriors still fight their eternal war.",
-    "possible_enemies": ["warrior_spirit", "ghost_general", "undead_knight"],
-    "possible_bosses": ["spectral_warlord"],
+    "possible_enemies": [
+      "warrior_spirit",
+      "ghost_general",
+      "undead_knight"
+    ],
+    "possible_bosses": [
+      "spectral_warlord"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["thunder_mountain", "forbidden_city", "shadow_realm"],
+    "connections": [
+      "thunder_mountain",
+      "forbidden_city",
+      "shadow_realm"
+    ],
     "difficulty": 5,
     "rest_cost": 20,
     "can_rest": false,
@@ -688,11 +1048,21 @@
   "forbidden_city": {
     "name": "Forbidden City of Shadows",
     "description": "A city consumed by darkness, where forbidden magic was practiced. Dangerous shadows lurk in every corner.",
-    "possible_enemies": ["shadow_wraith", "dark_mage", "void_spirit"],
-    "possible_bosses": ["shadow_overlord"],
+    "possible_enemies": [
+      "shadow_wraith",
+      "dark_mage",
+      "void_spirit"
+    ],
+    "possible_bosses": [
+      "shadow_overlord"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["crystal_palace", "ancient_battlefield", "void_gateway"],
+    "connections": [
+      "crystal_palace",
+      "ancient_battlefield",
+      "void_gateway"
+    ],
     "difficulty": 6,
     "rest_cost": 25,
     "can_rest": false,
@@ -702,11 +1072,22 @@
   "paradise_garden": {
     "name": "Garden of Eternal Blossoms",
     "description": "A paradise filled with flowers that never wilt. Peaceful creatures and spirits dwell here.",
-    "possible_enemies": ["flower_spirit", "butterfly_queen", "nature_guardian"],
-    "possible_bosses": ["garden_keeper"],
-    "shops": ["herb_shop"],
+    "possible_enemies": [
+      "flower_spirit",
+      "butterfly_queen",
+      "nature_guardian"
+    ],
+    "possible_bosses": [
+      "garden_keeper"
+    ],
+    "shops": [
+      "herb_shop"
+    ],
     "missions_available": true,
-    "connections": ["floating_islands", "paradise_sanctum"],
+    "connections": [
+      "floating_islands",
+      "paradise_sanctum"
+    ],
     "difficulty": 4,
     "rest_cost": 20,
     "can_rest": true,
@@ -721,10 +1102,15 @@
       "celestial_guardian",
       "master_disciple"
     ],
-    "possible_bosses": ["grand_master"],
+    "possible_bosses": [
+      "grand_master"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["paradise_garden", "paradise_summit"],
+    "connections": [
+      "paradise_garden",
+      "paradise_summit"
+    ],
     "difficulty": 6,
     "rest_cost": 30,
     "can_rest": true,
@@ -734,11 +1120,20 @@
   "paradise_summit": {
     "name": "Summit of the Immortals",
     "description": "The highest peak in Yixuan where immortal warriors train. Only the strongest may reach this place.",
-    "possible_enemies": ["immortal_warrior", "cloud_golem", "lightning_spirit"],
-    "possible_bosses": ["immortal_emperor"],
+    "possible_enemies": [
+      "immortal_warrior",
+      "cloud_golem",
+      "lightning_spirit"
+    ],
+    "possible_bosses": [
+      "immortal_emperor"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["paradise_sanctum", "heavenly_gate"],
+    "connections": [
+      "paradise_sanctum",
+      "heavenly_gate"
+    ],
     "difficulty": 6,
     "rest_cost": 35,
     "can_rest": false,
@@ -748,11 +1143,20 @@
   "shadow_realm": {
     "name": "Realm of Eternal Night",
     "description": "A dimension of perpetual darkness where shadows hold power. Only the bravest venture here.",
-    "possible_enemies": ["shadow_creature", "night_wraith", "dark_knight"],
-    "possible_bosses": ["nightmare_lord"],
+    "possible_enemies": [
+      "shadow_creature",
+      "night_wraith",
+      "dark_knight"
+    ],
+    "possible_bosses": [
+      "nightmare_lord"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["ancient_battlefield", "void_gateway"],
+    "connections": [
+      "ancient_battlefield",
+      "void_gateway"
+    ],
     "difficulty": 6,
     "rest_cost": 25,
     "can_rest": false,
@@ -762,11 +1166,21 @@
   "void_gateway": {
     "name": "Gateway to the Void",
     "description": "A portal to the void itself. The boundary between worlds grows thin here.",
-    "possible_enemies": ["void_spawn", "chaos_beast", "reality_tear"],
-    "possible_bosses": ["void_lord"],
+    "possible_enemies": [
+      "void_spawn",
+      "chaos_beast",
+      "reality_tear"
+    ],
+    "possible_bosses": [
+      "void_lord"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["forbidden_city", "shadow_realm", "true_void"],
+    "connections": [
+      "forbidden_city",
+      "shadow_realm",
+      "true_void"
+    ],
     "difficulty": 7,
     "rest_cost": 30,
     "can_rest": false,
@@ -776,11 +1190,19 @@
   "true_void": {
     "name": "The True Void",
     "description": "Beyond all dimensions, where even light fears to tread. The ultimate challenge awaits.",
-    "possible_enemies": ["void_essence", "chaos_elemental", "reality_ender"],
-    "possible_bosses": ["cosmic_horror"],
+    "possible_enemies": [
+      "void_essence",
+      "chaos_elemental",
+      "reality_ender"
+    ],
+    "possible_bosses": [
+      "cosmic_horror"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["void_gateway"],
+    "connections": [
+      "void_gateway"
+    ],
     "difficulty": 8,
     "rest_cost": 50,
     "can_rest": false,
@@ -795,10 +1217,15 @@
       "heavenly_warrior",
       "light_messenger"
     ],
-    "possible_bosses": ["celestial_emperor"],
+    "possible_bosses": [
+      "celestial_emperor"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["paradise_summit", "celestial_realm"],
+    "connections": [
+      "paradise_summit",
+      "celestial_realm"
+    ],
     "difficulty": 7,
     "rest_cost": 40,
     "can_rest": false,
@@ -808,11 +1235,21 @@
   "celestial_realm": {
     "name": "Celestial Realm",
     "description": "The realm of the gods, a place of eternal beauty and power. Those who reach here are legends.",
-    "possible_enemies": ["divine_being", "celestial_knight", "star_lord"],
-    "possible_bosses": ["supreme_deity"],
-    "shops": ["divine_shop"],
+    "possible_enemies": [
+      "divine_being",
+      "celestial_knight",
+      "star_lord"
+    ],
+    "possible_bosses": [
+      "supreme_deity"
+    ],
+    "shops": [
+      "divine_shop"
+    ],
     "missions_available": true,
-    "connections": ["heavenly_gate"],
+    "connections": [
+      "heavenly_gate"
+    ],
     "difficulty": 8,
     "rest_cost": 50,
     "can_rest": true,
@@ -822,11 +1259,22 @@
   "golden_temple": {
     "name": "Golden Temple of Wealth",
     "description": "A magnificent temple made of gold and jewels, guarded by the legendary Golden Guardians.",
-    "possible_enemies": ["golden_guardian", "treasure_golem", "wealth_spirit"],
-    "possible_bosses": ["golden_dragon"],
-    "shops": ["treasure_shop"],
+    "possible_enemies": [
+      "golden_guardian",
+      "treasure_golem",
+      "wealth_spirit"
+    ],
+    "possible_bosses": [
+      "golden_dragon"
+    ],
+    "shops": [
+      "treasure_shop"
+    ],
     "missions_available": true,
-    "connections": ["port_lianghai", "mountain_treasury"],
+    "connections": [
+      "port_lianghai",
+      "mountain_treasury"
+    ],
     "difficulty": 5,
     "rest_cost": 25,
     "can_rest": true,
@@ -841,10 +1289,15 @@
       "treasure_sentinel",
       "gemstone_elemental"
     ],
-    "possible_bosses": ["treasure_lord"],
+    "possible_bosses": [
+      "treasure_lord"
+    ],
     "shops": [],
     "missions_available": true,
-    "connections": ["golden_temple", "crystal_palace"],
+    "connections": [
+      "golden_temple",
+      "crystal_palace"
+    ],
     "difficulty": 5,
     "rest_cost": 20,
     "can_rest": false,
@@ -854,20 +1307,39 @@
   "sacred_grove": {
     "name": "Sacred Grove",
     "description": "A pristine sanctuary of nature, now tainted by a dark presence.",
-    "possible_enemies": ["corrupted_druid", "forest_guardian", "nature_wraith"],
-    "possible_bosses": ["archdruid_malfurion"],
+    "possible_enemies": [
+      "corrupted_druid",
+      "forest_guardian",
+      "nature_wraith"
+    ],
+    "possible_bosses": [
+      "archdruid_malfurion"
+    ],
     "shops": [],
-    "connections": ["deep_woods", "cathedral_of_light"],
+    "connections": [
+      "deep_woods",
+      "cathedral_of_light"
+    ],
     "difficulty": 6,
     "can_rest": false
   },
   "cathedral_of_light": {
     "name": "Cathedral of Light",
     "description": "A magnificent cathedral where the most powerful holy warriors and priests used to gather.",
-    "possible_enemies": ["fallen_paladin", "void_acolyte", "shadow_priest"],
-    "possible_bosses": ["high_inquisitor_whitemane", "uther_the_fallen"],
+    "possible_enemies": [
+      "fallen_paladin",
+      "void_acolyte",
+      "shadow_priest"
+    ],
+    "possible_bosses": [
+      "high_inquisitor_whitemane",
+      "uther_the_fallen"
+    ],
     "shops": [],
-    "connections": ["sacred_grove", "celestial_realm"],
+    "connections": [
+      "sacred_grove",
+      "celestial_realm"
+    ],
     "difficulty": 7,
     "can_rest": true,
     "rest_cost": 30
@@ -875,11 +1347,20 @@
   "taiga_outskirts": {
     "name": "Taiga Outskirts",
     "description": "The frigid outer edge of the Siberian taiga. Frost-covered pines stretch endlessly into the grey horizon. Siberian wolves howl in the distance and the ground crunches underfoot with permafrost. The air smells of pine resin and ice.",
-    "possible_enemies": ["siberian_wolf", "taiga_lynx", "taiga_bandit"],
+    "possible_enemies": [
+      "siberian_wolf",
+      "taiga_lynx",
+      "taiga_bandit"
+    ],
     "possible_bosses": [],
-    "shops": ["taiga_traders"],
+    "shops": [
+      "taiga_traders"
+    ],
     "missions_available": false,
-    "connections": ["starting_village", "frozen_river"],
+    "connections": [
+      "starting_village",
+      "frozen_river"
+    ],
     "difficulty": 3,
     "rest_cost": 10,
     "can_rest": true,
@@ -894,7 +1375,7 @@
         "id": "taiga_trapper",
         "name": "Old Trapper Voronov",
         "dialogues": [
-          "Forty winters I've walked this taiga. It gets colder every year \u2014 and meaner.",
+          "Forty winters I've walked this taiga. It gets colder every year — and meaner.",
           "Stay on the marked paths. Off-trail, the wolves travel in packs of twelve.",
           "I've seen tracks in the deep snow. Prints big as wagon wheels. Something lives out there."
         ]
@@ -903,7 +1384,7 @@
         "id": "taiga_merchant",
         "name": "Merchant Anya",
         "dialogues": [
-          "Good furs and sharp steel \u2014 that's what keeps you alive out here.",
+          "Good furs and sharp steel — that's what keeps you alive out here.",
           "The shamans in the deep taiga don't take kindly to outsiders. Tread carefully.",
           "Heard a rumour of a great beast in the permafrost caverns. The Snowbinable, they call it."
         ]
@@ -912,12 +1393,19 @@
   },
   "frozen_river": {
     "name": "Frozen River",
-    "description": "A vast river locked beneath thick, ancient ice. The banks are stalked by bears and wolverines. Strange runes are carved into the ice \u2014 warnings left by the taiga shamans of old. The ice groans beneath your feet.",
-    "possible_enemies": ["siberian_wolf", "brown_bear", "wolverine_beast"],
+    "description": "A vast river locked beneath thick, ancient ice. The banks are stalked by bears and wolverines. Strange runes are carved into the ice — warnings left by the taiga shamans of old. The ice groans beneath your feet.",
+    "possible_enemies": [
+      "siberian_wolf",
+      "brown_bear",
+      "wolverine_beast"
+    ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["taiga_outskirts", "deep_taiga"],
+    "connections": [
+      "taiga_outskirts",
+      "deep_taiga"
+    ],
     "difficulty": 4,
     "rest_cost": 12,
     "can_rest": true,
@@ -951,7 +1439,10 @@
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["frozen_river", "permafrost_cavern"],
+    "connections": [
+      "frozen_river",
+      "permafrost_cavern"
+    ],
     "difficulty": 5,
     "can_rest": false,
     "weather_probabilities": {
@@ -973,12 +1464,19 @@
   },
   "permafrost_cavern": {
     "name": "Permafrost Cavern",
-    "description": "A vast underground cavern carved from permafrost that has been frozen since the world was young. Ice trolls roam the crystalline halls and colossal golems of frozen earth guard the deeper passages. The cold here is absolute \u2014 even fire seems reluctant.",
-    "possible_enemies": ["ice_troll_taiga", "permafrost_golem", "frost_shaman"],
+    "description": "A vast underground cavern carved from permafrost that has been frozen since the world was young. Ice trolls roam the crystalline halls and colossal golems of frozen earth guard the deeper passages. The cold here is absolute — even fire seems reluctant.",
+    "possible_enemies": [
+      "ice_troll_taiga",
+      "permafrost_golem",
+      "frost_shaman"
+    ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["deep_taiga", "snowbinable_lair"],
+    "connections": [
+      "deep_taiga",
+      "snowbinable_lair"
+    ],
     "difficulty": 6,
     "can_rest": false,
     "weather_probabilities": {
@@ -988,11 +1486,18 @@
   "snowbinable_lair": {
     "name": "Snowbinable's Lair",
     "description": "A colossal ice cavern at the heart of the taiga. Every surface is coated in hoarfrost and the bones of those who came before. The air itself vibrates with ancient cold. Somewhere in the darkness, something enormous breathes. This is the domain of the Snowbinable.",
-    "possible_enemies": ["ice_troll_taiga", "permafrost_golem"],
-    "possible_bosses": ["snowbinable"],
+    "possible_enemies": [
+      "ice_troll_taiga",
+      "permafrost_golem"
+    ],
+    "possible_bosses": [
+      "snowbinable"
+    ],
     "shops": [],
     "missions_available": false,
-    "connections": ["permafrost_cavern"],
+    "connections": [
+      "permafrost_cavern"
+    ],
     "difficulty": 7,
     "can_rest": false,
     "weather_probabilities": {
@@ -1001,17 +1506,25 @@
   },
   "port_kostantora": {
     "name": "Port Kostantora",
-    "description": "The great gateway port of the Osmano\u011flu Empire \u2014 and one of the most infamous places on earth. The docks reek of salt, tar, and desperation. Slave traders barter openly in the market squares while corsair ships bristle in the harbour. Chains rattle in the alleys. Ottoman soldiers patrol with cold indifference. This is the empire's dark beating heart \u2014 everything flows through here.",
+    "description": "The great gateway port of the Kalovanim Empire — and one of the most infamous places on earth. The docks reek of salt, tar, and desperation. Slave traders barter openly in the market squares while corsair ships bristle in the harbour. Chains rattle in the alleys. Kalovar soldiers patrol with cold indifference. This is the empire's dark beating heart — everything flows through here.",
     "possible_enemies": [
-      "ottoman_corsair",
-      "slave_trader",
+      "kalovar_corsair",
+      "kalovar_slaver",
       "bazaar_thief",
-      "pirate_lord_captain"
+      "corsair_captain"
     ],
-    "possible_bosses": ["ottoman_pirate_lord"],
-    "shops": ["kostantora_market"],
+    "possible_bosses": [
+      "kalovar_pirate_lord"
+    ],
+    "shops": [
+      "kostantora_market"
+    ],
     "missions_available": false,
-    "connections": ["port_lesben", "kostantora_city", "kostantora_docks"],
+    "connections": [
+      "port_lesben",
+      "kostantora_city",
+      "kostantora_docks"
+    ],
     "difficulty": 4,
     "rest_cost": 15,
     "can_rest": true,
@@ -1046,14 +1559,18 @@
     "name": "Kostantora Docks",
     "description": "The sprawling dockside district of Port Kostantora. Corsair galleys sit three-deep in the harbour. The air smells of gunpowder and salt water. Sailors brawl in taverns and the slave auctioneers call their prices from raised platforms. The Pirate Lord Barbaros holds court somewhere in here.",
     "possible_enemies": [
-      "ottoman_corsair",
-      "pirate_lord_captain",
+      "kalovar_corsair",
+      "corsair_captain",
       "bazaar_thief"
     ],
-    "possible_bosses": ["ottoman_pirate_lord"],
+    "possible_bosses": [
+      "kalovar_pirate_lord"
+    ],
     "shops": [],
     "missions_available": false,
-    "connections": ["port_kostantora"],
+    "connections": [
+      "port_kostantora"
+    ],
     "difficulty": 5,
     "can_rest": false,
     "weather_probabilities": {
@@ -1075,21 +1592,24 @@
   },
   "kostantora_city": {
     "name": "Kostantora: The Imperial City",
-    "description": "Beyond the docks lies the true Kostantora, a city of domes, minarets, and marble. Grand bazaars overflow with goods from every corner of the known world. Janissary soldiers patrol every street. Ottoman architecture rises in breathtaking curves and arches. At the city's centre, the palace of Grand Vizier Karamanli dominates the skyline.",
+    "description": "Beyond the docks lies the true Kostantora, a city of domes, spire-towers, and marble. Grand bazaars overflow with goods from every corner of the known world. Kazhari soldiers patrol every street. Kalovar architecture rises in breathtaking curves and arches. At the city's centre, the palace of Grand Vizier Karandar dominates the skyline.",
     "possible_enemies": [
-      "ottoman_janissary",
+      "kalovar_kazhari",
       "bazaar_thief",
       "shadow_dervish",
-      "ottoman_court_mage"
+      "kalovar_court_mage"
     ],
     "possible_bosses": [],
-    "shops": ["grand_bazaar_shop"],
+    "shops": [
+      "grand_bazaar_shop"
+    ],
     "missions_available": false,
     "connections": [
       "port_kostantora",
       "grand_bazaar_district",
-      "janissary_quarter",
-      "vizier_palace"
+      "kazhari_quarter",
+      "vizier_palace",
+      "ruins_of_constanplea"
     ],
     "difficulty": 5,
     "rest_cost": 20,
@@ -1102,19 +1622,19 @@
     },
     "npcs": [
       {
-        "id": "ottoman_scholar",
+        "id": "kalovar_scholar",
         "name": "Scholar Ibn Rashid",
         "dialogues": [
-          "The empire has stood for three hundred years. Knowledge \u2014 not swords \u2014 built it.",
+          "The empire has stood for three hundred years. Knowledge — not swords — built it.",
           "The Grand Vizier is the true power here. The Sultan is his symbol.",
           "I have maps of every district in this city. For the right price, they are yours."
         ]
       },
       {
-        "id": "janissary_deserter",
+        "id": "kazhari_deserter",
         "name": "Deserter Selim",
         "dialogues": [
-          "I served the Janissary corps for twelve years. I'd rather die poor than serve another day.",
+          "I served the Kazhari corps for twelve years. I'd rather die poor than serve another day.",
           "The palace guards are different from us soldiers. Fanatical. Loyal unto death.",
           "If you're heading to the Sultan's throne room, you're either the bravest person alive or the most foolish."
         ]
@@ -1126,14 +1646,19 @@
     "description": "A labyrinth of covered markets so vast you could spend a week and still not see every stall. Merchants from every nation haggle in a dozen languages. Silks, spices, weapons, and stolen goods trade hands constantly. Thieves move through the crowds like ghosts. The Grand Bazaar is the economic heart of the entire empire.",
     "possible_enemies": [
       "bazaar_thief",
-      "desert_raider",
-      "slave_trader",
-      "ottoman_corsair"
+      "kalovar_raider",
+      "kalovar_slaver",
+      "kalovar_corsair"
     ],
     "possible_bosses": [],
-    "shops": ["grand_bazaar_shop"],
+    "shops": [
+      "grand_bazaar_shop"
+    ],
     "missions_available": false,
-    "connections": ["kostantora_city", "anatolian_plains"],
+    "connections": [
+      "kostantora_city",
+      "karastani_plains"
+    ],
     "difficulty": 4,
     "rest_cost": 18,
     "can_rest": true,
@@ -1148,25 +1673,27 @@
         "id": "spice_merchant_omar",
         "name": "Merchant Omar",
         "dialogues": [
-          "The finest spices in the known world! Better than gold \u2014 at least you can eat spices.",
+          "The finest spices in the known world! Better than gold — at least you can eat spices.",
           "I trade with every port from here to the far east. The empire's reach is endless.",
           "Word is the Sultan has closed the eastern gates. Bad for business. Very bad."
         ]
       }
     ]
   },
-  "janissary_quarter": {
-    "name": "The Janissary Quarter",
-    "description": "The barracks district of the legendary Janissary corps \u2014 the Sultan's elite standing army. Drill yards echo with the clash of steel and the bark of sergeants. These are no ordinary soldiers. Taken as children, trained for decades, loyal to the empire above all else. Trespassers are treated as spies.",
+  "kazhari_quarter": {
+    "name": "The Kazhari Quarter",
+    "description": "The barracks district of the legendary Kazhari corps — the Sultan's elite standing army. Drill yards echo with the clash of steel and the bark of sergeants. These are no ordinary soldiers. Taken as children, trained for decades, loyal to the empire above all else. Trespassers are treated as spies.",
     "possible_enemies": [
-      "ottoman_janissary",
-      "janissary_captain",
-      "ottoman_court_mage"
+      "kalovar_kazhari",
+      "kazhari_captain",
+      "kalovar_court_mage"
     ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["kostantora_city"],
+    "connections": [
+      "kostantora_city"
+    ],
     "difficulty": 6,
     "can_rest": false,
     "weather_probabilities": {
@@ -1176,11 +1703,11 @@
     },
     "npcs": [
       {
-        "id": "retired_janissary",
-        "name": "Retired Janissary Mehmed",
+        "id": "retired_kazhari",
+        "name": "Retired Kazhari Mehmed",
         "dialogues": [
           "I earned my retirement with forty years of blood. Don't think you can just walk in here.",
-          "The corps is the spine of this empire. Without the Janissaries, the Sultan is just a man in robes.",
+          "The corps is the spine of this empire. Without the Kazharis, the Sultan is just a man in robes.",
           "If you're going to the palace, the captain knows you're here. They always do."
         ]
       }
@@ -1188,17 +1715,22 @@
   },
   "vizier_palace": {
     "name": "The Grand Vizier's Palace",
-    "description": "The opulent palace of Grand Vizier Karamanli dominates an entire hill in Kostantora. Its walls are inlaid with lapis lazuli and gold. Palace guards stand at every doorway. Shadow dervishes patrol the corridors silently. At its heart, the Grand Vizier schemes within his private chambers.",
+    "description": "The opulent palace of Grand Vizier Karandar dominates an entire hill in Kostantora. Its walls are inlaid with lapis lazuli and gold. Palace guards stand at every doorway. Shadow dervishes patrol the corridors silently. At its heart, the Grand Vizier schemes within his private chambers.",
     "possible_enemies": [
       "palace_guard",
       "shadow_dervish",
-      "ottoman_court_mage",
-      "janissary_captain"
+      "kalovar_court_mage",
+      "kazhari_captain"
     ],
-    "possible_bosses": ["grand_vizier_karamanli"],
+    "possible_bosses": [
+      "grand_vizier_karamanli"
+    ],
     "shops": [],
     "missions_available": false,
-    "connections": ["kostantora_city", "sultan_palace"],
+    "connections": [
+      "kostantora_city",
+      "sultan_palace"
+    ],
     "difficulty": 7,
     "can_rest": false,
     "weather_probabilities": {
@@ -1218,14 +1750,14 @@
       }
     ]
   },
-  "anatolian_plains": {
-    "name": "The Anatolian Plains",
-    "description": "Vast golden plains stretching to the horizon, dotted with ancient ruins and grazing war horses. Desert raiders roam in packs on horseback and Anatolian lions stalk the tall grasses. Ottoman cavalry patrols pass in perfect formation. This land has been conquered and reconquered a hundred times \u2014 every hill hides the memory of a battle.",
+  "karastani_plains": {
+    "name": "The Karastani Plains",
+    "description": "Vast golden plains stretching to the horizon, dotted with ancient ruins and grazing war horses. Desert raiders roam in packs on horseback and Karastani lions stalk the tall grasses. Kalovar cavalry patrols pass in perfect formation. This land has been conquered and reconquered a hundred times — every hill hides the memory of a battle.",
     "possible_enemies": [
-      "desert_raider",
-      "anatolian_lion",
-      "ottoman_janissary",
-      "ottoman_war_elephant"
+      "kalovar_raider",
+      "karastani_lion",
+      "kalovar_kazhari",
+      "kalovar_war_elephant"
     ],
     "possible_bosses": [],
     "shops": [],
@@ -1257,17 +1789,20 @@
   },
   "kapali_mountains": {
     "name": "The Kapali Mountains",
-    "description": "A rugged, cloud-wreathed mountain range forming the empire's eastern spine. Desert serpents nest in the rocky passes and shadow dervishes have established hidden mountain shrines. The mountain fortresses of the Janissaries command every valley. Few cross these mountains without permission \u2014 or without a fight.",
+    "description": "A rugged, cloud-wreathed mountain range forming the empire's eastern spine. Desert serpents nest in the rocky passes and shadow dervishes have established hidden mountain shrines. The mountain fortresses of the Kazharis command every valley. Few cross these mountains without permission — or without a fight.",
     "possible_enemies": [
-      "desert_serpent",
+      "karastani_serpent",
       "shadow_dervish",
-      "ottoman_janissary",
-      "janissary_captain"
+      "kalovar_kazhari",
+      "kazhari_captain"
     ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["anatolian_plains", "desert_of_ankhara"],
+    "connections": [
+      "karastani_plains",
+      "desert_of_ankhara"
+    ],
     "difficulty": 6,
     "can_rest": false,
     "weather_probabilities": {
@@ -1279,17 +1814,20 @@
   },
   "desert_of_ankhara": {
     "name": "The Desert of Ankhara",
-    "description": "An endless sea of burning sand beyond the mountains. The heat is absolute. Desert serpents grow enormous in these wastes and war elephants are herded through in great caravans. Ancient Ottoman fortresses half-buried in sand hold secrets the empire would prefer forgotten. At its far edge, the Sultan's private hunting grounds begin.",
+    "description": "An endless sea of burning sand beyond the mountains. The heat is absolute. Desert serpents grow enormous in these wastes and war elephants are herded through in great caravans. Ancient Kalovar fortresses half-buried in sand hold secrets the empire would prefer forgotten. At its far edge, the Sultan's private hunting grounds begin.",
     "possible_enemies": [
-      "desert_serpent",
-      "desert_raider",
-      "ottoman_war_elephant",
-      "anatolian_lion"
+      "karastani_serpent",
+      "kalovar_raider",
+      "kalovar_war_elephant",
+      "karastani_lion"
     ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["kapali_mountains", "sultan_hunting_grounds"],
+    "connections": [
+      "kapali_mountains",
+      "sultan_hunting_grounds"
+    ],
     "difficulty": 7,
     "can_rest": false,
     "weather_probabilities": {
@@ -1300,17 +1838,20 @@
   },
   "sultan_hunting_grounds": {
     "name": "The Sultan's Hunting Grounds",
-    "description": "A vast enclosed wilderness maintained for the Sultan's pleasure. Only the finest \u2014 and most dangerous \u2014 creatures roam here: Anatolian lions, enormous desert serpents, and war elephants trained for battle. The Sultan himself hunts here when affairs of state permit. Trespassers are executed on sight.",
+    "description": "A vast enclosed wilderness maintained for the Sultan's pleasure. Only the finest — and most dangerous — creatures roam here: Karastani lions, enormous desert serpents, and war elephants trained for battle. The Sultan himself hunts here when affairs of state permit. Trespassers are executed on sight.",
     "possible_enemies": [
-      "anatolian_lion",
-      "desert_serpent",
-      "ottoman_war_elephant",
+      "karastani_lion",
+      "karastani_serpent",
+      "kalovar_war_elephant",
       "palace_guard"
     ],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": ["desert_of_ankhara", "sultan_palace"],
+    "connections": [
+      "desert_of_ankhara",
+      "sultan_palace"
+    ],
     "difficulty": 7,
     "can_rest": false,
     "weather_probabilities": {
@@ -1321,12 +1862,20 @@
   },
   "sultan_palace": {
     "name": "The Sultan's Throne Room",
-    "description": "The most forbidden chamber in the Osmano\u011flu Empire. Walls of white marble rise forty feet above a floor inlaid with the empire's map in gold. The Sultan's throne is carved from a single block of onyx. Sultanate banners hang from every column. Palace guards line every wall in perfect silence. Sultan Yildirim waits at the far end. He has known you were coming for some time.",
-    "possible_enemies": ["palace_guard", "janissary_captain"],
-    "possible_bosses": ["sultan_yildirim"],
+    "description": "The most forbidden chamber in the Kalovanim Empire. Walls of white marble rise forty feet above a floor inlaid with the empire's map in gold. The Sultan's throne is carved from a single block of onyx. Sultanate banners hang from every column. Palace guards line every wall in perfect silence. Sultan Velkar waits at the far end. He has known you were coming for some time.",
+    "possible_enemies": [
+      "palace_guard",
+      "kazhari_captain"
+    ],
+    "possible_bosses": [
+      "sultan_yildirim"
+    ],
     "shops": [],
     "missions_available": false,
-    "connections": ["vizier_palace", "sultan_hunting_grounds"],
+    "connections": [
+      "vizier_palace",
+      "sultan_hunting_grounds"
+    ],
     "difficulty": 8,
     "can_rest": false,
     "weather_probabilities": {
@@ -1334,5 +1883,267 @@
       "rainy": 20,
       "stormy": 10
     }
+  },
+  "the_coldwater_crossing": {
+    "name": "The Coldwater Crossing",
+    "description": "The northern border where the Coldwater River divides Kalovar-held lands from the Varak steppe. Fort ruins and old treaty markers line the bank. Varak raiders cross in winter when the ice holds. Kalovar border scouts patrol the southern bank. This is the place where three wars started and one ended.",
+    "possible_enemies": [
+      "varak_raider",
+      "kalovar_border_scout",
+      "steppe_archer"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": true,
+    "connections": [
+      "port_urkilsh",
+      "varak_iron_steppe"
+    ],
+    "difficulty": 4,
+    "rest_cost": 12,
+    "can_rest": true,
+    "npcs": [
+      {
+        "id": "treaty_keeper_aldo",
+        "name": "Treaty Keeper Aldo",
+        "dialogues": [
+          "This crossing has been at peace for forty years. Someone is testing that now.",
+          "The Varak don't raid without reason. Find the reason and you find the solution.",
+          "I've been stationed here twelve years. I know every stone of this riverbank."
+        ],
+        "quest_unlock": "coldwater_incursion"
+      }
+    ]
+  },
+  "varak_iron_steppe": {
+    "name": "The Varak Iron Steppe",
+    "description": "The endless grass ocean of the northern continent where the Varak clans roam. The wind never stops. Clan totem poles mark territory boundaries. Berserkers train in the open air, their war-cries carrying for miles. Moving camps appear and vanish overnight. This is where the iron horde was born.",
+    "possible_enemies": [
+      "varak_raider",
+      "clan_berserker",
+      "steppe_archer",
+      "varak_bear_warrior"
+    ],
+    "possible_bosses": [
+      "varak_war_chief"
+    ],
+    "shops": [],
+    "missions_available": true,
+    "connections": [
+      "the_coldwater_crossing",
+      "greymount_clan_hold"
+    ],
+    "difficulty": 5,
+    "rest_cost": 18,
+    "can_rest": true,
+    "npcs": [
+      {
+        "id": "zevari_singer_brynja",
+        "name": "Zevari Singer Brynja",
+        "dialogues": [
+          "The songs remember everything the clan has ever done. Including what they would rather forget.",
+          "You travel alone across the steppe. Either brave or foolish. Perhaps both.",
+          "The war-chief does not trust outsiders. Bring him proof of strength if you want an audience."
+        ],
+        "quest_unlock": "test_of_the_steppe"
+      }
+    ]
+  },
+  "greymount_clan_hold": {
+    "name": "Greymount Clan Hold",
+    "description": "The great fortified encampment of the Greymount clan, largest of the Varak Confederation. Timber walls thirty feet high enclose longhouses, forge-yards, and a central fire that never goes out. Bear Warrior sentries guard every gate. The clan-chief rules from the mead hall at its heart.",
+    "possible_enemies": [
+      "varak_bear_warrior",
+      "clan_berserker",
+      "steppe_archer"
+    ],
+    "possible_bosses": [
+      "varak_war_chief"
+    ],
+    "shops": [],
+    "missions_available": true,
+    "connections": [
+      "varak_iron_steppe"
+    ],
+    "difficulty": 5,
+    "rest_cost": 15,
+    "can_rest": true,
+    "npcs": [
+      {
+        "id": "clan_healer_sigrid",
+        "name": "Clan Healer Sigrid",
+        "dialogues": [
+          "We heal the ones the steppe hasn't killed yet. Come back when you have wounds worth treating.",
+          "The Bear Warriors drink a preparation before battle. I make it. I'm the only one who knows the recipe.",
+          "Our stockpiles are running low. If you can bring us eastern medicines, you'd earn real gratitude."
+        ],
+        "quest_unlock": "healers_request"
+      }
+    ]
+  },
+  "rivers_crown": {
+    "name": "River's Crown",
+    "description": "The greatest city in the known world and capital of the Yixuan river kingdoms. Tier upon tier of lacquered red-and-gold architecture rises above the Yi Xuan River. The Imperial Palace occupies an entire district. The Examination Hall draws scholars from across the continent. The market quarter never closes. Jade Court Assassins move silently through every crowd.",
+    "possible_enemies": [
+      "jade_court_assassin",
+      "river_bandit",
+      "bazaar_thief"
+    ],
+    "possible_bosses": [],
+    "shops": [
+      "grand_bazaar_shop"
+    ],
+    "missions_available": true,
+    "connections": [
+      "port_lianghai",
+      "ghost_river_stretch",
+      "jade_examination_hall"
+    ],
+    "difficulty": 4,
+    "rest_cost": 22,
+    "can_rest": true,
+    "npcs": [
+      {
+        "id": "scholar_wei",
+        "name": "Scholar Wei Linhua",
+        "dialogues": [
+          "The Examination Hall has stood for eight centuries. I have sat for the high examinations four times.",
+          "River's Crown is the largest city in the world. Getting lost here is a real risk. I speak from experience.",
+          "The Jade Court Assassins answer to the Imperial Censor. Do not ask questions about that office."
+        ],
+        "quest_unlock": "stolen_examination_scrolls"
+      },
+      {
+        "id": "silkworm_empress_shrine",
+        "name": "Shrine Keeper Mei",
+        "dialogues": [
+          "We honour the Silkworm Empress at this shrine every morning. She gave us silk. Silk is everything.",
+          "The old city was different before the current dynasty. Many things changed. Not all for the worse.",
+          "If you seek the Ghost River, go south along the eastern bank. But go in daylight."
+        ]
+      }
+    ]
+  },
+  "ghost_river_stretch": {
+    "name": "The Ghost River",
+    "description": "A three-mile stretch of the Yi Xuan River where the water runs black. An ancient battle was fought here eight hundred years ago. The locals will not fish it. Boatmen will not linger. Something moves beneath the dark water and voices speak in accents no one has heard in living memory. A monk's temple burns offerings at the bank every evening.",
+    "possible_enemies": [
+      "ghost_legionnaire",
+      "constanplea_revenant",
+      "river_serpent"
+    ],
+    "possible_bosses": [
+      "celestial_serpent_lord"
+    ],
+    "shops": [],
+    "missions_available": true,
+    "connections": [
+      "rivers_crown"
+    ],
+    "difficulty": 5,
+    "rest_cost": 20,
+    "can_rest": true,
+    "npcs": [
+      {
+        "id": "monk_brother_chen",
+        "name": "Brother Chen of the River Temple",
+        "dialogues": [
+          "We burn offerings every sunset. The spirits have not troubled us in three years. I will not stop now.",
+          "Do not cross the black water at night. This is not superstition. This is accumulated experience.",
+          "Something has stirred the deep river spirits recently. I need a brave soul to investigate."
+        ],
+        "quest_unlock": "the_black_water_mystery"
+      }
+    ]
+  },
+  "jade_examination_hall": {
+    "name": "The Jade Examination Hall",
+    "description": "The most prestigious institution in the eastern world. Stone examination cells line endless corridors. Scholars in grey robes move in silence. Jade automata patrol the vaults where centuries of examination records are kept. The Grand Examiner has held the post for forty years. Thieves and cheats are caught with disturbing regularity.",
+    "possible_enemies": [
+      "jade_automaton",
+      "jade_court_assassin",
+      "corrupted_scholar"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": true,
+    "connections": [
+      "rivers_crown"
+    ],
+    "difficulty": 5,
+    "can_rest": false,
+    "npcs": [
+      {
+        "id": "grand_examiner_zhao",
+        "name": "Grand Examiner Zhao",
+        "dialogues": [
+          "The examination is the foundation of this empire. Touch nothing in this hall without permission.",
+          "Someone has been selling examination positions. I have been looking for them for six months.",
+          "If you can find the corruption, I can offer you access to the great archive. Every document of the last four centuries."
+        ],
+        "quest_unlock": "examination_corruption"
+      }
+    ]
+  },
+  "spine_of_heaven_pass": {
+    "name": "Spine of Heaven Pass",
+    "description": "The highest navigable crossing through the Spine of Heaven mountain range that divides the eastern interior from the coast. Perpetual ice, screaming winds, and strange creatures that exist nowhere else in the world. The northern mountain clans guard the lower approaches. Something ancient watches from the peaks above.",
+    "possible_enemies": [
+      "ice_elemental",
+      "varak_raider",
+      "lotus_guardian"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": true,
+    "connections": [
+      "bamboo_forest",
+      "rivers_crown"
+    ],
+    "difficulty": 6,
+    "can_rest": false,
+    "npcs": [
+      {
+        "id": "mountain_clan_guide_tara",
+        "name": "Mountain Clan Guide Tara",
+        "dialogues": [
+          "I have led three crossings of this pass. Two of those groups made it across complete.",
+          "The ice spirits are hungry this season. We must bring offerings or they will take one of us instead.",
+          "Past the third peak there is a valley that does not appear on any map I have seen. I do not go there."
+        ],
+        "quest_unlock": "spine_crossing"
+      }
+    ]
+  },
+  "ruins_of_constanplea": {
+    "name": "Ruins of Constanplea",
+    "description": "The lower quarter of Kostantora where the old Byzantra city still lies beneath the surface — half-excavated, half-buried, wholly haunted. Ghost legionnaires patrol walls that no longer stand above ground. The remnant of the Church of the Eternal Flame juts from the earth like a broken tooth. Scholars dig here and occasionally do not return.",
+    "possible_enemies": [
+      "ghost_legionnaire",
+      "constanplea_revenant",
+      "corrupted_scholar",
+      "skeleton"
+    ],
+    "possible_bosses": [],
+    "shops": [],
+    "missions_available": true,
+    "connections": [
+      "kostantora_city"
+    ],
+    "difficulty": 5,
+    "rest_cost": 15,
+    "can_rest": true,
+    "npcs": [
+      {
+        "id": "archaeologist_theodora",
+        "name": "Archaeologist Theodora",
+        "dialogues": [
+          "The old city is still here under everything. The Kalovars built on top rather than clear it away.",
+          "I've found three sections of the old imperial library. Most of it burned, but not all.",
+          "The ghost legionnaires patrol the same routes they walked in life. Learn the routes and you can avoid them."
+        ],
+        "quest_unlock": "recover_the_archive"
+      }
+    ]
   }
 }

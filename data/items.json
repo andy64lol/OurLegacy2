@@ -3875,5 +3875,133 @@
       "duration": 6,
       "price": 70,
       "rarity": "uncommon"
+   },
+   "Kalovar Sabre": {
+      "type": "weapon",
+      "description": "A curved cavalry sabre favoured by Kalovar mounted soldiers — fast, single-edged, and lethal at range",
+      "attack_bonus": 20,
+      "speed_bonus": 4,
+      "price": 140,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 4
+      }
+   },
+   "Corsair's Cutlass": {
+      "type": "weapon",
+      "description": "A heavy-bladed seafarer's sword, nicked from years of use but still razor sharp where it counts",
+      "attack_bonus": 22,
+      "speed_bonus": 2,
+      "price": 120,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 3
+      }
+   },
+   "Kalovar War Lance": {
+      "type": "weapon",
+      "description": "A long cavalry lance used by Kalovar heavy horse — devastating on the charge, unwieldy on foot",
+      "attack_bonus": 35,
+      "defense_bonus": 3,
+      "price": 280,
+      "rarity": "rare",
+      "requirements": {
+         "level": 7
+      }
+   },
+   "Steppe Recurve Bow": {
+      "type": "weapon",
+      "description": "A short but powerful recurve bow made from layered bone and sinew — the Varak steppe archer's weapon of choice",
+      "attack_bonus": 18,
+      "speed_bonus": 5,
+      "price": 160,
+      "rarity": "uncommon",
+      "requirements": {
+         "level": 4
+      }
+   },
+   "Bear Warrior Axe": {
+      "type": "weapon",
+      "description": "A specially weighted axe used by initiates of the Varak Bear Warrior order, bearing the First Mother's mark",
+      "attack_bonus": 28,
+      "defense_bonus": 4,
+      "price": 240,
+      "rarity": "rare",
+      "requirements": {
+         "level": 6
+      }
+   },
+   "Yixuan River Blade": {
+      "type": "weapon",
+      "description": "A thin, flexible sword forged in the workshops of River's Crown from Yixuan river-stone and folded steel",
+      "attack_bonus": 25,
+      "speed_bonus": 5,
+      "mp_bonus": 15,
+      "price": 300,
+      "rarity": "rare",
+      "requirements": {
+         "level": 6
+      }
+   },
+   "Jade Court Rapier": {
+      "type": "weapon",
+      "description": "A slim and elegant thrusting sword used by Jade Court Assassins. Almost too beautiful to be so deadly.",
+      "attack_bonus": 32,
+      "speed_bonus": 8,
+      "price": 400,
+      "rarity": "rare",
+      "requirements": {
+         "level": 8
+      }
+   },
+   "Constanplea Ghost Blade": {
+      "type": "weapon",
+      "description": "An ancient sword excavated from the Constanplea ruins, still bearing a faint blue light. The dead recognise it.",
+      "attack_bonus": 40,
+      "defense_bonus": 6,
+      "magic_weapon": true,
+      "mp_bonus": 20,
+      "price": 700,
+      "rarity": "legendary",
+      "requirements": {
+         "level": 10
+      }
+   },
+   "Kalovar Grand Vizier's Staff": {
+      "type": "weapon",
+      "description": "The ceremonial war-staff of a Kalovar Grand Vizier, crackling with court magic and political authority",
+      "attack_bonus": 55,
+      "magic_weapon": true,
+      "mp_bonus": 45,
+      "speed_bonus": 3,
+      "price": 900,
+      "rarity": "legendary",
+      "requirements": {
+         "level": 12,
+         "class": "Mage"
+      }
+   },
+   "Iron Horde Standard": {
+      "type": "offhand",
+      "description": "A clan battle standard of the Iron Horde. Inspires Varak warriors to near-supernatural ferocity — and terrifies everyone else.",
+      "defense_bonus": 8,
+      "attack_bonus": 10,
+      "fear_factor": 0.12,
+      "price": 380,
+      "rarity": "rare",
+      "requirements": {
+         "level": 8
+      }
+   },
+   "Varak Totem Shield": {
+      "type": "offhand",
+      "description": "A large round shield faced with carved clan totems. Heavy as stone, tough as the northern winter.",
+      "defense_bonus": 18,
+      "hp_bonus": 25,
+      "price": 260,
+      "rarity": "rare",
+      "requirements": {
+         "level": 6
+      }
    }
 }

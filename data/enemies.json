@@ -788,35 +788,6 @@
       "Large Health Potion"
     ]
   },
-  "ottoman_corsair": {
-    "name": "Ottoman Corsair",
-    "hp": 55,
-    "attack": 17,
-    "defense": 5,
-    "speed": 14,
-    "experience_reward": 45,
-    "gold_reward": 28,
-    "loot_table": [
-      "Corsair Cutlass",
-      "Ottoman Gold Coin",
-      "Corsair Flag"
-    ]
-  },
-  "slave_trader": {
-    "name": "Slave Trader",
-    "hp": 48,
-    "attack": 14,
-    "defense": 6,
-    "speed": 10,
-    "experience_reward": 40,
-    "gold_reward": 35,
-    "loot_table": [
-      "Slave Chain",
-      "Ottoman Gold Coin",
-      "Health Potion",
-      "The New Order: Life in Kostantora"
-    ]
-  },
   "bazaar_thief": {
     "name": "Bazaar Thief",
     "hp": 35,
@@ -829,91 +800,6 @@
       "Ottoman Gold Coin",
       "Spice Bundle",
       "Steel Dagger"
-    ]
-  },
-  "ottoman_janissary": {
-    "name": "Janissary Soldier",
-    "hp": 75,
-    "attack": 20,
-    "defense": 12,
-    "speed": 10,
-    "experience_reward": 65,
-    "gold_reward": 38,
-    "loot_table": [
-      "Janissary Badge",
-      "Ottoman Chainmail",
-      "Ottoman Scimitar"
-    ]
-  },
-  "desert_raider": {
-    "name": "Desert Raider",
-    "hp": 60,
-    "attack": 18,
-    "defense": 7,
-    "speed": 15,
-    "experience_reward": 50,
-    "gold_reward": 30,
-    "loot_table": [
-      "Desert Jewel",
-      "Ottoman Bow",
-      "Spice Bundle"
-    ]
-  },
-  "anatolian_lion": {
-    "name": "Anatolian Lion",
-    "hp": 85,
-    "attack": 26,
-    "defense": 6,
-    "speed": 18,
-    "experience_reward": 75,
-    "gold_reward": 35,
-    "loot_table": [
-      "Lion's Mane Trophy",
-      "Health Potion",
-      "Large Health Potion"
-    ]
-  },
-  "desert_serpent": {
-    "name": "Desert Serpent",
-    "hp": 65,
-    "attack": 22,
-    "defense": 4,
-    "speed": 16,
-    "experience_reward": 58,
-    "gold_reward": 28,
-    "loot_table": [
-      "Desert Serpent Fang",
-      "Venom Sac",
-      "Desert Serpent Blade"
-    ]
-  },
-  "ottoman_court_mage": {
-    "name": "Ottoman Court Mage",
-    "hp": 65,
-    "attack": 24,
-    "defense": 5,
-    "speed": 10,
-    "experience_reward": 70,
-    "gold_reward": 40,
-    "loot_table": [
-      "Vizier Staff",
-      "Mana Potion",
-      "Spice Bundle",
-      "The Faith and Law of the Osmano\u011flu Empire"
-    ]
-  },
-  "janissary_captain": {
-    "name": "Janissary Captain",
-    "hp": 100,
-    "attack": 28,
-    "defense": 16,
-    "speed": 11,
-    "experience_reward": 110,
-    "gold_reward": 60,
-    "loot_table": [
-      "Janissary Plate Armor",
-      "Janissary Badge",
-      "Ottoman Scimitar"
     ]
   },
   "palace_guard": {
@@ -945,7 +831,78 @@
       "Mana Potion"
     ]
   },
-  "ottoman_war_elephant": {
+  "kalovar_corsair": {
+    "name": "Kalovar Corsair",
+    "hp": 55,
+    "attack": 17,
+    "defense": 5,
+    "speed": 14,
+    "experience_reward": 45,
+    "gold_reward": 28,
+    "loot_table": [
+      "Corsair Cutlass",
+      "Ottoman Gold Coin",
+      "Corsair Flag"
+    ]
+  },
+  "kalovar_kazhari": {
+    "name": "Kazhari Soldier",
+    "hp": 75,
+    "attack": 20,
+    "defense": 12,
+    "speed": 10,
+    "experience_reward": 65,
+    "gold_reward": 38,
+    "loot_table": [
+      "Janissary Badge",
+      "Ottoman Chainmail",
+      "Ottoman Scimitar"
+    ]
+  },
+  "karastani_lion": {
+    "name": "Karastani Lion",
+    "hp": 85,
+    "attack": 26,
+    "defense": 6,
+    "speed": 18,
+    "experience_reward": 75,
+    "gold_reward": 35,
+    "loot_table": [
+      "Lion's Mane Trophy",
+      "Health Potion",
+      "Large Health Potion"
+    ]
+  },
+  "kalovar_court_mage": {
+    "name": "Kalovar Court Mage",
+    "hp": 65,
+    "attack": 24,
+    "defense": 5,
+    "speed": 10,
+    "experience_reward": 70,
+    "gold_reward": 40,
+    "loot_table": [
+      "Vizier Staff",
+      "Mana Potion",
+      "Spice Bundle",
+      "The Faith and Law of the Osmanoğlu Empire"
+    ]
+  },
+  "kazhari_captain": {
+    "name": "Kazhari Captain",
+    "hp": 100,
+    "attack": 28,
+    "defense": 16,
+    "speed": 11,
+    "experience_reward": 110,
+    "gold_reward": 60,
+    "loot_table": [
+      "Janissary Plate Armor",
+      "Janissary Badge",
+      "Ottoman Scimitar"
+    ]
+  },
+  "kalovar_war_elephant": {
     "name": "War Elephant",
     "hp": 200,
     "attack": 35,
@@ -959,7 +916,22 @@
       "Large Health Potion"
     ]
   },
-  "pirate_lord_captain": {
+  "kalovar_slaver": {
+    "name": "Slave Trader",
+    "hp": 48,
+    "attack": 14,
+    "defense": 6,
+    "speed": 10,
+    "experience_reward": 40,
+    "gold_reward": 35,
+    "loot_table": [
+      "Slave Chain",
+      "Ottoman Gold Coin",
+      "Health Potion",
+      "The New Order: Life in Kostantora"
+    ]
+  },
+  "corsair_captain": {
     "name": "Pirate Captain",
     "hp": 90,
     "attack": 22,
@@ -971,6 +943,288 @@
       "Corsair Cutlass",
       "Corsair Coat",
       "Ottoman Gold Coin"
+    ]
+  },
+  "kalovar_raider": {
+    "name": "Desert Raider",
+    "hp": 60,
+    "attack": 18,
+    "defense": 7,
+    "speed": 15,
+    "experience_reward": 50,
+    "gold_reward": 30,
+    "loot_table": [
+      "Desert Jewel",
+      "Ottoman Bow",
+      "Spice Bundle"
+    ]
+  },
+  "karastani_serpent": {
+    "name": "Desert Serpent",
+    "hp": 65,
+    "attack": 22,
+    "defense": 4,
+    "speed": 16,
+    "experience_reward": 58,
+    "gold_reward": 28,
+    "loot_table": [
+      "Desert Serpent Fang",
+      "Venom Sac",
+      "Desert Serpent Blade"
+    ]
+  },
+  "kalovar_palace_guard": {
+    "name": "Kalovar Palace Guard",
+    "hp": 95,
+    "attack": 28,
+    "defense": 18,
+    "speed": 10,
+    "experience_reward": 120,
+    "gold_reward": 55,
+    "loot_table": [
+      "Kalovar Sabre",
+      "Large Health Potion",
+      "Steel Ingot"
+    ]
+  },
+  "varak_raider": {
+    "name": "Varak Raider",
+    "hp": 55,
+    "attack": 19,
+    "defense": 8,
+    "speed": 13,
+    "experience_reward": 65,
+    "gold_reward": 28,
+    "loot_table": [
+      "Bone Hatchet",
+      "Northern Fur Pelt",
+      "Barbarian Iron Chunk"
+    ]
+  },
+  "clan_berserker": {
+    "name": "Clan Berserker",
+    "hp": 80,
+    "attack": 28,
+    "defense": 6,
+    "speed": 14,
+    "experience_reward": 90,
+    "gold_reward": 35,
+    "loot_table": [
+      "Clan Greataxe",
+      "Barbarian Totem Shard",
+      "Warrior's Brew"
+    ]
+  },
+  "steppe_archer": {
+    "name": "Steppe Archer",
+    "hp": 45,
+    "attack": 22,
+    "defense": 5,
+    "speed": 16,
+    "experience_reward": 70,
+    "gold_reward": 30,
+    "loot_table": [
+      "Barbarian Iron Chunk",
+      "Northern Fur Pelt",
+      "Health Potion"
+    ]
+  },
+  "varak_bear_warrior": {
+    "name": "Varak Bear Warrior",
+    "hp": 110,
+    "attack": 32,
+    "defense": 14,
+    "speed": 9,
+    "experience_reward": 130,
+    "gold_reward": 50,
+    "loot_table": [
+      "Bear-Claw Gauntlet",
+      "Northern Fur Pelt",
+      "Barbarian Totem Shard"
+    ]
+  },
+  "varak_war_chief": {
+    "name": "Varak War-Chief",
+    "hp": 200,
+    "attack": 42,
+    "defense": 20,
+    "speed": 11,
+    "experience_reward": 280,
+    "gold_reward": 120,
+    "loot_table": [
+      "Warbrand",
+      "Barbarian Totem Shard",
+      "Large Health Potion"
+    ],
+    "is_boss": true
+  },
+  "river_serpent": {
+    "name": "Yi Xuan River Serpent",
+    "hp": 60,
+    "attack": 20,
+    "defense": 9,
+    "speed": 14,
+    "experience_reward": 75,
+    "gold_reward": 32,
+    "loot_table": [
+      "Wolf Fang",
+      "Herb",
+      "Eastern Spice Bundle"
+    ]
+  },
+  "jade_court_assassin": {
+    "name": "Jade Court Assassin",
+    "hp": 50,
+    "attack": 30,
+    "defense": 8,
+    "speed": 20,
+    "experience_reward": 100,
+    "gold_reward": 45,
+    "loot_table": [
+      "Serpent Fang Dagger",
+      "Jade Fragment",
+      "Mana Potion"
+    ]
+  },
+  "lotus_guardian": {
+    "name": "Lotus Spirit Guardian",
+    "hp": 90,
+    "attack": 18,
+    "defense": 16,
+    "speed": 10,
+    "experience_reward": 110,
+    "gold_reward": 40,
+    "loot_table": [
+      "Lotus Root",
+      "Jade Fragment",
+      "Jade Tea"
+    ]
+  },
+  "river_bandit": {
+    "name": "River Bandit",
+    "hp": 42,
+    "attack": 16,
+    "defense": 6,
+    "speed": 13,
+    "experience_reward": 55,
+    "gold_reward": 25,
+    "loot_table": [
+      "Bamboo Staff",
+      "Health Potion",
+      "Fermented Soybean Paste"
+    ]
+  },
+  "jade_automaton": {
+    "name": "Jade Automaton",
+    "hp": 120,
+    "attack": 25,
+    "defense": 22,
+    "speed": 7,
+    "experience_reward": 150,
+    "gold_reward": 60,
+    "loot_table": [
+      "Jade Fragment",
+      "Crystal Shard",
+      "Steel Ingot"
+    ]
+  },
+  "celestial_serpent_lord": {
+    "name": "Celestial Serpent Lord",
+    "hp": 320,
+    "attack": 55,
+    "defense": 28,
+    "speed": 16,
+    "experience_reward": 420,
+    "gold_reward": 180,
+    "loot_table": [
+      "Jade Dragon Sword",
+      "Jade Fragment",
+      "Large Health Potion"
+    ],
+    "is_boss": true
+  },
+  "ghost_legionnaire": {
+    "name": "Ghost Legionnaire",
+    "hp": 48,
+    "attack": 17,
+    "defense": 12,
+    "speed": 11,
+    "experience_reward": 70,
+    "gold_reward": 18,
+    "loot_table": [
+      "Bone Fragment",
+      "Crystal Shard",
+      "Health Potion"
+    ]
+  },
+  "corrupted_scholar": {
+    "name": "Corrupted Scholar",
+    "hp": 38,
+    "attack": 24,
+    "defense": 5,
+    "speed": 12,
+    "experience_reward": 65,
+    "gold_reward": 22,
+    "loot_table": [
+      "Mana Potion",
+      "Crystal Shard",
+      "Jade Tea"
+    ]
+  },
+  "constanplea_revenant": {
+    "name": "Constanplea Revenant",
+    "hp": 85,
+    "attack": 26,
+    "defense": 14,
+    "speed": 9,
+    "experience_reward": 110,
+    "gold_reward": 35,
+    "loot_table": [
+      "Shadow Essence",
+      "Bone Fragment",
+      "Large Health Potion"
+    ]
+  },
+  "kalovar_border_scout": {
+    "name": "Kalovar Border Scout",
+    "hp": 52,
+    "attack": 18,
+    "defense": 10,
+    "speed": 15,
+    "experience_reward": 70,
+    "gold_reward": 30,
+    "loot_table": [
+      "Steel Dagger",
+      "Health Potion",
+      "Leather Strip"
+    ]
+  },
+  "kalovar_war_mage": {
+    "name": "Kalovar War Mage",
+    "hp": 55,
+    "attack": 32,
+    "defense": 8,
+    "speed": 11,
+    "experience_reward": 95,
+    "gold_reward": 40,
+    "loot_table": [
+      "Mana Potion",
+      "Crystal Shard",
+      "Dark Crystal"
+    ]
+  },
+  "corsair_first_mate": {
+    "name": "Corsair First Mate",
+    "hp": 70,
+    "attack": 24,
+    "defense": 12,
+    "speed": 13,
+    "experience_reward": 88,
+    "gold_reward": 38,
+    "loot_table": [
+      "Dao Blade",
+      "Mana Potion",
+      "Yixuan Silk"
     ]
   }
 }
