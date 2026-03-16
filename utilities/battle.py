@@ -249,7 +249,6 @@ def collect_battle_rewards(player: Dict[str, Any], enemy_dict: Dict[str, Any],
             "color": "var(--blue)"
         })
 
-    _old_level = player.get('level', 1)
     player['experience'] = player.get('experience', 0) + exp_reward
     leveled_up = False
     while player['experience'] >= player.get('experience_to_next', 100):

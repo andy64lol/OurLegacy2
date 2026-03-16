@@ -81,8 +81,6 @@ def spend_attribute_point(player: Dict[str, Any], attr: str) -> Dict[str, Any]:
     ensure_attributes(player)
     player['attributes'][attr] = player['attributes'].get(attr, BASE_ATTRIBUTE) + 1
     new_val = player['attributes'][attr]
-    _delta = new_val - BASE_ATTRIBUTE
-
     if attr == 'str':
         player['base_attack'] = player.get('base_attack', player.get('attack', 10)) + 2
         player['attack'] = player.get('attack', 10) + 2
