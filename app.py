@@ -20,6 +20,7 @@ import os
 import time as _time_module
 from typing import Any
 
+from utilities.dice import Dice
 from utilities.stats import (
     ensure_attributes,
     spend_attribute_point,
@@ -55,6 +56,8 @@ from utilities.save_load import (
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+
+dice = Dice()
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
@@ -290,11 +293,13 @@ def update_weekly_challenge(player, event_type, amount=1):
     """Track weekly challenge progress for the given event type."""
     ch_prog = player.setdefault("weekly_challenges_progress", {})
     for ch in GAME_DATA["weekly_challenges"]:
-        ch_id = ch["id"]
+        ch_id = ch.get("id", "")
+        if not ch_id:
+            continue
         prog = ch_prog.get(ch_id, {})
         if prog.get("claimed"):
             continue
-        if ch["type"] == event_type:
+        if ch.get("type") == event_type:
             entry = ch_prog.setdefault(ch_id, {})
             entry["count"] = entry.get("count", 0) + amount
 
@@ -303,8 +308,10 @@ def update_level_challenges(player):
     """Update level_reach challenges to match current level."""
     ch_prog = player.setdefault("weekly_challenges_progress", {})
     for ch in GAME_DATA["weekly_challenges"]:
-        if ch["type"] == "level_reach":
-            ch_id = ch["id"]
+        if ch.get("type") == "level_reach":
+            ch_id = ch.get("id", "")
+            if not ch_id:
+                continue
             prog = ch_prog.get(ch_id, {})
             if prog.get("claimed"):
                 continue
@@ -317,17 +324,19 @@ def build_challenges_display(player):
     ch_prog = player.get("weekly_challenges_progress", {})
     result = []
     for ch in GAME_DATA["weekly_challenges"]:
-        ch_id = ch["id"]
+        ch_id = ch.get("id", "")
+        if not ch_id:
+            continue
         prog = ch_prog.get(ch_id, {})
         count = prog.get("count", 0)
-        target = ch["target"]
+        target = ch.get("target", 0)
         claimed = prog.get("claimed", False)
         result.append(
             {
                 "id": ch_id,
-                "name": ch["name"],
-                "description": ch["description"],
-                "type": ch["type"],
+                "name": ch.get("name", ch_id),
+                "description": ch.get("description", ""),
+                "type": ch.get("type", ""),
                 "count": min(count, target),
                 "target": target,
                 "claimed": claimed,
@@ -374,7 +383,7 @@ def _enemy_take_turn(enemy, player, player_effects, log):
         if dodge > 0 and random.random() < dodge:
             log.append(f"You dodge the {enemy['name']}'s attack!")
             return
-        e_dmg = max(1, enemy["attack"] - player["defense"] + random.randint(-2, 4))
+        e_dmg = max(1, enemy["attack"] - player["defense"] + dice.between(-2, 4))
         if "shield" in player_effects:
             absorb = player_effects["shield"].get("data", {}).get("absorb_amount", 0)
             reduction = min(absorb, e_dmg)
@@ -462,7 +471,7 @@ def boss_take_turn(enemy, player, player_effects, log):
 
         if dmg > 0:
             # Ability damage ignores some defense
-            raw = max(1, dmg - player["defense"] // 2 + random.randint(-3, 5))
+            raw = max(1, dmg - player["defense"] // 2 + dice.between(-3, 5))
             if "shield" in player_effects:
                 absorb = (
                     player_effects["shield"].get("data", {}).get("absorb_amount", 0)
@@ -491,11 +500,11 @@ def boss_take_turn(enemy, player, player_effects, log):
             player_effects["stunned"] = {"turns": 1, "data": {}}
 
         if ability.get("description"):
-            log.append(f"  ({ability['description']})")
+            log.append(f"  ({ability.get('description', '')})")
 
     if not used_ability:
         # Regular attack
-        e_dmg = max(1, enemy["attack"] - player["defense"] + random.randint(-2, 4))
+        e_dmg = max(1, enemy["attack"] - player["defense"] + dice.between(-2, 4))
         if "shield" in player_effects:
             absorb = player_effects["shield"].get("data", {}).get("absorb_amount", 0)
             reduction = min(absorb, e_dmg)
@@ -790,7 +799,9 @@ def auto_equip_best(player):
     return messages
 
 
-# ─── Quest Helpers ───────────────────────────────────────────────────────────
+# Bro comments are unnecessary here
+
+# NO THEY'RE NECESSARY FOR THE TEAM
 
 
 def get_quest_progress(mission_id):
@@ -953,9 +964,6 @@ def get_mission_progress_display(mission_id, player):
     return items_display
 
 
-# ─── Routes ─────────────────────────────────────────────────────────────────
-
-
 @app.route("/game_assets/<path:filename>")
 def serve_game_asset(filename):
     return send_from_directory("data/assets", filename)
@@ -1015,11 +1023,11 @@ def create():
         race_data = GAME_DATA["races"].get(race, {})
         race_mods = race_data.get("stat_modifiers", {})
 
-        base_hp = max(10, stats["hp"] + race_mods.get("hp", 0))
-        base_mp = max(0, stats["mp"] + race_mods.get("mp", 0))
-        base_atk = max(1, stats["attack"] + race_mods.get("attack", 0))
-        base_def = max(1, stats["defense"] + race_mods.get("defense", 0))
-        base_spd = max(1, stats["speed"] + race_mods.get("speed", 0))
+        base_hp = max(10, stats.get("hp", 100) + race_mods.get("hp", 0))
+        base_mp = max(0, stats.get("mp", 50) + race_mods.get("mp", 0))
+        base_atk = max(1, stats.get("attack", 10) + race_mods.get("attack", 0))
+        base_def = max(1, stats.get("defense", 8) + race_mods.get("defense", 0))
+        base_spd = max(1, stats.get("speed", 10) + race_mods.get("speed", 0))
         base_gold = max(
             0, cls_data.get("starting_gold", 100) + race_mods.get("gold", 0)
         )
@@ -1143,7 +1151,7 @@ def game():
             "index.html", show_create=True, data=GAME_DATA, create_error=create_error
         )
 
-    # ── Battle state: show battle view inline ──────────────────────────────
+    # ── Battle state: show battle view inline ──────────────.g�───────────────
     enemy: dict[str, Any] = session.get("battle_enemy") or {}
     if enemy:
         battle_log = session.get("battle_log", [])
@@ -1770,7 +1778,7 @@ def action_explore():
             "speed": enemy_data.get("speed", 10),
             "exp_reward": int(enemy_data.get("experience_reward", 30) * scale),
             "gold_reward": max(
-                1, int(enemy_data.get("gold_reward", 10)) + random.randint(-3, 10)
+                1, int(enemy_data.get("gold_reward", 10)) + dice.between(-3, 10)
             ),
             "loot_table": enemy_data.get("loot_table", []),
         }
@@ -1818,14 +1826,14 @@ def action_explore():
         explore_event_roll = random.random()
         if explore_event_roll < 0.08:
             # Trap!
-            dmg = random.randint(5, max(6, player.get("level", 1) * 3))
+            dmg = dice.between(5, max(6, player.get("level", 1) * 3))
             player["hp"] = max(1, player["hp"] - dmg)
             add_message(
                 f"You trigger a hidden trap! You take {dmg} damage.", "var(--red)"
             )
         elif explore_event_roll < 0.14:
             # Ancient shrine — restore MP
-            mp_restore = random.randint(10, 30)
+            mp_restore = dice.between(10, 30)
             player["mp"] = min(player["max_mp"], player["mp"] + mp_restore)
             add_message(
                 f"You find an ancient shrine and meditate. +{mp_restore} MP restored.",
@@ -1833,7 +1841,7 @@ def action_explore():
             )
         elif explore_event_roll < 0.19:
             # Mysterious tome — bonus EXP
-            exp_bonus = random.randint(15, 40)
+            exp_bonus = dice.between(15, 40)
             player["exp"] = player.get("exp", 0) + exp_bonus
             add_message(
                 f"You discover a worn tome. Studying it grants you +{exp_bonus} EXP.",
@@ -1859,7 +1867,7 @@ def action_explore():
     # ── Non-combat exploration outcomes
     # 30% chance to find gold (5-20)
     if random.random() < 0.30:
-        gold_found = random.randint(5, 20)
+        gold_found = dice.between(5, 20)
         player["gold"] += gold_found
         add_message(
             f"You spot {gold_found} gold coins glinting on the ground.", "var(--gold)"
@@ -1870,7 +1878,7 @@ def action_explore():
         difficulty = area.get("difficulty", 1)
         tier = max(1, min(difficulty, 5))
         mats = MATERIALS_BY_TIER.get(tier, MATERIALS_BY_TIER[1])
-        num = random.randint(1, 3)
+        num = dice.roll_1d(3)
         gathered = random.choices(mats, k=num)
         for mat in gathered:
             player["inventory"].append(mat)
@@ -1881,7 +1889,7 @@ def action_explore():
     discovery_bonus = player.get("attr_discovery", 0.0)
     roll2 = random.random()
     if roll2 < 0.20:
-        heal = random.randint(10, 30)
+        heal = dice.between(10, 30)
         player["hp"] = min(player["max_hp"], player["hp"] + heal)
         add_message(
             f"You discover a healing herb and recover {heal} HP.", "var(--green-bright)"
@@ -1973,7 +1981,7 @@ def action_travel():
     return redirect(url_for("game"))
 
 
-# ─── Manual Boss Challenge ─────────────────────────────────────────────────────
+# ─── Manual Boss Challenge ─────────────em�t��──────────────────────────────────────
 
 
 @app.route("/action/challenge_boss", methods=["POST"])
@@ -2223,23 +2231,23 @@ def action_use_item():
 
     lower = item_name.lower()
     if "health" in lower or ("potion" in lower and "mana" not in lower):
-        heal = random.randint(40, 70)
+        heal = dice.between(40, 70)
         if "large" in lower or "greater" in lower:
-            heal = random.randint(70, 130)
+            heal = dice.between(70, 130)
         player["hp"] = min(player["max_hp"], player["hp"] + heal)
         player["inventory"].remove(item_name)
         add_message(
             f"You drink the {item_name} and recover {heal} HP.", "var(--green-bright)"
         )
     elif "mana" in lower:
-        restore = random.randint(25, 50)
+        restore = dice.between(25, 50)
         player["mp"] = min(player["max_mp"], player["mp"] + restore)
         player["inventory"].remove(item_name)
         add_message(
             f"You drink the {item_name} and restore {restore} MP.", "var(--mana-bright)"
         )
     elif "elixir" in lower or "tears" in lower:
-        heal = random.randint(50, 100)
+        heal = dice.between(50, 100)
         player["hp"] = min(player["max_hp"], player["hp"] + heal)
         player["inventory"].remove(item_name)
         add_message(
@@ -2360,7 +2368,7 @@ def action_claim_challenge():
         return redirect(url_for("index"))
 
     ch_id = request.form.get("challenge_id", "")
-    ch_def = next((c for c in GAME_DATA["weekly_challenges"] if c["id"] == ch_id), None)
+    ch_def = next((c for c in GAME_DATA["weekly_challenges"] if c.get("id") == ch_id), None)
     if not ch_def:
         add_message("Unknown challenge.", "var(--red)")
         return redirect(url_for("game") + "#challenges")
@@ -2373,7 +2381,7 @@ def action_claim_challenge():
         return redirect(url_for("game") + "#challenges")
 
     count = prog.get("count", 0)
-    target = ch_def["target"]
+    target = ch_def.get("target", 0)
     if count < target:
         add_message(f"Challenge not yet completed ({count}/{target}).", "var(--red)")
         return redirect(url_for("game") + "#challenges")
@@ -2384,7 +2392,7 @@ def action_claim_challenge():
     leveled = gain_experience(player, exp)
     ch_prog[ch_id]["claimed"] = True
 
-    add_message(f"Challenge Complete: {ch_def['name']}!", "var(--gold)")
+    add_message(f"Challenge Complete: {ch_def.get('name', ch_id)}!", "var(--gold)")
     add_message(f"Reward: +{exp} EXP, +{gold} gold.", "var(--text-light)")
     if leveled:
         add_message(
@@ -2416,7 +2424,7 @@ def land_buy_housing():
     price = max(1, int(base_price * (1.0 - discount)))
     if player["gold"] < price:
         add_message(
-            f"Not enough gold. {h_data['name']} costs {price} gold.", "var(--red)"
+            f"Not enough gold. {h_data.get('name', h_key)} costs {price} gold.", "var(--red)"
         )
         save_player(player)
         return redirect(url_for("game"))
@@ -2425,7 +2433,7 @@ def land_buy_housing():
     owned = player.get("housing_owned", [])
     owned.append(h_key)
     player["housing_owned"] = owned
-    add_message(f"You purchase {h_data['name']} for {price} gold.", "var(--gold)")
+    add_message(f"You purchase {h_data.get('name', h_key)} for {price} gold.", "var(--gold)")
     save_player(player)
     return redirect(url_for("game") + "?tab=land")
 
@@ -2533,7 +2541,7 @@ def land_plant():
     }
     player["crops"] = crops
     add_message(
-        f"You plant {crop_def['name']} in {slot_id}. Ready in {crop_def['growth_time']} turns.",
+        f"You plant {crop_def.get('name', crop_key)} in {slot_id}. Ready in {crop_def.get('growth_time', 5)} turns.",
         "var(--green-bright)",
     )
     save_player(player)
@@ -2598,7 +2606,7 @@ def land_buy_pet():
     price = pet_data.get("price", 500)
     if player["gold"] < price:
         add_message(
-            f"Not enough gold. {pet_data['name']} costs {price} gold.", "var(--red)"
+            f"Not enough gold. {pet_data.get('name', pet_key)} costs {price} gold.", "var(--red)"
         )
         save_player(player)
         return redirect(url_for("game") + "?tab=land")
@@ -2633,7 +2641,7 @@ def land_buy_pet():
             player["max_mp"] = player.get("max_mp", 0) + val
             player["mp"] = min(player["mp"] + val, player["max_mp"])
 
-    add_message(f"You adopt {pet_data['name']} as your companion!", "var(--gold)")
+    add_message(f"You adopt {pet_data.get('name', pet_key)} as your companion!", "var(--gold)")
     if boosts:
         boost_str = ", ".join(
             f"+{v} {k}" for k, v in boosts.items() if isinstance(v, int)
@@ -2804,7 +2812,7 @@ def battle_attack():
         return _handle_victory(player, enemy, log)
 
     if not stunned:
-        p_dmg = max(1, player["attack"] - enemy["defense"] + random.randint(-3, 6))
+        p_dmg = max(1, player["attack"] - enemy["defense"] + dice.between(-3, 6))
         crit = random.random() < 0.10
         if crit:
             p_dmg = int(p_dmg * 1.6)
@@ -2895,19 +2903,19 @@ def battle_use_item():
     else:
         lower = item_name.lower()
         if "health" in lower or ("potion" in lower and "mana" not in lower):
-            heal = random.randint(40, 70)
+            heal = dice.between(40, 70)
             if "large" in lower or "greater" in lower:
-                heal = random.randint(70, 130)
+                heal = dice.between(70, 130)
             player["hp"] = min(player["max_hp"], player["hp"] + heal)
             player["inventory"].remove(item_name)
             log.append(f"You quaff the {item_name}, recovering {heal} HP.")
         elif "mana" in lower:
-            restore = random.randint(25, 50)
+            restore = dice.between(25, 50)
             player["mp"] = min(player["max_mp"], player["mp"] + restore)
             player["inventory"].remove(item_name)
             log.append(f"You drink the {item_name}, restoring {restore} MP.")
         else:
-            heal = random.randint(50, 100)
+            heal = dice.between(50, 100)
             player["hp"] = min(player["max_hp"], player["hp"] + heal)
             player["inventory"].remove(item_name)
             log.append(f"You use the {item_name}, regaining {heal} HP.")
@@ -2946,7 +2954,7 @@ def battle_flee():
         save_player(player)
         return redirect(url_for("game"))
     else:
-        e_dmg = max(1, enemy["attack"] - player["defense"] + random.randint(0, 5))
+        e_dmg = max(1, enemy["attack"] - player["defense"] + dice.between(0, 5))
         player["hp"] = max(0, player["hp"] - e_dmg)
         log.append(
             f"You try to flee but the {enemy['name']} cuts you off, dealing {e_dmg} damage!"
@@ -3247,8 +3255,8 @@ def dungeon_room():
     if not player or not active:
         return redirect(url_for("game") + "?tab=dungeons")
 
-    rooms = active["rooms"]
-    idx = active["room_index"]
+    rooms = active.get("rooms", [])
+    idx = active.get("room_index", 0)
     if idx >= len(rooms):
         return redirect(url_for("dungeon_complete"))
 
@@ -3289,8 +3297,8 @@ def dungeon_proceed():
     if not player or not active:
         return redirect(url_for("game") + "?tab=dungeons")
 
-    rooms = active["rooms"]
-    idx = active["room_index"]
+    rooms = active.get("rooms", [])
+    idx = active.get("room_index", 0)
     if idx >= len(rooms):
         return redirect(url_for("dungeon_complete"))
 
@@ -3328,7 +3336,7 @@ def dungeon_proceed():
             add_message(msg["text"], msg.get("color", "var(--text-light)"))
 
     elif room_type == "trap_chest":
-        roll = random.randint(1, 20)
+        roll = dice.roll_1d(20)
         result = process_trap_chest_room(player, room, dungeons_data, items_data, roll)
         for msg in result.get("messages", []):
             add_message(msg["text"], msg.get("color", "var(--text-light)"))
@@ -3485,9 +3493,6 @@ def dungeon_abandon():
     session.pop("active_dungeon", None)
     add_message("You retreat from the dungeon.", "var(--text-dim)")
     return redirect(url_for("game") + "?tab=dungeons")
-
-
-# ─── Elite Market Routes ───────────────────────────────────────────────────────
 
 
 @app.route("/market")

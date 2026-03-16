@@ -11,3 +11,9 @@ class Dice:
     def roll_min_max(self, num_dice, sides):
         rolls = self.roll(num_dice, sides)
         return min(rolls), max(rolls)
+
+    def between(self, low, high):
+        """Roll a random integer between low and high (inclusive)."""
+        if high < low:
+            return low
+        return random.randint(low, high)
