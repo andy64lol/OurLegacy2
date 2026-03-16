@@ -55,7 +55,7 @@ from utilities.save_load import (
 )
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 
 dice = Dice()
 
