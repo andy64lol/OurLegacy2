@@ -59,10 +59,11 @@ app.secret_key = os.urandom(24)
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 
-def load_json(filename):
+def load_json(filename) -> dict[str, Any]:
     try:
         with open(os.path.join(DATA_DIR, filename), "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
     except (OSError, ValueError, KeyError):
         return {}
 
