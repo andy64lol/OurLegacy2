@@ -18,7 +18,7 @@ import json
 import random
 import os
 import time as _time_module
-from typing import Any, Union
+from typing import Any
 
 from utilities.stats import (
     ensure_attributes,
@@ -3586,9 +3586,6 @@ def api_server_load():
         session.modified = True
 
     return jsonify({"ok": result.get("ok"), "message": result.get("message", "")})
-
-
-# ─── Utility API ─────────────────────────────────────────────────────────────
 
 
 @app.route("/api/player_stats")
