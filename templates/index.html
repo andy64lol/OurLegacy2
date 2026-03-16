@@ -16,7 +16,7 @@ const raceData  = {{ data.races  | tojson }};
 <div class="welcome-screen">
     <div class="welcome-inner">
         <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="title-banner">
-        <div style="text-align:center;margin-top:-10px;margin-bottom:4px;font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">v1.0.0 Release</div>
+        <div style="text-align:center;margin-top:-10px;margin-bottom:4px;font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">v1.0.5 &mdash; Talk and Walk</div>
         {% if splash_text %}
         <div style="text-align:center;margin-bottom:14px;font-size:13px;color:var(--gold);font-style:italic;padding:0 20px;line-height:1.4;">
             {{ splash_text }}
@@ -602,6 +602,21 @@ const raceData  = {{ data.races  | tojson }};
                             {% endif %}
                         </div>
                         {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ── Recent Events (mini-diary) ── -->
+            {% if messages %}
+            <div class="panel" style="margin-bottom:14px;">
+                <div class="panel-title">Recent Events</div>
+                <div class="panel-body" style="padding-bottom:10px;">
+                    {% for entry in messages[:5] %}
+                    <div class="log-entry" style="color:{{ entry.color }};font-size:13px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);">{{ entry.text }}</div>
+                    {% endfor %}
+                    <div style="margin-top:8px;">
+                        <button class="btn btn-xsmall btn-secondary" onclick="switchTab('diary')">Full Diary &rarr;</button>
                     </div>
                 </div>
             </div>

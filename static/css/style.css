@@ -339,14 +339,19 @@ strong { font-weight: 600; }
 }
 .text-input:focus { border-color: var(--wood-bright); }
 
-.class-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 7px; }
-.class-card { display: block; cursor: pointer; }
+.class-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 7px; align-items: stretch; }
+.class-card { display: flex; cursor: pointer; height: 100%; }
 .class-card input[type="radio"] { display: none; }
 .class-card-inner {
     padding: 9px 11px;
     border: 2px solid var(--border);
     background: var(--slate-dark);
     transition: background 0.1s, border-color 0.1s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 52px;
+    width: 100%;
 }
 .class-card input:checked + .class-card-inner {
     border-color: var(--wood-bright);
@@ -358,8 +363,8 @@ strong { font-weight: 600; }
 .class-desc-short{ font-size: 13px; color: var(--text-dim); margin-top: 2px; }
 .class-full-desc { font-size: 15px; color: var(--text-light); margin-bottom: 16px; line-height: 1.6; }
 
-.race-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 7px; }
-.race-card { display: block; cursor: pointer; }
+.race-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 7px; align-items: stretch; }
+.race-card { display: flex; cursor: pointer; height: 100%; }
 .race-card input[type="radio"] { display: none; }
 .race-card-inner {
     padding: 7px 10px;
@@ -367,6 +372,11 @@ strong { font-weight: 600; }
     background: var(--slate-dark);
     border-radius: 4px;
     transition: background 0.1s, border-color 0.1s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 48px;
+    width: 100%;
 }
 .race-card input:checked + .race-card-inner {
     border-color: var(--wood-bright);
@@ -558,19 +568,21 @@ strong { font-weight: 600; }
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     margin-bottom: 4px;
+    align-items: stretch;
 }
 .wiz-grid-4 {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     margin-bottom: 4px;
+    align-items: stretch;
 }
 @media (max-width: 600px) {
     .wiz-grid-4 { grid-template-columns: repeat(2, 1fr); }
     .wiz-grid-3 { grid-template-columns: repeat(2, 1fr); }
 }
 
-.wiz-card { display: block; cursor: pointer; }
+.wiz-card { display: flex; cursor: pointer; height: 100%; }
 .wiz-card input[type="radio"] { display: none; }
 .wiz-card-inner {
     padding: 10px 12px;
@@ -580,6 +592,11 @@ strong { font-weight: 600; }
     text-align: center;
     transition: border-color 0.12s, background 0.12s;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 52px;
+    width: 100%;
 }
 .wiz-card-inner:hover { border-color: var(--slate-bright); }
 .wiz-card-inner.wiz-selected {

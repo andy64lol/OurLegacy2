@@ -1292,9 +1292,12 @@ def game():
     # Missions
     completed = session.get("completed_missions", [])
     completed_set = set(completed)
+    npc_unlocked_quests = set(session.get("npc_unlocked_quests", []))
     available_missions = []
     for mid, mission in GAME_DATA["missions"].items():
         if mid in completed_set:
+            continue
+        if mission.get("npc_triggered") and mid not in npc_unlocked_quests:
             continue
         unlock_level = mission.get("unlock_level", 1)
         prereqs = mission.get("prerequisites", [])
@@ -1750,7 +1753,55 @@ def action_explore():
         save_player(player)
         return redirect(url_for("game"))
 
-    # Non-combat exploration outcomes
+    # ── NPC Encounter (20% chance in areas with NPCs, no battle)
+    area_npcs = area.get("npcs", [])
+    npc_talked = False
+    if area_npcs and random.random() < 0.20:
+        npc = random.choice(area_npcs)
+        npc_name = npc.get("name", "Stranger")
+        dialogue = random.choice(npc.get("dialogues", ["..."]))
+        add_message(f'You encounter {npc_name}.', "var(--gold)")
+        add_message(f'"{dialogue}"', "var(--text-light)")
+
+        # Quest unlock via NPC dialogue
+        quest_unlock = npc.get("quest_unlock")
+        if quest_unlock:
+            completed_missions = session.get("completed_missions", [])
+            npc_unlocked = session.get("npc_unlocked_quests", [])
+            mission_info = GAME_DATA["missions"].get(quest_unlock, {})
+            if quest_unlock not in completed_missions and quest_unlock not in npc_unlocked and mission_info:
+                npc_unlocked.append(quest_unlock)
+                session["npc_unlocked_quests"] = npc_unlocked
+                mission_name = mission_info.get("name", quest_unlock)
+                add_message(f'New quest unlocked: {mission_name}!', "var(--green-bright)")
+        npc_talked = True
+
+    # ── Random Explore Events (one event per explore)
+    if not npc_talked:
+        explore_event_roll = random.random()
+        if explore_event_roll < 0.08:
+            # Trap!
+            dmg = random.randint(5, max(6, player.get("level", 1) * 3))
+            player["hp"] = max(1, player["hp"] - dmg)
+            add_message(f"You trigger a hidden trap! You take {dmg} damage.", "var(--red)")
+        elif explore_event_roll < 0.14:
+            # Ancient shrine — restore MP
+            mp_restore = random.randint(10, 30)
+            player["mp"] = min(player["max_mp"], player["mp"] + mp_restore)
+            add_message(f"You find an ancient shrine and meditate. +{mp_restore} MP restored.", "var(--mana-bright,#7eb8f7)")
+        elif explore_event_roll < 0.19:
+            # Mysterious tome — bonus EXP
+            exp_bonus = random.randint(15, 40)
+            player["exp"] = player.get("exp", 0) + exp_bonus
+            add_message(f"You discover a worn tome. Studying it grants you +{exp_bonus} EXP.", "var(--gold)")
+        elif explore_event_roll < 0.23:
+            # Abandoned camp — find multiple items
+            finds = random.choice([["Health Potion"], ["Mana Potion"], ["Health Potion", "Rope"], ["Iron Arrow", "Iron Arrow"]])
+            for item in finds:
+                player["inventory"].append(item)
+            add_message(f"You find an abandoned camp with supplies: {', '.join(finds)}.", "var(--text-light)")
+
+    # ── Non-combat exploration outcomes
     # 30% chance to find gold (5-20)
     if random.random() < 0.30:
         gold_found = random.randint(5, 20)
@@ -3001,6 +3052,7 @@ def api_save():
         "current_weather": session.get("current_weather", "sunny"),
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
+        "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
         "save_version": "7.1",
         "game_version": GAME_VERSION,
     }
@@ -3056,6 +3108,7 @@ def api_load():
     session["current_weather"] = data.get("current_weather", "sunny")
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
+    session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
     session.modified = True
     return jsonify({"ok": True, "player_name": player.get("name")})
 
@@ -3448,6 +3501,7 @@ def api_server_save():
         current_area=session.get("current_area", "starting_village"),
         visited_areas=session.get("visited_areas", []),
         completed_missions=session.get("completed_missions", []),
+        npc_unlocked_quests=session.get("npc_unlocked_quests", []),
     )
     return jsonify(result)
 
@@ -3471,6 +3525,7 @@ def api_server_load():
         session["current_area"] = result["current_area"]
         session["visited_areas"] = result["visited_areas"]
         session["completed_missions"] = result["completed_missions"]
+        session["npc_unlocked_quests"] = result.get("npc_unlocked_quests", [])
         session["messages"] = []
         session.modified = True
 

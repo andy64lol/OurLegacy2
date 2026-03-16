@@ -8,14 +8,16 @@
     "reward": {
       "experience": 50,
       "gold": 25,
-      "items": ["Health Potion"]
+      "items": [
+        "Health Potion"
+      ]
     },
     "area": "forest_path",
     "unlock_level": 1,
     "prerequisites": [],
     "accept_cutscene": "mission_accept_tutorial"
   },
-  "capture_bandits":{
+  "capture_bandits": {
     "name": "Bandit Capture",
     "description": "Capture 3 bandits in the Dark Forest to bring them to justice.",
     "type": "kill",
@@ -24,7 +26,10 @@
     "reward": {
       "experience": 60,
       "gold": 40,
-      "items": ["Bandit's Chain", "Rusty Sword"]
+      "items": [
+        "Bandit's Chain",
+        "Rusty Sword"
+      ]
     },
     "area": "forest_path",
     "unlock_level": 1,
@@ -39,11 +44,15 @@
     "reward": {
       "experience": 75,
       "gold": 40,
-      "items": ["Leather Armor"]
+      "items": [
+        "Leather Armor"
+      ]
     },
     "area": "forest_path",
     "unlock_level": 2,
-    "prerequisites": ["tutorial_quest"]
+    "prerequisites": [
+      "tutorial_quest"
+    ]
   },
   "orc_invasion": {
     "name": "Orc Menace",
@@ -54,11 +63,16 @@
     "reward": {
       "experience": 100,
       "gold": 60,
-      "items": ["Steel Dagger", "Large Health Potion"]
+      "items": [
+        "Steel Dagger",
+        "Large Health Potion"
+      ]
     },
     "area": "deep_woods",
     "unlock_level": 3,
-    "prerequisites": ["forest_cleaning"]
+    "prerequisites": [
+      "forest_cleaning"
+    ]
   },
   "ancient_artifact": {
     "name": "Lost Relic",
@@ -69,11 +83,16 @@
     "reward": {
       "experience": 150,
       "gold": 100,
-      "items": ["Magic Staff", "Mystic Robes"]
+      "items": [
+        "Magic Staff",
+        "Mystic Robes"
+      ]
     },
     "area": "ancient_ruins",
     "unlock_level": 4,
-    "prerequisites": ["orc_invasion"]
+    "prerequisites": [
+      "orc_invasion"
+    ]
   },
   "undead_horde": {
     "name": "Undead Rising",
@@ -84,11 +103,16 @@
     "reward": {
       "experience": 125,
       "gold": 80,
-      "items": ["Chain Mail", "Mana Potion"]
+      "items": [
+        "Chain Mail",
+        "Mana Potion"
+      ]
     },
     "area": "underground_tombs",
     "unlock_level": 4,
-    "prerequisites": ["ancient_artifact"]
+    "prerequisites": [
+      "ancient_artifact"
+    ]
   },
   "crystal_guardian": {
     "name": "Crystal Protector",
@@ -99,11 +123,16 @@
     "reward": {
       "experience": 200,
       "gold": 120,
-      "items": ["Ice Crystal", "Frost Potion"]
+      "items": [
+        "Ice Crystal",
+        "Frost Potion"
+      ]
     },
     "area": "crystal_caves",
     "unlock_level": 5,
-    "prerequisites": ["undead_horde"]
+    "prerequisites": [
+      "undead_horde"
+    ]
   },
   "dark_mage_hunt": {
     "name": "Sorcerer Hunt",
@@ -114,11 +143,16 @@
     "reward": {
       "experience": 175,
       "gold": 100,
-      "items": ["Dark Crystal", "Ring of Power"]
+      "items": [
+        "Dark Crystal",
+        "Ring of Power"
+      ]
     },
     "area": "deep_woods",
     "unlock_level": 5,
-    "prerequisites": ["orc_invasion"]
+    "prerequisites": [
+      "orc_invasion"
+    ]
   },
   "troll_slayer": {
     "name": "Troll Bane",
@@ -129,11 +163,17 @@
     "reward": {
       "experience": 250,
       "gold": 150,
-      "items": ["Troll Club", "Large Health Potion", "Boots of Speed"]
+      "items": [
+        "Troll Club",
+        "Large Health Potion",
+        "Boots of Speed"
+      ]
     },
     "area": "underground_tombs",
     "unlock_level": 6,
-    "prerequisites": ["undead_horde"]
+    "prerequisites": [
+      "undead_horde"
+    ]
   },
   "dragon_slayer": {
     "name": "Dragon's End",
@@ -144,11 +184,18 @@
     "reward": {
       "experience": 500,
       "gold": 500,
-      "items": ["Dragon Scale Armor", "Fire Gem", "Dragon Heart"]
+      "items": [
+        "Dragon Scale Armor",
+        "Fire Gem",
+        "Dragon Heart"
+      ]
     },
     "area": "dragon_lair",
     "unlock_level": 8,
-    "prerequisites": ["crystal_guardian", "troll_slayer"]
+    "prerequisites": [
+      "crystal_guardian",
+      "troll_slayer"
+    ]
   },
   "treasure_hunter": {
     "name": "Hidden Riches",
@@ -163,11 +210,16 @@
     "reward": {
       "experience": 200,
       "gold": 200,
-      "items": ["Ring of Power", "Large Health Potion"]
+      "items": [
+        "Ring of Power",
+        "Large Health Potion"
+      ]
     },
     "area": "any",
     "unlock_level": 3,
-    "prerequisites": ["tutorial_quest"]
+    "prerequisites": [
+      "tutorial_quest"
+    ]
   },
   "merchant_favor": {
     "name": "Trading Favor",
@@ -181,11 +233,16 @@
     "reward": {
       "experience": 100,
       "gold": 150,
-      "items": ["Health Potion", "Mana Potion"]
+      "items": [
+        "Health Potion",
+        "Mana Potion"
+      ]
     },
     "area": "starting_village",
     "unlock_level": 2,
-    "prerequisites": ["tutorial_quest"]
+    "prerequisites": [
+      "tutorial_quest"
+    ]
   },
   "shadow_plague": {
     "name": "Shadow Corruption",
@@ -196,11 +253,16 @@
     "reward": {
       "experience": 150,
       "gold": 90,
-      "items": ["Shadow Blade", "Crown of Wisdom"]
+      "items": [
+        "Shadow Blade",
+        "Crown of Wisdom"
+      ]
     },
     "area": "moonlit_glade",
     "unlock_level": 4,
-    "prerequisites": ["orc_invasion"]
+    "prerequisites": [
+      "orc_invasion"
+    ]
   },
   "arcane_scholar": {
     "name": "Mage's Quest",
@@ -214,11 +276,16 @@
     "reward": {
       "experience": 180,
       "gold": 120,
-      "items": ["Ethereal Staff", "Ring of Mana"]
+      "items": [
+        "Ethereal Staff",
+        "Ring of Mana"
+      ]
     },
     "area": "spire_of_sorcery",
     "unlock_level": 5,
-    "prerequisites": ["dark_mage_hunt"]
+    "prerequisites": [
+      "dark_mage_hunt"
+    ]
   },
   "void_walker": {
     "name": "Into the Void",
@@ -229,11 +296,17 @@
     "reward": {
       "experience": 250,
       "gold": 180,
-      "items": ["Obsidian Edge", "Dark Crystal", "Large Health Potion"]
+      "items": [
+        "Obsidian Edge",
+        "Dark Crystal",
+        "Large Health Potion"
+      ]
     },
     "area": "void_cavern",
     "unlock_level": 6,
-    "prerequisites": ["shadow_plague"]
+    "prerequisites": [
+      "shadow_plague"
+    ]
   },
   "temple_protector": {
     "name": "Obsidian Oath",
@@ -244,11 +317,16 @@
     "reward": {
       "experience": 160,
       "gold": 110,
-      "items": ["Chain Mail", "Plate Armor"]
+      "items": [
+        "Chain Mail",
+        "Plate Armor"
+      ]
     },
     "area": "obsidian_temple",
     "unlock_level": 5,
-    "prerequisites": ["undead_horde"]
+    "prerequisites": [
+      "undead_horde"
+    ]
   },
   "frost_mage": {
     "name": "Ice Master",
@@ -259,11 +337,17 @@
     "reward": {
       "experience": 200,
       "gold": 140,
-      "items": ["Crystalline Wand", "Mystic Robes", "Boots of Speed"]
+      "items": [
+        "Crystalline Wand",
+        "Mystic Robes",
+        "Boots of Speed"
+      ]
     },
     "area": "crystal_caves",
     "unlock_level": 5,
-    "prerequisites": ["crystal_guardian"]
+    "prerequisites": [
+      "crystal_guardian"
+    ]
   },
   "inferno_slayer": {
     "name": "Flames of Wrath",
@@ -274,11 +358,16 @@
     "reward": {
       "experience": 120,
       "gold": 80,
-      "items": ["Spellsword", "Fire Gem"]
+      "items": [
+        "Spellsword",
+        "Fire Gem"
+      ]
     },
     "area": "moonlit_glade",
     "unlock_level": 4,
-    "prerequisites": ["shadow_plague"]
+    "prerequisites": [
+      "shadow_plague"
+    ]
   },
   "shadow_bow": {
     "name": "Archer's Training",
@@ -289,11 +378,16 @@
     "reward": {
       "experience": 90,
       "gold": 50,
-      "items": ["Ninja Kunai", "Ring of Precision"]
+      "items": [
+        "Ninja Kunai",
+        "Ring of Precision"
+      ]
     },
     "area": "deep_woods",
     "unlock_level": 3,
-    "prerequisites": ["forest_cleaning"]
+    "prerequisites": [
+      "forest_cleaning"
+    ]
   },
   "swamp_hunt": {
     "name": "Swamp Stalker",
@@ -307,11 +401,17 @@
     "reward": {
       "experience": 200,
       "gold": 150,
-      "items": ["Venomstrike Dagger", "Poison Crystal"]
+      "items": [
+        "Venomstrike Dagger",
+        "Poison Crystal"
+      ]
     },
     "area": "swamp_of_shadows",
     "unlock_level": 4,
-    "prerequisites": ["orc_invasion", "forest_cleaning"]
+    "prerequisites": [
+      "orc_invasion",
+      "forest_cleaning"
+    ]
   },
   "hydra_slayer": {
     "name": "Hydra Hunter",
@@ -322,11 +422,17 @@
     "reward": {
       "experience": 400,
       "gold": 300,
-      "items": ["Hydra Fang", "Swamp Scale Armor", "Venom Sac"]
+      "items": [
+        "Hydra Fang",
+        "Swamp Scale Armor",
+        "Venom Sac"
+      ]
     },
     "area": "swamp_of_shadows",
     "unlock_level": 5,
-    "prerequisites": ["swamp_hunt"]
+    "prerequisites": [
+      "swamp_hunt"
+    ]
   },
   "cemetery_cleansing": {
     "name": "Grave Duty",
@@ -340,11 +446,17 @@
     "reward": {
       "experience": 220,
       "gold": 160,
-      "items": ["Ghostwalker Cloak", "Soul Gem"]
+      "items": [
+        "Ghostwalker Cloak",
+        "Soul Gem"
+      ]
     },
     "area": "haunted_cemetery",
     "unlock_level": 5,
-    "prerequisites": ["undead_horde", "temple_protector"]
+    "prerequisites": [
+      "undead_horde",
+      "temple_protector"
+    ]
   },
   "necromancer_defeat": {
     "name": "Necromancer's End",
@@ -355,11 +467,17 @@
     "reward": {
       "experience": 500,
       "gold": 350,
-      "items": ["Necromancer's Robes", "Skull Staff", "Bone Crown"]
+      "items": [
+        "Necromancer's Robes",
+        "Skull Staff",
+        "Bone Crown"
+      ]
     },
     "area": "haunted_cemetery",
     "unlock_level": 6,
-    "prerequisites": ["cemetery_cleansing"]
+    "prerequisites": [
+      "cemetery_cleansing"
+    ]
   },
   "mountain_climb": {
     "name": "Mountain Trek",
@@ -370,11 +488,16 @@
     "reward": {
       "experience": 180,
       "gold": 120,
-      "items": ["Gauntlets of Strength", "Stone Shield"]
+      "items": [
+        "Gauntlets of Strength",
+        "Stone Shield"
+      ]
     },
     "area": "mountain_base",
     "unlock_level": 4,
-    "prerequisites": ["ancient_artifact"]
+    "prerequisites": [
+      "ancient_artifact"
+    ]
   },
   "thunder_conquest": {
     "name": "Storm Challenger",
@@ -388,11 +511,17 @@
     "reward": {
       "experience": 280,
       "gold": 200,
-      "items": ["Lightning Crystal", "Thundercloud Cloak"]
+      "items": [
+        "Lightning Crystal",
+        "Thundercloud Cloak"
+      ]
     },
     "area": "thunder_peak",
     "unlock_level": 6,
-    "prerequisites": ["mountain_climb", "inferno_slayer"]
+    "prerequisites": [
+      "mountain_climb",
+      "inferno_slayer"
+    ]
   },
   "giant_slayer": {
     "name": "Thunder Lord's Fall",
@@ -403,11 +532,17 @@
     "reward": {
       "experience": 550,
       "gold": 400,
-      "items": ["Thunder Hammer", "Storm Giant's Belt", "Giant's Gauntlets"]
+      "items": [
+        "Thunder Hammer",
+        "Storm Giant's Belt",
+        "Giant's Gauntlets"
+      ]
     },
     "area": "thunder_peak",
     "unlock_level": 7,
-    "prerequisites": ["thunder_conquest"]
+    "prerequisites": [
+      "thunder_conquest"
+    ]
   },
   "crypt_explorer": {
     "name": "Into the Depths",
@@ -418,11 +553,17 @@
     "reward": {
       "experience": 350,
       "gold": 250,
-      "items": ["Death Knight's Shield", "Cursed Amulet"]
+      "items": [
+        "Death Knight's Shield",
+        "Cursed Amulet"
+      ]
     },
     "area": "crypt_of_eternity",
     "unlock_level": 7,
-    "prerequisites": ["necromancer_defeat", "temple_protector"]
+    "prerequisites": [
+      "necromancer_defeat",
+      "temple_protector"
+    ]
   },
   "lich_king_defeat": {
     "name": "Eternal Nightmare",
@@ -433,11 +574,18 @@
     "reward": {
       "experience": 700,
       "gold": 600,
-      "items": ["Crown of Malachar", "Phylactery", "Lich King's Robes", "Soul Reaver"]
+      "items": [
+        "Crown of Malachar",
+        "Phylactery",
+        "Lich King's Robes",
+        "Soul Reaver"
+      ]
     },
     "area": "crypt_of_eternity",
     "unlock_level": 8,
-    "prerequisites": ["crypt_explorer"]
+    "prerequisites": [
+      "crypt_explorer"
+    ]
   },
   "demon_gate": {
     "name": "Infernal Gate",
@@ -451,11 +599,16 @@
     "reward": {
       "experience": 400,
       "gold": 300,
-      "items": ["Infernal Blade", "Demon Heart"]
+      "items": [
+        "Infernal Blade",
+        "Demon Heart"
+      ]
     },
     "area": "hellfire_citadel",
     "unlock_level": 8,
-    "prerequisites": ["lich_king_defeat"]
+    "prerequisites": [
+      "lich_king_defeat"
+    ]
   },
   "demon_prince_defeat": {
     "name": "Prince of Darkness",
@@ -466,11 +619,18 @@
     "reward": {
       "experience": 800,
       "gold": 800,
-      "items": ["Demon Prince's Crown", "Chaos Orb", "Azgorath's Cloak", "Hellfire Shield"]
+      "items": [
+        "Demon Prince's Crown",
+        "Chaos Orb",
+        "Azgorath's Cloak",
+        "Hellfire Shield"
+      ]
     },
     "area": "hellfire_citadel",
     "unlock_level": 9,
-    "prerequisites": ["demon_gate"]
+    "prerequisites": [
+      "demon_gate"
+    ]
   },
   "sky_ascent": {
     "name": "Ascension",
@@ -481,11 +641,17 @@
     "reward": {
       "experience": 450,
       "gold": 350,
-      "items": ["Wind Walkers", "Eternal Feather"]
+      "items": [
+        "Wind Walkers",
+        "Eternal Feather"
+      ]
     },
     "area": "sky_sanctuary",
     "unlock_level": 8,
-    "prerequisites": ["giant_slayer", "demon_prince_defeat"]
+    "prerequisites": [
+      "giant_slayer",
+      "demon_prince_defeat"
+    ]
   },
   "elder_dragon_defeat": {
     "name": "Wind's End",
@@ -496,15 +662,23 @@
     "reward": {
       "experience": 1000,
       "gold": 1000,
-      "items": ["Zephyr's Scale", "Stormbreaker", "Sky Crown", "Dragon Soul Gem", "Cloudstrider Boots"]
+      "items": [
+        "Zephyr's Scale",
+        "Stormbreaker",
+        "Sky Crown",
+        "Dragon Soul Gem",
+        "Cloudstrider Boots"
+      ]
     },
     "area": "sky_sanctuary",
     "unlock_level": 9,
-    "prerequisites": ["sky_ascent"]
+    "prerequisites": [
+      "sky_ascent"
+    ]
   },
   "restore_peace_in_bridagrak_oblast": {
-    "name": "Restore Peace in Brïdagrak Oblast",
-    "description": "Clear out the lawless Outlaw Lands of Brïdagrak Oblast and restore order.",
+    "name": "Restore Peace in Br\u00efdagrak Oblast",
+    "description": "Clear out the lawless Outlaw Lands of Br\u00efdagrak Oblast and restore order.",
     "type": "kill",
     "target": "Dalokurg",
     "target_count": 1,
@@ -514,7 +688,9 @@
     },
     "area": "outlaw_lands_of_bridagrak_oblast",
     "unlock_level": 8,
-    "prerequisites": ["giant_slayer"]
+    "prerequisites": [
+      "giant_slayer"
+    ]
   },
   "sabotage_ninja_operations": {
     "name": "Sabotage operations from Ninja clans",
@@ -528,6 +704,252 @@
     },
     "area": "port_lianghai",
     "unlock_level": 8,
-    "prerequisites": ["shadow_bow"]
+    "prerequisites": [
+      "shadow_bow"
+    ]
+  },
+  "lost_child": {
+    "name": "Lost in the Forest",
+    "description": "Elder Mira's granddaughter went into the Dark Forest and hasn't returned. Find her by defeating the goblins who took her.",
+    "type": "kill",
+    "target": "goblin",
+    "target_count": 5,
+    "reward": {
+      "experience": 80,
+      "gold": 60,
+      "items": [
+        "Health Potion",
+        "Iron Shield"
+      ]
+    },
+    "area": "forest_path",
+    "unlock_level": 1,
+    "prerequisites": [],
+    "npc_triggered": true
+  },
+  "stolen_ore": {
+    "name": "The Missing Iron",
+    "description": "Blacksmith Torren's iron shipment was stolen by bandits in the forest. Recover it by defeating them.",
+    "type": "kill",
+    "target": "bandit",
+    "target_count": 4,
+    "reward": {
+      "experience": 70,
+      "gold": 50,
+      "items": [
+        "Iron Sword"
+      ]
+    },
+    "area": "forest_path",
+    "unlock_level": 1,
+    "prerequisites": [],
+    "npc_triggered": true
+  },
+  "goblin_cache": {
+    "name": "The Goblin Cache",
+    "description": "A lost ranger told you of a goblin stash deep in the forest. Defeat 6 goblins and claim their spoils.",
+    "type": "kill",
+    "target": "goblin",
+    "target_count": 6,
+    "reward": {
+      "experience": 100,
+      "gold": 75,
+      "items": [
+        "Health Potion",
+        "Goblin Dagger"
+      ]
+    },
+    "area": "forest_path",
+    "unlock_level": 1,
+    "prerequisites": [],
+    "npc_triggered": true
+  },
+  "haunted_melody": {
+    "name": "The Haunted Melody",
+    "description": "Old Bard Fenwick speaks of a ghost haunting the Ancient Ruins. Defeat the Shadow Knights who torment it.",
+    "type": "kill",
+    "target": "shadow_knight",
+    "target_count": 3,
+    "reward": {
+      "experience": 150,
+      "gold": 100,
+      "items": [
+        "Shadow Cloak",
+        "Health Potion"
+      ]
+    },
+    "area": "ancient_ruins",
+    "unlock_level": 2,
+    "prerequisites": [
+      "tutorial_quest"
+    ],
+    "npc_triggered": true
+  },
+  "shadow_seal": {
+    "name": "Break the Shadow Seal",
+    "description": "Archaeologist Voss discovered a sealed chamber in the ruins. Break the seal by defeating the Ancient Golems guarding it.",
+    "type": "kill",
+    "target": "ancient_golem",
+    "target_count": 3,
+    "reward": {
+      "experience": 200,
+      "gold": 150,
+      "items": [
+        "Ancient Relic",
+        "Mana Potion"
+      ]
+    },
+    "area": "ancient_ruins",
+    "unlock_level": 2,
+    "prerequisites": [
+      "capture_bandits"
+    ],
+    "npc_triggered": true
+  },
+  "witchs_bargain": {
+    "name": "The Witch's Bargain",
+    "description": "Forest Witch Sylva demands the defeat of the Orc Chieftain as payment for her blessing. Take on the boss.",
+    "type": "kill",
+    "target": "orc_chieftain",
+    "target_count": 1,
+    "reward": {
+      "experience": 300,
+      "gold": 200,
+      "items": [
+        "Witch's Brew",
+        "Wolf Fang Amulet"
+      ]
+    },
+    "area": "deep_woods",
+    "unlock_level": 3,
+    "prerequisites": [
+      "forest_cleaning"
+    ],
+    "npc_triggered": true
+  },
+  "spirit_at_rest": {
+    "name": "A Spirit at Rest",
+    "description": "A wandering spirit in the Moonlit Glade cannot find peace. Defeat the Shadow Knights haunting the glade to free them.",
+    "type": "kill",
+    "target": "shadow_knight",
+    "target_count": 4,
+    "reward": {
+      "experience": 180,
+      "gold": 130,
+      "items": [
+        "Spirit Gem",
+        "Silver Arrow"
+      ]
+    },
+    "area": "moonlit_glade",
+    "unlock_level": 3,
+    "prerequisites": [
+      "ancient_artifact"
+    ],
+    "npc_triggered": true
+  },
+  "sea_route_cleared": {
+    "name": "Clear the Sea Route",
+    "description": "Captain Drova needs the port approach cleared of bandits and thieves threatening her trade routes.",
+    "type": "kill",
+    "target": "bandit",
+    "target_count": 5,
+    "reward": {
+      "experience": 160,
+      "gold": 200,
+      "items": [
+        "Sailor's Charm",
+        "Health Potion"
+      ]
+    },
+    "area": "port_lesben",
+    "unlock_level": 2,
+    "prerequisites": [
+      "capture_bandits"
+    ],
+    "npc_triggered": true
+  },
+  "crystal_bounty": {
+    "name": "Crystal Bounty",
+    "description": "Miner Petra needs help clearing the Crystal Caves. Defeat the Crystal Guardians threatening her crew.",
+    "type": "kill",
+    "target": "crystal_golem",
+    "target_count": 3,
+    "reward": {
+      "experience": 250,
+      "gold": 175,
+      "items": [
+        "Crystal Shard",
+        "Mana Potion",
+        "Health Potion"
+      ]
+    },
+    "area": "crystal_caves",
+    "unlock_level": 4,
+    "prerequisites": [
+      "undead_horde"
+    ],
+    "npc_triggered": true
+  },
+  "wandering_merchant": {
+    "name": "The Missing Merchant",
+    "description": "A merchant from the village went missing on the road to the ruins. Investigate by clearing out the bandits on the route.",
+    "type": "kill",
+    "target": "bandit",
+    "target_count": 6,
+    "reward": {
+      "experience": 120,
+      "gold": 90,
+      "items": [
+        "Merchant's Map",
+        "Gold Pouch"
+      ]
+    },
+    "area": "ancient_ruins",
+    "unlock_level": 2,
+    "prerequisites": [
+      "tutorial_quest"
+    ]
+  },
+  "fire_and_ice": {
+    "name": "Fire and Ice",
+    "description": "Elemental forces clash in the Crystal Peaks. Defeat Fire Elementals threatening the sacred ice formations.",
+    "type": "kill",
+    "target": "fire_elemental",
+    "target_count": 4,
+    "reward": {
+      "experience": 320,
+      "gold": 240,
+      "items": [
+        "Frost Crystal",
+        "Elemental Core"
+      ]
+    },
+    "area": "crystal_peaks",
+    "unlock_level": 5,
+    "prerequisites": [
+      "frost_mage",
+      "inferno_slayer"
+    ]
+  },
+  "void_anomaly": {
+    "name": "Void Anomaly",
+    "description": "Strange rifts have opened in the Void Cavern. Seal them by defeating the Void Spawns emerging from within.",
+    "type": "kill",
+    "target": "void_spawn",
+    "target_count": 5,
+    "reward": {
+      "experience": 380,
+      "gold": 280,
+      "items": [
+        "Void Fragment",
+        "Shadow Essence"
+      ]
+    },
+    "area": "void_cavern",
+    "unlock_level": 6,
+    "prerequisites": [
+      "void_walker"
+    ]
   }
 }

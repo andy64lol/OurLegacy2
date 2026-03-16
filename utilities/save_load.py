@@ -72,7 +72,8 @@ def build_save_data(player: Dict[str, Any],
                     current_area: str,
                     visited_areas: List[str],
                     completed_missions: List[str],
-                    achievements: Optional[List] = None) -> Dict[str, Any]:
+                    achievements: Optional[List] = None,
+                    npc_unlocked_quests: Optional[List] = None) -> Dict[str, Any]:
     """Build a save data dict from current game state."""
     return {
         "player": player,
@@ -80,6 +81,7 @@ def build_save_data(player: Dict[str, Any],
         "visited_areas": list(visited_areas),
         "completed_missions": completed_missions,
         "achievements": achievements or [],
+        "npc_unlocked_quests": npc_unlocked_quests or [],
         "save_version": SAVE_VERSION,
         "game_version": GAME_VERSION,
         "save_time": datetime.now().isoformat(),
@@ -91,7 +93,8 @@ def save_game(player: Dict[str, Any],
               visited_areas: List[str],
               completed_missions: List[str],
               achievements: Optional[List] = None,
-              filename_prefix: str = "") -> Dict[str, Any]:
+              filename_prefix: str = "",
+              npc_unlocked_quests: Optional[List] = None) -> Dict[str, Any]:
     """
     Save game to a JSON file.
     Returns {'ok': bool, 'message': str, 'filename': str}
@@ -99,7 +102,8 @@ def save_game(player: Dict[str, Any],
     try:
         os.makedirs(SAVES_DIR, exist_ok=True)
         save_data = build_save_data(player, current_area, visited_areas,
-                                    completed_missions, achievements)
+                                    completed_missions, achievements,
+                                    npc_unlocked_quests)
 
         name = player.get('name', 'unknown').replace('/', '_')
         pid = player.get('uuid', 'xxxx')[:8]
@@ -177,6 +181,7 @@ def load_save(filepath: str) -> Dict[str, Any]:
         visited_areas = data.get('visited_areas', [current_area])
         completed_missions = data.get('completed_missions', [])
         achievements = data.get('achievements', [])
+        npc_unlocked_quests = data.get('npc_unlocked_quests', [])
 
         if not player or not player.get('name'):
             return {
@@ -192,6 +197,7 @@ def load_save(filepath: str) -> Dict[str, Any]:
             'visited_areas': visited_areas,
             'completed_missions': completed_missions,
             'achievements': achievements,
+            'npc_unlocked_quests': npc_unlocked_quests,
         }
     except FileNotFoundError:
         return {'ok': False, 'message': 'Save file not found.'}
