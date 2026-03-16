@@ -723,7 +723,7 @@ def auto_equip_best(player):
     Only swaps if the inventory item is better than what is equipped.
     Returns list of messages about what was equipped.
     """
-    items_data = GAME_DATA["items"]
+    items_data: dict[str, Any] = GAME_DATA["items"]
     player_level = player.get("level", 1)
     player_class = player.get("class", "")
     _ensure_equipment_slots(player)
@@ -800,8 +800,8 @@ def get_quest_progress(mission_id):
 def update_quest_kills(enemy_key, enemy_name):
     """Update kill counts for all active kill quests matching this enemy."""
     completed = set(session.get("completed_missions", []))
-    missions = GAME_DATA["missions"]
-    quest_progress = session.get("quest_progress", {})
+    missions: dict[str, Any] = GAME_DATA["missions"]
+    quest_progress: dict[str, Any] = session.get("quest_progress") or {}
     changed = False
 
     for mid, mission in missions.items():
@@ -1368,9 +1368,9 @@ def game():
     # Your Land data
     land_data = None
     if area_key == "your_land":
-        housing_data = GAME_DATA["housing"]
-        farming_data = GAME_DATA["farming"].get("crops", {})
-        pets_data = GAME_DATA["pets"]
+        housing_data: dict[str, Any] = GAME_DATA["housing"]
+        farming_data: dict[str, Any] = GAME_DATA["farming"].get("crops", {})
+        pets_data: dict[str, Any] = GAME_DATA["pets"]
         owned_set = set(player.get("housing_owned", []))
         building_slots = player.get("building_slots", {})
         crops = player.get("crops", {})
@@ -1556,7 +1556,7 @@ def game():
             }
 
     # Crafting data for inline tab
-    crafting_data = GAME_DATA.get("crafting", {})
+    crafting_data: dict[str, Any] = GAME_DATA.get("crafting", {})
     raw_recipes = get_recipes(crafting_data)
     crafting_recipes = []
     for recipe in raw_recipes:
@@ -1566,7 +1566,7 @@ def game():
         )
 
     # Dungeon data for inline tab
-    dungeons_data = GAME_DATA.get("dungeons", {})
+    dungeons_data: dict[str, Any] = GAME_DATA.get("dungeons", {})
     completed_dungeons_set = set(player.get("completed_dungeons", []))
     dungeon_list = get_available_dungeons(
         dungeons_data, area_key, player.get("level", 1)
@@ -2342,7 +2342,7 @@ def action_complete_mission():
     # Update weekly challenge
     update_weekly_challenge(player, "mission_count", 1)
 
-    quest_progress = session.get("quest_progress", {})
+    quest_progress: dict[str, Any] = session.get("quest_progress") or {}
     quest_progress.pop(mission_id, None)
     session["quest_progress"] = quest_progress
 
@@ -2716,8 +2716,8 @@ def battle_spell():
         return redirect(url_for("game"))
 
     spell_name = request.form.get("spell", "")
-    spells_data = GAME_DATA["spells"]
-    items_data = GAME_DATA["items"]
+    spells_data: dict[str, Any] = GAME_DATA["spells"]
+    items_data: dict[str, Any] = GAME_DATA["items"]
     weapon = player.get("equipment", {}).get("weapon")
     available_spells = get_available_spells(weapon, items_data, spells_data)
     available_names = [s["name"] for s in available_spells]
@@ -3184,7 +3184,7 @@ def action_craft():
         return redirect(url_for("index"))
 
     recipe_id = request.form.get("recipe_id", "")
-    crafting_data = GAME_DATA.get("crafting", {})
+    crafting_data: dict[str, Any] = GAME_DATA.get("crafting", {})
     result = craft_item(player, recipe_id, crafting_data)
     color = "var(--green-bright)" if result["ok"] else "var(--red)"
     add_message(result["message"], color)
@@ -3207,7 +3207,7 @@ def dungeon_enter():
         return redirect(url_for("index"))
 
     dungeon_id = request.form.get("dungeon_id", "")
-    dungeons_data = GAME_DATA.get("dungeons", {})
+    dungeons_data: dict[str, Any] = GAME_DATA.get("dungeons", {})
     all_dungeons = dungeons_data.get("dungeons", [])
     dungeon = next((d for d in all_dungeons if d.get("id") == dungeon_id), None)
 
@@ -3258,7 +3258,7 @@ def dungeon_room():
 
     room_type = room.get("type", "empty")
     if room_type in ("question", "multi_choice") and not current_challenge:
-        dungeons_data = GAME_DATA.get("dungeons", {})
+        dungeons_data: dict[str, Any] = GAME_DATA.get("dungeons", {})
         if room_type == "question":
             current_challenge = room.get("challenge") or process_question_room(
                 dungeons_data
@@ -3297,10 +3297,10 @@ def dungeon_proceed():
     room: dict[str, Any] = rooms[idx]
     room_type = room.get("type", "empty")
 
-    dungeons_data = GAME_DATA.get("dungeons", {})
-    items_data = GAME_DATA.get("items", {})
-    enemies_data = GAME_DATA.get("enemies", {})
-    areas_data = GAME_DATA.get("areas", {})
+    dungeons_data: dict[str, Any] = GAME_DATA.get("dungeons", {})
+    items_data: dict[str, Any] = GAME_DATA.get("items", {})
+    enemies_data: dict[str, Any] = GAME_DATA.get("enemies", {})
+    areas_data: dict[str, Any] = GAME_DATA.get("areas", {})
     area_key = session.get("current_area", "starting_village")
 
     if room_type == "battle":
@@ -3335,8 +3335,8 @@ def dungeon_proceed():
 
     elif room_type == "boss":
         boss_id = room.get("boss_id", active.get("dungeon", {}).get("boss_id", ""))
-        bosses_data = GAME_DATA.get("bosses", {})
-        boss_data = bosses_data.get(boss_id, {})
+        bosses_data: dict[str, Any] = GAME_DATA.get("bosses", {})
+        boss_data: dict[str, Any] = bosses_data.get(boss_id, {})
         if boss_data:
             difficulty = room.get("difficulty", 1)
             scale = 0.8 + difficulty * 0.2
