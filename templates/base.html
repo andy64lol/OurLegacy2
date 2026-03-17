@@ -18,5 +18,34 @@
     {% block content %}{% endblock %}
     <script src="/static/js/game.js"></script>
     {% block extra_scripts %}{% endblock %}
+
+    <!-- Settings Modal (available on all pages) -->
+    <div id="settings-modal" class="settings-overlay" style="display:none;" onclick="settingsOverlayClick(event)">
+        <div class="settings-panel panel">
+            <div class="panel-title">Settings</div>
+            <div class="panel-body settings-body">
+                <div class="settings-section-label">Audio</div>
+                <div class="settings-row">
+                    <span class="settings-label">Music</span>
+                    <button id="settings-music-toggle" class="btn btn-secondary btn-xsmall" onclick="settingsToggleMusic()">On</button>
+                </div>
+                <div class="settings-row">
+                    <span class="settings-label">Volume</span>
+                    <input type="range" id="settings-music-slider" min="0" max="100" value="30"
+                           oninput="settingsSetVolume(this.value)" class="music-slider">
+                    <span id="settings-music-vol" class="music-vol-label">30%</span>
+                </div>
+                <div class="settings-section-label" style="margin-top:8px;">Display</div>
+                <div class="settings-row" id="settings-bg-row">
+                    <span class="settings-label">Background</span>
+                    <button id="settings-bg-toggle" class="btn btn-secondary btn-xsmall" onclick="settingsToggleBg()">On</button>
+                    <span id="settings-bg-note" class="settings-note"></span>
+                </div>
+            </div>
+            <div class="settings-footer">
+                <button class="btn btn-secondary btn-small" onclick="closeSettings()">Close</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -8,6 +8,7 @@ const raceData  = {{ data.races  | tojson }};
 {% endif %}
 {% endblock %}
 {% block content %}
+{% set _cg = {'Warrior':'◆','Mage':'✦','Rogue':'▸','Hunter':'▲','Bard':'♩','Paladin':'✛','Druid':'✿','Priest':'✝'} %}
 
 {# ════════════════════════════════════════════════════════════
    WELCOME / MAIN MENU VIEW
@@ -45,6 +46,7 @@ const raceData  = {{ data.races  | tojson }};
             <div class="save-load-bar" style="margin-top:18px;">
                 <label for="load-file-input-main" class="btn btn-secondary" style="cursor:pointer;">Load Saved Game</label>
                 <input type="file" id="load-file-input-main" accept=".olsave" style="display:none;">
+                <button class="btn btn-secondary" onclick="openSettings()">Settings</button>
             </div>
             <div id="save-status" class="save-notice" style="display:none;"></div>
         </div>
@@ -162,7 +164,7 @@ const raceData  = {{ data.races  | tojson }};
 
         <div class="battle-arena">
             <div class="panel">
-                <div class="panel-title">{{ player.name }}</div>
+                <div class="panel-title"><span class="name-glyph">{{ _cg.get(player['class'], '◇') }}</span>{{ player.name }}</div>
                 <div class="panel-body">
                     <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
                         {{ player['class'] }} &mdash; Lv.{{ player.level }}
@@ -396,7 +398,7 @@ const raceData  = {{ data.races  | tojson }};
         </div>
 
         <div class="panel sidebar-panel">
-            <div class="panel-title">{{ player.name }}</div>
+            <div class="panel-title"><span class="name-glyph">{{ _cg.get(player['class'], '◇') }}</span>{{ player.name }}</div>
             <div class="panel-body">
                 <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
                 <div class="char-level">Level {{ player.level }}</div>
@@ -483,28 +485,15 @@ const raceData  = {{ data.races  | tojson }};
         </div>
 
         <div class="sidebar-save-section">
-            <button class="btn btn-secondary btn-small" onclick="saveGame()">Save Game</button>
             <input type="file" id="load-file-input" accept=".olsave" style="display:none;">
-            <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()" style="margin-top:4px;">Load Game</button>
-
-            <div class="music-control-row" style="margin-top:10px;">
-                <span class="music-label">&#9835; Music</span>
-                <input type="range" id="music-volume-slider" min="0" max="100" value="30"
-                       oninput="setMusicVolume(this.value)" class="music-slider">
-                <span id="music-volume-label" class="music-vol-label">30%</span>
-            </div>
-
-            <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:6px;">
-                <span class="music-label">&#9728; Background</span>
-                <button id="bg-toggle-btn" class="btn btn-secondary btn-xsmall" onclick="toggleBackground()" style="min-width:46px;font-size:12px;">On</button>
-            </div>
+            <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()">Load Game</button>
+            <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;">Settings</button>
         </div>
 
         <div class="sidebar-nav">
-            <a href="/" class="btn btn-danger btn-small"
-               onclick="return confirm('Return to the main menu? Unsaved progress will be lost.')">
-                Main Menu
-            </a>
+            <button class="btn btn-danger btn-small" onclick="saveAndQuit()">
+                Save and Quit to Main Menu
+            </button>
         </div>
     </aside>
 
@@ -1451,7 +1440,7 @@ const raceData  = {{ data.races  | tojson }};
                     <!-- Identity -->
                     <div class="stat-label" style="margin-bottom:8px;">Identity</div>
                     <div class="cs-identity-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-bottom:18px;">
-                        <div class="cs-row"><span class="stat-name">Name</span><span class="stat-val">{{ player.name }}</span></div>
+                        <div class="cs-row"><span class="stat-name">Name</span><span class="stat-val"><span class="name-glyph">{{ _cg.get(player['class'], '◇') }}</span>{{ player.name }}</span></div>
                         <div class="cs-row"><span class="stat-name">Gender</span><span class="stat-val">{{ player.get('gender','—').title() }}</span></div>
                         <div class="cs-row"><span class="stat-name">Class</span><span class="stat-val">{{ player['class'] }}</span></div>
                         <div class="cs-row"><span class="stat-name">Race</span><span class="stat-val">{{ player.get('race','—') }}</span></div>

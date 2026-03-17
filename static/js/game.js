@@ -448,24 +448,119 @@ function initPagination() {
 
 function initBackground() {
     var main = document.querySelector('.main-content');
-    var btn  = document.getElementById('bg-toggle-btn');
-    if (!main || !btn) return;
+    if (!main) return;
     var bgOff = localStorage.getItem('ol2_bg_off') === 'true';
     if (bgOff) {
         main.classList.add('no-bg');
-        btn.textContent = 'Off';
-    } else {
-        btn.textContent = 'On';
     }
 }
 
 function toggleBackground() {
     var main = document.querySelector('.main-content');
-    var btn  = document.getElementById('bg-toggle-btn');
-    if (!main || !btn) return;
+    if (!main) return;
     var isOff = main.classList.toggle('no-bg');
-    btn.textContent = isOff ? 'Off' : 'On';
     localStorage.setItem('ol2_bg_off', isOff ? 'true' : 'false');
+}
+
+// ─── Settings Modal ─────────────────────────────────────────────────────────
+
+function openSettings() {
+    var modal = document.getElementById('settings-modal');
+    if (!modal) return;
+
+    var muted = localStorage.getItem('ol2_music_muted') === 'true';
+    var vol = parseFloat(localStorage.getItem('ol2_music_volume'));
+    if (isNaN(vol)) vol = 0.3;
+
+    var toggleBtn = document.getElementById('settings-music-toggle');
+    var slider    = document.getElementById('settings-music-slider');
+    var volLabel  = document.getElementById('settings-music-vol');
+
+    if (toggleBtn) toggleBtn.textContent = muted ? 'Off' : 'On';
+    var displayVol = muted ? 0 : Math.round(vol * 100);
+    if (slider)   slider.value = displayVol;
+    if (volLabel) volLabel.textContent = displayVol + '%';
+
+    var bgBtn  = document.getElementById('settings-bg-toggle');
+    var bgNote = document.getElementById('settings-bg-note');
+    var main   = document.querySelector('.main-content');
+    if (bgBtn) {
+        if (!main) {
+            bgBtn.disabled = true;
+            if (bgNote) bgNote.textContent = 'In-game only';
+        } else {
+            bgBtn.disabled = false;
+            if (bgNote) bgNote.textContent = '';
+            bgBtn.textContent = main.classList.contains('no-bg') ? 'Off' : 'On';
+        }
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeSettings() {
+    var modal = document.getElementById('settings-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function settingsOverlayClick(e) {
+    if (e.target === document.getElementById('settings-modal')) closeSettings();
+}
+
+function settingsToggleMusic() {
+    toggleMusicMute();
+    var btn   = document.getElementById('settings-music-toggle');
+    var slider = document.getElementById('settings-music-slider');
+    var label  = document.getElementById('settings-music-vol');
+    var vol = _musicAudio ? Math.round(_musicAudio.volume * 100) : 0;
+    if (btn)   btn.textContent = _musicMuted ? 'Off' : 'On';
+    if (slider) slider.value = vol;
+    if (label)  label.textContent = vol + '%';
+}
+
+function settingsSetVolume(val) {
+    setMusicVolume(val);
+    var btn   = document.getElementById('settings-music-toggle');
+    var label = document.getElementById('settings-music-vol');
+    if (btn)   btn.textContent = (parseInt(val, 10) === 0) ? 'Off' : 'On';
+    if (label) label.textContent = val + '%';
+}
+
+function settingsToggleBg() {
+    toggleBackground();
+    var main = document.querySelector('.main-content');
+    var btn  = document.getElementById('settings-bg-toggle');
+    if (btn && main) btn.textContent = main.classList.contains('no-bg') ? 'Off' : 'On';
+}
+
+// ─── Save and Quit ───────────────────────────────────────────────────────────
+
+async function saveAndQuit() {
+    showToast('Saving...', 'var(--text-dim)', 2500);
+    try {
+        var response = await fetch('/api/save', { method: 'POST' });
+        if (!response.ok) {
+            var err = await response.json().catch(function() { return {}; });
+            throw new Error(err.error || 'Save failed');
+        }
+        var disposition = response.headers.get('Content-Disposition') || '';
+        var filenameMatch = disposition.match(/filename="([^"]+)"/);
+        var filename = filenameMatch ? filenameMatch[1] : 'our_legacy_save.olsave';
+        var blob = await response.blob();
+        var url  = URL.createObjectURL(blob);
+        var a    = document.createElement('a');
+        a.href     = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Saved. Returning to main menu...', 'var(--green-bright)', 2000);
+        setTimeout(function() { window.location.href = '/'; }, 1200);
+    } catch (e) {
+        showToast('Save error: ' + e.message + '. Returning anyway.', 'var(--red)', 4000);
+        setTimeout(function() { window.location.href = '/'; }, 3000);
+    }
 }
 
 // ─── Low HP Warning ────────────────────────────────────────────────────────────

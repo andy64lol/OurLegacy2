@@ -8,7 +8,7 @@ MARKET_COOLDOWN_MINUTES = 10
 MARKET_ITEM_COUNT = 12
 BIRTHDAY_MONTH = 3
 BIRTHDAY_DAY = 24
-BIRTHDAY_ITEM_NAME = "Talisman of And\u0155\u00ebo"
+BIRTHDAY_ITEM_NAME = "Talisman of Andy"
 
 _DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 _ITEMS_FILE = os.path.join(_DATA_DIR, "items.json")
@@ -130,11 +130,13 @@ class MarketAPI:
             return result["data"].get("items", [])
         return []
 
-    def filter_items(self,
-                     item_type: Optional[str] = None,
-                     rarity: Optional[str] = None,
-                     class_req: Optional[str] = None,
-                     max_price: Optional[int] = None) -> List[Dict[str, Any]]:
+    def filter_items(
+        self,
+        item_type: Optional[str] = None,
+        rarity: Optional[str] = None,
+        class_req: Optional[str] = None,
+        max_price: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
         items = self.get_all_items()
         filtered = []
         for item in items:
