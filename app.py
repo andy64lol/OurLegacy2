@@ -45,6 +45,7 @@ from utilities.dungeons import (
     complete_dungeon,
     _pick_multi_choice,
 )
+from flask_session import Session
 from utilities.market import get_market_api
 from utilities.save_load import (
     save_game,
@@ -55,7 +56,12 @@ from utilities.save_load import (
 )
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
+app.secret_key = os.environ.get("SECRET_KEY", "ol2-default-dev-key-change-in-prod")
+app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_FILE_DIR"] = os.path.join(os.path.dirname(__file__), ".flask_sessions")
+app.config["SESSION_PERMANENT"] = False
+os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
+Session(app)
 
 dice = Dice()
 

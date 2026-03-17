@@ -42,4 +42,4 @@ bash/backups/
 .cache/
 .pythonlibs/
 replit.md
-attached_assets/
+.flask_sessions/

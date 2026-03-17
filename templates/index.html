@@ -672,7 +672,7 @@ const raceData  = {{ data.races  | tojson }};
                 <div class="panel-title">
                     🎯 Attributes
                     {% if attr_summary.unspent_points > 0 %}
-                    <span class="attr-points-badge">{{ attr_summary.unspent_points }} point{{ 's' if attr_summary.unspent_points != 1 }} available</span>
+                    <span class="attr-points-badge" id="attr-points-badge">{{ attr_summary.unspent_points }} point{{ 's' if attr_summary.unspent_points != 1 }} available</span>
                     {% endif %}
                 </div>
                 <div class="panel-body">
@@ -1583,6 +1583,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     var s = data.attr_summary;
                     var valEl = document.getElementById('attr-val-' + attr);
                     if (valEl) valEl.textContent = s.attributes[attr].value;
+                    var badgeEl = document.getElementById('attr-points-badge');
+                    if (badgeEl) {
+                        if (s.unspent_points > 0) {
+                            badgeEl.textContent = s.unspent_points + ' point' + (s.unspent_points !== 1 ? 's' : '') + ' available';
+                        } else {
+                            badgeEl.style.display = 'none';
+                        }
+                    }
                     if (s.unspent_points <= 0) {
                         document.querySelectorAll('.attr-spend-btn').forEach(function(b) {
                             b.style.display = 'none';
