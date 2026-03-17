@@ -2001,12 +2001,15 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
 /* ─── Name Glyphs ────────────────────────────────────────────── */
 .name-glyph {
     display: inline-block;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--gold);
-    margin-right: 5px;
-    opacity: 0.85;
-    vertical-align: baseline;
-    letter-spacing: 0;
+    background: rgba(232,196,96,0.12);
+    border: 1px solid var(--gold-dim);
+    padding: 0 4px;
+    margin-right: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
 }
 
 /* ─── Settings Modal ─────────────────────────────────────────── */

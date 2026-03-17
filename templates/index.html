@@ -8,7 +8,7 @@ const raceData  = {{ data.races  | tojson }};
 {% endif %}
 {% endblock %}
 {% block content %}
-{% set _cg = {'Warrior':'◆','Mage':'✦','Rogue':'▸','Hunter':'▲','Bard':'♩','Paladin':'✛','Druid':'✿','Priest':'✝'} %}
+{% set _cg = {'Warrior':'WR','Mage':'MG','Rogue':'RG','Hunter':'HN','Bard':'BD','Paladin':'PL','Druid':'DR','Priest':'PR'} %}
 
 
 {% if show_welcome %}
@@ -44,6 +44,8 @@ const raceData  = {{ data.races  | tojson }};
             <div class="save-load-bar" style="margin-top:18px;">
                 <label for="load-file-input-main" class="btn btn-secondary" style="cursor:pointer;">Load Saved Game</label>
                 <input type="file" id="load-file-input-main" accept=".olsave" style="display:none;">
+            </div>
+            <div class="save-load-bar" style="margin-top:8px;">
                 <button class="btn btn-secondary" onclick="openSettings()">Settings</button>
             </div>
             <div id="save-status" class="save-notice" style="display:none;"></div>
@@ -158,7 +160,7 @@ const raceData  = {{ data.races  | tojson }};
 
         <div class="battle-arena">
             <div class="panel">
-                <div class="panel-title"><span class="name-glyph">{{ _cg.get(player['class'], '◇') }}</span>{{ player.name }}</div>
+                <div class="panel-title"><span class="name-glyph">{{ _cg.get(player['class'], '??') }}</span>{{ player.name }}</div>
                 <div class="panel-body">
                     <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
                         {{ player['class'] }} &mdash; Lv.{{ player.level }}
@@ -390,7 +392,7 @@ const raceData  = {{ data.races  | tojson }};
         </div>
 
         <div class="panel sidebar-panel">
-            <div class="panel-title"><span class="name-glyph">{{ _cg.get(player['class'], '◇') }}</span>{{ player.name }}</div>
+            <div class="panel-title"><span class="name-glyph">{{ _cg.get(player['class'], '??') }}</span>{{ player.name }}</div>
             <div class="panel-body">
                 <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
                 <div class="char-level">Level {{ player.level }}</div>
@@ -479,13 +481,13 @@ const raceData  = {{ data.races  | tojson }};
         <div class="sidebar-save-section">
             <input type="file" id="load-file-input" accept=".olsave" style="display:none;">
             <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()">Load Game</button>
-            <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;">Settings</button>
         </div>
 
         <div class="sidebar-nav">
             <button class="btn btn-danger btn-small" onclick="saveAndQuit()">
                 Save and Quit to Main Menu
             </button>
+            <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;">Settings</button>
         </div>
     </aside>
 
@@ -1432,7 +1434,7 @@ const raceData  = {{ data.races  | tojson }};
                     <!-- Identity -->
                     <div class="stat-label" style="margin-bottom:8px;">Identity</div>
                     <div class="cs-identity-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-bottom:18px;">
-                        <div class="cs-row"><span class="stat-name">Name</span><span class="stat-val"><span class="name-glyph">{{ _cg.get(player['class'], '◇') }}</span>{{ player.name }}</span></div>
+                        <div class="cs-row"><span class="stat-name">Name</span><span class="stat-val"><span class="name-glyph">{{ _cg.get(player['class'], '??') }}</span>{{ player.name }}</span></div>
                         <div class="cs-row"><span class="stat-name">Gender</span><span class="stat-val">{{ player.get('gender','—').title() }}</span></div>
                         <div class="cs-row"><span class="stat-name">Class</span><span class="stat-val">{{ player['class'] }}</span></div>
                         <div class="cs-row"><span class="stat-name">Race</span><span class="stat-val">{{ player.get('race','—') }}</span></div>
