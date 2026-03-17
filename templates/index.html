@@ -10,9 +10,7 @@ const raceData  = {{ data.races  | tojson }};
 {% block content %}
 {% set _cg = {'Warrior':'◆','Mage':'✦','Rogue':'▸','Hunter':'▲','Bard':'♩','Paladin':'✛','Druid':'✿','Priest':'✝'} %}
 
-{# ════════════════════════════════════════════════════════════
-   WELCOME / MAIN MENU VIEW
-   ════════════════════════════════════════════════════════════ #}
+
 {% if show_welcome %}
 <div class="welcome-screen">
     <div class="welcome-inner">
@@ -68,9 +66,7 @@ const raceData  = {{ data.races  | tojson }};
     </div>
 </div>
 
-{# ════════════════════════════════════════════════════════════
-   CHARACTER CREATION VIEW — WIZARD
-   ════════════════════════════════════════════════════════════ #}
+
 {% elif show_create %}
 <div class="wizard-outer" id="wizard-outer">
     <div class="wizard-npc-row">
@@ -104,9 +100,7 @@ const raceData  = {{ data.races  | tojson }};
     <input type="hidden" name="background" id="h-background">
 </form>
 
-{# ════════════════════════════════════════════════════════════
-   BATTLE VIEW
-   ════════════════════════════════════════════════════════════ #}
+
 {% elif in_battle %}
 <div class="battle-outer">
 
@@ -385,9 +379,7 @@ const raceData  = {{ data.races  | tojson }};
 
 </div><!-- end .battle-outer -->
 
-{# ════════════════════════════════════════════════════════════
-   MAIN GAME VIEW
-   ════════════════════════════════════════════════════════════ #}
+
 {% else %}
 <div class="game-layout">
 
@@ -1568,36 +1560,33 @@ const raceData  = {{ data.races  | tojson }};
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.attr-spend-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            const attr = btn.dataset.attr;
+            var attr = btn.dataset.attr;
             btn.disabled = true;
             fetch('/api/spend_attr_point', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({attr: attr})
             })
-            .then(r => r.json())
+            .then(function(r) { return r.json(); })
             .then(function(data) {
-                const msgEl = document.getElementById('attr-message');
+                var msgEl = document.getElementById('attr-message');
                 if (msgEl) {
                     msgEl.textContent = data.message;
                     msgEl.style.display = 'block';
                     msgEl.style.color = data.ok ? 'var(--green-bright)' : 'var(--red)';
-                    setTimeout(() => { msgEl.style.display = 'none'; }, 3000);
+                    clearTimeout(msgEl._hideTimer);
+                    msgEl._hideTimer = setTimeout(function() { msgEl.style.display = 'none'; }, 5000);
                 }
                 if (data.ok && data.attr_summary) {
-                    const s = data.attr_summary;
-                    const valEl = document.getElementById('attr-val-' + attr);
+                    var s = data.attr_summary;
+                    var valEl = document.getElementById('attr-val-' + attr);
                     if (valEl) valEl.textContent = s.attributes[attr].value;
                     if (s.unspent_points <= 0) {
                         document.querySelectorAll('.attr-spend-btn').forEach(function(b) {
                             b.style.display = 'none';
                         });
-                    }
-                    if (data.player_stats) {
-                        const ps = data.player_stats;
-                        ['attack','defense','speed','max_hp','max_mp'].forEach(function(stat) {
-                            const el = document.querySelector('.stat-mini span');
-                        });
+                    } else {
+                        setTimeout(function() { btn.disabled = false; }, 1500);
                     }
                 } else {
                     btn.disabled = false;
@@ -1606,7 +1595,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(function() { btn.disabled = false; });
         });
     });
-
 });
 </script>
 {% endif %}

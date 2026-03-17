@@ -1,5 +1,3 @@
-// Our Legacy 2 - Client-Side Game Script
-
 document.addEventListener('DOMContentLoaded', function () {
     initToastContainer();
     initTabs();
@@ -14,8 +12,6 @@ document.addEventListener('DOMContentLoaded', function () {
     initBattleKeys();
     checkMobile();
 });
-
-// ─── Toast Notifications ───────────────────────────────────────────────────────
 
 function initToastContainer() {
     if (!document.getElementById('toast-container')) {
@@ -153,8 +149,6 @@ function initPageTransitions() {
     });
 }
 
-// ─── Elite Market AJAX loader ─────────────────────────────────────────────────
-
 var _marketLoaded = false;
 
 function loadMarketTab() {
@@ -228,8 +222,6 @@ function renderMarket(data, container) {
     container.innerHTML = html;
 }
 
-// ─── Save: download encrypted .olsave file ────────────────────────────────────
-
 async function saveGame() {
     showToast('Saving game...', 'var(--text-dim)', 2000);
     try {
@@ -259,15 +251,13 @@ async function saveGame() {
     }
 }
 
-// ─── Load: upload encrypted .olsave file ──────────────────────────────────────
-
 function triggerLoadFile() {
     var input = document.getElementById('load-file-input');
     if (input) input.click();
 }
 
 function initLoadFileInput() {
-    var input = document.getElementById('load-file-input');
+    var input = document.getElementById('load-file-input') || document.getElementById('load-file-input-main');
     if (!input) return;
     input.addEventListener('change', async function () {
         var file = this.files[0];
@@ -297,8 +287,6 @@ function initLoadFileInput() {
     });
 }
 
-// ─── Music Player ─────────────────────────────────────────────────────────────
-
 var _musicAudio = null;
 var _musicMuted = false;
 
@@ -319,17 +307,10 @@ function initMusic() {
         _musicMuted = true;
     }
 
-    // Update slider to reflect current volume
-    var slider = document.getElementById('music-volume-slider');
-    if (slider) {
-        slider.value = _musicMuted ? 0 : Math.round(_musicAudio.volume * 100);
-    }
-
-    // Restore playback position so music doesn't restart on every page action
     var savedTime = parseFloat(localStorage.getItem('ol2_music_time'));
     function startPlayback() {
         if (!isNaN(savedTime) && savedTime > 0 && savedTime < _musicAudio.duration) {
-            try { _musicAudio.currentTime = savedTime; } catch (e) { /* ignore */ }
+            try { _musicAudio.currentTime = savedTime; } catch (e) {}
         }
         if (_musicMuted) return;
         var playPromise = _musicAudio.play();
@@ -348,14 +329,12 @@ function initMusic() {
         _musicAudio.addEventListener('canplay', startPlayback, { once: true });
     }
 
-    // Save playback position before the page navigates away
     window.addEventListener('beforeunload', function () {
         if (_musicAudio) {
             localStorage.setItem('ol2_music_time', _musicAudio.currentTime);
         }
     });
 
-    // Keep saving position periodically in case beforeunload doesn't fire
     setInterval(function () {
         if (_musicAudio && !_musicAudio.paused) {
             localStorage.setItem('ol2_music_time', _musicAudio.currentTime);
@@ -372,8 +351,6 @@ function setMusicVolume(val) {
         _musicAudio.volume = vol;
         if (!_musicMuted && _musicAudio.paused) _musicAudio.play();
     }
-    var label = document.getElementById('music-volume-label');
-    if (label) label.textContent = val + '%';
 }
 
 function toggleMusicMute() {
@@ -387,13 +364,7 @@ function toggleMusicMute() {
         _musicAudio.volume = savedVol;
         if (_musicAudio.paused) _musicAudio.play();
     }
-    var slider = document.getElementById('music-volume-slider');
-    if (slider) slider.value = Math.round(_musicAudio.volume * 100);
-    var label = document.getElementById('music-volume-label');
-    if (label) label.textContent = Math.round(_musicAudio.volume * 100) + '%';
 }
-
-// ─── Pagination ────────────────────────────────────────────────────────────
 
 function initPagination() {
     document.querySelectorAll('.pageable-list').forEach(function (list) {
@@ -444,8 +415,6 @@ function initPagination() {
     });
 }
 
-// ─── Background Toggle ─────────────────────────────────────────────────────────
-
 function initBackground() {
     var main = document.querySelector('.main-content');
     if (!main) return;
@@ -461,8 +430,6 @@ function toggleBackground() {
     var isOff = main.classList.toggle('no-bg');
     localStorage.setItem('ol2_bg_off', isOff ? 'true' : 'false');
 }
-
-// ─── Settings Modal ─────────────────────────────────────────────────────────
 
 function openSettings() {
     var modal = document.getElementById('settings-modal');
@@ -509,11 +476,11 @@ function settingsOverlayClick(e) {
 
 function settingsToggleMusic() {
     toggleMusicMute();
-    var btn   = document.getElementById('settings-music-toggle');
+    var btn    = document.getElementById('settings-music-toggle');
     var slider = document.getElementById('settings-music-slider');
     var label  = document.getElementById('settings-music-vol');
     var vol = _musicAudio ? Math.round(_musicAudio.volume * 100) : 0;
-    if (btn)   btn.textContent = _musicMuted ? 'Off' : 'On';
+    if (btn)    btn.textContent = _musicMuted ? 'Off' : 'On';
     if (slider) slider.value = vol;
     if (label)  label.textContent = vol + '%';
 }
@@ -532,8 +499,6 @@ function settingsToggleBg() {
     var btn  = document.getElementById('settings-bg-toggle');
     if (btn && main) btn.textContent = main.classList.contains('no-bg') ? 'Off' : 'On';
 }
-
-// ─── Save and Quit ───────────────────────────────────────────────────────────
 
 async function saveAndQuit() {
     showToast('Saving...', 'var(--text-dim)', 2500);
@@ -563,8 +528,6 @@ async function saveAndQuit() {
     }
 }
 
-// ─── Low HP Warning ────────────────────────────────────────────────────────────
-
 function initLowHpWarning() {
     document.querySelectorAll('.bar-fill.bar-hp').forEach(function (bar) {
         var widthStr = bar.style.width || '100%';
@@ -574,9 +537,6 @@ function initLowHpWarning() {
         }
     });
 }
-
-// ─── Battle Keyboard Shortcuts ─────────────────────────────────────────────────
-// 1 = Strike, 2 = Defend, 3 = Use Item, 4 = Flee/Retreat
 
 function initBattleKeys() {
     var actionGrid = document.querySelector('.battle-action-grid');

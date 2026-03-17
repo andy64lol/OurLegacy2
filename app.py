@@ -71,6 +71,15 @@ def load_json(filename) -> dict[str, Any]:
         return {}
 
 
+def load_json_list(filename) -> list:
+    try:
+        with open(os.path.join(DATA_DIR, filename), "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data if isinstance(data, list) else []
+    except (OSError, ValueError, KeyError):
+        return []
+
+
 GAME_DATA: dict[str, Any] = {
     "classes": load_json("classes.json"),
     "races": load_json("races.json"),
@@ -93,9 +102,7 @@ GAME_DATA: dict[str, Any] = {
     "dialogues": load_json("dialogues.json"),
     "cutscenes": load_json("cutscenes.json"),
     "books": load_json("books.json"),
-    "splash_texts": load_json("splash_text.json")
-    if isinstance(load_json("splash_text.json"), list)
-    else [],
+    "splash_texts": load_json_list("splash_text.json"),
 }
 
 GAME_VERSION = "1.0.0"
