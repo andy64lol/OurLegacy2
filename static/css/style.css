@@ -1998,18 +1998,25 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     color: var(--text-bright);
 }
 
-/* ─── Name Glyphs ────────────────────────────────────────────── */
-.name-glyph {
-    display: inline-block;
-    font-size: 10px;
-    color: var(--gold);
-    background: rgba(232,196,96,0.12);
-    border: 1px solid var(--gold-dim);
-    padding: 0 4px;
-    margin-right: 6px;
+/* ─── Class & Type Glyphs ────────────────────────────────────── */
+.class-glyph {
+    width: 20px;
+    height: 20px;
     vertical-align: middle;
-    letter-spacing: 0.04em;
-    line-height: 1.5;
+    margin-right: 6px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    flex-shrink: 0;
+}
+
+.type-glyph {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    margin-right: 4px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    opacity: 0.85;
 }
 
 /* ─── Settings Modal ─────────────────────────────────────────── */

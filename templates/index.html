@@ -9,6 +9,8 @@ const raceData  = {{ data.races  | tojson }};
 {% endblock %}
 {% block content %}
 {% set _cg = {'Warrior':'WR','Mage':'MG','Rogue':'RG','Hunter':'HN','Bard':'BD','Paladin':'PL','Druid':'DR','Priest':'PR'} %}
+{% set _cglyph = {'Warrior':'warrior','Mage':'mage','Rogue':'rouge','Hunter':'hunter','Bard':'bard','Paladin':'paladin','Druid':'druid','Priest':'priest'} %}
+{% set _tglyph = {'weapon':'weapon','armor':'armor','offhand':'offhand','accessory':'accessories','book':'book','consumable':'food','material':'materials'} %}
 
 
 {% if show_welcome %}
@@ -160,7 +162,7 @@ const raceData  = {{ data.races  | tojson }};
 
         <div class="battle-arena">
             <div class="panel">
-                <div class="panel-title"><span class="name-glyph">{{ _cg.get(player['class'], '??') }}</span>{{ player.name }}</div>
+                <div class="panel-title"><img class="class-glyph" src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png" alt="{{ player['class'] }}" title="{{ player['class'] }}">{{ player.name }}</div>
                 <div class="panel-body">
                     <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
                         {{ player['class'] }} &mdash; Lv.{{ player.level }}
@@ -392,7 +394,7 @@ const raceData  = {{ data.races  | tojson }};
         </div>
 
         <div class="panel sidebar-panel">
-            <div class="panel-title"><span class="name-glyph">{{ _cg.get(player['class'], '??') }}</span>{{ player.name }}</div>
+            <div class="panel-title"><img class="class-glyph" src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png" alt="{{ player['class'] }}" title="{{ player['class'] }}">{{ player.name }}</div>
             <div class="panel-body">
                 <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
                 <div class="char-level">Level {{ player.level }}</div>
@@ -711,7 +713,7 @@ const raceData  = {{ data.races  | tojson }};
                         {% for item in inventory_items %}
                         <div class="inv-card rarity-border-{{ item.rarity }} pageable-item{% if item.equippable and not item.can_equip %} cannot-equip{% endif %}">
                             <div class="inv-card-name">
-                                <span class="rarity-{{ item.rarity }}">{{ item.name }}</span>
+                                {% if _tglyph.get(item.type) %}<img class="type-glyph" src="/game_assets/glyphs/{{ _tglyph.get(item.type) }}.png" alt="{{ item.type }}" title="{{ item.type | title }}">{% endif %}<span class="rarity-{{ item.rarity }}">{{ item.name }}</span>
                                 {% if item.count > 1 %}<span class="inv-qty">x{{ item.count }}</span>{% endif %}
                                 {% if item.req_label %}
                                 <span class="item-req-badge">{{ item.req_label }}</span>
@@ -822,7 +824,7 @@ const raceData  = {{ data.races  | tojson }};
                         {% for item in shop_items %}
                         <div class="shop-card pageable-item {% if not item.can_afford %}cannot-afford{% endif %}">
                             <div class="shop-card-name rarity-{{ item.rarity }}">{{ item.name }}</div>
-                            <div class="shop-card-type">{{ item.type }}</div>
+                            <div class="shop-card-type">{% if _tglyph.get(item.type) %}<img class="type-glyph" src="/game_assets/glyphs/{{ _tglyph.get(item.type) }}.png" alt="{{ item.type }}" title="{{ item.type | title }}">{% endif %}{{ item.type | title }}</div>
                             {% if item.stats %}
                             <div class="shop-card-stats">{{ item.stats }}</div>
                             {% endif %}
@@ -1434,7 +1436,7 @@ const raceData  = {{ data.races  | tojson }};
                     <!-- Identity -->
                     <div class="stat-label" style="margin-bottom:8px;">Identity</div>
                     <div class="cs-identity-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-bottom:18px;">
-                        <div class="cs-row"><span class="stat-name">Name</span><span class="stat-val"><span class="name-glyph">{{ _cg.get(player['class'], '??') }}</span>{{ player.name }}</span></div>
+                        <div class="cs-row"><span class="stat-name">Name</span><span class="stat-val"><img class="class-glyph" src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png" alt="{{ player['class'] }}" title="{{ player['class'] }}">{{ player.name }}</span></div>
                         <div class="cs-row"><span class="stat-name">Gender</span><span class="stat-val">{{ player.get('gender','—').title() }}</span></div>
                         <div class="cs-row"><span class="stat-name">Class</span><span class="stat-val">{{ player['class'] }}</span></div>
                         <div class="cs-row"><span class="stat-name">Race</span><span class="stat-val">{{ player.get('race','—') }}</span></div>
