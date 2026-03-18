@@ -436,7 +436,7 @@ def boss_take_turn(enemy, player, player_effects, log):
         desc = phase_data.get("description", "")
         result["phase_changed"] = True
         result["new_phase_desc"] = desc
-        log.append(f"⚠ {enemy['name']} enters a new phase! {desc}")
+        log.append(f"{enemy['name']} enters a new phase! {desc}")
 
     # Apply phase multipliers to current combat stats (snapshot every turn)
     if "_base_attack" not in enemy:
@@ -495,9 +495,9 @@ def boss_take_turn(enemy, player, player_effects, log):
                 if red:
                     log.append(f"Your shield absorbs {red} damage!")
             player["hp"] = max(0, player["hp"] - raw)
-            log.append(f"💥 {enemy['name']} uses {ab_name}! You take {raw} damage!")
+            log.append(f"{enemy['name']} uses {ab_name}! You take {raw} damage!")
         else:
-            log.append(f"⚡ {enemy['name']} uses {ab_name}!")
+            log.append(f"{enemy['name']} uses {ab_name}!")
 
         if effect == "debuff":
             atk_red = ability.get("attack_reduction", 0)
@@ -1769,7 +1769,7 @@ def action_explore():
             dialogue = get_boss_dialogue(boss_key, "start")
             session["battle_enemy"] = enemy
             session["battle_log"] = [
-                f"⚠ {enemy['name']} blocks your path! Prepare for a boss battle! (HP: {enemy['hp']})"
+                f"{enemy['name']} blocks your path! Prepare for a boss battle! (HP: {enemy['hp']})"
             ]
             if dialogue:
                 session["battle_log"].append(f'"{dialogue}"')

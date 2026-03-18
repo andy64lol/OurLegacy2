@@ -113,7 +113,7 @@ const raceData  = {{ data.races  | tojson }};
 
         <div class="battle-header">
             <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
-                {% if enemy.is_boss %}⚔ BOSS BATTLE{% else %}Combat{% endif %}
+                {% if enemy.is_boss %}BOSS BATTLE{% else %}Combat{% endif %}
             </div>
             <div style="font-size:20px;font-weight:600;color:{{ 'var(--gold)' if enemy.is_boss else 'var(--red)' }};">
                 {{ enemy.name }}
@@ -235,8 +235,8 @@ const raceData  = {{ data.races  | tojson }};
                 {% for line in battle_log %}
                 <div class="log-entry
                     {%- if 'CRITICAL' in line %} log-crit
-                    {%- elif '⚠' in line or 'enters a new phase' in line %} log-phase
-                    {%- elif '💥' in line or '⚡' in line or 'uses ' in line %} log-ability
+                    {%- elif 'enters a new phase' in line %} log-phase
+                    {%- elif 'uses ' in line %} log-ability
                     {%- elif 'strikes you' in line or 'cuts you' in line %} log-damage
                     {%- elif 'defeated' in line.lower() or 'falls' in line.lower() %} log-victory
                     {%- else %} log-normal
@@ -278,7 +278,7 @@ const raceData  = {{ data.races  | tojson }};
 
         {% if boss_abilities_info %}
         <div class="panel" style="margin-top:16px;">
-            <div class="panel-title" style="color:var(--red);">⚔ Boss Abilities</div>
+            <div class="panel-title" style="color:var(--red);">Boss Abilities</div>
             <div class="panel-body">
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;">
                     {% for ab in boss_abilities_info %}
@@ -313,7 +313,7 @@ const raceData  = {{ data.races  | tojson }};
     <!-- ── Spellbook sidebar ── -->
     <div class="battle-spell-sidebar">
         <div class="panel battle-spellbook-panel">
-            <div class="panel-title" style="color:var(--mana-bright);">&#10024; Spellbook</div>
+            <div class="panel-title" style="color:var(--mana-bright);">Spellbook</div>
             <div class="panel-body">
 
                 <!-- MP bar -->
@@ -672,7 +672,7 @@ const raceData  = {{ data.races  | tojson }};
             <!-- Attributes Panel -->
             <div class="panel" style="margin-bottom:14px;" id="attr-panel">
                 <div class="panel-title">
-                    🎯 Attributes
+                    Attributes
                     {% if attr_summary.unspent_points > 0 %}
                     <span class="attr-points-badge" id="attr-points-badge">{{ attr_summary.unspent_points }} point{{ 's' if attr_summary.unspent_points != 1 }} available</span>
                     {% endif %}
@@ -733,7 +733,7 @@ const raceData  = {{ data.races  | tojson }};
                                 <div class="item-req-block">&#10007; {{ item.equip_block_reason }}</div>
                                 {% endif %}
                             {% elif item.is_book %}
-                                <div class="item-can-use" style="color:var(--gold);">&#128218; Readable book{% if item.already_read %} &mdash; already read{% endif %}</div>
+                                <div class="item-can-use" style="color:var(--gold);">Readable book{% if item.already_read %} &mdash; already read{% endif %}</div>
                             {% else %}
                                 <div class="item-can-use" style="color:var(--mana-bright,#7eb8f7);">&#10003; Usable ({{ item.type }})</div>
                             {% endif %}
@@ -1010,11 +1010,10 @@ const raceData  = {{ data.races  | tojson }};
             </div>
 
             <div class="panel land-section">
-                <div class="panel-title">⚔️ Training Grounds</div>
+                <div class="panel-title">Training Grounds</div>
                 <div class="panel-body">
                     {% if not land_data.has_training_place %}
                     <div class="land-locked-notice">
-                        <div class="land-locked-icon">🔒</div>
                         <div class="land-locked-text">
                             <strong>Training Place Required</strong>
                             <p>Build a Training Place on your land to unlock physical training sessions.</p>
@@ -1111,11 +1110,10 @@ const raceData  = {{ data.races  | tojson }};
             </div>
 
             <div class="panel land-section">
-                <div class="panel-title">🌱 Farming</div>
+                <div class="panel-title">Farming</div>
                 <div class="panel-body">
                     {% if not land_data.has_garden %}
                     <div class="land-locked-notice">
-                        <div class="land-locked-icon">🔒</div>
                         <div class="land-locked-text">
                             <strong>Garden Required</strong>
                             <p>Build a Garden on your land to unlock farming and crop cultivation.</p>
@@ -1164,7 +1162,7 @@ const raceData  = {{ data.races  | tojson }};
             </div>
 
             <div class="panel land-section">
-                <div class="panel-title">🐾 Companion Pets</div>
+                <div class="panel-title">Companion Pets</div>
                 <div class="panel-body">
                     {% if land_data.current_pet %}
                     <div class="current-pet-box">
@@ -1299,7 +1297,7 @@ const raceData  = {{ data.races  | tojson }};
         <div class="tab-content" id="tab-missions">
             <div class="panel">
                 <div class="panel-title">
-                    📜 Quests
+                    Quests
                     <span class="panel-subtitle">{{ completed_count }} completed</span>
                 </div>
                 <div class="panel-body">
@@ -1315,9 +1313,9 @@ const raceData  = {{ data.races  | tojson }};
                         </div>
                         <div class="quest-desc">{{ m.description }}</div>
                         {% if not m.level_ok %}
-                        <div class="quest-lock-reason">🔒 Requires Level {{ m.unlock_level }}</div>
+                        <div class="quest-lock-reason">Requires Level {{ m.unlock_level }}</div>
                         {% elif not m.prereqs_met %}
-                        <div class="quest-lock-reason">🔒 Prerequisites not met</div>
+                        <div class="quest-lock-reason">Prerequisites not met</div>
                         {% endif %}
                         {% if m.progress %}
                         <div class="quest-progress-list">
