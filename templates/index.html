@@ -11,6 +11,8 @@ const raceData  = {{ data.races  | tojson }};
 {% set _cg = {'Warrior':'WR','Mage':'MG','Rogue':'RG','Hunter':'HN','Bard':'BD','Paladin':'PL','Druid':'DR','Priest':'PR'} %}
 {% set _cglyph = {'Warrior':'warrior','Mage':'mage','Rogue':'rouge','Hunter':'hunter','Bard':'bard','Paladin':'paladin','Druid':'druid','Priest':'priest'} %}
 {% set _tglyph = {'weapon':'weapon','armor':'armor','offhand':'offhand','accessory':'accessories','book':'book','consumable':'food','material':'materials'} %}
+{% set _sglyph = {'weapon':'weapon','armor':'armor','offhand':'offhand','accessory_1':'accessories','accessory_2':'accessories','accessory_3':'accessories'} %}
+{% set _gglyph = {'male':'male','female':'female','nonbinary':'non_binary'} %}
 
 
 {% if show_welcome %}
@@ -48,7 +50,7 @@ const raceData  = {{ data.races  | tojson }};
                 <input type="file" id="load-file-input-main" accept=".olsave" style="display:none;">
             </div>
             <div class="save-load-bar" style="margin-top:8px;">
-                <button class="btn btn-secondary" onclick="openSettings()">Settings</button>
+                <button class="btn btn-secondary" onclick="openSettings()"><img class="type-glyph" src="/game_assets/glyphs/settings.png" alt="settings"> Settings</button>
             </div>
             <div id="save-status" class="save-notice" style="display:none;"></div>
         </div>
@@ -113,7 +115,7 @@ const raceData  = {{ data.races  | tojson }};
 
         <div class="battle-header">
             <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
-                {% if enemy.is_boss %}BOSS BATTLE{% else %}Combat{% endif %}
+                {% if enemy.is_boss %}<img class="type-glyph" src="/game_assets/glyphs/fight.png" alt="boss battle">BOSS BATTLE{% else %}Combat{% endif %}
             </div>
             <div style="font-size:20px;font-weight:600;color:{{ 'var(--gold)' if enemy.is_boss else 'var(--red)' }};">
                 {{ enemy.name }}
@@ -313,7 +315,7 @@ const raceData  = {{ data.races  | tojson }};
     <!-- ── Spellbook sidebar ── -->
     <div class="battle-spell-sidebar">
         <div class="panel battle-spellbook-panel">
-            <div class="panel-title" style="color:var(--mana-bright);">Spellbook</div>
+            <div class="panel-title" style="color:var(--mana-bright);"><img class="class-glyph" src="/game_assets/glyphs/sparkles.png" alt="spells">Spellbook</div>
             <div class="panel-body">
 
                 <!-- MP bar -->
@@ -339,7 +341,7 @@ const raceData  = {{ data.races  | tojson }};
                                 class="btn-spell spell-{{ stype }} {% if not can_cast %}btn-disabled{% endif %}"
                                 {% if not can_cast %}disabled{% endif %}>
                                 <div class="spell-header">
-                                    <span class="spell-name">{{ spell.name }}</span>
+                                    <img class="type-glyph" src="/game_assets/glyphs/spell.png" alt="spell"><span class="spell-name">{{ spell.name }}</span>
                                     <span class="spell-cost-badge">{{ spell.mp_cost }} MP</span>
                                 </div>
                                 <div class="spell-tags">
@@ -489,7 +491,7 @@ const raceData  = {{ data.races  | tojson }};
             <button class="btn btn-danger btn-small" onclick="saveAndQuit()">
                 Save and Quit to Main Menu
             </button>
-            <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;">Settings</button>
+            <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;"><img class="type-glyph" src="/game_assets/glyphs/settings.png" alt="settings"> Settings</button>
         </div>
     </aside>
 
@@ -621,7 +623,7 @@ const raceData  = {{ data.races  | tojson }};
                     <div class="equip-grid">
                         {% for slot in ['weapon','armor','offhand','accessory_1','accessory_2','accessory_3'] %}
                         <div class="equip-slot-card">
-                            <div class="equip-slot-label">{{ slot.replace('_',' ').title() }}</div>
+                            <div class="equip-slot-label">{% if _sglyph.get(slot) %}<img class="type-glyph" src="/game_assets/glyphs/{{ _sglyph.get(slot) }}.png" alt="{{ slot }}">{% endif %}{{ slot.replace('_',' ').title() }}</div>
                             {% if equipped_details.get(slot) %}
                             {% set eq = equipped_details[slot] %}
                             <div class="equip-slot-item rarity-{{ eq.rarity }}">{{ eq.name }}</div>
@@ -1010,7 +1012,7 @@ const raceData  = {{ data.races  | tojson }};
             </div>
 
             <div class="panel land-section">
-                <div class="panel-title">Training Grounds</div>
+                <div class="panel-title"><img class="class-glyph" src="/game_assets/glyphs/fight.png" alt="training">Training Grounds</div>
                 <div class="panel-body">
                     {% if not land_data.has_training_place %}
                     <div class="land-locked-notice">
@@ -1435,7 +1437,7 @@ const raceData  = {{ data.races  | tojson }};
                     <div class="stat-label" style="margin-bottom:8px;">Identity</div>
                     <div class="cs-identity-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-bottom:18px;">
                         <div class="cs-row"><span class="stat-name">Name</span><span class="stat-val"><img class="class-glyph" src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png" alt="{{ player['class'] }}" title="{{ player['class'] }}">{{ player.name }}</span></div>
-                        <div class="cs-row"><span class="stat-name">Gender</span><span class="stat-val">{{ player.get('gender','—').title() }}</span></div>
+                        <div class="cs-row"><span class="stat-name">Gender</span><span class="stat-val">{% set _gk = player.get('gender','') %}{% if _gglyph.get(_gk) %}<img class="type-glyph" src="/game_assets/glyphs/{{ _gglyph.get(_gk) }}.png" alt="{{ _gk }}">{% endif %}{{ _gk.title() or '—' }}</span></div>
                         <div class="cs-row"><span class="stat-name">Class</span><span class="stat-val">{{ player['class'] }}</span></div>
                         <div class="cs-row"><span class="stat-name">Race</span><span class="stat-val">{{ player.get('race','—') }}</span></div>
                         <div class="cs-row"><span class="stat-name">Background</span><span class="stat-val">{{ player.get('background','—').replace('_',' ').title() }}</span></div>
