@@ -247,6 +247,10 @@ strong { font-weight: 600; }
         linear-gradient(to bottom, rgba(28,24,16,0.8) 0%, rgba(40,22,10,0.95) 100%),
         repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
 }
+body.ol2-bg-1 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24,16,0.75) 0%,rgba(40,22,10,0.88) 100%), url('/game_assets/backgrounds/1.png') center/cover no-repeat; }
+body.ol2-bg-2 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24,16,0.75) 0%,rgba(40,22,10,0.88) 100%), url('/game_assets/backgrounds/2.png') center/cover no-repeat; }
+body.ol2-bg-3 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24,16,0.75) 0%,rgba(40,22,10,0.88) 100%), url('/game_assets/backgrounds/3.png') center/cover no-repeat; }
+body.ol2-bg-4 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24,16,0.75) 0%,rgba(40,22,10,0.88) 100%), url('/game_assets/backgrounds/4.png') center/cover no-repeat; }
 .welcome-inner { max-width: 900px; width: 100%; }
 
 .scroll-panel {
@@ -743,10 +747,10 @@ strong { font-weight: 600; }
     overflow-y: auto;
     position: relative;
 }
-body.ol2-bg-1 { background-image: url('/game_assets/backgrounds/1.png'); background-size: cover; background-attachment: fixed; background-position: center; }
-body.ol2-bg-2 { background-image: url('/game_assets/backgrounds/2.png'); background-size: cover; background-attachment: fixed; background-position: center; }
-body.ol2-bg-3 { background-image: url('/game_assets/backgrounds/3.png'); background-size: cover; background-attachment: fixed; background-position: center; }
-body.ol2-bg-4 { background-image: url('/game_assets/backgrounds/4.png'); background-size: cover; background-attachment: fixed; background-position: center; }
+body.ol2-bg-1 .main-content { background-image: url('/game_assets/backgrounds/1.png'); background-size: cover; background-position: center top; background-attachment: local; }
+body.ol2-bg-2 .main-content { background-image: url('/game_assets/backgrounds/2.png'); background-size: cover; background-position: center top; background-attachment: local; }
+body.ol2-bg-3 .main-content { background-image: url('/game_assets/backgrounds/3.png'); background-size: cover; background-position: center top; background-attachment: local; }
+body.ol2-bg-4 .main-content { background-image: url('/game_assets/backgrounds/4.png'); background-size: cover; background-position: center top; background-attachment: local; }
 .main-content > * { position: relative; z-index: 1; }
 
 /* ─── Toast Notifications ────────────────────────────────── */
