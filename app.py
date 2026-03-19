@@ -54,6 +54,13 @@ from utilities.save_load import (
     encrypt_save,
     decrypt_save,
 )
+from utilities.supabase_db import (
+    register_user,
+    login_user,
+    cloud_save,
+    cloud_load,
+    get_cloud_save_meta,
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "ol2-default-dev-key-change-in-prod")
@@ -987,7 +994,18 @@ def serve_game_asset(filename):
 def index():
     splash_texts = GAME_DATA.get("splash_texts", [])
     splash = random.choice(splash_texts) if splash_texts else ""
-    return render_template("index.html", show_welcome=True, splash_text=splash)
+    online_user = session.get("online_username")
+    online_user_id = session.get("online_user_id")
+    cloud_meta = None
+    if online_user_id:
+        cloud_meta = get_cloud_save_meta(online_user_id)
+    return render_template(
+        "index.html",
+        show_welcome=True,
+        splash_text=splash,
+        online_user=online_user,
+        cloud_meta=cloud_meta,
+    )
 
 
 @app.route("/play")
@@ -1637,6 +1655,7 @@ def game():
         active_dungeon=active_dungeon,
         attr_summary=attr_summary,
         read_books=player.get("read_books", []),
+        online_user=session.get("online_username"),
     )
 
 
@@ -3672,6 +3691,113 @@ def api_player_stats():
 def new_game():
     session.clear()
     return redirect(url_for("index"))
+
+
+# ─── Online Account Routes ────────────────────────────────────────────────────
+
+
+@app.route("/api/online/register", methods=["POST"])
+def api_online_register():
+    data = request.get_json(force=True, silent=True) or {}
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
+    result = register_user(username, password)
+    if result["ok"]:
+        return jsonify(result), 200
+    return jsonify(result), 400
+
+
+@app.route("/api/online/login", methods=["POST"])
+def api_online_login():
+    data = request.get_json(force=True, silent=True) or {}
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
+    result = login_user(username, password)
+    if result["ok"]:
+        session["online_username"] = username.lower()
+        session["online_user_id"] = result["user_id"]
+        session.modified = True
+        return jsonify({"ok": True, "message": result["message"], "username": username.lower()})
+    return jsonify({"ok": False, "message": result["message"]}), 401
+
+
+@app.route("/api/online/logout", methods=["POST"])
+def api_online_logout():
+    session.pop("online_username", None)
+    session.pop("online_user_id", None)
+    session.modified = True
+    return jsonify({"ok": True, "message": "Logged out."})
+
+
+@app.route("/api/online/cloud_save", methods=["POST"])
+def api_cloud_save():
+    user_id = session.get("online_user_id")
+    if not user_id:
+        return jsonify({"ok": False, "message": "Not logged in."}), 401
+    player = session.get("player")
+    if not player:
+        return jsonify({"ok": False, "message": "No active character."}), 400
+    ensure_attributes(player)
+    save_data = {
+        "player": player,
+        "current_area": session.get("current_area", "starting_village"),
+        "completed_missions": session.get("completed_missions", []),
+        "visited_areas": session.get("visited_areas", []),
+        "quest_progress": session.get("quest_progress", {}),
+        "seen_cutscenes": session.get("seen_cutscenes", []),
+        "current_weather": session.get("current_weather", "sunny"),
+        "messages": session.get("messages", [])[-20:],
+        "diary": session.get("diary", []),
+        "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
+        "save_version": "7.1",
+        "game_version": GAME_VERSION,
+    }
+    result = cloud_save(user_id, save_data)
+    return jsonify(result), 200 if result["ok"] else 500
+
+
+@app.route("/api/online/cloud_load", methods=["POST"])
+def api_cloud_load():
+    user_id = session.get("online_user_id")
+    if not user_id:
+        return jsonify({"ok": False, "message": "Not logged in."}), 401
+    result = cloud_load(user_id)
+    if not result["ok"]:
+        return jsonify(result), 404
+
+    data = result["data"]
+    player = data.get("player")
+    if not player or not player.get("name"):
+        return jsonify({"ok": False, "message": "Invalid cloud save."}), 400
+
+    _ensure_equipment_slots(player)
+    player.setdefault("game_ticks", 0)
+    player.setdefault("weekly_challenges_progress", {})
+    player.setdefault("boss_cooldowns", {})
+    player.setdefault("race", "Descendants from another world")
+    ensure_attributes(player)
+
+    session["player"] = player
+    session["current_area"] = data.get("current_area", "starting_village")
+    session["completed_missions"] = data.get("completed_missions", [])
+    session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
+    session["quest_progress"] = data.get("quest_progress", {})
+    session["seen_cutscenes"] = data.get("seen_cutscenes", [])
+    session["current_weather"] = data.get("current_weather", "sunny")
+    session["messages"] = data.get("messages", [])
+    session["diary"] = data.get("diary", [])
+    session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
+    session.modified = True
+    return jsonify({"ok": True, "message": result["message"], "player_name": player.get("name")})
+
+
+@app.route("/api/online/cloud_meta")
+def api_cloud_meta():
+    user_id = session.get("online_user_id")
+    if not user_id:
+        return jsonify({"ok": False, "meta": None})
+    meta = get_cloud_save_meta(user_id)
+    return jsonify({"ok": True, "meta": meta})
 
 
 port = int(os.environ.get("PORT", 5000))

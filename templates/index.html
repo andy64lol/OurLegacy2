@@ -50,6 +50,55 @@ const raceData  = {{ data.races  | tojson }};
                 <label for="load-file-input-main" class="btn btn-secondary" style="cursor:pointer;">Load Saved Game</label>
                 <input type="file" id="load-file-input-main" accept=".olsave" style="display:none;">
             </div>
+
+            <!-- Online Game Section -->
+            <div class="save-load-bar" style="margin-top:8px;">
+                <button class="btn btn-secondary" onclick="openOnlinePanel()" style="background:linear-gradient(135deg,rgba(80,60,120,0.6),rgba(50,30,90,0.6));border-color:var(--mana-bright);">
+                    &#127760; Online Game
+                </button>
+            </div>
+
+            <!-- Online Panel (hidden by default) -->
+            <div id="online-panel" style="display:none;margin-top:12px;background:rgba(20,15,40,0.85);border:1px solid var(--mana-bright);border-radius:10px;padding:16px;">
+                {% if online_user %}
+                <!-- Logged In View -->
+                <div id="online-logged-in">
+                    <div style="text-align:center;font-size:13px;color:var(--mana-bright);margin-bottom:10px;">
+                        Logged in as <strong>{{ online_user }}</strong>
+                    </div>
+                    {% if cloud_meta %}
+                    <div style="background:rgba(60,40,100,0.4);border:1px solid rgba(180,130,255,0.3);border-radius:6px;padding:10px;margin-bottom:10px;font-size:12px;color:var(--text-dim);">
+                        Cloud Save: <strong style="color:var(--gold);">{{ cloud_meta.player_name }}</strong>
+                        &mdash; Lv.{{ cloud_meta.level }} {{ cloud_meta.character_class }}
+                        <br><span style="font-size:11px;">{{ cloud_meta.current_area|replace('_',' ')|title }}</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="cloudLoad()" style="width:100%;margin-bottom:6px;">&#8659; Load Cloud Save</button>
+                    {% else %}
+                    <div style="text-align:center;font-size:12px;color:var(--text-dim);margin-bottom:10px;">No cloud save yet.</div>
+                    {% endif %}
+                    <button class="btn btn-secondary" onclick="onlineLogout()" style="width:100%;font-size:12px;opacity:0.7;">Logout</button>
+                </div>
+                {% else %}
+                <!-- Login / Register Tabs -->
+                <div style="display:flex;gap:6px;margin-bottom:12px;">
+                    <button class="btn btn-secondary" id="tab-login" onclick="switchOnlineTab('login')" style="flex:1;font-size:12px;">Login</button>
+                    <button class="btn btn-secondary" id="tab-register" onclick="switchOnlineTab('register')" style="flex:1;font-size:12px;opacity:0.5;">Register</button>
+                </div>
+                <div id="online-login-form">
+                    <input type="text" id="ol-username" placeholder="Username" autocomplete="username" style="width:100%;box-sizing:border-box;margin-bottom:7px;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                    <input type="password" id="ol-password" placeholder="Password" autocomplete="current-password" style="width:100%;box-sizing:border-box;margin-bottom:10px;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                    <button class="btn btn-secondary" onclick="onlineLogin()" style="width:100%;background:linear-gradient(135deg,rgba(80,60,150,0.7),rgba(50,30,100,0.7));border-color:var(--mana-bright);">Login &amp; Load Cloud Save</button>
+                </div>
+                <div id="online-register-form" style="display:none;">
+                    <input type="text" id="ol-reg-username" placeholder="Choose username (min 3 chars)" autocomplete="username" style="width:100%;box-sizing:border-box;margin-bottom:7px;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                    <input type="password" id="ol-reg-password" placeholder="Choose password (min 6 chars)" autocomplete="new-password" style="width:100%;box-sizing:border-box;margin-bottom:7px;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                    <input type="password" id="ol-reg-confirm" placeholder="Confirm password" autocomplete="new-password" style="width:100%;box-sizing:border-box;margin-bottom:10px;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                    <button class="btn btn-secondary" onclick="onlineRegister()" style="width:100%;background:linear-gradient(135deg,rgba(30,100,60,0.7),rgba(20,70,40,0.7));border-color:var(--green-bright);">Create Account</button>
+                </div>
+                {% endif %}
+                <div id="online-status" style="margin-top:10px;text-align:center;font-size:12px;min-height:18px;"></div>
+            </div>
+
             <div class="save-load-bar" style="margin-top:8px;">
                 <button class="btn btn-secondary" onclick="openSettings()"><img class="type-glyph" src="/game_assets/glyphs/settings.png" alt="settings"> Settings</button>
             </div>
@@ -501,6 +550,12 @@ const raceData  = {{ data.races  | tojson }};
         <div class="sidebar-save-section">
             <input type="file" id="load-file-input" accept=".olsave" style="display:none;">
             <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()">Load Game</button>
+            {% if online_user %}
+            <button class="btn btn-secondary btn-small" onclick="inGameCloudSave()" style="margin-top:4px;background:linear-gradient(135deg,rgba(80,60,120,0.6),rgba(50,30,90,0.6));border-color:var(--mana-bright);width:100%;" title="Logged in as {{ online_user }}">
+                &#9729; Cloud Save
+            </button>
+            <div id="cloud-save-status" style="font-size:11px;text-align:center;min-height:14px;margin-top:2px;"></div>
+            {% endif %}
         </div>
 
         <div class="sidebar-nav">
@@ -1573,6 +1628,94 @@ const raceData  = {{ data.races  | tojson }};
         this.value = '';
     });
 })();
+
+// ── Online Game panel ──────────────────────────────────────────────────────
+function openOnlinePanel() {
+    var panel = document.getElementById('online-panel');
+    if (!panel) return;
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+function switchOnlineTab(tab) {
+    var lf = document.getElementById('online-login-form');
+    var rf = document.getElementById('online-register-form');
+    var tl = document.getElementById('tab-login');
+    var tr = document.getElementById('tab-register');
+    if (tab === 'login') {
+        lf.style.display = 'block'; rf.style.display = 'none';
+        tl.style.opacity = '1'; tr.style.opacity = '0.5';
+    } else {
+        lf.style.display = 'none'; rf.style.display = 'block';
+        tl.style.opacity = '0.5'; tr.style.opacity = '1';
+    }
+    document.getElementById('online-status').textContent = '';
+}
+function setOnlineStatus(msg, ok) {
+    var el = document.getElementById('online-status');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.color = ok ? 'var(--green-bright)' : 'var(--red)';
+}
+async function onlineLogin() {
+    var u = (document.getElementById('ol-username') || {}).value || '';
+    var p = (document.getElementById('ol-password') || {}).value || '';
+    if (!u || !p) { setOnlineStatus('Enter username and password.', false); return; }
+    setOnlineStatus('Logging in...', true);
+    try {
+        var res = await fetch('/api/online/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: u, password: p})
+        });
+        var json = await res.json();
+        if (json.ok) {
+            setOnlineStatus(json.message, true);
+            setTimeout(function() { window.location.reload(); }, 700);
+        } else {
+            setOnlineStatus(json.message || 'Login failed.', false);
+        }
+    } catch(e) { setOnlineStatus('Network error: ' + e.message, false); }
+}
+async function onlineRegister() {
+    var u = (document.getElementById('ol-reg-username') || {}).value || '';
+    var p = (document.getElementById('ol-reg-password') || {}).value || '';
+    var c = (document.getElementById('ol-reg-confirm') || {}).value || '';
+    if (!u || !p) { setOnlineStatus('Fill in all fields.', false); return; }
+    if (p !== c) { setOnlineStatus('Passwords do not match.', false); return; }
+    setOnlineStatus('Creating account...', true);
+    try {
+        var res = await fetch('/api/online/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: u, password: p})
+        });
+        var json = await res.json();
+        setOnlineStatus(json.message || (json.ok ? 'Account created! You can now log in.' : 'Failed.'), json.ok);
+        if (json.ok) { setTimeout(function() { switchOnlineTab('login'); }, 1200); }
+    } catch(e) { setOnlineStatus('Network error: ' + e.message, false); }
+}
+async function onlineLogout() {
+    await fetch('/api/online/logout', {method: 'POST'});
+    window.location.reload();
+}
+async function cloudLoad() {
+    setOnlineStatus('Loading cloud save...', true);
+    try {
+        var res = await fetch('/api/online/cloud_load', {method: 'POST'});
+        var json = await res.json();
+        if (json.ok) {
+            setOnlineStatus(json.message, true);
+            setTimeout(function() { window.location.href = '/game'; }, 800);
+        } else {
+            setOnlineStatus(json.message || 'Load failed.', false);
+        }
+    } catch(e) { setOnlineStatus('Network error: ' + e.message, false); }
+}
+// Auto-open the online panel if already logged in and panel was previously open
+{% if online_user %}
+document.addEventListener('DOMContentLoaded', function() {
+    // Keep panel closed by default even when logged in; user clicks to open
+});
+{% endif %}
 </script>
 {% endif %}
 {% if not show_create and not in_battle and not show_welcome %}

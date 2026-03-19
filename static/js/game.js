@@ -555,3 +555,23 @@ function dismissCutscene(cutsceneId) {
         if (overlay) overlay.style.display = 'none';
     });
 }
+
+async function inGameCloudSave() {
+    var statusEl = document.getElementById('cloud-save-status');
+    if (statusEl) { statusEl.textContent = 'Saving...'; statusEl.style.color = 'var(--text-dim)'; }
+    try {
+        var res = await fetch('/api/online/cloud_save', { method: 'POST' });
+        var json = await res.json();
+        if (json.ok) {
+            if (statusEl) { statusEl.textContent = json.message; statusEl.style.color = 'var(--green-bright)'; }
+            showToast(json.message, 'var(--green-bright)', 2500);
+        } else {
+            if (statusEl) { statusEl.textContent = json.message; statusEl.style.color = 'var(--red)'; }
+            showToast('Cloud save failed: ' + json.message, 'var(--red)', 3000);
+        }
+    } catch(e) {
+        if (statusEl) { statusEl.textContent = 'Error: ' + e.message; statusEl.style.color = 'var(--red)'; }
+        showToast('Cloud save error: ' + e.message, 'var(--red)', 3000);
+    }
+    setTimeout(function() { if (statusEl) statusEl.textContent = ''; }, 4000);
+}
