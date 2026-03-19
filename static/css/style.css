@@ -733,6 +733,7 @@ strong { font-weight: 600; }
 .rest-notice  { font-size: 13px; color: var(--green-bright); margin-top: 7px; text-transform: uppercase; }
 
 .sidebar-nav         { padding: 14px 12px; margin-top: auto; }
+.sidebar-quick-toggles { display: flex; gap: 6px; margin-top: 6px; }
 .sidebar-save-section{ padding: 10px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
 
 .main-content {

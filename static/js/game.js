@@ -474,30 +474,54 @@ function settingsOverlayClick(e) {
     if (e.target === document.getElementById('settings-modal')) closeSettings();
 }
 
+function _syncMusicButtons() {
+    var state = _musicMuted ? 'Off' : 'On';
+    var btn = document.getElementById('settings-music-toggle');
+    var sb  = document.getElementById('sidebar-music-btn');
+    if (btn) btn.textContent = state;
+    if (sb)  sb.textContent  = 'Music: ' + state;
+}
+
+function _syncBgButtons() {
+    var main = document.querySelector('.main-content');
+    var on   = main && !main.classList.contains('no-bg');
+    var state = on ? 'On' : 'Off';
+    var btn = document.getElementById('settings-bg-toggle');
+    var sb  = document.getElementById('sidebar-bg-btn');
+    if (btn) btn.textContent = state;
+    if (sb)  sb.textContent  = 'BG: ' + state;
+}
+
 function settingsToggleMusic() {
     toggleMusicMute();
-    var btn    = document.getElementById('settings-music-toggle');
     var slider = document.getElementById('settings-music-slider');
     var label  = document.getElementById('settings-music-vol');
     var vol = _musicAudio ? Math.round(_musicAudio.volume * 100) : 0;
-    if (btn)    btn.textContent = _musicMuted ? 'Off' : 'On';
     if (slider) slider.value = vol;
     if (label)  label.textContent = vol + '%';
+    _syncMusicButtons();
 }
 
 function settingsSetVolume(val) {
     setMusicVolume(val);
-    var btn   = document.getElementById('settings-music-toggle');
     var label = document.getElementById('settings-music-vol');
-    if (btn)   btn.textContent = (parseInt(val, 10) === 0) ? 'Off' : 'On';
     if (label) label.textContent = val + '%';
+    _syncMusicButtons();
 }
 
 function settingsToggleBg() {
     toggleBackground();
-    var main = document.querySelector('.main-content');
-    var btn  = document.getElementById('settings-bg-toggle');
-    if (btn && main) btn.textContent = main.classList.contains('no-bg') ? 'Off' : 'On';
+    _syncBgButtons();
+}
+
+function quickToggleMusic() {
+    toggleMusicMute();
+    _syncMusicButtons();
+}
+
+function quickToggleBg() {
+    toggleBackground();
+    _syncBgButtons();
 }
 
 async function saveAndQuit() {

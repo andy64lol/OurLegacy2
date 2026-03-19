@@ -172,16 +172,16 @@ const raceData  = {{ data.races  | tojson }};
                 <div class="panel-title"><img class="class-glyph" src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png" alt="{{ player['class'] }}" title="{{ player['class'] }}">{{ player.name }}</div>
                 <div class="panel-body">
                     <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
-                        {{ player['class'] }} &mdash; Lv.{{ player.level }}
+                        {{ player['class'] }} &mdash; <img class="type-glyph" src="/game_assets/glyphs/level.gif" alt="level"> Lv.{{ player.level }}
                     </div>
                     <div class="bar-group">
-                        <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
+                        <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.png" alt="hp"> HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
                         <div class="bar-track">
                             <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
                         </div>
                     </div>
                     <div class="bar-group">
-                        <div class="bar-label">MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
+                        <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/mana.png" alt="mp"> MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
                         <div class="bar-track">
                             <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
                         </div>
@@ -211,7 +211,7 @@ const raceData  = {{ data.races  | tojson }};
                 <div class="panel-title panel-title-enemy">{{ enemy.name }}</div>
                 <div class="panel-body">
                     <div class="bar-group">
-                        <div class="bar-label">HP <span class="bar-nums">{{ enemy.hp }} / {{ enemy.max_hp }}</span></div>
+                        <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.png" alt="hp"> HP <span class="bar-nums">{{ enemy.hp }} / {{ enemy.max_hp }}</span></div>
                         <div class="bar-track">
                             <div class="bar-fill bar-hp" style="width:{{ [(enemy.hp / enemy.max_hp * 100)|int, 100]|min }}%"></div>
                         </div>
@@ -404,29 +404,29 @@ const raceData  = {{ data.races  | tojson }};
             <div class="panel-title"><img class="class-glyph" src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png" alt="{{ player['class'] }}" title="{{ player['class'] }}">{{ player.name }}</div>
             <div class="panel-body">
                 <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
-                <div class="char-level">Level {{ player.level }}</div>
+                <div class="char-level"><img class="type-glyph" src="/game_assets/glyphs/level.gif" alt="level"> Level {{ player.level }}</div>
                 <div style="font-size:12px;color:var(--text-dim);margin-top:2px;margin-bottom:4px;">{{ player.get('race', 'Unknown') }}</div>
 
                 <div class="bar-group">
-                    <div class="bar-label">HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
+                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.png" alt="hp"> HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
                     <div class="bar-track">
                         <div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div>
                     </div>
                 </div>
                 <div class="bar-group">
-                    <div class="bar-label">MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
+                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/mana.png" alt="mp"> MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
                     <div class="bar-track">
                         <div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div>
                     </div>
                 </div>
                 <div class="bar-group">
-                    <div class="bar-label">EXP <span class="bar-nums">{{ player.experience }} / {{ player.experience_to_next }}</span></div>
+                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/exp.png" alt="exp"> EXP <span class="bar-nums">{{ player.experience }} / {{ player.experience_to_next }}</span></div>
                     <div class="bar-track">
                         <div class="bar-fill bar-exp" style="width:{{ [(player.experience / player.experience_to_next * 100)|int, 100]|min }}%"></div>
                     </div>
                 </div>
 
-                <div class="gold-display">Gold: <span class="gold-amount">{{ player.gold }}</span></div>
+                <div class="gold-display"><img class="type-glyph" src="/game_assets/glyphs/gold.png" alt="gold"> Gold: <span class="gold-amount">{{ player.gold }}</span></div>
 
                 <div class="stat-mini-grid">
                     <div class="stat-mini"><span>ATK</span><strong>{{ player.attack }}</strong></div>
@@ -443,7 +443,14 @@ const raceData  = {{ data.races  | tojson }};
                 <div class="sidebar-status-row">
                     <div class="sidebar-status-item">
                         <span class="sidebar-status-key">Time</span>
-                        <span class="sidebar-status-val">{{ game_time }}</span>
+                        <span class="sidebar-status-val">
+                            {% if game_time in ['Dawn','Morning','Noon','Afternoon'] %}
+                            <img class="type-glyph" src="/game_assets/glyphs/time_day.png" alt="day">
+                            {% else %}
+                            <img class="type-glyph" src="/game_assets/glyphs/time_night.png" alt="night">
+                            {% endif %}
+                            {{ game_time }}
+                        </span>
                     </div>
                     <div class="sidebar-status-item">
                         <span class="sidebar-status-key">Weather</span>
@@ -496,6 +503,10 @@ const raceData  = {{ data.races  | tojson }};
             <button class="btn btn-danger btn-small" onclick="saveAndQuit()">
                 Save and Quit to Main Menu
             </button>
+            <div class="sidebar-quick-toggles">
+                <button id="sidebar-music-btn" class="btn btn-secondary btn-xsmall" onclick="quickToggleMusic()">Music: On</button>
+                <button id="sidebar-bg-btn" class="btn btn-secondary btn-xsmall" onclick="quickToggleBg()">BG: On</button>
+            </div>
             <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;"><img class="type-glyph" src="/game_assets/glyphs/settings.png" alt="settings"> Settings</button>
         </div>
     </aside>
