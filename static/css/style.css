@@ -738,7 +738,7 @@ strong { font-weight: 600; }
 .main-content {
     padding: 18px;
     overflow-y: auto;
-    background-image: url('/game_assets/ingame_background_when_playing.png');
+    background-image: url('/game_assets/backgrounds/1.png');
     background-size: cover;
     background-position: center top;
     background-attachment: local;
