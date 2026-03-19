@@ -40,6 +40,8 @@ def register_user(username: str, password: str) -> Dict[str, Any]:
     username = username.strip().lower()
     if not username or len(username) < 3:
         return {"ok": False, "message": "Username must be at least 3 characters."}
+    if len(username) > 20:
+        return {"ok": False, "message": "Username must be 20 characters or fewer."}
     if not password or len(password) < 6:
         return {"ok": False, "message": "Password must be at least 6 characters."}
 

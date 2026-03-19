@@ -6,3 +6,4 @@ flask-session==0.8.0
 supabase==2.28.2
 flask-session==0.8.0
 supabase==2.28.2
+Flask-Limiter

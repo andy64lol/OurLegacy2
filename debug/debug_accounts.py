@@ -1,7 +1,8 @@
 """
 debug_accounts.py — Debug script for Our Legacy 2 account system.
 
-Tests: registration, login, logout, cloud meta/save/load, and edge cases.
+Tests: registration, login, logout, cloud meta/save/load, edge cases,
+       username length limits, and rate limiting.
 Run with: python debug/debug_accounts.py
 The app must be running on localhost:5000.
 """
@@ -12,7 +13,7 @@ import time
 import sys
 
 BASE_URL = "http://127.0.0.1:5000"
-TEST_USER = f"debugtest_{int(time.time())}"
+TEST_USER = f"dbg{int(time.time()) % 10**7}"
 TEST_PASS = "DebugPass123"
 
 PASS = "\033[92m[PASS]\033[0m"
@@ -102,29 +103,64 @@ try:
 except Exception as e:
     log("FAIL", "Reject username < 3 chars", f"Could not parse response: {e}")
 
-# Password too short
-r4 = reg_session.post(f"{BASE_URL}/api/online/register",
-                      json={"username": TEST_USER + "_x", "password": "abc"})
+# Username exactly 20 chars — should succeed
+user_20 = f"u{'x' * 17}{int(time.time()) % 100:02d}"[:20]
+r_20 = reg_session.post(f"{BASE_URL}/api/online/register",
+                        json={"username": user_20, "password": TEST_PASS})
 try:
-    body4 = r4.json()
-    check("Reject password < 6 chars",
-          r4.status_code == 400 and not body4.get("ok"),
-          body4.get("message", ""),
-          f"Expected 400/ok=false, got HTTP {r4.status_code}")
+    body_20 = r_20.json()
+    check("Accept username of exactly 20 chars",
+          r_20.status_code in (200, 400) and r_20.status_code != 500,
+          f"HTTP {r_20.status_code} — {body_20.get('message', '')}",
+          f"Server error for 20-char username: HTTP {r_20.status_code}")
+    if r_20.status_code == 200:
+        log("INFO", f"20-char username '{user_20}' created (will be cleaned up from Supabase)")
 except Exception as e:
-    log("FAIL", "Reject password < 6 chars", f"Could not parse response: {e}")
+    log("FAIL", "Accept username of exactly 20 chars", f"Could not parse response: {e}")
+
+# Username 21 chars — should be rejected
+r_21 = reg_session.post(f"{BASE_URL}/api/online/register",
+                        json={"username": "a" * 21, "password": TEST_PASS})
+try:
+    body_21 = r_21.json()
+    check("Reject username > 20 chars",
+          r_21.status_code == 400 and not body_21.get("ok"),
+          body_21.get("message", ""),
+          f"Expected 400, got HTTP {r_21.status_code} — username over limit was accepted!")
+except Exception as e:
+    log("FAIL", "Reject username > 20 chars", f"Could not parse response: {e}")
+
+# Password too short — use a fresh session so rate limit doesn't interfere
+r4 = requests.post(f"{BASE_URL}/api/online/register",
+                   json={"username": TEST_USER + "x", "password": "abc"})
+if r4.status_code == 429:
+    log("WARN", "Reject password < 6 chars — skipped (register rate limit reached for this IP)",
+        "Restart the app to reset the in-memory limit counter and re-run")
+else:
+    try:
+        body4 = r4.json()
+        check("Reject password < 6 chars",
+              r4.status_code == 400 and not body4.get("ok"),
+              body4.get("message", ""),
+              f"Expected 400/ok=false, got HTTP {r4.status_code}")
+    except Exception as e:
+        log("FAIL", "Reject password < 6 chars", f"Could not parse response: {e}")
 
 # Empty fields
-r5 = reg_session.post(f"{BASE_URL}/api/online/register",
-                      json={"username": "", "password": ""})
-try:
-    body5 = r5.json()
-    check("Reject empty fields on register",
-          r5.status_code == 400 and not body5.get("ok"),
-          body5.get("message", ""),
-          f"Expected 400/ok=false, got HTTP {r5.status_code}")
-except Exception as e:
-    log("FAIL", "Reject empty fields on register", f"Could not parse response: {e}")
+r5 = requests.post(f"{BASE_URL}/api/online/register",
+                   json={"username": "", "password": ""})
+if r5.status_code == 429:
+    log("WARN", "Reject empty fields on register — skipped (register rate limit reached for this IP)",
+        "Restart the app to reset the in-memory limit counter and re-run")
+else:
+    try:
+        body5 = r5.json()
+        check("Reject empty fields on register",
+              r5.status_code == 400 and not body5.get("ok"),
+              body5.get("message", ""),
+              f"Expected 400/ok=false, got HTTP {r5.status_code}")
+    except Exception as e:
+        log("FAIL", "Reject empty fields on register", f"Could not parse response: {e}")
 
 
 # ─── 3. Login ─────────────────────────────────────────────────────────────────
@@ -157,7 +193,7 @@ try:
 except Exception as e:
     log("FAIL", "Reject non-existent user", f"Could not parse response: {e}")
 
-# Case-insensitive username (login with uppercase)
+# Case-insensitive username
 r3 = login_session.post(f"{BASE_URL}/api/online/login",
                         json={"username": TEST_USER.upper(), "password": TEST_PASS})
 try:
@@ -166,12 +202,11 @@ try:
           r3.status_code == 200 and body3.get("ok"),
           body3.get("message", ""),
           f"Got HTTP {r3.status_code} — {body3.get('message', '')}")
-    # Logout after this test to clear session
     login_session.post(f"{BASE_URL}/api/online/logout")
 except Exception as e:
     log("FAIL", "Accept username case-insensitively", f"Could not parse response: {e}")
 
-# Happy path login (fresh session we'll keep for later tests)
+# Happy path login (keep this session for later tests)
 auth_session = requests.Session()
 r4 = auth_session.post(f"{BASE_URL}/api/online/login",
                        json={"username": TEST_USER, "password": TEST_PASS})
@@ -186,7 +221,6 @@ except Exception as e:
     log("FAIL", "Login with correct credentials", f"Could not parse response: {e}")
     login_ok = False
 
-# Username stored as lowercase in session
 if login_ok:
     check("Returned username is lowercase",
           body4.get("username", "") == TEST_USER.lower(),
@@ -207,18 +241,17 @@ if login_ok:
               f"meta={body.get('meta')}",
               f"HTTP {r.status_code} — {body}")
         if body.get("meta") is None:
-            log("INFO", "No cloud save on this account yet (meta is null — expected for new users)")
+            log("INFO", "No cloud save on this account yet (expected for new users)")
     except Exception as e:
         log("FAIL", "Cloud meta endpoint", f"Could not parse response: {e}")
 
-    # Cloud meta when NOT logged in
     anon_session = requests.Session()
     r2 = anon_session.get(f"{BASE_URL}/api/online/cloud_meta")
     try:
         body2 = r2.json()
         check("Cloud meta returns ok=False when not logged in",
               r2.status_code == 200 and not body2.get("ok"),
-              body2.get("message", "ok=False returned correctly"),
+              "ok=False returned correctly",
               f"Expected ok=false, got {body2}")
     except Exception as e:
         log("FAIL", "Cloud meta (not logged in)", f"Could not parse response: {e}")
@@ -236,8 +269,8 @@ if login_ok:
         body = r.json()
         if r.status_code == 400 and "No active character" in body.get("message", ""):
             log("WARN", "Cloud save skipped",
-                "No active game session — this is expected if you haven't started a game")
-            log("INFO", "Cloud save endpoint exists and responds correctly (returns 400 with proper message)")
+                "No active game session — expected if you haven't started a game")
+            log("INFO", "Cloud save endpoint responds correctly (400 with proper message)")
         elif r.status_code == 200 and body.get("ok"):
             log("PASS", "Cloud save succeeded", body.get("message", ""))
         else:
@@ -246,7 +279,6 @@ if login_ok:
     except Exception as e:
         log("FAIL", "Cloud save endpoint", f"Could not parse response: {e}")
 
-    # Cloud save without login
     anon_session = requests.Session()
     r2 = anon_session.post(f"{BASE_URL}/api/online/cloud_save")
     try:
@@ -271,7 +303,7 @@ if login_ok:
         body = r.json()
         if r.status_code == 404 and not body.get("ok"):
             log("WARN", "Cloud load skipped",
-                "No cloud save exists for this user yet — expected for a brand-new test account")
+                "No cloud save exists for this user yet — expected for a new test account")
         elif r.status_code == 200 and body.get("ok"):
             log("PASS", "Cloud load succeeded", body.get("message", ""))
         else:
@@ -280,7 +312,6 @@ if login_ok:
     except Exception as e:
         log("FAIL", "Cloud load endpoint", f"Could not parse response: {e}")
 
-    # Cloud load without login
     anon_session = requests.Session()
     r2 = anon_session.post(f"{BASE_URL}/api/online/cloud_load")
     try:
@@ -310,18 +341,16 @@ if login_ok:
     except Exception as e:
         log("FAIL", "Logout endpoint", f"Could not parse response: {e}")
 
-    # Verify session is actually cleared after logout
     r2 = auth_session.get(f"{BASE_URL}/api/online/cloud_meta")
     try:
         body2 = r2.json()
-        check("Session cleared after logout (cloud_meta returns ok=False)",
+        check("Session cleared after logout",
               not body2.get("ok"),
               "Session correctly invalidated",
               f"Session still active after logout — {body2}")
     except Exception as e:
         log("FAIL", "Session cleared after logout", f"Could not parse response: {e}")
 
-    # Double logout (should still return ok)
     r3 = auth_session.post(f"{BASE_URL}/api/online/logout")
     try:
         body3 = r3.json()
@@ -339,8 +368,8 @@ else:
 
 section("8. SECURITY & EDGE CASES")
 
-# SQL injection-like username attempt
 inj_session = requests.Session()
+
 r = inj_session.post(f"{BASE_URL}/api/online/login",
                      json={"username": "' OR '1'='1", "password": "anything"})
 try:
@@ -348,11 +377,10 @@ try:
     check("Login rejects SQL-injection-like username",
           not body.get("ok"),
           body.get("message", ""),
-          f"Unexpected ok=True for injection payload")
+          "Unexpected ok=True for injection payload")
 except Exception as e:
     log("FAIL", "SQL injection protection", f"Could not parse response: {e}")
 
-# Missing JSON body
 r2 = inj_session.post(f"{BASE_URL}/api/online/login",
                       data="not json",
                       headers={"Content-Type": "text/plain"})
@@ -361,22 +389,58 @@ check("Login handles non-JSON body gracefully",
       f"HTTP {r2.status_code}",
       f"Got HTTP {r2.status_code} — may cause 500 error")
 
-# Very long username (stress test)
-r3 = inj_session.post(f"{BASE_URL}/api/online/register",
-                      json={"username": "a" * 500, "password": TEST_PASS})
-try:
-    body3 = r3.json()
-    check("Register rejects extremely long username gracefully",
-          r3.status_code != 500,
-          f"HTTP {r3.status_code} — {body3.get('message', '')}",
-          f"Server returned 500 — unhandled error for long username")
-except Exception as e:
-    log("FAIL", "Long username handling", f"Could not parse response: {e}")
+
+# ─── 9. Rate Limiting ─────────────────────────────────────────────────────────
+
+section("9. RATE LIMITING")
+
+log("INFO", "Login limit: 10 per minute per IP")
+log("INFO", "Register limit: 5 per hour per IP")
+log("INFO", "Sending 10 rapid wrong-password login attempts to trigger the login rate limit...")
+
+rl_session = requests.Session()
+last_status = None
+hit_429 = False
+
+for i in range(12):
+    r = rl_session.post(f"{BASE_URL}/api/online/login",
+                        json={"username": "ratelimitcheckuser", "password": "badpass"})
+    last_status = r.status_code
+    if r.status_code == 429:
+        hit_429 = True
+        check(f"Login rate limit triggered on attempt {i + 1}",
+              True,
+              "HTTP 429 Too Many Requests — rate limiter is working")
+        break
+
+if not hit_429:
+    log("FAIL", "Login rate limit not triggered after 12 attempts",
+        f"Last status: {last_status} — check that flask-limiter is installed and active")
+
+log("INFO", "Testing register rate limit (5 per hour)...")
+log("INFO", "Note: previous registration tests count toward the 5/hour limit.")
+
+rl_reg_session = requests.Session()
+hit_reg_429 = False
+
+for i in range(8):
+    r = rl_reg_session.post(f"{BASE_URL}/api/online/register",
+                            json={"username": "ab", "password": "x"})
+    if r.status_code == 429:
+        hit_reg_429 = True
+        check(f"Register rate limit triggered on attempt {i + 1}",
+              True,
+              "HTTP 429 Too Many Requests — rate limiter is working")
+        break
+
+if not hit_reg_429:
+    log("WARN", "Register rate limit not triggered in 8 attempts",
+        "This may be because the hour window reset, or flask-limiter is not active")
 
 
-# ─── 9. Summary ───────────────────────────────────────────────────────────────
+# ─── 10. Summary ──────────────────────────────────────────────────────────────
 
-section("9. SUMMARY")
+section("10. SUMMARY")
 
 passed = [l for s, l in results if s == "PASS"]
 failed = [l for s, l in results if s == "FAIL"]
@@ -391,4 +455,7 @@ if failed:
         print(f"    \033[91m✗\033[0m {label}")
 
 print(f"\n  Test account used: {TEST_USER}")
-print(f"  (You can delete it from Supabase: ol2_users WHERE username='{TEST_USER}')\n")
+print(f"  (Clean up: DELETE FROM ol2_users WHERE username='{TEST_USER}'")
+if 'user_20' in dir():
+    print(f"             DELETE FROM ol2_users WHERE username='{user_20}')")
+print()

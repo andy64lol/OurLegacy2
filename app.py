@@ -14,6 +14,8 @@ from flask import (
     make_response,
     send_from_directory,
 )
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import json
 import random
 import os
@@ -64,6 +66,14 @@ from utilities.supabase_db import (
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "ol2-default-dev-key-change-in-prod")
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri="memory://",
+)
+
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = os.path.join(os.path.dirname(__file__), ".flask_sessions")
 app.config["SESSION_PERMANENT"] = False
@@ -3697,6 +3707,7 @@ def new_game():
 
 
 @app.route("/api/online/register", methods=["POST"])
+@limiter.limit("5 per hour")
 def api_online_register():
     data = request.get_json(force=True, silent=True) or {}
     username = data.get("username", "").strip()
@@ -3708,6 +3719,7 @@ def api_online_register():
 
 
 @app.route("/api/online/login", methods=["POST"])
+@limiter.limit("10 per minute")
 def api_online_login():
     data = request.get_json(force=True, silent=True) or {}
     username = data.get("username", "").strip()
