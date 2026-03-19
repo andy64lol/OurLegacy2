@@ -733,21 +733,20 @@ strong { font-weight: 600; }
 .rest-notice  { font-size: 13px; color: var(--green-bright); margin-top: 7px; text-transform: uppercase; }
 
 .sidebar-nav         { padding: 14px 12px; margin-top: auto; }
-.sidebar-quick-toggles { display: flex; gap: 6px; margin-top: 6px; }
+.bg-option-btn.active { background: var(--wood-bright) !important; color: var(--bg-dark) !important; }
+.diff-glyph { width: 12px; height: 12px; vertical-align: middle; margin: 0 1px; }
+.diff-empty  { opacity: 0.25; font-size: 10px; }
 .sidebar-save-section{ padding: 10px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
 
 .main-content {
     padding: 18px;
     overflow-y: auto;
-    background-image: url('/game_assets/backgrounds/1.png');
-    background-size: cover;
-    background-position: center top;
-    background-attachment: local;
     position: relative;
 }
-.main-content.no-bg {
-    background-image: none;
-}
+body.ol2-bg-1 { background-image: url('/game_assets/backgrounds/1.png'); background-size: cover; background-attachment: fixed; background-position: center; }
+body.ol2-bg-2 { background-image: url('/game_assets/backgrounds/2.png'); background-size: cover; background-attachment: fixed; background-position: center; }
+body.ol2-bg-3 { background-image: url('/game_assets/backgrounds/3.png'); background-size: cover; background-attachment: fixed; background-position: center; }
+body.ol2-bg-4 { background-image: url('/game_assets/backgrounds/4.png'); background-size: cover; background-attachment: fixed; background-position: center; }
 .main-content > * { position: relative; z-index: 1; }
 
 /* ─── Toast Notifications ────────────────────────────────── */
@@ -2031,6 +2030,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     align-items: center;
     gap: 10px;
 }
+.settings-bg-row { flex-wrap: wrap; gap: 6px; }
 
 .settings-label {
     font-size: 13px;

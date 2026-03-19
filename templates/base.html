@@ -35,11 +35,13 @@
                            oninput="settingsSetVolume(this.value)" class="music-slider">
                     <span id="settings-music-vol" class="music-vol-label">30%</span>
                 </div>
-                <div class="settings-section-label" style="margin-top:8px;">Display</div>
-                <div class="settings-row" id="settings-bg-row">
-                    <span class="settings-label">Background</span>
-                    <button id="settings-bg-toggle" class="btn btn-secondary btn-xsmall" onclick="settingsToggleBg()">On</button>
-                    <span id="settings-bg-note" class="settings-note"></span>
+                <div class="settings-section-label" style="margin-top:8px;">Background</div>
+                <div class="settings-row settings-bg-row">
+                    <button class="bg-option-btn btn btn-secondary btn-xsmall" data-bg="1" onclick="applyBackground('1')">BG 1</button>
+                    <button class="bg-option-btn btn btn-secondary btn-xsmall" data-bg="2" onclick="applyBackground('2')">BG 2</button>
+                    <button class="bg-option-btn btn btn-secondary btn-xsmall" data-bg="3" onclick="applyBackground('3')">BG 3</button>
+                    <button class="bg-option-btn btn btn-secondary btn-xsmall" data-bg="4" onclick="applyBackground('4')">BG 4</button>
+                    <button class="bg-option-btn btn btn-secondary btn-xsmall" data-bg="none" onclick="applyBackground('none')">None</button>
                 </div>
             </div>
             <div class="settings-footer">

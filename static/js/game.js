@@ -416,19 +416,27 @@ function initPagination() {
 }
 
 function initBackground() {
-    var main = document.querySelector('.main-content');
-    if (!main) return;
-    var bgOff = localStorage.getItem('ol2_bg_off') === 'true';
-    if (bgOff) {
-        main.classList.add('no-bg');
+    var bg = localStorage.getItem('ol2_bg');
+    if (!bg) {
+        var legacyOff = localStorage.getItem('ol2_bg_off') === 'true';
+        bg = legacyOff ? 'none' : '1';
+    }
+    _applyBgClass(bg);
+}
+
+function _applyBgClass(val) {
+    document.body.classList.remove('ol2-bg-1','ol2-bg-2','ol2-bg-3','ol2-bg-4');
+    if (val && val !== 'none') {
+        document.body.classList.add('ol2-bg-' + val);
     }
 }
 
-function toggleBackground() {
-    var main = document.querySelector('.main-content');
-    if (!main) return;
-    var isOff = main.classList.toggle('no-bg');
-    localStorage.setItem('ol2_bg_off', isOff ? 'true' : 'false');
+function applyBackground(val) {
+    _applyBgClass(val);
+    localStorage.setItem('ol2_bg', val);
+    document.querySelectorAll('.bg-option-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.bg === val);
+    });
 }
 
 function openSettings() {
@@ -448,19 +456,10 @@ function openSettings() {
     if (slider)   slider.value = displayVol;
     if (volLabel) volLabel.textContent = displayVol + '%';
 
-    var bgBtn  = document.getElementById('settings-bg-toggle');
-    var bgNote = document.getElementById('settings-bg-note');
-    var main   = document.querySelector('.main-content');
-    if (bgBtn) {
-        if (!main) {
-            bgBtn.disabled = true;
-            if (bgNote) bgNote.textContent = 'In-game only';
-        } else {
-            bgBtn.disabled = false;
-            if (bgNote) bgNote.textContent = '';
-            bgBtn.textContent = main.classList.contains('no-bg') ? 'Off' : 'On';
-        }
-    }
+    var currentBg = localStorage.getItem('ol2_bg') || '1';
+    document.querySelectorAll('.bg-option-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.bg === currentBg);
+    });
 
     modal.style.display = 'flex';
 }
@@ -474,54 +473,23 @@ function settingsOverlayClick(e) {
     if (e.target === document.getElementById('settings-modal')) closeSettings();
 }
 
-function _syncMusicButtons() {
-    var state = _musicMuted ? 'Off' : 'On';
-    var btn = document.getElementById('settings-music-toggle');
-    var sb  = document.getElementById('sidebar-music-btn');
-    if (btn) btn.textContent = state;
-    if (sb)  sb.textContent  = 'Music: ' + state;
-}
-
-function _syncBgButtons() {
-    var main = document.querySelector('.main-content');
-    var on   = main && !main.classList.contains('no-bg');
-    var state = on ? 'On' : 'Off';
-    var btn = document.getElementById('settings-bg-toggle');
-    var sb  = document.getElementById('sidebar-bg-btn');
-    if (btn) btn.textContent = state;
-    if (sb)  sb.textContent  = 'BG: ' + state;
-}
-
 function settingsToggleMusic() {
     toggleMusicMute();
+    var btn    = document.getElementById('settings-music-toggle');
     var slider = document.getElementById('settings-music-slider');
     var label  = document.getElementById('settings-music-vol');
     var vol = _musicAudio ? Math.round(_musicAudio.volume * 100) : 0;
+    if (btn)    btn.textContent = _musicMuted ? 'Off' : 'On';
     if (slider) slider.value = vol;
     if (label)  label.textContent = vol + '%';
-    _syncMusicButtons();
 }
 
 function settingsSetVolume(val) {
     setMusicVolume(val);
+    var btn   = document.getElementById('settings-music-toggle');
     var label = document.getElementById('settings-music-vol');
+    if (btn)   btn.textContent = (parseInt(val, 10) === 0) ? 'Off' : 'On';
     if (label) label.textContent = val + '%';
-    _syncMusicButtons();
-}
-
-function settingsToggleBg() {
-    toggleBackground();
-    _syncBgButtons();
-}
-
-function quickToggleMusic() {
-    toggleMusicMute();
-    _syncMusicButtons();
-}
-
-function quickToggleBg() {
-    toggleBackground();
-    _syncBgButtons();
 }
 
 async function saveAndQuit() {

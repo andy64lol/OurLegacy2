@@ -19,7 +19,7 @@ const raceData  = {{ data.races  | tojson }};
 <div class="welcome-screen">
     <div class="welcome-inner">
         <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="title-banner">
-        <div style="text-align:center;margin-top:-10px;margin-bottom:4px;font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">v1.1.5 &mdash; Fresh Glyphs</div>
+        <div style="text-align:center;margin-top:-10px;margin-bottom:4px;font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">v1.1.6 &mdash; Patches</div>
         
         {% if splash_text %}
         <div style="text-align:center;margin-bottom:14px;font-size:13px;color:var(--gold);font-style:italic;padding:0 20px;line-height:1.4;">
@@ -76,6 +76,10 @@ const raceData  = {{ data.races  | tojson }};
             <div class="feature-tile">
                 <div class="feature-title">Quests</div>
                 <div class="feature-desc">Over 50 unique quests to complete</div>
+            </div>
+            <div class="feature-tile">
+                <div class="feature-title">Crafting</div>
+                <div class="feature-desc">Discover and craft powerful gear</div>
             </div>
         </div>
     </div>
@@ -503,10 +507,6 @@ const raceData  = {{ data.races  | tojson }};
             <button class="btn btn-danger btn-small" onclick="saveAndQuit()">
                 Save and Quit to Main Menu
             </button>
-            <div class="sidebar-quick-toggles">
-                <button id="sidebar-music-btn" class="btn btn-secondary btn-xsmall" onclick="quickToggleMusic()">Music: On</button>
-                <button id="sidebar-bg-btn" class="btn btn-secondary btn-xsmall" onclick="quickToggleBg()">BG: On</button>
-            </div>
             <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;"><img class="type-glyph" src="/game_assets/glyphs/settings.png" alt="settings"> Settings</button>
         </div>
     </aside>
@@ -809,7 +809,7 @@ const raceData  = {{ data.races  | tojson }};
                                     {% if conn.difficulty > 0 %}
                                     <div style="font-size:12px;color:var(--text-dim);">
                                         Difficulty: <span style="color:{% if conn.difficulty <= 2 %}var(--green-bright){% elif conn.difficulty <= 3 %}var(--gold){% else %}var(--red){% endif %}">
-                                            {% for i in range(conn.difficulty) %}★{% endfor %}{% for i in range(5 - conn.difficulty) %}☆{% endfor %}
+                                            {% for i in range(conn.difficulty) %}<img class="diff-glyph" src="/game_assets/glyphs/fight.png" alt="*">{% endfor %}{% for i in range(5 - conn.difficulty) %}<span class="diff-empty">-</span>{% endfor %}
                                         </span>
                                     </div>
                                     {% endif %}
@@ -1342,7 +1342,7 @@ const raceData  = {{ data.races  | tojson }};
                                 <span class="quest-progress-label">{{ prog.label }}</span>
                                 <span class="quest-progress-val {% if prog.done %}done{% endif %}">
                                     {{ prog.current }} / {{ prog.target }}
-                                    {% if prog.done %} ✓{% endif %}
+                                    {% if prog.done %} <img class="type-glyph" src="/game_assets/glyphs/sparkles.png" alt="done">{% endif %}
                                 </span>
                             </div>
                             {% endfor %}
@@ -1388,7 +1388,7 @@ const raceData  = {{ data.races  | tojson }};
                             <div style="flex:1;min-width:180px;">
                                 <div style="font-size:15px;font-weight:600;color:{% if ch.claimed %}var(--text-dim){% elif ch.ready %}var(--gold){% else %}var(--text-light){% endif %};">
                                     {{ ch.name }}
-                                    {% if ch.claimed %}<span style="font-size:12px;color:var(--green-bright);font-weight:normal;"> ✓ Claimed</span>{% endif %}
+                                    {% if ch.claimed %}<span style="font-size:12px;color:var(--green-bright);font-weight:normal;"> <img class="type-glyph" src="/game_assets/glyphs/sparkles.png" alt="claimed"> Claimed</span>{% endif %}
                                 </div>
                                 <div style="font-size:13px;color:var(--text-dim);margin-top:3px;">{{ ch.description }}</div>
                                 <div style="margin-top:8px;">
