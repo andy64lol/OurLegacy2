@@ -3800,6 +3800,26 @@ def api_cloud_meta():
     return jsonify({"ok": True, "meta": meta})
 
 
+@app.route("/api/online/cloud_download")
+def api_cloud_download():
+    user_id = session.get("online_user_id")
+    if not user_id:
+        return jsonify({"ok": False, "message": "Not logged in."}), 401
+    result = cloud_load(user_id)
+    if not result["ok"]:
+        return jsonify({"ok": False, "message": result["message"]}), 404
+    raw_bytes = encrypt_save(result["data"])
+    username = session.get("online_username", "player")
+    data = result["data"]
+    player = data.get("player", {})
+    player_name = (player.get("name") or username).replace(" ", "_")
+    filename = f"cloud_{player_name}_lv{player.get('level', 1)}.olsave"
+    response = make_response(raw_bytes)
+    response.headers["Content-Type"] = "application/octet-stream"
+    response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
 port = int(os.environ.get("PORT", 5000))
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=port, debug=False)
