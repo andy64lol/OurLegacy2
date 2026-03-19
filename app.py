@@ -80,6 +80,15 @@ app.config["SESSION_PERMANENT"] = False
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
 
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({
+        "ok": False,
+        "message": "Too many attempts. Please wait a moment and try again.",
+    }), 429
+
+
 dice = Dice()
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
