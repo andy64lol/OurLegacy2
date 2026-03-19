@@ -978,7 +978,6 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     gap: 14px;
 }
 .connection-card.visited { border-color: var(--wood-mid); }
-.conn-info {}
 .conn-name { font-size: 15px; font-weight: 500; color: var(--text-bright); }
 .conn-danger { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
 .conn-danger.danger { color: var(--red); }
