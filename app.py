@@ -3819,6 +3819,15 @@ def api_online_login():
 
 @app.route("/api/online/logout", methods=["POST"])
 def api_online_logout():
+    game_keys = [
+        "player", "current_area", "completed_missions", "visited_areas",
+        "quest_progress", "seen_cutscenes", "current_weather", "messages",
+        "diary", "npc_unlocked_quests", "battle_enemy", "battle_player_effects",
+        "battle_enemy_effects", "active_dungeon", "pending_cutscene",
+        "weekly_challenges_progress",
+    ]
+    for key in game_keys:
+        session.pop(key, None)
     session.pop("online_username", None)
     session.pop("online_user_id", None)
     session.modified = True

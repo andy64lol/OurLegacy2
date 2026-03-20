@@ -560,20 +560,25 @@ async function logoutAndSave() {
     var statusEl = document.getElementById('cloud-save-status');
     if (statusEl) { statusEl.textContent = 'Saving to cloud...'; statusEl.style.color = 'var(--text-dim)'; }
     showToast('Saving to cloud...', 'var(--text-dim)', 2000);
+    var saveOk = false;
     try {
         var saveRes = await fetch('/api/online/cloud_save', { method: 'POST' });
         var saveJson = await saveRes.json();
-        if (!saveJson.ok) {
-            if (statusEl) { statusEl.textContent = saveJson.message; statusEl.style.color = 'var(--red)'; }
-            showToast('Cloud save failed: ' + saveJson.message, 'var(--red)', 3500);
-            return;
+        if (saveJson.ok) {
+            saveOk = true;
+            if (statusEl) { statusEl.textContent = 'Saved! Logging out...'; statusEl.style.color = 'var(--green-bright)'; }
+        } else {
+            if (statusEl) { statusEl.textContent = 'Save failed: ' + saveJson.message; statusEl.style.color = 'var(--red)'; }
+            showToast('Cloud save failed: ' + saveJson.message + '. Logging out anyway...', 'var(--red)', 3500);
         }
-        if (statusEl) { statusEl.textContent = 'Saved! Logging out...'; statusEl.style.color = 'var(--green-bright)'; }
-        await fetch('/api/online/logout', { method: 'POST' });
-        showToast('Saved and logged out. Returning to menu...', 'var(--green-bright)', 2000);
-        setTimeout(function() { window.location.href = '/'; }, 1200);
     } catch(e) {
-        if (statusEl) { statusEl.textContent = 'Error: ' + e.message; statusEl.style.color = 'var(--red)'; }
-        showToast('Error: ' + e.message, 'var(--red)', 3500);
+        if (statusEl) { statusEl.textContent = 'Save error. Logging out anyway...'; statusEl.style.color = 'var(--red)'; }
+        showToast('Save error: ' + e.message + '. Logging out anyway...', 'var(--red)', 3500);
     }
+    try {
+        await fetch('/api/online/logout', { method: 'POST' });
+    } catch(e) { /* ignore logout errors */ }
+    var delay = saveOk ? 1200 : 3500;
+    if (saveOk) showToast('Saved and logged out. Returning to menu...', 'var(--green-bright)', 2000);
+    setTimeout(function() { window.location.href = '/'; }, delay);
 }
