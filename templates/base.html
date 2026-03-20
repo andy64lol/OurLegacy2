@@ -111,7 +111,7 @@
         var socket = null;
 
         function initChat() {
-            socket = io({ transports: ['websocket', 'polling'] });
+            socket = io({ transports: ['polling', 'websocket'] });
 
             socket.on('connect', function() {
                 document.getElementById('chat-loading') && (document.getElementById('chat-loading').textContent = '');

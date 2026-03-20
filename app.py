@@ -14,6 +14,7 @@ from flask import (
     make_response,
     send_from_directory,
 )
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_socketio import SocketIO, emit as socketio_emit, disconnect as socketio_disconnect
@@ -70,6 +71,7 @@ from utilities.supabase_db import (
 )
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 app.secret_key = os.environ.get("SECRET_KEY", "ol2-default-dev-key-change-in-prod")
 
 limiter = Limiter(

@@ -8,3 +8,14 @@ Flask-Limiter
 flask-socketio
 eventlet
 better-profanity
+better-profanity
+cryptography
+eventlet
+flask
+Flask-Limiter
+flask-session
+flask-socketio
+gunicorn
+requests
+supabase
+werkzeug
