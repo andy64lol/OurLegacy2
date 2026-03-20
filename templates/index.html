@@ -59,7 +59,7 @@ const raceData  = {{ data.races  | tojson }};
                 </button>
                 {% else %}
                 <button class="btn btn-secondary" onclick="openOnlineModal()" style="background:linear-gradient(135deg,rgba(80,60,120,0.6),rgba(50,30,90,0.6));border-color:var(--mana-bright);">
-                    &#127760; Sign In
+                    <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:14px;height:14px;image-rendering:pixelated;vertical-align:middle;margin-right:4px;"> Sign In
                 </button>
                 {% endif %}
             </div>
@@ -104,7 +104,7 @@ const raceData  = {{ data.races  | tojson }};
     <div id="online-modal-box" style="background:linear-gradient(160deg,rgba(18,12,38,0.98),rgba(10,6,28,0.98));border:1px solid rgba(180,130,255,0.45);border-radius:14px;padding:28px 24px;width:100%;max-width:360px;position:relative;box-shadow:0 0 40px rgba(140,90,255,0.25);">
         <button onclick="closeOnlineModal()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;">&times;</button>
         <div style="text-align:center;margin-bottom:18px;">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:var(--mana-bright);opacity:0.8;margin-bottom:4px;">&#127760; Online Account</div>
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:var(--mana-bright);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:5px;"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:14px;height:14px;image-rendering:pixelated;"> Online Account</div>
         </div>
         {% if online_user %}
         <!-- Logged In View -->
@@ -569,7 +569,7 @@ const raceData  = {{ data.races  | tojson }};
                 <button onclick="switchTab('crafting',false)" class="btn btn-secondary btn-small" style="text-align:center;">Crafting</button>
                 <button onclick="switchTab('market',false)" class="btn btn-secondary btn-small" style="text-align:center;">Elite Market</button>
                 {% if online_user %}
-                <button onclick="toggleChat()" class="btn btn-secondary btn-small" style="text-align:center;">&#127760; Global Chat</button>
+                <button onclick="toggleChat()" class="btn btn-secondary btn-small" style="text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:14px;height:14px;image-rendering:pixelated;"> Global Chat</button>
                 {% endif %}
             </div>
         </div>
@@ -579,7 +579,7 @@ const raceData  = {{ data.races  | tojson }};
             <input type="file" id="load-file-input" accept=".olsave" style="display:none;">
             <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()">Load Game</button>
             {% else %}
-            <div style="font-size:11px;color:var(--mana-bright);text-align:center;padding:3px 0;opacity:0.85;">&#127760; {{ online_user }}</div>
+            <div style="font-size:11px;color:var(--mana-bright);text-align:center;padding:3px 0;opacity:0.85;display:flex;align-items:center;justify-content:center;gap:4px;"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:13px;height:13px;image-rendering:pixelated;"> {{ online_user }}</div>
             {% endif %}
         </div>
 

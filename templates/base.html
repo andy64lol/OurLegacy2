@@ -59,7 +59,7 @@
 
             <!-- Header -->
             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(60,30,100,0.5);border-bottom:1px solid rgba(180,130,255,0.2);">
-                <span style="font-size:13px;font-weight:600;color:var(--mana-bright);letter-spacing:0.05em;">&#127760; Global Chat</span>
+                <span style="font-size:13px;font-weight:600;color:var(--mana-bright);letter-spacing:0.05em;display:flex;align-items:center;gap:5px;"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:16px;height:16px;image-rendering:pixelated;"> Global Chat</span>
                 <div style="display:flex;gap:8px;align-items:center;">
                     <button id="chat-users-btn" onclick="toggleOnlineUsers()" style="background:none;border:none;color:var(--text-dim);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid rgba(180,130,255,0.25);">
                         <span id="chat-online-count">0</span> online
@@ -95,7 +95,7 @@
         <!-- Toggle Button -->
         <button id="chat-toggle-btn" onclick="toggleChat()" title="Global Chat"
             style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(80,50,150,0.9),rgba(40,20,90,0.9));border:2px solid rgba(180,130,255,0.5);color:var(--mana-bright);font-size:20px;cursor:pointer;box-shadow:0 2px 12px rgba(100,50,200,0.4);position:relative;display:flex;align-items:center;justify-content:center;">
-            &#128172;
+            <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:24px;height:24px;image-rendering:pixelated;">
             <span id="chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;line-height:16px;text-align:center;font-weight:700;"></span>
         </button>
     </div>
