@@ -1,13 +1,24 @@
 """
 Supabase integration for Our Legacy 2.
 Handles user accounts (username + hashed password), cloud saves, and global chat.
+
+All Supabase calls are executed inside gevent's native thread pool (tpool) to
+avoid the httpx/asyncio vs gevent event-loop conflict that causes silent hangs
+on gunicorn+gevent deployments (e.g. Render).
 """
 import os
 import hashlib
-import pickle
 import base64
 import secrets
 from typing import Optional, Dict, Any, List
+
+try:
+    from gevent import tpool as _tpool
+    def _run(fn, *args, **kwargs):
+        return _tpool.execute(fn, *args, **kwargs)
+except ImportError:
+    def _run(fn, *args, **kwargs):
+        return fn(*args, **kwargs)
 
 from supabase import create_client, Client
 from utilities.save_load import encrypt_save, decrypt_save
@@ -31,14 +42,20 @@ def censor_text(text: str) -> str:
         return text
     return _profanity.censor(text)
 
+
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 
+_client: Optional[Client] = None
+
 
 def _get_client() -> Client:
+    global _client
     if not SUPABASE_URL or not SUPABASE_KEY:
         raise RuntimeError("Supabase credentials not configured.")
-    return create_client(SUPABASE_URL, SUPABASE_KEY)
+    if _client is None:
+        _client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    return _client
 
 
 def _hash_password(password: str, salt: Optional[str] = None) -> tuple[str, str]:
@@ -66,7 +83,7 @@ def register_user(username: str, password: str) -> Dict[str, Any]:
     if contains_profanity(username):
         return {"ok": False, "message": "Username contains inappropriate language."}
 
-    try:
+    def _do():
         client = _get_client()
         existing = (
             client.table("ol2_users")
@@ -76,12 +93,14 @@ def register_user(username: str, password: str) -> Dict[str, Any]:
         )
         if existing.data:
             return {"ok": False, "message": "Username already taken."}
-
         pw_hash, salt = _hash_password(password)
         client.table("ol2_users").insert(
             {"username": username, "pw_hash": pw_hash, "salt": salt}
         ).execute()
         return {"ok": True, "message": f"Account '{username}' created successfully!"}
+
+    try:
+        return _run(_do)
     except Exception as e:
         return {"ok": False, "message": f"Registration failed: {e}"}
 
@@ -92,7 +111,8 @@ def login_user(username: str, password: str) -> Dict[str, Any]:
     Returns {'ok': bool, 'message': str, 'user_id': str|None}
     """
     username = username.strip().lower()
-    try:
+
+    def _do():
         client = _get_client()
         result = (
             client.table("ol2_users")
@@ -102,13 +122,14 @@ def login_user(username: str, password: str) -> Dict[str, Any]:
         )
         if not result.data:
             return {"ok": False, "message": "Invalid username or password.", "user_id": None}
-
         row = result.data[0]
         pw_hash, _ = _hash_password(password, salt=row["salt"])
         if pw_hash != row["pw_hash"]:
             return {"ok": False, "message": "Invalid username or password.", "user_id": None}
-
         return {"ok": True, "message": f"Welcome back, {username}!", "user_id": str(row["id"])}
+
+    try:
+        return _run(_do)
     except Exception as e:
         return {"ok": False, "message": f"Login failed: {e}", "user_id": None}
 
@@ -117,35 +138,29 @@ def login_user(username: str, password: str) -> Dict[str, Any]:
 
 def cloud_save(user_id: str, save_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Save game state to Supabase as an encrypted pickle blob.
+    Save game state to Supabase as an encrypted blob.
     Each user has one cloud save slot (upsert by user_id).
     Returns {'ok': bool, 'message': str}
     """
-    try:
+    encrypted_bytes = encrypt_save(save_data)
+    encoded = base64.b64encode(encrypted_bytes).decode("utf-8")
+    player = save_data.get("player", {})
+    row = {
+        "user_id": user_id,
+        "save_blob": encoded,
+        "player_name": player.get("name", ""),
+        "level": player.get("level", 1),
+        "character_class": player.get("class", ""),
+        "current_area": save_data.get("current_area", ""),
+    }
+
+    def _do():
         client = _get_client()
-        encrypted_bytes = encrypt_save(save_data)
-        encoded = base64.b64encode(encrypted_bytes).decode("utf-8")
-
-        player = save_data.get("player", {})
-        meta = {
-            "player_name": player.get("name", ""),
-            "level": player.get("level", 1),
-            "character_class": player.get("class", ""),
-            "current_area": save_data.get("current_area", ""),
-        }
-
-        client.table("ol2_saves").upsert(
-            {
-                "user_id": user_id,
-                "save_blob": encoded,
-                "player_name": meta["player_name"],
-                "level": meta["level"],
-                "character_class": meta["character_class"],
-                "current_area": meta["current_area"],
-            },
-            on_conflict="user_id",
-        ).execute()
+        client.table("ol2_saves").upsert(row, on_conflict="user_id").execute()
         return {"ok": True, "message": "Game saved to the cloud!"}
+
+    try:
+        return _run(_do)
     except Exception as e:
         return {"ok": False, "message": f"Cloud save failed: {e}"}
 
@@ -155,7 +170,7 @@ def cloud_load(user_id: str) -> Dict[str, Any]:
     Load game state from Supabase for the given user.
     Returns {'ok': bool, 'message': str, 'data': dict|None}
     """
-    try:
+    def _do():
         client = _get_client()
         result = (
             client.table("ol2_saves")
@@ -163,17 +178,24 @@ def cloud_load(user_id: str) -> Dict[str, Any]:
             .eq("user_id", user_id)
             .execute()
         )
-        if not result.data:
-            return {"ok": False, "message": "No cloud save found.", "data": None}
+        return result.data
 
-        row = result.data[0]
-        encoded = row["save_blob"]
-        raw_bytes = base64.b64decode(encoded.encode("utf-8"))
-        data = decrypt_save(raw_bytes)
+    try:
+        data = _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Cloud load failed: {e}", "data": None}
+
+    if not data:
+        return {"ok": False, "message": "No cloud save found.", "data": None}
+
+    try:
+        row = data[0]
+        raw_bytes = base64.b64decode(row["save_blob"].encode("utf-8"))
+        save = decrypt_save(raw_bytes)
         return {
             "ok": True,
             "message": f"Loaded save for {row['player_name']} (Lv.{row['level']})",
-            "data": data,
+            "data": save,
         }
     except Exception as e:
         return {"ok": False, "message": f"Cloud load failed: {e}", "data": None}
@@ -181,7 +203,7 @@ def cloud_load(user_id: str) -> Dict[str, Any]:
 
 def get_cloud_save_meta(user_id: str) -> Optional[Dict[str, Any]]:
     """Return metadata about the user's cloud save, or None if none exists."""
-    try:
+    def _do():
         client = _get_client()
         result = (
             client.table("ol2_saves")
@@ -189,38 +211,32 @@ def get_cloud_save_meta(user_id: str) -> Optional[Dict[str, Any]]:
             .eq("user_id", user_id)
             .execute()
         )
-        if result.data:
-            return result.data[0]
-        return None
+        return result.data
+
+    try:
+        data = _run(_do)
+        return data[0] if data else None
     except Exception:
         return None
 
 
 # ─── Global Chat ──────────────────────────────────────────────────────────────
 
-CHAT_TABLE_SQL = """
--- Run this once in your Supabase SQL editor to create the chat table:
-CREATE TABLE IF NOT EXISTS ol2_chat (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  username TEXT NOT NULL,
-  message TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ol2_chat_created_at_idx ON ol2_chat(created_at DESC);
-"""
-
-
 def send_chat_message(username: str, message: str) -> Dict[str, Any]:
     """Store a chat message in Supabase. Returns {'ok': bool, 'row': dict}."""
-    try:
+    def _do():
         client = _get_client()
         result = (
             client.table("ol2_chat")
             .insert({"username": username, "message": message})
             .execute()
         )
-        if result.data:
-            return {"ok": True, "row": result.data[0]}
+        return result.data
+
+    try:
+        data = _run(_do)
+        if data:
+            return {"ok": True, "row": data[0]}
         return {"ok": False, "row": None}
     except Exception as e:
         return {"ok": False, "row": None, "error": str(e)}
@@ -228,7 +244,7 @@ def send_chat_message(username: str, message: str) -> Dict[str, Any]:
 
 def get_chat_history(limit: int = 60) -> List[Dict[str, Any]]:
     """Return the most recent chat messages, oldest first."""
-    try:
+    def _do():
         client = _get_client()
         result = (
             client.table("ol2_chat")
@@ -238,5 +254,8 @@ def get_chat_history(limit: int = 60) -> List[Dict[str, Any]]:
             .execute()
         )
         return result.data or []
+
+    try:
+        return _run(_do)
     except Exception:
         return []
