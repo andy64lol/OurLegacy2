@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ourlegacy2
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -k gevent -w 1 --bind 0.0.0.0:$PORT app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false

@@ -78,3 +78,15 @@ yarl==1.23.0
 zope.event==6.1
 zope.interface==8.2
 zstandard==0.25.0
+better-profanity
+cryptography
+flask
+flask-limiter
+flask-session
+flask-socketio
+gevent
+gevent-websocket
+gunicorn
+python-dotenv
+supabase
+werkzeug
