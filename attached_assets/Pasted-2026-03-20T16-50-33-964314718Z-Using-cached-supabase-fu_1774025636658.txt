@@ -1,0 +1,50 @@
+2026-03-20T16:50:33.964314718Z Using cached supabase_functions-2.28.2-py3-none-any.whl (8.8 kB)
+2026-03-20T16:50:33.965848086Z Using cached tenacity-9.1.4-py3-none-any.whl (28 kB)
+2026-03-20T16:50:33.967425947Z Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2026-03-20T16:50:33.969068743Z Using cached typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+2026-03-20T16:50:33.970605811Z Using cached urllib3-2.6.3-py3-none-any.whl (131 kB)
+2026-03-20T16:50:33.972397848Z Using cached websockets-15.0.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (182 kB)
+2026-03-20T16:50:33.974221808Z Using cached werkzeug-3.1.6-py3-none-any.whl (225 kB)
+2026-03-20T16:50:33.976178549Z Using cached wrapt-2.1.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (114 kB)
+2026-03-20T16:50:33.977899581Z Using cached wsproto-1.3.2-py3-none-any.whl (24 kB)
+2026-03-20T16:50:33.979501554Z Using cached yarl-1.23.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (102 kB)
+2026-03-20T16:50:33.981320943Z Using cached zope_event-6.1-py3-none-any.whl (6.4 kB)
+2026-03-20T16:50:33.98284131Z Using cached zope_interface-8.2-cp311-cp311-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl (259 kB)
+2026-03-20T16:50:33.984896268Z Using cached zstandard-0.25.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.6 MB)
+2026-03-20T16:50:34.446722711Z Installing collected packages: StrEnum, pyroaring, zstandard, zope.interface, zope.event, wrapt, websockets, urllib3, typing_extensions, tenacity, six, pyparsing, PyJWT, Pygments, pycparser, propcache, packaging, ordered-set, multidict, msgspec, mmh3, mdurl, MarkupSafe, itsdangerous, idna, hyperframe, hpack, h11, greenlet, fsspec, dnspython, darkdetect, click, charset-normalizer, certifi, cachetools, cachelib, blinker, bidict, better-profanity, annotated-types, yarl, wsproto, Werkzeug, typing-inspection, requests, python-dateutil, pydantic_core, markdown-it-py, Jinja2, httpcore, h2, gunicorn, gevent, deprecation, Deprecated, customtkinter, cffi, anyio, strictyaml, simple-websocket, rich, pydantic, limits, httpx, gevent-websocket, Flask, cryptography, realtime, python-engineio, pyiceberg, Flask-Session, Flask-Limiter, supabase-functions, supabase-auth, storage3, python-socketio, postgrest, supabase, Flask-SocketIO
+2026-03-20T16:51:00.626667034Z Successfully installed Deprecated-1.3.1 Flask-3.1.3 Flask-Limiter-4.1.1 Flask-Session-0.8.0 Flask-SocketIO-5.6.1 Jinja2-3.1.6 MarkupSafe-3.0.3 PyJWT-2.12.1 Pygments-2.19.2 StrEnum-0.4.15 Werkzeug-3.1.6 annotated-types-0.7.0 anyio-4.12.1 better-profanity-0.7.0 bidict-0.23.1 blinker-1.9.0 cachelib-0.13.0 cachetools-6.2.6 certifi-2026.2.25 cffi-2.0.0 charset-normalizer-3.4.5 click-8.3.1 cryptography-46.0.5 customtkinter-5.2.2 darkdetect-0.8.0 deprecation-2.1.0 dnspython-2.8.0 fsspec-2026.2.0 gevent-25.9.1 gevent-websocket-0.10.1 greenlet-3.3.2 gunicorn-25.1.0 h11-0.16.0 h2-4.3.0 hpack-4.1.0 httpcore-1.0.9 httpx-0.28.1 hyperframe-6.1.0 idna-3.11 itsdangerous-2.2.0 limits-5.8.0 markdown-it-py-4.0.0 mdurl-0.1.2 mmh3-5.2.1 msgspec-0.20.0 multidict-6.7.1 ordered-set-4.1.0 packaging-26.0 postgrest-2.28.2 propcache-0.4.1 pycparser-3.0 pydantic-2.12.5 pydantic_core-2.41.5 pyiceberg-0.11.1 pyparsing-3.3.2 pyroaring-1.0.4 python-dateutil-2.9.0.post0 python-engineio-4.13.1 python-socketio-5.16.1 realtime-2.28.2 requests-2.32.5 rich-14.3.3 simple-websocket-1.1.0 six-1.17.0 storage3-2.28.2 strictyaml-1.7.3 supabase-2.28.2 supabase-auth-2.28.2 supabase-functions-2.28.2 tenacity-9.1.4 typing-inspection-0.4.2 typing_extensions-4.15.0 urllib3-2.6.3 websockets-15.0.1 wrapt-2.1.2 wsproto-1.3.2 yarl-1.23.0 zope.event-6.1 zope.interface-8.2 zstandard-0.25.0
+2026-03-20T16:51:00.70346747Z 
+2026-03-20T16:51:00.703489392Z [notice] A new release of pip is available: 24.0 -> 26.0.1
+2026-03-20T16:51:00.703499442Z [notice] To update, run: pip install --upgrade pip
+2026-03-20T16:51:39.918688368Z ==> Uploading build...
+2026-03-20T16:51:53.321369268Z ==> Uploaded in 9.6s. Compression took 3.8s
+2026-03-20T16:51:53.530358902Z ==> Build successful 🎉
+2026-03-20T16:51:58.807666102Z ==> Deploying...
+2026-03-20T16:51:59.015799622Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-03-20T16:52:30.139820536Z ==> Running 'gunicorn app:app'
+2026-03-20T16:52:46.072757591Z [2026-03-20 16:52:46 +0000] [56] [INFO] Starting gunicorn 25.1.0
+2026-03-20T16:52:46.073259595Z [2026-03-20 16:52:46 +0000] [56] [INFO] Listening at: http://0.0.0.0:10000 (56)
+2026-03-20T16:52:46.073316398Z [2026-03-20 16:52:46 +0000] [56] [INFO] Using worker: sync
+2026-03-20T16:52:46.263786163Z [2026-03-20 16:52:46 +0000] [57] [INFO] Booting worker with pid: 57
+2026-03-20T16:52:46.266582849Z Traceback (most recent call last):
+2026-03-20T16:52:46.266955897Z   File "src/gevent/greenlet.py", line 900, in gevent._gevent_cgreenlet.Greenlet.run
+2026-03-20T16:52:46.266965748Z   File "/opt/render/project/python/Python-3.11.11/lib/python3.11/threading.py", line 1002, in _bootstrap
+2026-03-20T16:52:46.266974078Z     self._bootstrap_inner()
+2026-03-20T16:52:46.266978288Z   File "/opt/render/project/python/Python-3.11.11/lib/python3.11/threading.py", line 1049, in _bootstrap_inner
+2026-03-20T16:52:46.266983319Z     self._delete()
+2026-03-20T16:52:46.266987649Z   File "/opt/render/project/python/Python-3.11.11/lib/python3.11/threading.py", line 1081, in _delete
+2026-03-20T16:52:46.266991599Z     del _active[get_ident()]
+2026-03-20T16:52:46.266995659Z         ~~~~~~~^^^^^^^^^^^^^
+2026-03-20T16:52:46.268229629Z KeyError: 136329241946976
+2026-03-20T16:52:46.26824119Z 2026-03-20T16:52:46Z <Greenlet at 0x7bfda009eb60: <bound method Thread._bootstrap of <Timer(Thread-1, stopped 136329241946976)>>> failed with KeyError
+2026-03-20T16:52:46.26824549Z 
+2026-03-20T16:52:46.269247398Z [2026-03-20 16:52:46 +0000] [57] [ERROR] Control server error: no running event loop
+2026-03-20T16:52:47.560840088Z 127.0.0.1 - - [20/Mar/2026:16:52:47 +0000] "HEAD / HTTP/1.1" 200 0 "-" "Go-http-client/1.1"
+2026-03-20T16:52:50.251938423Z ==> Your service is live 🎉
+2026-03-20T16:52:50.269842848Z 127.0.0.1 - - [20/Mar/2026:16:52:50 +0000] "GET / HTTP/1.1" 200 19914 "-" "Go-http-client/2.0"
+2026-03-20T16:52:50.463770849Z ==> 
+2026-03-20T16:52:50.466374215Z ==> ///////////////////////////////////////////////////////////
+2026-03-20T16:52:50.468794226Z ==> 
+2026-03-20T16:52:50.470975541Z ==> Available at your primary URL https://ourlegacy2.onrender.com
+2026-03-20T16:52:50.473172066Z ==> 
+2026-03-20T16:52:50.475412852Z ==> ///////////////////////////////////////////////////////////
