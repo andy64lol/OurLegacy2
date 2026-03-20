@@ -104,9 +104,11 @@ def _inject_chat_globals():
 @socketio.on("connect")
 def _on_chat_connect():
     username = session.get("online_username")
-    if username:
-        _chat_online[request.sid] = username
-    socketio_emit("online_users", sorted(set(_chat_online.values())))
+    if not username:
+        socketio_disconnect()
+        return
+    _chat_online[request.sid] = username
+    socketio_emit("online_users", sorted(set(_chat_online.values())), broadcast=True)
     history = get_chat_history(60)
     socketio_emit("chat_history", history)
 
