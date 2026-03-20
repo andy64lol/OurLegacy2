@@ -2483,6 +2483,25 @@ def action_use_item():
         add_message(
             f"You use the {item_name} and feel its power (+{heal} HP).", "var(--gold)"
         )
+    elif item_data.get("effect") == "birthday_cake":
+        heal_amount = player["max_hp"] - player["hp"]
+        mp_amount = player["max_mp"] - player["mp"]
+        player["hp"] = player["max_hp"]
+        player["mp"] = player["max_mp"]
+        exp_bonus = int(item_data.get("exp_bonus", 0))
+        leveled = gain_experience(player, exp_bonus) if exp_bonus else False
+        player["inventory"].remove(item_name)
+        add_message(
+            f"You eat a slice of the {item_name}. It is, without exaggeration, the greatest thing you have ever tasted. "
+            f"Fully restored (+{heal_amount} HP, +{mp_amount} MP) and granted {exp_bonus:,} EXP in honour of Andrew's birthday. "
+            f"Happy Birthday, Primordial One!",
+            "var(--gold)",
+        )
+        if leveled:
+            add_message(
+                f"The birthday magic carries you to level {player['level']}! Andrew's gift keeps giving.",
+                "var(--gold)",
+            )
     elif item_data.get("effect") == "grant_exp":
         exp_grant = int(item_data.get("value", 0))
         player["inventory"].remove(item_name)

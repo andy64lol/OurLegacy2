@@ -4004,6 +4004,17 @@
          "level": 6
       }
    },
+   "Primordial Birthday Cake": {
+      "type": "consumable",
+      "description": "A towering, multi-layered cake baked by the cosmos itself in honour of Andrew — The Primordial One's birthday. The frosting shimmers with stardust, the candles burn with the light of newborn stars, and each slice tastes of every good thing ever created. It fully restores your health and mana, fills you with a profound sense of celebratory joy, and grants a generous helping of experience — because on Andrew's birthday, everyone levels up a little.",
+      "effect": "birthday_cake",
+      "heal_pct": 100,
+      "mp_restore_pct": 100,
+      "exp_bonus": 50000,
+      "price": 9999999999,
+      "rarity": "legendary",
+      "event_item": true
+   },
    "Primordial Essence": {
       "type": "consumable",
       "description": "A crystallized fragment of the cosmos itself, bestowed by a being older than time. Its inner light pulses with the weight of countless ages. Consuming it floods your very soul with an incomprehensible surge of experience — the lifetime of a god compressed into a single breath. Extremely rare and impossibly expensive.",

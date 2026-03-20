@@ -28,6 +28,18 @@
       }
     },
     {
+      "id": "primordial_birthday",
+      "name": "The Primordial One's Birthday",
+      "description": "Today marks the birthday of Andrew — The Primordial One, the ancient being from whom all existence flows. The entire realm erupts in celebration. Even the monsters have paused their slaughter to bake a cake.",
+      "date": "2026-03-24",
+      "reward_type": "item",
+      "reward_item": "Primordial Birthday Cake",
+      "reward_message": "HAPPY BIRTHDAY, ANDREW — THE PRIMORDIAL ONE! The realm itself trembles with joy. A magnificent birthday cake materialises before you, baked by the cosmos and frosted with stardust. May his ancient glory endure another aeon!",
+      "condition": {
+        "type": "none"
+      }
+    },
+    {
       "id": "spring_blessing_gold",
       "name": "Spring Blessing",
       "description": "Adventurers who answer the call on the sacred day of the Spring Blessing receive a fortune in gold from the realm's treasury.",
