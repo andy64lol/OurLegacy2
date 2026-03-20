@@ -1,16 +1,35 @@
 """
 Supabase integration for Our Legacy 2.
-Handles user accounts (username + hashed password) and cloud saves (pickled + encrypted).
+Handles user accounts (username + hashed password), cloud saves, and global chat.
 """
 import os
 import hashlib
 import pickle
 import base64
 import secrets
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from supabase import create_client, Client
 from utilities.save_load import encrypt_save, decrypt_save
+
+try:
+    from better_profanity import profanity as _profanity
+    _profanity.load_censor_words()
+    _PROFANITY_AVAILABLE = True
+except Exception:
+    _PROFANITY_AVAILABLE = False
+
+
+def contains_profanity(text: str) -> bool:
+    if not _PROFANITY_AVAILABLE:
+        return False
+    return _profanity.contains_profanity(text)
+
+
+def censor_text(text: str) -> str:
+    if not _PROFANITY_AVAILABLE:
+        return text
+    return _profanity.censor(text)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
@@ -44,6 +63,8 @@ def register_user(username: str, password: str) -> Dict[str, Any]:
         return {"ok": False, "message": "Username must be 20 characters or fewer."}
     if not password or len(password) < 6:
         return {"ok": False, "message": "Password must be at least 6 characters."}
+    if contains_profanity(username):
+        return {"ok": False, "message": "Username contains inappropriate language."}
 
     try:
         client = _get_client()
@@ -173,3 +194,49 @@ def get_cloud_save_meta(user_id: str) -> Optional[Dict[str, Any]]:
         return None
     except Exception:
         return None
+
+
+# ─── Global Chat ──────────────────────────────────────────────────────────────
+
+CHAT_TABLE_SQL = """
+-- Run this once in your Supabase SQL editor to create the chat table:
+CREATE TABLE IF NOT EXISTS ol2_chat (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username TEXT NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ol2_chat_created_at_idx ON ol2_chat(created_at DESC);
+"""
+
+
+def send_chat_message(username: str, message: str) -> Dict[str, Any]:
+    """Store a chat message in Supabase. Returns {'ok': bool, 'row': dict}."""
+    try:
+        client = _get_client()
+        result = (
+            client.table("ol2_chat")
+            .insert({"username": username, "message": message})
+            .execute()
+        )
+        if result.data:
+            return {"ok": True, "row": result.data[0]}
+        return {"ok": False, "row": None}
+    except Exception as e:
+        return {"ok": False, "row": None, "error": str(e)}
+
+
+def get_chat_history(limit: int = 60) -> List[Dict[str, Any]]:
+    """Return the most recent chat messages, oldest first."""
+    try:
+        client = _get_client()
+        result = (
+            client.table("ol2_chat")
+            .select("username, message, created_at")
+            .order("created_at", desc=False)
+            .limit(limit)
+            .execute()
+        )
+        return result.data or []
+    except Exception:
+        return []

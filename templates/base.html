@@ -49,5 +49,223 @@
             </div>
         </div>
     </div>
+
+    <!-- ── Global Chat Widget ───────────────────────────────────────── -->
+    <div id="chat-widget" style="position:fixed;bottom:20px;right:20px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:0;">
+
+        <!-- Chat Panel -->
+        <div id="chat-panel" style="display:none;width:320px;max-height:480px;background:linear-gradient(160deg,rgba(14,10,30,0.97),rgba(8,5,20,0.97));border:1px solid rgba(180,130,255,0.4);border-radius:12px;box-shadow:0 4px 32px rgba(80,40,160,0.4);overflow:hidden;flex-direction:column;margin-bottom:8px;">
+
+            <!-- Header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(60,30,100,0.5);border-bottom:1px solid rgba(180,130,255,0.2);">
+                <span style="font-size:13px;font-weight:600;color:var(--mana-bright);letter-spacing:0.05em;">&#127760; Global Chat</span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button id="chat-users-btn" onclick="toggleOnlineUsers()" style="background:none;border:none;color:var(--text-dim);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid rgba(180,130,255,0.25);">
+                        <span id="chat-online-count">0</span> online
+                    </button>
+                    <button onclick="toggleChat()" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;line-height:1;padding:0;">&times;</button>
+                </div>
+            </div>
+
+            <!-- Online Users Dropdown -->
+            <div id="chat-users-list" style="display:none;padding:8px 14px;background:rgba(40,20,70,0.6);border-bottom:1px solid rgba(180,130,255,0.15);max-height:100px;overflow-y:auto;">
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:5px;">Online Players</div>
+                <div id="chat-users-inner" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+            </div>
+
+            <!-- Messages -->
+            <div id="chat-messages" style="flex:1;overflow-y:auto;padding:10px 12px;min-height:200px;max-height:280px;display:flex;flex-direction:column;gap:4px;">
+                <div style="text-align:center;font-size:11px;color:var(--text-dim);padding:20px 0;" id="chat-loading">Connecting...</div>
+            </div>
+
+            <!-- Input -->
+            <div style="padding:10px 12px;border-top:1px solid rgba(180,130,255,0.15);background:rgba(20,10,40,0.5);">
+                {% if online_username %}
+                <div style="display:flex;gap:6px;align-items:center;">
+                    <input id="chat-input" type="text" maxlength="200" placeholder="Message the realm..." autocomplete="off"
+                        style="flex:1;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.35);border-radius:6px;color:var(--text-light);font-size:12px;outline:none;"
+                        onkeydown="if(event.key==='Enter')chatSend()">
+                    <button onclick="chatSend()" style="padding:7px 12px;background:linear-gradient(135deg,rgba(80,50,150,0.8),rgba(50,30,100,0.8));border:1px solid var(--mana-bright);border-radius:6px;color:var(--mana-bright);font-size:12px;cursor:pointer;white-space:nowrap;">Send</button>
+                </div>
+                <div id="chat-error" style="font-size:11px;color:var(--red);min-height:14px;margin-top:4px;"></div>
+                <div id="chat-cooldown" style="font-size:11px;color:var(--text-dim);min-height:14px;display:none;text-align:center;"></div>
+                {% else %}
+                <div style="text-align:center;font-size:12px;color:var(--text-dim);padding:6px 0;">
+                    <a href="/" style="color:var(--mana-bright);">Sign in</a> to join the chat
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Toggle Button -->
+        <button id="chat-toggle-btn" onclick="toggleChat()" title="Global Chat"
+            style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(80,50,150,0.9),rgba(40,20,90,0.9));border:2px solid rgba(180,130,255,0.5);color:var(--mana-bright);font-size:20px;cursor:pointer;box-shadow:0 2px 12px rgba(100,50,200,0.4);position:relative;display:flex;align-items:center;justify-content:center;">
+            &#128172;
+            <span id="chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;line-height:16px;text-align:center;font-weight:700;"></span>
+        </button>
+    </div>
+
+    <!-- SocketIO client -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+    (function() {
+        var CURRENT_USER = {{ online_username | tojson }};
+        var chatOpen = false;
+        var unreadCount = 0;
+        var cooldownTimer = null;
+        var socket = null;
+
+        function initChat() {
+            socket = io({ transports: ['websocket', 'polling'] });
+
+            socket.on('connect', function() {
+                document.getElementById('chat-loading') && (document.getElementById('chat-loading').textContent = '');
+            });
+
+            socket.on('chat_history', function(msgs) {
+                var box = document.getElementById('chat-messages');
+                if (!box) return;
+                box.innerHTML = '';
+                if (!msgs || !msgs.length) {
+                    box.innerHTML = '<div style="text-align:center;font-size:11px;color:var(--text-dim);padding:20px 0;">No messages yet. Be the first!</div>';
+                    return;
+                }
+                msgs.forEach(function(m) { appendMessage(m, false); });
+                box.scrollTop = box.scrollHeight;
+            });
+
+            socket.on('chat_message', function(msg) {
+                appendMessage(msg, true);
+                if (!chatOpen) {
+                    unreadCount++;
+                    var badge = document.getElementById('chat-badge');
+                    badge.style.display = 'flex';
+                    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                }
+            });
+
+            socket.on('online_users', function(users) {
+                var countEl = document.getElementById('chat-online-count');
+                var innerEl = document.getElementById('chat-users-inner');
+                if (countEl) countEl.textContent = users.length;
+                if (innerEl) {
+                    innerEl.innerHTML = users.map(function(u) {
+                        var isMe = (u === CURRENT_USER);
+                        return '<span style="font-size:11px;padding:2px 7px;border-radius:10px;background:' +
+                            (isMe ? 'rgba(80,150,80,0.3);border:1px solid var(--green-bright);color:var(--green-bright)' :
+                                     'rgba(80,60,120,0.3);border:1px solid rgba(180,130,255,0.3);color:var(--mana-bright)') +
+                            ';">' + escHtml(u) + (isMe ? ' (you)' : '') + '</span>';
+                    }).join('');
+                }
+            });
+
+            socket.on('chat_error', function(data) {
+                var el = document.getElementById('chat-error');
+                if (!el) return;
+                el.textContent = data.message || 'Error.';
+                if (data.message && data.message.indexOf('Wait') !== -1) {
+                    startCooldownDisplay(data.message);
+                }
+                setTimeout(function() { if (el) el.textContent = ''; }, 4000);
+            });
+
+            socket.on('disconnect', function() {});
+        }
+
+        function appendMessage(msg, animate) {
+            var box = document.getElementById('chat-messages');
+            if (!box) return;
+            var placeholder = document.getElementById('chat-loading');
+            if (placeholder) placeholder.remove();
+            var noMsg = box.querySelector('[data-nomsg]');
+            if (noMsg) noMsg.remove();
+
+            var isMe = (msg.username === CURRENT_USER);
+            var div = document.createElement('div');
+            div.style.cssText = 'display:flex;flex-direction:column;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
+            var time = '';
+            if (msg.created_at) {
+                try {
+                    var d = new Date(msg.created_at);
+                    time = d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+                } catch(e) {}
+            }
+            div.innerHTML =
+                '<div style="max-width:240px;padding:5px 10px;border-radius:' + (isMe ? '10px 10px 2px 10px' : '10px 10px 10px 2px') +
+                ';background:' + (isMe ? 'rgba(70,40,130,0.6)' : 'rgba(30,20,60,0.7)') +
+                ';border:1px solid ' + (isMe ? 'rgba(160,100,255,0.4)' : 'rgba(100,80,180,0.3)') + ';word-break:break-word;">' +
+                '<span style="font-size:10px;font-weight:700;color:' + (isMe ? 'var(--mana-bright)' : 'var(--gold)') + ';">' +
+                escHtml(msg.username) + '</span>' +
+                '<div style="font-size:12px;color:var(--text-light);margin-top:2px;">' + escHtml(msg.message) + '</div>' +
+                (time ? '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;text-align:right;">' + time + '</div>' : '') +
+                '</div>';
+            if (animate) div.style.opacity = '0';
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+            if (animate) {
+                setTimeout(function() { div.style.transition = 'opacity 0.2s'; div.style.opacity = '1'; }, 10);
+            }
+        }
+
+        function startCooldownDisplay(msg) {
+            var cd = document.getElementById('chat-cooldown');
+            var inp = document.getElementById('chat-input');
+            if (!cd) return;
+            var match = msg.match(/(\d+)s/);
+            var secs = match ? parseInt(match[1]) : 10;
+            cd.style.display = 'block';
+            if (inp) inp.disabled = true;
+            var interval = setInterval(function() {
+                secs--;
+                if (secs <= 0) {
+                    clearInterval(interval);
+                    cd.style.display = 'none';
+                    cd.textContent = '';
+                    if (inp) inp.disabled = false;
+                } else {
+                    cd.textContent = 'Next message in ' + secs + 's';
+                }
+            }, 1000);
+        }
+
+        function escHtml(s) {
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        window.toggleChat = function() {
+            chatOpen = !chatOpen;
+            var panel = document.getElementById('chat-panel');
+            panel.style.display = chatOpen ? 'flex' : 'none';
+            panel.style.flexDirection = 'column';
+            if (chatOpen) {
+                unreadCount = 0;
+                var badge = document.getElementById('chat-badge');
+                badge.style.display = 'none';
+                badge.textContent = '';
+                var box = document.getElementById('chat-messages');
+                if (box) box.scrollTop = box.scrollHeight;
+                var inp = document.getElementById('chat-input');
+                if (inp && !inp.disabled) setTimeout(function() { inp.focus(); }, 80);
+            }
+        };
+
+        window.toggleOnlineUsers = function() {
+            var el = document.getElementById('chat-users-list');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        };
+
+        window.chatSend = function() {
+            if (!socket) return;
+            var inp = document.getElementById('chat-input');
+            if (!inp) return;
+            var msg = inp.value.trim();
+            if (!msg) return;
+            socket.emit('chat_send', { message: msg });
+            inp.value = '';
+        };
+
+        document.addEventListener('DOMContentLoaded', initChat);
+    })();
+    </script>
 </body>
 </html>

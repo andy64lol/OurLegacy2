@@ -16,6 +16,7 @@ from flask import (
 )
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_socketio import SocketIO, emit as socketio_emit, disconnect as socketio_disconnect
 import json
 import random
 import os
@@ -62,6 +63,10 @@ from utilities.supabase_db import (
     cloud_save,
     cloud_load,
     get_cloud_save_meta,
+    send_chat_message,
+    get_chat_history,
+    censor_text,
+    contains_profanity,
 )
 
 app = Flask(__name__)
@@ -79,6 +84,69 @@ app.config["SESSION_FILE_DIR"] = os.path.join(os.path.dirname(__file__), ".flask
 app.config["SESSION_PERMANENT"] = False
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
+
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", manage_session=False)
+
+# Online users: {sid: username}  (in-memory, single worker)
+_chat_online: dict = {}
+_chat_cooldowns: dict = {}  # {username: last_sent_timestamp}
+CHAT_COOLDOWN_SECS = 10
+CHAT_MAX_LEN = 200
+
+
+@app.context_processor
+def _inject_chat_globals():
+    return {"online_username": session.get("online_username")}
+
+
+# ─── SocketIO Chat Events ──────────────────────────────────────────────────────
+
+@socketio.on("connect")
+def _on_chat_connect():
+    username = session.get("online_username")
+    if username:
+        _chat_online[request.sid] = username
+    socketio_emit("online_users", sorted(set(_chat_online.values())))
+    history = get_chat_history(60)
+    socketio_emit("chat_history", history)
+
+
+@socketio.on("disconnect")
+def _on_chat_disconnect():
+    _chat_online.pop(request.sid, None)
+    socketio_emit("online_users", sorted(set(_chat_online.values())), broadcast=True)
+
+
+@socketio.on("chat_send")
+def _on_chat_send(data):
+    username = session.get("online_username")
+    if not username:
+        socketio_emit("chat_error", {"message": "You must be logged in to chat."})
+        return
+    raw = str(data.get("message", "")).strip()
+    if not raw:
+        return
+    if len(raw) > CHAT_MAX_LEN:
+        socketio_emit("chat_error", {"message": f"Message too long (max {CHAT_MAX_LEN} chars)."})
+        return
+    now = _time_module.time()
+    last = _chat_cooldowns.get(username, 0)
+    remaining = int(CHAT_COOLDOWN_SECS - (now - last))
+    if remaining > 0:
+        socketio_emit("chat_error", {"message": f"Please wait {remaining}s before sending again."})
+        return
+    censored = censor_text(raw)
+    _chat_cooldowns[username] = now
+    result = send_chat_message(username, censored)
+    if result["ok"]:
+        row = result["row"]
+        socketio_emit("chat_message", {
+            "username": username,
+            "message": censored,
+            "created_at": row.get("created_at", ""),
+        }, broadcast=True)
+    else:
+        socketio_emit("chat_error", {"message": "Failed to send message. Try again."})
 
 
 @app.errorhandler(429)
@@ -3843,4 +3911,4 @@ def api_cloud_download():
 
 port = int(os.environ.get("PORT", 5000))
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=port, debug=False)
+    socketio.run(app, host="0.0.0.0", port=port, debug=False)
