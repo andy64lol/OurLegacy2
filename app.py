@@ -1,5 +1,5 @@
-import eventlet
-eventlet.monkey_patch()
+from gevent import monkey
+monkey.patch_all()
 
 """
 Our Legacy 2 - Flask Web Interface
@@ -90,7 +90,7 @@ app.config["SESSION_PERMANENT"] = False
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", manage_session=False)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", manage_session=False)
 
 # Online users: {sid: username}  (in-memory, single worker)
 _chat_online: dict = {}
