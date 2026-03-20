@@ -51,53 +51,60 @@ const raceData  = {{ data.races  | tojson }};
                 <input type="file" id="load-file-input-main" accept=".olsave" style="display:none;">
             </div>
 
-            <!-- Online Game Section -->
-            <div class="save-load-bar" style="margin-top:8px;">
-                <button class="btn btn-secondary" onclick="openOnlinePanel()" style="background:linear-gradient(135deg,rgba(80,60,120,0.6),rgba(50,30,90,0.6));border-color:var(--mana-bright);">
-                    &#127760; Online Game
-                </button>
-            </div>
-
-            <!-- Online Panel (hidden by default) -->
-            <div id="online-panel" style="display:none;margin-top:12px;background:rgba(20,15,40,0.85);border:1px solid var(--mana-bright);border-radius:10px;padding:16px;">
-                {% if online_user %}
-                <!-- Logged In View -->
-                <div id="online-logged-in">
-                    <div style="text-align:center;font-size:13px;color:var(--mana-bright);margin-bottom:10px;">
-                        Logged in as <strong>{{ online_user }}</strong>
+            <!-- Online Account Section -->
+            <div style="margin-top:20px;border-top:1px solid rgba(180,130,255,0.2);padding-top:16px;">
+                <div style="text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--mana-bright);opacity:0.7;margin-bottom:12px;">&#127760; Online Account</div>
+                <div id="online-panel" style="background:rgba(20,15,40,0.85);border:1px solid rgba(180,130,255,0.35);border-radius:10px;padding:16px;">
+                    {% if online_user %}
+                    <!-- Logged In View -->
+                    <div id="online-logged-in">
+                        <div style="text-align:center;font-size:13px;color:var(--mana-bright);margin-bottom:12px;">
+                            &#10024; Welcome back, <strong>{{ online_user }}</strong>
+                        </div>
+                        {% if cloud_meta %}
+                        <div style="background:rgba(60,40,100,0.4);border:1px solid rgba(180,130,255,0.3);border-radius:6px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--text-dim);">
+                            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:4px;">Cloud Save</div>
+                            <strong style="color:var(--gold);font-size:14px;">{{ cloud_meta.player_name }}</strong>
+                            &mdash; Lv.{{ cloud_meta.level }} {{ cloud_meta.character_class }}
+                            <br><span style="font-size:11px;">{{ cloud_meta.current_area|replace('_',' ')|title }}</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="cloudLoad()" style="width:100%;margin-bottom:8px;font-size:14px;">&#9654; Continue Adventure</button>
+                        <button class="btn btn-secondary" onclick="downloadCloudSave()" style="width:100%;margin-bottom:8px;font-size:12px;">&#8659; Download Cloud Save</button>
+                        {% else %}
+                        <div style="text-align:center;font-size:12px;color:var(--text-dim);margin-bottom:12px;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px;">
+                            No cloud save yet.<br>Begin a new journey and your progress will be saved online.
+                        </div>
+                        <a href="/create" class="btn btn-primary" style="display:block;width:100%;box-sizing:border-box;text-align:center;margin-bottom:8px;font-size:14px;">&#9728; Start New Journey</a>
+                        {% endif %}
+                        <button class="btn btn-secondary" onclick="onlineLogout()" style="width:100%;font-size:12px;opacity:0.6;">Logout</button>
                     </div>
-                    {% if cloud_meta %}
-                    <div style="background:rgba(60,40,100,0.4);border:1px solid rgba(180,130,255,0.3);border-radius:6px;padding:10px;margin-bottom:10px;font-size:12px;color:var(--text-dim);">
-                        Cloud Save: <strong style="color:var(--gold);">{{ cloud_meta.player_name }}</strong>
-                        &mdash; Lv.{{ cloud_meta.level }} {{ cloud_meta.character_class }}
-                        <br><span style="font-size:11px;">{{ cloud_meta.current_area|replace('_',' ')|title }}</span>
-                    </div>
-                    <button class="btn btn-secondary" onclick="cloudLoad()" style="width:100%;margin-bottom:6px;">&#9654; Play Cloud Save</button>
-                    <button class="btn btn-secondary" onclick="downloadCloudSave()" style="width:100%;margin-bottom:6px;font-size:12px;">&#8659; Download Cloud Save</button>
                     {% else %}
-                    <div style="text-align:center;font-size:12px;color:var(--text-dim);margin-bottom:10px;">No cloud save yet. Start a new journey and use Logout and Save in-game.</div>
+                    <!-- Login / Register Tabs -->
+                    <div style="display:flex;gap:6px;margin-bottom:14px;">
+                        <button class="btn btn-secondary" id="tab-login" onclick="switchOnlineTab('login')" style="flex:1;font-size:12px;">Sign In</button>
+                        <button class="btn btn-secondary" id="tab-register" onclick="switchOnlineTab('register')" style="flex:1;font-size:12px;opacity:0.5;">Register</button>
+                    </div>
+                    <div id="online-login-form">
+                        <input type="text" id="ol-username" placeholder="Username" autocomplete="username" maxlength="20"
+                            style="width:100%;box-sizing:border-box;margin-bottom:7px;padding:8px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;"
+                            onkeydown="if(event.key==='Enter')onlineLogin()">
+                        <input type="password" id="ol-password" placeholder="Password" autocomplete="current-password"
+                            style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:8px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;"
+                            onkeydown="if(event.key==='Enter')onlineLogin()">
+                        <button class="btn btn-primary" id="login-btn" onclick="onlineLogin()" style="width:100%;font-size:14px;">Sign In &amp; Play</button>
+                    </div>
+                    <div id="online-register-form" style="display:none;">
+                        <input type="text" id="ol-reg-username" placeholder="Choose username (3–20 chars)" autocomplete="username" maxlength="20"
+                            style="width:100%;box-sizing:border-box;margin-bottom:7px;padding:8px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                        <input type="password" id="ol-reg-password" placeholder="Choose password (min 6 chars)" autocomplete="new-password"
+                            style="width:100%;box-sizing:border-box;margin-bottom:7px;padding:8px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                        <input type="password" id="ol-reg-confirm" placeholder="Confirm password" autocomplete="new-password"
+                            style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:8px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                        <button class="btn btn-secondary" id="register-btn" onclick="onlineRegister()" style="width:100%;background:linear-gradient(135deg,rgba(30,100,60,0.7),rgba(20,70,40,0.7));border-color:var(--green-bright);font-size:14px;">Create Account &amp; Play</button>
+                    </div>
                     {% endif %}
-                    <button class="btn btn-secondary" onclick="onlineLogout()" style="width:100%;font-size:12px;opacity:0.7;">Logout</button>
+                    <div id="online-status" style="margin-top:10px;text-align:center;font-size:12px;min-height:18px;"></div>
                 </div>
-                {% else %}
-                <!-- Login / Register Tabs -->
-                <div style="display:flex;gap:6px;margin-bottom:12px;">
-                    <button class="btn btn-secondary" id="tab-login" onclick="switchOnlineTab('login')" style="flex:1;font-size:12px;">Login</button>
-                    <button class="btn btn-secondary" id="tab-register" onclick="switchOnlineTab('register')" style="flex:1;font-size:12px;opacity:0.5;">Register</button>
-                </div>
-                <div id="online-login-form">
-                    <input type="text" id="ol-username" placeholder="Username" autocomplete="username" maxlength="20" style="width:100%;box-sizing:border-box;margin-bottom:7px;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
-                    <input type="password" id="ol-password" placeholder="Password" autocomplete="current-password" style="width:100%;box-sizing:border-box;margin-bottom:10px;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
-                    <button class="btn btn-secondary" onclick="onlineLogin()" style="width:100%;background:linear-gradient(135deg,rgba(80,60,150,0.7),rgba(50,30,100,0.7));border-color:var(--mana-bright);">Login</button>
-                </div>
-                <div id="online-register-form" style="display:none;">
-                    <input type="text" id="ol-reg-username" placeholder="Choose username (3–20 chars)" autocomplete="username" maxlength="20" style="width:100%;box-sizing:border-box;margin-bottom:7px;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
-                    <input type="password" id="ol-reg-password" placeholder="Choose password (min 6 chars)" autocomplete="new-password" style="width:100%;box-sizing:border-box;margin-bottom:7px;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
-                    <input type="password" id="ol-reg-confirm" placeholder="Confirm password" autocomplete="new-password" style="width:100%;box-sizing:border-box;margin-bottom:10px;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
-                    <button class="btn btn-secondary" onclick="onlineRegister()" style="width:100%;background:linear-gradient(135deg,rgba(30,100,60,0.7),rgba(20,70,40,0.7));border-color:var(--green-bright);">Create Account</button>
-                </div>
-                {% endif %}
-                <div id="online-status" style="margin-top:10px;text-align:center;font-size:12px;min-height:18px;"></div>
             </div>
 
             <div class="save-load-bar" style="margin-top:8px;">
@@ -1636,11 +1643,6 @@ const raceData  = {{ data.races  | tojson }};
 })();
 
 // ── Online Game panel ──────────────────────────────────────────────────────
-function openOnlinePanel() {
-    var panel = document.getElementById('online-panel');
-    if (!panel) return;
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-}
 function switchOnlineTab(tab) {
     var lf = document.getElementById('online-login-form');
     var rf = document.getElementById('online-register-form');
@@ -1661,11 +1663,42 @@ function setOnlineStatus(msg, ok) {
     el.textContent = msg;
     el.style.color = ok ? 'var(--green-bright)' : 'var(--red)';
 }
+async function autoPlayAfterLogin() {
+    setOnlineStatus('Checking for saved game...', true);
+    try {
+        var metaRes = await fetch('/api/online/cloud_meta');
+        var metaJson = await metaRes.json();
+        if (metaJson.ok && metaJson.meta) {
+            setOnlineStatus('Save found! Loading your adventure...', true);
+            var loadRes = await fetch('/api/online/cloud_load', {method: 'POST'});
+            var loadJson = await loadRes.json();
+            if (loadJson.ok) {
+                window.location.href = '/game';
+            } else {
+                setOnlineStatus('Could not load save: ' + (loadJson.message || 'Unknown error.'), false);
+                setLoginBtnsDisabled(false);
+            }
+        } else {
+            setOnlineStatus('No save found. Starting new journey...', true);
+            setTimeout(function() { window.location.href = '/create'; }, 700);
+        }
+    } catch(e) {
+        setOnlineStatus('Network error: ' + e.message, false);
+        setLoginBtnsDisabled(false);
+    }
+}
+function setLoginBtnsDisabled(disabled) {
+    var lb = document.getElementById('login-btn');
+    var rb = document.getElementById('register-btn');
+    if (lb) lb.disabled = disabled;
+    if (rb) rb.disabled = disabled;
+}
 async function onlineLogin() {
     var u = (document.getElementById('ol-username') || {}).value || '';
     var p = (document.getElementById('ol-password') || {}).value || '';
     if (!u || !p) { setOnlineStatus('Enter username and password.', false); return; }
-    setOnlineStatus('Logging in...', true);
+    setOnlineStatus('Signing in...', true);
+    setLoginBtnsDisabled(true);
     try {
         var res = await fetch('/api/online/login', {
             method: 'POST',
@@ -1674,12 +1707,16 @@ async function onlineLogin() {
         });
         var json = await res.json();
         if (json.ok) {
-            setOnlineStatus(json.message, true);
-            setTimeout(function() { window.location.reload(); }, 700);
+            setOnlineStatus('Signed in! Loading...', true);
+            await autoPlayAfterLogin();
         } else {
             setOnlineStatus(json.message || 'Login failed.', false);
+            setLoginBtnsDisabled(false);
         }
-    } catch(e) { setOnlineStatus('Network error: ' + e.message, false); }
+    } catch(e) {
+        setOnlineStatus('Network error: ' + e.message, false);
+        setLoginBtnsDisabled(false);
+    }
 }
 async function onlineRegister() {
     var u = (document.getElementById('ol-reg-username') || {}).value || '';
@@ -1688,6 +1725,7 @@ async function onlineRegister() {
     if (!u || !p) { setOnlineStatus('Fill in all fields.', false); return; }
     if (p !== c) { setOnlineStatus('Passwords do not match.', false); return; }
     setOnlineStatus('Creating account...', true);
+    setLoginBtnsDisabled(true);
     try {
         var res = await fetch('/api/online/register', {
             method: 'POST',
@@ -1695,9 +1733,29 @@ async function onlineRegister() {
             body: JSON.stringify({username: u, password: p})
         });
         var json = await res.json();
-        setOnlineStatus(json.message || (json.ok ? 'Account created! You can now log in.' : 'Failed.'), json.ok);
-        if (json.ok) { setTimeout(function() { switchOnlineTab('login'); }, 1200); }
-    } catch(e) { setOnlineStatus('Network error: ' + e.message, false); }
+        if (json.ok) {
+            setOnlineStatus('Account created! Signing in...', true);
+            var loginRes = await fetch('/api/online/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: u, password: p})
+            });
+            var loginJson = await loginRes.json();
+            if (loginJson.ok) {
+                await autoPlayAfterLogin();
+            } else {
+                setOnlineStatus('Account created! Please sign in.', true);
+                setTimeout(function() { switchOnlineTab('login'); }, 1200);
+                setLoginBtnsDisabled(false);
+            }
+        } else {
+            setOnlineStatus(json.message || 'Registration failed.', false);
+            setLoginBtnsDisabled(false);
+        }
+    } catch(e) {
+        setOnlineStatus('Network error: ' + e.message, false);
+        setLoginBtnsDisabled(false);
+    }
 }
 async function onlineLogout() {
     await fetch('/api/online/logout', {method: 'POST'});
@@ -1738,12 +1796,6 @@ async function downloadCloudSave() {
         setOnlineStatus('Downloaded!', true);
     } catch(e) { setOnlineStatus('Error: ' + e.message, false); }
 }
-// Auto-open the online panel if already logged in and panel was previously open
-{% if online_user %}
-document.addEventListener('DOMContentLoaded', function() {
-    // Keep panel closed by default even when logged in; user clicks to open
-});
-{% endif %}
 </script>
 {% endif %}
 {% if not show_create and not in_battle and not show_welcome %}
