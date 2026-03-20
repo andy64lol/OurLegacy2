@@ -568,6 +568,9 @@ const raceData  = {{ data.races  | tojson }};
                 <button onclick="switchTab('dungeons',false)" class="btn btn-secondary btn-small" style="text-align:center;">Dungeons</button>
                 <button onclick="switchTab('crafting',false)" class="btn btn-secondary btn-small" style="text-align:center;">Crafting</button>
                 <button onclick="switchTab('market',false)" class="btn btn-secondary btn-small" style="text-align:center;">Elite Market</button>
+                {% if online_user %}
+                <button onclick="toggleChat()" class="btn btn-secondary btn-small" style="text-align:center;">&#127760; Global Chat</button>
+                {% endif %}
             </div>
         </div>
 
