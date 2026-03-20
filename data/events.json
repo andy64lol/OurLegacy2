@@ -1,0 +1,43 @@
+{
+  "events": [
+    {
+      "id": "primordial_gift",
+      "name": "The Primordial One's Gift",
+      "description": "A being older than time itself reaches across the veil to reward those who have proven their mettle in battle. Defeat nine bosses during the event window and receive a fragment of primordial power.",
+      "start": "2026-03-23",
+      "end": "2026-03-27",
+      "reward_type": "item",
+      "reward_item": "Primordial Essence",
+      "reward_message": "The Primordial One acknowledges your strength. A crystallized shard of cosmic power materialises in your hands!",
+      "condition": {
+        "type": "boss_kills",
+        "count": 9
+      }
+    },
+    {
+      "id": "grand_feast",
+      "name": "The Grand Feast",
+      "description": "The gods themselves celebrate the season with a grand banquet and have sent their finest delicacies down to worthy adventurers. A gift for all who brave the realm during this festive period.",
+      "start": "2026-03-23",
+      "end": "2026-03-27",
+      "reward_type": "item",
+      "reward_item": "Grand Feast Platter",
+      "reward_message": "A divine parcel materialises before you — a lavish Grand Feast Platter sent by the gods themselves. Enjoy the bounty!",
+      "condition": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "spring_blessing_gold",
+      "name": "Spring Blessing",
+      "description": "Adventurers who answer the call on the sacred day of the Spring Blessing receive a fortune in gold from the realm's treasury.",
+      "date": "2026-03-24",
+      "reward_type": "gold",
+      "reward_amount": 1000000,
+      "reward_message": "Today is the sacred Spring Blessing! The realm's treasury showers you with 1,000,000 gold coins — welcome, blessed adventurer!",
+      "condition": {
+        "type": "first_login_on_date"
+      }
+    }
+  ]
+}

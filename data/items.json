@@ -4003,5 +4003,27 @@
       "requirements": {
          "level": 6
       }
+   },
+   "Primordial Essence": {
+      "type": "consumable",
+      "description": "A crystallized fragment of the cosmos itself, bestowed by a being older than time. Its inner light pulses with the weight of countless ages. Consuming it floods your very soul with an incomprehensible surge of experience — the lifetime of a god compressed into a single breath. Extremely rare and impossibly expensive.",
+      "effect": "grant_exp",
+      "value": 100000000000,
+      "price": 9999999999,
+      "rarity": "legendary",
+      "event_item": true
+   },
+   "Grand Feast Platter": {
+      "type": "consumable",
+      "description": "A divine spread of roasted meats, enchanted fruits, celestial bread, and bottles of restorative ambrosia, prepared in the feasting halls of the gods and delivered by winged messengers. Eating it fully restores your health and mana, and leaves you with a vigorous glow that keeps regenerating both for a time.",
+      "effect": "grand_feast",
+      "heal_pct": 100,
+      "mp_restore_pct": 100,
+      "regen_hp": 50,
+      "regen_mp": 30,
+      "regen_turns": 10,
+      "price": 9999999999,
+      "rarity": "legendary",
+      "event_item": true
    }
 }

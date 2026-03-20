@@ -217,6 +217,7 @@ GAME_DATA: dict[str, Any] = {
     "cutscenes": load_json("cutscenes.json"),
     "books": load_json("books.json"),
     "splash_texts": load_json_list("splash_text.json"),
+    "events": load_json("events.json").get("events", []),
 }
 
 GAME_VERSION = "1.0.0"
@@ -358,6 +359,63 @@ def gain_experience(player, amount):
     return leveled
 
 
+# ─── Timed Events ─────────────────────────────────────────────────────────────
+
+import datetime as _dt
+
+
+def check_and_award_events(player):
+    """Check all active events and award unclaimed rewards to the player."""
+    events = GAME_DATA.get("events", [])
+    if not events:
+        return
+
+    today_str = _dt.date.today().isoformat()
+    claimed = player.setdefault("claimed_events", [])
+
+    for event in events:
+        event_id = event.get("id", "")
+        if not event_id or event_id in claimed:
+            continue
+
+        # ── Date window check ──────────────────────────────────────────────
+        if "date" in event:
+            if today_str != event["date"]:
+                continue
+        elif "start" in event and "end" in event:
+            if not (event["start"] <= today_str <= event["end"]):
+                continue
+        else:
+            continue
+
+        # ── Condition check ────────────────────────────────────────────────
+        condition = event.get("condition", {})
+        ctype = condition.get("type", "none")
+
+        if ctype == "boss_kills":
+            required = condition.get("count", 1)
+            if player.get("total_bosses_defeated", 0) < required:
+                continue
+        elif ctype == "first_login_on_date":
+            pass  # date already matched above; just being present counts
+        # ctype == "none" always passes
+
+        # ── Award reward ───────────────────────────────────────────────────
+        rtype = event.get("reward_type", "")
+        msg = event.get("reward_message", f"You received a reward from the event '{event.get('name', '')}'!")
+
+        if rtype == "item":
+            item_name = event.get("reward_item", "")
+            if item_name:
+                player["inventory"].append(item_name)
+        elif rtype == "gold":
+            amount = int(event.get("reward_amount", 0))
+            player["gold"] = player.get("gold", 0) + amount
+
+        claimed.append(event_id)
+        add_message(f"[EVENT] {event.get('name', 'Event')}: {msg}", "var(--gold)")
+
+
 def advance_crops(player):
     crops = player.get("crops", {})
     for _slot_id, crop_info in crops.items():
@@ -381,6 +439,31 @@ def get_game_time(player):
 def advance_game_time(player):
     """Increment game ticks by 1."""
     player["game_ticks"] = player.get("game_ticks", 0) + 1
+
+
+def apply_regen_effects(player):
+    """Tick down any active regen effects (e.g. from Grand Feast Platter)."""
+    effects = player.get("regen_effects", [])
+    if not effects:
+        return
+    remaining = []
+    for eff in effects:
+        if eff.get("turns_remaining", 0) <= 0:
+            continue
+        hp_tick = int(eff.get("hp_per_turn", 0))
+        mp_tick = int(eff.get("mp_per_turn", 0))
+        if hp_tick:
+            player["hp"] = min(player["max_hp"], player["hp"] + hp_tick)
+        if mp_tick:
+            player["mp"] = min(player["max_mp"], player["mp"] + mp_tick)
+        eff["turns_remaining"] -= 1
+        if eff["turns_remaining"] > 0:
+            remaining.append(eff)
+        else:
+            add_message(
+                f"The {eff.get('source', 'regeneration')} effect has faded.", "var(--text-dim)"
+            )
+    player["regen_effects"] = remaining
 
 
 # ─── Weather ──────────────────────────────────────────────────────────────────
@@ -1284,14 +1367,20 @@ def game():
             "index.html", show_create=True, data=GAME_DATA, create_error=create_error
         )
 
+    # ── Timed events ──────────────────────────────────────────────────────────
+    check_and_award_events(player)
+    save_player(player)
+
     # ── Battle state: show battle view inline ──────────────.g�───────────────
     enemy: dict[str, Any] = session.get("battle_enemy") or {}
     if enemy:
         battle_log = session.get("battle_log", [])
+        _items_data = GAME_DATA["items"]
         usable_items = [
             i
             for i in player.get("inventory", [])
             if any(x in i.lower() for x in ["potion", "elixir", "tears", "tonic"])
+            or isinstance(_items_data.get(i), dict) and _items_data[i].get("event_item")
         ]
         weapon = player.get("equipment", {}).get("weapon")
         available_spells = get_available_spells(
@@ -1860,6 +1949,7 @@ def action_explore():
     player["explore_count"] = player.get("explore_count", 0) + 1
     advance_crops(player)
     advance_game_time(player)
+    apply_regen_effects(player)
 
     # Roll weather
     new_weather = roll_area_weather(area)
@@ -2072,6 +2162,7 @@ def action_rest():
     player["mp"] = player["max_mp"]
     advance_crops(player)
     advance_game_time(player)
+    apply_regen_effects(player)
 
     if cost > 0:
         add_message(
@@ -2391,6 +2482,40 @@ def action_use_item():
         player["inventory"].remove(item_name)
         add_message(
             f"You use the {item_name} and feel its power (+{heal} HP).", "var(--gold)"
+        )
+    elif item_data.get("effect") == "grant_exp":
+        exp_grant = int(item_data.get("value", 0))
+        player["inventory"].remove(item_name)
+        leveled = gain_experience(player, exp_grant)
+        add_message(
+            f"You consume the {item_name}. A torrent of cosmic power surges through you, granting {exp_grant:,} EXP!",
+            "var(--gold)",
+        )
+        if leveled:
+            add_message(
+                f"You have reached level {player['level']}! The cosmos recognises your ascension.",
+                "var(--gold)",
+            )
+    elif item_data.get("effect") == "grand_feast":
+        heal_amount = player["max_hp"] - player["hp"]
+        mp_amount = player["max_mp"] - player["mp"]
+        player["hp"] = player["max_hp"]
+        player["mp"] = player["max_mp"]
+        regen_hp = int(item_data.get("regen_hp", 50))
+        regen_mp = int(item_data.get("regen_mp", 30))
+        regen_turns = int(item_data.get("regen_turns", 10))
+        player.setdefault("regen_effects", []).append({
+            "hp_per_turn": regen_hp,
+            "mp_per_turn": regen_mp,
+            "turns_remaining": regen_turns,
+            "source": item_name,
+        })
+        player["inventory"].remove(item_name)
+        add_message(
+            f"You devour the {item_name} — a divine banquet fit for the gods! Fully restored "
+            f"(+{heal_amount} HP, +{mp_amount} MP) and a vigorous feast-glow begins regenerating "
+            f"+{regen_hp} HP and +{regen_mp} MP per turn for {regen_turns} turns.",
+            "var(--gold)",
         )
     elif item_type == "book":
         return redirect(url_for("action_read_book") + f"?item={item_name}")
@@ -3210,6 +3335,7 @@ def _handle_victory(player, enemy, log):
     update_weekly_challenge(player, "kill_count", 1)
     if enemy.get("is_boss"):
         update_weekly_challenge(player, "boss_kill", 1)
+        player["total_bosses_defeated"] = player.get("total_bosses_defeated", 0) + 1
         # Boss defeat dialogue
         boss_key = enemy.get("key", "")
         defeat_dialogue = get_boss_dialogue(boss_key, "defeat")
