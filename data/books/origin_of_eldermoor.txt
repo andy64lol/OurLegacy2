@@ -1,0 +1,149 @@
+THE ORIGIN OF ELDENMOOR
+A Sacred Transcription of the Primordial Scriptures
+
+Recovered from the Vault of First Things beneath the Ashen Peaks
+Translated and annotated by High Archivist Selenne of the Order of the Unbroken Seal
+Third Edition — with expanded commentary on the Incomprehensible Passages
+
+─────────────────────────────────────────────────
+
+TRANSLATOR'S FOREWORD
+
+What you hold is the most sacred and most baffling text in all of recorded history. The original scripture was discovered carved into a wall of impossible material — not stone, not metal, but something smooth, flat, and faintly warm to the touch. The symbols glow a dim green when moonlight strikes them.
+
+Scholars have debated their meaning for three hundred years. I have done my best.
+
+I apologise in advance for the passages I could not explain. They are many.
+
+— Archivist Selenne, Year of the Broken Comet
+
+─────────────────────────────────────────────────
+
+BOOK I: THE FIRST UTTERANCE
+
+In the beginning, the Primordial One — whose mortal name, the scriptures suggest, was Andrew — looked upon the void and found it wanting. And so the Primordial One raised a hand and spoke the Words of First Making:
+
+    print("Hello, World")
+
+Scholars have wrestled with this passage for centuries. The dominant interpretation holds that "Hello, World" was the Primordial One's greeting to existence itself — an acknowledgement that the world had arrived and was expected. The word "print" is believed to be a divine verb meaning "let there be" or possibly "make manifest." What was made manifest was, apparently, a greeting.
+
+Brother Aldemar of the Southern Seminary maintains that "Hello, World" is a term of affection, and that the Primordial One loved creation from the first instant, which is why this phrase came before anything else. This interpretation is popular among the faithful.
+
+It is notable that the line ends with parentheses enclosing the words. Some believe the parentheses are a form of sacred containment — a boundary placed around that which is spoken, so that it might hold its shape.
+
+─────────────────────────────────────────────────
+
+BOOK II: THE NAMING OF THINGS
+
+With the world now greeted, the Primordial One set about naming its elements. The scriptures record this process thus:
+
+    mountains = 47
+    rivers = 312
+    villages = ["Eldenmoor", "Ashvale", "Crysthaven", "Thornwick"]
+    is_world_good = True
+
+Here the Primordial One appears to have taken stock of creation with remarkable precision. That there are exactly forty-seven mountains is recorded as divine fact — cartographers have been attempting to count them ever since, with results ranging from thirty-one to two hundred and twelve, depending on what one considers a mountain. The Order of the Forty-Seven holds that only their count is correct and all others are heretics.
+
+The sacred list of villages — enclosed in what theologians call the Holy Brackets — is the source of one of the great schisms of our age. The villages of Coldwater and Mirrenfen are not in the list. Their residents have been arguing about this for generations.
+
+The final declaration — "is_world_good = True" — is universally regarded as the most comforting line in all scripture. The Primordial One looked upon creation and assigned to it the value of True. Whatever True means, the scholars agree it is preferable to its opposite.
+
+─────────────────────────────────────────────────
+
+BOOK III: THE GREAT LOOP OF DAYS
+
+The scriptures then describe the creation of time itself. This passage is among the most contested:
+
+    for day in range(7):
+        make_sun_rise()
+        make_creatures_do_stuff()
+        make_sun_set()
+
+The holy word "for" appears to initiate a sacred cycle. The phrase "range(7)" is interpreted as the span of creation — seven being a number of obvious divine significance, though whether the Primordial One chose it deliberately or merely found it convenient is unknown.
+
+Of the three sacred acts performed each day — the rising of the sun, the doing of stuff by creatures, and the setting of the sun — it is the middle one that has generated the most commentary. "Make_creatures_do_stuff" is, frankly, vague. The Order of Purposeful Motion holds that this is intentional: the Primordial One gave creatures agency to determine what "stuff" meant for themselves. The Order of Divine Instruction holds that the specific stuff was defined elsewhere in a scripture we have not yet found.
+
+The underscores between words in these sacred commands are believed to be a form of punctuation used only in divine writing. Their meaning remains unknown, though they are now incorporated into formal priestly titles. High_Archivist Selenne thanks you for your attention.
+
+─────────────────────────────────────────────────
+
+BOOK IV: THE SHAPING OF PERSONS
+
+After time was established, the Primordial One turned to the creation of persons. The scripture reads:
+
+    def make_person(name, strength, wisdom):
+        person = {}
+        person["name"] = name
+        person["hp"] = 100
+        person["gold"] = 0
+        person["inventory"] = []
+        return person
+
+The holy word "def" — pronounced by scholars as either "deff" or "deef," a debate which has consumed three academic careers — appears to precede acts of deliberate creation. The Primordial One spoke "def make_person" and thereby established the pattern from which all persons would be drawn.
+
+Note that all persons begin with one hundred points of what the scripture calls "hp." Scholars believe this is an abbreviation of some divine phrase. Popular theories include "holy potential," "heart-pulse," "heavenly portion," and "hopefully persistent." The most literal scholars insist it simply means health, which is boring, and are mostly ignored at conferences.
+
+All persons also begin with zero gold and an empty inventory. This is taken by some as a statement on the nature of existence — that we arrive with nothing and must earn everything. It is taken by others as confirmation that the Primordial One had a sense of humour.
+
+─────────────────────────────────────────────────
+
+BOOK V: THE LAWS OF CONSEQUENCE
+
+The scriptures then describe a system of moral law unlike any our own theologians have devised:
+
+    if player_is_honest:
+        give_reward()
+    elif player_tried_but_failed:
+        give_smaller_reward()
+    else:
+        print("You really shouldn't have done that.")
+
+The structure of this law is elegant. Honesty is rewarded. Effort is rewarded, if lesser. And those who choose a third path receive only a message from the Primordial One — direct, personal, and presumably delivered in a tone of disappointment.
+
+The phrase "You really shouldn't have done that" has been inscribed above the gates of seven prisons. It has also been used as the full text of three diplomatic letters, with mixed results.
+
+─────────────────────────────────────────────────
+
+BOOK VI: THE MYSTERY OF THE ERROR
+
+The scriptures contain one passage that has defeated every scholar who has attempted it. It appears without context, between a description of the northern forests and the recipe for enchanted bread:
+
+    Traceback (most recent call last):
+      File "world.py", line 4892, in create_weather
+        apply_snow(region)
+      File "world.py", line 203, in apply_snow
+        intensity = temperature / (temp_base - temp_base)
+    ZeroDivisionError: division by zero
+
+It is believed that this passage describes a moment when the Primordial One's great work encountered an unexpected difficulty during the creation of weather. The word "Error" appears to denote a divine setback. The phrase "ZeroDivisionError" has been interpreted as a fundamental paradox encountered at the boundary of creation — a thing divided by itself becoming nothing, a mystery of existence itself.
+
+The region of Coldmarch does not have reliable snowfall. Scholars now believe they know why.
+
+─────────────────────────────────────────────────
+
+BOOK VII: THE PRIMORDIAL ONE'S REFLECTION
+
+The final passage of the scripture is the most personal. It appears to be the Primordial One speaking not to creation, but to themselves:
+
+    # TODO: add more content later
+    # NOTE: world is mostly working, needs balancing
+    # Andrew — remember to fix the snow thing
+
+Here the symbol "#" appears before each line, which theologians believe marks it as sacred aside — words spoken within the mind of the divine. The phrase "TODO" is believed to mean "tasks of divine obligation" — things the Primordial One intended to return to.
+
+The line "world is mostly working, needs balancing" is the source of considerable debate. "Mostly working" suggests the Primordial One was aware of imperfections. "Needs balancing" has launched an entire theological school dedicated to finding what is unbalanced and evening it out. They have not agreed on what this means. The school has, however, raised considerable funds.
+
+The final line — "Andrew — remember to fix the snow thing" — is the only place in all of scripture where the Primordial One uses their personal name. That even a being of infinite power left themselves a note suggests that creation is a large project, and that the divine is not so different from the rest of us.
+
+The snow in Coldmarch has still not been fixed.
+
+─────────────────────────────────────────────────
+
+CLOSING NOTE FROM THE ARCHIVIST
+
+I have spent thirty-one years studying this text. I understand perhaps a fifth of it. The sacred words "import," "while True," and "pip install" remain beyond my comprehension. I have included them in the appendix for future scholars and pray they fare better than I have.
+
+May the Primordial One's work compile without errors.
+
+— Archivist Selenne
+  (High_Archivist, formally)

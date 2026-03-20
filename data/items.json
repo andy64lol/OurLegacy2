@@ -3509,6 +3509,13 @@
       "price": 20,
       "rarity": "common"
    },
+   "The Origin of Eldenmoor": {
+      "type": "book",
+      "book_key": "origin_of_eldermoor",
+      "description": "A scholarly transcription of the Primordial Scriptures — texts said to record how Andrew, the Primordial One, created the world using sacred commands no mortal has ever understood. Cheap because everyone assumes it's fiction.",
+      "price": 5,
+      "rarity": "common"
+   },
    "The Warrior's Code of Byzantra": {
       "type": "book",
       "book_key": "warriors_code_of_byzantra",

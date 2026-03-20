@@ -96,5 +96,12 @@
     "description": "Medicines, preparations, and philosophy of Yixuan healing arts — a western physician's honest account of an eastern tradition that works better than he expected.",
     "file": "books/eastern_alchemists_compendium.txt",
     "rarity": "rare"
+  },
+  "origin_of_eldermoor": {
+    "title": "The Origin of Eldenmoor",
+    "author": "High Archivist Selenne of the Order of the Unbroken Seal",
+    "description": "A sacred transcription of the Primordial Scriptures — ancient texts believed to record how Andrew, the Primordial One, created all of existence using words and commands that no living scholar has ever been able to fully decipher.",
+    "file": "books/origin_of_eldermoor.txt",
+    "rarity": "common"
   }
 }
