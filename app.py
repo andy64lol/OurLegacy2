@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 """
 Our Legacy 2 - Flask Web Interface
 Medieval fantasy RPG playable in the browser.
