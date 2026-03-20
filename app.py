@@ -1,5 +1,12 @@
-from gevent import monkey
-monkey.patch_all()
+import sys as _sys
+
+# Patch the standard library with gevent when running directly (python app.py).
+# When running under gunicorn, the gevent worker handles patching via post_fork
+# (see gunicorn.conf.py). Patching in the gunicorn master process causes the
+# "no running event loop" crash when workers are forked.
+if "gunicorn" not in _sys.modules:
+    from gevent import monkey as _monkey
+    _monkey.patch_all()
 
 """
 Our Legacy 2 - Flask Web Interface
