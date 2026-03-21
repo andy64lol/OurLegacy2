@@ -3593,6 +3593,20 @@
       "price": 80,
       "rarity": "rare"
    },
+   "Origia: A History of the First Settlement": {
+      "type": "book",
+      "book_key": "origia_first_settlement",
+      "description": "A Bureau of Historical Records account of the village most call Starting Village — its true name, its founding, and why the world keeps forgetting what it is actually called.",
+      "price": 35,
+      "rarity": "uncommon"
+   },
+   "Waymarks and Namings": {
+      "type": "book",
+      "book_key": "waymarks_and_namings",
+      "description": "The Cartographers' Guild's official lexicon of western place names, with corrected entries for Origia, Ashvale, Thornwick, and Eldenmoor.",
+      "price": 25,
+      "rarity": "common"
+   },
    "Yixuan Silk": {
       "type": "material",
       "description": "Lustrous silk from the eastern kingdoms, lighter than linen and stronger than you'd expect",

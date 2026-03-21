@@ -1174,6 +1174,14 @@ def serve_game_asset(filename):
     return send_from_directory("data/assets", filename)
 
 
+@app.route("/chat")
+def chat_page():
+    username = session.get("online_username")
+    if not username:
+        return redirect(url_for("index"))
+    return render_template("chat.html", online_username=username)
+
+
 @app.route("/")
 def index():
     splash_texts = GAME_DATA.get("splash_texts", [])

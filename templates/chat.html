@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Chat — Our Legacy 2</title>
+    <link rel="icon" href="/game_assets/game_title_our_legacy_2.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; background: var(--bg-dark, #0a0614); color: var(--text-light, #e0d8f0); font-family: 'Segoe UI', sans-serif; }
+
+        #chat-page {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 860px;
+            margin: 0 auto;
+            border-left: 1px solid rgba(180,130,255,0.15);
+            border-right: 1px solid rgba(180,130,255,0.15);
+            background: linear-gradient(160deg, rgba(14,10,30,0.98), rgba(8,5,20,0.98));
+        }
+
+        #chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: rgba(60,30,100,0.55);
+            border-bottom: 1px solid rgba(180,130,255,0.25);
+            flex-shrink: 0;
+        }
+
+        #chat-header .title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--mana-bright, #c084fc);
+            letter-spacing: 0.06em;
+        }
+
+        #chat-header .back-link {
+            font-size: 13px;
+            color: var(--text-dim, #8878aa);
+            text-decoration: none;
+            padding: 5px 12px;
+            border: 1px solid rgba(180,130,255,0.25);
+            border-radius: 6px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        #chat-header .back-link:hover { color: var(--mana-bright, #c084fc); border-color: rgba(180,130,255,0.5); }
+
+        #online-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: rgba(40,20,70,0.5);
+            border-bottom: 1px solid rgba(180,130,255,0.12);
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        #online-bar .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim, #8878aa); }
+        #chat-users-inner-page { display: flex; flex-wrap: wrap; gap: 5px; }
+
+        #chat-messages-page {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #chat-input-bar {
+            padding: 14px 20px;
+            border-top: 1px solid rgba(180,130,255,0.15);
+            background: rgba(20,10,40,0.6);
+            flex-shrink: 0;
+        }
+        #chat-input-bar .row { display: flex; gap: 8px; align-items: center; }
+        #chat-input-page {
+            flex: 1;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.45);
+            border: 1px solid rgba(180,130,255,0.35);
+            border-radius: 8px;
+            color: var(--text-light, #e0d8f0);
+            font-size: 14px;
+            outline: none;
+        }
+        #chat-input-page:focus { border-color: rgba(180,130,255,0.65); }
+        #chat-send-page {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, rgba(80,50,150,0.85), rgba(50,30,100,0.85));
+            border: 1px solid var(--mana-bright, #c084fc);
+            border-radius: 8px;
+            color: var(--mana-bright, #c084fc);
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        #chat-send-page:hover { background: linear-gradient(135deg, rgba(100,65,170,0.9), rgba(65,40,120,0.9)); }
+        #chat-error-page { font-size: 12px; color: var(--red, #f87171); min-height: 16px; margin-top: 6px; }
+        #chat-cooldown-page { font-size: 12px; color: var(--text-dim, #8878aa); min-height: 16px; display: none; text-align: center; margin-top: 4px; }
+    </style>
+</head>
+<body>
+<div id="chat-page">
+
+    <div id="chat-header">
+        <div class="title">
+            <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:28px;height:28px;image-rendering:pixelated;">
+            Global Chat
+        </div>
+        <a class="back-link" href="/game">&#8592; Return to Game</a>
+    </div>
+
+    <div id="online-bar">
+        <span class="label">Online:</span>
+        <div id="chat-users-inner-page"></div>
+    </div>
+
+    <div id="chat-messages-page">
+        <div style="text-align:center;font-size:12px;color:var(--text-dim);padding:30px 0;" id="chat-loading-page">Connecting...</div>
+    </div>
+
+    <div id="chat-input-bar">
+        <div class="row">
+            <input id="chat-input-page" type="text" maxlength="200" placeholder="Message the realm..." autocomplete="off"
+                onkeydown="if(event.key==='Enter')chatSend()">
+            <button id="chat-send-page" onclick="chatSend()">Send</button>
+        </div>
+        <div id="chat-error-page"></div>
+        <div id="chat-cooldown-page"></div>
+    </div>
+
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+(function() {
+    var CURRENT_USER = {{ online_username | tojson }};
+    var socket = null;
+    var cooldownTimer = null;
+
+    function initChat() {
+        socket = io({ transports: ['polling', 'websocket'] });
+
+        socket.on('connect', function() {
+            var l = document.getElementById('chat-loading-page');
+            if (l) l.remove();
+        });
+
+        socket.on('chat_history', function(msgs) {
+            var box = document.getElementById('chat-messages-page');
+            if (!box) return;
+            box.innerHTML = '';
+            if (!msgs || !msgs.length) {
+                box.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--text-dim);padding:30px 0;">No messages yet. Be the first!</div>';
+                return;
+            }
+            msgs.forEach(function(m) { appendMessage(m, false); });
+            box.scrollTop = box.scrollHeight;
+        });
+
+        socket.on('chat_message', function(msg) {
+            appendMessage(msg, true);
+        });
+
+        socket.on('online_users', function(users) {
+            var innerEl = document.getElementById('chat-users-inner-page');
+            if (innerEl) {
+                innerEl.innerHTML = users.map(function(u) {
+                    var isMe = (u === CURRENT_USER);
+                    return '<span style="font-size:11px;padding:2px 9px;border-radius:12px;background:' +
+                        (isMe ? 'rgba(80,150,80,0.3);border:1px solid var(--green-bright,#4ade80);color:var(--green-bright,#4ade80)' :
+                                 'rgba(80,60,120,0.3);border:1px solid rgba(180,130,255,0.3);color:var(--mana-bright,#c084fc)') +
+                        ';">' + escHtml(u) + (isMe ? ' (you)' : '') + '</span>';
+                }).join('');
+            }
+        });
+
+        socket.on('chat_error', function(data) {
+            var el = document.getElementById('chat-error-page');
+            if (!el) return;
+            el.textContent = data.message || 'Error.';
+            if (data.message && data.message.indexOf('Wait') !== -1) {
+                startCooldownDisplay(data.message);
+            }
+            setTimeout(function() { if (el) el.textContent = ''; }, 4000);
+        });
+    }
+
+    function appendMessage(msg, animate) {
+        var box = document.getElementById('chat-messages-page');
+        if (!box) return;
+        var isMe = (msg.username === CURRENT_USER);
+        var div = document.createElement('div');
+        div.style.cssText = 'display:flex;flex-direction:column;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
+        var time = '';
+        if (msg.created_at) {
+            try {
+                var d = new Date(msg.created_at);
+                time = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            } catch(e) {}
+        }
+        div.innerHTML =
+            '<div style="max-width:560px;padding:7px 14px;border-radius:' + (isMe ? '12px 12px 3px 12px' : '12px 12px 12px 3px') +
+            ';background:' + (isMe ? 'rgba(70,40,130,0.6)' : 'rgba(30,20,60,0.7)') +
+            ';border:1px solid ' + (isMe ? 'rgba(160,100,255,0.4)' : 'rgba(100,80,180,0.3)') + ';word-break:break-word;">' +
+            '<span style="font-size:11px;font-weight:700;color:' + (isMe ? 'var(--mana-bright,#c084fc)' : 'var(--gold,#f6c90e)') + ';">' +
+            escHtml(msg.username) + '</span>' +
+            '<div style="font-size:14px;color:var(--text-light,#e0d8f0);margin-top:3px;">' + escHtml(msg.message) + '</div>' +
+            (time ? '<div style="font-size:10px;color:var(--text-dim,#8878aa);margin-top:3px;text-align:right;">' + time + '</div>' : '') +
+            '</div>';
+        if (animate) div.style.opacity = '0';
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+        if (animate) {
+            setTimeout(function() { div.style.transition = 'opacity 0.2s'; div.style.opacity = '1'; }, 10);
+        }
+    }
+
+    function startCooldownDisplay(msg) {
+        var cd = document.getElementById('chat-cooldown-page');
+        var inp = document.getElementById('chat-input-page');
+        if (!cd) return;
+        var match = msg.match(/(\d+)s/);
+        var secs = match ? parseInt(match[1]) : 10;
+        cd.style.display = 'block';
+        if (inp) inp.disabled = true;
+        var interval = setInterval(function() {
+            secs--;
+            if (secs <= 0) {
+                clearInterval(interval);
+                cd.style.display = 'none';
+                cd.textContent = '';
+                if (inp) inp.disabled = false;
+            } else {
+                cd.textContent = 'Next message in ' + secs + 's';
+            }
+        }, 1000);
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    window.chatSend = function() {
+        if (!socket) return;
+        var inp = document.getElementById('chat-input-page');
+        if (!inp) return;
+        var msg = inp.value.trim();
+        if (!msg) return;
+        socket.emit('chat_send', { message: msg });
+        inp.value = '';
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initChat();
+        var inp = document.getElementById('chat-input-page');
+        if (inp) inp.focus();
+    });
+})();
+</script>
+</body>
+</html>

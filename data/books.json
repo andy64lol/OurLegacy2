@@ -103,5 +103,19 @@
     "description": "A sacred transcription of the Primordial Scriptures — ancient texts believed to record how Andrew, the Primordial One, created all of existence using words and commands that no living scholar has ever been able to fully decipher.",
     "file": "books/origin_of_eldermoor.txt",
     "rarity": "common"
+  },
+  "origia_first_settlement": {
+    "title": "Origia: A History of the First Settlement",
+    "author": "Chronicler Aldus Vren, Royal Surveyor, Third Grade",
+    "description": "A Bureau of Historical Records account of the village known to most as Starting Village — its true name, its founding, its notable residents, and why the world insists on forgetting what it is actually called.",
+    "file": "books/origia_first_settlement.txt",
+    "rarity": "uncommon"
+  },
+  "waymarks_and_namings": {
+    "title": "Waymarks and Namings: A Lexicon of Western Place Names",
+    "author": "Scholar Petronis of the Cartographers' Guild",
+    "description": "The Cartographers' Guild's official lexicon of place names in the western territories, including long-overdue corrections to several embarrassing errors — among them the matter of Origia.",
+    "file": "books/waymarks_and_namings.txt",
+    "rarity": "common"
   }
 }
