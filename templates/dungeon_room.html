@@ -64,6 +64,8 @@
                     {% elif room.type == 'chest' %}Treasure Chamber
                     {% elif room.type == 'trap_chest' %}Trapped Chest
                     {% elif room.type == 'battle' %}Combat Chamber
+                    {% elif room.type == 'ambush' %}Ambush Chamber
+                    {% elif room.type == 'shrine' %}Sacred Shrine
                     {% elif room.type == 'question' %}Riddle Chamber
                     {% elif room.type == 'multi_choice' %}Choice Chamber
                     {% elif room.type == 'empty' %}Empty Chamber
@@ -139,6 +141,28 @@
                 </div>
                 <form method="POST" action="/action/dungeon/proceed">
                     <button type="submit" class="btn btn-primary" style="margin-top:16px;">Engage!</button>
+                </form>
+
+                <!-- ── AMBUSH ROOM ── -->
+                {% elif room.type == 'ambush' %}
+                <div class="room-battle-banner">
+                    <div style="font-size:13px;letter-spacing:0.12em;border:2px solid var(--red);padding:5px 18px;display:inline-block;color:var(--red);margin-bottom:10px;animation:pulse 1s infinite alternate;">AMBUSH!</div>
+                    <div style="color:var(--red);font-weight:700;font-size:17px;">Something lurks in the shadows ahead!</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">A powerful foe waits to strike — rewards are greater but so is the danger.</div>
+                </div>
+                <form method="POST" action="/action/dungeon/proceed">
+                    <button type="submit" class="btn btn-primary" style="margin-top:16px;border-color:var(--red);">Face the Ambush!</button>
+                </form>
+
+                <!-- ── SHRINE ROOM ── -->
+                {% elif room.type == 'shrine' %}
+                <div class="room-chest-banner">
+                    <div style="font-size:13px;letter-spacing:0.12em;border:2px solid var(--green-bright);padding:5px 18px;display:inline-block;color:var(--green-bright);margin-bottom:10px;">SHRINE</div>
+                    <div style="color:var(--green-bright);font-weight:600;font-size:16px;">A sacred shrine glows in the darkness!</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">Approach and receive the blessing — HP and MP restored.</div>
+                </div>
+                <form method="POST" action="/action/dungeon/proceed">
+                    <button type="submit" class="btn btn-primary" style="margin-top:16px;border-color:var(--green-bright);color:var(--green-bright);">Approach the Shrine</button>
                 </form>
 
                 <!-- ── CHEST ROOM ── -->

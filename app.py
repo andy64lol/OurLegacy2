@@ -53,6 +53,8 @@ from utilities.dungeons import (
     process_trap_chest_room,
     process_empty_room,
     process_battle_room,
+    process_shrine_room,
+    process_ambush_room,
     process_question_room,
     answer_question,
     answer_multi_choice,
@@ -3644,6 +3646,7 @@ def dungeon_proceed():
 
     room: dict[str, Any] = rooms[idx]
     room_type = room.get("type", "empty")
+    dungeon: dict[str, Any] = active.get("dungeon", {})
 
     dungeons_data: dict[str, Any] = GAME_DATA.get("dungeons", {})
     items_data: dict[str, Any] = GAME_DATA.get("items", {})
@@ -3652,7 +3655,7 @@ def dungeon_proceed():
     area_key = session.get("current_area", "starting_village")
 
     if room_type == "battle":
-        result = process_battle_room(player, room, enemies_data, areas_data, area_key)
+        result = process_battle_room(player, room, enemies_data, areas_data, area_key, dungeon=dungeon)
         if result["type"] == "battle":
             enemy = result["enemy"]
             session["battle_enemy"] = enemy
@@ -3669,6 +3672,30 @@ def dungeon_proceed():
         else:
             for msg in result.get("messages", []):
                 add_message(msg["text"], msg.get("color", "var(--text-light)"))
+
+    elif room_type == "ambush":
+        result = process_ambush_room(player, room, enemies_data, areas_data, area_key, dungeon=dungeon)
+        if result["type"] == "ambush":
+            enemy = result["enemy"]
+            session["battle_enemy"] = enemy
+            session["battle_log"] = [
+                f"AMBUSH! A powerful {enemy.get('name', 'enemy')} leaps from the shadows!"
+            ]
+            session["battle_player_effects"] = {}
+            session["battle_enemy_effects"] = {}
+            active["room_index"] = idx + 1
+            active["current_challenge"] = None
+            session["active_dungeon"] = active
+            save_player(player)
+            return redirect(url_for("game"))
+        else:
+            for msg in result.get("messages", []):
+                add_message(msg["text"], msg.get("color", "var(--text-light)"))
+
+    elif room_type == "shrine":
+        result = process_shrine_room(player)
+        for msg in result.get("messages", []):
+            add_message(msg["text"], msg.get("color", "var(--text-light)"))
 
     elif room_type == "chest":
         result = process_chest_room(player, room, dungeons_data, items_data)

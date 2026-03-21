@@ -5,6 +5,7 @@
       "name": "Forest Crypt",
       "description": "An overgrown crypt hidden deep within the whispering woods.",
       "allowed_areas": ["whispering_woods", "forest_outskirts"],
+      "possible_enemies": ["orc", "skeleton", "forest_guardian", "wolf", "goblin"],
       "difficulty": [1, 2],
       "rooms": 5,
       "boss_id": "orc_chieftain",
@@ -14,12 +15,13 @@
         "items": ["Chieftain's Axe", "Orc War Banner"]
       },
       "room_weights": {
-        "question": 30,
-        "battle": 40,
+        "question": 25,
+        "battle": 35,
         "chest": 10,
         "trap_chest": 5,
         "multi_choice": 10,
-        "empty": 5
+        "shrine": 10,
+        "ambush": 5
       }
     },
     {
@@ -27,6 +29,7 @@
       "name": "Goblin Cave",
       "description": "A foul-smelling cave system infested with greedy goblins.",
       "allowed_areas": ["mountain_pass", "rocky_hills"],
+      "possible_enemies": ["goblin", "goblin_archer", "wolf", "cave_bear", "bandit"],
       "difficulty": [2, 3],
       "rooms": 6,
       "boss_id": "goblin_king",
@@ -36,12 +39,13 @@
         "items": ["Goblin King's Dagger", "Stolen Gold Necklace"]
       },
       "room_weights": {
-        "question": 20,
-        "battle": 50,
+        "question": 15,
+        "battle": 40,
         "chest": 15,
         "trap_chest": 5,
         "multi_choice": 5,
-        "empty": 5
+        "shrine": 10,
+        "ambush": 10
       }
     },
     {
@@ -49,6 +53,7 @@
       "name": "Ancient Ruins",
       "description": "Crumbling remains of a long-forgotten civilization.",
       "allowed_areas": ["ruined_city", "desert_plains"],
+      "possible_enemies": ["skeleton", "ghost", "ancient_golem", "evil_sorcerer", "troll"],
       "difficulty": [3, 4],
       "rooms": 7,
       "boss_id": "troll_king",
@@ -58,12 +63,13 @@
         "items": ["Troll Club", "Earth Crystal"]
       },
       "room_weights": {
-        "question": 35,
-        "battle": 30,
+        "question": 30,
+        "battle": 25,
         "chest": 10,
         "trap_chest": 10,
         "multi_choice": 10,
-        "empty": 5
+        "shrine": 10,
+        "ambush": 5
       }
     },
     {
@@ -71,6 +77,7 @@
       "name": "Swamp Den",
       "description": "A murky, poisonous den located in the heart of the marsh.",
       "allowed_areas": ["poisonous_marsh", "swamp_village"],
+      "possible_enemies": ["swamp_rat", "poison_elemental", "giant_spider", "wraith", "troll"],
       "difficulty": [3, 4],
       "rooms": 7,
       "boss_id": "swamp_hydra",
@@ -80,12 +87,13 @@
         "items": ["Hydra Fang", "Poison Crystal"]
       },
       "room_weights": {
-        "question": 15,
-        "battle": 45,
+        "question": 10,
+        "battle": 35,
         "chest": 10,
         "trap_chest": 15,
         "multi_choice": 5,
-        "empty": 10
+        "shrine": 15,
+        "ambush": 10
       }
     },
     {
@@ -93,6 +101,7 @@
       "name": "Crystal Cavern",
       "description": "A beautiful but deadly cavern filled with razor-sharp crystals.",
       "allowed_areas": ["crystal_mountains", "frozen_peaks"],
+      "possible_enemies": ["ice_elemental", "rock_golem", "cave_bear", "wind_elemental", "ancient_golem"],
       "difficulty": [4, 5],
       "rooms": 8,
       "boss_id": "ice_queen",
@@ -102,12 +111,13 @@
         "items": ["Ice Queen's Crown", "Boreas"]
       },
       "room_weights": {
-        "question": 25,
-        "battle": 35,
+        "question": 20,
+        "battle": 30,
         "chest": 15,
         "trap_chest": 10,
         "multi_choice": 10,
-        "empty": 5
+        "shrine": 10,
+        "ambush": 5
       }
     },
     {
@@ -115,6 +125,7 @@
       "name": "Shadow Fortress",
       "description": "A dark citadel where shadows themselves come to life.",
       "allowed_areas": ["shadow_valley", "dark_forest"],
+      "possible_enemies": ["shadow_knight", "dark_mage", "wraith", "death_knight", "ghost"],
       "difficulty": [4, 5],
       "rooms": 8,
       "boss_id": "shadow_lord",
@@ -124,12 +135,13 @@
         "items": ["Shadow Blade", "Void Crystal"]
       },
       "room_weights": {
-        "question": 20,
-        "battle": 40,
+        "question": 15,
+        "battle": 35,
         "chest": 10,
         "trap_chest": 15,
         "multi_choice": 10,
-        "empty": 5
+        "shrine": 10,
+        "ambush": 5
       }
     },
     {
@@ -137,6 +149,7 @@
       "name": "Fire Temple",
       "description": "A temple built over a lake of molten lava.",
       "allowed_areas": ["fire_volcano", "lava_fields"],
+      "possible_enemies": ["fire_wraith", "fire_demon", "infernal_imp", "hell_knight", "demon"],
       "difficulty": [5, 6],
       "rooms": 9,
       "boss_id": "fire_elemental_lord",
@@ -146,12 +159,13 @@
         "items": ["Fire Gem", "Dragon Scale Armor"]
       },
       "room_weights": {
-        "question": 30,
-        "battle": 40,
+        "question": 25,
+        "battle": 35,
         "chest": 10,
         "trap_chest": 10,
         "multi_choice": 5,
-        "empty": 5
+        "shrine": 10,
+        "ambush": 5
       }
     },
     {
@@ -159,6 +173,7 @@
       "name": "Ice Citadel",
       "description": "A fortress of eternal frost atop the world's highest peak.",
       "allowed_areas": ["frozen_peaks", "ice_wastes"],
+      "possible_enemies": ["ice_elemental", "rock_golem", "lightning_golem", "wind_elemental", "ancient_golem"],
       "difficulty": [5, 6],
       "rooms": 9,
       "boss_id": "ice_giant_king",
@@ -168,12 +183,13 @@
         "items": ["Frostbite", "Glacial Shield"]
       },
       "room_weights": {
-        "question": 25,
-        "battle": 40,
+        "question": 20,
+        "battle": 35,
         "chest": 10,
         "trap_chest": 10,
         "multi_choice": 10,
-        "empty": 5
+        "shrine": 10,
+        "ambush": 5
       }
     },
     {
@@ -181,6 +197,7 @@
       "name": "Thunder Peak",
       "description": "Where lightning never stops and the air hums with power.",
       "allowed_areas": ["storm_mountains", "lightning_valley"],
+      "possible_enemies": ["storm_elemental", "thunder_bird", "lightning_golem", "storm_dragon", "wind_elemental"],
       "difficulty": [6, 6],
       "rooms": 10,
       "boss_id": "storm_giant",
@@ -190,12 +207,13 @@
         "items": ["Thunder Hammer", "Lightning Crystal"]
       },
       "room_weights": {
-        "question": 20,
-        "battle": 45,
+        "question": 15,
+        "battle": 40,
         "chest": 10,
         "trap_chest": 10,
         "multi_choice": 10,
-        "empty": 5
+        "shrine": 5,
+        "ambush": 10
       }
     },
     {
@@ -203,6 +221,7 @@
       "name": "Undead Crypt",
       "description": "A massive burial ground where the dead do not rest.",
       "allowed_areas": ["graveyard_hills", "cursed_forest"],
+      "possible_enemies": ["skeleton", "ghost", "wraith", "death_knight", "lich", "undead_knight"],
       "difficulty": [6, 7],
       "rooms": 10,
       "boss_id": "necromancer_lord",
@@ -212,12 +231,13 @@
         "items": ["Necromancer's Robes", "Skull Staff"]
       },
       "room_weights": {
-        "question": 25,
-        "battle": 45,
+        "question": 20,
+        "battle": 40,
         "chest": 10,
         "trap_chest": 10,
         "multi_choice": 5,
-        "empty": 5
+        "shrine": 5,
+        "ambush": 10
       }
     },
     {
@@ -225,6 +245,7 @@
       "name": "Demon Portal",
       "description": "A rift between worlds spewing forth chaotic energy.",
       "allowed_areas": ["hell_gate", "chaos_realm"],
+      "possible_enemies": ["infernal_imp", "hell_knight", "fire_demon", "demon", "death_knight"],
       "difficulty": [7, 8],
       "rooms": 11,
       "boss_id": "demon_prince",
@@ -234,12 +255,13 @@
         "items": ["Demon Prince's Crown", "Infernal Blade"]
       },
       "room_weights": {
-        "question": 15,
-        "battle": 55,
+        "question": 10,
+        "battle": 45,
         "chest": 5,
         "trap_chest": 15,
         "multi_choice": 5,
-        "empty": 5
+        "shrine": 5,
+        "ambush": 15
       }
     },
     {
@@ -247,6 +269,7 @@
       "name": "Void Realm",
       "description": "A dimension of nothingness where reality begins to fade.",
       "allowed_areas": ["void_edge", "nothingness"],
+      "possible_enemies": ["spectral_wyrm", "corrupted_priest", "evil_sorcerer", "wraith", "lich"],
       "difficulty": [8, 8],
       "rooms": 12,
       "boss_id": "void_tyrant",
@@ -256,12 +279,13 @@
         "items": ["Void Heart", "Dragonsoul Blade"]
       },
       "room_weights": {
-        "question": 20,
-        "battle": 40,
+        "question": 15,
+        "battle": 35,
         "chest": 10,
         "trap_chest": 10,
         "multi_choice": 10,
-        "empty": 10
+        "shrine": 5,
+        "ambush": 15
       }
     },
     {
@@ -269,6 +293,7 @@
       "name": "Dragon's Lair",
       "description": "The golden-filled nest of the world's most feared dragon.",
       "allowed_areas": ["dragon_mountains", "fire_volcano"],
+      "possible_enemies": ["dragon", "fire_wraith", "ancient_golem", "fire_demon", "hell_knight"],
       "difficulty": [8, 9],
       "rooms": 13,
       "boss_id": "fire_dragon_boss",
@@ -278,12 +303,13 @@
         "items": ["Dragon Scale Armor", "Fire Gem", "Ancient Dragon Scale"]
       },
       "room_weights": {
-        "question": 10,
-        "battle": 50,
+        "question": 5,
+        "battle": 45,
         "chest": 20,
         "trap_chest": 10,
         "multi_choice": 5,
-        "empty": 5
+        "shrine": 5,
+        "ambush": 10
       }
     },
     {
@@ -291,6 +317,7 @@
       "name": "Celestial Tower",
       "description": "A tower reaching into the heavens, guarded by holy beings.",
       "allowed_areas": ["heavenly_reaches", "divine_plains"],
+      "possible_enemies": ["corrupted_priest", "evil_sorcerer", "ancient_golem", "lightning_golem", "wind_elemental"],
       "difficulty": [9, 9],
       "rooms": 14,
       "boss_id": "celestial_guardian",
@@ -300,12 +327,13 @@
         "items": ["Crown of the Dawn", "Divine Sword"]
       },
       "room_weights": {
-        "question": 40,
-        "battle": 30,
+        "question": 35,
+        "battle": 25,
         "chest": 10,
         "trap_chest": 5,
         "multi_choice": 10,
-        "empty": 5
+        "shrine": 10,
+        "ambush": 5
       }
     },
     {
@@ -313,6 +341,7 @@
       "name": "Supreme Realm",
       "description": "The final test for any hero. Only the strongest survive.",
       "allowed_areas": ["supreme_peak", "eternal_void"],
+      "possible_enemies": ["spectral_wyrm", "lich", "void_tyrant", "death_knight", "demon", "corrupted_priest"],
       "difficulty": [10, 10],
       "rooms": 15,
       "boss_id": "supreme_being",
@@ -322,12 +351,13 @@
         "items": ["Supreme Artifact", "Eternal Essence", "Legendary Crown"]
       },
       "room_weights": {
-        "question": 20,
-        "battle": 50,
+        "question": 15,
+        "battle": 40,
         "chest": 10,
         "trap_chest": 10,
         "multi_choice": 5,
-        "empty": 5
+        "shrine": 5,
+        "ambush": 15
       }
     }
   ],
@@ -439,6 +469,201 @@
           "time_limit": 60,
           "failure_damage": 15,
           "success_reward": {"gold": 50, "experience": 100}
+        },
+        {
+          "id": "riddle_wind",
+          "question": "I can fly without wings, I can cry without eyes. Wherever I go, darkness follows me. What am I?",
+          "answer": "cloud",
+          "hints": [
+            "You see me in the sky",
+            "I bring rain",
+            "I am made of water"
+          ],
+          "time_limit": 60,
+          "failure_damage": 15,
+          "success_reward": {"gold": 60, "experience": 120}
+        },
+        {
+          "id": "riddle_river",
+          "question": "I have a mouth but I cannot eat. I have a bed but I cannot sleep. What am I?",
+          "answer": "river",
+          "hints": [
+            "I flow through landscapes",
+            "Fish live in me",
+            "I end at the sea"
+          ],
+          "time_limit": 60,
+          "failure_damage": 15,
+          "success_reward": {"gold": 55, "experience": 110}
+        },
+        {
+          "id": "riddle_silence",
+          "question": "The more you have of it, the less you see. What is it?",
+          "answer": "darkness",
+          "hints": [
+            "It is the opposite of light",
+            "It exists in dungeons",
+            "Candles banish it"
+          ],
+          "time_limit": 60,
+          "failure_damage": 20,
+          "success_reward": {"gold": 70, "experience": 130}
+        },
+        {
+          "id": "riddle_sword",
+          "question": "I am always before you and never behind you. What am I?",
+          "answer": "future",
+          "hints": [
+            "It is not the past",
+            "It has not happened yet",
+            "Time moves toward it"
+          ],
+          "time_limit": 60,
+          "failure_damage": 15,
+          "success_reward": {"gold": 60, "experience": 120}
+        },
+        {
+          "id": "riddle_book",
+          "question": "I have many stories, but I cannot speak. I have a spine, but I cannot walk. What am I?",
+          "answer": "book",
+          "hints": [
+            "You find me in libraries",
+            "Scholars love me",
+            "I contain words"
+          ],
+          "time_limit": 60,
+          "failure_damage": 15,
+          "success_reward": {"gold": 50, "experience": 100}
+        },
+        {
+          "id": "riddle_needle",
+          "question": "I have an eye but cannot see. What am I?",
+          "answer": "needle",
+          "hints": [
+            "It is used for sewing",
+            "Thread passes through me",
+            "I am sharp and thin"
+          ],
+          "time_limit": 60,
+          "failure_damage": 10,
+          "success_reward": {"gold": 45, "experience": 90}
+        },
+        {
+          "id": "riddle_stars",
+          "question": "I have billions of eyes yet I live in darkness. I have millions of ears yet only silence knows me. What am I?",
+          "answer": "stars",
+          "hints": [
+            "I appear at night",
+            "You cannot count all of me",
+            "I am far away"
+          ],
+          "time_limit": 60,
+          "failure_damage": 20,
+          "success_reward": {"gold": 75, "experience": 150}
+        },
+        {
+          "id": "riddle_gold",
+          "question": "I can be cracked, made, told, and played. What am I?",
+          "answer": "joke",
+          "hints": [
+            "It can make you laugh",
+            "Jesters use it",
+            "It is not serious"
+          ],
+          "time_limit": 60,
+          "failure_damage": 15,
+          "success_reward": {"gold": 55, "experience": 110}
+        },
+        {
+          "id": "riddle_age",
+          "question": "I grow shorter as I grow older. What am I?",
+          "answer": "candle",
+          "hints": [
+            "I provide light",
+            "Fire consumes me",
+            "I am made of wax"
+          ],
+          "time_limit": 60,
+          "failure_damage": 15,
+          "success_reward": {"gold": 60, "experience": 120}
+        },
+        {
+          "id": "riddle_ice",
+          "question": "What is always coming but never arrives?",
+          "answer": "tomorrow",
+          "hints": [
+            "It is about time",
+            "When it arrives, it becomes something else",
+            "Today was once this"
+          ],
+          "time_limit": 60,
+          "failure_damage": 20,
+          "success_reward": {"gold": 70, "experience": 140}
+        },
+        {
+          "id": "riddle_mirror",
+          "question": "I show you yourself but I am not you. I have no weight but can hold your reflection. What am I?",
+          "answer": "mirror",
+          "hints": [
+            "It hangs on walls",
+            "Vampires fear it",
+            "Glass makes me"
+          ],
+          "time_limit": 60,
+          "failure_damage": 15,
+          "success_reward": {"gold": 55, "experience": 110}
+        },
+        {
+          "id": "riddle_grave",
+          "question": "What has a neck but no head, and wears a cap?",
+          "answer": "bottle",
+          "hints": [
+            "Potions are stored in me",
+            "I can hold liquid",
+            "I have a cork or lid"
+          ],
+          "time_limit": 60,
+          "failure_damage": 10,
+          "success_reward": {"gold": 50, "experience": 100}
+        },
+        {
+          "id": "riddle_teeth",
+          "question": "I have teeth but cannot bite. I am used every morning but never at night. What am I?",
+          "answer": "comb",
+          "hints": [
+            "It is used for grooming",
+            "Hair is its target",
+            "It has many thin prongs"
+          ],
+          "time_limit": 60,
+          "failure_damage": 10,
+          "success_reward": {"gold": 45, "experience": 90}
+        },
+        {
+          "id": "riddle_shadow2",
+          "question": "I follow you everywhere in daylight, disappear in darkness, and cannot be caught. What am I?",
+          "answer": "shadow",
+          "hints": [
+            "You cast me when standing in sunlight",
+            "I mimic your shape",
+            "I vanish at night"
+          ],
+          "time_limit": 60,
+          "failure_damage": 15,
+          "success_reward": {"gold": 60, "experience": 120}
+        },
+        {
+          "id": "riddle_clock",
+          "question": "I have hands but cannot clap. I have a face but cannot smile. I tell you something every moment. What am I?",
+          "answer": "clock",
+          "hints": [
+            "It hangs on walls",
+            "It measures something important",
+            "It ticks"
+          ],
+          "time_limit": 60,
+          "failure_damage": 15,
+          "success_reward": {"gold": 55, "experience": 110}
         }
       ]
     },
@@ -536,6 +761,66 @@
           "time_limit": 30,
           "failure_damage": 15,
           "success_reward": {"gold": 100, "experience": 175}
+        },
+        {
+          "id": "torch_selection",
+          "question": "Three torches light a chamber. One flickers red, one burns blue, one glows steady white. Which leads to the treasure vault?",
+          "options": [
+            {"text": "Red torch", "correct": false, "reason": "The red flame hides a pit trap!"},
+            {"text": "Blue torch", "correct": false, "reason": "The blue flame leads to a dead end."},
+            {"text": "White torch", "correct": true, "reason": "Steady light reveals the true path!"}
+          ],
+          "time_limit": 30,
+          "failure_damage": 20,
+          "success_reward": {"gold": 120, "experience": 180}
+        },
+        {
+          "id": "potion_selection",
+          "question": "A mysterious alchemist offers you a potion. Red restores strength, blue grants vision, green grants speed. Which do you drink?",
+          "options": [
+            {"text": "Red Potion", "correct": true, "reason": "Strength surges through your veins!"},
+            {"text": "Blue Potion", "correct": false, "reason": "Visions overwhelm your senses — pain!"},
+            {"text": "Green Potion", "correct": false, "reason": "You run in circles and lose time."}
+          ],
+          "time_limit": 30,
+          "failure_damage": 15,
+          "success_reward": {"gold": 90, "experience": 160}
+        },
+        {
+          "id": "door_selection",
+          "question": "Three doors stand before you: one made of iron, one of oak, one of stone. The dungeon's treasure lies behind one. Which do you open?",
+          "options": [
+            {"text": "Iron door", "correct": false, "reason": "The iron door conceals a trap!"},
+            {"text": "Oak door", "correct": true, "reason": "The humble door holds the greatest reward!"},
+            {"text": "Stone door", "correct": false, "reason": "The stone door is sealed shut — you hurt yourself forcing it."}
+          ],
+          "time_limit": 30,
+          "failure_damage": 20,
+          "success_reward": {"gold": 130, "experience": 190}
+        },
+        {
+          "id": "inscription_selection",
+          "question": "Ancient runes on the floor read: 'Step on me to gain, step off to lose.' What do you do?",
+          "options": [
+            {"text": "Step on the rune", "correct": true, "reason": "Ancient power flows into you!"},
+            {"text": "Step around it", "correct": false, "reason": "A hidden floor panel snaps upward — pain!"},
+            {"text": "Smash the rune", "correct": false, "reason": "Destroying the rune releases a curse!"}
+          ],
+          "time_limit": 30,
+          "failure_damage": 15,
+          "success_reward": {"gold": 100, "experience": 175}
+        },
+        {
+          "id": "statue_selection",
+          "question": "Three statues depict a warrior, a scholar, and a thief. The dungeon's guardian asks: 'Which of these serves a dungeon best?'",
+          "options": [
+            {"text": "The Warrior", "correct": false, "reason": "Brawn alone shatters against stone walls."},
+            {"text": "The Scholar", "correct": true, "reason": "Knowledge reveals every secret!"},
+            {"text": "The Thief", "correct": false, "reason": "Cunning alone is not enough down here."}
+          ],
+          "time_limit": 30,
+          "failure_damage": 20,
+          "success_reward": {"gold": 110, "experience": 185}
         }
       ]
     },

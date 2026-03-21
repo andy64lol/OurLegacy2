@@ -128,12 +128,14 @@ def generate_dungeon_rooms(
 
     if not room_weights or sum(room_weights.values()) == 0:
         room_weights = {
-            'battle': 40,
+            'battle': 35,
             'question': 20,
             'chest': 15,
-            'empty': 15,
+            'empty': 10,
             'trap_chest': 5,
-            'multi_choice': 5
+            'multi_choice': 5,
+            'shrine': 5,
+            'ambush': 5
         }
 
     if total_rooms <= 0:
@@ -312,9 +314,14 @@ def process_empty_room(_room: Dict[str, Any]) -> Dict[str, Any]:
 def process_battle_room(_player: Dict[str, Any], room: Dict[str, Any],
                         enemies_data: Dict[str, Any], areas_data: Dict[str,
                                                                        Any],
-                        current_area: str) -> Dict[str, Any]:
-    area = areas_data.get(current_area, {})
-    possible = area.get('possible_enemies', [])
+                        current_area: str,
+                        dungeon: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    possible: List[str] = []
+    if dungeon:
+        possible = dungeon.get('possible_enemies', [])
+    if not possible:
+        area = areas_data.get(current_area, {})
+        possible = area.get('possible_enemies', [])
     if not possible:
         possible = [
             k for k in enemies_data.keys()
@@ -364,6 +371,97 @@ def process_battle_room(_player: Dict[str, Any], room: Dict[str, Any],
         scaled,
         'messages': [{
             'text': f'A {scaled.get("name", "foe")} blocks your path!',
+            'color': 'var(--red)'
+        }],
+    }
+
+
+def process_shrine_room(player: Dict[str, Any]) -> Dict[str, Any]:
+    """A shrine that restores some HP and/or MP."""
+    max_hp = player.get('max_hp', 100)
+    max_mp = player.get('max_mp', 50)
+    current_hp = player.get('hp', max_hp)
+    current_mp = player.get('mp', max_mp)
+
+    heal_amount = int(max_hp * 0.25)
+    mp_amount = int(max_mp * 0.25)
+    heal_amount = min(heal_amount, max_hp - current_hp)
+    mp_amount = min(mp_amount, max_mp - current_mp)
+
+    player['hp'] = current_hp + heal_amount
+    player['mp'] = current_mp + mp_amount
+
+    shrine_flavors = [
+        'A ancient stone shrine hums with divine energy.',
+        'Soft golden light bathes the chamber from a sacred altar.',
+        'A forgotten deity blesses you from this crumbling shrine.',
+        'The shrine pulses with healing warmth as you approach.',
+    ]
+    messages = [{'text': random.choice(shrine_flavors), 'color': 'var(--gold)'}]
+    if heal_amount > 0:
+        messages.append({
+            'text': f'The shrine restores {heal_amount} HP!',
+            'color': 'var(--green-bright)'
+        })
+    if mp_amount > 0:
+        messages.append({
+            'text': f'The shrine restores {mp_amount} MP!',
+            'color': 'var(--mp-blue)'
+        })
+    if heal_amount == 0 and mp_amount == 0:
+        messages.append({
+            'text': 'You are already at full strength. The shrine nods in approval.',
+            'color': 'var(--text-dim)'
+        })
+    return {'type': 'shrine', 'messages': messages, 'heal': heal_amount, 'mp': mp_amount}
+
+
+def process_ambush_room(_player: Dict[str, Any], room: Dict[str, Any],
+                        enemies_data: Dict[str, Any], areas_data: Dict[str, Any],
+                        current_area: str,
+                        dungeon: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """An ambush — a stronger enemy with a bonus reward on victory."""
+    possible: List[str] = []
+    if dungeon:
+        possible = dungeon.get('possible_enemies', [])
+    if not possible:
+        area = areas_data.get(current_area, {})
+        possible = area.get('possible_enemies', [])
+    if not possible:
+        possible = [k for k in enemies_data.keys() if isinstance(enemies_data[k], dict)][:8]
+    if not possible:
+        return {
+            'type': 'empty',
+            'messages': [{'text': 'The shadows hold nothing.', 'color': 'var(--text-dim)'}]
+        }
+
+    enemy_key = random.choice(possible)
+    enemy_data = enemies_data.get(enemy_key, {})
+    if not isinstance(enemy_data, dict):
+        return {
+            'type': 'empty',
+            'messages': [{'text': 'The ambush melts away.', 'color': 'var(--text-dim)'}]
+        }
+
+    difficulty = room.get('difficulty', 1)
+    scale = 1.0 + difficulty * 0.25
+    scaled = dict(enemy_data)
+    scaled['key'] = enemy_key
+    scaled['hp'] = int(scaled.get('hp', 50) * scale)
+    scaled['max_hp'] = scaled['hp']
+    scaled['attack'] = int(scaled.get('attack', 5) * scale)
+    scaled['defense'] = int(scaled.get('defense', 2) * scale)
+    scaled['speed'] = scaled.get('speed', 10)
+    scaled['exp_reward'] = int(scaled.get('experience_reward', 30) * scale * 1.5)
+    scaled['gold_reward'] = max(1, int(scaled.get('gold_reward', 10) * 1.5) + random.randint(5, 15))
+    scaled['loot_table'] = scaled.get('loot_table', [])
+    scaled['is_ambush'] = True
+
+    return {
+        'type': 'ambush',
+        'enemy': scaled,
+        'messages': [{
+            'text': f'AMBUSH! A powerful {scaled.get("name", "foe")} leaps from the shadows!',
             'color': 'var(--red)'
         }],
     }
