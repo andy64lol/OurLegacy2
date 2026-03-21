@@ -2342,7 +2342,7 @@ def action_sell():
         add_message("You do not have that item.", "var(--red)")
 
     save_player(player)
-    return redirect(url_for("game"))
+    return redirect(url_for("game") + "?tab=inventory")
 
 
 # ─── Companion System ────────────────────────────────────────────────────────
@@ -3873,7 +3873,8 @@ def api_market_data():
     if not player:
         return jsonify({"ok": False, "error": "Not logged in"})
     market_api = get_market_api()
-    result = market_api.fetch_market_data()
+    extra_seed = session.get("market_reroll_count", 0)
+    result = market_api.fetch_market_data(extra_seed=extra_seed)
     market_items = []
     cooldown_msg = None
     if result.get("ok") and result.get("data", {}).get("ok"):
@@ -3888,8 +3889,26 @@ def api_market_data():
             "market_items": market_items,
             "cooldown_msg": cooldown_msg,
             "player_gold": player.get("gold", 0),
+            "reroll_count": extra_seed,
         }
     )
+
+
+@app.route("/action/market/reset", methods=["POST"])
+def market_reset():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+    cost = 1000
+    if player.get("gold", 0) < cost:
+        add_message(f"You need {cost} gold to reroll the Elite Market.", "var(--red)")
+    else:
+        player["gold"] -= cost
+        session["market_reroll_count"] = session.get("market_reroll_count", 0) + 1
+        session.modified = True
+        save_player(player)
+        add_message("The Elite Market stock has been rerolled!", "var(--gold)")
+    return redirect(url_for("game") + "?tab=market")
 
 
 @app.route("/action/market/buy", methods=["POST"])

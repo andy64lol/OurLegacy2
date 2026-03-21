@@ -180,8 +180,16 @@ function renderMarket(data, container) {
         return;
     }
     var gold = data.player_gold;
-    var html = '<div style="margin-bottom:10px;font-size:13px;color:var(--text-dim);">' +
-        data.market_items.length + ' elite items available. Market refreshes every 10 minutes.</div>';
+    var canReroll = gold >= 1000;
+    var html = '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">';
+    html += '<div style="font-size:13px;color:var(--text-dim);">' + data.market_items.length + ' elite items available. Market refreshes every 10 minutes.</div>';
+    html += '<form method="POST" action="/action/market/reset" onsubmit="document.body.classList.add(\'page-fade-out\')">';
+    if (canReroll) {
+        html += '<button type="submit" class="btn btn-secondary btn-small" style="border-color:var(--gold-dim);color:var(--gold-dim);" title="Spend 1,000 gold to reroll the market stock">&#8635; Reroll Stock (1,000g)</button>';
+    } else {
+        html += '<button type="button" class="btn btn-disabled btn-small" disabled title="Need 1,000 gold to reroll">&#8635; Reroll Stock (1,000g)</button>';
+    }
+    html += '</form></div>';
     data.market_items.forEach(function (item) {
         var price = item.marketPrice || item.price || 0;
         var rarity = (item.rarity || 'common').toLowerCase();

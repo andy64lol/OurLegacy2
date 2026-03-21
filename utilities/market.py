@@ -57,8 +57,8 @@ def _is_birthday() -> bool:
     return now.month == BIRTHDAY_MONTH and now.day == BIRTHDAY_DAY
 
 
-def _select_market_items(pool: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    seed = _get_time_window_seed()
+def _select_market_items(pool: List[Dict[str, Any]], extra_seed: int = 0) -> List[Dict[str, Any]]:
+    seed = _get_time_window_seed() + extra_seed * 999983
     rng = random.Random(seed)
     count = min(MARKET_ITEM_COUNT, len(pool))
     return rng.sample(pool, count)
@@ -82,6 +82,7 @@ class MarketAPI:
         self.cache: Optional[Dict[str, Any]] = None
         self.cache_window: Optional[int] = None
         self.cooldown_minutes = MARKET_COOLDOWN_MINUTES
+        self._last_extra_seed: int = 0
 
     def _is_cache_valid(self) -> bool:
         if self.cache is None or self.cache_window is None:
@@ -98,11 +99,11 @@ class MarketAPI:
             return timedelta(seconds=remaining_seconds)
         return None
 
-    def fetch_market_data(self, force_refresh: bool = False) -> Dict[str, Any]:
+    def fetch_market_data(self, force_refresh: bool = False, extra_seed: int = 0) -> Dict[str, Any]:
         """Fetch market data from local items.json. Returns result dict with ok, data, message."""
         current_window = _get_time_window_seed()
 
-        if not force_refresh and self._is_cache_valid():
+        if not force_refresh and self._is_cache_valid() and extra_seed == self._last_extra_seed:
             return {"ok": True, "data": self.cache, "cached": True}
 
         items = _load_items()
@@ -111,7 +112,7 @@ class MarketAPI:
         if not pool:
             return {"ok": False, "message": "The Elite Market has no wares today."}
 
-        selected = _select_market_items(pool)
+        selected = _select_market_items(pool, extra_seed=extra_seed)
 
         if _is_birthday():
             bday_item = _get_birthday_item(items)
@@ -122,6 +123,7 @@ class MarketAPI:
         data = {"ok": True, "items": selected}
         self.cache = data
         self.cache_window = current_window
+        self._last_extra_seed = extra_seed
         return {"ok": True, "data": data, "cached": False}
 
     def get_all_items(self) -> List[Dict[str, Any]]:
