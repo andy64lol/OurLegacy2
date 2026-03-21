@@ -15,7 +15,8 @@
       "ancient_ruins",
       "tavern",
       "your_land",
-      "taiga_outskirts"
+      "taiga_outskirts",
+      "eldenmoor_city"
     ],
     "rest_cost": 5,
     "can_rest": true,
@@ -2143,6 +2144,59 @@
           "The ghost legionnaires patrol the same routes they walked in life. Learn the routes and you can avoid them."
         ],
         "quest_unlock": "recover_the_archive"
+      }
+    ]
+  },
+  "eldenmoor_city": {
+    "name": "Eldenmoor City",
+    "description": "What was once a humble village — the very Eldenmoor written into the Primordial Scriptures — has grown into a proud walled city over three centuries. Cobblestone roads wind between old timber-frame houses and newer stone halls. The Sagefire Spire, built on the site where the First Sage Aetheryn first heard the voice of the Primordial One, rises at the city's heart. Pilgrims come from as far as Ashvale and Thornwick to stand beneath it.",
+    "possible_enemies": [
+      "thief",
+      "city_guard_deserter"
+    ],
+    "possible_bosses": [],
+    "shops": [
+      "general_store"
+    ],
+    "missions_available": true,
+    "connections": [
+      "starting_village"
+    ],
+    "rest_cost": 10,
+    "can_rest": true,
+    "weather_probabilities": {
+      "sunny": 40,
+      "rainy": 35,
+      "stormy": 15,
+      "snowy": 10
+    },
+    "npcs": [
+      {
+        "id": "high_archivist_pellan",
+        "name": "High Archivist Pellan",
+        "dialogues": [
+          "Eldenmoor was already old before the walls were built. The Primordial Scriptures name it first among the villages — that is no accident.",
+          "The First Sage Aetheryn walked every road in Ashvale, Thornwick, and Crysthaven before settling here. She said Eldenmoor smelled like something that was meant to last.",
+          "We have fragments of Aetheryn's own notes in the lower archive. They are written in a hand so small you need candlelight and patience to read them."
+        ]
+      },
+      {
+        "id": "pilgrim_warden_osric",
+        "name": "Pilgrim Warden Osric",
+        "dialogues": [
+          "We get pilgrims from Ashvale every harvest season. They walk the old road barefoot, same as Aetheryn is said to have done.",
+          "Thornwick sends scholars, not pilgrims. Different sort of reverence, I suppose.",
+          "The Sagefire never goes out. In three hundred years, not once. Make of that what you will."
+        ]
+      },
+      {
+        "id": "sagefire_keeper",
+        "name": "Keeper of the Sagefire",
+        "dialogues": [
+          "Aetheryn lit the first flame here herself, they say, the night the Primordial Scriptures were revealed to her. She stood in this exact spot.",
+          "The Order of the Unbroken Seal sends a delegate every decade. We give them access to the spire and they give us nothing in return. Tradition.",
+          "You feel it, don't you? That warmth. It's older than the stones around it."
+        ]
       }
     ]
   }

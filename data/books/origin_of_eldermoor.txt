@@ -139,6 +139,34 @@ The snow in Coldmarch has still not been fixed.
 
 ─────────────────────────────────────────────────
 
+APPENDIX I: THE FIRST SAGE — AETHERYN OF ELDENMOOR
+
+Compiled by High Archivist Selenne from oral accounts, temple records, and the surviving fragments of Aetheryn's own correspondence. Included here because the scriptures cannot be understood without knowing who first understood them.
+
+The woman known to history as Aetheryn was not born in Eldenmoor. She was born in Ashvale, a village to the south, where her father mended nets and her mother kept bees. By most accounts she was a difficult child — unusually interested in the sky, in patterns, in questions no one around her had thought to ask.
+
+She left Ashvale at seventeen. The records from that village note simply: "Aetheryn, daughter of Maren and Tove, departed southward. Did not say where."
+
+She spent two years in Thornwick, studying with the scholars there. Thornwick in those days had a small but serious library, and Aetheryn worked her way through it methodically. The head librarian of Thornwick, a man named Brother Edwyn, wrote of her: "She reads as though she expects the books to eventually say something they have not said yet. She is never quite satisfied. I find this exhausting and admirable in equal measure."
+
+She left Thornwick at nineteen, walking the long road north. She passed through Crysthaven without stopping. She arrived in Eldenmoor — then a village of perhaps two hundred souls — in the early hours of a grey morning and asked the innkeeper for a room and a candle.
+
+Three weeks later, she emerged from that room carrying what she said were translations of scripture she had found carved on a wall behind the inn. No wall behind the inn has since been found. This is considered either a miracle or an early sign of Aetheryn's lifelong habit of not explaining herself fully.
+
+The people of Eldenmoor did not know what to make of her. The people of Ashvale, when they heard, were mostly surprised she had settled anywhere. The scholars of Thornwick requested copies of the translations, which Aetheryn sent with a note reading: "I expect you will disagree with my interpretations. You are welcome to." They did. They still do.
+
+Aetheryn lived in Eldenmoor until her death at an advanced age. She refused every invitation to relocate to a larger city. When asked why she stayed, she reportedly said: "The Primordial One named this place first. I trust the order of things."
+
+She is buried beneath what is now the Sagefire Spire. The flame above her was lit on the night she died and has not gone out since.
+
+Pilgrims from Ashvale still walk the old road to Eldenmoor every harvest season, barefoot, in her memory.
+
+The scholars of Thornwick still send letters asking for clarification on her translations.
+
+She never wrote back about those, either.
+
+─────────────────────────────────────────────────
+
 CLOSING NOTE FROM THE ARCHIVIST
 
 I have spent thirty-one years studying this text. I understand perhaps a fifth of it. The sacred words "import," "while True," and "pip install" remain beyond my comprehension. I have included them in the appendix for future scholars and pray they fare better than I have.
