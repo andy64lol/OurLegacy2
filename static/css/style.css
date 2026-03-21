@@ -738,7 +738,7 @@ body.ol2-bg-4 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24
 
 .sidebar-nav         { padding: 14px 12px; margin-top: auto; }
 .bg-option-btn.active { background: var(--wood-bright) !important; color: var(--bg-dark) !important; }
-.diff-glyph { width: 12px; height: 12px; vertical-align: middle; margin: 0 1px; }
+.diff-glyph { width: 20px; height: 20px; vertical-align: middle; margin: 0 2px; }
 .diff-empty  { opacity: 0.25; font-size: 10px; }
 .sidebar-save-section{ padding: 10px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
 
@@ -1978,23 +1978,22 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
 
 /* ─── Class & Type Glyphs ────────────────────────────────────── */
 .class-glyph {
-    width: 20px;
-    height: 20px;
+    width: 32px;
+    height: 32px;
     vertical-align: middle;
-    margin-right: 6px;
+    margin-right: 8px;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     flex-shrink: 0;
 }
 
 .type-glyph {
-    width: 14px;
-    height: 14px;
+    width: 22px;
+    height: 22px;
     vertical-align: middle;
-    margin-right: 4px;
+    margin-right: 6px;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    opacity: 0.85;
 }
 
 /* ─── Settings Modal ─────────────────────────────────────────── */
