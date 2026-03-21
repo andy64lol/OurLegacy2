@@ -2,7 +2,7 @@ ORIGIA: A HISTORY OF THE FIRST SETTLEMENT
 Being a Complete Account of the Village Whose Name the World Has Forgotten
 
 By Chronicler Aldus Vren, Royal Surveyor, Third Grade
-Commissioned by the Bureau of Historical Records
+Commissioned by the Bureau of Historical Records of the Kingdom of Ænglia
 Dedicated to every innkeeper who has ever corrected a traveller and been ignored
 
 ─────────────────────────────────────────────────
@@ -13,7 +13,7 @@ This book is about a village called Origia.
 
 You probably know it as Starting Village.
 
-This is incorrect. The village has a name. It is Origia. It has been Origia for longer than most of the surrounding region has been inhabited, longer than the roads that pass through it were roads, longer than anyone now alive can remember. The name is carved into the foundation stone of the old mill. It is written in the land survey records dating to the second century of the Byzantra Empire. It appears in the Primordial Scriptures — listed second in the holy inventory of places, directly after Eldenmoor — in a list that scholars have spent centuries debating.
+This is incorrect. The village has a name. It is Origia. It has been Origia for longer than most of the surrounding region has been inhabited, longer than the roads that pass through it were roads, longer than anyone now alive can remember. The name is carved into the foundation stone of the old mill. It is written in the earliest land records of the Kingdom of Ænglia. It appears in the Primordial Scriptures — listed second in the holy inventory of places, directly after Eldenmoor — in a list that scholars have spent centuries debating.
 
 The village is called Origia.
 
@@ -23,53 +23,77 @@ Adventurers call it Starting Village. They have done so for approximately one hu
 
 PART ONE: THE FOUNDING
 
-Origia was established in what historians date to the early settlement period, when the first organised migrations moved inland from the coastal ports. The settlers who chose the site did so for sensible reasons: a freshwater spring, a sheltered valley, soil that actually produced crops without resentment.
+Origia was established in what historians date to the early settlement period, when the first organised migrations moved inland from the coastal ports. The settlers who chose the site did so for sensible reasons: a freshwater spring, a sheltered valley, soil that actually produced crops without resentment, and roads — or the promise of roads — running in several directions at once.
 
-The name they gave it comes from the old southern tongue. "Origia" is derived from the word for beginning, or origin, or first-thing, depending on which dialect you consult. The settlers, apparently, were not subtle people. They founded a village and named it "the place where things begin." This turned out to be prophetic in ways they could not have anticipated.
+The name they gave it comes from the old Ænglian tongue. "Origia" is derived from the word for beginning, or origin, or first-thing, depending on which dialect you consult. The settlers were not subtle people. They founded a village and named it "the place where things begin." This turned out to be prophetic in ways they could not have anticipated.
 
 The founding families left no detailed records. What we know of them comes from the Bureau's land surveys, the Primordial Scriptures (which list the village but offer no biographical detail), and a carved wooden beam in the inn that reads: "Here stood the first house. It leaked." Scholars have agreed that this is probably true.
 
 ─────────────────────────────────────────────────
 
-PART TWO: ORIGIA IN THE EARLY IMPERIAL PERIOD
+PART TWO: THE CROSSROADS — ORIGIA AS A MERCHANT HUB
 
-By the time the Byzantra Empire extended its administrative reach into the western lands, Origia was already what it would remain for centuries: a modest, functional, thoroughly unremarkable village.
+From the earliest records, Origia was something unusual for a village of its size: a place that mattered to people who were not from it.
 
-The Imperial census of the fourth century lists Origia with a population of three hundred and twelve, seven functioning wells, one inn, one smithy, one shrine of no particular denomination, and — a census-taker's note appended in different ink — "an unusually high number of people who claim to be passing through."
+The roads that passed through Origia connected the forest paths to the north, the ancient ruins to the east, the routes south toward Ashvale and southwest toward Thornwick, and the longer roads that eventually reached Eldenmoor — the royal capital — and beyond. Any merchant moving goods through the western territories had two choices: go around Origia, which added days to any journey, or go through it, which did not.
 
-This last observation is telling. Even then, Origia was a crossroads. The roads that passed through it connected the forest paths to the north, the ancient ruins to the east, and the wider world in every other direction. People arrived. People left. The people who arrived and stayed were, statistically speaking, fewer than average.
+Almost every merchant went through it.
 
-The inn, which stood on the eastern side of the village square, recorded its guests in a leather-bound ledger. The Bureau holds eighty-three of these ledgers in its archive. Reviewing them, a pattern emerges: almost no one recorded Origia as their destination. They were always on the way to somewhere else. Origia was where they slept before setting out.
+The consequences of this were significant. The inn expanded three times in its first century. A second smithy opened. A modest market square developed around the central well, and by the third generation, the market ran five days a week and attracted traders from as far as the northern taiga and the coastal ports. The Bureau's oldest surviving trade ledger, commissioned by Queen Aelvara of the Nevrolian dynasty, notes that Origia handled more goods in transit than any settlement of comparable size in the kingdom — and that this figure had been consistent for at least four generations before the ledger was opened.
+
+Origia was not, to be precise, a wealthy village. Most of the wealth moved through it. The merchants stayed a night, paid the innkeeper, had their horses reshod, and continued. The village grew not by keeping what passed through it but by being impossible to avoid.
+
+This made it strategically important in ways its residents found, by all accounts, mostly inconvenient.
 
 ─────────────────────────────────────────────────
 
-PART THREE: HOW A VILLAGE LOST ITS NAME
+PART THREE: THE BYZANTRA INCURSION
+
+The Byzantra Empire, in its period of western expansion, did not overlook Origia. Byzantran strategists were, whatever their other faults, thorough readers of trade routes, and Origia's position at the junction of the western road network was not lost on them.
+
+The Empire attempted to bring Origia under its administration on two occasions.
+
+The first attempt was diplomatic. A Byzantran envoy arrived in Origia during the reign of King Edric II of the Nevrolian line, presented a formal offer of "protective inclusion" in the Empire's western territories, and was informed by the king's representative — a minor lord named Halvard, who happened to be visiting the inn at the time — that Origia was part of the Kingdom of Ænglia and would remain so. The envoy left. The Empire noted the refusal and began planning.
+
+The second attempt was military. A Byzantran force crossed the western border during the interregnum following King Edric II's death and moved toward Origia with the apparent intention of occupying it before a new king could be crowned and a proper defence organised.
+
+They did not get there.
+
+The details of what stopped them are disputed. The most credible account — compiled from Ænglian border records, two Byzantran dispatches captured in the aftermath, and a highly partial local ballad — suggests that the advancing force encountered unexpected resistance from a combination of Ænglian border militia, a company of mercenaries who happened to be stopping at the inn in Origia on their way to an unrelated contract, and the terrain itself, which the Byzantrans had not adequately surveyed. The force retreated. A formal protest was lodged by the Nevrolian court. The Empire did not attempt a third incursion.
+
+Origia was never occupied. Origia was never governed by Byzantra. Origia was never part of the Byzantra Empire.
+
+The Bureau notes this because certain maps produced by the Cartographers' Guild in earlier editions implied otherwise through the clumsy placement of imperial boundary markings. The Guild has since corrected this. The Bureau filed a formal complaint regardless.
+
+─────────────────────────────────────────────────
+
+PART FOUR: ORIGIA IN THE KINGDOM OF ÆNGLIA
+
+Origia is, and has always been, a village of the Kingdom of Ænglia. It sits within the western territories administered from the royal capital at Eldenmoor City — the very Eldenmoor named first in the Primordial Scriptures, now a walled city of some distinction, home to the Sagefire Spire and the royal court of the Nevrolian dynasty.
+
+The relationship between Origia and the crown has been, through most of the kingdom's history, one of mutual indifference with occasional moments of appreciation. The crown values Origia's position on the trade routes; Origia values the crown's army, which keeps roads reasonably safe. Tax records show consistent payment with only one documented period of dispute, which was resolved when the crown lowered the levy on goods in transit and Origia agreed to stop hiding the ledgers.
+
+The current royal charter designates Origia as a free market settlement — meaning no single lord holds dominion over its market square, and merchants of any origin may trade there without additional gate fees. This charter, renewed by every monarch of the Nevrolian line since its original issue, is the primary reason Origia's market has remained among the busiest in the western territories.
+
+─────────────────────────────────────────────────
+
+PART FIVE: HOW A VILLAGE LOST ITS NAME
 
 The precise moment when "Starting Village" entered common usage cannot be determined. The earliest written use of the phrase the Bureau has found dates to approximately one hundred and forty years ago, in a private letter from one Gavin of the Sword (an adventurer, presumably) to a friend: "After Starting Village I took the north road and the forest was worse than anyone warned."
 
-Gavin of the Sword did not explain why he called it Starting Village. He probably assumed his friend would know what he meant. The friend, whoever they were, apparently did.
+Gavin of the Sword did not explain why he called it Starting Village. He probably assumed his friend would know what he meant. The friend, apparently, did.
 
-The phrase spread. Adventurers are, as a profession, prone to creating their own vocabulary, and "Starting Village" had an obvious logic to it: it was, for a great many of them, the village where they started. Heroes began there. Legends launched from its square. The road out of Origia led — through one path or another — to every notable location, every great danger, every treasure and catastrophe that the world had to offer.
+The phrase spread. Adventurers are, as a profession, prone to creating their own vocabulary, and "Starting Village" had an obvious logic to it: it was, for a great many of them, the village where they started. Heroes began there. Legends launched from its square. The road out of Origia led — through one path or another — to every notable location, every great danger, every treasure and catastrophe that the western territories had to offer.
 
-The innkeeper of that era, a woman named Bessie Thorpe, reportedly spent twenty years insisting to every guest that the village was called Origia. Her daughter gave up on this project. Her granddaughter, the current innkeeper, no longer mentions it unless directly asked, at which point she says "Origia" in a tone that suggests she has explained this before and does not expect it to help.
+The innkeeper of that era, a woman named Bessie Thorpe, reportedly spent twenty years insisting to every guest that the village was called Origia. Her daughter gave up on this project. Her granddaughter, the current innkeeper, no longer mentions it unless directly asked.
 
 She is correct that it does not help.
 
 ─────────────────────────────────────────────────
 
-PART FOUR: WHAT THE VILLAGE IS, ACTUALLY
+PART SIX: NOTABLE PERSONS OF ORIGIA
 
-The Bureau's current survey of Origia describes a village of standard construction: stone-and-timber buildings, a central well, an inn of reasonable quality, a smithy that produces functional if unspectacular equipment, and a small shrine maintained by Elder Mira, who has occupied her position so long that several younger residents assume she was born there holding a staff.
-
-The roads out of Origia are, as noted, numerous. This is the village's defining characteristic. Go north and you reach the forest path, and beyond it the deeper wilderness. Go east and you find the ancient ruins, which draw scholars and treasure hunters in roughly equal measure. Go further and eventually you reach Eldenmoor City — whose High Archivist Pellan once wrote to the Bureau asking that we note, for the record, that Origia was named before Eldenmoor in the Primordial Scriptures, and that she considered this "a matter of historical importance that the Bureau has so far failed to address." The Bureau addressed it by filing her letter.
-
-Ashvale lies to the south. Thornwick to the southwest. Both maintain what might be called formal relations with Origia — they acknowledge its existence, they trade with it occasionally, and they do not call it Starting Village, which Origia's residents appreciate more than they say aloud.
-
-─────────────────────────────────────────────────
-
-PART FIVE: NOTABLE PERSONS OF ORIGIA
-
-The Bureau's records contain the names of over forty individuals born or long-resident in Origia who went on to achieve some form of documented distinction. A partial list:
+The Bureau's records contain the names of over forty individuals born or long-resident in Origia who went on to achieve documented distinction. A partial list:
 
 Blacksmith Torren's grandfather, Edvin, forged the blade used by the hero Cassia of the Three Campaigns. Cassia is widely celebrated. Edvin is listed in the Bureau's records as "Edvin, blade-maker, Origia."
 
@@ -81,20 +105,15 @@ The adventurer known as "the Wandering Blade" — whose real name was Petra Vorn
 
 CLOSING OBSERVATIONS
 
-Origia is a village that has spent its entire existence as a beginning rather than an end. It has never produced a great monument, won a battle, or generated a legend of its own. It has generated, by the Bureau's conservative estimate, approximately two thousand legends — all of them belonging to people who started there and finished somewhere else.
+Origia is a village that has spent its entire existence as a beginning rather than an end. It has never produced a great monument or won a battle of its own. What it has done is remain — at the centre of every road worth travelling, in every era worth documenting — as the place where things depart from.
 
-This is perhaps its own kind of distinction.
+The Kingdom of Ænglia knows its value. The Byzantra Empire learned the limits of that value the hard way. The merchants who pass through it every week understand it instinctively, without ever needing to articulate it.
 
-The Bureau recommends that the village's true name — Origia — be restored to common usage, printed on maps, and taught in schools.
-
-The Bureau acknowledges that this will probably not happen.
-
-The inn is good. The beds are comfortable. The innkeeper will tell you the name of the village if you ask and will not hold it against you if you forget.
-
-Her name is Hilda Thorpe.
 The village is called Origia.
 You will probably call it Starting Village.
 
+The innkeeper's name is Hilda Thorpe, and she will serve you without comment on either subject.
+
 — Aldus Vren, Royal Surveyor, Third Grade
-  Filed with the Bureau of Historical Records
+  Filed with the Bureau of Historical Records, Kingdom of Ænglia
   (This copy was found in the inn's lost-and-found. It had been there for eleven years.)

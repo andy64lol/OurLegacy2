@@ -27,7 +27,8 @@
         "dialogues": [
           "Safe travels, adventurer. The roads grow darker each passing day.",
           "I've seen many young souls set out for glory. Few return unchanged.",
-          "The forest to the north whispers at night. Take heed."
+          "The forest to the north whispers at night. Take heed.",
+          "You know, this village has a name. Origia. It always has. I don't expect you'll use it, but there it is."
         ],
         "quest_unlock": "lost_child"
       },
@@ -2149,7 +2150,7 @@
   },
   "eldenmoor_city": {
     "name": "Eldenmoor City",
-    "description": "What was once a humble village — the very Eldenmoor written into the Primordial Scriptures — has grown into a proud walled city over three centuries. Cobblestone roads wind between old timber-frame houses and newer stone halls. The Sagefire Spire, built on the site where the First Sage Aetheryn first heard the voice of the Primordial One, rises at the city's heart. Pilgrims come from as far as Ashvale and Thornwick to stand beneath it.",
+    "description": "Royal capital of the Kingdom of Ænglia and seat of the Nevrolian dynasty. What began as a humble village — the very Eldenmoor named first in the Primordial Scriptures — has grown over three centuries into a great walled city. Cobblestone roads wind between old timber-frame houses and newer stone halls. The Sagefire Spire rises at the city's heart, its flame unbroken since the death of the First Sage Aetheryn. Pilgrims come from Ashvale and Thornwick; merchants come from Origia; scholars come from everywhere.",
     "possible_enemies": [
       "thief",
       "city_guard_deserter"

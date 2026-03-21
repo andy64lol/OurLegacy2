@@ -3607,6 +3607,13 @@
       "price": 25,
       "rarity": "common"
    },
+   "A History of the Kingdom of Ænglia": {
+      "type": "book",
+      "book_key": "history_of_aenglia",
+      "description": "High Archivist Pellan's definitive account of Ænglia — from the first settlements and the founding of the Nevrolian dynasty to the Byzantra incursion and the rise of Eldenmoor as the royal capital.",
+      "price": 60,
+      "rarity": "uncommon"
+   },
    "Yixuan Silk": {
       "type": "material",
       "description": "Lustrous silk from the eastern kingdoms, lighter than linen and stronger than you'd expect",

@@ -117,5 +117,12 @@
     "description": "The Cartographers' Guild's official lexicon of place names in the western territories, including long-overdue corrections to several embarrassing errors — among them the matter of Origia.",
     "file": "books/waymarks_and_namings.txt",
     "rarity": "common"
+  },
+  "history_of_aenglia": {
+    "title": "A History of the Kingdom of Ænglia",
+    "author": "High Archivist Pellan of Eldenmoor",
+    "description": "The definitive history of the Kingdom of Ænglia — from the first settlements at Origia and Eldenmoor, through the founding of the Nevrolian dynasty, the Byzantra incursion, and the rise of Eldenmoor as the royal capital.",
+    "file": "books/history_of_aenglia.txt",
+    "rarity": "uncommon"
   }
 }

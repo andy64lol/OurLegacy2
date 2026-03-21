@@ -3,6 +3,7 @@ A Lexicon of Place Names in the Western Territories
 
 Compiled and annotated by Scholar Petronis of the Cartographers' Guild
 Third revised edition — with corrections to the second edition's embarrassing entry on Coldwater
+(And the also-embarrassing imperial boundary markings near Origia. See that entry.)
 
 ─────────────────────────────────────────────────
 
@@ -10,9 +11,9 @@ FOREWORD TO THE THIRD EDITION
 
 The Cartographers' Guild has, over the course of two centuries, produced more maps than any institution in the known world. In that time, we have been wrong about a remarkable number of things. The second edition of this lexicon listed Coldwater as "probably fictional." Coldwater's residents wrote to us. We have corrected this.
 
-We have also, in this edition, finally addressed the Origia situation. See entry below.
+We have also, in this edition, corrected the Origia situation — both the name issue and the boundary issue. The village was never part of the Byzantra Empire. The Bureau of Historical Records of the Kingdom of Ænglia wrote to us about this at considerable length. We have corrected it. The Guild apologises, particularly to the Bureau, and more particularly to the Kingdom of Ænglia, and most particularly to Origia itself.
 
-This lexicon covers place names in the western territories only. Eastern territories are addressed in a separate volume compiled by Scholar-Merchant Katakalon, which I recommend with the caveat that Katakalon spells "Yixuan" four different ways in a single chapter and appears not to have noticed.
+This lexicon covers place names in the western territories of the Kingdom of Ænglia only. Eastern territories are addressed in a separate volume compiled by Scholar-Merchant Katakalon, which I recommend with the caveat that Katakalon spells "Yixuan" four different ways in a single chapter and appears not to have noticed.
 
 — Scholar Petronis, Cartographers' Guild
 
@@ -22,79 +23,82 @@ THE LEXICON
 
 ASHVALE
 
-A village of moderate size in the southern territories, notable primarily for its proximity to the Ashvale forest road and its annual harvest pilgrimage to Eldenmoor City. The name derives from the old word for ash-tree, combined with the valley designation "vale" — straightforward naming by practical people.
+A village of moderate size in the southern territories of Ænglia, notable for its proximity to the Ashvale forest road and its annual harvest pilgrimage to Eldenmoor City. The name derives from the old word for ash-tree, combined with the valley designation "vale" — straightforward naming by practical people.
 
-Ashvale's population is described in every survey as "stable," which in cartographic notation means it is neither growing nor shrinking and the residents seem to prefer it that way. The village produces smoked fish, woven baskets, and — according to one very specific trade record — an unusual quantity of beeswax.
+Ashvale's population is described in every survey as "stable." The village produces smoked fish, woven baskets, and — according to one very specific trade record — an unusual quantity of beeswax. It sits on one of the secondary roads that feeds into the larger network centred on Origia, making it a regular stop for merchants moving goods toward the capital.
 
-The Ashvale pilgrim tradition, in which residents walk barefoot to Eldenmoor City each harvest season in honour of the First Sage Aetheryn (who was born in Ashvale), is well-documented. The Guild notes that Aetheryn is the village's most famous native, and that the village has never, to our knowledge, asked for anything in return for this. They simply walk. Every year. Barefoot.
+The Ashvale pilgrim tradition, in which residents walk barefoot to Eldenmoor City each harvest season in honour of the First Sage Aetheryn (who was born in Ashvale), is well-documented. Aetheryn is the village's most famous native, and the village has never asked for anything in return for this. They simply walk. Every year. Barefoot.
 
 We find this admirable.
 
-CARTOGRAPHERS' NOTE: Ashvale appears on Guild maps under its correct name and has done so since the first edition. We have never called it anything else. The Guild is pleased to note this, as there are so few things we have consistently gotten right.
+CARTOGRAPHERS' NOTE: Ashvale appears on Guild maps under its correct name and has done so since the first edition. We have never called it anything else. The Guild is pleased to note this.
 
 ─────────────────────────────────────────────────
 
-ELDENMOOR (CITY)
+ELDENMOOR (CITY) — ROYAL CAPITAL OF ÆNGLIA
 
-Eldenmoor City is the only settlement in the western territories to carry explicit mention in the Primordial Scriptures, where it appears first in the holy list of villages. Scholars of the Order of the Unbroken Seal have strong opinions about what this means. The Guild's position is that it means Eldenmoor was named first, which is either significant or arbitrary, and we decline to adjudicate.
+Eldenmoor City is the royal capital of the Kingdom of Ænglia and the seat of the Nevrolian dynasty. It is the largest settlement in the western territories and the centre of Ænglian administration, justice, and — following the establishment of the Sagefire Spire — pilgrimage.
 
-The city was, historically, a village. Its growth into a walled city occurred over three centuries, driven primarily by pilgrimage traffic, the establishment of the Sagefire Spire, and what the city's own records describe as "the gradual realisation that people were going to keep coming regardless."
+It appears first in the Primordial Scriptures' holy list of villages, ahead of every other named place. Scholars of the Order of the Unbroken Seal believe this is deeply significant. The Guild's position is that it means Eldenmoor was named first, which may or may not be significant, and we decline to adjudicate theological questions.
 
-The Sagefire — an eternal flame burning atop the Spire — has become one of the western territories' most recognisable landmarks. The Guild's survey teams have used it as a navigation point since the second century. It has not, in recorded history, gone out.
+The city was, historically, a village. Its growth into a walled capital occurred over three centuries, driven by the consolidation of the Nevrolian kingdom, pilgrimage traffic to the Sagefire Spire, and the relocation of the royal court from the older fortress at Greyvast — a decision every subsequent monarch has appeared satisfied with, if only because Greyvast was reportedly very cold.
 
-See also: ORIGIA (for the Primordial Scriptures' second-named village).
+The Sagefire — an eternal flame burning atop the Spire, lit on the night of the First Sage Aetheryn's death — has never gone out. The Guild's survey teams have used it as a navigation point for centuries. It is visible from the western road on clear nights.
+
+CARTOGRAPHERS' NOTE: Previous editions listed Eldenmoor as a village. It has been a city and a royal capital for well over a century. This was a significant error on our part. We have corrected it.
+
+See also: ORIGIA (second-named village in the Primordial Scriptures; principal trade hub of the western territories).
 
 ─────────────────────────────────────────────────
 
 ORIGIA
 
-The correct name of the village most travellers, traders, adventurers, and mapmakers (including, historically, the Guild — see the first and second editions, for which we apologise) have called "Starting Village."
+The correct name of the village most travellers, traders, adventurers, and — historically — this Guild have called "Starting Village." Origia is a settlement of the Kingdom of Ænglia, situated in the western territories approximately two days' journey from Eldenmoor City by the main road.
 
 The village is named Origia. This is documented in:
 - The Primordial Scriptures (second village named, after Eldenmoor)
-- Bureau of Historical Records surveys, earliest dated to the second century of the Byzantra Empire
-- The foundation stone of the old mill, which is carved in letters large enough to be read from the road
-- Approximately nine hundred years of administrative records that everyone involved in mapmaking apparently chose not to consult
+- Kingdom of Ænglia land records, earliest dating to the founding period of the Nevrolian dynasty
+- The foundation stone of the old mill, carved in letters large enough to read from the road
+- The royal free market charter, issued and renewed by every Nevrolian monarch since the original grant
 
-The Guild regrets that our first two editions listed this village as "Starting Village (local name: Origia)." The correct framing is: "Origia (colloquially known as Starting Village)." We have corrected this.
+Origia has never been part of the Byzantra Empire. The Guild's second edition implied otherwise through the careless placement of imperial boundary lines on the western map. This was incorrect. The Byzantra Empire attempted to bring Origia under its administration twice — once diplomatically, once militarily — and failed both times. Origia remained Ænglian. The Guild has corrected the maps. We are sorry.
 
-Why do people call it Starting Village? Because a very large number of legends, journeys, and notable adventures begin there. The roads from Origia connect to the forest paths, the ancient ruins, the northern wilderness, Ashvale, Thornwick, and — via those connections — eventually everywhere else. It is, structurally, a beginning.
+Why is Origia significant? Because it sits at the junction of every major road in the western territories. Merchants moving goods between Ashvale and Thornwick pass through it. Merchants moving goods toward Eldenmoor pass through it. Merchants moving goods toward the northern forest territories or the ancient ruins pass through it. There is, practically speaking, no efficient route through the western territories that does not eventually pass through Origia. This has made it the busiest market settlement in the region despite never having walls, a garrison, or a noble house in residence.
 
-It is also, to be precise, Origia. The innkeeper (current: Hilda Thorpe, descendant of a long line of innkeepers who have been correcting this misconception) will confirm this if asked. She has been confirming it for thirty years. She is tired. Please call it Origia.
+It is also, to be precise, called Origia. The innkeeper (current: Hilda Thorpe) will confirm this if asked.
 
-CARTOGRAPHERS' NOTE: All Guild maps from this edition forward will list the village as Origia. We anticipate that people will continue to call it Starting Village. This is outside our jurisdiction.
+CARTOGRAPHERS' NOTE: All Guild maps from this edition forward list the village as Origia, within the territory of the Kingdom of Ænglia. The imperial boundary lines have been corrected. We are sorry.
 
 ─────────────────────────────────────────────────
 
 THORNWICK
 
-Thornwick is a settlement of scholarly character in the southwestern territories. Its library — modest by the standards of larger cities, substantial by the standards of everything in the western territories — has attracted academics, travellers, and correspondents for several centuries.
+Thornwick is a settlement of scholarly character in the southwestern territories of Ænglia. Its library has attracted academics, travellers, and correspondents for several centuries.
 
-The village is named for the thornbushes that border its northern approach. This is, the Guild acknowledges, not particularly imaginative, but the naming is at least honest. The thorns are real. They are maintained. Nobody is misled.
+The village is named for the thornbushes that border its northern approach. The naming is honest. The thorns are real and maintained. Nobody is misled.
 
-Thornwick's most notable historical contribution is its role in the education of Aetheryn, the First Sage of the Primordial Scriptures, who spent two years there as a young scholar before continuing north to Eldenmoor. The library records from that period still exist and include a note from the head librarian, Brother Edwyn, describing Aetheryn as "exhausting, admirable, and unlikely to be satisfied by anything this library contains, though she is welcome to try." She tried. She moved on. Thornwick named a reading room after her approximately one hundred and fifty years later, once it was clear she was going to remain historically significant.
+Thornwick's most notable historical contribution is its role in the education of Aetheryn, the First Sage, who spent two years there before continuing north to Eldenmoor. The library records include a note from the head librarian, Brother Edwyn: "She reads as though she expects the books to eventually say something they have not said yet. I find this exhausting and admirable." Thornwick named a reading room after her one hundred and fifty years later.
 
-Thornwick maintains a formal scholarly relationship with Eldenmoor City, primarily consisting of regular letters requesting clarification on theological questions and receiving, in response, polite non-answers. This correspondence has been ongoing for two centuries. The scholars of Thornwick describe it as "productive." The keepers of the Sagefire Spire describe it as "tradition."
+Thornwick sits on the secondary road network that feeds into Origia, and sees a moderate amount of merchant traffic accordingly. The scholars of the library are not, as a group, fond of the noise.
 
-CARTOGRAPHERS' NOTE: Thornwick is listed on Guild maps under its correct name. The thorn bushes are noted as a landmark on the approach from the south. Travellers are advised to use the gate, not the hedgerow.
+CARTOGRAPHERS' NOTE: Thornwick is correctly named on Guild maps. Travellers are advised to use the gate rather than the hedgerow.
 
 ─────────────────────────────────────────────────
 
-APPENDIX: NAMES THE GUILD HAS GOTTEN WRONG
+APPENDIX: NAMES AND THINGS THE GUILD HAS GOTTEN WRONG
 
-For transparency, the Cartographers' Guild maintains a record of naming errors in previous editions. A partial list, western territories only:
+For transparency, the Guild maintains a record of errors in previous editions. Western territories only:
 
-- Origia listed as "Starting Village" (editions 1 and 2). Corrected in edition 3.
+- Origia listed as "Starting Village" (editions 1 and 2). Corrected.
+- Origia shown within Byzantra imperial boundaries (editions 1 and 2). Incorrect. Origia is Ænglian. Has always been Ænglian. The Byzantra Empire tried and failed to make it otherwise. Corrected.
+- Eldenmoor listed as a village (editions 1 and 2). It is the royal capital of Ænglia. Corrected.
 - Coldwater listed as "probably fictional" (edition 2). Coldwater is real. We apologise.
-- The river now known as the Grey Run was listed as "Unnamed River (local designation disputed)." The locals call it the Grey Run. They have always called it the Grey Run. The dispute was internal to the Guild and should not have appeared in print.
-- The village of Mirrenfen was omitted from edition 1 entirely. A reader from Mirrenfen wrote to inform us. The letter was six pages long and entirely justified.
-- Eldenmoor was listed as a village in editions 1 and 2. It is a city. It has been a city for over a century. We acknowledge this was a significant oversight.
+- The Grey Run listed as "Unnamed River (local designation disputed)." The dispute was internal to the Guild and should not have appeared in print. Corrected.
+- The village of Mirrenfen omitted from edition 1 entirely. A reader from Mirrenfen wrote six pages about this. They were right. Corrected.
 
-The Guild thanks all correspondents who have written to correct our errors over the years. We have read every letter. We have, where the evidence supported it, updated the maps.
+The Guild thanks all correspondents who have written to correct our errors. We have read every letter and updated the maps where the evidence supported it.
 
-Where the evidence did not support the correction — Coldwater notwithstanding — we have filed the letters and moved on.
-
-This is, we believe, the correct approach to knowledge.
+We acknowledge that "the evidence supported it" applies to rather more letters than we initially admitted.
 
 — Scholar Petronis
   Cartographers' Guild, Western Office
