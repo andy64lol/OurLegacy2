@@ -196,20 +196,26 @@ const raceData  = {{ data.races  | tojson }};
     <div class="battle-main">
 
         <div class="battle-header">
-            <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
-                {% if enemy.is_boss %}<img class="type-glyph" src="/game_assets/glyphs/fight.png" alt="boss battle">BOSS BATTLE{% else %}Combat{% endif %}
+            {% if enemy.is_boss %}
+            <div style="font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:0.18em;margin-bottom:6px;font-weight:700;opacity:0.85;">
+                <img class="type-glyph" src="/game_assets/glyphs/fight.png" alt="boss battle"> ⚔ Boss Encounter ⚔
             </div>
-            <div style="font-size:20px;font-weight:600;color:{{ 'var(--gold)' if enemy.is_boss else 'var(--red)' }};">
+            <div style="font-size:22px;font-weight:700;color:var(--gold);letter-spacing:0.04em;text-shadow:0 0 20px rgba(255,180,60,0.5);">
                 {{ enemy.name }}
             </div>
+            {% else %}
+            <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Combat</div>
+            <div style="font-size:20px;font-weight:600;color:var(--red);">{{ enemy.name }}</div>
+            {% endif %}
         </div>
 
         {% if boss_dialogue and enemy.is_boss %}
-        <div style="
-            background:rgba(220,50,50,0.10);border:1px solid var(--red);border-radius:8px;
-            padding:12px 18px;margin:0 0 14px 0;text-align:center;
-            font-style:italic;color:var(--red);font-size:15px;">
-            "{{ boss_dialogue }}"
+        <div class="boss-dialogue-banner">
+            <div class="boss-dialogue-icon">💀</div>
+            <div class="boss-dialogue-body">
+                <div class="boss-dialogue-label">{{ enemy.name }} declares</div>
+                <div class="boss-dialogue-text">"{{ boss_dialogue }}"</div>
+            </div>
         </div>
         {% endif %}
 
@@ -284,16 +290,30 @@ const raceData  = {{ data.races  | tojson }};
 
             <div class="battle-vs">VS</div>
 
-            <div class="panel">
-                <div class="panel-title panel-title-enemy">{{ enemy.name }}</div>
+            <div class="panel{% if enemy.is_boss %} boss-panel{% endif %}">
+                <div class="panel-title panel-title-enemy">{{ enemy.name }}{% if enemy.is_boss %} ☠{% endif %}</div>
                 <div class="panel-body">
+                    {% set _ehp_pct = [(enemy.hp / enemy.max_hp * 100)|int, 100]|min %}
+                    {% if enemy.is_boss %}
+                    <div class="boss-header-label"><img class="type-glyph" src="/game_assets/glyphs/hp.png" alt="hp"> Boss Vitality</div>
+                    <div class="{% if _ehp_pct <= 25 %}boss-hp-low{% endif %}">
+                        <div class="boss-hp-track">
+                            <div class="boss-hp-fill" style="width:{{ _ehp_pct }}%"></div>
+                        </div>
+                        <div class="boss-hp-numbers">
+                            <span>HP</span>
+                            <strong>{{ enemy.hp }} / {{ enemy.max_hp }}</strong>
+                        </div>
+                    </div>
+                    {% else %}
                     <div class="bar-group">
                         <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.png" alt="hp"> HP <span class="bar-nums">{{ enemy.hp }} / {{ enemy.max_hp }}</span></div>
                         <div class="bar-track">
-                            <div class="bar-fill bar-hp" style="width:{{ [(enemy.hp / enemy.max_hp * 100)|int, 100]|min }}%"></div>
+                            <div class="bar-fill bar-hp" style="width:{{ _ehp_pct }}%"></div>
                         </div>
                     </div>
-                    <div class="stat-mini-grid">
+                    {% endif %}
+                    <div class="stat-mini-grid" style="{% if enemy.is_boss %}margin-top:10px;{% endif %}">
                         <div class="stat-mini"><span>ATK</span><strong>{{ enemy.attack }}</strong></div>
                         <div class="stat-mini"><span>DEF</span><strong>{{ enemy.defense }}</strong></div>
                         <div class="stat-mini"><span>SPD</span><strong>{{ enemy.speed }}</strong></div>

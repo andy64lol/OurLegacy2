@@ -1070,6 +1070,139 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
 .spell-page-btn:hover:not(:disabled) { background: var(--slate-mid); }
 .spell-page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+/* ─── Boss Dialogue Banner ────────────────────────────────── */
+@keyframes bossDialogueAppear {
+    0%   { opacity: 0; transform: translateY(-10px) scale(0.97); }
+    100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+@keyframes bossDialogueShimmer {
+    0%   { transform: translateX(-120%); }
+    100% { transform: translateX(220%); }
+}
+@keyframes bossIconPulse {
+    0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 6px rgba(255,80,80,0.5)); }
+    50%       { transform: scale(1.12); filter: drop-shadow(0 0 14px rgba(255,100,100,0.9)); }
+}
+.boss-dialogue-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, rgba(110,0,0,0.55) 0%, rgba(30,0,0,0.85) 100%);
+    border: 1px solid rgba(255,80,80,0.55);
+    border-left: 4px solid var(--red);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 0 0 18px 0;
+    box-shadow: 0 0 24px rgba(200,40,40,0.25), inset 0 0 40px rgba(0,0,0,0.4);
+    animation: bossDialogueAppear 0.55s cubic-bezier(0.23,1,0.32,1) forwards;
+    position: relative;
+    overflow: hidden;
+}
+.boss-dialogue-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(255,60,60,0.08), transparent);
+    animation: bossDialogueShimmer 3.5s ease-in-out infinite;
+}
+.boss-dialogue-icon {
+    font-size: 38px;
+    flex-shrink: 0;
+    animation: bossIconPulse 2s ease-in-out infinite;
+    line-height: 1;
+}
+.boss-dialogue-body { flex: 1; min-width: 0; }
+.boss-dialogue-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgba(255,100,100,0.75);
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+.boss-dialogue-text {
+    font-style: italic;
+    color: #f9caca;
+    font-size: 15px;
+    line-height: 1.5;
+    text-shadow: 0 0 18px rgba(255,100,100,0.3);
+}
+
+/* ─── Epic Boss HP Bar ────────────────────────────────────── */
+@keyframes bossBarShimmer {
+    0%   { left: -60%; }
+    100% { left: 160%; }
+}
+@keyframes bossBarGlow {
+    0%, 100% { box-shadow: 0 0 10px rgba(200,40,40,0.4), inset 0 0 8px rgba(0,0,0,0.5); }
+    50%       { box-shadow: 0 0 22px rgba(255,60,60,0.65), inset 0 0 8px rgba(0,0,0,0.5); }
+}
+@keyframes bossBarLowGlow {
+    0%, 100% { box-shadow: 0 0 14px rgba(255,20,20,0.55); }
+    50%       { box-shadow: 0 0 32px rgba(255,20,20,0.9); }
+}
+.boss-hp-track {
+    height: 22px;
+    background: linear-gradient(90deg, rgba(50,0,0,0.9) 0%, rgba(20,0,0,0.95) 100%);
+    border: 2px solid rgba(200,50,50,0.7);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    animation: bossBarGlow 2s ease-in-out infinite;
+}
+.boss-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7a0000 0%, #c81e1e 55%, #ff4444 100%);
+    transition: width 0.45s ease;
+    position: relative;
+    overflow: hidden;
+}
+.boss-hp-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    animation: bossBarShimmer 2.8s ease-in-out infinite;
+}
+.boss-hp-low .boss-hp-track {
+    border-color: rgba(255,30,30,0.85);
+    animation: bossBarLowGlow 0.9s ease-in-out infinite;
+}
+.boss-hp-low .boss-hp-fill {
+    background: linear-gradient(90deg, #5a0000 0%, #aa0000 50%, #ff2020 100%);
+}
+.boss-hp-numbers {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--text-dim);
+}
+.boss-hp-numbers strong { color: #f9a0a0; font-size: 13px; }
+.boss-panel {
+    background: linear-gradient(160deg, rgba(80,0,0,0.35) 0%, rgba(20,0,0,0.55) 100%) !important;
+    border-color: rgba(200,50,50,0.55) !important;
+}
+.boss-panel .panel-title.panel-title-enemy {
+    background: linear-gradient(90deg, rgba(120,0,0,0.8), rgba(60,0,0,0.8)) !important;
+    color: #ffb0a0 !important;
+    letter-spacing: 0.05em;
+    font-size: 15px !important;
+}
+.boss-header-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--red);
+    font-weight: 700;
+    opacity: 0.85;
+    margin-bottom: 3px;
+}
+
 /* Existing battle layout pieces */
 .battle-layout { max-width: 920px; margin: 0 auto; padding: 22px 18px; }
 .battle-header { text-align: center; margin-bottom: 14px; }
