@@ -1639,6 +1639,97 @@ const raceData  = {{ data.races  | tojson }};
             </div>
         </div>
 
+        <!-- ── Events ── -->
+        <div class="tab-content" id="tab-events">
+            <div class="panel">
+                <div class="panel-title">
+                    Events
+                    <span class="panel-subtitle">
+                        {% if events_data.active %}{{ events_data.active|length }} active{% else %}None active{% endif %}
+                    </span>
+                </div>
+                <div class="panel-body">
+
+                    {% if not events_data.active and not events_data.upcoming %}
+                    <p class="empty-notice">No events are currently running or scheduled in the next two weeks.</p>
+                    {% endif %}
+
+                    {% if events_data.active %}
+                    <div class="stat-label" style="margin-bottom:10px;">Active Events</div>
+                    {% for ev in events_data.active %}
+                    <div style="margin-bottom:14px;padding:14px;background:var(--panel-bg);border:1px solid var(--gold);border-radius:6px;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+                            <div style="flex:1;min-width:180px;">
+                                <div style="font-size:15px;font-weight:600;color:{% if ev.is_claimed %}var(--text-dim){% else %}var(--gold){% endif %};">
+                                    {{ ev.name }}
+                                    {% if ev.is_claimed %}
+                                    <span style="font-size:12px;color:var(--green-bright);font-weight:normal;"> <img class="type-glyph" src="/game_assets/glyphs/sparkles.png" alt="claimed"> Claimed</span>
+                                    {% endif %}
+                                </div>
+                                <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">{{ ev.description }}</div>
+
+                                {% if ev.condition_type == 'boss_kills' and not ev.is_claimed %}
+                                <div style="margin-top:10px;">
+                                    <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">Boss kills: {{ ev.progress }} / {{ ev.required }}</div>
+                                    <div class="bar-track" style="height:8px;">
+                                        <div class="bar-fill bar-exp" style="width:{{ [(ev.progress / ev.required * 100)|int, 100]|min }}%;"></div>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <div style="margin-top:8px;font-size:12px;color:var(--text-dim);">
+                                    Ends: {{ ev.end }}
+                                    {% if ev.days_remaining is not none %}
+                                    &mdash; <span style="color:{% if ev.days_remaining <= 1 %}var(--red){% else %}var(--text-light){% endif %};">
+                                        {{ ev.days_remaining }} day{{ 's' if ev.days_remaining != 1 else '' }} remaining
+                                    </span>
+                                    {% endif %}
+                                </div>
+
+                                <div style="margin-top:6px;font-size:12px;color:var(--gold);">
+                                    Reward:
+                                    {% if ev.reward_type == 'item' %}{{ ev.reward_item }}
+                                    {% elif ev.reward_type == 'gold' %}{{ '{:,}'.format(ev.reward_amount) }} gold
+                                    {% else %}—{% endif %}
+                                </div>
+                            </div>
+                            <div style="text-align:right;white-space:nowrap;">
+                                {% if ev.is_claimed %}
+                                <span style="font-size:12px;color:var(--text-dim);">Reward collected</span>
+                                {% elif not ev.is_eligible %}
+                                <span style="font-size:12px;color:var(--text-dim);">Not yet eligible</span>
+                                {% else %}
+                                <span style="font-size:12px;color:var(--green-bright);">Eligible — reward on next visit</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if events_data.upcoming %}
+                    <div class="stat-label" style="margin-top:{% if events_data.active %}18px{% else %}0{% endif %};margin-bottom:10px;">Upcoming Events</div>
+                    {% for ev in events_data.upcoming %}
+                    <div style="margin-bottom:12px;padding:14px;background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;opacity:0.8;">
+                        <div style="font-size:15px;font-weight:600;color:var(--text-light);">{{ ev.name }}</div>
+                        <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">{{ ev.description }}</div>
+                        <div style="margin-top:8px;font-size:12px;color:var(--text-dim);">
+                            Starts: {{ ev.start }} &mdash; <span style="color:var(--text-light);">in {{ ev.days_until }} day{{ 's' if ev.days_until != 1 else '' }}</span>
+                        </div>
+                        <div style="margin-top:6px;font-size:12px;color:var(--gold);">
+                            Reward:
+                            {% if ev.reward_type == 'item' %}{{ ev.reward_item }}
+                            {% elif ev.reward_type == 'gold' %}{{ '{:,}'.format(ev.reward_amount) }} gold
+                            {% else %}—{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
     </main>
 </div>
 
