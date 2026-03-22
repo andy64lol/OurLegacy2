@@ -659,6 +659,12 @@ const raceData  = {{ data.races  | tojson }};
             </button>
             <button class="tab-btn" data-tab="diary">Diary</button>
             <button class="tab-btn" data-tab="character">Character</button>
+            <button class="tab-btn" data-tab="events">
+                Events
+                {% if events_data.active %}
+                <span class="tab-badge" style="background:var(--gold);">{{ events_data.active|length }}</span>
+                {% endif %}
+            </button>
         </nav>
 
         <!-- ── Explore ── -->

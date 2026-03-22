@@ -50,6 +50,12 @@
       "condition": {
         "type": "first_login_on_date"
       }
+    },
+    {
+      "id": "All saints of the realm",
+      "name": "All saints of the realm",
+      "description": "The realm's most revered heroes are honoured on this sacred day. Adventurers who log in on the day of the All Saints' Feast receive a special blessing from the gods.",
+      "date": "2026-03-25",
     }
   ]
 }

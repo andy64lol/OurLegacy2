@@ -1827,6 +1827,61 @@ def game():
             {**recipe, "can_craft": check["ok"], "missing": check.get("missing", [])}
         )
 
+    # Events data for inline tab
+    def _get_events_display(p):
+        today = _dt.date.today()
+        today_str = today.isoformat()
+        raw_events = GAME_DATA.get("events", [])
+        claimed = set(p.get("claimed_events", []))
+        boss_kills = p.get("total_bosses_defeated", 0)
+        active_evts, upcoming_evts = [], []
+        for ev in raw_events:
+            eid = ev.get("id", "")
+            if "date" in ev:
+                s_str = e_str = ev["date"]
+            elif "start" in ev and "end" in ev:
+                s_str, e_str = ev["start"], ev["end"]
+            else:
+                continue
+            try:
+                s_date = _dt.date.fromisoformat(s_str)
+                e_date = _dt.date.fromisoformat(e_str)
+            except ValueError:
+                continue
+            is_active = s_date <= today <= e_date
+            days_until = (s_date - today).days
+            is_upcoming = not is_active and 0 < days_until <= 14
+            if today > e_date:
+                continue
+            condition = ev.get("condition", {})
+            ctype = condition.get("type", "none")
+            required = condition.get("count") if ctype == "boss_kills" else None
+            progress = min(boss_kills, required) if required else None
+            is_eligible = (boss_kills >= required) if required else True
+            info = {
+                "id": eid,
+                "name": ev.get("name", ""),
+                "description": ev.get("description", ""),
+                "start": s_str,
+                "end": e_str,
+                "reward_type": ev.get("reward_type", ""),
+                "reward_item": ev.get("reward_item", ""),
+                "reward_amount": ev.get("reward_amount", 0),
+                "condition_type": ctype,
+                "required": required,
+                "progress": progress,
+                "is_eligible": is_eligible,
+                "is_claimed": eid in claimed,
+                "days_remaining": (e_date - today).days + 1 if is_active else None,
+                "days_until": days_until if is_upcoming else None,
+            }
+            if is_active:
+                active_evts.append(info)
+            elif is_upcoming:
+                upcoming_evts.append(info)
+        return {"active": active_evts, "upcoming": upcoming_evts}
+    events_data = _get_events_display(player)
+
     # Dungeon data for inline tab
     dungeons_data: dict[str, Any] = GAME_DATA.get("dungeons", {})
     completed_dungeons_set = set(player.get("completed_dungeons", []))
@@ -1874,6 +1929,7 @@ def game():
         attr_summary=attr_summary,
         read_books=player.get("read_books", []),
         online_user=session.get("online_username"),
+        events_data=events_data,
     )
 
 
