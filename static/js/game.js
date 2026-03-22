@@ -663,3 +663,22 @@ async function logoutAndSave() {
     if (saveOk) showToast('Saved and logged out. Returning to menu...', 'var(--green-bright)', 2000);
     setTimeout(function() { window.location.href = '/'; }, delay);
 }
+
+async function settingsDownloadCloud() {
+    try {
+        var res = await fetch('/api/online/cloud_download');
+        if (!res.ok) { showToast('Could not download cloud save.', 'var(--red)', 3000); return; }
+        var blob = await res.blob();
+        var cd = res.headers.get('Content-Disposition') || '';
+        var filenameMatch = cd.match(/filename="?([^"]+)"?/);
+        var filename = filenameMatch ? filenameMatch[1] : 'cloud_save.olsave';
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 1000);
+        showToast('Cloud save downloaded!', 'var(--green-bright)', 2500);
+    } catch(e) {
+        showToast('Download failed: ' + e.message, 'var(--red)', 3000);
+    }
+}

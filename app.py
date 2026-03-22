@@ -1946,6 +1946,8 @@ def game():
         read_books=player.get("read_books", []),
         online_user=session.get("online_username"),
         events_data=events_data,
+        game_classes=list(GAME_DATA.get("classes", {}).keys()),
+        game_races=list(GAME_DATA.get("races", {}).keys()),
     )
 
 
@@ -1966,6 +1968,25 @@ def _item_stat_summary(item_data):
         if val:
             sign = "+" if "penalty" not in bonus_key else "-"
             parts.append(f"{sign}{abs(int(val))} {label}")
+    effect = item_data.get("effect")
+    value = item_data.get("value", 0)
+    duration = item_data.get("duration", 0)
+    if effect == "heal":
+        parts.append(f"Heals {value} HP")
+    elif effect == "mp_restore":
+        parts.append(f"Restores {value} MP")
+    elif effect == "full_restore":
+        parts.append("Full HP & MP restore")
+    elif effect == "defense_boost":
+        parts.append(f"+{value} DEF ({duration} turns)")
+    elif effect == "attack_boost":
+        parts.append(f"+{value} ATK ({duration} turns)")
+    elif effect == "speed_boost":
+        parts.append(f"+{value} SPD ({duration} turns)")
+    elif effect == "grant_exp":
+        parts.append(f"+{value} EXP")
+    elif effect == "exp_bonus":
+        parts.append(f"+{int(value * 100)}% EXP bonus")
     return ", ".join(parts)
 
 
@@ -4378,6 +4399,47 @@ def api_dm_unread():
     if not username:
         return jsonify({})
     return jsonify(get_unread_dm_counts(username))
+
+
+@app.route("/action/customize_character", methods=["POST"])
+def action_customize_character():
+    player = get_player()
+    if not player:
+        return jsonify({"ok": False, "message": "No active character."})
+    cost = 10000
+    if player.get("gold", 0) < cost:
+        return jsonify({"ok": False, "message": f"You need {cost:,} gold to change your character."})
+    online_user = session.get("online_username")
+    data = request.json or {}
+    new_name = data.get("name", "").strip()
+    new_gender = data.get("gender", "").strip()
+    new_race = data.get("race", "").strip()
+    new_class = data.get("class", "").strip()
+    valid_genders = ["male", "female", "nonbinary"]
+    valid_races = list(GAME_DATA.get("races", {}).keys())
+    valid_classes = list(GAME_DATA.get("classes", {}).keys())
+    changes = []
+    if new_name and not online_user:
+        if 1 <= len(new_name) <= 20:
+            player["name"] = new_name
+            changes.append(f"name to {new_name}")
+        else:
+            return jsonify({"ok": False, "message": "Name must be 1–20 characters."})
+    if new_gender and new_gender in valid_genders:
+        player["gender"] = new_gender
+        changes.append(f"gender to {new_gender}")
+    if new_race and new_race in valid_races:
+        player["race"] = new_race
+        changes.append(f"race to {new_race}")
+    if new_class and new_class in valid_classes:
+        player["class"] = new_class
+        changes.append(f"class to {new_class}")
+    if not changes:
+        return jsonify({"ok": False, "message": "No valid changes provided."})
+    player["gold"] -= cost
+    save_player(player)
+    add_message(f"Character updated ({', '.join(changes)}). -{cost:,} gold.", "var(--gold)")
+    return jsonify({"ok": True, "message": f"Character updated: {', '.join(changes)}."})
 
 
 port = int(os.environ.get("PORT", 5000))

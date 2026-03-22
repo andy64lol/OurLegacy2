@@ -591,6 +591,7 @@ const raceData  = {{ data.races  | tojson }};
                 {% if online_user %}
                 <button onclick="toggleChat()" class="btn btn-secondary btn-small" style="text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;"> Global Chat</button>
                 {% endif %}
+                <button onclick="openCustomizeModal()" class="btn btn-secondary btn-small" style="text-align:center;border-color:var(--gold-dim);color:var(--gold-dim);" title="10,000 gold">&#9997; Change Character</button>
             </div>
         </div>
 
@@ -1627,7 +1628,7 @@ const raceData  = {{ data.races  | tojson }};
                         <div class="stat-row"><span class="stat-name">Item Discovery</span><span class="stat-val" style="color:var(--green-bright);">+{{ (player.attr_discovery * 100) | int }}%</span></div>
                         {% endif %}
                         {% if player.get('attr_exp_bonus') %}
-                        <div class="stat-row"><span class="stat-name">EXP Bonus</span><span class="stat-val" style="color:var(--exp-bright);">+{{ (player.attr_exp_bonus * 100) | int }}%</span></div>
+                        <div class="stat-row"><span class="stat-name">EXP Bonus</span><span class="stat-val" style="color:var(--green-bright);">+{{ (player.attr_exp_bonus * 100) | int }}%</span></div>
                         {% endif %}
                         {% if not player.attr_spell_power and not player.dodge_chance and not player.attr_gold_discount and not player.attr_discovery and not player.get('attr_exp_bonus') %}
                         <div class="stat-row"><span class="stat-name" style="color:var(--text-dim);">No bonus modifiers yet. Spend attribute points to unlock them.</span></div>
@@ -1886,6 +1887,52 @@ const raceData  = {{ data.races  | tojson }};
     </div>
 </div>
 {% endif %}
+
+<!-- Character Customization Modal -->
+<div id="customize-modal-overlay" onclick="closeCustomizeModal(event)" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.78);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+    <div id="customize-modal-box" style="background:linear-gradient(160deg,rgba(20,14,40,0.99),rgba(10,6,24,0.99));border:1px solid rgba(200,160,60,0.5);border-radius:14px;padding:28px 24px;width:100%;max-width:380px;position:relative;box-shadow:0 0 40px rgba(200,150,50,0.2);">
+        <button onclick="closeCustomizeModal()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;">&times;</button>
+        <div style="text-align:center;margin-bottom:6px;font-size:18px;font-weight:700;color:var(--gold);">&#9997; Change Character</div>
+        <div style="text-align:center;font-size:12px;color:var(--text-dim);margin-bottom:18px;">Costs <span style="color:var(--gold);font-weight:700;">10,000 gold</span> &mdash; only changed fields apply</div>
+        {% if not online_user %}
+        <div style="margin-bottom:12px;">
+            <label style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);display:block;margin-bottom:4px;">New Name</label>
+            <input id="cust-name" type="text" maxlength="20" placeholder="Leave blank to keep current" style="width:100%;box-sizing:border-box;padding:8px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(200,160,60,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+        </div>
+        {% else %}
+        <div style="margin-bottom:12px;font-size:12px;color:var(--text-dim);padding:8px 10px;background:rgba(0,0,0,0.3);border-radius:6px;border:1px solid rgba(200,160,60,0.2);">&#128274; Name cannot be changed on a cloud save account.</div>
+        {% endif %}
+        <div style="margin-bottom:12px;">
+            <label style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);display:block;margin-bottom:4px;">Gender</label>
+            <select id="cust-gender" style="width:100%;padding:8px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(200,160,60,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                <option value="">-- No change --</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="nonbinary">Non-Binary</option>
+            </select>
+        </div>
+        <div style="margin-bottom:12px;">
+            <label style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);display:block;margin-bottom:4px;">Race</label>
+            <select id="cust-race" style="width:100%;padding:8px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(200,160,60,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                <option value="">-- No change --</option>
+                {% for r in game_races %}
+                <option value="{{ r }}">{{ r }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="margin-bottom:18px;">
+            <label style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);display:block;margin-bottom:4px;">Class</label>
+            <select id="cust-class" style="width:100%;padding:8px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(200,160,60,0.4);border-radius:6px;color:var(--text-light);font-size:13px;">
+                <option value="">-- No change --</option>
+                {% for c in game_classes %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button id="cust-confirm-btn" class="btn btn-primary" style="width:100%;font-size:14px;" onclick="submitCustomize()">Confirm &mdash; 10,000 gold</button>
+        <div id="cust-status" style="margin-top:10px;text-align:center;font-size:12px;min-height:16px;"></div>
+    </div>
+</div>
 
 {% endif %}
 
@@ -2152,6 +2199,62 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+window.openCustomizeModal = function() {
+    var overlay = document.getElementById('customize-modal-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeCustomizeModal = function(e) {
+    if (e && e.target !== document.getElementById('customize-modal-overlay')) return;
+    var overlay = document.getElementById('customize-modal-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+    var statusEl = document.getElementById('cust-status');
+    if (statusEl) statusEl.textContent = '';
+};
+
+window.submitCustomize = async function() {
+    var btn = document.getElementById('cust-confirm-btn');
+    var statusEl = document.getElementById('cust-status');
+    var nameEl = document.getElementById('cust-name');
+    var genderEl = document.getElementById('cust-gender');
+    var raceEl = document.getElementById('cust-race');
+    var classEl = document.getElementById('cust-class');
+    var payload = {
+        gender: genderEl ? genderEl.value : '',
+        race: raceEl ? raceEl.value : '',
+        'class': classEl ? classEl.value : ''
+    };
+    if (nameEl) payload.name = nameEl.value.trim();
+    if (!payload.name && !payload.gender && !payload.race && !payload['class']) {
+        if (statusEl) { statusEl.textContent = 'Select at least one field to change.'; statusEl.style.color = 'var(--red)'; }
+        return;
+    }
+    if (btn) btn.disabled = true;
+    if (statusEl) { statusEl.textContent = 'Processing...'; statusEl.style.color = 'var(--text-dim)'; }
+    try {
+        var res = await fetch('/action/customize_character', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        var data = await res.json();
+        if (data.ok) {
+            if (statusEl) { statusEl.textContent = data.message; statusEl.style.color = 'var(--green-bright)'; }
+            setTimeout(function() { window.location.reload(); }, 1500);
+        } else {
+            if (statusEl) { statusEl.textContent = data.message; statusEl.style.color = 'var(--red)'; }
+            if (btn) btn.disabled = false;
+        }
+    } catch(e) {
+        if (statusEl) { statusEl.textContent = 'Error: ' + e.message; statusEl.style.color = 'var(--red)'; }
+        if (btn) btn.disabled = false;
+    }
+};
 </script>
 {% endif %}
 {% if show_create %}

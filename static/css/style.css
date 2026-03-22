@@ -218,7 +218,7 @@ strong { font-weight: 600; }
 .bar-fill    { height: 100%; transition: width 0.2s; }
 .bar-hp      { background: var(--red); }
 .bar-mp      { background: var(--mana-blue); }
-.bar-exp     { background: var(--exp-purple); }
+.bar-exp     { background: var(--green-bright); }
 
 /* ─── Stat Displays ──────────────────────────────────────── */
 .stat-mini-grid { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
@@ -1637,7 +1637,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     font-size: 13px;
     align-items: center;
 }
-.quest-reward-exp   { color: var(--exp-purple); padding: 2px 6px; border: 1px solid var(--exp-purple); }
+.quest-reward-exp   { color: var(--green-bright); padding: 2px 6px; border: 1px solid var(--green-bright); }
 .quest-reward-gold  { color: var(--gold);        padding: 2px 6px; border: 1px solid var(--gold-dim); }
 .quest-reward-item  { color: var(--rarity-uncommon); padding: 2px 6px; border: 1px solid var(--rarity-uncommon); font-size: 12px; }
 
