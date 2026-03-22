@@ -4064,5 +4064,14 @@
       "price": 9999999999,
       "rarity": "legendary",
       "event_item": true
+   },
+   "Saintly Blessing": {
+      "type": "consumable",
+      "description": "A sacred blessing from the gods themselves, bestowed on the day of All Saints. It radiates with divine light and carries the weight of countless prayers. Consuming it grants a profound sense of spiritual connection, a surge of experience, and a temporary aura of holy protection.",
+      "effect": "saintly_blessing",
+      "exp_bonus": 25000,
+      "price": 100000,
+      "rarity": "legendary",
+      "event_item": true
    }
 }

@@ -55,7 +55,13 @@
       "id": "All saints of the realm",
       "name": "All saints of the realm",
       "description": "The realm's most revered heroes are honoured on this sacred day. Adventurers who log in on the day of the All Saints' Feast receive a special blessing from the gods.",
-      "date": "2026-03-25",
+      "date": "2026-03-27",
+      "reward_type": "item",
+      "reward_item": "Saintly Blessing",
+      "reward_message": "Today is the sacred day of All Saints! The gods themselves bless you with a Saintly Blessing — may your deeds be remembered in song for generations to come!",
+      "condition": {
+        "type": "first_login_on_date"
+      }
     }
   ]
 }
