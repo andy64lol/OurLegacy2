@@ -99,8 +99,8 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 app.secret_key = os.environ.get("SECRET_KEY", "ol2-default-dev-key-change-in-prod")
 
 limiter = Limiter(
-    get_remote_address,
     app=app,
+    key_func=get_remote_address,
     default_limits=[],
     storage_uri="memory://",
 )
