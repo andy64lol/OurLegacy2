@@ -19,7 +19,7 @@ const raceData  = {{ data.races  | tojson }};
 <div class="welcome-screen">
     <div class="welcome-inner">
         <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="title-banner">
-        <div style="text-align:center;margin-top:-10px;margin-bottom:4px;font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">v2.0.6 &mdash; Le Chat Update 🐱</div>
+        <div style="text-align:center;margin-top:-10px;margin-bottom:4px;font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">v2.1.0 &mdash; Friends Update &#10024;</div>
         
         {% if splash_text %}
         <div style="text-align:center;margin-bottom:14px;font-size:13px;color:var(--gold);font-style:italic;padding:0 20px;line-height:1.4;">
@@ -64,7 +64,11 @@ const raceData  = {{ data.races  | tojson }};
                 {% endif %}
             </div>
 
-            <div class="save-load-bar" style="margin-top:8px;">
+            <div class="save-load-bar" style="margin-top:8px;justify-content:center;gap:8px;">
+                {% if online_user %}
+                <a href="/friends" class="btn btn-secondary" style="background:linear-gradient(135deg,rgba(60,30,100,0.6),rgba(30,15,60,0.6));border-color:var(--mana-bright);">&#10024; Friends</a>
+                <a href="/chat" class="btn btn-secondary" style="background:linear-gradient(135deg,rgba(60,30,100,0.6),rgba(30,15,60,0.6));border-color:var(--mana-bright);"><img class="type-glyph" src="/game_assets/glyphs/chat.png" alt="chat"> Chat</a>
+                {% endif %}
                 <button class="btn btn-secondary" onclick="openSettings()"><img class="type-glyph" src="/game_assets/glyphs/settings.png" alt="settings"> Settings</button>
             </div>
             <div id="save-status" class="save-notice" style="display:none;"></div>

@@ -80,6 +80,14 @@ from utilities.supabase_db import (
     get_chat_history,
     censor_text,
     contains_profanity,
+    send_friend_request,
+    respond_friend_request,
+    remove_friend,
+    get_friends,
+    send_dm,
+    get_dm_conversation,
+    mark_dms_read,
+    get_unread_dm_counts,
 )
 
 app = Flask(__name__)
@@ -4129,6 +4137,121 @@ def api_cloud_download():
     response.headers["Content-Type"] = "application/octet-stream"
     response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+# ─── Friends & DM Routes ──────────────────────────────────────────────────────
+
+@app.route("/friends")
+def friends_page():
+    username = session.get("online_username")
+    if not username:
+        return redirect("/")
+    return render_template("friends.html", online_username=username)
+
+
+@app.route("/api/friends", methods=["GET"])
+def api_friends():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    result = get_friends(username)
+    online = set(_chat_online.values())
+    for f in result.get("friends", []):
+        f["online"] = f["username"] in online
+    unread = get_unread_dm_counts(username)
+    for f in result.get("friends", []):
+        f["unread"] = unread.get(f["username"], 0)
+    return jsonify(result)
+
+
+@app.route("/api/friends/request", methods=["POST"])
+def api_friend_request():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    target = (request.json or {}).get("target", "").strip().lower()
+    if not target:
+        return jsonify({"ok": False, "message": "No target specified."})
+    result = send_friend_request(username, target)
+    if result.get("ok"):
+        target_sids = [sid for sid, u in _chat_online.items() if u == target]
+        for sid in target_sids:
+            if result.get("accepted"):
+                socketio.emit("friend_accepted", {"from": username}, to=sid)
+            else:
+                socketio.emit("friend_request", {"from": username}, to=sid)
+    return jsonify(result)
+
+
+@app.route("/api/friends/respond", methods=["POST"])
+def api_friend_respond():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    data = request.json or {}
+    request_id = data.get("id", "")
+    accept = bool(data.get("accept", False))
+    result = respond_friend_request(request_id, accept, username)
+    if result.get("ok") and accept:
+        friend = result.get("friend", "")
+        target_sids = [sid for sid, u in _chat_online.items() if u == friend]
+        for sid in target_sids:
+            socketio.emit("friend_accepted", {"from": username}, to=sid)
+    return jsonify(result)
+
+
+@app.route("/api/friends/remove", methods=["POST"])
+def api_friend_remove():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    target = (request.json or {}).get("target", "").strip().lower()
+    return jsonify(remove_friend(username, target))
+
+
+@app.route("/api/dm/<other>", methods=["GET"])
+def api_dm_get(other):
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "messages": []})
+    other = other.strip().lower()
+    mark_dms_read(username, other)
+    messages = get_dm_conversation(username, other)
+    return jsonify({"ok": True, "messages": messages})
+
+
+@app.route("/api/dm/send", methods=["POST"])
+def api_dm_send():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    data = request.json or {}
+    recipient = data.get("recipient", "").strip().lower()
+    message = data.get("message", "").strip()
+    if not recipient or not message:
+        return jsonify({"ok": False, "message": "Missing fields."})
+    result = send_dm(username, recipient, message)
+    if result.get("ok"):
+        row = result["row"]
+        payload = {
+            "id": row.get("id"),
+            "sender": username,
+            "recipient": recipient,
+            "message": row.get("message", message),
+            "created_at": row.get("created_at"),
+        }
+        target_sids = [sid for sid, u in _chat_online.items() if u == recipient]
+        for sid in target_sids:
+            socketio.emit("dm_message", payload, to=sid)
+    return jsonify(result)
+
+
+@app.route("/api/dm/unread", methods=["GET"])
+def api_dm_unread():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({})
+    return jsonify(get_unread_dm_counts(username))
 
 
 port = int(os.environ.get("PORT", 5000))

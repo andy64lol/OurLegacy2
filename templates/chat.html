@@ -117,7 +117,10 @@
             <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:28px;height:28px;image-rendering:pixelated;">
             Global Chat
         </div>
-        <a class="back-link" href="/game">&#8592; Return to Game</a>
+        <div style="display:flex;gap:8px;">
+            <a class="back-link" href="/friends">&#10024; Friends</a>
+            <a class="back-link" href="/game">&#8592; Game</a>
+        </div>
     </div>
 
     <div id="online-bar">
@@ -183,10 +186,10 @@
             if (innerEl) {
                 innerEl.innerHTML = users.map(function(u) {
                     var isMe = (u === CURRENT_USER);
-                    return '<span style="font-size:11px;padding:2px 9px;border-radius:12px;background:' +
-                        (isMe ? 'rgba(80,150,80,0.3);border:1px solid var(--green-bright,#4ade80);color:var(--green-bright,#4ade80)' :
-                                 'rgba(80,60,120,0.3);border:1px solid rgba(180,130,255,0.3);color:var(--mana-bright,#c084fc)') +
-                        ';">' + escHtml(u) + (isMe ? ' (you)' : '') + '</span>';
+                    if (isMe) {
+                        return '<span style="font-size:11px;padding:2px 9px;border-radius:12px;background:rgba(80,150,80,0.3);border:1px solid var(--green-bright,#4ade80);color:var(--green-bright,#4ade80);">' + escHtml(u) + ' (you)</span>';
+                    }
+                    return '<a href="/friends?dm=' + encodeURIComponent(u) + '" title="Message or add ' + escHtml(u) + '" style="font-size:11px;padding:2px 9px;border-radius:12px;background:rgba(80,60,120,0.3);border:1px solid rgba(180,130,255,0.3);color:var(--mana-bright,#c084fc);text-decoration:none;cursor:pointer;" onmouseover="this.style.borderColor=\'rgba(180,130,255,0.7)\'" onmouseout="this.style.borderColor=\'rgba(180,130,255,0.3)\'">' + escHtml(u) + '</a>';
                 }).join('');
             }
         });
