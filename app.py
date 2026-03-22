@@ -88,6 +88,10 @@ from utilities.supabase_db import (
     get_dm_conversation,
     mark_dms_read,
     get_unread_dm_counts,
+    block_user,
+    unblock_user,
+    is_blocked,
+    get_blocked_by_me,
 )
 
 app = Flask(__name__)
@@ -114,6 +118,12 @@ _chat_online: dict = {}
 _chat_cooldowns: dict = {}  # {username: last_sent_timestamp}
 CHAT_COOLDOWN_SECS = 10
 CHAT_MAX_LEN = 200
+
+_dm_cooldowns: dict = {}      # {username: last_dm_timestamp}
+_fr_cooldowns: dict = {}      # {username: [timestamps]} — friend request rate limiting
+DM_COOLDOWN_SECS = 2
+DM_MAX_LEN = 500
+FR_MAX_PER_MINUTE = 5
 
 
 @app.context_processor
@@ -4172,6 +4182,15 @@ def api_friend_request():
     target = (request.json or {}).get("target", "").strip().lower()
     if not target:
         return jsonify({"ok": False, "message": "No target specified."})
+    now = _time_module.time()
+    timestamps = _fr_cooldowns.get(username, [])
+    timestamps = [t for t in timestamps if now - t < 60]
+    if len(timestamps) >= FR_MAX_PER_MINUTE:
+        return jsonify({"ok": False, "message": f"Too many requests. Try again in a moment."})
+    timestamps.append(now)
+    _fr_cooldowns[username] = timestamps
+    if is_blocked(username, target):
+        return jsonify({"ok": False, "message": "Unable to send request to that user."})
     result = send_friend_request(username, target)
     if result.get("ok"):
         target_sids = [sid for sid, u in _chat_online.items() if u == target]
@@ -4230,6 +4249,16 @@ def api_dm_send():
     message = data.get("message", "").strip()
     if not recipient or not message:
         return jsonify({"ok": False, "message": "Missing fields."})
+    if len(message) > DM_MAX_LEN:
+        return jsonify({"ok": False, "message": f"Message too long (max {DM_MAX_LEN} chars)."})
+    now = _time_module.time()
+    last_dm = _dm_cooldowns.get(username, 0)
+    if now - last_dm < DM_COOLDOWN_SECS:
+        wait = int(DM_COOLDOWN_SECS - (now - last_dm)) + 1
+        return jsonify({"ok": False, "message": f"Please wait {wait}s before sending another message."})
+    _dm_cooldowns[username] = now
+    if is_blocked(username, recipient):
+        return jsonify({"ok": False, "message": "You cannot message this user."})
     result = send_dm(username, recipient, message)
     if result.get("ok"):
         row = result["row"]
@@ -4244,6 +4273,29 @@ def api_dm_send():
         for sid in target_sids:
             socketio.emit("dm_message", payload, to=sid)
     return jsonify(result)
+
+
+@app.route("/api/block", methods=["POST"])
+def api_block_user():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    data = request.json or {}
+    target = data.get("target", "").strip().lower()
+    action = data.get("action", "block")
+    if not target:
+        return jsonify({"ok": False, "message": "No target specified."})
+    if action == "unblock":
+        return jsonify(unblock_user(username, target))
+    return jsonify(block_user(username, target))
+
+
+@app.route("/api/block/list", methods=["GET"])
+def api_block_list():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"blocked": []})
+    return jsonify({"ok": True, "blocked": get_blocked_by_me(username)})
 
 
 @app.route("/api/dm/unread", methods=["GET"])

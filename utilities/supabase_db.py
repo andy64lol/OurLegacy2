@@ -43,8 +43,8 @@ def censor_text(text: str) -> str:
     return _profanity.censor(text)
 
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
-SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "").strip()
 
 _client: Optional[Client] = None
 
@@ -427,6 +427,88 @@ def send_chat_message(username: str, message: str) -> Dict[str, Any]:
         return {"ok": False, "row": None}
     except Exception as e:
         return {"ok": False, "row": None, "error": str(e)}
+
+
+# ─── Blocks / Blacklist ───────────────────────────────────────────────────────
+
+def block_user(blocker: str, blocked: str) -> Dict[str, Any]:
+    """Block a user. Also removes any existing friendship."""
+    if blocker == blocked:
+        return {"ok": False, "message": "You can't block yourself."}
+
+    def _do():
+        client = _get_client()
+        exists = client.table("ol2_users").select("id").eq("username", blocked).execute()
+        if not exists.data:
+            return {"ok": False, "message": "User not found."}
+        already = (
+            client.table("ol2_blocks")
+            .select("id")
+            .eq("blocker", blocker)
+            .eq("blocked", blocked)
+            .execute()
+        )
+        if not already.data:
+            client.table("ol2_blocks").insert({"blocker": blocker, "blocked": blocked}).execute()
+        client.table("ol2_friends").delete().or_(
+            f"and(requester.eq.{blocker},target.eq.{blocked}),and(requester.eq.{blocked},target.eq.{blocker})"
+        ).execute()
+        return {"ok": True, "message": f"{blocked} has been blocked."}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Failed: {e}"}
+
+
+def unblock_user(blocker: str, blocked: str) -> Dict[str, Any]:
+    """Remove a block."""
+    def _do():
+        client = _get_client()
+        client.table("ol2_blocks").delete().eq("blocker", blocker).eq("blocked", blocked).execute()
+        return {"ok": True, "message": f"{blocked} has been unblocked."}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Failed: {e}"}
+
+
+def is_blocked(sender: str, recipient: str) -> bool:
+    """Return True if recipient has blocked sender."""
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_blocks")
+            .select("id")
+            .eq("blocker", recipient)
+            .eq("blocked", sender)
+            .execute()
+        )
+        return bool(result.data)
+
+    try:
+        return _run(_do)
+    except Exception:
+        return False
+
+
+def get_blocked_by_me(username: str) -> List[str]:
+    """Return list of usernames blocked by username."""
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_blocks")
+            .select("blocked")
+            .eq("blocker", username)
+            .execute()
+        )
+        return [r["blocked"] for r in (result.data or [])]
+
+    try:
+        return _run(_do)
+    except Exception:
+        return []
 
 
 def get_chat_history(limit: int = 60) -> List[Dict[str, Any]]:

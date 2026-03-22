@@ -216,6 +216,26 @@
             opacity: 0.7;
         }
         #dm-remove-btn:hover { opacity: 1; }
+        #dm-block-btn {
+            font-size: 11px;
+            color: #f97316;
+            background: none;
+            border: 1px solid rgba(249,115,22,0.3);
+            border-radius: 5px;
+            padding: 3px 10px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        #dm-block-btn:hover { opacity: 1; }
+        .blocked-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+        }
+        .blocked-name { flex: 1; font-size: 12px; color: var(--text-dim); text-decoration: line-through; opacity: 0.7; }
+        .btn-unblock { padding: 2px 8px; background: rgba(100,60,20,0.4); border: 1px solid rgba(249,115,22,0.4); border-radius: 4px; color: #f97316; font-size: 11px; cursor: pointer; }
+        .btn-unblock:hover { background: rgba(130,80,20,0.6); }
 
         #dm-messages {
             flex: 1;
@@ -329,7 +349,10 @@
             <div id="dm-conversation" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
                 <div id="dm-header">
                     <div id="dm-with-name"></div>
-                    <button id="dm-remove-btn" onclick="removeFriend()">Remove Friend</button>
+                    <div style="display:flex;gap:6px;">
+                        <button id="dm-block-btn" onclick="blockUser()">&#128683; Block</button>
+                        <button id="dm-remove-btn" onclick="removeFriend()">Remove</button>
+                    </div>
                 </div>
                 <div id="dm-messages"></div>
                 <div id="dm-input-bar">
@@ -355,6 +378,7 @@
     var socket = null;
     var currentDmWith = null;
     var friendsData = { friends: [], incoming: [], outgoing: [] };
+    var blockedUsers = [];
 
     // ── Socket ──────────────────────────────────────────────────
     function initSocket() {
@@ -385,14 +409,16 @@
         });
     }
 
-    // ── Load friends ─────────────────────────────────────────────
+    // ── Load friends + blocked list ──────────────────────────────
     function loadFriends() {
-        fetch('/api/friends')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                friendsData = data;
-                renderSidebar(data);
-            });
+        Promise.all([
+            fetch('/api/friends').then(function(r) { return r.json(); }),
+            fetch('/api/block/list').then(function(r) { return r.json(); })
+        ]).then(function(results) {
+            friendsData = results[0];
+            blockedUsers = results[1].blocked || [];
+            renderSidebar(friendsData);
+        });
     }
 
     function renderSidebar(data) {
@@ -434,6 +460,17 @@
                 html += '<div class="outgoing-row">' +
                     '<span class="outgoing-name">' + esc(req.username) + '</span>' +
                     '<span class="outgoing-label">pending...</span>' +
+                    '</div>';
+            });
+        }
+
+        // Blocked users
+        if (blockedUsers && blockedUsers.length) {
+            html += '<div class="sidebar-section-label" style="color:#f97316;opacity:0.7;">&#128683; Blocked (' + blockedUsers.length + ')</div>';
+            blockedUsers.forEach(function(u) {
+                html += '<div class="blocked-row">' +
+                    '<span class="blocked-name">' + esc(u) + '</span>' +
+                    '<button class="btn-unblock" onclick="doUnblock(\'' + esc(u) + '\')">Unblock</button>' +
                     '</div>';
             });
         }
@@ -488,6 +525,40 @@
                 currentDmWith = null;
                 document.getElementById('dm-empty').style.display = '';
                 document.getElementById('dm-conversation').style.display = 'none';
+                loadFriends();
+            }
+        });
+    };
+
+    // ── Block user ────────────────────────────────────────────────
+    window.blockUser = function() {
+        if (!currentDmWith) return;
+        if (!confirm('Block ' + currentDmWith + '? This will remove the friendship and prevent them from messaging or adding you.')) return;
+        fetch('/api/block', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target: currentDmWith, action: 'block' })
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.ok) {
+                showToast('&#128683; ' + d.message);
+                currentDmWith = null;
+                document.getElementById('dm-empty').style.display = '';
+                document.getElementById('dm-conversation').style.display = 'none';
+                loadFriends();
+            } else {
+                showToast(d.message || 'Failed to block user.');
+            }
+        });
+    };
+
+    window.doUnblock = function(username) {
+        fetch('/api/block', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target: username, action: 'unblock' })
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.ok) {
+                showToast('&#9989; ' + d.message);
                 loadFriends();
             }
         });
