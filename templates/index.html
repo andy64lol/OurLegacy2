@@ -65,10 +65,6 @@ const raceData  = {{ data.races  | tojson }};
             </div>
 
             <div class="save-load-bar" style="margin-top:8px;justify-content:center;gap:8px;">
-                {% if online_user %}
-                <a href="/friends" class="btn btn-secondary" style="background:linear-gradient(135deg,rgba(60,30,100,0.6),rgba(30,15,60,0.6));border-color:var(--mana-bright);">&#10024; Friends</a>
-                <a href="/chat" class="btn btn-secondary" style="background:linear-gradient(135deg,rgba(60,30,100,0.6),rgba(30,15,60,0.6));border-color:var(--mana-bright);"><img class="type-glyph" src="/game_assets/glyphs/chat.png" alt="chat"> Chat</a>
-                {% endif %}
                 <button class="btn btn-secondary" onclick="openSettings()"><img class="type-glyph" src="/game_assets/glyphs/settings.png" alt="settings"> Settings</button>
             </div>
             <div id="save-status" class="save-notice" style="display:none;"></div>
@@ -1050,8 +1046,8 @@ const raceData  = {{ data.races  | tojson }};
                     <div style="display:flex;gap:10px;flex-wrap:wrap;">
                         <a href="/dungeon/room" class="btn btn-primary">Continue</a>
                         <form method="POST" action="/dungeon/abandon">
-                            <button type="submit" class="btn btn-danger btn-small"
-                                onclick="return confirm('Abandon this dungeon run? All progress lost.')">Abandon</button>
+                            <button type="button" class="btn btn-danger btn-small"
+                                onclick="var b=this;gameConfirm('Abandon this dungeon run? All progress will be lost.',function(){b.closest('form').submit();})">Abandon</button>
                         </form>
                     </div>
                 </div>
@@ -1372,8 +1368,8 @@ const raceData  = {{ data.races  | tojson }};
                             {% endif %}
                             <form method="post" action="/action/dismiss_companion" style="margin-top:8px;">
                                 <input type="hidden" name="companion_id" value="{{ comp.id }}">
-                                <button type="submit" class="btn btn-xsmall btn-danger"
-                                    onclick="return confirm('Dismiss {{ comp.name }} from your party?')">
+                                <button type="button" class="btn btn-xsmall btn-danger"
+                                    onclick="var b=this;gameConfirm('Dismiss {{ comp.name }} from your party?',function(){b.closest('form').submit();})">
                                     Dismiss
                                 </button>
                             </form>

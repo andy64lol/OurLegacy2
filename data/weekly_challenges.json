@@ -19,6 +19,24 @@
       "reward_gold": 2000
     },
     {
+      "id": "kill_100",
+      "name": "Veteran Slayer",
+      "description": "Defeat 100 enemies",
+      "type": "kill_count",
+      "target": 100,
+      "reward_exp": 18000,
+      "reward_gold": 5000
+    },
+    {
+      "id": "kill_250",
+      "name": "Champion of Slaughter",
+      "description": "Defeat 250 enemies",
+      "type": "kill_count",
+      "target": 250,
+      "reward_exp": 50000,
+      "reward_gold": 15000
+    },
+    {
       "id": "complete_3_missions",
       "name": "Quest Lover",
       "description": "Complete 3 missions",
@@ -26,6 +44,24 @@
       "target": 3,
       "reward_exp": 3000,
       "reward_gold": 1000
+    },
+    {
+      "id": "complete_10_missions",
+      "name": "Quest Master",
+      "description": "Complete 10 missions",
+      "type": "mission_count",
+      "target": 10,
+      "reward_exp": 12000,
+      "reward_gold": 4000
+    },
+    {
+      "id": "complete_25_missions",
+      "name": "Grand Quester",
+      "description": "Complete 25 missions",
+      "type": "mission_count",
+      "target": 25,
+      "reward_exp": 35000,
+      "reward_gold": 12000
     },
     {
       "id": "complete_1_dungeon",
@@ -37,6 +73,33 @@
       "reward_gold": 1500
     },
     {
+      "id": "complete_3_dungeons",
+      "name": "Dungeon Runner",
+      "description": "Complete 3 dungeons",
+      "type": "dungeon_complete",
+      "target": 3,
+      "reward_exp": 15000,
+      "reward_gold": 5000
+    },
+    {
+      "id": "complete_10_dungeons",
+      "name": "Dungeon Conqueror",
+      "description": "Complete 10 dungeons",
+      "type": "dungeon_complete",
+      "target": 10,
+      "reward_exp": 50000,
+      "reward_gold": 18000
+    },
+    {
+      "id": "complete_25_dungeons",
+      "name": "Dungeon Lord",
+      "description": "Complete 25 dungeons",
+      "type": "dungeon_complete",
+      "target": 25,
+      "reward_exp": 150000,
+      "reward_gold": 60000
+    },
+    {
       "id": "reach_level_10",
       "name": "Rising Star",
       "description": "Reach level 10",
@@ -46,6 +109,33 @@
       "reward_gold": 1500
     },
     {
+      "id": "reach_level_20",
+      "name": "Seasoned Adventurer",
+      "description": "Reach level 20",
+      "type": "level_reach",
+      "target": 20,
+      "reward_exp": 20000,
+      "reward_gold": 6000
+    },
+    {
+      "id": "reach_level_35",
+      "name": "Elite Warrior",
+      "description": "Reach level 35",
+      "type": "level_reach",
+      "target": 35,
+      "reward_exp": 60000,
+      "reward_gold": 20000
+    },
+    {
+      "id": "reach_level_50",
+      "name": "Legendary Hero",
+      "description": "Reach level 50",
+      "type": "level_reach",
+      "target": 50,
+      "reward_exp": 200000,
+      "reward_gold": 75000
+    },
+    {
       "id": "defeat_1_boss",
       "name": "Boss Slayer",
       "description": "Defeat 1 boss",
@@ -53,7 +143,51 @@
       "target": 1,
       "reward_exp": 10000,
       "reward_gold": 3000
+    },
+    {
+      "id": "defeat_5_bosses",
+      "name": "Boss Hunter",
+      "description": "Defeat 5 bosses",
+      "type": "boss_kill",
+      "target": 5,
+      "reward_exp": 40000,
+      "reward_gold": 14000
+    },
+    {
+      "id": "defeat_15_bosses",
+      "name": "Boss Nemesis",
+      "description": "Defeat 15 bosses",
+      "type": "boss_kill",
+      "target": 15,
+      "reward_exp": 120000,
+      "reward_gold": 45000
+    },
+    {
+      "id": "gold_10000",
+      "name": "Treasure Seeker",
+      "description": "Accumulate 10,000 gold",
+      "type": "gold_reach",
+      "target": 10000,
+      "reward_exp": 5000,
+      "reward_gold": 2000
+    },
+    {
+      "id": "gold_50000",
+      "name": "Wealthy Merchant",
+      "description": "Accumulate 50,000 gold",
+      "type": "gold_reach",
+      "target": 50000,
+      "reward_exp": 20000,
+      "reward_gold": 8000
+    },
+    {
+      "id": "gold_200000",
+      "name": "Gold Baron",
+      "description": "Accumulate 200,000 gold",
+      "type": "gold_reach",
+      "target": 200000,
+      "reward_exp": 80000,
+      "reward_gold": 30000
     }
   ]
 }
-

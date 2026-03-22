@@ -20,6 +20,18 @@
     <script src="/static/js/game.js"></script>
     {% block extra_scripts %}{% endblock %}
 
+    <!-- Custom Confirm Modal -->
+    <div id="game-confirm-overlay" style="display:none;position:fixed;inset:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,0.82);z-index:10000;align-items:center;justify-content:center;overflow:hidden;" onclick="event.stopPropagation()">
+        <div style="background:linear-gradient(160deg,rgba(20,12,40,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.45);border-radius:12px;padding:28px 28px 22px;max-width:380px;width:90%;box-shadow:0 8px 40px rgba(60,20,120,0.55);text-align:center;">
+            <div style="font-size:28px;margin-bottom:12px;">&#9888;&#65039;</div>
+            <div id="game-confirm-msg" style="font-size:14px;color:var(--text-light);margin-bottom:22px;line-height:1.6;"></div>
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button id="game-confirm-ok" class="btn btn-danger" style="min-width:100px;">Confirm</button>
+                <button id="game-confirm-cancel" class="btn btn-secondary" style="min-width:100px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Settings Modal (available on all pages) -->
     <div id="settings-modal" class="settings-overlay" style="display:none;" onclick="settingsOverlayClick(event)">
         <div class="settings-panel panel">

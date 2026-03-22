@@ -544,8 +544,24 @@ def update_level_challenges(player):
             entry["count"] = max(entry.get("count", 0), player.get("level", 1))
 
 
+def update_gold_challenges(player):
+    """Update gold_reach challenges to match current gold."""
+    ch_prog = player.setdefault("weekly_challenges_progress", {})
+    for ch in GAME_DATA["weekly_challenges"]:
+        if ch.get("type") == "gold_reach":
+            ch_id = ch.get("id", "")
+            if not ch_id:
+                continue
+            prog = ch_prog.get(ch_id, {})
+            if prog.get("claimed"):
+                continue
+            entry = ch_prog.setdefault(ch_id, {})
+            entry["count"] = max(entry.get("count", 0), player.get("gold", 0))
+
+
 def build_challenges_display(player):
     """Build challenge display list for template."""
+    update_gold_challenges(player)
     ch_prog = player.get("weekly_challenges_progress", {})
     result = []
     for ch in GAME_DATA["weekly_challenges"]:
@@ -3963,6 +3979,8 @@ def api_market_data():
             "market_items": market_items,
             "cooldown_msg": cooldown_msg,
             "player_gold": player.get("gold", 0),
+            "player_level": player.get("level", 1),
+            "player_class": player.get("class", ""),
             "reroll_count": extra_seed,
         }
     )

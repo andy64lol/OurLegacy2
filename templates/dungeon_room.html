@@ -209,8 +209,8 @@
 
                 <!-- Abandon -->
                 <form method="POST" action="/dungeon/abandon" style="margin-top:14px;">
-                    <button type="submit" class="btn btn-danger btn-small"
-                        onclick="return confirm('Abandon the dungeon? All progress will be lost.')">
+                    <button type="button" class="btn btn-danger btn-small"
+                        onclick="var b=this;gameConfirm('Abandon the dungeon? All progress will be lost.',function(){b.closest('form').submit();})">
                         Retreat from Dungeon
                     </button>
                 </form>

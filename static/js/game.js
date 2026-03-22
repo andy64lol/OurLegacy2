@@ -13,6 +13,27 @@ document.addEventListener('DOMContentLoaded', function () {
     checkMobile();
 });
 
+function gameConfirm(message, onConfirm) {
+    var overlay = document.getElementById('game-confirm-overlay');
+    var msgEl   = document.getElementById('game-confirm-msg');
+    var okBtn   = document.getElementById('game-confirm-ok');
+    var cancelBtn = document.getElementById('game-confirm-cancel');
+    if (!overlay) { if (onConfirm && window.confirm(message)) onConfirm(); return; }
+    msgEl.textContent = message;
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    function close() {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+        okBtn.removeEventListener('click', doOk);
+        cancelBtn.removeEventListener('click', doCancel);
+    }
+    function doOk() { close(); if (onConfirm) onConfirm(); }
+    function doCancel() { close(); }
+    okBtn.addEventListener('click', doOk);
+    cancelBtn.addEventListener('click', doCancel);
+}
+
 function initToastContainer() {
     if (!document.getElementById('toast-container')) {
         var c = document.createElement('div');
@@ -181,6 +202,8 @@ function renderMarket(data, container) {
         return;
     }
     var gold = data.player_gold;
+    var playerLevel = data.player_level || 1;
+    var playerClass = (data.player_class || '').toLowerCase();
     var canReroll = gold >= 1000;
     var html = '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">';
     html += '<div style="font-size:13px;color:var(--text-dim);">' + data.market_items.length + ' elite items available. Market refreshes every 10 minutes.</div>';
@@ -196,12 +219,21 @@ function renderMarket(data, container) {
         var rarity = (item.rarity || 'common').toLowerCase();
         var canAfford = gold >= price;
         var isBirthday = !!item.birthday_special;
+
+        var req = item.requirements || {};
+        var reqLevel = req.level || 0;
+        var reqClass = (req['class'] || '').toLowerCase();
+        var meetsLevel = playerLevel >= reqLevel;
+        var meetsClass = !reqClass || playerClass === reqClass;
+        var canUse = meetsLevel && meetsClass;
+
         var rowStyle = 'margin-bottom:10px;padding:12px;background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;';
         if (isBirthday) rowStyle = 'margin-bottom:10px;padding:12px;background:linear-gradient(135deg,#1a0a2e,#0a1a2e);border:2px solid var(--gold);border-radius:6px;box-shadow:0 0 14px rgba(255,200,50,0.25);';
+        if (!canUse) rowStyle = rowStyle.replace('border:1px solid var(--border)', 'border:1px solid rgba(200,80,80,0.4)');
         html += '<div class="shop-item-row" style="' + rowStyle + '">';
         if (isBirthday) html += '<div style="font-size:11px;color:var(--gold);margin-bottom:6px;letter-spacing:1px;">&#9733; BIRTHDAY SPECIAL &mdash; FREE TODAY ONLY &#9733;</div>';
-        html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">';
-        html += '<div>';
+        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">';
+        html += '<div style="flex:1;min-width:180px;">';
         html += '<span class="item-name rarity-' + rarity + '">' + (item.name || item.itemName || '?') + '</span>';
         html += '<span class="item-rarity"> &mdash; ' + rarity.charAt(0).toUpperCase() + rarity.slice(1) + '</span>';
         if (item.type) html += '<span class="text-dim"> (' + item.type + ')</span>';
@@ -211,8 +243,25 @@ function renderMarket(data, container) {
             for (var k in item.stats) { html += '+' + item.stats[k] + ' ' + k + ' '; }
             html += '</div>';
         }
+        if (reqLevel || reqClass) {
+            var parts = [];
+            if (reqLevel) parts.push('Level ' + reqLevel + '+');
+            if (reqClass) parts.push(req['class']);
+            html += '<div style="margin-top:6px;font-size:12px;">';
+            html += '<span style="color:var(--text-dim);">Requires: </span>';
+            html += '<span style="color:' + (canUse ? 'var(--green-bright)' : 'var(--red)') + ';">' + parts.join(', ') + '</span>';
+            if (!canUse) {
+                var reasons = [];
+                if (!meetsLevel) reasons.push('need level ' + reqLevel);
+                if (!meetsClass) reasons.push('wrong class');
+                html += ' <span style="color:var(--red);font-size:11px;">&#9888; ' + reasons.join(', ') + '</span>';
+            } else {
+                html += ' <span style="color:var(--green-bright);font-size:11px;">&#10003; You can use this</span>';
+            }
+            html += '</div>';
+        }
         html += '</div>';
-        html += '<div style="display:flex;align-items:center;gap:8px;">';
+        html += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">';
         if (isBirthday) {
             html += '<span style="color:var(--gold);font-weight:bold;">FREE</span>';
         } else {
@@ -222,7 +271,7 @@ function renderMarket(data, container) {
             html += '<form method="POST" action="/action/market/buy" onsubmit="document.body.classList.add(\'page-fade-out\')">' +
                 '<input type="hidden" name="item_name" value="' + (item.name || item.itemName) + '">' +
                 '<input type="hidden" name="item_price" value="' + price + '">' +
-                '<button type="submit" class="btn btn-primary">' + (isBirthday ? 'Claim Free' : 'Buy') + '</button></form>';
+                '<button type="submit" class="btn ' + (canUse ? 'btn-primary' : 'btn-secondary') + '">' + (isBirthday ? 'Claim Free' : 'Buy') + '</button></form>';
         } else {
             html += '<button class="btn btn-disabled" disabled>Not enough gold</button>';
         }

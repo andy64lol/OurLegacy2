@@ -372,7 +372,28 @@
 <div id="friends-toast"></div>
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<style>
+#fc-overlay{position:fixed;inset:0;width:100%;height:100%;background:rgba(0,0,0,0.82);z-index:10000;display:none;align-items:center;justify-content:center;overflow:hidden;}
+#fc-box{background:linear-gradient(160deg,rgba(20,12,40,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.45);border-radius:12px;padding:28px 28px 22px;max-width:380px;width:90%;box-shadow:0 8px 40px rgba(60,20,120,0.55);text-align:center;}
+</style>
+<div id="fc-overlay"><div id="fc-box">
+<div style="font-size:28px;margin-bottom:12px;">&#9888;&#65039;</div>
+<div id="fc-msg" style="font-size:14px;color:#e0d8f0;margin-bottom:22px;line-height:1.6;"></div>
+<div style="display:flex;gap:10px;justify-content:center;">
+<button id="fc-ok" style="min-width:100px;padding:8px 16px;background:rgba(160,30,30,0.7);border:1px solid #f87171;border-radius:6px;color:#f87171;cursor:pointer;">Confirm</button>
+<button id="fc-cancel" style="min-width:100px;padding:8px 16px;background:rgba(40,20,70,0.7);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:#e0d8f0;cursor:pointer;">Cancel</button>
+</div></div></div>
+
 <script>
+function friendsPageConfirm(msg, onOk) {
+    var ov=document.getElementById('fc-overlay'), m=document.getElementById('fc-msg'),
+        ok=document.getElementById('fc-ok'), cl=document.getElementById('fc-cancel');
+    m.textContent=msg; ov.style.display='flex'; document.body.style.overflow='hidden';
+    function close(){ov.style.display='none';document.body.style.overflow='';ok.removeEventListener('click',doOk);cl.removeEventListener('click',doClose);}
+    function doOk(){close();if(onOk)onOk();}
+    function doClose(){close();}
+    ok.addEventListener('click',doOk); cl.addEventListener('click',doClose);
+}
 (function() {
     var ME = {{ online_username | tojson }};
     var socket = null;
@@ -514,40 +535,44 @@
     // ── Remove friend ─────────────────────────────────────────────
     window.removeFriend = function() {
         if (!currentDmWith) return;
-        if (!confirm('Remove ' + currentDmWith + ' as a friend?')) return;
-        fetch('/api/friends/remove', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ target: currentDmWith })
-        }).then(function(r) { return r.json(); }).then(function(d) {
-            if (d.ok) {
-                showToast(d.message);
-                currentDmWith = null;
-                document.getElementById('dm-empty').style.display = '';
-                document.getElementById('dm-conversation').style.display = 'none';
-                loadFriends();
-            }
+        var target = currentDmWith;
+        friendsPageConfirm('Remove ' + target + ' as a friend?', function() {
+            fetch('/api/friends/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target: target })
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.ok) {
+                    showToast(d.message);
+                    currentDmWith = null;
+                    document.getElementById('dm-empty').style.display = '';
+                    document.getElementById('dm-conversation').style.display = 'none';
+                    loadFriends();
+                }
+            });
         });
     };
 
     // ── Block user ────────────────────────────────────────────────
     window.blockUser = function() {
         if (!currentDmWith) return;
-        if (!confirm('Block ' + currentDmWith + '? This will remove the friendship and prevent them from messaging or adding you.')) return;
-        fetch('/api/block', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ target: currentDmWith, action: 'block' })
-        }).then(function(r) { return r.json(); }).then(function(d) {
-            if (d.ok) {
-                showToast('&#128683; ' + d.message);
-                currentDmWith = null;
-                document.getElementById('dm-empty').style.display = '';
-                document.getElementById('dm-conversation').style.display = 'none';
-                loadFriends();
-            } else {
-                showToast(d.message || 'Failed to block user.');
-            }
+        var target = currentDmWith;
+        friendsPageConfirm('Block ' + target + '? This will remove the friendship and prevent them from messaging or adding you.', function() {
+            fetch('/api/block', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target: target, action: 'block' })
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.ok) {
+                    showToast('&#128683; ' + d.message);
+                    currentDmWith = null;
+                    document.getElementById('dm-empty').style.display = '';
+                    document.getElementById('dm-conversation').style.display = 'none';
+                    loadFriends();
+                } else {
+                    showToast(d.message || 'Failed to block user.');
+                }
+            });
         });
     };
 
