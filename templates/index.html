@@ -665,6 +665,9 @@ const raceData  = {{ data.races  | tojson }};
                 <span class="tab-badge" style="background:var(--gold);">{{ events_data.active|length }}</span>
                 {% endif %}
             </button>
+            {% if online_username %}
+            <button class="tab-btn" data-tab="friends">&#10024; Friends</button>
+            {% endif %}
         </nav>
 
         <!-- ── Explore ── -->
@@ -1641,10 +1644,7 @@ const raceData  = {{ data.races  | tojson }};
 
         <!-- ── Events ── -->
         <div class="tab-content" id="tab-events">
-            <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
-
-            <!-- Events panel -->
-            <div class="panel" style="flex:1;min-width:260px;">
+            <div class="panel">
                 <div class="panel-title">
                     Events
                     <span class="panel-subtitle">
@@ -1731,137 +1731,150 @@ const raceData  = {{ data.races  | tojson }};
 
                 </div>
             </div>
+        </div>
 
-            <!-- Friends panel (online only) -->
-            {% if online_username %}
-            <div class="panel" style="width:240px;flex-shrink:0;" id="events-friends-panel">
+        <!-- ── Friends (online only) ── -->
+        {% if online_username %}
+        <div class="tab-content" id="tab-friends">
+            <div class="panel">
                 <div class="panel-title">
                     &#10024; Friends
-                    <a href="/friends" style="font-size:11px;font-weight:normal;color:var(--mana-bright);text-decoration:none;margin-left:8px;opacity:0.8;">View all</a>
+                    <a href="/friends" style="font-size:11px;font-weight:normal;color:var(--mana-bright);text-decoration:none;margin-left:8px;opacity:0.8;">Full view &amp; DMs</a>
                 </div>
                 <div class="panel-body" style="padding:0;">
 
-                    <!-- Add friend row -->
-                    <div style="padding:10px 12px;border-bottom:1px solid rgba(180,130,255,0.12);">
-                        <div style="display:flex;gap:6px;">
-                            <input type="text" id="ef-add-input" placeholder="Add by username…" maxlength="20"
-                                style="flex:1;padding:5px 8px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.3);border-radius:5px;color:var(--text-light);font-size:12px;outline:none;"
+                    <div style="padding:12px 14px;border-bottom:1px solid rgba(180,130,255,0.12);">
+                        <div style="display:flex;gap:7px;">
+                            <input type="text" id="ef-add-input" placeholder="Add friend by username…" maxlength="20"
+                                style="flex:1;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.3);border-radius:6px;color:var(--text-light);font-size:13px;outline:none;"
                                 onkeydown="if(event.key==='Enter')efAddFriend()">
                             <button onclick="efAddFriend()"
-                                style="padding:5px 10px;background:linear-gradient(135deg,rgba(80,50,150,0.85),rgba(50,30,100,0.85));border:1px solid var(--mana-bright);border-radius:5px;color:var(--mana-bright);font-size:12px;cursor:pointer;white-space:nowrap;">
+                                style="padding:7px 14px;background:linear-gradient(135deg,rgba(80,50,150,0.85),rgba(50,30,100,0.85));border:1px solid var(--mana-bright);border-radius:6px;color:var(--mana-bright);font-size:13px;cursor:pointer;white-space:nowrap;">
                                 + Add
                             </button>
                         </div>
-                        <div id="ef-add-msg" style="font-size:11px;min-height:14px;margin-top:4px;"></div>
+                        <div id="ef-add-msg" style="font-size:11px;min-height:14px;margin-top:5px;"></div>
                     </div>
 
-                    <!-- Friends list -->
-                    <div id="ef-friends-list" style="max-height:320px;overflow-y:auto;padding:6px 0;">
-                        <div style="padding:10px 12px;font-size:12px;color:var(--text-dim);">Loading…</div>
+                    <div id="ef-friends-list" style="padding:6px 0;">
+                        <div style="padding:12px 14px;font-size:13px;color:var(--text-dim);">Loading…</div>
                     </div>
 
                 </div>
             </div>
-
-            <script>
-            (function() {
-                function efEsc(s) {
-                    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-                }
-
-                function efLoad() {
-                    Promise.all([
-                        fetch('/api/friends').then(function(r){return r.json();}),
-                        fetch('/api/block/list').then(function(r){return r.json();})
-                    ]).then(function(results) {
-                        var data = results[0];
-                        var blocked = (results[1].blocked || []);
-                        efRender(data, blocked);
-                    }).catch(function() {
-                        var el = document.getElementById('ef-friends-list');
-                        if (el) el.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:var(--red);">Failed to load friends.</div>';
-                    });
-                }
-
-                function efRender(data, blocked) {
-                    var el = document.getElementById('ef-friends-list');
-                    if (!el) return;
-                    var html = '';
-
-                    if (data.incoming && data.incoming.length) {
-                        html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);padding:6px 12px 2px;">&#128228; Requests (' + data.incoming.length + ')</div>';
-                        data.incoming.forEach(function(req) {
-                            html += '<div style="padding:6px 12px;border-bottom:1px solid rgba(180,130,255,0.07);">' +
-                                '<div style="font-size:12px;color:var(--gold);margin-bottom:4px;">&#10024; ' + efEsc(req.username) + '</div>' +
-                                '<div style="display:flex;gap:4px;">' +
-                                '<button onclick="efRespond(\'' + efEsc(req.id) + '\',true)" style="padding:2px 8px;background:rgba(30,100,60,0.6);border:1px solid var(--green-bright);border-radius:4px;color:var(--green-bright);font-size:11px;cursor:pointer;">Accept</button>' +
-                                '<button onclick="efRespond(\'' + efEsc(req.id) + '\',false)" style="padding:2px 8px;background:rgba(100,30,30,0.4);border:1px solid rgba(200,80,80,0.4);border-radius:4px;color:var(--red);font-size:11px;cursor:pointer;">Decline</button>' +
-                                '</div></div>';
-                        });
-                    }
-
-                    html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);padding:6px 12px 2px;">Friends (' + (data.friends ? data.friends.length : 0) + ')</div>';
-                    if (!data.friends || !data.friends.length) {
-                        html += '<div style="padding:6px 12px;font-size:12px;color:var(--text-dim);">No friends yet.</div>';
-                    } else {
-                        data.friends.forEach(function(f) {
-                            html += '<div style="display:flex;align-items:center;gap:7px;padding:6px 12px;border-bottom:1px solid rgba(180,130,255,0.06);">' +
-                                '<div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,rgba(80,50,150,0.7),rgba(40,20,80,0.7));border:1px solid rgba(180,130,255,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--mana-bright);flex-shrink:0;">' + efEsc(f.username.charAt(0).toUpperCase()) + '</div>' +
-                                '<span style="flex:1;font-size:12px;color:var(--text-light);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + efEsc(f.username) + '">' + efEsc(f.username) + '</span>' +
-                                (f.unread ? '<span style="background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 5px;">' + f.unread + '</span>' : '') +
-                                (f.online ? '<span style="width:7px;height:7px;border-radius:50%;background:var(--green-bright);flex-shrink:0;" title="Online"></span>' : '<span style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0;" title="Offline"></span>') +
-                                '</div>';
-                        });
-                    }
-
-                    if (data.outgoing && data.outgoing.length) {
-                        html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);padding:6px 12px 2px;">Sent</div>';
-                        data.outgoing.forEach(function(req) {
-                            html += '<div style="display:flex;align-items:center;gap:6px;padding:5px 12px;">' +
-                                '<span style="flex:1;font-size:12px;color:var(--text-dim);">' + efEsc(req.username) + '</span>' +
-                                '<span style="font-size:10px;color:var(--text-dim);opacity:.6;font-style:italic;">pending…</span>' +
-                                '</div>';
-                        });
-                    }
-
-                    el.innerHTML = html;
-                }
-
-                window.efAddFriend = function() {
-                    var inp = document.getElementById('ef-add-input');
-                    var msg = document.getElementById('ef-add-msg');
-                    var target = (inp.value || '').trim().toLowerCase();
-                    if (!target) return;
-                    msg.textContent = '';
-                    fetch('/api/friends/request', {
-                        method: 'POST',
-                        headers: {'Content-Type':'application/json'},
-                        body: JSON.stringify({target: target})
-                    }).then(function(r){return r.json();}).then(function(d) {
-                        msg.style.color = d.ok ? 'var(--green-bright)' : 'var(--red)';
-                        msg.textContent = d.message || '';
-                        if (d.ok) { inp.value = ''; efLoad(); }
-                        setTimeout(function(){msg.textContent='';}, 4000);
-                    });
-                };
-
-                window.efRespond = function(id, accept) {
-                    fetch('/api/friends/respond', {
-                        method: 'POST',
-                        headers: {'Content-Type':'application/json'},
-                        body: JSON.stringify({id: id, accept: accept})
-                    }).then(function(r){return r.json();}).then(function(d) {
-                        if (d.ok) efLoad();
-                    });
-                };
-
-                efLoad();
-            })();
-            </script>
-            {% endif %}
-
-            </div>
         </div>
+
+        <script>
+        (function() {
+            var _efLoaded = false;
+
+            function efEsc(s) {
+                return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            }
+
+            function efLoad() {
+                Promise.all([
+                    fetch('/api/friends').then(function(r){return r.json();}),
+                    fetch('/api/block/list').then(function(r){return r.json();})
+                ]).then(function(results) {
+                    efRender(results[0], results[1].blocked || []);
+                }).catch(function() {
+                    var el = document.getElementById('ef-friends-list');
+                    if (el) el.innerHTML = '<div style="padding:12px 14px;font-size:13px;color:var(--red);">Failed to load friends.</div>';
+                });
+            }
+
+            function efRender(data, blocked) {
+                var el = document.getElementById('ef-friends-list');
+                if (!el) return;
+                var html = '';
+
+                if (data.incoming && data.incoming.length) {
+                    html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);padding:8px 14px 3px;">&#128228; Requests (' + data.incoming.length + ')</div>';
+                    data.incoming.forEach(function(req) {
+                        html += '<div style="padding:8px 14px;border-bottom:1px solid rgba(180,130,255,0.07);">' +
+                            '<div style="font-size:13px;color:var(--gold);margin-bottom:5px;">&#10024; ' + efEsc(req.username) + '</div>' +
+                            '<div style="display:flex;gap:5px;">' +
+                            '<button onclick="efRespond(\'' + efEsc(req.id) + '\',true)" style="padding:3px 10px;background:rgba(30,100,60,0.6);border:1px solid var(--green-bright);border-radius:4px;color:var(--green-bright);font-size:12px;cursor:pointer;">Accept</button>' +
+                            '<button onclick="efRespond(\'' + efEsc(req.id) + '\',false)" style="padding:3px 10px;background:rgba(100,30,30,0.4);border:1px solid rgba(200,80,80,0.4);border-radius:4px;color:var(--red);font-size:12px;cursor:pointer;">Decline</button>' +
+                            '</div></div>';
+                    });
+                }
+
+                html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);padding:8px 14px 3px;">Friends (' + (data.friends ? data.friends.length : 0) + ')</div>';
+                if (!data.friends || !data.friends.length) {
+                    html += '<div style="padding:8px 14px;font-size:13px;color:var(--text-dim);">No friends yet. Send a request above!</div>';
+                } else {
+                    data.friends.forEach(function(f) {
+                        html += '<div style="display:flex;align-items:center;gap:9px;padding:8px 14px;border-bottom:1px solid rgba(180,130,255,0.06);">' +
+                            '<div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,rgba(80,50,150,0.7),rgba(40,20,80,0.7));border:1px solid rgba(180,130,255,0.35);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--mana-bright);flex-shrink:0;">' + efEsc(f.username.charAt(0).toUpperCase()) + '</div>' +
+                            '<span style="flex:1;font-size:13px;color:var(--text-light);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + efEsc(f.username) + '</span>' +
+                            (f.unread ? '<span style="background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 6px;">' + f.unread + '</span>' : '') +
+                            (f.online ? '<span style="width:8px;height:8px;border-radius:50%;background:var(--green-bright);flex-shrink:0;" title="Online"></span>' : '<span style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0;" title="Offline"></span>') +
+                            '</div>';
+                    });
+                }
+
+                if (data.outgoing && data.outgoing.length) {
+                    html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);padding:8px 14px 3px;">Sent Requests</div>';
+                    data.outgoing.forEach(function(req) {
+                        html += '<div style="display:flex;align-items:center;gap:7px;padding:6px 14px;">' +
+                            '<span style="flex:1;font-size:13px;color:var(--text-dim);">' + efEsc(req.username) + '</span>' +
+                            '<span style="font-size:11px;color:var(--text-dim);opacity:.6;font-style:italic;">pending…</span>' +
+                            '</div>';
+                    });
+                }
+
+                if (blocked && blocked.length) {
+                    html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#f97316;opacity:.7;padding:8px 14px 3px;">&#128683; Blocked (' + blocked.length + ')</div>';
+                    blocked.forEach(function(u) {
+                        html += '<div style="display:flex;align-items:center;gap:7px;padding:6px 14px;">' +
+                            '<span style="flex:1;font-size:12px;color:var(--text-dim);text-decoration:line-through;">' + efEsc(u) + '</span>' +
+                            '</div>';
+                    });
+                }
+
+                el.innerHTML = html || '<div style="padding:8px 14px;font-size:13px;color:var(--text-dim);">Nothing to show.</div>';
+            }
+
+            window.efAddFriend = function() {
+                var inp = document.getElementById('ef-add-input');
+                var msg = document.getElementById('ef-add-msg');
+                var target = (inp.value || '').trim().toLowerCase();
+                if (!target) return;
+                msg.textContent = '';
+                fetch('/api/friends/request', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({target: target})
+                }).then(function(r){return r.json();}).then(function(d) {
+                    msg.style.color = d.ok ? 'var(--green-bright)' : 'var(--red)';
+                    msg.textContent = d.message || '';
+                    if (d.ok) { inp.value = ''; efLoad(); }
+                    setTimeout(function(){msg.textContent='';}, 4000);
+                });
+            };
+
+            window.efRespond = function(id, accept) {
+                fetch('/api/friends/respond', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({id: id, accept: accept})
+                }).then(function(r){return r.json();}).then(function(d) {
+                    if (d.ok) efLoad();
+                });
+            };
+
+            document.addEventListener('tabChanged', function(e) {
+                if (e.detail === 'friends') efLoad();
+            });
+
+            if (document.getElementById('tab-friends') && document.getElementById('tab-friends').classList.contains('active')) {
+                efLoad();
+            }
+        })();
+        </script>
+        {% endif %}
 
     </main>
 </div>

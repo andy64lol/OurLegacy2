@@ -103,6 +103,7 @@ function switchTab(tabName, instant) {
     }
     var mainContent = document.querySelector('.main-content');
     if (mainContent) mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    document.dispatchEvent(new CustomEvent('tabChanged', { detail: tabName }));
 }
 
 function initTabs() {
@@ -469,17 +470,40 @@ function openSettings() {
         btn.classList.toggle('active', btn.dataset.bg === currentBg);
     });
 
+    var fsBtn = document.getElementById('settings-fs-btn');
+    if (fsBtn) fsBtn.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Go Fullscreen';
+
     modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 }
 
 function closeSettings() {
     var modal = document.getElementById('settings-modal');
     if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
 }
 
 function settingsOverlayClick(e) {
     if (e.target === document.getElementById('settings-modal')) closeSettings();
 }
+
+function settingsToggleFullscreen() {
+    var fsBtn = document.getElementById('settings-fs-btn');
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().then(function() {
+            if (fsBtn) fsBtn.textContent = 'Exit Fullscreen';
+        }).catch(function() {});
+    } else {
+        document.exitFullscreen().then(function() {
+            if (fsBtn) fsBtn.textContent = 'Go Fullscreen';
+        }).catch(function() {});
+    }
+}
+
+document.addEventListener('fullscreenchange', function() {
+    var fsBtn = document.getElementById('settings-fs-btn');
+    if (fsBtn) fsBtn.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Go Fullscreen';
+});
 
 function settingsToggleMusic() {
     toggleMusicMute();
