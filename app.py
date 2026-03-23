@@ -33,6 +33,8 @@ import random
 import os
 import time as _time_module
 import uuid
+import urllib.request as _urllib_request
+import urllib.error as _urllib_error
 from typing import Any
 
 from utilities.dice import Dice
@@ -648,7 +650,6 @@ def _build_game_state() -> dict[str, Any]:
         "visited_areas": session.get("visited_areas", []),
         "quest_progress": session.get("quest_progress", {}),
         "seen_cutscenes": session.get("seen_cutscenes", []),
-        "current_weather": session.get("current_weather", "sunny"),
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
         "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
@@ -674,8 +675,6 @@ def _apply_game_state(data: dict[str, Any]) -> None:
     session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
-    _raw_weather = data.get("current_weather") or "sunny"
-    session["current_weather"] = _raw_weather if GAME_DATA["weather"].get(_raw_weather) else "sunny"
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
@@ -830,11 +829,30 @@ def advance_crops(player):
 # ─── Time of Day ──────────────────────────────────────────────────────────────
 
 
-def get_game_time(player):
-    """Return current time period name based on game ticks (each period = 6 ticks)."""
-    ticks = player.get("game_ticks", 0)
-    period_idx = (ticks // 6) % len(TIME_PERIODS)
-    return TIME_PERIODS[period_idx]
+def get_game_time(player=None):
+    """Return current time period name based on real London local time."""
+    import datetime as _dt2
+    import zoneinfo
+    london_now = _dt2.datetime.now(_dt2.timezone.utc).astimezone(
+        zoneinfo.ZoneInfo("Europe/London")
+    )
+    hour = london_now.hour
+    if 5 <= hour < 7:
+        return "Dawn"
+    elif 7 <= hour < 10:
+        return "Morning"
+    elif 10 <= hour < 13:
+        return "Noon"
+    elif 13 <= hour < 16:
+        return "Afternoon"
+    elif 16 <= hour < 19:
+        return "Dusk"
+    elif 19 <= hour < 22:
+        return "Evening"
+    elif 22 <= hour <= 23:
+        return "Night"
+    else:
+        return "Midnight"
 
 
 def advance_game_time(player):
@@ -869,20 +887,50 @@ def apply_regen_effects(player):
 
 # ─── Weather ──────────────────────────────────────────────────────────────────
 
+# WMO weather interpretation codes → game weather types
+_WMO_TO_GAME_WEATHER = {
+    0: "sunny", 1: "sunny", 2: "sunny", 3: "sunny",
+    45: "rainy", 48: "rainy",
+    51: "rainy", 53: "rainy", 55: "rainy",
+    56: "rainy", 57: "rainy",
+    61: "rainy", 63: "rainy", 65: "rainy",
+    66: "rainy", 67: "rainy",
+    71: "snowy", 73: "snowy", 75: "snowy", 77: "snowy",
+    80: "rainy", 81: "rainy", 82: "rainy",
+    85: "snowy", 86: "snowy",
+    95: "stormy", 96: "stormy", 99: "stormy",
+}
 
-def roll_area_weather(area):
-    """Roll weather based on area weather_probabilities, or fall back to defaults."""
-    probs = area.get("weather_probabilities")
-    if probs:
-        choices = list(probs.keys())
-        weights = list(probs.values())
-        return random.choices(choices, weights=weights, k=1)[0]
-    area_name = area.get("name", "").lower()
-    if "tomb" in area_name or "cavern" in area_name or "underground" in area_name:
+_real_weather_cache: dict = {"weather": "sunny", "fetched_at": 0.0}
+_WEATHER_CACHE_TTL = 2 * 3600  # 2 IRL hours = 1 game day
+
+
+def get_real_weather(area_name: str = "") -> str:
+    """Return real London weather from Open-Meteo, cached for 2 hours.
+    Underground/subterranean areas always return 'null'."""
+    name_lower = area_name.lower()
+    if "tomb" in name_lower or "cavern" in name_lower or "underground" in name_lower:
         return "null"
-    return random.choices(
-        ["sunny", "rainy", "snowy", "stormy"], weights=[50, 25, 15, 10], k=1
-    )[0]
+
+    now = _time_module.time()
+    if now - _real_weather_cache["fetched_at"] >= _WEATHER_CACHE_TTL:
+        try:
+            url = (
+                "https://api.open-meteo.com/v1/forecast"
+                "?latitude=51.5074&longitude=-0.1278"
+                "&current_weather=true"
+                "&timezone=Europe%2FLondon"
+            )
+            with _urllib_request.urlopen(url, timeout=5) as resp:
+                payload = json.loads(resp.read().decode())
+            wmo_code = int(payload["current_weather"]["weathercode"])
+            mapped = _WMO_TO_GAME_WEATHER.get(wmo_code, "sunny")
+            _real_weather_cache["weather"] = mapped
+            _real_weather_cache["fetched_at"] = now
+        except Exception:
+            pass  # Keep cached value on failure
+
+    return _real_weather_cache["weather"]
 
 
 def get_weather_bonuses(weather_key):
@@ -1770,7 +1818,6 @@ def create():
         session["visited_areas"] = ["starting_village"]
         session["quest_progress"] = {}
         session["seen_cutscenes"] = []
-        session["current_weather"] = "sunny"
         trigger_cutscene("welcome_cutscene")
         add_message(
             f"Welcome, {name} the {race} {cls}! Your legend begins.", "var(--gold)"
@@ -2177,11 +2224,10 @@ def game():
             )
 
     # Time and weather
-    game_time = get_game_time(player)
+    game_time = get_game_time()
     game_time_icon = TIME_ICONS.get(game_time, "")
-    current_weather = session.get("current_weather") or "sunny"
-    if not GAME_DATA["weather"].get(current_weather):
-        current_weather = "sunny"
+    area_name_for_weather = GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "")
+    current_weather = get_real_weather(area_name_for_weather)
     weather_def = GAME_DATA["weather"].get(current_weather, {})
     weather_display = current_weather.replace("_", " ").title()
     weather_icon = ""
@@ -2463,10 +2509,7 @@ def action_explore():
     advance_game_time(player)
     apply_regen_effects(player)
 
-    # Roll weather
-    new_weather = roll_area_weather(area)
-    session["current_weather"] = new_weather
-    add_message(f"Weather: {new_weather.title()}.", "var(--text-dim)")
+    current_weather = get_real_weather(area.get("name", ""))
 
     # Boss encounter: 8% chance if area has bosses
     if possible_bosses and random.random() < 0.08:
@@ -3825,9 +3868,8 @@ def _handle_victory(player, enemy, log):
     gold = enemy.get("gold_reward", 10)
 
     # Apply weather bonuses
-    current_weather = session.get("current_weather") or "sunny"
-    if not GAME_DATA["weather"].get(current_weather):
-        current_weather = "sunny"
+    _area_name_bw = GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "")
+    current_weather = get_real_weather(_area_name_bw)
     exp_bonus_pct, gold_bonus_pct = get_weather_bonuses(current_weather)
     if exp_bonus_pct > 0:
         bonus_exp = int(exp * exp_bonus_pct)
@@ -3968,7 +4010,6 @@ def api_save():
         "visited_areas": session.get("visited_areas", []),
         "quest_progress": session.get("quest_progress", {}),
         "seen_cutscenes": session.get("seen_cutscenes", []),
-        "current_weather": session.get("current_weather", "sunny"),
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
         "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
@@ -4024,8 +4065,6 @@ def api_load():
     session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
-    _raw_weather = data.get("current_weather") or "sunny"
-    session["current_weather"] = _raw_weather if GAME_DATA["weather"].get(_raw_weather) else "sunny"
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
@@ -4547,7 +4586,7 @@ def api_online_logout():
     _autosave()
     game_keys = [
         "player", "current_area", "completed_missions", "visited_areas",
-        "quest_progress", "seen_cutscenes", "current_weather", "messages",
+        "quest_progress", "seen_cutscenes", "messages",
         "diary", "npc_unlocked_quests", "battle_enemy", "battle_player_effects",
         "battle_enemy_effects", "active_dungeon", "pending_cutscene",
         "weekly_challenges_progress",
@@ -4576,7 +4615,6 @@ def api_cloud_save():
         "visited_areas": session.get("visited_areas", []),
         "quest_progress": session.get("quest_progress", {}),
         "seen_cutscenes": session.get("seen_cutscenes", []),
-        "current_weather": session.get("current_weather", "sunny"),
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
         "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
@@ -4614,8 +4652,6 @@ def api_cloud_load():
     session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
-    _raw_weather = data.get("current_weather") or "sunny"
-    session["current_weather"] = _raw_weather if GAME_DATA["weather"].get(_raw_weather) else "sunny"
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])

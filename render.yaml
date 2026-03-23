@@ -11,3 +11,5 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_KEY
         sync: false
+      - key: SECRET_SALT
+        sync: false

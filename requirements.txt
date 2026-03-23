@@ -90,3 +90,6 @@ gunicorn
 python-dotenv
 supabase
 werkzeug
+flask-limiter
+flask-socketio
+gevent
