@@ -556,7 +556,7 @@ GAME_DATA: dict[str, Any] = {
     "events": load_json("events.json").get("events", []),
 }
 
-GAME_VERSION = "1.0.0"
+GAME_VERSION = "2.5.1"
 
 BUILDING_TYPES = {
     "house": {"label": "House", "slots": 3},
@@ -1193,8 +1193,18 @@ def boss_take_turn(enemy, player, player_effects, log):
 # ─── Companion combat helpers ─────────────────────────────────────────────────
 
 _COMPANION_RANK_HP = {
-    "common": 300, "uncommon": 500, "rare": 750,
-    "epic": 1200, "legendary": 2000,
+    "common": 400, "uncommon": 700, "rare": 1100,
+    "epic": 1800, "legendary": 3000,
+}
+
+_COMPANION_RANK_ATK_CAP = {
+    "common": 120, "uncommon": 180, "rare": 260,
+    "epic": 380, "legendary": 520,
+}
+
+_COMPANION_RANK_DEF_CAP = {
+    "common": 40, "uncommon": 60, "rare": 90,
+    "epic": 130, "legendary": 180,
 }
 
 
@@ -1204,16 +1214,22 @@ def _get_companion_combat_stats(comp_entry):
     comp_data = GAME_DATA["companions"].get(comp_id, {})
     rank = comp_data.get("rank", "common")
     max_hp = _COMPANION_RANK_HP.get(rank, 400)
+    atk_cap = _COMPANION_RANK_ATK_CAP.get(rank, 120)
+    def_cap = _COMPANION_RANK_DEF_CAP.get(rank, 40)
     atk_bonus = comp_data.get("attack_bonus", 0)
     def_bonus = comp_data.get("defense_bonus", 0)
+    crit_bonus = comp_data.get("crit_damage_bonus", 0)
+    base_atk = atk_bonus * 8 + 60 + crit_bonus // 5
+    base_def = def_bonus * 5 + 12
     return {
         "id": comp_id,
         "name": comp_entry.get("name", comp_data.get("name", "Companion")),
         "hp": comp_entry.get("hp", max_hp),
         "max_hp": comp_entry.get("max_hp", max_hp),
-        "attack": min(200, atk_bonus * 6 + 55),
-        "defense": min(80, def_bonus * 4 + 10),
+        "attack": min(atk_cap, base_atk),
+        "defense": min(def_cap, base_def),
         "action_chance": comp_data.get("action_chance", 0.40),
+        "crit_chance": min(0.35, comp_data.get("crit_chance", 0) / 100.0),
     }
 
 
@@ -1237,8 +1253,9 @@ def _companion_take_action(battle_companions, enemy, log):
         if random.random() > comp.get("action_chance", 0.40):
             continue
         dmg = max(1, comp["attack"] - enemy["defense"] + dice.between(-3, 6))
-        if random.random() < 0.08:
-            dmg = int(dmg * 1.5)
+        comp_crit_rate = 0.08 + comp.get("crit_chance", 0.0)
+        if random.random() < comp_crit_rate:
+            dmg = int(dmg * 1.75)
             log.append(f"[{comp['name']} lands a critical blow on {enemy['name']} for {dmg}!]")
         else:
             log.append(f"[{comp['name']} attacks {enemy['name']} for {dmg} damage.]")
@@ -2309,14 +2326,21 @@ def game():
         if isinstance(comp, dict):
             comp_id = comp.get("id")
             comp_data = GAME_DATA["companions"].get(comp_id, {})
+            rank = comp_data.get("rank", "common")
+            max_hp = comp.get("max_hp", _COMPANION_RANK_HP.get(rank, 400))
+            cur_hp = comp.get("hp", max_hp)
+            hp_pct = int(cur_hp / max_hp * 100) if max_hp > 0 else 100
             active_companions.append(
                 {
                     "id": comp_id,
                     "name": comp.get("name", comp_id or ""),
                     "class": comp_data.get("class", ""),
-                    "rank": comp_data.get("rank", "common"),
+                    "rank": rank,
                     "description": comp_data.get("description", ""),
                     "stat_summary": _companion_stat_summary(comp_data),
+                    "hp": cur_hp,
+                    "max_hp": max_hp,
+                    "hp_pct": hp_pct,
                 }
             )
 
@@ -2557,9 +2581,11 @@ def _companion_stat_summary(comp_data):
         ("speed_bonus", "SPD"),
         ("hp_bonus", "HP"),
         ("mp_bonus", "MP"),
-        ("spell_power_bonus", "SP"),
+        ("spell_power_bonus", "SpellPwr"),
         ("crit_chance", "Crit%"),
-        ("healing_bonus", "Heal"),
+        ("crit_damage_bonus", "CritDmg%"),
+        ("healing_bonus", "HealAura"),
+        ("post_battle_heal", "PostHeal"),
     ]:
         val = comp_data.get(bonus_key)
         if val:
@@ -3071,6 +3097,16 @@ def action_hire_companion():
             stat = stat_key.replace("_bonus", "")
             player[stat] = player.get(stat, 0) + bonus
             player[f"max_{stat}"] = player.get(f"max_{stat}", 0) + bonus
+    if comp_data.get("spell_power_bonus", 0):
+        player["attr_spell_power"] = player.get("attr_spell_power", 0) + comp_data["spell_power_bonus"]
+    if comp_data.get("crit_chance", 0):
+        player["attr_crit_chance"] = player.get("attr_crit_chance", 0) + comp_data["crit_chance"]
+    if comp_data.get("crit_damage_bonus", 0):
+        player["attr_crit_damage"] = player.get("attr_crit_damage", 0) + comp_data["crit_damage_bonus"]
+    if comp_data.get("healing_bonus", 0):
+        player["attr_healing_bonus"] = player.get("attr_healing_bonus", 0) + comp_data["healing_bonus"]
+    if comp_data.get("post_battle_heal", 0):
+        player["attr_post_battle_heal"] = player.get("attr_post_battle_heal", 0) + comp_data["post_battle_heal"]
 
     rank = comp_data.get("rank", "common")
     comp_max_hp = _COMPANION_RANK_HP.get(rank, 400)
@@ -3114,6 +3150,16 @@ def action_dismiss_companion():
             stat = stat_key.replace("_bonus", "")
             player[stat] = max(1, player.get(stat, 0) - bonus)
             player[f"max_{stat}"] = max(1, player.get(f"max_{stat}", 1) - bonus)
+    if comp_data.get("spell_power_bonus", 0):
+        player["attr_spell_power"] = max(0, player.get("attr_spell_power", 0) - comp_data["spell_power_bonus"])
+    if comp_data.get("crit_chance", 0):
+        player["attr_crit_chance"] = max(0, player.get("attr_crit_chance", 0) - comp_data["crit_chance"])
+    if comp_data.get("crit_damage_bonus", 0):
+        player["attr_crit_damage"] = max(0, player.get("attr_crit_damage", 0) - comp_data["crit_damage_bonus"])
+    if comp_data.get("healing_bonus", 0):
+        player["attr_healing_bonus"] = max(0, player.get("attr_healing_bonus", 0) - comp_data["healing_bonus"])
+    if comp_data.get("post_battle_heal", 0):
+        player["attr_post_battle_heal"] = max(0, player.get("attr_post_battle_heal", 0) - comp_data["post_battle_heal"])
 
     companions.remove(to_remove)
     player["companions"] = companions
@@ -3837,9 +3883,11 @@ def battle_attack():
 
     if not stunned:
         p_dmg = max(1, player["attack"] - enemy["defense"] + dice.between(-3, 6))
-        crit = random.random() < 0.10
+        base_crit_rate = 0.10 + min(0.40, player.get("attr_crit_chance", 0) / 100.0)
+        crit = random.random() < base_crit_rate
         if crit:
-            p_dmg = int(p_dmg * 1.6)
+            crit_mult = 1.6 + player.get("attr_crit_damage", 0) / 100.0
+            p_dmg = int(p_dmg * crit_mult)
             log.append(f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy_name}!")
         else:
             log.append(f"You attack the {enemy_name} for {p_dmg} damage.")
@@ -4108,6 +4156,14 @@ def _handle_victory(player, enemy, log):
     )
     if loot_item:
         add_message(f"Found: {loot_item}", "var(--gold)")
+
+    # Post-battle companion healing aura
+    post_heal = player.get("attr_post_battle_heal", 0)
+    if post_heal and post_heal > 0:
+        actual = min(post_heal, player["max_hp"] - player["hp"])
+        if actual > 0:
+            player["hp"] += actual
+            log.append(f"Your companion's aura restores {actual} HP after battle.")
 
     # Update quest kill progress
     enemy_key = enemy.get("key", enemy.get("name", "").lower().replace(" ", "_"))
