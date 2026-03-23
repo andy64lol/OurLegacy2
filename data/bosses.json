@@ -1,9 +1,9 @@
 {
   "fire_dragon_boss": {
     "name": "Ancient Fire Dragon",
-    "hp": 5100,
-    "attack": 595,
-    "defense": 340,
+    "hp": 3000,
+    "attack": 350,
+    "defense": 200,
     "speed": 15,
     "description": "The legendary Ancient Fire Dragon, ruler of the mountains. Its breath can melt stone and its roar shakes the very earth.",
     "special_abilities": [
@@ -78,9 +78,9 @@
   },
   "troll_king": {
     "name": "Troll King",
-    "hp": 2600,
-    "attack": 364,
-    "defense": 234,
+    "hp": 1600,
+    "attack": 224,
+    "defense": 144,
     "speed": 8,
     "description": "The massive ruler of the underground tombs. Its enormous size and incredible strength make it a formidable opponent.",
     "special_abilities": [
@@ -124,9 +124,9 @@
   },
   "shadow_lord": {
     "name": "Shadow Lord",
-    "hp": 3060,
-    "attack": 510,
-    "defense": 204,
+    "hp": 1800,
+    "attack": 300,
+    "defense": 120,
     "speed": 18,
     "description": "A mysterious entity of pure darkness that rules the deepest parts of the ancient ruins.",
     "special_abilities": [
@@ -192,9 +192,9 @@
   },
   "ice_queen": {
     "name": "Ice Queen",
-    "hp": 2080,
-    "attack": 325,
-    "defense": 195,
+    "hp": 1280,
+    "attack": 200,
+    "defense": 120,
     "speed": 20,
     "description": "The ethereal ruler of the Crystal Caves, she commands the power of eternal winter.",
     "special_abilities": [
@@ -260,9 +260,9 @@
   },
   "orc_chieftain": {
     "name": "Orc Chieftain",
-    "hp": 1200,
-    "attack": 220,
-    "defense": 100,
+    "hp": 720,
+    "attack": 132,
+    "defense": 60,
     "speed": 12,
     "description": "The brutal leader of the orc clan in the Deep Woods, wielding a massive war axe.",
     "special_abilities": [
@@ -311,9 +311,9 @@
   },
   "void_tyrant": {
     "name": "Void Tyrant Kael'dor",
-    "hp": 6800,
-    "attack": 680,
-    "defense": 425,
+    "hp": 4000,
+    "attack": 400,
+    "defense": 250,
     "speed": 14,
     "description": "An ancient being of cosmic horror that dwells beyond reality itself. The strongest challenge.",
     "experience_reward": 500,
@@ -334,9 +334,9 @@
   },
   "swamp_hydra": {
     "name": "Swamp Hydra",
-    "hp": 2200,
-    "attack": 250,
-    "defense": 140,
+    "hp": 1320,
+    "attack": 150,
+    "defense": 84,
     "speed": 10,
     "description": "A massive serpentine beast dwelling in the poisonous waters of the Swamp of Shadows. Each head must be destroyed separately.",
     "special_abilities": [
@@ -412,9 +412,9 @@
   },
   "necromancer_lord": {
     "name": "Necromancer Lord Vorthak",
-    "hp": 2340,
-    "attack": 364,
-    "defense": 130,
+    "hp": 1440,
+    "attack": 224,
+    "defense": 80,
     "speed": 16,
     "description": "A master of dark magic who commands the undead from his throne in the Haunted Cemetery.",
     "special_abilities": [
@@ -491,9 +491,9 @@
   },
   "storm_giant": {
     "name": "Thunder Lord Thorigar",
-    "hp": 4760,
-    "attack": 544,
-    "defense": 374,
+    "hp": 2800,
+    "attack": 320,
+    "defense": 220,
     "speed": 12,
     "description": "A colossal giant who commands the storms atop Thunder Peak, wielding a massive hammer forged from lightning.",
     "special_abilities": [
@@ -567,9 +567,9 @@
   },
   "lich_king": {
     "name": "Lich King Malachar",
-    "hp": 5950,
-    "attack": 646,
-    "defense": 340,
+    "hp": 3500,
+    "attack": 380,
+    "defense": 200,
     "speed": 15,
     "description": "The undying ruler of the Crypt of Eternity, wielding ancient necromantic power that defies death itself.",
     "special_abilities": [
@@ -666,9 +666,9 @@
   },
   "demon_prince": {
     "name": "Demon Prince Azgorath",
-    "hp": 9240,
-    "attack": 990,
-    "defense": 616,
+    "hp": 5460,
+    "attack": 585,
+    "defense": 364,
     "speed": 16,
     "description": "The heir to the infernal throne, ruling from the heart of Hellfire Citadel with fiery wrath and demonic power.",
     "special_abilities": [
@@ -765,9 +765,9 @@
   },
   "elder_dragon": {
     "name": "Elder Dragon Zephyr",
-    "hp": 11000,
-    "attack": 1100,
-    "defense": 770,
+    "hp": 6500,
+    "attack": 650,
+    "defense": 455,
     "speed": 20,
     "description": "An ancient dragon of immense power who guards the Sky Sanctuary, commanding the winds themselves.",
     "special_abilities": [
@@ -880,9 +880,9 @@
   },
   "Dalokurg": {
     "name": "The infamous bandit leader, Dälokurg",
-    "hp": 2210,
-    "attack": 520,
-    "defense": 416,
+    "hp": 1360,
+    "attack": 320,
+    "defense": 256,
     "speed": 28,
     "description": "Dälokurg, the notorious bandit leader known for his cunning and ruthlessness. He commands a large group of bandits and has a reputation for ambushing travelers on the roads.",
     "special_abilities": [
@@ -919,9 +919,9 @@
   },
   "purple_sandworm": {
     "name": "Purple Sandworm",
-    "hp": 8450,
-    "attack": 1170,
-    "defense": 1170,
+    "hp": 5200,
+    "attack": 720,
+    "defense": 720,
     "speed": 12,
     "description": "A massive sandworm that dwells beneath the desert sands. Its purple scales shimmer in the sunlight, and it can burrow quickly to ambush prey.",
     "special_abilities": [
@@ -969,9 +969,9 @@
   },
   "goblin_king": {
     "name": "Goblin King",
-    "hp": 1400,
-    "attack": 200,
-    "defense": 80,
+    "hp": 840,
+    "attack": 120,
+    "defense": 48,
     "speed": 14,
     "description": "The greedy and cunning ruler of the goblin cave, wielding a dagger made from stolen treasures.",
     "special_abilities": [
@@ -1036,9 +1036,9 @@
   },
   "fire_elemental_lord": {
     "name": "Fire Elemental Lord Ignaros",
-    "hp": 4420,
-    "attack": 544,
-    "defense": 306,
+    "hp": 2600,
+    "attack": 320,
+    "defense": 180,
     "speed": 16,
     "description": "A towering being of pure flame that rules over the Fire Temple. Its presence causes the very air to burn.",
     "special_abilities": [
@@ -1122,9 +1122,9 @@
   },
   "ice_giant_king": {
     "name": "Ice Giant King Thrym",
-    "hp": 4760,
-    "attack": 510,
-    "defense": 374,
+    "hp": 2800,
+    "attack": 300,
+    "defense": 220,
     "speed": 10,
     "description": "The colossal ruler of the frozen peaks, wielding a massive club of eternal ice. His breath freezes the very soul.",
     "special_abilities": [
@@ -1207,9 +1207,9 @@
   },
   "celestial_guardian": {
     "name": "Celestial Guardian Auriel",
-    "hp": 8360,
-    "attack": 836,
-    "defense": 616,
+    "hp": 4940,
+    "attack": 494,
+    "defense": 364,
     "speed": 22,
     "description": "A divine being of pure light that guards the Celestial Tower. Its presence radiates holy power that burns the unworthy.",
     "special_abilities": [
@@ -1301,9 +1301,9 @@
   },
   "supreme_being": {
     "name": "Supreme Being Eternus",
-    "hp": 13200,
-    "attack": 1210,
-    "defense": 880,
+    "hp": 7800,
+    "attack": 715,
+    "defense": 520,
     "speed": 30,
     "description": "The ultimate entity that exists beyond time and space. Only the most legendary heroes may challenge this being of pure cosmic power.",
     "special_abilities": [
@@ -1425,9 +1425,9 @@
   },
   "archdruid_malfurion": {
     "name": "Corrupted Archdruid Malfurion",
-    "hp": 5850,
-    "attack": 546,
-    "defense": 325,
+    "hp": 3600,
+    "attack": 336,
+    "defense": 200,
     "speed": 18,
     "description": "A legendary druid fallen to the nightmare. He commands the very soul of the forest to crush intruders.",
     "experience_reward": 800,
@@ -1443,9 +1443,9 @@
   },
   "high_inquisitor_whitemane": {
     "name": "High Inquisitor Whitemane",
-    "hp": 5200,
-    "attack": 494,
-    "defense": 260,
+    "hp": 3200,
+    "attack": 304,
+    "defense": 160,
     "speed": 22,
     "description": "The leader of a fanatical sect, she uses her divine powers to judge and purify all who cross her path.",
     "experience_reward": 750,
@@ -1461,9 +1461,9 @@
   },
   "uther_the_fallen": {
     "name": "Uther the Fallen",
-    "hp": 8500,
-    "attack": 765,
-    "defense": 595,
+    "hp": 5000,
+    "attack": 450,
+    "defense": 350,
     "speed": 12,
     "description": "A once-great paladin whose light has been extinguished. He remains a formidable guardian of the sacred halls.",
     "experience_reward": 900,
@@ -1479,9 +1479,9 @@
   },
   "snowbinable": {
     "name": "Snowbinable",
-    "hp": 12600,
-    "attack": 1120,
-    "defense": 700,
+    "hp": 7200,
+    "attack": 640,
+    "defense": 400,
     "speed": 12,
     "description": "A colossus born from the soul of the taiga itself. Part beast, part blizzard — it has haunted the permafrost for a thousand years. No hunter who tracked it ever returned.",
     "special_abilities": [
@@ -1561,9 +1561,9 @@
   },
   "ottoman_pirate_lord": {
     "name": "Pirate Lord Barbaros",
-    "hp": 4760,
-    "attack": 510,
-    "defense": 238,
+    "hp": 2800,
+    "attack": 300,
+    "defense": 140,
     "speed": 15,
     "description": "The legendary commander of the Ottoman corsair fleet, Barbaros has plundered a hundred ports. His scarred face and booming laugh are the last things most men ever see.",
     "special_abilities": [
@@ -1625,9 +1625,9 @@
   },
   "grand_vizier_karamanli": {
     "name": "Grand Vizier Karamanli",
-    "hp": 10640,
-    "attack": 1008,
-    "defense": 504,
+    "hp": 6080,
+    "attack": 576,
+    "defense": 288,
     "speed": 13,
     "description": "The cunning Grand Vizier of the Osmanoğlu Empire, Karamanli controls the Sultan's court through manipulation, sorcery, and iron will. He fights with a forbidden blend of court magic and political ruthlessness.",
     "special_abilities": [
@@ -1706,9 +1706,9 @@
   },
   "sultan_yildirim": {
     "name": "Sultan Yildirim",
-    "hp": 19250,
-    "attack": 1680,
-    "defense": 1050,
+    "hp": 11000,
+    "attack": 960,
+    "defense": 600,
     "speed": 14,
     "description": "The thunderous Sultan of the Osmanoğlu Empire — Yildirim, The Lightning. He has conquered thirty kingdoms and his empire stretches to the horizon in every direction. He does not merely fight; he annihilates.",
     "special_abilities": [
