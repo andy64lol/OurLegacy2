@@ -57,7 +57,6 @@
             overflow: hidden;
         }
 
-        /* ── Left sidebar (friends list + requests + add) ── */
         #friends-sidebar {
             width: 240px;
             flex-shrink: 0;
@@ -112,7 +111,6 @@
             gap: 8px;
             padding: 8px 14px;
             cursor: pointer;
-            border-radius: 0;
             transition: background 0.12s;
             position: relative;
         }
@@ -135,30 +133,11 @@
             text-transform: uppercase;
         }
         .friend-name { flex: 1; font-size: 13px; color: var(--text-light); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .online-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: var(--green-bright, #4ade80);
-            flex-shrink: 0;
-        }
-        .offline-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: rgba(255,255,255,0.15);
-            flex-shrink: 0;
-        }
-        .unread-badge {
-            background: var(--red, #f87171);
-            color: white;
-            font-size: 10px;
-            font-weight: 700;
-            border-radius: 10px;
-            padding: 1px 6px;
-            flex-shrink: 0;
-        }
+        .online-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-bright, #4ade80); flex-shrink: 0; }
+        .offline-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+        .unread-badge { background: var(--red, #f87171); color: white; font-size: 10px; font-weight: 700; border-radius: 10px; padding: 1px 6px; flex-shrink: 0; }
 
-        .request-row {
-            padding: 8px 14px;
-            border-bottom: 1px solid rgba(180,130,255,0.08);
-        }
+        .request-row { padding: 8px 14px; border-bottom: 1px solid rgba(180,130,255,0.08); }
         .request-name { font-size: 13px; color: var(--gold, #f6c90e); margin-bottom: 5px; }
         .request-btns { display: flex; gap: 5px; }
         .btn-accept { padding: 3px 10px; background: rgba(30,100,60,0.6); border: 1px solid var(--green-bright, #4ade80); border-radius: 4px; color: var(--green-bright); font-size: 11px; cursor: pointer; }
@@ -166,16 +145,10 @@
         .btn-decline { padding: 3px 10px; background: rgba(100,30,30,0.4); border: 1px solid rgba(200,80,80,0.4); border-radius: 4px; color: var(--red, #f87171); font-size: 11px; cursor: pointer; }
         .btn-decline:hover { background: rgba(120,30,30,0.7); }
 
-        .outgoing-row {
-            padding: 6px 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .outgoing-row { padding: 6px 14px; display: flex; align-items: center; gap: 6px; }
         .outgoing-name { font-size: 12px; color: var(--text-dim); flex: 1; }
         .outgoing-label { font-size: 10px; color: var(--text-dim); opacity: 0.6; font-style: italic; }
 
-        /* ── Right DM panel ── */
         #dm-panel {
             flex: 1;
             display: flex;
@@ -205,34 +178,24 @@
             background: rgba(40,20,70,0.4);
         }
         #dm-with-name { font-size: 15px; font-weight: 700; color: var(--mana-bright); }
-        #dm-remove-btn {
+        #dm-header-btns { display: flex; gap: 6px; align-items: center; }
+        #dm-trade-btn {
             font-size: 11px;
-            color: var(--red);
-            background: none;
-            border: 1px solid rgba(200,80,80,0.3);
+            color: var(--gold, #f6c90e);
+            background: rgba(80,60,20,0.3);
+            border: 1px solid rgba(246,201,14,0.4);
             border-radius: 5px;
             padding: 3px 10px;
             cursor: pointer;
-            opacity: 0.7;
         }
+        #dm-trade-btn:hover { background: rgba(100,80,20,0.5); border-color: rgba(246,201,14,0.7); }
+        #dm-trade-btn:disabled { opacity: 0.35; cursor: default; }
+        #dm-remove-btn { font-size: 11px; color: var(--red); background: none; border: 1px solid rgba(200,80,80,0.3); border-radius: 5px; padding: 3px 10px; cursor: pointer; opacity: 0.7; }
         #dm-remove-btn:hover { opacity: 1; }
-        #dm-block-btn {
-            font-size: 11px;
-            color: #f97316;
-            background: none;
-            border: 1px solid rgba(249,115,22,0.3);
-            border-radius: 5px;
-            padding: 3px 10px;
-            cursor: pointer;
-            opacity: 0.7;
-        }
+        #dm-block-btn { font-size: 11px; color: #f97316; background: none; border: 1px solid rgba(249,115,22,0.3); border-radius: 5px; padding: 3px 10px; cursor: pointer; opacity: 0.7; }
         #dm-block-btn:hover { opacity: 1; }
-        .blocked-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 14px;
-        }
+
+        .blocked-row { display: flex; align-items: center; gap: 8px; padding: 6px 14px; }
         .blocked-name { flex: 1; font-size: 12px; color: var(--text-dim); text-decoration: line-through; opacity: 0.7; }
         .btn-unblock { padding: 2px 8px; background: rgba(100,60,20,0.4); border: 1px solid rgba(249,115,22,0.4); border-radius: 4px; color: #f97316; font-size: 11px; cursor: pointer; }
         .btn-unblock:hover { background: rgba(130,80,20,0.6); }
@@ -253,31 +216,12 @@
             flex-shrink: 0;
         }
         #dm-input-row { display: flex; gap: 8px; align-items: center; }
-        #dm-input {
-            flex: 1;
-            padding: 9px 13px;
-            background: rgba(0,0,0,0.45);
-            border: 1px solid rgba(180,130,255,0.35);
-            border-radius: 8px;
-            color: var(--text-light);
-            font-size: 14px;
-            outline: none;
-        }
+        #dm-input { flex: 1; padding: 9px 13px; background: rgba(0,0,0,0.45); border: 1px solid rgba(180,130,255,0.35); border-radius: 8px; color: var(--text-light); font-size: 14px; outline: none; }
         #dm-input:focus { border-color: rgba(180,130,255,0.65); }
-        #dm-send-btn {
-            padding: 9px 18px;
-            background: linear-gradient(135deg, rgba(80,50,150,0.85), rgba(50,30,100,0.85));
-            border: 1px solid var(--mana-bright);
-            border-radius: 8px;
-            color: var(--mana-bright);
-            font-size: 14px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
+        #dm-send-btn { padding: 9px 18px; background: linear-gradient(135deg, rgba(80,50,150,0.85), rgba(50,30,100,0.85)); border: 1px solid var(--mana-bright); border-radius: 8px; color: var(--mana-bright); font-size: 14px; cursor: pointer; white-space: nowrap; }
         #dm-send-btn:hover { opacity: 0.85; }
         #dm-error { font-size: 12px; color: var(--red); min-height: 14px; margin-top: 4px; }
 
-        /* toast notifications */
         #friends-toast {
             position: fixed;
             bottom: 24px;
@@ -304,8 +248,212 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
+        /* ── Trade Overlay ── */
+        #trade-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 12000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #trade-box {
+            background: linear-gradient(160deg, rgba(16,10,34,0.99), rgba(8,5,20,0.99));
+            border: 1px solid rgba(246,201,14,0.4);
+            border-radius: 14px;
+            width: min(720px, 96vw);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 48px rgba(180,130,0,0.25);
+            overflow: hidden;
+        }
+        #trade-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: rgba(60,40,10,0.5);
+            border-bottom: 1px solid rgba(246,201,14,0.25);
+            flex-shrink: 0;
+        }
+        #trade-title { font-size: 15px; font-weight: 700; color: var(--gold, #f6c90e); }
+        #trade-status-badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: rgba(100,80,20,0.5);
+            border: 1px solid rgba(246,201,14,0.4);
+            color: var(--gold);
+        }
+        #trade-cancel-btn {
+            padding: 5px 14px;
+            background: rgba(120,30,30,0.5);
+            border: 1px solid rgba(200,80,80,0.5);
+            border-radius: 6px;
+            color: var(--red, #f87171);
+            font-size: 12px;
+            cursor: pointer;
+        }
+        #trade-cancel-btn:hover { background: rgba(160,40,40,0.7); }
+
+        #trade-body { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+
+        /* Invite panel */
+        #trade-invite-panel {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        #trade-invite-panel .big { font-size: 28px; margin-bottom: 12px; }
+        #trade-invite-panel .msg { font-size: 15px; color: var(--text-light); margin-bottom: 20px; }
+        .trade-invite-btns { display: flex; gap: 12px; justify-content: center; }
+        .trade-invite-btns button { padding: 10px 28px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+        #trade-accept-btn { background: rgba(30,100,60,0.7); border: 1px solid var(--green-bright, #4ade80); color: var(--green-bright); }
+        #trade-accept-btn:hover { background: rgba(30,130,70,0.85); }
+        #trade-decline-btn { background: rgba(100,30,30,0.5); border: 1px solid var(--red, #f87171); color: var(--red); }
+        #trade-decline-btn:hover { background: rgba(130,40,40,0.7); }
+
+        /* Waiting panel */
+        #trade-waiting-panel {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+        #trade-waiting-panel .spin { font-size: 28px; display: block; margin-bottom: 14px; animation: spin 2s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Active trade columns */
+        #trade-columns {
+            display: flex;
+            gap: 12px;
+        }
+        .trade-col {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(180,130,255,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 140px;
+        }
+        .trade-col.my-col { border-color: rgba(246,201,14,0.3); }
+        .trade-col-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .my-col .trade-col-header { color: var(--gold, #f6c90e); }
+        .trade-item-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px;
+        }
+        .trade-item-chip.mine { background: rgba(80,60,10,0.5); border: 1px solid rgba(246,201,14,0.3); color: var(--gold); cursor: pointer; }
+        .trade-item-chip.mine:hover { background: rgba(100,80,10,0.7); }
+        .trade-item-chip.theirs { background: rgba(40,30,80,0.5); border: 1px solid rgba(180,130,255,0.3); color: var(--mana-bright); }
+        .trade-item-chip .remove-x { font-size: 10px; opacity: 0.6; }
+        .trade-item-chip.mine:hover .remove-x { opacity: 1; }
+        .trade-empty-hint { font-size: 12px; color: var(--text-dim); font-style: italic; padding: 4px 0; }
+
+        /* Gold row */
+        .trade-gold-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(180,130,255,0.1); }
+        .trade-gold-label { font-size: 12px; color: var(--gold); }
+        .trade-gold-input { width: 90px; padding: 4px 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(246,201,14,0.4); border-radius: 5px; color: var(--gold); font-size: 13px; }
+        .trade-gold-input:focus { outline: none; border-color: var(--gold); }
+        .trade-gold-set-btn { padding: 4px 10px; background: rgba(80,60,10,0.6); border: 1px solid rgba(246,201,14,0.4); border-radius: 5px; color: var(--gold); font-size: 12px; cursor: pointer; }
+        .trade-gold-set-btn:hover { background: rgba(100,80,10,0.8); }
+        .trade-gold-display { font-size: 13px; color: var(--gold); }
+
+        /* Confirm bar */
+        #trade-confirm-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(180,130,255,0.15);
+            border-radius: 8px;
+            gap: 10px;
+        }
+        #trade-confirm-status { font-size: 12px; color: var(--text-dim); flex: 1; }
+        #trade-confirm-btn {
+            padding: 8px 20px;
+            background: rgba(30,100,60,0.7);
+            border: 1px solid var(--green-bright, #4ade80);
+            border-radius: 7px;
+            color: var(--green-bright);
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        #trade-confirm-btn:hover { background: rgba(30,130,70,0.85); }
+        #trade-confirm-btn:disabled { opacity: 0.35; cursor: default; }
+        #trade-unconfirm-btn {
+            padding: 8px 20px;
+            background: rgba(100,60,10,0.5);
+            border: 1px solid rgba(246,201,14,0.4);
+            border-radius: 7px;
+            color: var(--gold);
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        #trade-unconfirm-btn:hover { background: rgba(130,80,10,0.7); }
+
+        /* Inventory browser */
+        #trade-inventory-section {
+            border-top: 1px solid rgba(180,130,255,0.12);
+            padding-top: 10px;
+        }
+        #trade-inventory-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        #trade-inventory-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            max-height: 130px;
+            overflow-y: auto;
+        }
+        .inv-chip {
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(30,20,60,0.7);
+            border: 1px solid rgba(180,130,255,0.25);
+            color: var(--text-light);
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.12s, border-color 0.12s;
+        }
+        .inv-chip:hover { background: rgba(60,40,100,0.8); border-color: rgba(180,130,255,0.55); }
+        .inv-chip.offered { background: rgba(60,45,5,0.7); border-color: rgba(246,201,14,0.45); color: var(--gold); cursor: default; }
+        .inv-chip.no-more { opacity: 0.3; cursor: default; }
+
+        /* Approved panel */
+        #trade-approved-panel {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        #trade-approved-panel .big { font-size: 32px; margin-bottom: 12px; }
+        #trade-approved-panel .summary { font-size: 13px; color: var(--text-light); margin: 6px 0; }
+
         @media (max-width: 600px) {
             #friends-sidebar { width: 180px; }
+            #trade-columns { flex-direction: column; }
+            #trade-box { max-height: 95vh; }
         }
     </style>
 </head>
@@ -313,9 +461,7 @@
 <div id="friends-page">
 
     <div id="friends-header">
-        <div class="title">
-            &#10024; Friends
-        </div>
+        <div class="title">&#10024; Friends</div>
         <div class="hdr-links">
             <a href="/chat">&#128172; Chat</a>
             <a href="/game">&#8592; Game</a>
@@ -323,8 +469,6 @@
     </div>
 
     <div id="friends-body">
-
-        <!-- ── Sidebar ── -->
         <div id="friends-sidebar">
             <div id="add-friend-bar">
                 <input type="text" id="add-friend-input" placeholder="Add by username..." maxlength="20"
@@ -339,7 +483,6 @@
             </div>
         </div>
 
-        <!-- ── DM Panel ── -->
         <div id="dm-panel">
             <div id="dm-empty">
                 <div class="big-icon">&#10024;</div>
@@ -349,7 +492,8 @@
             <div id="dm-conversation" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
                 <div id="dm-header">
                     <div id="dm-with-name"></div>
-                    <div style="display:flex;gap:6px;">
+                    <div id="dm-header-btns">
+                        <button id="dm-trade-btn" onclick="startTrade()" title="Trade items with this player">&#128181; Trade</button>
                         <button id="dm-block-btn" onclick="blockUser()">&#128683; Block</button>
                         <button id="dm-remove-btn" onclick="removeFriend()">Remove</button>
                     </div>
@@ -365,25 +509,97 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
+<!-- ── Trade Overlay ── -->
+<div id="trade-overlay">
+    <div id="trade-box">
+        <div id="trade-header">
+            <span id="trade-title">Trade</span>
+            <span id="trade-status-badge">Pending</span>
+            <button id="trade-cancel-btn" onclick="tradeCancel()">Cancel Trade</button>
+        </div>
+        <div id="trade-body">
+
+            <!-- Invite (you're the recipient) -->
+            <div id="trade-invite-panel" style="display:none;">
+                <div class="big">&#128181;</div>
+                <div class="msg"><strong id="trade-invite-from"></strong> wants to trade with you!</div>
+                <div class="trade-invite-btns">
+                    <button id="trade-accept-btn" onclick="tradeAccept()">&#10003; Accept</button>
+                    <button id="trade-decline-btn" onclick="tradeDecline()">&#10005; Decline</button>
+                </div>
+            </div>
+
+            <!-- Waiting (you sent the invite) -->
+            <div id="trade-waiting-panel" style="display:none;">
+                <span class="spin">&#9881;</span>
+                Waiting for <strong id="trade-waiting-for"></strong> to accept your trade request...
+                <div style="margin-top:14px;font-size:12px;color:var(--text-dim);">They will see a notification. You can cancel at any time.</div>
+            </div>
+
+            <!-- Active trade -->
+            <div id="trade-active-panel" style="display:none;">
+                <div id="trade-columns">
+                    <div class="trade-col my-col">
+                        <div class="trade-col-header">Your Offer</div>
+                        <div id="trade-my-items"><span class="trade-empty-hint">No items yet</span></div>
+                        <div class="trade-gold-row">
+                            <span class="trade-gold-label">&#128081; Gold:</span>
+                            <input type="number" id="trade-gold-input" class="trade-gold-input" min="0" max="9999999" value="0" placeholder="0">
+                            <button class="trade-gold-set-btn" onclick="tradeSetGold()">Set</button>
+                        </div>
+                    </div>
+                    <div class="trade-col">
+                        <div class="trade-col-header">Their Offer</div>
+                        <div id="trade-their-items"><span class="trade-empty-hint">Nothing offered yet</span></div>
+                        <div class="trade-gold-row">
+                            <span class="trade-gold-label">&#128081; Gold:</span>
+                            <span class="trade-gold-display" id="trade-their-gold">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="trade-confirm-bar">
+                    <span id="trade-confirm-status">Waiting for both players to confirm...</span>
+                    <button id="trade-confirm-btn" onclick="tradeConfirm(true)">&#10003; Confirm Offer</button>
+                    <button id="trade-unconfirm-btn" style="display:none;" onclick="tradeConfirm(false)">&#8635; Edit Offer</button>
+                </div>
+
+                <div id="trade-inventory-section">
+                    <div id="trade-inventory-header">Your Inventory — click an item to add it to your offer</div>
+                    <div id="trade-inventory-list"></div>
+                </div>
+            </div>
+
+            <!-- Approved / applying -->
+            <div id="trade-approved-panel" style="display:none;">
+                <div class="big">&#127381;</div>
+                <div style="font-size:16px;font-weight:700;color:var(--green-bright);margin-bottom:12px;">Trade Agreed!</div>
+                <div class="summary" id="trade-approved-summary"></div>
+                <div id="trade-applying-msg" style="margin-top:16px;font-size:13px;color:var(--text-dim);">Applying trade...</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Confirm dialog -->
+<div id="fc-overlay" style="position:fixed;inset:0;width:100%;height:100%;background:rgba(0,0,0,0.82);z-index:14000;display:none;align-items:center;justify-content:center;">
+    <div id="fc-box" style="background:linear-gradient(160deg,rgba(20,12,40,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.45);border-radius:12px;padding:28px 28px 22px;max-width:380px;width:90%;box-shadow:0 8px 40px rgba(60,20,120,0.55);text-align:center;">
+        <div style="font-size:28px;margin-bottom:12px;">&#9888;&#65039;</div>
+        <div id="fc-msg" style="font-size:14px;color:#e0d8f0;margin-bottom:22px;line-height:1.6;"></div>
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <button id="fc-ok" style="min-width:100px;padding:8px 16px;background:rgba(160,30,30,0.7);border:1px solid #f87171;border-radius:6px;color:#f87171;cursor:pointer;">Confirm</button>
+            <button id="fc-cancel" style="min-width:100px;padding:8px 16px;background:rgba(40,20,70,0.7);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:#e0d8f0;cursor:pointer;">Cancel</button>
+        </div>
     </div>
 </div>
 
 <div id="friends-toast"></div>
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-<style>
-#fc-overlay{position:fixed;inset:0;width:100%;height:100%;background:rgba(0,0,0,0.82);z-index:10000;display:none;align-items:center;justify-content:center;overflow:hidden;}
-#fc-box{background:linear-gradient(160deg,rgba(20,12,40,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.45);border-radius:12px;padding:28px 28px 22px;max-width:380px;width:90%;box-shadow:0 8px 40px rgba(60,20,120,0.55);text-align:center;}
-</style>
-<div id="fc-overlay"><div id="fc-box">
-<div style="font-size:28px;margin-bottom:12px;">&#9888;&#65039;</div>
-<div id="fc-msg" style="font-size:14px;color:#e0d8f0;margin-bottom:22px;line-height:1.6;"></div>
-<div style="display:flex;gap:10px;justify-content:center;">
-<button id="fc-ok" style="min-width:100px;padding:8px 16px;background:rgba(160,30,30,0.7);border:1px solid #f87171;border-radius:6px;color:#f87171;cursor:pointer;">Confirm</button>
-<button id="fc-cancel" style="min-width:100px;padding:8px 16px;background:rgba(40,20,70,0.7);border:1px solid rgba(180,130,255,0.4);border-radius:6px;color:#e0d8f0;cursor:pointer;">Cancel</button>
-</div></div></div>
-
 <script>
 function friendsPageConfirm(msg, onOk) {
     var ov=document.getElementById('fc-overlay'), m=document.getElementById('fc-msg'),
@@ -394,12 +610,18 @@ function friendsPageConfirm(msg, onOk) {
     function doClose(){close();}
     ok.addEventListener('click',doOk); cl.addEventListener('click',doClose);
 }
+
 (function() {
     var ME = {{ online_username | tojson }};
     var socket = null;
     var currentDmWith = null;
+    var currentDmIsOnline = false;
     var friendsData = { friends: [], incoming: [], outgoing: [] };
     var blockedUsers = [];
+
+    // ── Trade state ──────────────────────────────────────────────
+    var tradeState = null; // null | { id, with, status, myConfirmed, theirConfirmed }
+    var tradeInvite = null; // { trade_id, from }
 
     // ── Socket ──────────────────────────────────────────────────
     function initSocket() {
@@ -428,7 +650,304 @@ function friendsPageConfirm(msg, onOk) {
         socket.on('online_users', function() {
             loadFriends();
         });
+
+        // ── Trade socket events ──────────────────────────────────
+        socket.on('trade_invite', function(data) {
+            tradeInvite = data;
+            openTradeOverlay();
+            setTradePanel('invite');
+            document.getElementById('trade-invite-from').textContent = data.from;
+            document.getElementById('trade-title').textContent = 'Trade Request';
+            document.getElementById('trade-status-badge').textContent = 'Incoming';
+            showToast('&#128181; <strong>' + esc(data.from) + '</strong> wants to trade!');
+        });
+
+        socket.on('trade_invite_sent', function(data) {
+            tradeState = { id: data.trade_id, with: data.to, status: 'pending', myConfirmed: false, theirConfirmed: false };
+            openTradeOverlay();
+            setTradePanel('waiting');
+            document.getElementById('trade-waiting-for').textContent = data.to;
+            document.getElementById('trade-title').textContent = 'Trade — ' + data.to;
+            document.getElementById('trade-status-badge').textContent = 'Waiting...';
+        });
+
+        socket.on('trade_update', function(data) {
+            tradeState = tradeState || {};
+            tradeState.id = data.trade_id;
+            tradeState.with = data.other;
+            tradeState.status = data.status;
+            tradeState.myConfirmed = data.my_confirmed;
+            tradeState.theirConfirmed = data.their_confirmed;
+            openTradeOverlay();
+            setTradePanel('active');
+            renderTradeActive(data);
+        });
+
+        socket.on('trade_approved', function(data) {
+            tradeState = tradeState || {};
+            tradeState.id = data.trade_id;
+            tradeState.status = 'approved';
+            openTradeOverlay();
+            setTradePanel('approved');
+            var summary = '';
+            if (data.receive_items && data.receive_items.length) summary += 'Receiving: ' + data.receive_items.join(', ') + '. ';
+            if (data.receive_gold) summary += 'Receiving ' + data.receive_gold.toLocaleString() + ' gold. ';
+            if (data.give_items && data.give_items.length) summary += 'Giving: ' + data.give_items.join(', ') + '. ';
+            if (data.give_gold) summary += 'Giving ' + data.give_gold.toLocaleString() + ' gold.';
+            document.getElementById('trade-approved-summary').textContent = summary || 'No items exchanged.';
+            document.getElementById('trade-status-badge').textContent = 'Agreed!';
+            document.getElementById('trade-applying-msg').textContent = 'Applying trade to your character...';
+            fetch('/api/trade/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ trade_id: data.trade_id })
+            }).then(function(r) { return r.json(); }).then(function(d) {
+                if (d.ok) {
+                    document.getElementById('trade-applying-msg').textContent = d.message || 'Trade complete!';
+                    document.getElementById('trade-applying-msg').style.color = 'var(--green-bright)';
+                    showToast('&#127381; Trade complete! ' + (d.message || ''));
+                    setTimeout(closeTradeOverlay, 4000);
+                } else {
+                    document.getElementById('trade-applying-msg').textContent = 'Error: ' + (d.message || 'Apply failed.');
+                    document.getElementById('trade-applying-msg').style.color = 'var(--red)';
+                }
+                tradeState = null;
+            }).catch(function(e) {
+                document.getElementById('trade-applying-msg').textContent = 'Network error applying trade.';
+            });
+        });
+
+        socket.on('trade_cancelled', function(data) {
+            var msg = (data && data.message) ? data.message : 'Trade cancelled.';
+            showToast('&#10060; ' + esc(msg));
+            tradeState = null;
+            tradeInvite = null;
+            closeTradeOverlay();
+        });
+
+        socket.on('trade_error', function(data) {
+            showToast('&#9888; ' + esc((data && data.message) ? data.message : 'Trade error.'));
+        });
     }
+
+    // ── Trade overlay helpers ────────────────────────────────────
+    function openTradeOverlay() {
+        document.getElementById('trade-overlay').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTradeOverlay() {
+        document.getElementById('trade-overlay').style.display = 'none';
+        document.body.style.overflow = '';
+        tradeState = null;
+        tradeInvite = null;
+        setTradePanel(null);
+    }
+
+    function setTradePanel(which) {
+        var panels = ['invite', 'waiting', 'active', 'approved'];
+        panels.forEach(function(p) {
+            var el = document.getElementById('trade-' + p + '-panel');
+            if (el) el.style.display = (p === which) ? '' : 'none';
+        });
+    }
+
+    function renderTradeActive(data) {
+        document.getElementById('trade-title').textContent = 'Trade — ' + (data.other || '');
+        var badge = data.my_confirmed && data.their_confirmed ? 'Both Confirmed'
+                  : data.my_confirmed ? 'You Confirmed'
+                  : data.their_confirmed ? 'They Confirmed'
+                  : 'Active';
+        document.getElementById('trade-status-badge').textContent = badge;
+
+        // My items
+        var myItemsEl = document.getElementById('trade-my-items');
+        if (data.my_offer && data.my_offer.items && data.my_offer.items.length) {
+            myItemsEl.innerHTML = data.my_offer.items.map(function(item) {
+                return '<span class="trade-item-chip mine" onclick="tradeRemoveItem(' + JSON.stringify(item) + ')" title="Click to remove">' +
+                    esc(item) + ' <span class="remove-x">&#10005;</span></span>';
+            }).join('');
+        } else {
+            myItemsEl.innerHTML = '<span class="trade-empty-hint">No items yet — pick from inventory below</span>';
+        }
+        document.getElementById('trade-gold-input').value = (data.my_offer && data.my_offer.gold) ? data.my_offer.gold : 0;
+
+        // Their items
+        var theirItemsEl = document.getElementById('trade-their-items');
+        if (data.their_offer && data.their_offer.items && data.their_offer.items.length) {
+            theirItemsEl.innerHTML = data.their_offer.items.map(function(item) {
+                return '<span class="trade-item-chip theirs">' + esc(item) + '</span>';
+            }).join('');
+        } else {
+            theirItemsEl.innerHTML = '<span class="trade-empty-hint">Nothing offered yet</span>';
+        }
+        document.getElementById('trade-their-gold').textContent = (data.their_offer && data.their_offer.gold)
+            ? data.their_offer.gold.toLocaleString() : '0';
+
+        // Confirm buttons
+        var confirmBtn = document.getElementById('trade-confirm-btn');
+        var unconfirmBtn = document.getElementById('trade-unconfirm-btn');
+        if (data.my_confirmed) {
+            confirmBtn.style.display = 'none';
+            unconfirmBtn.style.display = '';
+        } else {
+            confirmBtn.style.display = '';
+            unconfirmBtn.style.display = 'none';
+        }
+
+        // Status
+        var statusEl = document.getElementById('trade-confirm-status');
+        if (data.my_confirmed && data.their_confirmed) {
+            statusEl.textContent = 'Both confirmed! Finalizing...';
+            statusEl.style.color = 'var(--green-bright)';
+        } else if (data.my_confirmed) {
+            statusEl.textContent = 'You confirmed. Waiting for ' + esc(data.other) + '...';
+            statusEl.style.color = 'var(--gold)';
+        } else if (data.their_confirmed) {
+            statusEl.textContent = esc(data.other) + ' has confirmed. Confirm your offer to proceed!';
+            statusEl.style.color = 'var(--mana-bright)';
+        } else {
+            statusEl.textContent = 'Review both offers, then confirm when ready.';
+            statusEl.style.color = 'var(--text-dim)';
+        }
+
+        // Disable item removal if confirmed
+        if (data.my_confirmed) {
+            myItemsEl.querySelectorAll('.trade-item-chip.mine').forEach(function(chip) {
+                chip.style.cursor = 'default';
+                chip.onclick = null;
+                var x = chip.querySelector('.remove-x');
+                if (x) x.style.display = 'none';
+            });
+        }
+
+        loadTradeInventory(data.my_offer ? data.my_offer.items : [], data.my_confirmed);
+    }
+
+    function loadTradeInventory(offeredItems, isConfirmed) {
+        fetch('/api/player/inventory')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var listEl = document.getElementById('trade-inventory-list');
+                if (!d.ok) { listEl.innerHTML = '<span class="trade-empty-hint">No character loaded.</span>'; return; }
+                var inv = d.inventory || [];
+                if (!inv.length) { listEl.innerHTML = '<span class="trade-empty-hint">Inventory is empty.</span>'; return; }
+
+                // Build count of available items (inventory minus already offered)
+                var allItems = inv.slice();
+                var offered = offeredItems ? offeredItems.slice() : [];
+                var available = [];
+                var tmp = allItems.slice();
+                offered.forEach(function(o) {
+                    var idx = tmp.indexOf(o);
+                    if (idx !== -1) tmp.splice(idx, 1);
+                });
+                // Count unique items and whether any are available
+                var seen = {};
+                var chips = '';
+                // First show available items
+                tmp.forEach(function(item) {
+                    if (!seen[item]) {
+                        seen[item] = 0;
+                        available.push(item);
+                    }
+                    seen[item]++;
+                });
+                // Mark offered items
+                var offSeen = {};
+                offered.forEach(function(item) {
+                    offSeen[item] = (offSeen[item] || 0) + 1;
+                });
+
+                // Show unique offered items as "offered" chips
+                var offUniq = Object.keys(offSeen);
+                offUniq.forEach(function(item) {
+                    var cnt = offSeen[item];
+                    chips += '<span class="inv-chip offered" title="In your offer">' + esc(item) + (cnt > 1 ? ' x' + cnt : '') + ' (offered)</span>';
+                });
+
+                // Show available items
+                var avUniq = {};
+                available.forEach(function(item) {
+                    avUniq[item] = (avUniq[item] || 0) + 1;
+                });
+                Object.keys(avUniq).sort().forEach(function(item) {
+                    var cnt = avUniq[item];
+                    if (isConfirmed) {
+                        chips += '<span class="inv-chip no-more" title="Unconfirm to add items">' + esc(item) + (cnt > 1 ? ' x' + cnt : '') + '</span>';
+                    } else {
+                        chips += '<span class="inv-chip" onclick="tradeAddItem(' + JSON.stringify(item) + ')" title="Add to offer">' + esc(item) + (cnt > 1 ? ' x' + cnt : '') + '</span>';
+                    }
+                });
+
+                if (!chips) chips = '<span class="trade-empty-hint">No more items available.</span>';
+                listEl.innerHTML = chips;
+
+                // Gold display
+                var goldEl = document.getElementById('trade-gold-input');
+                if (goldEl && !isConfirmed) {
+                    goldEl.max = d.gold || 0;
+                }
+            });
+    }
+
+    // ── Trade actions ────────────────────────────────────────────
+    window.startTrade = function() {
+        if (!currentDmWith) return;
+        if (!currentDmIsOnline) {
+            showToast('&#9888; ' + esc(currentDmWith) + ' is offline. You can only trade with online players.');
+            return;
+        }
+        if (tradeState) {
+            showToast('&#9888; You already have an active trade.');
+            return;
+        }
+        if (!socket) return;
+        socket.emit('trade_request', { target: currentDmWith });
+    };
+
+    window.tradeAccept = function() {
+        if (!tradeInvite || !socket) return;
+        socket.emit('trade_accept', { trade_id: tradeInvite.trade_id });
+        tradeState = { id: tradeInvite.trade_id, with: tradeInvite.from, status: 'active', myConfirmed: false, theirConfirmed: false };
+        tradeInvite = null;
+    };
+
+    window.tradeDecline = function() {
+        if (!tradeInvite || !socket) return;
+        socket.emit('trade_decline', { trade_id: tradeInvite.trade_id });
+        tradeInvite = null;
+        closeTradeOverlay();
+    };
+
+    window.tradeCancel = function() {
+        if (!socket) { closeTradeOverlay(); return; }
+        var tid = (tradeState && tradeState.id) || (tradeInvite && tradeInvite.trade_id);
+        if (tid) socket.emit('trade_cancel', { trade_id: tid });
+        else closeTradeOverlay();
+    };
+
+    window.tradeAddItem = function(itemName) {
+        if (!tradeState || !socket) return;
+        socket.emit('trade_add_item', { trade_id: tradeState.id, item_name: itemName });
+    };
+
+    window.tradeRemoveItem = function(itemName) {
+        if (!tradeState || !socket) return;
+        socket.emit('trade_remove_item', { trade_id: tradeState.id, item_name: itemName });
+    };
+
+    window.tradeSetGold = function() {
+        if (!tradeState || !socket) return;
+        var val = parseInt(document.getElementById('trade-gold-input').value, 10);
+        if (isNaN(val) || val < 0) val = 0;
+        socket.emit('trade_set_gold', { trade_id: tradeState.id, gold: val });
+    };
+
+    window.tradeConfirm = function(confirmed) {
+        if (!tradeState || !socket) return;
+        socket.emit('trade_confirm', { trade_id: tradeState.id, confirmed: confirmed });
+    };
 
     // ── Load friends + blocked list ──────────────────────────────
     function loadFriends() {
@@ -439,13 +958,22 @@ function friendsPageConfirm(msg, onOk) {
             friendsData = results[0];
             blockedUsers = results[1].blocked || [];
             renderSidebar(friendsData);
+            updateTradeButton();
         });
+    }
+
+    function updateTradeButton() {
+        var btn = document.getElementById('dm-trade-btn');
+        if (!btn || !currentDmWith) return;
+        var friend = (friendsData.friends || []).find(function(f) { return f.username === currentDmWith; });
+        currentDmIsOnline = !!(friend && friend.online);
+        btn.disabled = !currentDmIsOnline;
+        btn.title = currentDmIsOnline ? 'Trade items with ' + currentDmWith : currentDmWith + ' is offline';
     }
 
     function renderSidebar(data) {
         var html = '';
 
-        // Incoming requests
         if (data.incoming && data.incoming.length) {
             html += '<div class="sidebar-section-label">&#128228; Requests (' + data.incoming.length + ')</div>';
             data.incoming.forEach(function(req) {
@@ -458,7 +986,6 @@ function friendsPageConfirm(msg, onOk) {
             });
         }
 
-        // Friends
         html += '<div class="sidebar-section-label">Friends (' + (data.friends ? data.friends.length : 0) + ')</div>';
         if (!data.friends || !data.friends.length) {
             html += '<div style="padding:8px 14px;font-size:12px;color:var(--text-dim);">No friends yet. Send a request above!</div>';
@@ -474,7 +1001,6 @@ function friendsPageConfirm(msg, onOk) {
             });
         }
 
-        // Outgoing requests
         if (data.outgoing && data.outgoing.length) {
             html += '<div class="sidebar-section-label">Sent Requests</div>';
             data.outgoing.forEach(function(req) {
@@ -485,7 +1011,6 @@ function friendsPageConfirm(msg, onOk) {
             });
         }
 
-        // Blocked users
         if (blockedUsers && blockedUsers.length) {
             html += '<div class="sidebar-section-label" style="color:#f97316;opacity:0.7;">&#128683; Blocked (' + blockedUsers.length + ')</div>';
             blockedUsers.forEach(function(u) {
@@ -499,7 +1024,6 @@ function friendsPageConfirm(msg, onOk) {
         document.getElementById('sidebar-content').innerHTML = html;
     }
 
-    // ── Add friend ────────────────────────────────────────────────
     window.addFriend = function() {
         var inp = document.getElementById('add-friend-input');
         var msgEl = document.getElementById('add-friend-msg');
@@ -518,21 +1042,16 @@ function friendsPageConfirm(msg, onOk) {
         });
     };
 
-    // ── Respond to request ────────────────────────────────────────
     window.respondRequest = function(id, accept) {
         fetch('/api/friends/respond', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: id, accept: accept })
         }).then(function(r) { return r.json(); }).then(function(d) {
-            if (d.ok) {
-                showToast(d.message);
-                loadFriends();
-            }
+            if (d.ok) { showToast(d.message); loadFriends(); }
         });
     };
 
-    // ── Remove friend ─────────────────────────────────────────────
     window.removeFriend = function() {
         if (!currentDmWith) return;
         var target = currentDmWith;
@@ -553,7 +1072,6 @@ function friendsPageConfirm(msg, onOk) {
         });
     };
 
-    // ── Block user ────────────────────────────────────────────────
     window.blockUser = function() {
         if (!currentDmWith) return;
         var target = currentDmWith;
@@ -582,14 +1100,10 @@ function friendsPageConfirm(msg, onOk) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ target: username, action: 'unblock' })
         }).then(function(r) { return r.json(); }).then(function(d) {
-            if (d.ok) {
-                showToast('&#9989; ' + d.message);
-                loadFriends();
-            }
+            if (d.ok) { showToast('&#9989; ' + d.message); loadFriends(); }
         });
     };
 
-    // ── Open DM ───────────────────────────────────────────────────
     window.openDm = function(username) {
         currentDmWith = username;
         document.getElementById('dm-with-name').textContent = username;
@@ -642,7 +1156,6 @@ function friendsPageConfirm(msg, onOk) {
         if (animate) setTimeout(function() { div.style.transition = 'opacity 0.2s'; div.style.opacity = '1'; }, 10);
     }
 
-    // ── Send DM ───────────────────────────────────────────────────
     window.dmSend = function() {
         if (!currentDmWith) return;
         var inp = document.getElementById('dm-input');
@@ -665,7 +1178,6 @@ function friendsPageConfirm(msg, onOk) {
         });
     };
 
-    // ── Toast ─────────────────────────────────────────────────────
     function showToast(html) {
         var container = document.getElementById('friends-toast');
         var el = document.createElement('div');
@@ -676,22 +1188,28 @@ function friendsPageConfirm(msg, onOk) {
             el.style.transition = 'opacity 0.4s';
             el.style.opacity = '0';
             setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 400);
-        }, 4000);
+        }, 5000);
     }
 
     function esc(s) {
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    // Pressing Enter sets gold
     document.addEventListener('DOMContentLoaded', function() {
+        var goldInput = document.getElementById('trade-gold-input');
+        if (goldInput) {
+            goldInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') tradeSetGold();
+            });
+        }
+
         initSocket();
         loadFriends();
-        // Check for ?dm= in URL
+
         var params = new URLSearchParams(window.location.search);
         var dmTarget = params.get('dm');
-        if (dmTarget) {
-            setTimeout(function() { openDm(dmTarget.toLowerCase()); }, 400);
-        }
+        if (dmTarget) setTimeout(function() { openDm(dmTarget.toLowerCase()); }, 400);
     });
 })();
 </script>

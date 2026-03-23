@@ -132,6 +132,8 @@ FR_MAX_PER_MINUTE = 5
 _active_trades: dict = {}
 TRADE_MAX_ITEMS = 10
 TRADE_MAX_GOLD = 9_999_999
+TRADE_TIMEOUT_SECS = 300   # 5 min inactivity → auto-cancel
+_bg_started = False
 
 
 @app.context_processor
@@ -272,6 +274,7 @@ def _on_trade_request(data):
         "applied_a": False,
         "applied_b": False,
         "created_at": _time_module.time(),
+        "last_activity": _time_module.time(),
     }
     for s in target_sids:
         socketio.emit("trade_invite", {"trade_id": trade_id, "from": username}, to=s)
@@ -292,6 +295,7 @@ def _on_trade_accept(data):
         socketio_emit("trade_error", {"message": "Only the recipient can accept."})
         return
     trade["status"] = "active"
+    trade["last_activity"] = _time_module.time()
     _emit_trade_update(trade)
 
 
@@ -344,6 +348,7 @@ def _on_trade_add_item(data):
         socketio_emit("trade_error", {"message": f"You don't have '{item_name}'."})
         return
     trade[my_offer_key]["items"].append(item_name)
+    trade["last_activity"] = _time_module.time()
     _emit_trade_update(trade)
 
 
@@ -365,6 +370,7 @@ def _on_trade_remove_item(data):
     items = trade[my_offer_key]["items"]
     if item_name in items:
         items.remove(item_name)
+    trade["last_activity"] = _time_module.time()
     _emit_trade_update(trade)
 
 
@@ -393,6 +399,7 @@ def _on_trade_set_gold(data):
     if amount > player.get("gold", 0):
         amount = player.get("gold", 0)
     trade[my_offer_key]["gold"] = amount
+    trade["last_activity"] = _time_module.time()
     _emit_trade_update(trade)
 
 
@@ -408,6 +415,7 @@ def _on_trade_confirm(data):
         return
     my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
     trade[my_confirmed_key] = confirmed
+    trade["last_activity"] = _time_module.time()
     if trade["confirmed_a"] and trade["confirmed_b"]:
         trade["status"] = "approved"
         a_sids = [s for s, u in _chat_online.items() if u == trade["player_a"]]
@@ -447,6 +455,43 @@ def _on_trade_cancel(data):
         socketio.emit("trade_cancelled", {"message": f"{username} cancelled the trade."}, to=s)
     socketio_emit("trade_cancelled", {"message": "You cancelled the trade."})
     _active_trades.pop(trade_id, None)
+
+
+# ─── Background World Tick ─────────────────────────────────────────────────────
+
+def _expire_stale_trades():
+    """Cancel trades that have been inactive beyond TRADE_TIMEOUT_SECS."""
+    now = _time_module.time()
+    for tid, trade in list(_active_trades.items()):
+        if trade["status"] not in ("pending", "active"):
+            continue
+        last = trade.get("last_activity", trade.get("created_at", now))
+        if now - last > TRADE_TIMEOUT_SECS:
+            for p in (trade["player_a"], trade["player_b"]):
+                for s, u in list(_chat_online.items()):
+                    if u == p:
+                        socketio.emit("trade_cancelled", {
+                            "message": "Trade expired due to inactivity (5 min timeout)."
+                        }, to=s)
+            _active_trades.pop(tid, None)
+
+
+def _world_tick():
+    """Background greenlet: fires every 30 s for housekeeping tasks."""
+    while True:
+        socketio.sleep(30)
+        try:
+            _expire_stale_trades()
+        except Exception:
+            pass
+
+
+@app.before_request
+def _ensure_background_tasks():
+    global _bg_started
+    if not _bg_started:
+        _bg_started = True
+        socketio.start_background_task(_world_tick)
 
 
 @app.errorhandler(429)
@@ -4663,13 +4708,27 @@ def api_block_list():
 
 @app.route("/api/player/inventory")
 def api_player_inventory():
+    username = session.get("online_username")
     player = session.get("player")
     if not player:
-        return jsonify({"ok": False, "inventory": [], "gold": 0})
+        return jsonify({"ok": False, "inventory": [], "gold": 0, "in_trade": None})
+    offered_items: list = []
+    offered_gold = 0
+    active_trade_id = None
+    for tid, trade in _active_trades.items():
+        if username and username in (trade["player_a"], trade["player_b"]) and trade["status"] == "active":
+            key = "offer_a" if username == trade["player_a"] else "offer_b"
+            offered_items = list(trade[key]["items"])
+            offered_gold = trade[key]["gold"]
+            active_trade_id = tid
+            break
     return jsonify({
         "ok": True,
         "inventory": player.get("inventory", []),
         "gold": player.get("gold", 0),
+        "offered_items": offered_items,
+        "offered_gold": offered_gold,
+        "active_trade_id": active_trade_id,
     })
 
 
