@@ -1,4 +1,4 @@
-# Our Legacy 2 — MMO Roadmap (Text-Based)
+# Our Legacy 2 — MMO Roadmap
 
 ## 1. Persistent World & Server Architecture
 - [ ] Migrate from filesystem sessions to a database-backed session store (Redis or Supabase)
