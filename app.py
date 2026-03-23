@@ -1190,6 +1190,119 @@ def boss_take_turn(enemy, player, player_effects, log):
     return result
 
 
+# ─── Companion combat helpers ─────────────────────────────────────────────────
+
+_COMPANION_RANK_HP = {
+    "common": 300, "uncommon": 500, "rare": 750,
+    "epic": 1200, "legendary": 2000,
+}
+
+
+def _get_companion_combat_stats(comp_entry):
+    """Derive in-battle combat stats for a companion from game data + stored HP."""
+    comp_id = comp_entry.get("id", "")
+    comp_data = GAME_DATA["companions"].get(comp_id, {})
+    rank = comp_data.get("rank", "common")
+    max_hp = _COMPANION_RANK_HP.get(rank, 400)
+    atk_bonus = comp_data.get("attack_bonus", 0)
+    def_bonus = comp_data.get("defense_bonus", 0)
+    return {
+        "id": comp_id,
+        "name": comp_entry.get("name", comp_data.get("name", "Companion")),
+        "hp": comp_entry.get("hp", max_hp),
+        "max_hp": comp_entry.get("max_hp", max_hp),
+        "attack": min(200, atk_bonus * 6 + 55),
+        "defense": min(80, def_bonus * 4 + 10),
+        "action_chance": comp_data.get("action_chance", 0.40),
+    }
+
+
+def _build_battle_companions(player):
+    """Build session battle_companions list from player's hired companions."""
+    return [
+        _get_companion_combat_stats(c)
+        for c in player.get("companions", [])
+        if isinstance(c, dict)
+    ]
+
+
+def _companion_take_action(battle_companions, enemy, log):
+    """
+    Each living companion rolls against their action_chance (40% baseline).
+    Returns True if the enemy was killed by a companion this turn.
+    """
+    for comp in battle_companions:
+        if comp["hp"] <= 0:
+            continue
+        if random.random() > comp.get("action_chance", 0.40):
+            continue
+        dmg = max(1, comp["attack"] - enemy["defense"] + dice.between(-3, 6))
+        if random.random() < 0.08:
+            dmg = int(dmg * 1.5)
+            log.append(f"[{comp['name']} lands a critical blow on {enemy['name']} for {dmg}!]")
+        else:
+            log.append(f"[{comp['name']} attacks {enemy['name']} for {dmg} damage.]")
+        enemy["hp"] = max(0, enemy["hp"] - dmg)
+        if enemy["hp"] <= 0:
+            return True
+    return False
+
+
+def _companion_last_stand(battle_companions, enemy, log):
+    """
+    Simulate companions fighting solo after the player goes down.
+    Returns True if they defeat the enemy before all perishing.
+    """
+    alive = [c for c in battle_companions if c["hp"] > 0]
+    if not alive:
+        return False
+    log.append("You collapse! Your companions fight on in your name!")
+    for _ in range(50):
+        for comp in [c for c in alive if c["hp"] > 0]:
+            dmg = max(1, comp["attack"] - enemy["defense"] + dice.between(-3, 6))
+            log.append(f"[{comp['name']} fights on — {dmg} damage to {enemy['name']}!]")
+            enemy["hp"] = max(0, enemy["hp"] - dmg)
+            if enemy["hp"] <= 0:
+                return True
+        alive = [c for c in alive if c["hp"] > 0]
+        if not alive:
+            return False
+        target = alive[0]
+        e_dmg = max(1, enemy["attack"] - target["defense"] + dice.between(-2, 4))
+        target["hp"] = max(0, target["hp"] - e_dmg)
+        log.append(f"The {enemy['name']} strikes {target['name']} for {e_dmg} damage!")
+        if target["hp"] <= 0:
+            log.append(f"{target['name']} falls!")
+        alive = [c for c in alive if c["hp"] > 0]
+    return False
+
+
+def _sync_companion_hp_to_player(player, battle_companions):
+    """Write battle HP from session companions back into the player's companion list."""
+    hp_map = {c["id"]: c["hp"] for c in battle_companions}
+    for comp in player.get("companions", []):
+        if isinstance(comp, dict) and comp.get("id") in hp_map:
+            comp["hp"] = max(0, hp_map[comp["id"]])
+
+
+def _restore_companion_hp(player):
+    """Restore all companions to full HP after any battle outcome."""
+    for comp in player.get("companions", []):
+        if isinstance(comp, dict) and "max_hp" in comp:
+            comp["hp"] = comp["max_hp"]
+
+
+def _ensure_companion_hp(player):
+    """Migration: assign HP/max_hp to companions hired before this system existed."""
+    for comp in player.get("companions", []):
+        if not isinstance(comp, dict):
+            continue
+        if "max_hp" not in comp:
+            stats = _get_companion_combat_stats(comp)
+            comp["hp"] = stats["max_hp"]
+            comp["max_hp"] = stats["max_hp"]
+
+
 # ─── Cutscenes ────────────────────────────────────────────────────────────────
 
 
@@ -1852,6 +1965,8 @@ def game():
     save_player(player)
 
     # ── Battle state: show battle view inline ──────────────.g�───────────────
+    _ensure_companion_hp(player)
+
     enemy: dict[str, Any] = session.get("battle_enemy") or {}
     if enemy:
         battle_log = session.get("battle_log", [])
@@ -1900,6 +2015,7 @@ def game():
                         "cooldown_left": cooldowns.get(ab["name"], 0),
                     }
                 )
+        battle_companions = session.get("battle_companions", [])
         return render_template(
             "index.html",
             in_battle=True,
@@ -1914,6 +2030,7 @@ def game():
             boss_dialogue=boss_dialogue,
             boss_phase_info=boss_phase_info,
             boss_abilities_info=boss_abilities_info,
+            battle_companions=battle_companions,
         )
 
     _ensure_equipment_slots(player)
@@ -2543,6 +2660,7 @@ def action_explore():
                 session["battle_log"].append(f'"{dialogue}"')
             session["battle_player_effects"] = {}
             session["battle_enemy_effects"] = {}
+            session["battle_companions"] = _build_battle_companions(player)
             session.modified = True
             save_player(player)
             return redirect(url_for("game"))
@@ -2575,6 +2693,7 @@ def action_explore():
         ]
         session["battle_player_effects"] = {}
         session["battle_enemy_effects"] = {}
+        session["battle_companions"] = _build_battle_companions(player)
         session.modified = True
         save_player(player)
         return redirect(url_for("game"))
@@ -2834,6 +2953,7 @@ def action_challenge_boss():
         session["battle_log"].append(f'"{dialogue}"')
     session["battle_player_effects"] = {}
     session["battle_enemy_effects"] = {}
+    session["battle_companions"] = _build_battle_companions(player)
     session.modified = True
     save_player(player)
     return redirect(url_for("game"))
@@ -2952,7 +3072,14 @@ def action_hire_companion():
             player[stat] = player.get(stat, 0) + bonus
             player[f"max_{stat}"] = player.get(f"max_{stat}", 0) + bonus
 
-    companions.append({"id": comp_id, "name": comp_data.get("name", comp_id)})
+    rank = comp_data.get("rank", "common")
+    comp_max_hp = _COMPANION_RANK_HP.get(rank, 400)
+    companions.append({
+        "id": comp_id,
+        "name": comp_data.get("name", comp_id),
+        "hp": comp_max_hp,
+        "max_hp": comp_max_hp,
+    })
     add_message(f"{comp_data.get('name')} joins your party!", "var(--gold)")
     save_player(player)
     return redirect(url_for("game"))
@@ -3692,6 +3819,7 @@ def battle_attack():
     log = session.get("battle_log", [])
     player_effects: dict[str, Any] = session.get("battle_player_effects") or {}
     enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
+    battle_companions = session.get("battle_companions", [])
 
     # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
@@ -3720,14 +3848,38 @@ def battle_attack():
         if enemy["hp"] <= 0:
             session["battle_player_effects"] = player_effects
             session["battle_enemy_effects"] = enemy_effects
+            _sync_companion_hp_to_player(player, battle_companions)
+            _restore_companion_hp(player)
             return _handle_victory(player, enemy, log)
 
     _enemy_take_turn(enemy, player, player_effects, log)
 
-    if player["hp"] <= 0:
+    # Companion action
+    if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
+        session["battle_companions"] = battle_companions
         session["battle_player_effects"] = player_effects
         session["battle_enemy_effects"] = enemy_effects
-        return _handle_defeat(player, enemy, log)
+        _sync_companion_hp_to_player(player, battle_companions)
+        _restore_companion_hp(player)
+        return _handle_victory(player, enemy, log)
+
+    session["battle_companions"] = battle_companions
+
+    if player["hp"] <= 0:
+        won = _companion_last_stand(battle_companions, enemy, log)
+        session["battle_companions"] = battle_companions
+        _sync_companion_hp_to_player(player, battle_companions)
+        if won:
+            player["hp"] = 1
+            log.append("Your companions fought on and saved you! You survive, barely.")
+            _restore_companion_hp(player)
+            session["battle_player_effects"] = player_effects
+            session["battle_enemy_effects"] = enemy_effects
+            return _handle_victory(player, enemy, log)
+        else:
+            session["battle_player_effects"] = player_effects
+            session["battle_enemy_effects"] = enemy_effects
+            return _handle_defeat(player, enemy, log)
 
     session["battle_enemy"] = enemy
     session["battle_log"] = log
@@ -3747,6 +3899,7 @@ def battle_defend():
     log = session.get("battle_log", [])
     player_effects: dict[str, Any] = session.get("battle_player_effects") or {}
     enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
+    battle_companions = session.get("battle_companions", [])
 
     # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
@@ -3763,16 +3916,37 @@ def battle_defend():
         return _handle_victory(player, enemy, log)
 
     log.append("You brace yourself, raising your guard.")
-    # Temporarily double defense for the defend action
     real_defense = player["defense"]
     player["defense"] = real_defense * 2
     _enemy_take_turn(enemy, player, player_effects, log)
     player["defense"] = real_defense
 
-    if player["hp"] <= 0:
+    # Companion action
+    if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
+        session["battle_companions"] = battle_companions
         session["battle_player_effects"] = player_effects
         session["battle_enemy_effects"] = enemy_effects
-        return _handle_defeat(player, enemy, log)
+        _sync_companion_hp_to_player(player, battle_companions)
+        _restore_companion_hp(player)
+        return _handle_victory(player, enemy, log)
+
+    session["battle_companions"] = battle_companions
+
+    if player["hp"] <= 0:
+        won = _companion_last_stand(battle_companions, enemy, log)
+        session["battle_companions"] = battle_companions
+        _sync_companion_hp_to_player(player, battle_companions)
+        if won:
+            player["hp"] = 1
+            log.append("Your companions fought on and saved you! You survive, barely.")
+            _restore_companion_hp(player)
+            session["battle_player_effects"] = player_effects
+            session["battle_enemy_effects"] = enemy_effects
+            return _handle_victory(player, enemy, log)
+        else:
+            session["battle_player_effects"] = player_effects
+            session["battle_enemy_effects"] = enemy_effects
+            return _handle_defeat(player, enemy, log)
 
     session["battle_enemy"] = enemy
     session["battle_log"] = log
@@ -3792,6 +3966,7 @@ def battle_use_item():
     log = session.get("battle_log", [])
     player_effects: dict[str, Any] = session.get("battle_player_effects") or {}
     enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
+    battle_companions = session.get("battle_companions", [])
     item_name = request.form.get("item", "")
 
     if item_name not in player["inventory"]:
@@ -3818,10 +3993,32 @@ def battle_use_item():
 
         _enemy_take_turn(enemy, player, player_effects, log)
 
-    if player["hp"] <= 0:
+    # Companion action
+    if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
+        session["battle_companions"] = battle_companions
         session["battle_player_effects"] = player_effects
         session["battle_enemy_effects"] = enemy_effects
-        return _handle_defeat(player, enemy, log)
+        _sync_companion_hp_to_player(player, battle_companions)
+        _restore_companion_hp(player)
+        return _handle_victory(player, enemy, log)
+
+    session["battle_companions"] = battle_companions
+
+    if player["hp"] <= 0:
+        won = _companion_last_stand(battle_companions, enemy, log)
+        session["battle_companions"] = battle_companions
+        _sync_companion_hp_to_player(player, battle_companions)
+        if won:
+            player["hp"] = 1
+            log.append("Your companions fought on and saved you! You survive, barely.")
+            _restore_companion_hp(player)
+            session["battle_player_effects"] = player_effects
+            session["battle_enemy_effects"] = enemy_effects
+            return _handle_victory(player, enemy, log)
+        else:
+            session["battle_player_effects"] = player_effects
+            session["battle_enemy_effects"] = enemy_effects
+            return _handle_defeat(player, enemy, log)
 
     session["battle_enemy"] = enemy
     session["battle_log"] = log
@@ -3846,6 +4043,7 @@ def battle_flee():
         session.pop("battle_enemy", None)
         session.pop("battle_player_effects", None)
         session.pop("battle_enemy_effects", None)
+        session.pop("battle_companions", None)
         session["battle_log"] = []
         save_player(player)
         return redirect(url_for("game"))
@@ -3930,6 +4128,7 @@ def _handle_victory(player, enemy, log):
     # Clear status effects
     session.pop("battle_player_effects", None)
     session.pop("battle_enemy_effects", None)
+    session.pop("battle_companions", None)
     session["battle_log"] = log
     session["battle_enemy"] = None
     save_player(player)
@@ -3971,6 +4170,7 @@ def _handle_defeat(player, enemy, log):
         add_message("You recover some health at the entrance.", "var(--text-dim)")
         session.pop("battle_player_effects", None)
         session.pop("battle_enemy_effects", None)
+        session.pop("battle_companions", None)
         session["battle_log"] = log
         session["battle_enemy"] = None
         # Restart dungeon from room 1
@@ -3988,6 +4188,7 @@ def _handle_defeat(player, enemy, log):
 
     session.pop("battle_player_effects", None)
     session.pop("battle_enemy_effects", None)
+    session.pop("battle_companions", None)
     session["battle_log"] = log
     session["battle_enemy"] = None
     save_player(player)
@@ -4233,6 +4434,7 @@ def dungeon_proceed():
             ]
             session["battle_player_effects"] = {}
             session["battle_enemy_effects"] = {}
+            session["battle_companions"] = _build_battle_companions(player)
             active["room_index"] = idx + 1
             active["current_challenge"] = None
             session["active_dungeon"] = active
@@ -4252,6 +4454,7 @@ def dungeon_proceed():
             ]
             session["battle_player_effects"] = {}
             session["battle_enemy_effects"] = {}
+            session["battle_companions"] = _build_battle_companions(player)
             active["room_index"] = idx + 1
             active["current_challenge"] = None
             session["active_dungeon"] = active
@@ -4321,6 +4524,7 @@ def dungeon_proceed():
             session["battle_log"].append(f'"{dialogue}"')
         session["battle_player_effects"] = {}
         session["battle_enemy_effects"] = {}
+        session["battle_companions"] = _build_battle_companions(player)
         active["room_index"] = idx + 1
         active["current_challenge"] = None
         session["active_dungeon"] = active
