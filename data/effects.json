@@ -131,5 +131,110 @@
     "damage": 50,
     "duration": 3,
     "ability_name": "Dragon Breath"
+  },
+
+  "bleed": {
+    "description": "A deep wound that bleeds for damage each turn. Cannot be resisted by construct or undead enemies.",
+    "type": "damage_over_time",
+    "damage": 6,
+    "duration": 4,
+    "tick_rate": 1,
+    "tags": ["physical", "debuff"]
+  },
+  "weaken": {
+    "description": "Cleaving blows leave the target exposed, reducing their defense.",
+    "type": "stat_reduction",
+    "defense_penalty": 5,
+    "duration": 4,
+    "tags": ["physical", "debuff"]
+  },
+  "daze": {
+    "description": "A bone-rattling impact stuns the target briefly, preventing their action.",
+    "type": "action_block",
+    "duration": 1,
+    "chance": 0.85,
+    "tags": ["physical", "debuff"]
+  },
+  "chill": {
+    "description": "Frost seeps into the enemy's limbs, slowing movement and reducing speed.",
+    "type": "speed_reduction",
+    "speed_penalty": 6,
+    "attack_penalty": 2,
+    "duration": 5,
+    "tags": ["ice", "debuff"]
+  },
+  "inspire": {
+    "description": "Rousing melodies fill allies with courage, boosting attack and speed.",
+    "type": "stat_boost",
+    "attack_bonus": 8,
+    "speed_bonus": 4,
+    "duration": 6,
+    "tags": ["bard", "buff"]
+  },
+  "parry": {
+    "description": "Expert swordsmanship raises a temporary defensive guard.",
+    "type": "stat_boost",
+    "defense_bonus": 10,
+    "absorb_amount": 15,
+    "duration": 2,
+    "tags": ["physical", "buff"]
+  },
+  "shaken": {
+    "description": "A devastating swing sends the target reeling, reducing their accuracy.",
+    "type": "accuracy_reduction",
+    "accuracy_penalty": 20,
+    "duration": 3,
+    "tags": ["physical", "debuff"]
+  },
+  "corrupted": {
+    "description": "Dark magic erodes the target's vitality and attack power.",
+    "type": "stat_reduction",
+    "attack_penalty": 5,
+    "max_hp_penalty": 10,
+    "duration": 6,
+    "tags": ["dark", "debuff"]
+  },
+  "nullify": {
+    "description": "Arcane interference strips away magical defenses and blocks spellcasting.",
+    "type": "action_block",
+    "duration": 3,
+    "chance": 0.75,
+    "tags": ["magic", "debuff"]
+  },
+  "empower": {
+    "description": "A surge of magical energy amplifies spell power and maximum MP.",
+    "type": "stat_boost",
+    "spell_power_bonus": 12,
+    "mp_bonus": 20,
+    "duration": 8,
+    "tags": ["magic", "buff"]
+  },
+  "iron_skin": {
+    "description": "Hardened skin provides a powerful temporary defensive barrier.",
+    "type": "damage_absorb",
+    "absorb_amount": 50,
+    "defense_bonus": 6,
+    "duration": 5,
+    "tags": ["physical", "buff"]
+  },
+  "swiftness": {
+    "description": "Fleet-footed agility dramatically raises speed and evasion.",
+    "type": "stat_boost",
+    "speed_bonus": 10,
+    "evasion_bonus": 12,
+    "duration": 7,
+    "tags": ["physical", "buff"]
+  },
+  "full_restore": {
+    "description": "Restores HP and MP completely",
+    "type": "instant_full_restore",
+    "heal_percent": 100,
+    "mp_percent": 100
+  },
+  "attack_boost": {
+    "description": "Increases attack power temporarily",
+    "type": "stat_boost",
+    "attack_bonus": 8,
+    "duration": 12
   }
 }

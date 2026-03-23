@@ -5,7 +5,13 @@
       "effect": "heal",
       "value": 50,
       "price": 25,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "consumable",
+         "healing"
+      ],
+      "min_value": 40,
+      "max_value": 60
    },
    "Mana Potion": {
       "type": "consumable",
@@ -13,15 +19,26 @@
       "effect": "mp_restore",
       "value": 30,
       "price": 30,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "consumable",
+         "mana"
+      ],
+      "min_value": 24,
+      "max_value": 36
    },
    "Large Health Potion": {
       "type": "consumable",
-      "description": "A powerful healing potion that restores 100 HP",
+      "description": "A hefty potion of red liquid that mends even grievous wounds.",
       "effect": "heal",
-      "value": 100,
-      "price": 50,
-      "rarity": "uncommon"
+      "min_value": 100,
+      "max_value": 160,
+      "price": 150,
+      "rarity": "uncommon",
+      "tags": [
+         "consumable",
+         "heal"
+      ]
    },
    "Frost Potion": {
       "type": "consumable",
@@ -30,7 +47,13 @@
       "value": 5,
       "duration": 10,
       "price": 75,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "consumable",
+         "healing",
+         "defensive"
+      ],
+      "on_use_buff": "defense_boost"
    },
    "Iron Sword": {
       "type": "weapon",
@@ -45,7 +68,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 14,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Steel Dagger": {
       "type": "weapon",
@@ -61,7 +91,16 @@
       "aim_accuracy": 92,
       "weight": 1,
       "sharpness": 20,
-      "smiting": 0
+      "smiting": 0,
+      "bleed_chance": 10,
+      "backstab_bonus": 7,
+      "crit_chance": 7,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed"
+      ]
    },
    "Magic Staff": {
       "type": "weapon",
@@ -79,7 +118,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 6,
+      "mana_efficiency": 5,
+      "crit_chance": 3,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Greatsword": {
       "type": "weapon",
@@ -96,7 +143,17 @@
       "aim_accuracy": 76,
       "weight": 8,
       "sharpness": 26,
-      "smiting": 0
+      "smiting": 0,
+      "sweep_chance": 18,
+      "knockback_chance": 15,
+      "crit_chance": 7,
+      "armor_penetration": 12,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Leather Armor": {
       "type": "armor",
@@ -106,7 +163,18 @@
       "rarity": "common",
       "requirements": {
          "level": 1
-      }
+      },
+      "armor_type": "light",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.05,
+      "fire_resistance": 0.05,
+      "ice_resistance": 0.05,
+      "lightning_resistance": 0.05,
+      "poison_resistance": 0.1,
+      "tags": [
+         "light",
+         "physical"
+      ]
    },
    "Chain Mail": {
       "type": "armor",
@@ -117,7 +185,18 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 2
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 3,
+      "physical_resistance": 0.088,
+      "fire_resistance": 0.055,
+      "ice_resistance": 0.055,
+      "lightning_resistance": 0.055,
+      "poison_resistance": 0.088,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Mystic Robes": {
       "type": "armor",
@@ -129,7 +208,21 @@
       "requirements": {
          "level": 2,
          "class": "Mage"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.033,
+      "fire_resistance": 0.11,
+      "ice_resistance": 0.11,
+      "lightning_resistance": 0.11,
+      "poison_resistance": 0.088,
+      "magic_resistance": 0.132,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Ring of Power": {
       "type": "accessory",
@@ -141,7 +234,14 @@
       "rarity": "rare",
       "requirements": {
          "level": 3
-      }
+      },
+      "tags": [
+         "accessory",
+         "ring",
+         "magical",
+         "offensive",
+         "defensive"
+      ]
    },
    "Boots of Speed": {
       "type": "accessory",
@@ -151,37 +251,59 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 2
-      }
+      },
+      "tags": [
+         "accessory",
+         "boots",
+         "mobile"
+      ]
    },
    "Goblin Ear": {
       "type": "material",
       "description": "A goblin's ear, proof of victory over the creature",
       "price": 5,
-      "rarity": "junk"
+      "rarity": "junk",
+      "tags": [
+         "material"
+      ]
    },
    "Orc Tooth": {
       "type": "material",
       "description": "A large orc tooth, hard and valuable",
       "price": 8,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Bone Fragment": {
       "type": "material",
       "description": "A fragment of ancient bone, infused with dark energy",
       "price": 6,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material",
+         "bone"
+      ]
    },
    "Wolf Fang": {
       "type": "material",
       "description": "A sharp wolf fang, useful for crafting",
       "price": 7,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Dragon Scale": {
       "type": "material",
       "description": "A precious dragon scale, said to possess magical properties",
       "price": 100,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "dragon"
+      ]
    },
    "Dragon Scale Armor": {
       "type": "armor",
@@ -191,37 +313,68 @@
       "rarity": "legendary",
       "requirements": {
          "level": 6
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.24,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.16,
+      "poison_resistance": 0.08,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Dragon Bone": {
       "type": "material",
       "description": "A sturdy bone from a dragon, ideal for forging powerful weapons",
       "price": 120,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "dragon",
+         "bone"
+      ]
    },
    "Spectral Dragon Scale": {
       "type": "material",
       "description": "A translucent scale from a spectral wyrm, humming with ghostly energy",
       "price": 350,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "dragon"
+      ]
    },
    "Ancient Dragon Bone": {
       "type": "material",
       "description": "Bone from an elder dragon, radiating ancient power",
       "price": 400,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "dragon",
+         "bone"
+      ]
    },
    "Serpent Tail": {
       "type": "material",
       "description": "A tail from a serpent, used as a potent poison source",
       "price": 12,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Phoenix Feather": {
       "type": "material",
       "description": "A feather from a phoenix, symbolizing rebirth and renewal",
       "price": 15,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Crystal Shard": {
       "description": "A shard of crystal, often used in magical crafting",
@@ -232,25 +385,44 @@
       "type": "material",
       "description": "A scale from an ancient dragon, radiating immense power",
       "price": 150,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "dragon"
+      ]
    },
    "Dark Crystal": {
       "type": "material",
       "description": "A crystal infused with dark magic energy",
       "price": 50,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "dark",
+         "crystal"
+      ]
    },
    "Ice Crystal": {
       "type": "material",
       "description": "A pristine ice crystal that never melts",
       "price": 40,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "ice",
+         "crystal"
+      ]
    },
    "Fire Gem": {
       "type": "material",
       "description": "A gemstone that glows with inner fire",
       "price": 75,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "fire",
+         "crystal"
+      ]
    },
    "Troll Club": {
       "type": "weapon",
@@ -267,13 +439,25 @@
       "aim_accuracy": 78,
       "weight": 6,
       "sharpness": 0,
-      "smiting": 8
+      "smiting": 8,
+      "stun_chance": 23,
+      "armor_crush": 6,
+      "crit_chance": 5,
+      "tags": [
+         "physical",
+         "bludgeoning",
+         "one-handed",
+         "holy"
+      ]
    },
    "Troll Hide": {
       "type": "material",
       "description": "Thick hide from a powerful troll, useful for crafting",
       "price": 45,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Rusty Dagger": {
       "type": "weapon",
@@ -285,7 +469,16 @@
       "aim_accuracy": 92,
       "weight": 1,
       "sharpness": 20,
-      "smiting": 0
+      "smiting": 0,
+      "bleed_chance": 10,
+      "backstab_bonus": 7,
+      "crit_chance": 7,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed"
+      ]
    },
    "Wooden Wand": {
       "type": "weapon",
@@ -303,7 +496,15 @@
       "aim_accuracy": 88,
       "weight": 1,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 7,
+      "mana_efficiency": 6,
+      "crit_chance": 3,
+      "tags": [
+         "magical",
+         "arcane",
+         "one-handed"
+      ]
    },
    "Crystalline Wand": {
       "type": "weapon",
@@ -322,7 +523,16 @@
       "weight": 1,
       "sharpness": 0,
       "smiting": 0,
-      "ice_attack": 21
+      "ice_attack": 21,
+      "spell_power": 9,
+      "mana_efficiency": 7,
+      "crit_chance": 4,
+      "tags": [
+         "magical",
+         "arcane",
+         "one-handed",
+         "ice"
+      ]
    },
    "Spellsword": {
       "type": "weapon",
@@ -339,7 +549,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 21,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 9,
+      "parry_chance": 11,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical"
+      ]
    },
    "Ethereal Staff": {
       "type": "weapon",
@@ -357,7 +575,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 20,
+      "mana_efficiency": 16,
+      "crit_chance": 10,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Rogue's Dagger": {
       "type": "weapon",
@@ -374,7 +600,16 @@
       "aim_accuracy": 92,
       "weight": 1,
       "sharpness": 24,
-      "smiting": 0
+      "smiting": 0,
+      "bleed_chance": 12,
+      "backstab_bonus": 9,
+      "crit_chance": 9,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed"
+      ]
    },
    "Ninja Kunai": {
       "type": "weapon",
@@ -391,7 +626,15 @@
       "aim_accuracy": 86,
       "weight": 1,
       "sharpness": 14,
-      "smiting": 0
+      "smiting": 0,
+      "multi_hit_chance": 15,
+      "bleed_chance": 8,
+      "crit_chance": 7,
+      "tags": [
+         "physical",
+         "ranged",
+         "finesse"
+      ]
    },
    "Shadow Blade": {
       "type": "weapon",
@@ -408,7 +651,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 21,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 9,
+      "parry_chance": 12,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Obsidian Edge": {
       "type": "weapon",
@@ -426,7 +676,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 28,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Iron Axe": {
       "type": "weapon",
@@ -443,7 +700,16 @@
       "aim_accuracy": 80,
       "weight": 5,
       "sharpness": 20,
-      "smiting": 0
+      "smiting": 0,
+      "armor_penetration": 13,
+      "cleave_chance": 15,
+      "crit_chance": 3,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Chieftain's Axe": {
       "type": "weapon",
@@ -461,7 +727,16 @@
       "aim_accuracy": 80,
       "weight": 5,
       "sharpness": 30,
-      "smiting": 0
+      "smiting": 0,
+      "armor_penetration": 36,
+      "cleave_chance": 40,
+      "crit_chance": 10,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Warhammer": {
       "type": "weapon",
@@ -478,7 +753,19 @@
       "aim_accuracy": 72,
       "weight": 9,
       "sharpness": 0,
-      "smiting": 8
+      "smiting": 8,
+      "stun_chance": 28,
+      "sweep_chance": 19,
+      "armor_crush": 10,
+      "knockback_chance": 23,
+      "crit_chance": 5,
+      "tags": [
+         "physical",
+         "bludgeoning",
+         "two-handed",
+         "heavy",
+         "holy"
+      ]
    },
    "Dragonsoul Blade": {
       "type": "weapon",
@@ -497,7 +784,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 28,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical"
+      ]
    },
    "Mourning Blade": {
       "type": "weapon",
@@ -513,7 +808,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 22,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 10,
+      "parry_chance": 12,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Plate Armor": {
       "type": "armor",
@@ -525,7 +827,18 @@
       "requirements": {
          "level": 3,
          "class": "Warrior"
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.195,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.065,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Dragon Scale Robes": {
       "type": "armor",
@@ -537,7 +850,21 @@
       "requirements": {
          "level": 4,
          "class": "Mage"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.039,
+      "fire_resistance": 0.13,
+      "ice_resistance": 0.13,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.104,
+      "magic_resistance": 0.156,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Shadow Cloak": {
       "type": "armor",
@@ -549,7 +876,19 @@
       "requirements": {
          "level": 3,
          "class": "Rogue"
-      }
+      },
+      "armor_type": "cloak",
+      "evasion_bonus": 15,
+      "physical_resistance": 0.065,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.065,
+      "poison_resistance": 0.13,
+      "tags": [
+         "light",
+         "evasive",
+         "physical"
+      ]
    },
    "Cloth Tunic": {
       "type": "armor",
@@ -561,7 +900,21 @@
       "requirements": {
          "level": 1,
          "class": "Mage"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.03,
+      "fire_resistance": 0.1,
+      "ice_resistance": 0.1,
+      "lightning_resistance": 0.1,
+      "poison_resistance": 0.08,
+      "magic_resistance": 0.12,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Colourful Cloth Robe": {
       "type": "armor",
@@ -573,7 +926,21 @@
       "requirements": {
          "level": 1,
          "class": "Bard"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.03,
+      "fire_resistance": 0.1,
+      "ice_resistance": 0.1,
+      "lightning_resistance": 0.1,
+      "poison_resistance": 0.08,
+      "magic_resistance": 0.12,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Enchanting Lute": {
       "type": "weapon",
@@ -591,7 +958,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 18,
-      "smiting": 0
+      "smiting": 0,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Dragonbone Lute": {
       "type": "weapon",
@@ -609,7 +985,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 27,
-      "smiting": 0
+      "smiting": 0,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Skyfall Lyre": {
       "type": "weapon",
@@ -627,7 +1012,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 28,
-      "smiting": 0
+      "smiting": 0,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "H\u00e4mmelson's Legendary Flute": {
       "type": "weapon",
@@ -646,7 +1040,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 28,
-      "smiting": 0
+      "smiting": 0,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "War Drum of The god of Thunder Z\u00e2esltral": {
       "type": "weapon",
@@ -667,7 +1070,16 @@
       "weight": 3,
       "sharpness": 29,
       "smiting": 0,
-      "lightning_attack": 29
+      "lightning_attack": 29,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Wooden Flute": {
       "type": "weapon",
@@ -685,7 +1097,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 18,
-      "smiting": 0
+      "smiting": 0,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Silver Lyre": {
       "type": "weapon",
@@ -703,7 +1124,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 19,
-      "smiting": 18
+      "smiting": 18,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Oak Harp": {
       "type": "weapon",
@@ -721,7 +1151,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 19,
-      "smiting": 0
+      "smiting": 0,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Rhythm Drum": {
       "type": "weapon",
@@ -740,7 +1179,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 18,
-      "smiting": 0
+      "smiting": 0,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Celestial Harp": {
       "type": "weapon",
@@ -758,7 +1206,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 22,
-      "smiting": 22
+      "smiting": 22,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Crystal Flute": {
       "type": "weapon",
@@ -777,7 +1234,16 @@
       "weight": 3,
       "sharpness": 21,
       "smiting": 0,
-      "ice_attack": 26
+      "ice_attack": 26,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Golden Lyre": {
       "type": "weapon",
@@ -795,7 +1261,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 22,
-      "smiting": 0
+      "smiting": 0,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Warfare Drum": {
       "type": "weapon",
@@ -813,7 +1288,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 21,
-      "smiting": 0
+      "smiting": 0,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Songsmith's Lyre": {
       "type": "weapon",
@@ -831,7 +1315,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 23,
-      "smiting": 0
+      "smiting": 0,
+      "inspire_chance": 25,
+      "harmony_bonus": 10,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "tags": [
+         "bard",
+         "instrument",
+         "magical"
+      ]
    },
    "Silken Robes": {
       "type": "armor",
@@ -843,7 +1336,21 @@
       "requirements": {
          "level": 1,
          "class": "Bard"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.03,
+      "fire_resistance": 0.1,
+      "ice_resistance": 0.1,
+      "lightning_resistance": 0.1,
+      "poison_resistance": 0.08,
+      "magic_resistance": 0.12,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Bard's Tunic": {
       "type": "armor",
@@ -856,7 +1363,19 @@
       "requirements": {
          "level": 2,
          "class": "Bard"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 3,
+      "physical_resistance": 0.088,
+      "fire_resistance": 0.055,
+      "ice_resistance": 0.055,
+      "lightning_resistance": 0.055,
+      "poison_resistance": 0.088,
+      "tags": [
+         "medium",
+         "physical",
+         "enchanted"
+      ]
    },
    "Harmonist's Vestments": {
       "type": "armor",
@@ -868,7 +1387,21 @@
       "requirements": {
          "level": 3,
          "class": "Bard"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.033,
+      "fire_resistance": 0.11,
+      "ice_resistance": 0.11,
+      "lightning_resistance": 0.11,
+      "poison_resistance": 0.088,
+      "magic_resistance": 0.132,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Melodist's Coat": {
       "type": "armor",
@@ -880,7 +1413,19 @@
       "requirements": {
          "level": 4,
          "class": "Bard"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.104,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.065,
+      "poison_resistance": 0.104,
+      "tags": [
+         "medium",
+         "physical",
+         "enchanted"
+      ]
    },
    "Virtuoso's Attire": {
       "type": "armor",
@@ -893,7 +1438,19 @@
       "requirements": {
          "level": 5,
          "class": "Bard"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.104,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.065,
+      "poison_resistance": 0.104,
+      "tags": [
+         "medium",
+         "physical",
+         "enchanted"
+      ]
    },
    "The Poetry god \u00c4epleollo's Robe": {
       "type": "armor",
@@ -908,7 +1465,21 @@
       "requirements": {
          "level": 7,
          "class": "Bard"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 8,
+      "physical_resistance": 0.048,
+      "fire_resistance": 0.16,
+      "ice_resistance": 0.16,
+      "lightning_resistance": 0.16,
+      "poison_resistance": 0.128,
+      "magic_resistance": 0.192,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Paladin's Shortsword": {
       "type": "weapon",
@@ -924,7 +1495,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 14,
-      "smiting": 13
+      "smiting": 13,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "holy"
+      ]
    },
    "Druidic Staff": {
       "type": "weapon",
@@ -942,7 +1521,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 5,
+      "mana_efficiency": 4,
+      "crit_chance": 2,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Crown of Wisdom": {
       "type": "accessory",
@@ -954,7 +1541,13 @@
       "requirements": {
          "level": 3,
          "class": "Mage"
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "magical",
+         "offensive"
+      ]
    },
    "Cloak of Shadows": {
       "type": "accessory",
@@ -966,7 +1559,13 @@
       "requirements": {
          "level": 3,
          "class": "Rogue"
-      }
+      },
+      "tags": [
+         "accessory",
+         "cloak",
+         "defensive",
+         "mobile"
+      ]
    },
    "Amulet of Valor": {
       "type": "accessory",
@@ -978,7 +1577,13 @@
       "requirements": {
          "level": 3,
          "class": "Warrior"
-      }
+      },
+      "tags": [
+         "accessory",
+         "amulet",
+         "offensive",
+         "defensive"
+      ]
    },
    "Ring of Mana": {
       "type": "accessory",
@@ -989,7 +1594,12 @@
       "requirements": {
          "level": 2,
          "class": "Mage"
-      }
+      },
+      "tags": [
+         "accessory",
+         "ring",
+         "magical"
+      ]
    },
    "Ring of Precision": {
       "type": "accessory",
@@ -1001,7 +1611,13 @@
       "requirements": {
          "level": 2,
          "class": "Rogue"
-      }
+      },
+      "tags": [
+         "accessory",
+         "ring",
+         "offensive",
+         "mobile"
+      ]
    },
    "Nature's Embrace": {
       "type": "weapon",
@@ -1020,7 +1636,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 17,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical"
+      ]
    },
    "Gaea's Wrath": {
       "type": "weapon",
@@ -1039,7 +1663,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 26,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical"
+      ]
    },
    "Sun-Blessed Mace": {
       "type": "weapon",
@@ -1057,7 +1689,17 @@
       "weight": 6,
       "sharpness": 0,
       "smiting": 17,
-      "fire_attack": 21
+      "fire_attack": 21,
+      "stun_chance": 12,
+      "armor_crush": 3,
+      "crit_chance": 2,
+      "tags": [
+         "physical",
+         "bludgeoning",
+         "one-handed",
+         "fire",
+         "holy"
+      ]
    },
    "Aegis of the Eternal Light": {
       "type": "weapon",
@@ -1075,7 +1717,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 27,
-      "smiting": 29
+      "smiting": 29,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "holy"
+      ]
    },
    "Scepter of Divine Grace": {
       "type": "weapon",
@@ -1093,7 +1743,15 @@
       "aim_accuracy": 85,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 15
+      "smiting": 15,
+      "spell_power": 6,
+      "mana_efficiency": 5,
+      "crit_chance": 3,
+      "tags": [
+         "magical",
+         "holy",
+         "one-handed"
+      ]
    },
    "Relic of the First Saint": {
       "type": "weapon",
@@ -1112,7 +1770,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 25,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 14,
+      "parry_chance": 17,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical"
+      ]
    },
    "Ironwood Barkskin": {
       "type": "armor",
@@ -1124,7 +1790,18 @@
       "requirements": {
          "level": 3,
          "class": "Druid"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 3,
+      "physical_resistance": 0.088,
+      "fire_resistance": 0.055,
+      "ice_resistance": 0.055,
+      "lightning_resistance": 0.055,
+      "poison_resistance": 0.088,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Elder Grove Vestments": {
       "type": "armor",
@@ -1137,7 +1814,21 @@
       "requirements": {
          "level": 5,
          "class": "Druid"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.039,
+      "fire_resistance": 0.13,
+      "ice_resistance": 0.13,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.104,
+      "magic_resistance": 0.156,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Consecrated Plate": {
       "type": "armor",
@@ -1149,7 +1840,18 @@
       "requirements": {
          "level": 3,
          "class": "Paladin"
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.165,
+      "fire_resistance": 0.055,
+      "ice_resistance": 0.055,
+      "lightning_resistance": 0.11,
+      "poison_resistance": 0.055,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Champion's Holy Bulwark": {
       "type": "armor",
@@ -1161,7 +1863,18 @@
       "requirements": {
          "level": 5,
          "class": "Paladin"
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.195,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.065,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Vestments of the Seraph": {
       "type": "armor",
@@ -1173,7 +1886,21 @@
       "requirements": {
          "level": 3,
          "class": "Priest"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.033,
+      "fire_resistance": 0.11,
+      "ice_resistance": 0.11,
+      "lightning_resistance": 0.11,
+      "poison_resistance": 0.088,
+      "magic_resistance": 0.132,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "High Oracle's Regalia": {
       "type": "armor",
@@ -1186,7 +1913,21 @@
       "requirements": {
          "level": 5,
          "class": "Priest"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.039,
+      "fire_resistance": 0.13,
+      "ice_resistance": 0.13,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.104,
+      "magic_resistance": 0.156,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Gauntlets of Strength": {
       "type": "accessory",
@@ -1198,7 +1939,13 @@
       "requirements": {
          "level": 2,
          "class": "Warrior"
-      }
+      },
+      "tags": [
+         "accessory",
+         "gauntlet",
+         "offensive",
+         "defensive"
+      ]
    },
    "Crown of the Dawn": {
       "type": "accessory",
@@ -1211,7 +1958,14 @@
       "rarity": "legendary",
       "requirements": {
          "level": 6
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "magical",
+         "offensive",
+         "defensive"
+      ]
    },
    "Solar Talisman": {
       "type": "accessory",
@@ -1222,7 +1976,13 @@
       "rarity": "rare",
       "requirements": {
          "level": 3
-      }
+      },
+      "tags": [
+         "accessory",
+         "amulet",
+         "magical",
+         "defensive"
+      ]
    },
    "Pendant of Fortitude": {
       "type": "accessory",
@@ -1233,7 +1993,12 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 2
-      }
+      },
+      "tags": [
+         "accessory",
+         "amulet",
+         "defensive"
+      ]
    },
    "Boots of the Phoenix": {
       "type": "accessory",
@@ -1244,7 +2009,13 @@
       "rarity": "legendary",
       "requirements": {
          "level": 5
-      }
+      },
+      "tags": [
+         "accessory",
+         "boots",
+         "defensive",
+         "mobile"
+      ]
    },
    "Assassin's Blade": {
       "type": "weapon",
@@ -1262,7 +2033,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 21,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 9,
+      "parry_chance": 11,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Arcane Grimoire": {
       "type": "weapon",
@@ -1281,7 +2059,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 27,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical"
+      ]
    },
    "Titan's Hammer": {
       "type": "weapon",
@@ -1300,7 +2086,15 @@
       "aim_accuracy": 78,
       "weight": 6,
       "sharpness": 0,
-      "smiting": 8
+      "smiting": 8,
+      "armor_crush": 10,
+      "crit_chance": 8,
+      "tags": [
+         "physical",
+         "bludgeoning",
+         "one-handed",
+         "holy"
+      ]
    },
    "Venomstrike Dagger": {
       "type": "weapon",
@@ -1319,7 +2113,17 @@
       "weight": 1,
       "sharpness": 27,
       "smiting": 0,
-      "poison_attack": 19
+      "poison_attack": 19,
+      "bleed_chance": 24,
+      "backstab_bonus": 18,
+      "crit_chance": 18,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed",
+         "poison"
+      ]
    },
    "Celestial Scepter": {
       "type": "weapon",
@@ -1338,7 +2142,15 @@
       "aim_accuracy": 85,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 29
+      "smiting": 29,
+      "spell_power": 24,
+      "mana_efficiency": 20,
+      "crit_chance": 12,
+      "tags": [
+         "magical",
+         "holy",
+         "one-handed"
+      ]
    },
    "Berserker's Axe": {
       "type": "weapon",
@@ -1356,7 +2168,16 @@
       "aim_accuracy": 80,
       "weight": 5,
       "sharpness": 30,
-      "smiting": 0
+      "smiting": 0,
+      "armor_penetration": 36,
+      "cleave_chance": 40,
+      "crit_chance": 10,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Nightshade Armor": {
       "type": "armor",
@@ -1369,7 +2190,18 @@
       "requirements": {
          "level": 4,
          "class": "Rogue"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.104,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.065,
+      "poison_resistance": 0.104,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Archmage's Vestments": {
       "type": "armor",
@@ -1381,7 +2213,21 @@
       "requirements": {
          "level": 6,
          "class": "Mage"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 8,
+      "physical_resistance": 0.048,
+      "fire_resistance": 0.16,
+      "ice_resistance": 0.16,
+      "lightning_resistance": 0.16,
+      "poison_resistance": 0.128,
+      "magic_resistance": 0.192,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Colossus Plate": {
       "type": "armor",
@@ -1395,7 +2241,18 @@
          "level": 6,
          "class": "Warrior",
          "strength": 20
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.24,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.16,
+      "poison_resistance": 0.08,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Ghostwalker Cloak": {
       "type": "armor",
@@ -1408,7 +2265,19 @@
       "requirements": {
          "level": 5,
          "class": "Rogue"
-      }
+      },
+      "armor_type": "cloak",
+      "evasion_bonus": 20,
+      "physical_resistance": 0.08,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.08,
+      "poison_resistance": 0.16,
+      "tags": [
+         "light",
+         "evasive",
+         "physical"
+      ]
    },
    "Elemental Aegis": {
       "type": "armor",
@@ -1420,7 +2289,19 @@
       "requirements": {
          "level": 5,
          "class": "Mage"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.128,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.08,
+      "poison_resistance": 0.128,
+      "tags": [
+         "medium",
+         "physical",
+         "enchanted"
+      ]
    },
    "Juggernaut's Bulwark": {
       "type": "armor",
@@ -1432,7 +2313,18 @@
       "requirements": {
          "level": 6,
          "class": "Warrior"
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.24,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.16,
+      "poison_resistance": 0.08,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Hunter's Bow": {
       "type": "weapon",
@@ -1449,7 +2341,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 7,
+      "armor_penetration": 5,
+      "multi_hit_chance": 6,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Longbow": {
       "type": "weapon",
@@ -1466,7 +2366,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 8,
+      "armor_penetration": 5,
+      "multi_hit_chance": 6,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Composite Bow": {
       "type": "weapon",
@@ -1483,7 +2391,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 14,
+      "armor_penetration": 9,
+      "multi_hit_chance": 11,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Elven Bow": {
       "type": "weapon",
@@ -1500,7 +2416,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 24,
+      "armor_penetration": 16,
+      "multi_hit_chance": 20,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Light Crossbow": {
       "type": "weapon",
@@ -1516,7 +2440,16 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 12
+      "smiting": 12,
+      "crit_chance": 6,
+      "armor_penetration": 4,
+      "multi_hit_chance": 5,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed",
+         "holy"
+      ]
    },
    "Heavy Crossbow": {
       "type": "weapon",
@@ -1533,7 +2466,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 9,
+      "armor_penetration": 6,
+      "multi_hit_chance": 7,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Repeating Crossbow": {
       "type": "weapon",
@@ -1550,7 +2491,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 14,
+      "armor_penetration": 9,
+      "multi_hit_chance": 12,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Hunting Spear": {
       "type": "weapon",
@@ -1565,7 +2514,10 @@
       "aim_accuracy": 88,
       "weight": 4,
       "sharpness": 12,
-      "smiting": 0
+      "smiting": 0,
+      "tags": [
+         "physical"
+      ]
    },
    "Warrior Spear": {
       "type": "weapon",
@@ -1580,7 +2532,10 @@
       "aim_accuracy": 88,
       "weight": 4,
       "sharpness": 16,
-      "smiting": 0
+      "smiting": 0,
+      "tags": [
+         "physical"
+      ]
    },
    "Tri-point Spear": {
       "type": "weapon",
@@ -1595,7 +2550,10 @@
       "aim_accuracy": 88,
       "weight": 4,
       "sharpness": 20,
-      "smiting": 0
+      "smiting": 0,
+      "tags": [
+         "physical"
+      ]
    },
    "Dragon Spear": {
       "type": "weapon",
@@ -1610,7 +2568,10 @@
       "aim_accuracy": 88,
       "weight": 4,
       "sharpness": 26,
-      "smiting": 0
+      "smiting": 0,
+      "tags": [
+         "physical"
+      ]
    },
    "Hunting Knife": {
       "type": "weapon",
@@ -1626,7 +2587,16 @@
       "aim_accuracy": 92,
       "weight": 1,
       "sharpness": 20,
-      "smiting": 0
+      "smiting": 0,
+      "bleed_chance": 10,
+      "backstab_bonus": 7,
+      "crit_chance": 7,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed"
+      ]
    },
    "Steel Hunting Knife": {
       "type": "weapon",
@@ -1642,7 +2612,16 @@
       "aim_accuracy": 92,
       "weight": 1,
       "sharpness": 24,
-      "smiting": 0
+      "smiting": 0,
+      "bleed_chance": 13,
+      "backstab_bonus": 9,
+      "crit_chance": 9,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed"
+      ]
    },
    "Assassin Hunting Knife": {
       "type": "weapon",
@@ -1659,7 +2638,16 @@
       "aim_accuracy": 92,
       "weight": 1,
       "sharpness": 27,
-      "smiting": 0
+      "smiting": 0,
+      "bleed_chance": 23,
+      "backstab_bonus": 17,
+      "crit_chance": 17,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed"
+      ]
    },
    "Master Hunter's Knife": {
       "type": "weapon",
@@ -1676,19 +2664,34 @@
       "aim_accuracy": 92,
       "weight": 1,
       "sharpness": 30,
-      "smiting": 0
+      "smiting": 0,
+      "bleed_chance": 40,
+      "backstab_bonus": 30,
+      "crit_chance": 30,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed"
+      ]
    },
    "Luck Charm": {
       "type": "accessory",
       "description": "A simple charm believed to bring good fortune to its bearer",
       "price": 30,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "accessory"
+      ]
    },
    "Fortune Charm": {
       "type": "accessory",
       "description": "An ornate charm that seems to attract luck and prosperity",
       "price": 75,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "accessory"
+      ]
    },
    "Blessing of the Wild": {
       "type": "accessory",
@@ -1696,7 +2699,12 @@
       "attack_bonus": 3,
       "hp_bonus": 20,
       "price": 120,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "accessory",
+         "offensive",
+         "defensive"
+      ]
    },
    "Hunter's Totem": {
       "type": "accessory",
@@ -1704,7 +2712,12 @@
       "attack_bonus": 4,
       "speed_bonus": 2,
       "price": 110,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "accessory",
+         "offensive",
+         "mobile"
+      ]
    },
    "Predator's Eye": {
       "type": "accessory",
@@ -1712,7 +2725,12 @@
       "attack_bonus": 5,
       "speed_bonus": 1,
       "price": 100,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "accessory",
+         "offensive",
+         "mobile"
+      ]
    },
    "Stalker's Badge": {
       "type": "accessory",
@@ -1720,7 +2738,11 @@
       "speed_bonus": 4,
       "stealth_bonus": 10,
       "price": 85,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "accessory",
+         "mobile"
+      ]
    },
    "Nature's Blessing": {
       "type": "accessory",
@@ -1728,7 +2750,12 @@
       "hp_bonus": 30,
       "mp_bonus": 15,
       "price": 95,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "accessory",
+         "magical",
+         "defensive"
+      ]
    },
    "Sharpshooter's Ring": {
       "type": "accessory",
@@ -1736,7 +2763,12 @@
       "attack_bonus": 6,
       "critical_chance": 0.1,
       "price": 130,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "accessory",
+         "ring",
+         "offensive"
+      ]
    },
    "Hydra Fang": {
       "type": "weapon",
@@ -1753,19 +2785,32 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 21,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 9,
+      "parry_chance": 11,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Venom Sac": {
       "type": "material",
       "description": "A gland containing potent poison from the hydra",
       "price": 80,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Swamp Scale": {
       "type": "material",
       "description": "A scale from the hydra's hide, resistant to poison",
       "price": 100,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Swamp Scale Armor": {
       "type": "armor",
@@ -1775,13 +2820,28 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.104,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.065,
+      "poison_resistance": 0.104,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Poison Crystal": {
       "type": "material",
       "description": "A crystal infused with deadly toxins",
       "price": 60,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "crystal"
+      ]
    },
    "Necromancer's Robes": {
       "type": "armor",
@@ -1793,7 +2853,21 @@
       "requirements": {
          "level": 5,
          "class": "Mage"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.039,
+      "fire_resistance": 0.13,
+      "ice_resistance": 0.13,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.104,
+      "magic_resistance": 0.156,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Skull Staff": {
       "type": "weapon",
@@ -1811,7 +2885,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 11,
+      "mana_efficiency": 9,
+      "crit_chance": 5,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Soul Orb": {
       "type": "offhand",
@@ -1834,7 +2916,13 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "magical",
+         "offensive"
+      ]
    },
    "Cursed Amulet": {
       "type": "accessory",
@@ -1846,7 +2934,13 @@
       "rarity": "rare",
       "requirements": {
          "level": 4
-      }
+      },
+      "tags": [
+         "accessory",
+         "amulet",
+         "offensive",
+         "defensive"
+      ]
    },
    "Stone Shield": {
       "type": "offhand",
@@ -1875,7 +2969,16 @@
       "weight": 6,
       "sharpness": 0,
       "smiting": 8,
-      "lightning_attack": 28
+      "lightning_attack": 28,
+      "armor_crush": 10,
+      "crit_chance": 8,
+      "tags": [
+         "physical",
+         "bludgeoning",
+         "one-handed",
+         "lightning",
+         "holy"
+      ]
    },
    "Storm Giant's Belt": {
       "type": "accessory",
@@ -1887,13 +2990,22 @@
       "rarity": "legendary",
       "requirements": {
          "level": 6
-      }
+      },
+      "tags": [
+         "accessory",
+         "offensive",
+         "defensive"
+      ]
    },
    "Lightning Crystal": {
       "type": "material",
       "description": "A pure crystal of condensed lightning energy",
       "price": 120,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "crystal"
+      ]
    },
    "Thundercloud Cloak": {
       "type": "armor",
@@ -1904,7 +3016,19 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "armor_type": "cloak",
+      "evasion_bonus": 15,
+      "physical_resistance": 0.065,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.065,
+      "poison_resistance": 0.13,
+      "tags": [
+         "light",
+         "evasive",
+         "physical"
+      ]
    },
    "Giant's Gauntlets": {
       "type": "accessory",
@@ -1916,7 +3040,13 @@
       "requirements": {
          "level": 5,
          "class": "Warrior"
-      }
+      },
+      "tags": [
+         "accessory",
+         "gauntlet",
+         "offensive",
+         "defensive"
+      ]
    },
    "Death Knight's Shield": {
       "type": "offhand",
@@ -1938,7 +3068,14 @@
       "rarity": "legendary",
       "requirements": {
          "level": 7
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "magical",
+         "offensive",
+         "defensive"
+      ]
    },
    "Necrotic Blade": {
       "type": "weapon",
@@ -1956,7 +3093,15 @@
       "weight": 3,
       "sharpness": 28,
       "smiting": 0,
-      "poison_attack": 27
+      "poison_attack": 27,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "poison"
+      ]
    },
    "Phylactery": {
       "type": "accessory",
@@ -1967,7 +3112,11 @@
       "rarity": "legendary",
       "requirements": {
          "level": 7
-      }
+      },
+      "tags": [
+         "accessory",
+         "defensive"
+      ]
    },
    "Soul Reaver": {
       "type": "weapon",
@@ -1985,7 +3134,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 28,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Lich King's Robes": {
       "type": "armor",
@@ -1997,7 +3153,21 @@
       "requirements": {
          "level": 7,
          "class": "Mage"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 8,
+      "physical_resistance": 0.048,
+      "fire_resistance": 0.16,
+      "ice_resistance": 0.16,
+      "lightning_resistance": 0.16,
+      "poison_resistance": 0.128,
+      "magic_resistance": 0.192,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Demon Prince's Crown": {
       "type": "accessory",
@@ -2008,7 +3178,12 @@
       "rarity": "legendary",
       "requirements": {
          "level": 8
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "offensive"
+      ]
    },
    "Infernal Blade": {
       "type": "weapon",
@@ -2026,7 +3201,15 @@
       "weight": 3,
       "sharpness": 29,
       "smiting": 0,
-      "fire_attack": 37
+      "fire_attack": 37,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "fire"
+      ]
    },
    "Hellfire Shield": {
       "type": "offhand",
@@ -2043,7 +3226,10 @@
       "type": "material",
       "description": "The still-beating heart of a demon",
       "price": 200,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Chaos Orb": {
       "type": "offhand",
@@ -2065,25 +3251,47 @@
       "rarity": "legendary",
       "requirements": {
          "level": 7
-      }
+      },
+      "armor_type": "cloak",
+      "evasion_bonus": 20,
+      "physical_resistance": 0.08,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.08,
+      "poison_resistance": 0.16,
+      "tags": [
+         "light",
+         "evasive",
+         "physical"
+      ]
    },
    "Soul Fragment": {
       "type": "material",
       "description": "A fragment of a damned soul, pulsing with dark energy",
       "price": 200,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Zephyr's Scale": {
       "type": "material",
       "description": "A scale from the Elder Dragon Zephyr, imbued with wind magic",
       "price": 500,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Wind Dragon's Heart": {
       "type": "material",
       "description": "The heart of an ancient wind dragon",
       "price": 600,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "dragon"
+      ]
    },
    "Stormbreaker": {
       "type": "weapon",
@@ -2102,7 +3310,15 @@
       "weight": 3,
       "sharpness": 29,
       "smiting": 0,
-      "lightning_attack": 29
+      "lightning_attack": 29,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "lightning"
+      ]
    },
    "Sky Crown": {
       "type": "accessory",
@@ -2114,7 +3330,14 @@
       "rarity": "legendary",
       "requirements": {
          "level": 8
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "offensive",
+         "defensive",
+         "mobile"
+      ]
    },
    "Dragon Soul Gem": {
       "type": "offhand",
@@ -2132,7 +3355,10 @@
       "type": "material",
       "description": "A feather from a creature of pure wind",
       "price": 250,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Wind Walkers": {
       "type": "accessory",
@@ -2143,7 +3369,11 @@
       "rarity": "legendary",
       "requirements": {
          "level": 7
-      }
+      },
+      "tags": [
+         "accessory",
+         "mobile"
+      ]
    },
    "Cloudstrider Boots": {
       "type": "accessory",
@@ -2153,7 +3383,12 @@
       "rarity": "legendary",
       "requirements": {
          "level": 8
-      }
+      },
+      "tags": [
+         "accessory",
+         "boots",
+         "mobile"
+      ]
    },
    "Obsidian Waraxe": {
       "type": "weapon",
@@ -2170,7 +3405,16 @@
       "aim_accuracy": 80,
       "weight": 5,
       "sharpness": 24,
-      "smiting": 0
+      "smiting": 0,
+      "armor_penetration": 22,
+      "cleave_chance": 25,
+      "crit_chance": 6,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Sundered Earth Hammer": {
       "type": "weapon",
@@ -2188,7 +3432,16 @@
       "weight": 6,
       "sharpness": 0,
       "smiting": 8,
-      "fire_attack": 28
+      "fire_attack": 28,
+      "armor_crush": 6,
+      "crit_chance": 5,
+      "tags": [
+         "physical",
+         "bludgeoning",
+         "one-handed",
+         "fire",
+         "holy"
+      ]
    },
    "Colossus Slayer": {
       "type": "weapon",
@@ -2205,7 +3458,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 23,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 11,
+      "parry_chance": 14,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Vahnir's Greatsword": {
       "type": "weapon",
@@ -2223,7 +3483,17 @@
       "aim_accuracy": 76,
       "weight": 8,
       "sharpness": 30,
-      "smiting": 0
+      "smiting": 0,
+      "sweep_chance": 30,
+      "knockback_chance": 24,
+      "crit_chance": 12,
+      "armor_penetration": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Mage New Weapons lvl 4-7": "MAGE_WEAPONS_PLACEHOLDER",
    "Ebonwood Staff": {
@@ -2243,7 +3513,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 11,
+      "mana_efficiency": 9,
+      "crit_chance": 5,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Crystal Prism Staff": {
       "type": "weapon",
@@ -2262,7 +3540,16 @@
       "weight": 3,
       "sharpness": 0,
       "smiting": 0,
-      "ice_attack": 27
+      "ice_attack": 27,
+      "spell_power": 13,
+      "mana_efficiency": 10,
+      "crit_chance": 6,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed",
+         "ice"
+      ]
    },
    "Phoenixfire Wand": {
       "type": "weapon",
@@ -2282,7 +3569,16 @@
       "weight": 1,
       "sharpness": 0,
       "smiting": 0,
-      "fire_attack": 26
+      "fire_attack": 26,
+      "spell_power": 16,
+      "mana_efficiency": 14,
+      "crit_chance": 8,
+      "tags": [
+         "magical",
+         "arcane",
+         "one-handed",
+         "fire"
+      ]
    },
    "Astral Beacon": {
       "type": "weapon",
@@ -2301,7 +3597,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 22,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 10,
+      "parry_chance": 12,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical"
+      ]
    },
    "Howertz's Staff": {
       "type": "weapon",
@@ -2320,7 +3624,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 20,
+      "mana_efficiency": 16,
+      "crit_chance": 10,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Rogue New Weapons lvl 4-7": "ROGUE_WEAPONS_PLACEHOLDER",
    "Toxic Thorn": {
@@ -2339,7 +3651,15 @@
       "weight": 3,
       "sharpness": 21,
       "smiting": 0,
-      "poison_attack": 19
+      "poison_attack": 19,
+      "crit_chance": 9,
+      "parry_chance": 11,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "poison"
+      ]
    },
    "Whisperstep Daggers": {
       "type": "weapon",
@@ -2357,7 +3677,16 @@
       "aim_accuracy": 92,
       "weight": 1,
       "sharpness": 27,
-      "smiting": 0
+      "smiting": 0,
+      "bleed_chance": 24,
+      "backstab_bonus": 18,
+      "crit_chance": 18,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed"
+      ]
    },
    "Midnight Cleaver": {
       "type": "weapon",
@@ -2374,7 +3703,16 @@
       "aim_accuracy": 80,
       "weight": 5,
       "sharpness": 24,
-      "smiting": 0
+      "smiting": 0,
+      "armor_penetration": 23,
+      "cleave_chance": 26,
+      "crit_chance": 6,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Phantom Strike": {
       "type": "weapon",
@@ -2391,7 +3729,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 22,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 11,
+      "parry_chance": 13,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Infiltration Shadow": {
       "type": "weapon",
@@ -2410,7 +3755,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 28,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Hunter New Weapons lvl 4-7": "HUNTER_WEAPONS_PLACEHOLDER",
    "Thornshot Bow": {
@@ -2428,7 +3780,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 13,
+      "armor_penetration": 9,
+      "multi_hit_chance": 11,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Ranger's Crossbow": {
       "type": "weapon",
@@ -2445,7 +3805,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 14,
+      "armor_penetration": 9,
+      "multi_hit_chance": 11,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Venomspitter": {
       "type": "weapon",
@@ -2463,7 +3831,15 @@
       "weight": 3,
       "sharpness": 22,
       "smiting": 0,
-      "poison_attack": 20
+      "poison_attack": 20,
+      "crit_chance": 10,
+      "parry_chance": 12,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "poison"
+      ]
    },
    "Stormcaller": {
       "type": "weapon",
@@ -2481,7 +3857,15 @@
       "weight": 3,
       "sharpness": 22,
       "smiting": 0,
-      "lightning_attack": 20
+      "lightning_attack": 20,
+      "crit_chance": 10,
+      "parry_chance": 13,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "lightning"
+      ]
    },
    "Phyla's Root Longbow": {
       "type": "weapon",
@@ -2499,7 +3883,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 24,
+      "armor_penetration": 16,
+      "multi_hit_chance": 20,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Demonforged Plate": {
       "type": "armor",
@@ -2511,7 +3903,18 @@
       "requirements": {
          "level": 5,
          "class": "Warrior"
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.195,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.065,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Titan's Wrath": {
       "type": "armor",
@@ -2524,7 +3927,18 @@
       "requirements": {
          "level": 6,
          "class": "Warrior"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.128,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.08,
+      "poison_resistance": 0.128,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Starweave Robes": {
       "type": "armor",
@@ -2536,7 +3950,21 @@
       "requirements": {
          "level": 5,
          "class": "Mage"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.039,
+      "fire_resistance": 0.13,
+      "ice_resistance": 0.13,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.104,
+      "magic_resistance": 0.156,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Voidwalker's Mantle": {
       "type": "armor",
@@ -2548,7 +3976,19 @@
       "requirements": {
          "level": 6,
          "class": "Mage"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.128,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.08,
+      "poison_resistance": 0.128,
+      "tags": [
+         "medium",
+         "physical",
+         "enchanted"
+      ]
    },
    "New Rogue Armor": "ROGUE_ARMOR_PLACEHOLDER",
    "Shadeflow Armor": {
@@ -2562,7 +4002,18 @@
       "requirements": {
          "level": 5,
          "class": "Rogue"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.104,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.065,
+      "poison_resistance": 0.104,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Death's Embrace": {
       "type": "armor",
@@ -2575,7 +4026,18 @@
       "requirements": {
          "level": 6,
          "class": "Rogue"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.128,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.08,
+      "poison_resistance": 0.128,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Thornweave Tunic": {
       "type": "armor",
@@ -2587,7 +4049,21 @@
       "requirements": {
          "level": 4,
          "class": "Hunter"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.039,
+      "fire_resistance": 0.13,
+      "ice_resistance": 0.13,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.104,
+      "magic_resistance": 0.156,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Windward Vest": {
       "type": "armor",
@@ -2600,7 +4076,18 @@
       "requirements": {
          "level": 5,
          "class": "Hunter"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.104,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.065,
+      "poison_resistance": 0.104,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Elixir of Giant Strength": {
       "type": "consumable",
@@ -2609,7 +4096,14 @@
       "attack_bonus": 15,
       "duration": 5,
       "price": 200,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "consumable",
+         "healing",
+         "offensive",
+         "divine"
+      ],
+      "on_use_buff": "giant_strength"
    },
    "Shadowstep Elixir": {
       "type": "consumable",
@@ -2617,15 +4111,29 @@
       "effect": "shadow_step",
       "charges": 3,
       "price": 220,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "consumable",
+         "healing",
+         "mobility",
+         "divine"
+      ],
+      "on_use_buff": "shadow_step"
    },
    "Phoenix Tears": {
       "type": "consumable",
-      "description": "A drop of phoenix tears that fully restores health",
-      "effect": "full_heal",
-      "value": 500,
-      "price": 400,
-      "rarity": "legendary"
+      "description": "Crystallised tears of a phoenix. Drinking them fully restores your health and mana in an instant.",
+      "effect": "full_restore",
+      "min_value": 0,
+      "max_value": 0,
+      "price": 500,
+      "rarity": "legendary",
+      "tags": [
+         "consumable",
+         "heal",
+         "restore",
+         "powerful"
+      ]
    },
    "Dragon's Breath Potion": {
       "type": "consumable",
@@ -2634,44 +4142,66 @@
       "damage": 50,
       "duration": 3,
       "price": 300,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "consumable",
+         "healing"
+      ]
    },
    "New Materials": "MATERIALS_PLACEHOLDER",
    "Storm Elemental Core": {
       "type": "material",
       "description": "The frozen heart of a storm elemental",
       "price": 100,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Golem Core": {
       "type": "material",
       "description": "The pulsating core of an ancient golem, filled with arcane power",
       "price": 200,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Ancient Relic": {
       "type": "material",
       "description": "An artifact from a bygone era, radiating mysterious energy",
       "price": 150,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Wind Elemental Essence": {
       "type": "material",
       "description": "Condensed wind energy in physical form",
       "price": 120,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Demon Blood": {
       "type": "material",
       "description": "Blood from an infernal creature",
       "price": 150,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Starlight Shard": {
       "type": "material",
       "description": "A fragment of pure starlight",
       "price": 180,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "New Accessories": "ACCESSORIES_PLACEHOLDER",
    "Ring of the Void": {
@@ -2683,7 +4213,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "tags": [
+         "accessory",
+         "ring",
+         "magical"
+      ]
    },
    "Amulet of the Guardian": {
       "type": "accessory",
@@ -2694,7 +4229,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "tags": [
+         "accessory",
+         "amulet",
+         "defensive"
+      ]
    },
    "Bracers of Fury": {
       "type": "accessory",
@@ -2705,7 +4245,11 @@
       "rarity": "rare",
       "requirements": {
          "level": 4
-      }
+      },
+      "tags": [
+         "accessory",
+         "offensive"
+      ]
    },
    "Charm of the Forest": {
       "type": "accessory",
@@ -2715,7 +4259,11 @@
       "rarity": "rare",
       "requirements": {
          "level": 4
-      }
+      },
+      "tags": [
+         "accessory",
+         "defensive"
+      ]
    },
    "Seal of the Ancients": {
       "type": "accessory",
@@ -2727,7 +4275,13 @@
       "rarity": "legendary",
       "requirements": {
          "level": 6
-      }
+      },
+      "tags": [
+         "accessory",
+         "magical",
+         "offensive",
+         "defensive"
+      ]
    },
    "Wooden Shield": {
       "type": "offhand",
@@ -2749,7 +4303,13 @@
       "rarity": "legendary",
       "requirements": {
          "level": 6
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "offensive",
+         "defensive"
+      ]
    },
    "Soul Gem": {
       "type": "offhand",
@@ -2770,7 +4330,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "magical"
+      ]
    },
    "Crystal of Eternal Winter": {
       "type": "offhand",
@@ -2791,7 +4356,12 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 3
-      }
+      },
+      "tags": [
+         "accessory",
+         "offensive",
+         "defensive"
+      ]
    },
    "Bone Necklace": {
       "type": "accessory",
@@ -2802,19 +4372,31 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "tags": [
+         "accessory",
+         "magical",
+         "offensive"
+      ]
    },
    "Eternal Essence": {
       "type": "material",
       "description": "A rare essence that never fades, used in high-level enchantments.",
       "price": 200,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Void Heart": {
       "type": "material",
       "description": "A heart pulsating with void energy, used in powerful enchantments.",
       "price": 250,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "dark"
+      ]
    },
    "Boreas": {
       "type": "weapon",
@@ -2832,7 +4414,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 29,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Dark Lord's Cloak": {
       "type": "armor",
@@ -2844,25 +4433,51 @@
       "requirements": {
          "level": 6,
          "class": "Mage"
-      }
+      },
+      "armor_type": "cloak",
+      "evasion_bonus": 20,
+      "physical_resistance": 0.08,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.08,
+      "poison_resistance": 0.16,
+      "tags": [
+         "light",
+         "evasive",
+         "physical",
+         "enchanted"
+      ]
    },
    "Void Crystal": {
       "type": "material",
       "description": "A crystal pulsating with void energy",
       "price": 120,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "dark",
+         "crystal"
+      ]
    },
    "Earth Crystal": {
       "type": "material",
       "description": "A crystal formed from the heart of the earth",
       "price": 100,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "crystal"
+      ]
    },
    "Dragon Heart": {
       "type": "material",
       "description": "The still-beating heart of a dragon, pulsating with power.",
       "price": 300,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "dragon"
+      ]
    },
    "Buckler Shield": {
       "type": "offhand",
@@ -2913,7 +4528,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 20,
+      "mana_efficiency": 16,
+      "crit_chance": 10,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "D\u00e4lokurg's Warhammer": {
       "type": "weapon",
@@ -2929,7 +4552,19 @@
       "aim_accuracy": 72,
       "weight": 9,
       "sharpness": 0,
-      "smiting": 8
+      "smiting": 8,
+      "stun_chance": 44,
+      "sweep_chance": 30,
+      "armor_crush": 16,
+      "knockback_chance": 36,
+      "crit_chance": 8,
+      "tags": [
+         "physical",
+         "bludgeoning",
+         "two-handed",
+         "heavy",
+         "holy"
+      ]
    },
    "Bandit Leader's Cloak": {
       "type": "armor",
@@ -2941,109 +4576,176 @@
       "requirements": {
          "level": 7,
          "class": "Rogue"
-      }
+      },
+      "armor_type": "cloak",
+      "evasion_bonus": 20,
+      "physical_resistance": 0.08,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.08,
+      "poison_resistance": 0.16,
+      "tags": [
+         "light",
+         "evasive",
+         "physical"
+      ]
    },
    "Iron Ore": {
       "type": "material",
       "description": "Raw iron ore mined from the earth, used for forging",
       "price": 5,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Coal": {
       "type": "material",
       "description": "A lump of coal, essential for smelting ores",
       "price": 3,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Steel Ingot": {
       "type": "material",
       "description": "A refined steel ingot, perfect for crafting weapons and armor",
       "price": 25,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Gold Nugget": {
       "type": "material",
       "description": "A small nugget of gold, valuable and malleable",
       "price": 15,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Herb": {
       "type": "material",
       "description": "A common healing herb found in meadows",
       "price": 3,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Mana Herb": {
       "type": "material",
       "description": "A rare herb that glows with magical energy",
       "price": 10,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Spring Water": {
       "type": "material",
       "description": "Pure water from a sacred spring",
       "price": 2,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Leather": {
       "type": "material",
       "description": "Cured leather, essential for armor crafting",
       "price": 8,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Leather Strip": {
       "type": "material",
       "description": "Strips of leather used for bindings and straps",
       "price": 4,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Hardwood": {
       "type": "material",
       "description": "Dense hardwood from ancient trees",
       "price": 6,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Stone Block": {
       "type": "material",
       "description": "A carved stone block, useful for shields and fortifications",
       "price": 12,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Shadow Essence": {
       "type": "material",
       "description": "Condensed shadow energy in physical form",
       "price": 80,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "dark"
+      ]
    },
    "Fire Essence": {
       "type": "material",
       "description": "Bottled flame energy, extremely hot to the touch",
       "price": 75,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "fire"
+      ]
    },
    "Ice Essence": {
       "type": "material",
       "description": "Frozen essence of arctic winds",
       "price": 70,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "ice"
+      ]
    },
    "Sandworm Scale": {
       "type": "material",
       "description": "A thick scale from a desert sandworm, hardened by the shifting sands",
       "price": 85,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Desert Crystal": {
       "type": "material",
       "description": "A crystal formed in the depths of the desert, pulsating with ancient heat",
       "price": 90,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "crystal"
+      ]
    },
    "Burrower's Fang": {
       "type": "material",
       "description": "A sharp fang from a subterranean burrower, coated in earthen residue",
       "price": 45,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Ninja's Shuriken": {
       "type": "weapon",
@@ -3060,7 +4762,15 @@
       "aim_accuracy": 86,
       "weight": 1,
       "sharpness": 14,
-      "smiting": 0
+      "smiting": 0,
+      "multi_hit_chance": 13,
+      "bleed_chance": 7,
+      "crit_chance": 6,
+      "tags": [
+         "physical",
+         "ranged",
+         "finesse"
+      ]
    },
    "Ninjato": {
       "type": "weapon",
@@ -3077,7 +4787,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 22,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 11,
+      "parry_chance": 13,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Bandit's Chain": {
       "type": "accessory",
@@ -3087,7 +4804,11 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 1
-      }
+      },
+      "tags": [
+         "accessory",
+         "mobile"
+      ]
    },
    "Paladin's Sword": {
       "type": "weapon",
@@ -3103,7 +4824,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 20,
-      "smiting": 20
+      "smiting": 20,
+      "crit_chance": 8,
+      "parry_chance": 10,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "holy"
+      ]
    },
    "Holy Shield": {
       "type": "armor",
@@ -3115,7 +4844,18 @@
       "requirements": {
          "level": 1,
          "class": "Paladin"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 3,
+      "physical_resistance": 0.088,
+      "fire_resistance": 0.055,
+      "ice_resistance": 0.055,
+      "lightning_resistance": 0.055,
+      "poison_resistance": 0.088,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Sacred Armor": {
       "type": "armor",
@@ -3126,7 +4866,18 @@
       "requirements": {
          "level": 3,
          "class": "Paladin"
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.195,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.065,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Divine Hammer": {
       "type": "weapon",
@@ -3143,13 +4894,25 @@
       "aim_accuracy": 78,
       "weight": 6,
       "sharpness": 0,
-      "smiting": 23
+      "smiting": 23,
+      "stun_chance": 24,
+      "armor_crush": 6,
+      "crit_chance": 5,
+      "tags": [
+         "physical",
+         "bludgeoning",
+         "one-handed",
+         "holy"
+      ]
    },
    "Divine Essence": {
       "type": "material",
       "description": "Pure essence of divine power extracted from holy artifacts",
       "price": 150,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Nature's Robe": {
       "type": "armor",
@@ -3161,7 +4924,21 @@
       "requirements": {
          "level": 1,
          "class": "Druid"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.033,
+      "fire_resistance": 0.11,
+      "ice_resistance": 0.11,
+      "lightning_resistance": 0.11,
+      "poison_resistance": 0.088,
+      "magic_resistance": 0.132,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Druid's Spear": {
       "type": "weapon",
@@ -3178,7 +4955,10 @@
       "aim_accuracy": 88,
       "weight": 4,
       "sharpness": 19,
-      "smiting": 0
+      "smiting": 0,
+      "tags": [
+         "physical"
+      ]
    },
    "Beast Form Amulet": {
       "type": "accessory",
@@ -3190,19 +4970,31 @@
       "requirements": {
          "level": 3,
          "class": "Druid"
-      }
+      },
+      "tags": [
+         "accessory",
+         "amulet",
+         "defensive",
+         "mobile"
+      ]
    },
    "Herb Bundle": {
       "type": "material",
       "description": "A collection of rare herbs gathered from enchanted forests",
       "price": 60,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Nature Stone": {
       "type": "material",
       "description": "A crystalline stone infused with the essence of nature",
       "price": 80,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Priest's Staff": {
       "type": "weapon",
@@ -3219,7 +5011,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 8,
+      "mana_efficiency": 6,
+      "crit_chance": 4,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Devout's Robe": {
       "type": "armor",
@@ -3231,7 +5031,21 @@
       "requirements": {
          "level": 1,
          "class": "Priest"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.033,
+      "fire_resistance": 0.11,
+      "ice_resistance": 0.11,
+      "lightning_resistance": 0.11,
+      "poison_resistance": 0.088,
+      "magic_resistance": 0.132,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Holy Wand": {
       "type": "weapon",
@@ -3248,13 +5062,25 @@
       "aim_accuracy": 88,
       "weight": 1,
       "sharpness": 0,
-      "smiting": 20
+      "smiting": 20,
+      "spell_power": 14,
+      "mana_efficiency": 12,
+      "crit_chance": 7,
+      "tags": [
+         "magical",
+         "arcane",
+         "one-handed",
+         "holy"
+      ]
    },
    "Sacred Water": {
       "type": "material",
       "description": "Pure water blessed by holy rituals, emitting a soft glow",
       "price": 75,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Resurrection Scroll": {
       "type": "consumable",
@@ -3262,7 +5088,15 @@
       "effect": "heal",
       "value": 99999999,
       "price": 500,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "consumable",
+         "healing",
+         "scroll",
+         "magical"
+      ],
+      "min_value": 79999999,
+      "max_value": 119999998
    },
    "High Priest's Scepter": {
       "type": "weapon",
@@ -3280,7 +5114,15 @@
       "aim_accuracy": 85,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 6,
+      "mana_efficiency": 5,
+      "crit_chance": 3,
+      "tags": [
+         "magical",
+         "holy",
+         "one-handed"
+      ]
    },
    "Saintly Robes": {
       "type": "armor",
@@ -3292,7 +5134,21 @@
       "requirements": {
          "level": 3,
          "class": "Priest"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.033,
+      "fire_resistance": 0.11,
+      "ice_resistance": 0.11,
+      "lightning_resistance": 0.11,
+      "poison_resistance": 0.088,
+      "magic_resistance": 0.132,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Guardian Hammer": {
       "type": "weapon",
@@ -3309,7 +5165,16 @@
       "aim_accuracy": 78,
       "weight": 6,
       "sharpness": 0,
-      "smiting": 8
+      "smiting": 8,
+      "stun_chance": 9,
+      "armor_crush": 2,
+      "crit_chance": 2,
+      "tags": [
+         "physical",
+         "bludgeoning",
+         "one-handed",
+         "holy"
+      ]
    },
    "Elder Wood Armor": {
       "type": "armor",
@@ -3321,7 +5186,18 @@
       "requirements": {
          "level": 4,
          "class": "Druid"
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.104,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.065,
+      "poison_resistance": 0.104,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Ancient Oak Staff": {
       "type": "weapon",
@@ -3339,7 +5215,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 5,
+      "mana_efficiency": 4,
+      "crit_chance": 2,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Holy Vestment": {
       "type": "armor",
@@ -3351,13 +5235,30 @@
       "requirements": {
          "level": 3,
          "class": "Priest"
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.039,
+      "fire_resistance": 0.13,
+      "ice_resistance": 0.13,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.104,
+      "magic_resistance": 0.156,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Divine Focus": {
       "type": "material",
       "description": "A crystallized focal point of divine power used in powerful rituals",
       "price": 120,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Goblin King's Dagger": {
       "type": "weapon",
@@ -3374,7 +5275,16 @@
       "aim_accuracy": 92,
       "weight": 1,
       "sharpness": 26,
-      "smiting": 0
+      "smiting": 0,
+      "bleed_chance": 21,
+      "backstab_bonus": 15,
+      "crit_chance": 15,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed"
+      ]
    },
    "Stolen Gold Necklace": {
       "type": "accessory",
@@ -3386,7 +5296,12 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 3
-      }
+      },
+      "tags": [
+         "accessory",
+         "offensive",
+         "defensive"
+      ]
    },
    "Divine Sword": {
       "type": "weapon",
@@ -3404,7 +5319,16 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 28,
-      "smiting": 30
+      "smiting": 30,
+      "crit_chance": 16,
+      "parry_chance": 20,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical",
+         "holy"
+      ]
    },
    "Supreme Artifact": {
       "type": "accessory",
@@ -3417,7 +5341,13 @@
       "rarity": "legendary",
       "requirements": {
          "level": 10
-      }
+      },
+      "tags": [
+         "accessory",
+         "magical",
+         "offensive",
+         "defensive"
+      ]
    },
    "Legendary Crown": {
       "type": "accessory",
@@ -3431,7 +5361,15 @@
       "rarity": "legendary",
       "requirements": {
          "level": 10
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "magical",
+         "offensive",
+         "defensive",
+         "mobile"
+      ]
    },
    "Crown of Greed": {
       "type": "accessory",
@@ -3442,13 +5380,21 @@
       "rarity": "rare",
       "requirements": {
          "level": 4
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "offensive"
+      ]
    },
    "Ember Core": {
       "type": "material",
       "description": "The smoldering heart of a fire elemental lord",
       "price": 150,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Flame Lord's Crown": {
       "type": "accessory",
@@ -3459,19 +5405,30 @@
       "rarity": "legendary",
       "requirements": {
          "level": 7
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "offensive"
+      ]
    },
    "Magma Stone": {
       "type": "material",
       "description": "A stone that burns with eternal heat, used in fire enchantments",
       "price": 120,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Ignaros's Heart": {
       "type": "material",
       "description": "The still-burning heart of the Fire Elemental Lord Ignaros",
       "price": 200,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Glacial Shield": {
       "type": "offhand",
@@ -3492,13 +5449,22 @@
       "rarity": "legendary",
       "requirements": {
          "level": 7
-      }
+      },
+      "tags": [
+         "accessory",
+         "crown",
+         "magical",
+         "defensive"
+      ]
    },
    "Heart of Winter": {
       "type": "material",
       "description": "A crystal containing the essence of eternal winter",
       "price": 180,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Auriel's Wings": {
       "type": "accessory",
@@ -3509,7 +5475,11 @@
       "rarity": "legendary",
       "requirements": {
          "level": 9
-      }
+      },
+      "tags": [
+         "accessory",
+         "mobile"
+      ]
    },
    "Celestial Halo": {
       "type": "accessory",
@@ -3521,25 +5491,39 @@
       "rarity": "legendary",
       "requirements": {
          "level": 9
-      }
+      },
+      "tags": [
+         "accessory",
+         "magical",
+         "defensive"
+      ]
    },
    "Holy Relic": {
       "type": "material",
       "description": "A sacred relic from the celestial realm, humming with divine power",
       "price": 250,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Cosmic Core": {
       "type": "material",
       "description": "The condensed essence of cosmic power, pulsing with universal energy",
       "price": 500,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Timeless Shard": {
       "type": "material",
       "description": "A fragment of crystal that exists outside of time itself",
       "price": 450,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Infinity Gem": {
       "type": "offhand",
@@ -3568,7 +5552,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 5,
+      "mana_efficiency": 4,
+      "crit_chance": 2,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Bone Hatchet": {
       "type": "weapon",
@@ -3584,7 +5576,16 @@
       "aim_accuracy": 80,
       "weight": 5,
       "sharpness": 16,
-      "smiting": 0
+      "smiting": 0,
+      "armor_penetration": 9,
+      "cleave_chance": 10,
+      "crit_chance": 2,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Taiga Hunter's Bow": {
       "type": "weapon",
@@ -3600,7 +5601,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 6,
+      "armor_penetration": 4,
+      "multi_hit_chance": 5,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Frost Blade": {
       "type": "weapon",
@@ -3617,7 +5626,15 @@
       "weight": 3,
       "sharpness": 15,
       "smiting": 0,
-      "ice_attack": 17
+      "ice_attack": 17,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "ice"
+      ]
    },
    "Shaman's Totem Staff": {
       "type": "weapon",
@@ -3634,7 +5651,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 5,
+      "mana_efficiency": 4,
+      "crit_chance": 2,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Siberian War Axe": {
       "type": "weapon",
@@ -3650,7 +5675,16 @@
       "aim_accuracy": 80,
       "weight": 5,
       "sharpness": 18,
-      "smiting": 0
+      "smiting": 0,
+      "armor_penetration": 9,
+      "cleave_chance": 10,
+      "crit_chance": 2,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Permafrost Spear": {
       "type": "weapon",
@@ -3667,7 +5701,11 @@
       "weight": 4,
       "sharpness": 13,
       "smiting": 0,
-      "ice_attack": 17
+      "ice_attack": 17,
+      "tags": [
+         "physical",
+         "ice"
+      ]
    },
    "Snowbinable Fang Sword": {
       "type": "weapon",
@@ -3685,37 +5723,61 @@
       "weight": 3,
       "sharpness": 17,
       "smiting": 0,
-      "ice_attack": 20
+      "ice_attack": 20,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "ice"
+      ]
    },
    "Siberian Wolf Fang": {
       "type": "material",
       "description": "A large fang from a Siberian wolf, valued for its sharpness.",
       "price": 15,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Bear Claw": {
       "type": "material",
       "description": "A sturdy claw from a brown bear. Useful in crafting or trade.",
       "price": 20,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Bear Hide": {
       "type": "material",
       "description": "A thick brown bear hide, excellent for crafting warm armor.",
       "price": 35,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Lynx Pelt": {
       "type": "material",
       "description": "A soft spotted pelt from a taiga lynx. Prized by furriers.",
       "price": 25,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Permafrost Shard": {
       "type": "material",
       "description": "A chunk of ancient frozen ground from deep in the taiga. Cold to the touch.",
       "price": 30,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material",
+         "ice"
+      ]
    },
    "Taiga Herb": {
       "type": "consumable",
@@ -3723,43 +5785,69 @@
       "effect": "heal",
       "value": 35,
       "price": 18,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "consumable",
+         "healing"
+      ],
+      "min_value": 28,
+      "max_value": 42
    },
    "Shaman's Bone Totem": {
       "type": "material",
       "description": "A small carved bone totem imbued with frost shaman magic.",
       "price": 40,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material",
+         "bone"
+      ]
    },
    "Wolverine Hide": {
       "type": "material",
       "description": "A dense, water-repellent hide from a ferocious wolverine. Highly durable.",
       "price": 50,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Snow Leopard Pelt": {
       "type": "material",
       "description": "An exquisite pelt from a snow leopard. Worth a great deal to merchants.",
       "price": 80,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Permafrost Core": {
       "type": "material",
       "description": "The frozen heart of a permafrost golem. Still radiates intense cold.",
       "price": 100,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "ice"
+      ]
    },
    "Spirit Essence": {
       "type": "material",
       "description": "A crystallized drop of taiga spirit energy. Shimmers with faint green light.",
       "price": 60,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Snowbinable Heart": {
       "type": "material",
       "description": "The legendary frozen heart of the Snowbinable. Pulsates with ancient permafrost energy.",
       "price": 500,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Ottoman Scimitar": {
       "type": "weapon",
@@ -3775,7 +5863,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 15,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Yatagan": {
       "type": "weapon",
@@ -3791,7 +5886,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 15,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Ottoman Bow": {
       "type": "weapon",
@@ -3807,7 +5909,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 6,
+      "armor_penetration": 4,
+      "multi_hit_chance": 5,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Ottoman Lance": {
       "type": "weapon",
@@ -3823,7 +5933,10 @@
       "aim_accuracy": 88,
       "weight": 4,
       "sharpness": 14,
-      "smiting": 0
+      "smiting": 0,
+      "tags": [
+         "physical"
+      ]
    },
    "Corsair Cutlass": {
       "type": "weapon",
@@ -3839,7 +5952,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 15,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Desert Serpent Blade": {
       "type": "weapon",
@@ -3856,7 +5976,15 @@
       "weight": 3,
       "sharpness": 15,
       "smiting": 0,
-      "poison_attack": 12
+      "poison_attack": 12,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "poison"
+      ]
    },
    "Vizier Staff": {
       "type": "weapon",
@@ -3873,7 +6001,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 5,
+      "mana_efficiency": 4,
+      "crit_chance": 2,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Janissary Carbine": {
       "type": "weapon",
@@ -3889,7 +6025,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 16,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Sultan's Blade": {
       "type": "weapon",
@@ -3906,7 +6049,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 17,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Blade of Yildirim": {
       "type": "weapon",
@@ -3923,7 +6073,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 18,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 5,
+      "parry_chance": 6,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Ottoman Chainmail": {
       "type": "armor",
@@ -3934,7 +6091,18 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 3
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 3,
+      "physical_resistance": 0.088,
+      "fire_resistance": 0.055,
+      "ice_resistance": 0.055,
+      "lightning_resistance": 0.055,
+      "poison_resistance": 0.088,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Corsair Coat": {
       "type": "armor",
@@ -3945,7 +6113,18 @@
       "rarity": "common",
       "requirements": {
          "level": 2
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 3,
+      "physical_resistance": 0.08,
+      "fire_resistance": 0.05,
+      "ice_resistance": 0.05,
+      "lightning_resistance": 0.05,
+      "poison_resistance": 0.08,
+      "tags": [
+         "medium",
+         "physical"
+      ]
    },
    "Janissary Plate Armor": {
       "type": "armor",
@@ -3956,7 +6135,18 @@
       "rarity": "rare",
       "requirements": {
          "level": 7
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.195,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.065,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Vizier's Silken Robes": {
       "type": "armor",
@@ -3967,7 +6157,21 @@
       "rarity": "rare",
       "requirements": {
          "level": 6
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.039,
+      "fire_resistance": 0.13,
+      "ice_resistance": 0.13,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.104,
+      "magic_resistance": 0.156,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Sultan's Gilded Plate": {
       "type": "armor",
@@ -3979,7 +6183,18 @@
       "rarity": "legendary",
       "requirements": {
          "level": 13
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.24,
+      "fire_resistance": 0.08,
+      "ice_resistance": 0.08,
+      "lightning_resistance": 0.16,
+      "poison_resistance": 0.08,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Sultan's Signet Ring": {
       "type": "accessory",
@@ -3991,7 +6206,13 @@
       "rarity": "rare",
       "requirements": {
          "level": 8
-      }
+      },
+      "tags": [
+         "accessory",
+         "ring",
+         "offensive",
+         "defensive"
+      ]
    },
    "Corsair's Amulet": {
       "type": "accessory",
@@ -4002,7 +6223,13 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 3
-      }
+      },
+      "tags": [
+         "accessory",
+         "amulet",
+         "defensive",
+         "mobile"
+      ]
    },
    "Janissary Medallion": {
       "type": "accessory",
@@ -4013,7 +6240,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 6
-      }
+      },
+      "tags": [
+         "accessory",
+         "offensive",
+         "defensive"
+      ]
    },
    "Ottoman Turban of Wisdom": {
       "type": "accessory",
@@ -4024,79 +6256,121 @@
       "rarity": "rare",
       "requirements": {
          "level": 7
-      }
+      },
+      "tags": [
+         "accessory",
+         "magical",
+         "offensive"
+      ]
    },
    "Ottoman Gold Coin": {
       "type": "material",
       "description": "A gold coin bearing the Sultan's tughra. Valuable anywhere in the world.",
       "price": 25,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Spice Bundle": {
       "type": "material",
       "description": "A bundle of rare spices from the eastern trade routes. Worth a handsome sum.",
       "price": 40,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material",
+         "ice"
+      ]
    },
    "Janissary Badge": {
       "type": "material",
       "description": "The insignia badge of a Janissary soldier \u2014 proof of a hard-won fight.",
       "price": 30,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Desert Jewel": {
       "type": "material",
       "description": "A gemstone mined from the Anatolian plains, prized for its deep amber colour.",
       "price": 65,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Corsair Flag": {
       "type": "material",
       "description": "The battle flag of an Ottoman corsair ship. Collectors pay well for these.",
       "price": 35,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Slave Chain": {
       "type": "material",
       "description": "A rusted chain from Port Kostantora's slave market. A grim reminder of the cost of empire.",
       "price": 5,
-      "rarity": "junk"
+      "rarity": "junk",
+      "tags": [
+         "material"
+      ]
    },
    "Lion's Mane Trophy": {
       "type": "material",
       "description": "The magnificent mane of an Anatolian lion. A prized hunting trophy.",
       "price": 70,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Desert Serpent Fang": {
       "type": "material",
       "description": "The hollow venom fang of a desert serpent. Used in exotic poison-craft.",
       "price": 45,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Elephant Tusk": {
       "type": "material",
       "description": "An ivory tusk from an Ottoman war elephant. Immensely valuable.",
       "price": 150,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Sultan's Seal": {
       "type": "material",
       "description": "The personal wax seal of Sultan Yildirim. An extremely rare prize.",
       "price": 500,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Grand Vizier's Grimoire": {
       "type": "material",
       "description": "The spell-tome of Grand Vizier Karamanli, filled with forbidden Ottoman court magic.",
       "price": 400,
-      "rarity": "legendary"
+      "rarity": "legendary",
+      "tags": [
+         "material"
+      ]
    },
    "Ottoman Silk": {
       "type": "material",
       "description": "Exquisite silk from Ottoman looms. Merchants will pay a fortune.",
       "price": 55,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "The Fall of Constanplea": {
       "type": "book",
@@ -4185,7 +6459,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 21,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 9,
+      "parry_chance": 12,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical"
+      ]
    },
    "The River Kingdoms of Yixuan": {
       "type": "book",
@@ -4247,67 +6529,102 @@
       "type": "material",
       "description": "Lustrous silk from the eastern kingdoms, lighter than linen and stronger than you'd expect",
       "price": 35,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Bamboo Fiber": {
       "type": "material",
       "description": "Stripped and cured bamboo fibre, surprisingly tough and flexible",
       "price": 12,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Jade Fragment": {
       "type": "material",
       "description": "A chip of genuine eastern jade, prized for both its beauty and its alleged protective properties",
       "price": 60,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Eastern Spice Bundle": {
       "type": "material",
       "description": "A wrapped bundle of black pepper, star anise, and dried ginger from Yixuan markets",
       "price": 40,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material",
+         "ice"
+      ]
    },
    "Barbarian Iron Chunk": {
       "type": "material",
       "description": "Crudely smelted iron from the northern clans \u2014 impure, but their smiths know tricks with it",
       "price": 18,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Clan War-Paint Pigment": {
       "type": "material",
       "description": "Thick pigment used by the Varak clans in battle rituals. Said to carry old blessing",
       "price": 25,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Lotus Root": {
       "type": "material",
       "description": "The starchy root of the jade lotus plant, used in eastern medicines and cooking",
       "price": 30,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Rice Bundle": {
       "type": "material",
       "description": "A tied sheaf of harvested rice, ready for milling or trade",
       "price": 10,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material",
+         "ice"
+      ]
    },
    "Fermented Soybean Paste": {
       "type": "material",
       "description": "A pungent eastern ingredient made from aged soybeans. Essential for many Yixuan preparations",
       "price": 22,
-      "rarity": "common"
+      "rarity": "common",
+      "tags": [
+         "material"
+      ]
    },
    "Northern Fur Pelt": {
       "type": "material",
       "description": "A thick pelt from the northern wilderness, warm enough for any winter",
       "price": 45,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "material"
+      ]
    },
    "Barbarian Totem Shard": {
       "type": "material",
       "description": "A broken fragment of a clan totem pole, carved with northern spirit-marks",
       "price": 55,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
    },
    "Dao Blade": {
       "type": "weapon",
@@ -4323,7 +6640,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 15,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Jade Spear": {
       "type": "weapon",
@@ -4339,7 +6663,10 @@
       "aim_accuracy": 88,
       "weight": 4,
       "sharpness": 13,
-      "smiting": 0
+      "smiting": 0,
+      "tags": [
+         "physical"
+      ]
    },
    "Bamboo Staff": {
       "type": "weapon",
@@ -4356,7 +6683,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 5,
+      "mana_efficiency": 4,
+      "crit_chance": 2,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Serpent Fang Dagger": {
       "type": "weapon",
@@ -4373,7 +6708,17 @@
       "weight": 1,
       "sharpness": 21,
       "smiting": 0,
-      "poison_attack": 11
+      "poison_attack": 11,
+      "bleed_chance": 10,
+      "backstab_bonus": 7,
+      "crit_chance": 7,
+      "tags": [
+         "physical",
+         "piercing",
+         "finesse",
+         "one-handed",
+         "poison"
+      ]
    },
    "Silk-Wrapped Yari": {
       "type": "weapon",
@@ -4389,7 +6734,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 16,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Jade Dragon Sword": {
       "type": "weapon",
@@ -4407,7 +6759,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 19,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 6,
+      "parry_chance": 8,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical"
+      ]
    },
    "Clan Greataxe": {
       "type": "weapon",
@@ -4423,7 +6783,16 @@
       "aim_accuracy": 80,
       "weight": 5,
       "sharpness": 18,
-      "smiting": 0
+      "smiting": 0,
+      "armor_penetration": 9,
+      "cleave_chance": 10,
+      "crit_chance": 2,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Warbrand": {
       "type": "weapon",
@@ -4439,7 +6808,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 17,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Skull-Crusher Maul": {
       "type": "weapon",
@@ -4455,7 +6831,19 @@
       "aim_accuracy": 72,
       "weight": 9,
       "sharpness": 0,
-      "smiting": 8
+      "smiting": 8,
+      "stun_chance": 11,
+      "sweep_chance": 7,
+      "armor_crush": 4,
+      "knockback_chance": 9,
+      "crit_chance": 2,
+      "tags": [
+         "physical",
+         "bludgeoning",
+         "two-handed",
+         "heavy",
+         "holy"
+      ]
    },
    "Iron Horde Axe": {
       "type": "weapon",
@@ -4472,7 +6860,16 @@
       "aim_accuracy": 80,
       "weight": 5,
       "sharpness": 20,
-      "smiting": 0
+      "smiting": 0,
+      "armor_penetration": 12,
+      "cleave_chance": 13,
+      "crit_chance": 3,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Bear-Claw Gauntlet": {
       "type": "weapon",
@@ -4489,7 +6886,10 @@
       "aim_accuracy": 90,
       "weight": 0,
       "sharpness": 6,
-      "smiting": 0
+      "smiting": 0,
+      "tags": [
+         "physical"
+      ]
    },
    "Yixuan Silk Robe": {
       "type": "armor",
@@ -4501,7 +6901,21 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "armor_type": "robe",
+      "evasion_bonus": 6,
+      "physical_resistance": 0.039,
+      "fire_resistance": 0.13,
+      "ice_resistance": 0.13,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.104,
+      "magic_resistance": 0.156,
+      "tags": [
+         "robe",
+         "magical",
+         "magic_resistant",
+         "enchanted"
+      ]
    },
    "Lacquered Eastern Plate": {
       "type": "armor",
@@ -4512,7 +6926,18 @@
       "rarity": "rare",
       "requirements": {
          "level": 8
-      }
+      },
+      "armor_type": "heavy",
+      "evasion_bonus": 0,
+      "physical_resistance": 0.195,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.13,
+      "poison_resistance": 0.065,
+      "tags": [
+         "heavy",
+         "physical"
+      ]
    },
    "Barbarian War-Paint Leather": {
       "type": "armor",
@@ -4523,7 +6948,18 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 4
-      }
+      },
+      "armor_type": "light",
+      "evasion_bonus": 7,
+      "physical_resistance": 0.055,
+      "fire_resistance": 0.055,
+      "ice_resistance": 0.055,
+      "lightning_resistance": 0.055,
+      "poison_resistance": 0.11,
+      "tags": [
+         "light",
+         "physical"
+      ]
    },
    "Fur-Lined Clan Cloak": {
       "type": "armor",
@@ -4534,7 +6970,19 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 3
-      }
+      },
+      "armor_type": "cloak",
+      "evasion_bonus": 12,
+      "physical_resistance": 0.055,
+      "fire_resistance": 0.055,
+      "ice_resistance": 0.055,
+      "lightning_resistance": 0.055,
+      "poison_resistance": 0.11,
+      "tags": [
+         "light",
+         "evasive",
+         "physical"
+      ]
    },
    "Jade-Threaded Vest": {
       "type": "armor",
@@ -4545,7 +6993,19 @@
       "rarity": "rare",
       "requirements": {
          "level": 6
-      }
+      },
+      "armor_type": "medium",
+      "evasion_bonus": 4,
+      "physical_resistance": 0.104,
+      "fire_resistance": 0.065,
+      "ice_resistance": 0.065,
+      "lightning_resistance": 0.065,
+      "poison_resistance": 0.104,
+      "tags": [
+         "medium",
+         "physical",
+         "enchanted"
+      ]
    },
    "Jade Tea": {
       "type": "consumable",
@@ -4553,7 +7013,13 @@
       "effect": "mp_restore",
       "value": 45,
       "price": 55,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "consumable",
+         "mana"
+      ],
+      "min_value": 36,
+      "max_value": 54
    },
    "Eastern Herb Medicine": {
       "type": "consumable",
@@ -4561,7 +7027,13 @@
       "effect": "heal",
       "value": 75,
       "price": 65,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "consumable",
+         "healing"
+      ],
+      "min_value": 60,
+      "max_value": 90
    },
    "Warrior's Brew": {
       "type": "consumable",
@@ -4570,7 +7042,13 @@
       "value": 8,
       "duration": 8,
       "price": 80,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "consumable",
+         "offensive",
+         "alchemical"
+      ],
+      "on_use_buff": "attack_boost"
    },
    "Jade Lotus Draught": {
       "type": "consumable",
@@ -4578,7 +7056,14 @@
       "effect": "heal",
       "value": 150,
       "price": 180,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "consumable",
+         "healing",
+         "alchemical"
+      ],
+      "min_value": 120,
+      "max_value": 180
    },
    "Pepper Tonic": {
       "type": "consumable",
@@ -4587,7 +7072,13 @@
       "value": 5,
       "duration": 6,
       "price": 70,
-      "rarity": "uncommon"
+      "rarity": "uncommon",
+      "tags": [
+         "consumable",
+         "mobility",
+         "alchemical"
+      ],
+      "on_use_buff": "speed_boost"
    },
    "Kalovar Sabre": {
       "type": "weapon",
@@ -4603,7 +7094,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 15,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Corsair's Cutlass": {
       "type": "weapon",
@@ -4619,7 +7117,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 15,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Kalovar War Lance": {
       "type": "weapon",
@@ -4635,7 +7140,10 @@
       "aim_accuracy": 88,
       "weight": 4,
       "sharpness": 14,
-      "smiting": 0
+      "smiting": 0,
+      "tags": [
+         "physical"
+      ]
    },
    "Steppe Recurve Bow": {
       "type": "weapon",
@@ -4651,7 +7159,15 @@
       "aim_accuracy": 82,
       "weight": 2,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 6,
+      "armor_penetration": 4,
+      "multi_hit_chance": 5,
+      "tags": [
+         "physical",
+         "ranged",
+         "two-handed"
+      ]
    },
    "Bear Warrior Axe": {
       "type": "weapon",
@@ -4667,7 +7183,16 @@
       "aim_accuracy": 80,
       "weight": 5,
       "sharpness": 18,
-      "smiting": 0
+      "smiting": 0,
+      "armor_penetration": 9,
+      "cleave_chance": 10,
+      "crit_chance": 2,
+      "tags": [
+         "physical",
+         "slashing",
+         "two-handed",
+         "heavy"
+      ]
    },
    "Yixuan River Blade": {
       "type": "weapon",
@@ -4684,7 +7209,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 16,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Jade Court Rapier": {
       "type": "weapon",
@@ -4700,7 +7232,14 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 16,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed"
+      ]
    },
    "Constanplea Ghost Blade": {
       "type": "weapon",
@@ -4718,7 +7257,15 @@
       "aim_accuracy": 85,
       "weight": 3,
       "sharpness": 17,
-      "smiting": 0
+      "smiting": 0,
+      "crit_chance": 4,
+      "parry_chance": 5,
+      "tags": [
+         "physical",
+         "slashing",
+         "one-handed",
+         "magical"
+      ]
    },
    "Kalovar Grand Vizier's Staff": {
       "type": "weapon",
@@ -4737,7 +7284,15 @@
       "aim_accuracy": 84,
       "weight": 3,
       "sharpness": 0,
-      "smiting": 0
+      "smiting": 0,
+      "spell_power": 6,
+      "mana_efficiency": 5,
+      "crit_chance": 3,
+      "tags": [
+         "magical",
+         "arcane",
+         "two-handed"
+      ]
    },
    "Iron Horde Standard": {
       "type": "offhand",
@@ -4771,7 +7326,10 @@
       "exp_bonus": 50000,
       "price": 9999999999,
       "rarity": "legendary",
-      "event_item": true
+      "event_item": true,
+      "tags": [
+         "consumable"
+      ]
    },
    "Primordial Essence": {
       "type": "consumable",
@@ -4780,7 +7338,10 @@
       "value": 100000000000,
       "price": 9999999999,
       "rarity": "legendary",
-      "event_item": true
+      "event_item": true,
+      "tags": [
+         "consumable"
+      ]
    },
    "Grand Feast Platter": {
       "type": "consumable",
@@ -4793,7 +7354,10 @@
       "regen_turns": 10,
       "price": 9999999999,
       "rarity": "legendary",
-      "event_item": true
+      "event_item": true,
+      "tags": [
+         "consumable"
+      ]
    },
    "Saintly Blessing": {
       "type": "consumable",
@@ -4802,12 +7366,91 @@
       "exp_bonus": 25000,
       "price": 100000,
       "rarity": "legendary",
-      "event_item": true
+      "event_item": true,
+      "tags": [
+         "consumable"
+      ]
    },
    "Venom Sacs": {
       "type": "material",
       "description": "A pouch of venom sacs from the Swamp Hydra, dripping with deadly toxins.",
       "price": 120,
-      "rarity": "rare"
+      "rarity": "rare",
+      "tags": [
+         "material"
+      ]
+   },
+   "Battle Tonic": {
+      "type": "consumable",
+      "description": "A fiery red tonic that surges battle energy through your veins, boosting attack for several turns.",
+      "effect": "attack_boost",
+      "on_use_buff": "attack_boost",
+      "duration": 5,
+      "price": 75,
+      "rarity": "uncommon",
+      "tags": [
+         "consumable",
+         "buff",
+         "combat",
+         "attack"
+      ]
+   },
+   "Iron Skin Draught": {
+      "type": "consumable",
+      "description": "A thick grey draught brewed from iron bark and troll fat. Dramatically hardens your skin against physical blows.",
+      "effect": "iron_skin",
+      "on_use_buff": "iron_skin",
+      "duration": 4,
+      "price": 90,
+      "rarity": "uncommon",
+      "tags": [
+         "consumable",
+         "buff",
+         "defense",
+         "armor"
+      ]
+   },
+   "Swiftness Elixir": {
+      "type": "consumable",
+      "description": "A shimmering silver elixir that makes your movements blur with unnatural speed.",
+      "effect": "swiftness",
+      "on_use_buff": "swiftness",
+      "duration": 4,
+      "price": 85,
+      "rarity": "uncommon",
+      "tags": [
+         "consumable",
+         "buff",
+         "speed",
+         "evasion"
+      ]
+   },
+   "Empowerment Draught": {
+      "type": "consumable",
+      "description": "A deep violet draught crackling with arcane energy. Amplifies all your abilities for a brief time.",
+      "effect": "empower",
+      "on_use_buff": "empower",
+      "duration": 3,
+      "price": 140,
+      "rarity": "rare",
+      "tags": [
+         "consumable",
+         "buff",
+         "magic",
+         "powerful"
+      ]
+   },
+   "Large Mana Potion": {
+      "type": "consumable",
+      "description": "A large flask of glowing blue liquid that replenishes mana reserves.",
+      "effect": "mp_restore",
+      "min_value": 80,
+      "max_value": 120,
+      "price": 140,
+      "rarity": "uncommon",
+      "tags": [
+         "consumable",
+         "mana"
+      ]
    }
 }

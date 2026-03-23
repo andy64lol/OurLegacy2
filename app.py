@@ -554,6 +554,7 @@ GAME_DATA: dict[str, Any] = {
     "books": load_json("books.json"),
     "splash_texts": load_json_list("splash_text.json"),
     "events": load_json("events.json").get("events", []),
+    "effects": load_json("effects.json"),
 }
 
 GAME_VERSION = "2.5.1"
@@ -1049,22 +1050,39 @@ def _enemy_take_turn(enemy, player, player_effects, log):
     if enemy.get("is_boss"):
         boss_take_turn(enemy, player, player_effects, log)
     else:
-        dodge = player.get("dodge_chance", 0.0)
+        # Evasion check: player armor evasion_bonus + attr_evasion
+        evasion_pct = player.get("attr_evasion", 0) / 100.0
+        dodge = player.get("dodge_chance", 0.0) + evasion_pct
         if dodge > 0 and random.random() < dodge:
-            log.append(f"You dodge the {enemy['name']}'s attack!")
+            log.append(f"You evade the {enemy['name']}'s attack!")
             return
-        e_dmg = max(1, enemy["attack"] - player["defense"] + dice.between(-2, 4))
+        # Apply physical resistance from armor
+        phys_res = player.get("physical_resistance", 0.0)
+        e_raw = max(1, enemy["attack"] - player["defense"] + dice.between(-2, 4))
+        e_dmg = max(1, int(e_raw * (1.0 - phys_res)))
         if "shield" in player_effects:
-            absorb = player_effects["shield"].get("data", {}).get("absorb_amount", 0)
+            shield_data = player_effects["shield"].get("data", player_effects["shield"])
+            absorb = shield_data.get("absorb_amount", 0)
             reduction = min(absorb, e_dmg)
             e_dmg = max(0, e_dmg - reduction)
             if reduction > 0:
                 log.append(f"Your shield absorbs {reduction} damage!")
+        # Active buff absorb (parry etc.)
+        for buff in list(player.get("active_buffs", [])):
+            if e_dmg <= 0:
+                break
+            mods = buff.get("modifiers", {})
+            absorb = mods.get("absorb_amount", 0)
+            if absorb > 0:
+                use = min(absorb, e_dmg)
+                e_dmg -= use
+                mods["absorb_amount"] = absorb - use
         player["hp"] = max(0, player["hp"] - e_dmg)
         if e_dmg > 0:
-            log.append(f"The {enemy['name']} strikes you for {e_dmg} damage.")
+            res_note = f" (-{int(phys_res * 100)}% phys res)" if phys_res > 0 else ""
+            log.append(f"The {enemy['name']} strikes you for {e_dmg} damage{res_note}.")
         else:
-            log.append(f"The {enemy['name']} attacks but your shield holds!")
+            log.append(f"The {enemy['name']} attacks but your defences hold!")
 
 
 def boss_take_turn(enemy, player, player_effects, log):
@@ -1347,18 +1365,20 @@ def apply_status_effect(effects_dict, effect_key, turns=None):
 
 
 def process_turn_effects(entity, effects_dict, log, entity_label):
-    """Process all active status effects for an entity. Returns updated effects dict."""
+    """Process all active status effects for an entity. Returns True if stunned."""
     to_remove = []
     stunned = False
     for eff_key, eff_info in list(effects_dict.items()):
-        data = eff_info.get("data", {})
+        # Support both old nested-data format and new flat format
+        data = eff_info.get("data", eff_info)
         eff_type = data.get("type", "")
 
+        # ── Old nested-format effects ──────────────────────────────────────────
         if eff_type == "damage_over_time":
             dmg = data.get("damage", 5)
             entity["hp"] = max(0, entity["hp"] - dmg)
             log.append(
-                f"{entity_label} takes {dmg} {eff_key} damage! ({eff_info['turns'] - 1} turns left)"
+                f"{entity_label} takes {dmg} {eff_key} damage! ({max(0, eff_info['turns'] - 1)} turns left)"
             )
         elif eff_type == "healing_over_time":
             heal = data.get("heal_amount", 8)
@@ -1368,11 +1388,38 @@ def process_turn_effects(entity, effects_dict, log, entity_label):
             stunned = True
             log.append(f"{entity_label} is stunned and cannot act!")
 
+        # ── New flat-format proc effects ───────────────────────────────────────
+        elif eff_key == "bleed":
+            dmg = eff_info.get("damage", 6)
+            entity["hp"] = max(0, entity["hp"] - dmg)
+            turns_left = max(0, eff_info["turns"] - 1)
+            log.append(f"{entity_label} bleeds for {dmg} damage! ({turns_left} turns left)")
+
+        elif eff_key == "daze":
+            stunned = True
+            log.append(f"{entity_label} is dazed and cannot act this turn!")
+
+        elif eff_key == "weaken":
+            # Weaken reduces effective defense — tracked in effect, applied in damage calc
+            turns_left = max(0, eff_info["turns"] - 1)
+            if turns_left > 0:
+                log.append(f"{entity_label}'s defences remain weakened! ({turns_left} turns left)")
+
+        elif eff_key == "shaken":
+            turns_left = max(0, eff_info["turns"] - 1)
+            if turns_left > 0:
+                log.append(f"{entity_label} is still shaken! ({turns_left} turns left)")
+
+        elif eff_key == "armor_crushed":
+            turns_left = max(0, eff_info["turns"] - 1)
+            if turns_left > 0:
+                log.append(f"{entity_label}'s armour remains crushed! ({turns_left} turns left)")
+
         eff_info["turns"] -= 1
         if eff_info["turns"] <= 0:
             to_remove.append(eff_key)
             if eff_type == "stat_boost":
-                # Revert stat boosts
+                # Revert stat boosts from old format
                 for stat_key in ("defense_bonus", "attack_bonus", "speed_bonus"):
                     if stat_key in data:
                         stat = stat_key.replace("_bonus", "")
@@ -1395,6 +1442,10 @@ STAT_BONUSES = [
     ("defense_penalty", "defense", -1),
     ("speed_penalty", "speed", -1),
     ("spell_power_bonus", "attr_spell_power", 1),
+    # New equipment stats
+    ("evasion_bonus", "attr_evasion", 1),
+    ("spell_power", "attr_spell_power", 1),
+    ("crit_chance", "attr_crit_chance", 1),
 ]
 
 
@@ -1404,7 +1455,7 @@ def apply_item_bonuses(player, item_data, direction=1):
         val = item_data.get(bonus_key, 0)
         if val:
             player[stat_key] = max(
-                1, player.get(stat_key, 0) + int(val) * sign * direction
+                0, player.get(stat_key, 0) + int(val) * sign * direction
             )
     hp_bonus = item_data.get("hp_bonus", 0)
     if hp_bonus and direction == 1:
@@ -1412,6 +1463,15 @@ def apply_item_bonuses(player, item_data, direction=1):
     mp_bonus = item_data.get("mp_bonus", 0)
     if mp_bonus and direction == 1:
         player["mp"] = min(player["mp"] + mp_bonus, player["max_mp"])
+
+    # Elemental resistances (armor only) — clamp to [0, 0.9]
+    res_keys = ("physical_resistance", "fire_resistance", "ice_resistance",
+                "lightning_resistance", "poison_resistance", "magic_resistance")
+    for rk in res_keys:
+        val = item_data.get(rk, 0.0)
+        if val:
+            current = player.get(rk, 0.0)
+            player[rk] = max(0.0, min(0.9, current + val * direction))
 
 
 def _ensure_equipment_slots(player):
@@ -2545,6 +2605,9 @@ def _item_stat_summary(item_data):
     if not isinstance(item_data, dict):
         return ""
     parts = []
+    itype = item_data.get("type", "")
+
+    # Core stat bonuses/penalties (all equippable types)
     for bonus_key, label in [
         ("attack_bonus", "ATK"),
         ("defense_bonus", "DEF"),
@@ -2552,38 +2615,108 @@ def _item_stat_summary(item_data):
         ("hp_bonus", "HP"),
         ("mp_bonus", "MP"),
         ("spell_power_bonus", "SpellPwr"),
+        ("spell_power", "SpellPwr"),
         ("defense_penalty", "-DEF"),
         ("speed_penalty", "-SPD"),
-        ("sharpness", "Sharp"),
-        ("smiting", "Smite"),
-        ("fire_attack", "Fire"),
-        ("ice_attack", "Ice"),
-        ("lightning_attack", "Lightning"),
-        ("poison_attack", "Poison"),
     ]:
         val = item_data.get(bonus_key)
         if val:
             sign = "+" if "penalty" not in bonus_key else "-"
             parts.append(f"{sign}{abs(int(val))} {label}")
-    effect = item_data.get("effect")
-    value = item_data.get("value", 0)
-    duration = item_data.get("duration", 0)
-    if effect == "heal":
-        parts.append(f"Heals {value} HP")
-    elif effect == "mp_restore":
-        parts.append(f"Restores {value} MP")
-    elif effect == "full_restore":
-        parts.append("Full HP & MP restore")
-    elif effect == "defense_boost":
-        parts.append(f"+{value} DEF ({duration} turns)")
-    elif effect == "attack_boost":
-        parts.append(f"+{value} ATK ({duration} turns)")
-    elif effect == "speed_boost":
-        parts.append(f"+{value} SPD ({duration} turns)")
-    elif effect == "grant_exp":
-        parts.append(f"+{value} EXP")
-    elif effect == "exp_bonus":
-        parts.append(f"+{int(value * 100)}% EXP bonus")
+
+    # Weapon-specific stats
+    if itype == "weapon":
+        for bonus_key, label in [
+            ("sharpness", "Sharp"),
+            ("smiting", "Smite"),
+            ("fire_attack", "Fire"),
+            ("ice_attack", "Ice"),
+            ("lightning_attack", "Lightning"),
+            ("poison_attack", "Poison"),
+        ]:
+            val = item_data.get(bonus_key)
+            if val:
+                parts.append(f"+{int(val)} {label}")
+
+        # Weapon-type proc attributes
+        wtype = item_data.get("weapon_type", "")
+        for proc_key, label in [
+            ("crit_chance", "Crit"),
+            ("bleed_chance", "Bleed"),
+            ("stun_chance", "Stun"),
+            ("sweep_chance", "Sweep"),
+            ("knockback_chance", "Knockback"),
+            ("armor_penetration", "ArmorPen"),
+            ("armor_crush", "ArmorCrush"),
+            ("cleave_chance", "Cleave"),
+            ("parry_chance", "Parry"),
+            ("backstab_bonus", "Backstab"),
+            ("multi_hit_chance", "MultiHit"),
+            ("inspire_chance", "Inspire"),
+            ("harmony_bonus", "Harmony"),
+            ("mana_efficiency", "ManaEff"),
+        ]:
+            val = item_data.get(proc_key)
+            if val:
+                parts.append(f"{val}% {label}" if "chance" in proc_key or proc_key == "armor_penetration" or proc_key == "mana_efficiency" else f"+{val} {label}")
+
+    # Armor-specific stats
+    elif itype == "armor":
+        armor_type = item_data.get("armor_type", "")
+        if armor_type:
+            parts.append(f"[{armor_type.title()}]")
+        eva = item_data.get("evasion_bonus", 0)
+        if eva:
+            parts.append(f"+{eva}% Evasion")
+        for res_key, label in [
+            ("physical_resistance", "PhysRes"),
+            ("fire_resistance", "FireRes"),
+            ("ice_resistance", "IceRes"),
+            ("lightning_resistance", "LightRes"),
+            ("poison_resistance", "PoisonRes"),
+            ("magic_resistance", "MagicRes"),
+        ]:
+            val = item_data.get(res_key, 0)
+            if val:
+                parts.append(f"+{int(val * 100)}% {label}")
+
+    # Consumable effects
+    elif itype == "consumable":
+        effect = item_data.get("effect")
+        min_v = item_data.get("min_value", item_data.get("value", 0))
+        max_v = item_data.get("max_value", item_data.get("value", 0))
+        value = item_data.get("value", 0)
+        duration = item_data.get("duration", 0)
+        on_use_buff = item_data.get("on_use_buff")
+
+        if effect == "heal":
+            if min_v != max_v:
+                parts.append(f"Heals {min_v}–{max_v} HP")
+            else:
+                parts.append(f"Heals {value} HP")
+        elif effect == "mp_restore":
+            if min_v != max_v:
+                parts.append(f"Restores {min_v}–{max_v} MP")
+            else:
+                parts.append(f"Restores {value} MP")
+        elif effect == "full_restore":
+            parts.append("Full HP & MP restore")
+        elif effect == "defense_boost":
+            parts.append(f"+{value} DEF ({duration} turns)")
+        elif effect == "attack_boost":
+            parts.append(f"+{value} ATK ({duration} turns)")
+        elif effect == "speed_boost":
+            parts.append(f"+{value} SPD ({duration} turns)")
+        elif effect == "grant_exp":
+            parts.append(f"+{value} EXP")
+        elif effect == "exp_bonus":
+            parts.append(f"+{int(value * 100)}% EXP bonus")
+        elif effect and effect not in ("birthday_cake", "grand_feast"):
+            parts.append(f"Effect: {effect.replace('_', ' ').title()}")
+
+        if on_use_buff:
+            parts.append(f"Applies: {on_use_buff.replace('_', ' ').title()}")
+
     return ", ".join(parts)
 
 
@@ -2687,6 +2820,105 @@ def _get_weapon_combat_effects(player, enemy):
             effects.append((bonus, f"Poison seeps in. +{bonus} poison damage."))
 
     return effects
+
+
+def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
+    """
+    Roll weapon-type proc chances and apply status effects to the enemy.
+    Returns a list of message strings for the battle log.
+    Modifies enemy_effects dict in place.
+    """
+    equipment = player.get("equipment", {})
+    weapon_name = equipment.get("weapon")
+    if not weapon_name:
+        return []
+    weapon = GAME_DATA["items"].get(weapon_name)
+    if not isinstance(weapon, dict):
+        return []
+
+    messages = []
+    wtype = weapon.get("weapon_type", "sword")
+    tags = weapon.get("tags", [])
+    enemy_tags = set(enemy.get("tags", []))
+
+    def _roll(chance_pct):
+        return random.random() * 100 < chance_pct
+
+    # ── Bleed (daggers, throwing, sharp weapons) ──────────────────────────────
+    bleed_chance = weapon.get("bleed_chance", 0)
+    if bleed_chance and _roll(bleed_chance):
+        if "construct" not in enemy_tags and "undead" not in enemy_tags:
+            stacks = enemy_effects.get("bleed", {}).get("stacks", 0)
+            enemy_effects["bleed"] = {"turns": 4, "damage": 6 + stacks * 2, "stacks": min(stacks + 1, 3)}
+            messages.append(f"Your blade opens a deep wound! [{enemy.get('name', 'Enemy')} is bleeding]")
+
+    # ── Stun / Daze (maces, warhammers) ──────────────────────────────────────
+    stun_chance = weapon.get("stun_chance", 0)
+    if stun_chance and _roll(stun_chance):
+        if "construct" not in enemy_tags:
+            existing = enemy_effects.get("daze", {}).get("turns", 0)
+            enemy_effects["daze"] = {"turns": max(1, existing + 1)}
+            messages.append(f"Your crushing blow dazes {enemy.get('name', 'the enemy')}! [Dazed — loses next action]")
+
+    # ── Weaken (axes — armor penetration leaves target exposed) ──────────────
+    cleave_chance = weapon.get("cleave_chance", 0)
+    if cleave_chance and _roll(cleave_chance):
+        pen = weapon.get("armor_penetration", 10)
+        existing = enemy_effects.get("weaken", {}).get("turns", 0)
+        enemy_effects["weaken"] = {"turns": max(existing, 4), "def_reduction": max(enemy_effects.get("weaken", {}).get("def_reduction", 0), int(pen * 0.6))}
+        messages.append(f"Your cleaving strike weakens {enemy.get('name', 'the enemy')}'s defences! [-{int(pen * 0.6)} DEF for 4 turns]")
+
+    # ── Knockback / Shaken (greatswords, warhammers) ──────────────────────────
+    knockback_chance = weapon.get("knockback_chance", 0)
+    if knockback_chance and _roll(knockback_chance):
+        enemy_effects["shaken"] = {"turns": 3, "acc_penalty": 20}
+        messages.append(f"{enemy.get('name', 'The enemy')} is knocked back and shaken! [-20% accuracy for 3 turns]")
+
+    # ── Sweep damage (greatswords, warhammers — bonus hit) ────────────────────
+    sweep_chance = weapon.get("sweep_chance", 0)
+    if sweep_chance and _roll(sweep_chance):
+        sweep_dmg = max(1, int(player.get("attack", 10) * 0.35))
+        enemy["hp"] = max(0, enemy.get("hp", 1) - sweep_dmg)
+        messages.append(f"Your sweeping blow strikes again for {sweep_dmg} bonus damage!")
+
+    # ── Multi-hit (throwing weapons) ──────────────────────────────────────────
+    multi_hit_chance = weapon.get("multi_hit_chance", 0)
+    if multi_hit_chance and _roll(multi_hit_chance):
+        hit_dmg = max(1, int(player.get("attack", 10) * 0.25))
+        enemy["hp"] = max(0, enemy.get("hp", 1) - hit_dmg)
+        messages.append(f"Your second projectile strikes for {hit_dmg} extra damage!")
+
+    # ── Parry (swords — temporary defense buff for player) ────────────────────
+    parry_chance = weapon.get("parry_chance", 0)
+    if parry_chance and _roll(parry_chance):
+        existing_buffs = player.get("active_buffs", [])
+        existing_buffs.append({"name": "Parry", "duration": 2, "modifiers": {"defense_bonus": 10, "absorb_amount": 15}})
+        player["active_buffs"] = existing_buffs
+        messages.append("You deflect the next blow with expert swordsmanship! [Parry: +10 DEF, absorbs 15 dmg for 2 turns]")
+
+    # ── Inspire (bard instruments) ────────────────────────────────────────────
+    inspire_chance = weapon.get("inspire_chance", 0)
+    if inspire_chance and _roll(inspire_chance):
+        inspire_bonus = weapon.get("harmony_bonus", 8)
+        existing_buffs = player.get("active_buffs", [])
+        existing_buffs.append({"name": "Inspire", "duration": 6, "modifiers": {"attack_bonus": inspire_bonus, "speed_bonus": int(inspire_bonus * 0.5)}})
+        player["active_buffs"] = existing_buffs
+        messages.append(f"Your melody inspires courage! [+{inspire_bonus} ATK, +{int(inspire_bonus * 0.5)} SPD for 6 turns]")
+
+    # ── Armor Crush (maces — reduces enemy effective defense) ─────────────────
+    armor_crush = weapon.get("armor_crush", 0)
+    if armor_crush and _roll(20):
+        existing = enemy_effects.get("armor_crushed", {}).get("def_reduction", 0)
+        enemy_effects["armor_crushed"] = {"turns": 5, "def_reduction": existing + armor_crush}
+        messages.append(f"You crush through the armour! [{enemy.get('name', 'Enemy')} defence -{armor_crush} for 5 turns]")
+
+    # ── Backstab (daggers — only if enemy is not yet in combat or is shaken) ──
+    backstab_bonus = weapon.get("backstab_bonus", 0)
+    if backstab_bonus and ("shaken" in enemy_effects or "daze" in enemy_effects):
+        enemy["hp"] = max(0, enemy.get("hp", 1) - backstab_bonus)
+        messages.append(f"You exploit the opening for a deadly backstab! +{backstab_bonus} bonus damage!")
+
+    return messages
 
 
 def _check_weapon_accuracy(player, enemy):
@@ -3413,6 +3645,43 @@ def action_use_item():
         )
     elif item_type == "book":
         return redirect(url_for("action_read_book") + f"?item={item_name}")
+    elif item_type == "consumable":
+        # Generic effect-driven consumable handling
+        effect = item_data.get("effect", "")
+        value = item_data.get("value", 0)
+        min_v = item_data.get("min_value", value)
+        max_v = item_data.get("max_value", value)
+        duration = item_data.get("duration", 0)
+        on_use_buff = item_data.get("on_use_buff", "")
+        consumed = True
+
+        if effect == "heal":
+            heal = dice.between(min_v, max_v) if min_v != max_v else value
+            player["hp"] = min(player["max_hp"], player["hp"] + heal)
+            add_message(f"You use the {item_name} and recover {heal} HP.", "var(--green-bright)")
+        elif effect == "mp_restore":
+            restore = dice.between(min_v, max_v) if min_v != max_v else value
+            player["mp"] = min(player["max_mp"], player["mp"] + restore)
+            add_message(f"You use the {item_name} and restore {restore} MP.", "var(--mana-bright)")
+        elif effect == "full_restore":
+            healed = player["max_hp"] - player["hp"]
+            mped = player["max_mp"] - player["mp"]
+            player["hp"] = player["max_hp"]
+            player["mp"] = player["max_mp"]
+            add_message(f"You use the {item_name}. Fully restored! (+{healed} HP, +{mped} MP)", "var(--gold)")
+        elif on_use_buff:
+            effects_data = GAME_DATA.get("effects", {})
+            buff_def = effects_data.get(on_use_buff, {})
+            dur = duration or buff_def.get("duration", 5)
+            mods = {k: v for k, v in buff_def.items() if k not in ("description", "type", "duration", "tags")}
+            player.setdefault("active_buffs", []).append({"name": on_use_buff.replace("_", " ").title(), "duration": dur, "modifiers": mods})
+            add_message(f"You use the {item_name}. {buff_def.get('description', 'A buff is applied!')} ({dur} turns)", "var(--green-bright)")
+        else:
+            consumed = False
+            add_message(f"You cannot use {item_name} outside of battle.", "var(--text-dim)")
+
+        if consumed:
+            player["inventory"].remove(item_name)
     else:
         add_message(f"You cannot use {item_name} outside of battle.", "var(--text-dim)")
 
@@ -4027,7 +4296,24 @@ def battle_attack():
         if not _check_weapon_accuracy(player, enemy):
             log.append(f"You swing at the {enemy_name} but miss!")
         else:
-            p_dmg = max(1, player["attack"] - enemy["defense"] + dice.between(-3, 6))
+            # Factor in weaken / armor_crushed debuffs on enemy defense
+            eff_enemy_def = enemy["defense"]
+            weaken_eff = enemy_effects.get("weaken", {})
+            if weaken_eff.get("turns", 0) > 0:
+                eff_enemy_def = max(0, eff_enemy_def - weaken_eff.get("def_reduction", 0))
+            armor_crush_eff = enemy_effects.get("armor_crushed", {})
+            if armor_crush_eff.get("turns", 0) > 0:
+                eff_enemy_def = max(0, eff_enemy_def - armor_crush_eff.get("def_reduction", 0))
+
+            # Armor penetration ignores a % of remaining defense
+            armor_pen_pct = 0
+            eq_weapon = GAME_DATA["items"].get(player.get("equipment", {}).get("weapon", ""), {})
+            if isinstance(eq_weapon, dict):
+                armor_pen_pct = eq_weapon.get("armor_penetration", 0)
+            if armor_pen_pct:
+                eff_enemy_def = int(eff_enemy_def * (1 - armor_pen_pct / 100.0))
+
+            p_dmg = max(1, player["attack"] - eff_enemy_def + dice.between(-3, 6))
             base_crit_rate = 0.10 + min(0.40, player.get("attr_crit_chance", 0) / 100.0)
             crit = random.random() < base_crit_rate
             if crit:
@@ -4047,6 +4333,11 @@ def battle_attack():
                     log.append(bonus_msg)
             if total_bonus > 0:
                 enemy["hp"] = max(0, enemy["hp"] - total_bonus)
+
+            # ── On-hit proc effects (bleed, stun, weaken, inspire, etc.) ─────
+            proc_msgs = _get_weapon_on_hit_procs(player, enemy, enemy_effects)
+            for msg in proc_msgs:
+                log.append(msg)
 
         if enemy["hp"] <= 0:
             session["battle_player_effects"] = player_effects
@@ -4175,24 +4466,56 @@ def battle_use_item():
     if item_name not in player["inventory"]:
         log.append("You reach for the item but it is not there.")
     else:
-        lower = item_name.lower()
-        if "health" in lower or ("potion" in lower and "mana" not in lower):
-            heal = dice.between(40, 70)
-            if "large" in lower or "greater" in lower:
-                heal = dice.between(70, 130)
+        item_data = GAME_DATA["items"].get(item_name, {})
+        if not isinstance(item_data, dict):
+            item_data = {}
+
+        effect = item_data.get("effect", "")
+        value = item_data.get("value", 0)
+        min_v = item_data.get("min_value", value)
+        max_v = item_data.get("max_value", value)
+        duration = item_data.get("duration", 0)
+        on_use_buff = item_data.get("on_use_buff", "")
+        used = True
+
+        if effect == "heal":
+            heal = dice.between(min_v, max_v) if min_v != max_v else value
             player["hp"] = min(player["max_hp"], player["hp"] + heal)
-            player["inventory"].remove(item_name)
             log.append(f"You quaff the {item_name}, recovering {heal} HP.")
-        elif "mana" in lower:
-            restore = dice.between(25, 50)
+        elif effect == "mp_restore":
+            restore = dice.between(min_v, max_v) if min_v != max_v else value
             player["mp"] = min(player["max_mp"], player["mp"] + restore)
-            player["inventory"].remove(item_name)
             log.append(f"You drink the {item_name}, restoring {restore} MP.")
+        elif effect == "full_restore":
+            healed = player["max_hp"] - player["hp"]
+            mped = player["max_mp"] - player["mp"]
+            player["hp"] = player["max_hp"]
+            player["mp"] = player["max_mp"]
+            log.append(f"You use the {item_name}. Fully restored! (+{healed} HP, +{mped} MP)")
+        elif on_use_buff:
+            effects_data = GAME_DATA.get("effects", {})
+            buff_def = effects_data.get(on_use_buff, {})
+            dur = duration or buff_def.get("duration", 5)
+            mods = {k: v for k, v in buff_def.items() if k not in ("description", "type", "duration", "tags")}
+            player.setdefault("active_buffs", []).append({"name": on_use_buff.replace("_", " ").title(), "duration": dur, "modifiers": mods})
+            log.append(f"You use the {item_name}. {buff_def.get('description', 'A buff is applied!')} ({dur} turns)")
+        elif item_data.get("type") == "consumable":
+            # Fallback: name-based healing
+            lower = item_name.lower()
+            if "mana" in lower or "mp" in lower:
+                restore = dice.between(25, 50)
+                player["mp"] = min(player["max_mp"], player["mp"] + restore)
+                log.append(f"You drink the {item_name}, restoring {restore} MP.")
+            else:
+                heal = dice.between(40, 80)
+                player["hp"] = min(player["max_hp"], player["hp"] + heal)
+                log.append(f"You use the {item_name}, regaining {heal} HP.")
         else:
-            heal = dice.between(50, 100)
-            player["hp"] = min(player["max_hp"], player["hp"] + heal)
+            used = False
+            log.append(f"You cannot use {item_name} in battle.")
+
+        if used:
             player["inventory"].remove(item_name)
-            log.append(f"You use the {item_name}, regaining {heal} HP.")
 
         _enemy_take_turn(enemy, player, player_effects, log)
 

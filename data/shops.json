@@ -16,7 +16,12 @@
       "Steel Dagger",
       "Leather Armor",
       "Wooden Shield",
-      "The Origin of Eldenmoor"
+      "The Origin of Eldenmoor",
+      "Battle Tonic",
+      "Iron Skin Draught",
+      "Swiftness Elixir",
+      "Empowerment Draught",
+      "Large Mana Potion"
     ],
     "max_buy": 10
   },
@@ -295,7 +300,11 @@
       "Origins of the Osman People",
       "Chronicles of Byzantra",
       "The Fall of Constanplea",
-      "The New Order: Life in Kostantora"
+      "The New Order: Life in Kostantora",
+      "Battle Tonic",
+      "Iron Skin Draught",
+      "Swiftness Elixir",
+      "Empowerment Draught"
     ],
     "max_buy": 15
   }
