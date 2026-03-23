@@ -11,6 +11,10 @@
       "Health Potion",
       "Goblin Ear",
       "Hunting Knife"
+    ],
+    "tags": [
+      "humanoid",
+      "small"
     ]
   },
   "orc": {
@@ -25,6 +29,10 @@
       "Orc Tooth",
       "Iron Axe",
       "Warrior Spear"
+    ],
+    "tags": [
+      "humanoid",
+      "strong"
     ]
   },
   "skeleton": {
@@ -39,6 +47,10 @@
       "Bone Fragment",
       "Rusty Dagger",
       "Steel Hunting Knife"
+    ],
+    "tags": [
+      "undead",
+      "brittle"
     ]
   },
   "wolf": {
@@ -53,6 +65,10 @@
       "Wolf Fang",
       "Health Potion",
       "Hunting Spear"
+    ],
+    "tags": [
+      "beast",
+      "pack"
     ]
   },
   "bandit": {
@@ -67,6 +83,10 @@
       "Steel Dagger",
       "Mana Potion",
       "Assassin Hunting Knife"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   },
   "troll": {
@@ -81,6 +101,10 @@
       "Troll Club",
       "Large Health Potion",
       "Tri-point Spear"
+    ],
+    "tags": [
+      "giant",
+      "regenerating"
     ]
   },
   "dark_mage": {
@@ -95,6 +119,10 @@
       "Magic Staff",
       "Dark Crystal",
       "Mana Potion"
+    ],
+    "tags": [
+      "humanoid",
+      "spellcaster"
     ]
   },
   "ice_elemental": {
@@ -109,6 +137,11 @@
       "Crystalline Wand",
       "Ice Crystal",
       "Frost Potion"
+    ],
+    "tags": [
+      "elemental",
+      "ice",
+      "cold"
     ]
   },
   "shadow_knight": {
@@ -122,6 +155,11 @@
     "loot_table": [
       "Shadow Blade",
       "Dark Crystal"
+    ],
+    "tags": [
+      "undead",
+      "humanoid",
+      "armored"
     ]
   },
   "fire_wraith": {
@@ -136,6 +174,11 @@
       "Spellsword",
       "Fire Gem",
       "Dragon Spear"
+    ],
+    "tags": [
+      "undead",
+      "fire",
+      "spectral"
     ]
   },
   "goblin_archer": {
@@ -150,6 +193,11 @@
       "Light Crossbow",
       "Health Potion",
       "Hunter's Bow"
+    ],
+    "tags": [
+      "humanoid",
+      "small",
+      "ranged"
     ]
   },
   "ancient_golem": {
@@ -163,6 +211,10 @@
     "loot_table": [
       "Golem Core",
       "Ancient Relic"
+    ],
+    "tags": [
+      "construct",
+      "armored"
     ]
   },
   "dragon": {
@@ -176,6 +228,10 @@
     "loot_table": [
       "Dragon Scale",
       "Dragon Bone"
+    ],
+    "tags": [
+      "dragon",
+      "flying"
     ]
   },
   "evil_sorcerer": {
@@ -189,6 +245,10 @@
     "loot_table": [
       "Sorcerous Tome",
       "Staff of Power"
+    ],
+    "tags": [
+      "humanoid",
+      "spellcaster"
     ]
   },
   "giant_spider": {
@@ -203,6 +263,10 @@
       "Venom Sac",
       "Spider Silk",
       "Steel Dagger"
+    ],
+    "tags": [
+      "beast",
+      "poisonous"
     ]
   },
   "swamp_rat": {
@@ -216,6 +280,10 @@
     "loot_table": [
       "Rat Tail",
       "Health Potion"
+    ],
+    "tags": [
+      "beast",
+      "small"
     ]
   },
   "poison_elemental": {
@@ -230,6 +298,10 @@
       "Poison Crystal",
       "Frost Potion",
       "Venom Sac"
+    ],
+    "tags": [
+      "elemental",
+      "poisonous"
     ]
   },
   "ghost": {
@@ -244,6 +316,11 @@
       "Soul Fragment",
       "Bone Fragment",
       "Spirit Dust"
+    ],
+    "tags": [
+      "undead",
+      "spectral",
+      "ethereal"
     ]
   },
   "wraith": {
@@ -258,6 +335,11 @@
       "Soul Fragment",
       "Dark Crystal",
       "Shadow Cloak"
+    ],
+    "tags": [
+      "undead",
+      "spectral",
+      "ethereal"
     ]
   },
   "death_knight": {
@@ -272,6 +354,11 @@
       "Death Knight's Shield",
       "Bone Crown",
       "Mourning Blade"
+    ],
+    "tags": [
+      "undead",
+      "humanoid",
+      "armored"
     ]
   },
   "lich": {
@@ -286,6 +373,10 @@
       "Skull Staff",
       "Bone Crown",
       "Soul Orb"
+    ],
+    "tags": [
+      "undead",
+      "spellcaster"
     ]
   },
   "spectral_wyrm": {
@@ -300,6 +391,11 @@
       "Dragon Bone",
       "Ancient Dragon Bone",
       "Spectral Dragon Scale"
+    ],
+    "tags": [
+      "undead",
+      "dragon",
+      "spectral"
     ]
   },
   "infernal_imp": {
@@ -314,6 +410,11 @@
       "Demon Blood",
       "Fire Gem",
       "Hellfire Essence"
+    ],
+    "tags": [
+      "demon",
+      "fire",
+      "small"
     ]
   },
   "hell_knight": {
@@ -328,6 +429,11 @@
       "Infernal Blade",
       "Demon Blood",
       "Cursed Amulet"
+    ],
+    "tags": [
+      "demon",
+      "humanoid",
+      "armored"
     ]
   },
   "fire_demon": {
@@ -342,6 +448,10 @@
       "Demon Heart",
       "Fire Gem",
       "Azgorath's Cloak"
+    ],
+    "tags": [
+      "demon",
+      "fire"
     ]
   },
   "wind_elemental": {
@@ -356,6 +466,10 @@
       "Wind Elemental Essence",
       "Eternal Feather",
       "Zephyr's Scale"
+    ],
+    "tags": [
+      "elemental",
+      "flying"
     ]
   },
   "storm_dragon": {
@@ -371,6 +485,11 @@
       "Lightning Crystal",
       "Dragon Scale",
       "Wind Dragon's Heart"
+    ],
+    "tags": [
+      "dragon",
+      "lightning",
+      "flying"
     ]
   },
   "mountain_goat": {
@@ -385,6 +504,9 @@
       "Goat Horn",
       "Mountain Herbs",
       "Hunting Spear"
+    ],
+    "tags": [
+      "beast"
     ]
   },
   "rock_golem": {
@@ -399,6 +521,10 @@
       "Golem Core",
       "Stone Shield",
       "Ancient Relic"
+    ],
+    "tags": [
+      "construct",
+      "armored"
     ]
   },
   "cave_bear": {
@@ -413,6 +539,10 @@
       "Bear Claw",
       "Bear Pelt",
       "Large Health Potion"
+    ],
+    "tags": [
+      "beast",
+      "strong"
     ]
   },
   "thunder_bird": {
@@ -427,6 +557,11 @@
       "Lightning Crystal",
       "Eternal Feather",
       "Stormcloud Cloak"
+    ],
+    "tags": [
+      "beast",
+      "lightning",
+      "flying"
     ]
   },
   "lightning_golem": {
@@ -441,6 +576,10 @@
       "Lightning Crystal",
       "Storm Elemental Core",
       "Thundercloud Cloak"
+    ],
+    "tags": [
+      "construct",
+      "lightning"
     ]
   },
   "thief": {
@@ -453,6 +592,10 @@
     "gold_reward": 30,
     "loot_table": [
       "Steel Dagger"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   },
   "storm_elemental": {
@@ -467,6 +610,10 @@
       "Storm Elemental Core",
       "Lightning Crystal",
       "Spirit Dust"
+    ],
+    "tags": [
+      "elemental",
+      "lightning"
     ]
   },
   "sand_viper": {
@@ -480,6 +627,10 @@
     "loot_table": [
       "Serpent Tail",
       "Venom Sac"
+    ],
+    "tags": [
+      "beast",
+      "poisonous"
     ]
   },
   "ninja": {
@@ -492,6 +643,10 @@
     "loot_table": [
       "Ninja's Shuriken",
       "Ninjato"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   },
   "undead_knight": {
@@ -506,6 +661,11 @@
       "Holy Relic",
       "Divine Essence",
       "Paladin's Sword"
+    ],
+    "tags": [
+      "undead",
+      "humanoid",
+      "armored"
     ]
   },
   "demon": {
@@ -520,6 +680,9 @@
       "Holy Relic",
       "Divine Essence",
       "Sacred Armor"
+    ],
+    "tags": [
+      "demon"
     ]
   },
   "corrupted_priest": {
@@ -534,6 +697,11 @@
       "Divine Essence",
       "Sacred Water",
       "Priest's Staff"
+    ],
+    "tags": [
+      "humanoid",
+      "undead",
+      "spellcaster"
     ]
   },
   "forest_guardian": {
@@ -548,6 +716,10 @@
       "Herb Bundle",
       "Nature Stone",
       "Druidic Staff"
+    ],
+    "tags": [
+      "nature",
+      "construct"
     ]
   },
   "corrupted_treant": {
@@ -562,6 +734,10 @@
       "Nature Stone",
       "Herb Bundle",
       "Druid's Spear"
+    ],
+    "tags": [
+      "nature",
+      "plant"
     ]
   },
   "nature_wraith": {
@@ -575,6 +751,11 @@
     "loot_table": [
       "Nature Stone",
       "Beast Form Amulet"
+    ],
+    "tags": [
+      "undead",
+      "nature",
+      "spectral"
     ]
   },
   "zealot": {
@@ -589,6 +770,10 @@
       "Divine Focus",
       "Sacred Water",
       "Holy Wand"
+    ],
+    "tags": [
+      "humanoid",
+      "fanatical"
     ]
   },
   "shadow_priest": {
@@ -603,6 +788,11 @@
       "Divine Focus",
       "Sacred Armor",
       "Holy Vestment"
+    ],
+    "tags": [
+      "humanoid",
+      "undead",
+      "spellcaster"
     ]
   },
   "corrupted_druid": {
@@ -617,6 +807,11 @@
       "Nature Stone",
       "Ironwood Barkskin",
       "Nature's Embrace"
+    ],
+    "tags": [
+      "humanoid",
+      "nature",
+      "spellcaster"
     ]
   },
   "fallen_paladin": {
@@ -631,6 +826,11 @@
       "Divine Essence",
       "Consecrated Plate",
       "Sun-Blessed Mace"
+    ],
+    "tags": [
+      "humanoid",
+      "undead",
+      "armored"
     ]
   },
   "void_acolyte": {
@@ -645,6 +845,11 @@
       "Divine Focus",
       "Vestments of the Seraph",
       "Scepter of Divine Grace"
+    ],
+    "tags": [
+      "humanoid",
+      "spellcaster",
+      "void"
     ]
   },
   "siberian_wolf": {
@@ -659,6 +864,11 @@
       "Siberian Wolf Fang",
       "Health Potion",
       "Taiga Hunter's Bow"
+    ],
+    "tags": [
+      "beast",
+      "pack",
+      "cold"
     ]
   },
   "brown_bear": {
@@ -673,6 +883,10 @@
       "Bear Claw",
       "Bear Hide",
       "Large Health Potion"
+    ],
+    "tags": [
+      "beast",
+      "strong"
     ]
   },
   "taiga_lynx": {
@@ -687,6 +901,9 @@
       "Lynx Pelt",
       "Steel Hunting Knife",
       "Taiga Herb"
+    ],
+    "tags": [
+      "beast"
     ]
   },
   "frost_shaman": {
@@ -702,6 +919,12 @@
       "Permafrost Shard",
       "Mana Potion",
       "Chronicles of Byzantra"
+    ],
+    "tags": [
+      "humanoid",
+      "spellcaster",
+      "ice",
+      "cold"
     ]
   },
   "taiga_bandit": {
@@ -716,6 +939,10 @@
       "Bone Hatchet",
       "Health Potion",
       "Siberian War Axe"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   },
   "wolverine_beast": {
@@ -730,6 +957,10 @@
       "Wolverine Hide",
       "Bear Claw",
       "Frost Blade"
+    ],
+    "tags": [
+      "beast",
+      "fierce"
     ]
   },
   "ice_troll_taiga": {
@@ -744,6 +975,9 @@
       "Permafrost Shard",
       "Large Health Potion",
       "Permafrost Spear"
+    ],
+    "tags": [
+      "humanoid"
     ]
   },
   "permafrost_golem": {
@@ -758,6 +992,11 @@
       "Permafrost Core",
       "Permafrost Shard",
       "Frost Blade"
+    ],
+    "tags": [
+      "construct",
+      "ice",
+      "cold"
     ]
   },
   "taiga_spirit": {
@@ -772,6 +1011,11 @@
       "Spirit Essence",
       "Shaman's Bone Totem",
       "Mana Potion"
+    ],
+    "tags": [
+      "undead",
+      "spectral",
+      "cold"
     ]
   },
   "snow_leopard": {
@@ -786,6 +1030,9 @@
       "Snow Leopard Pelt",
       "Frost Blade",
       "Large Health Potion"
+    ],
+    "tags": [
+      "beast"
     ]
   },
   "bazaar_thief": {
@@ -800,6 +1047,10 @@
       "Ottoman Gold Coin",
       "Spice Bundle",
       "Steel Dagger"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   },
   "palace_guard": {
@@ -815,6 +1066,10 @@
       "Janissary Plate Armor",
       "Ottoman Gold Coin",
       "Origins of the Osman People"
+    ],
+    "tags": [
+      "humanoid",
+      "armored"
     ]
   },
   "shadow_dervish": {
@@ -829,6 +1084,10 @@
       "Yatagan",
       "Desert Jewel",
       "Mana Potion"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   },
   "kalovar_corsair": {
@@ -843,6 +1102,10 @@
       "Corsair Cutlass",
       "Ottoman Gold Coin",
       "Corsair Flag"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   },
   "kalovar_kazhari": {
@@ -857,6 +1120,9 @@
       "Janissary Badge",
       "Ottoman Chainmail",
       "Ottoman Scimitar"
+    ],
+    "tags": [
+      "humanoid"
     ]
   },
   "karastani_lion": {
@@ -871,6 +1137,9 @@
       "Lion's Mane Trophy",
       "Health Potion",
       "Large Health Potion"
+    ],
+    "tags": [
+      "beast"
     ]
   },
   "kalovar_court_mage": {
@@ -885,7 +1154,11 @@
       "Vizier Staff",
       "Mana Potion",
       "Spice Bundle",
-      "The Faith and Law of the Osmanoğlu Empire"
+      "The Faith and Law of the Osmano\u011flu Empire"
+    ],
+    "tags": [
+      "humanoid",
+      "spellcaster"
     ]
   },
   "kazhari_captain": {
@@ -900,6 +1173,10 @@
       "Janissary Plate Armor",
       "Janissary Badge",
       "Ottoman Scimitar"
+    ],
+    "tags": [
+      "humanoid",
+      "armored"
     ]
   },
   "kalovar_war_elephant": {
@@ -914,6 +1191,9 @@
       "Elephant Tusk",
       "Ottoman Gold Coin",
       "Large Health Potion"
+    ],
+    "tags": [
+      "humanoid"
     ]
   },
   "kalovar_slaver": {
@@ -929,6 +1209,9 @@
       "Ottoman Gold Coin",
       "Health Potion",
       "The New Order: Life in Kostantora"
+    ],
+    "tags": [
+      "humanoid"
     ]
   },
   "corsair_captain": {
@@ -943,6 +1226,9 @@
       "Corsair Cutlass",
       "Corsair Coat",
       "Ottoman Gold Coin"
+    ],
+    "tags": [
+      "humanoid"
     ]
   },
   "kalovar_raider": {
@@ -957,6 +1243,9 @@
       "Desert Jewel",
       "Ottoman Bow",
       "Spice Bundle"
+    ],
+    "tags": [
+      "humanoid"
     ]
   },
   "karastani_serpent": {
@@ -971,6 +1260,9 @@
       "Desert Serpent Fang",
       "Venom Sac",
       "Desert Serpent Blade"
+    ],
+    "tags": [
+      "humanoid"
     ]
   },
   "kalovar_palace_guard": {
@@ -985,6 +1277,10 @@
       "Kalovar Sabre",
       "Large Health Potion",
       "Steel Ingot"
+    ],
+    "tags": [
+      "humanoid",
+      "armored"
     ]
   },
   "varak_raider": {
@@ -999,6 +1295,10 @@
       "Bone Hatchet",
       "Northern Fur Pelt",
       "Barbarian Iron Chunk"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   },
   "clan_berserker": {
@@ -1013,6 +1313,10 @@
       "Clan Greataxe",
       "Barbarian Totem Shard",
       "Warrior's Brew"
+    ],
+    "tags": [
+      "humanoid",
+      "fierce"
     ]
   },
   "steppe_archer": {
@@ -1027,6 +1331,10 @@
       "Barbarian Iron Chunk",
       "Northern Fur Pelt",
       "Health Potion"
+    ],
+    "tags": [
+      "humanoid",
+      "ranged"
     ]
   },
   "varak_bear_warrior": {
@@ -1041,6 +1349,11 @@
       "Bear-Claw Gauntlet",
       "Northern Fur Pelt",
       "Barbarian Totem Shard"
+    ],
+    "tags": [
+      "humanoid",
+      "beast",
+      "fierce"
     ]
   },
   "varak_war_chief": {
@@ -1056,7 +1369,12 @@
       "Barbarian Totem Shard",
       "Large Health Potion"
     ],
-    "is_boss": true
+    "is_boss": true,
+    "tags": [
+      "humanoid",
+      "armored",
+      "fierce"
+    ]
   },
   "river_serpent": {
     "name": "Yi Xuan River Serpent",
@@ -1070,6 +1388,9 @@
       "Wolf Fang",
       "Herb",
       "Eastern Spice Bundle"
+    ],
+    "tags": [
+      "humanoid"
     ]
   },
   "jade_court_assassin": {
@@ -1084,6 +1405,10 @@
       "Serpent Fang Dagger",
       "Jade Fragment",
       "Mana Potion"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   },
   "lotus_guardian": {
@@ -1098,6 +1423,9 @@
       "Lotus Root",
       "Jade Fragment",
       "Jade Tea"
+    ],
+    "tags": [
+      "humanoid"
     ]
   },
   "river_bandit": {
@@ -1112,6 +1440,10 @@
       "Bamboo Staff",
       "Health Potion",
       "Fermented Soybean Paste"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   },
   "jade_automaton": {
@@ -1126,6 +1458,10 @@
       "Jade Fragment",
       "Crystal Shard",
       "Steel Ingot"
+    ],
+    "tags": [
+      "construct",
+      "armored"
     ]
   },
   "celestial_serpent_lord": {
@@ -1141,7 +1477,11 @@
       "Jade Fragment",
       "Large Health Potion"
     ],
-    "is_boss": true
+    "is_boss": true,
+    "tags": [
+      "beast",
+      "holy"
+    ]
   },
   "ghost_legionnaire": {
     "name": "Ghost Legionnaire",
@@ -1155,6 +1495,12 @@
       "Bone Fragment",
       "Crystal Shard",
       "Health Potion"
+    ],
+    "tags": [
+      "undead",
+      "humanoid",
+      "armored",
+      "spectral"
     ]
   },
   "corrupted_scholar": {
@@ -1169,6 +1515,10 @@
       "Mana Potion",
       "Crystal Shard",
       "Jade Tea"
+    ],
+    "tags": [
+      "humanoid",
+      "spellcaster"
     ]
   },
   "constanplea_revenant": {
@@ -1183,6 +1533,11 @@
       "Shadow Essence",
       "Bone Fragment",
       "Large Health Potion"
+    ],
+    "tags": [
+      "undead",
+      "humanoid",
+      "spectral"
     ]
   },
   "kalovar_border_scout": {
@@ -1197,6 +1552,10 @@
       "Steel Dagger",
       "Health Potion",
       "Leather Strip"
+    ],
+    "tags": [
+      "humanoid",
+      "ranged"
     ]
   },
   "kalovar_war_mage": {
@@ -1211,6 +1570,10 @@
       "Mana Potion",
       "Crystal Shard",
       "Dark Crystal"
+    ],
+    "tags": [
+      "humanoid",
+      "spellcaster"
     ]
   },
   "corsair_first_mate": {
@@ -1225,6 +1588,10 @@
       "Dao Blade",
       "Mana Potion",
       "Yixuan Silk"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw"
     ]
   }
 }

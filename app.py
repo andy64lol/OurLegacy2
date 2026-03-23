@@ -1394,6 +1394,7 @@ STAT_BONUSES = [
     ("mp_bonus", "max_mp", 1),
     ("defense_penalty", "defense", -1),
     ("speed_penalty", "speed", -1),
+    ("spell_power_bonus", "attr_spell_power", 1),
 ]
 
 
@@ -1523,6 +1524,13 @@ def _item_score(item_data):
     score += item_data.get("spell_power_bonus", 0) * 1.5
     score -= item_data.get("defense_penalty", 0) * 2
     score -= item_data.get("speed_penalty", 0) * 1.5
+    score += item_data.get("sharpness", 0) * 0.8
+    score += item_data.get("smiting", 0) * 0.7
+    score += item_data.get("fire_attack", 0) * 0.9
+    score += item_data.get("ice_attack", 0) * 0.9
+    score += item_data.get("lightning_attack", 0) * 0.9
+    score += item_data.get("poison_attack", 0) * 0.7
+    score += (item_data.get("aim_accuracy", 85) - 85) * 0.3
     return score
 
 
@@ -2166,6 +2174,7 @@ def game():
                     "rarity": item_data.get("rarity", "common"),
                     "description": item_data.get("description", ""),
                     "stats": _item_stat_summary(item_data),
+                    "weapon_type": item_data.get("weapon_type", "") if slot == "weapon" else "",
                 }
 
     # Missions
@@ -2542,8 +2551,15 @@ def _item_stat_summary(item_data):
         ("speed_bonus", "SPD"),
         ("hp_bonus", "HP"),
         ("mp_bonus", "MP"),
+        ("spell_power_bonus", "SpellPwr"),
         ("defense_penalty", "-DEF"),
         ("speed_penalty", "-SPD"),
+        ("sharpness", "Sharp"),
+        ("smiting", "Smite"),
+        ("fire_attack", "Fire"),
+        ("ice_attack", "Ice"),
+        ("lightning_attack", "Lightning"),
+        ("poison_attack", "Poison"),
     ]:
         val = item_data.get(bonus_key)
         if val:
@@ -2569,6 +2585,128 @@ def _item_stat_summary(item_data):
     elif effect == "exp_bonus":
         parts.append(f"+{int(value * 100)}% EXP bonus")
     return ", ".join(parts)
+
+
+def _get_weapon_combat_effects(player, enemy):
+    """
+    Calculate bonus elemental/special damage from the player's equipped weapon
+    against the current enemy, taking enemy tags into account.
+    Returns a list of (bonus_dmg, message) tuples.
+    """
+    equipment = player.get("equipment", {})
+    weapon_name = equipment.get("weapon")
+    if not weapon_name:
+        return []
+    weapon = GAME_DATA["items"].get(weapon_name)
+    if not isinstance(weapon, dict):
+        return []
+
+    enemy_tags = set(enemy.get("tags", []))
+    effects = []
+
+    # ── Sharpness: bonus vs humanoid/beast, reduced vs armored/construct ─────
+    sharpness = weapon.get("sharpness", 0)
+    if sharpness:
+        if "humanoid" in enemy_tags or "beast" in enemy_tags:
+            bonus = int(sharpness * 1.5)
+            effects.append((bonus, f"Your blade bites deep! +{bonus} sharpness damage."))
+        elif "armored" in enemy_tags or "construct" in enemy_tags:
+            bonus = max(1, int(sharpness * 0.4))
+            effects.append((bonus, f"Your blade skips off the armour. +{bonus} damage."))
+        else:
+            bonus = sharpness
+            effects.append((bonus, f"Your weapon's edge adds {bonus} cutting damage."))
+
+    # ── Smiting: bonus vs undead/demon ───────────────────────────────────────
+    smiting = weapon.get("smiting", 0)
+    if smiting:
+        if "undead" in enemy_tags or "demon" in enemy_tags:
+            bonus = int(smiting * 2.5)
+            effects.append((bonus, f"Holy power surges! +{bonus} smiting damage vs {enemy['name']}!"))
+        elif "holy" in enemy_tags:
+            bonus = 0
+            effects.append((0, f"Smiting has no effect on holy beings."))
+        else:
+            bonus = smiting
+            effects.append((bonus, f"+{bonus} blessed damage."))
+
+    # ── Fire attack ──────────────────────────────────────────────────────────
+    fire_atk = weapon.get("fire_attack", 0)
+    if fire_atk:
+        if "ice" in enemy_tags or "cold" in enemy_tags:
+            bonus = int(fire_atk * 2.0)
+            effects.append((bonus, f"Fire melts the ice! +{bonus} fire damage!"))
+        elif "fire" in enemy_tags:
+            bonus = max(0, int(fire_atk * 0.2))
+            if bonus:
+                effects.append((bonus, f"The flame barely stings. +{bonus} fire damage."))
+        else:
+            bonus = fire_atk
+            effects.append((bonus, f"Your weapon blazes! +{bonus} fire damage."))
+
+    # ── Ice attack ───────────────────────────────────────────────────────────
+    ice_atk = weapon.get("ice_attack", 0)
+    if ice_atk:
+        if "fire" in enemy_tags or "demon" in enemy_tags:
+            bonus = int(ice_atk * 2.0)
+            effects.append((bonus, f"Frost shatters the flames! +{bonus} ice damage!"))
+        elif "ice" in enemy_tags or "cold" in enemy_tags:
+            bonus = max(0, int(ice_atk * 0.2))
+            if bonus:
+                effects.append((bonus, f"The ice barely chills. +{bonus} ice damage."))
+        else:
+            bonus = ice_atk
+            effects.append((bonus, f"Your weapon freezes! +{bonus} ice damage."))
+
+    # ── Lightning attack ─────────────────────────────────────────────────────
+    lightning_atk = weapon.get("lightning_attack", 0)
+    if lightning_atk:
+        if "armored" in enemy_tags or "construct" in enemy_tags:
+            bonus = int(lightning_atk * 1.8)
+            effects.append((bonus, f"Lightning conducts through armour! +{bonus} lightning damage!"))
+        elif "elemental" in enemy_tags and "lightning" in enemy_tags:
+            bonus = max(0, int(lightning_atk * 0.2))
+            if bonus:
+                effects.append((bonus, f"Lightning feeds the elemental. +{bonus} damage."))
+        else:
+            bonus = lightning_atk
+            effects.append((bonus, f"A bolt of lightning! +{bonus} lightning damage."))
+
+    # ── Poison attack ────────────────────────────────────────────────────────
+    poison_atk = weapon.get("poison_attack", 0)
+    if poison_atk:
+        if "construct" in enemy_tags or "undead" in enemy_tags:
+            bonus = max(0, int(poison_atk * 0.3))
+            if bonus:
+                effects.append((bonus, f"The poison has little effect. +{bonus} damage."))
+        elif "beast" in enemy_tags or "humanoid" in enemy_tags:
+            bonus = int(poison_atk * 1.4)
+            effects.append((bonus, f"Venom courses through! +{bonus} poison damage!"))
+        else:
+            bonus = poison_atk
+            effects.append((bonus, f"Poison seeps in. +{bonus} poison damage."))
+
+    return effects
+
+
+def _check_weapon_accuracy(player, enemy):
+    """
+    Returns True if the attack hits, False if it misses.
+    Uses weapon aim_accuracy vs enemy speed.
+    """
+    equipment = player.get("equipment", {})
+    weapon_name = equipment.get("weapon")
+    if not weapon_name:
+        return True
+    weapon = GAME_DATA["items"].get(weapon_name)
+    if not isinstance(weapon, dict):
+        return True
+    base_acc = weapon.get("aim_accuracy", 85) / 100.0
+    enemy_speed = enemy.get("speed", 10)
+    player_speed = player.get("speed", 10)
+    dodge_factor = max(0.0, min(0.25, (enemy_speed - player_speed) * 0.015))
+    hit_chance = max(0.55, base_acc - dodge_factor)
+    return random.random() < hit_chance
 
 
 def _companion_stat_summary(comp_data):
@@ -2676,6 +2814,7 @@ def action_explore():
                 "gold_reward": int(boss_data.get("gold_reward", 100) * scale),
                 "loot_table": boss_data.get("unique_loot", []),
                 "is_boss": True,
+                "tags": boss_data.get("tags", ["humanoid"]),
             }
             dialogue = get_boss_dialogue(boss_key, "start")
             session["battle_enemy"] = enemy
@@ -2712,6 +2851,7 @@ def action_explore():
                 1, int(enemy_data.get("gold_reward", 10)) + dice.between(-3, 10)
             ),
             "loot_table": enemy_data.get("loot_table", []),
+            "tags": enemy_data.get("tags", ["humanoid"]),
         }
         session["battle_enemy"] = enemy
         session["battle_log"] = [
@@ -2969,6 +3109,7 @@ def action_challenge_boss():
         "gold_reward": int(boss_data.get("gold_reward", 100) * scale),
         "loot_table": boss_data.get("unique_loot", []),
         "is_boss": True,
+        "tags": boss_data.get("tags", ["humanoid"]),
     }
     dialogue = get_boss_dialogue(boss_key, "start")
     session["battle_enemy"] = enemy
@@ -3882,16 +4023,30 @@ def battle_attack():
         return _handle_victory(player, enemy, log)
 
     if not stunned:
-        p_dmg = max(1, player["attack"] - enemy["defense"] + dice.between(-3, 6))
-        base_crit_rate = 0.10 + min(0.40, player.get("attr_crit_chance", 0) / 100.0)
-        crit = random.random() < base_crit_rate
-        if crit:
-            crit_mult = 1.6 + player.get("attr_crit_damage", 0) / 100.0
-            p_dmg = int(p_dmg * crit_mult)
-            log.append(f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy_name}!")
+        # ── Accuracy check ───────────────────────────────────────────────────
+        if not _check_weapon_accuracy(player, enemy):
+            log.append(f"You swing at the {enemy_name} but miss!")
         else:
-            log.append(f"You attack the {enemy_name} for {p_dmg} damage.")
-        enemy["hp"] = max(0, enemy["hp"] - p_dmg)
+            p_dmg = max(1, player["attack"] - enemy["defense"] + dice.between(-3, 6))
+            base_crit_rate = 0.10 + min(0.40, player.get("attr_crit_chance", 0) / 100.0)
+            crit = random.random() < base_crit_rate
+            if crit:
+                crit_mult = 1.6 + player.get("attr_crit_damage", 0) / 100.0
+                p_dmg = int(p_dmg * crit_mult)
+                log.append(f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy_name}!")
+            else:
+                log.append(f"You attack the {enemy_name} for {p_dmg} damage.")
+            enemy["hp"] = max(0, enemy["hp"] - p_dmg)
+
+            # ── Weapon elemental/special effects ─────────────────────────────
+            weapon_effects = _get_weapon_combat_effects(player, enemy)
+            total_bonus = 0
+            for bonus_dmg, bonus_msg in weapon_effects:
+                if bonus_dmg > 0:
+                    total_bonus += bonus_dmg
+                    log.append(bonus_msg)
+            if total_bonus > 0:
+                enemy["hp"] = max(0, enemy["hp"] - total_bonus)
 
         if enemy["hp"] <= 0:
             session["battle_player_effects"] = player_effects
@@ -4555,6 +4710,7 @@ def dungeon_proceed():
                 "gold_reward": int(boss_data.get("gold_reward", 100) * scale),
                 "loot_table": boss_data.get("loot_table", []),
                 "is_boss": True,
+                "tags": boss_data.get("tags", ["humanoid"]),
             }
         else:
             lvl = player.get("level", 1)
@@ -4570,6 +4726,7 @@ def dungeon_proceed():
                 "gold_reward": 100 + lvl * 20,
                 "loot_table": [],
                 "is_boss": True,
+                "tags": ["humanoid"],
             }
         dialogue = get_boss_dialogue(boss_id, "start")
         session["battle_enemy"] = enemy

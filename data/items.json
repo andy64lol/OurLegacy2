@@ -40,7 +40,12 @@
       "rarity": "common",
       "requirements": {
          "level": 1
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 14,
+      "smiting": 0
    },
    "Steel Dagger": {
       "type": "weapon",
@@ -51,7 +56,12 @@
       "rarity": "common",
       "requirements": {
          "level": 1
-      }
+      },
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 20,
+      "smiting": 0
    },
    "Magic Staff": {
       "type": "weapon",
@@ -64,7 +74,12 @@
       "requirements": {
          "level": 2,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Greatsword": {
       "type": "weapon",
@@ -76,7 +91,12 @@
       "requirements": {
          "level": 3,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "greatsword",
+      "aim_accuracy": 76,
+      "weight": 8,
+      "sharpness": 26,
+      "smiting": 0
    },
    "Leather Armor": {
       "type": "armor",
@@ -242,7 +262,12 @@
       "requirements": {
          "level": 4,
          "strength": 15
-      }
+      },
+      "weapon_type": "mace",
+      "aim_accuracy": 78,
+      "weight": 6,
+      "sharpness": 0,
+      "smiting": 8
    },
    "Troll Hide": {
       "type": "material",
@@ -255,7 +280,12 @@
       "description": "An old, rusty dagger found in ancient ruins",
       "attack_bonus": 3,
       "price": 15,
-      "rarity": "junk"
+      "rarity": "junk",
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 20,
+      "smiting": 0
    },
    "Wooden Wand": {
       "type": "weapon",
@@ -268,7 +298,12 @@
       "requirements": {
          "level": 1,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "wand",
+      "aim_accuracy": 88,
+      "weight": 1,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Crystalline Wand": {
       "type": "weapon",
@@ -281,7 +316,13 @@
       "requirements": {
          "level": 2,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "wand",
+      "aim_accuracy": 88,
+      "weight": 1,
+      "sharpness": 0,
+      "smiting": 0,
+      "ice_attack": 21
    },
    "Spellsword": {
       "type": "weapon",
@@ -293,7 +334,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 3
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 21,
+      "smiting": 0
    },
    "Ethereal Staff": {
       "type": "weapon",
@@ -306,7 +352,12 @@
       "requirements": {
          "level": 5,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Rogue's Dagger": {
       "type": "weapon",
@@ -318,7 +369,12 @@
       "requirements": {
          "level": 1,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 24,
+      "smiting": 0
    },
    "Ninja Kunai": {
       "type": "weapon",
@@ -330,7 +386,12 @@
       "requirements": {
          "level": 2,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "throwing",
+      "aim_accuracy": 86,
+      "weight": 1,
+      "sharpness": 14,
+      "smiting": 0
    },
    "Shadow Blade": {
       "type": "weapon",
@@ -342,7 +403,12 @@
       "requirements": {
          "level": 4,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 21,
+      "smiting": 0
    },
    "Obsidian Edge": {
       "type": "weapon",
@@ -355,7 +421,12 @@
       "requirements": {
          "level": 5,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 28,
+      "smiting": 0
    },
    "Iron Axe": {
       "type": "weapon",
@@ -367,7 +438,12 @@
       "requirements": {
          "level": 2,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "axe",
+      "aim_accuracy": 80,
+      "weight": 5,
+      "sharpness": 20,
+      "smiting": 0
    },
    "Chieftain's Axe": {
       "type": "weapon",
@@ -380,7 +456,12 @@
       "requirements": {
          "level": 5,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "axe",
+      "aim_accuracy": 80,
+      "weight": 5,
+      "sharpness": 30,
+      "smiting": 0
    },
    "Warhammer": {
       "type": "weapon",
@@ -392,7 +473,12 @@
       "requirements": {
          "level": 4,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "warhammer",
+      "aim_accuracy": 72,
+      "weight": 9,
+      "sharpness": 0,
+      "smiting": 8
    },
    "Dragonsoul Blade": {
       "type": "weapon",
@@ -406,7 +492,12 @@
       "requirements": {
          "level": 6,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 28,
+      "smiting": 0
    },
    "Mourning Blade": {
       "type": "weapon",
@@ -417,7 +508,12 @@
       "requirements": {
          "level": 4,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 22,
+      "smiting": 0
    },
    "Plate Armor": {
       "type": "armor",
@@ -490,7 +586,12 @@
       "requirements": {
          "level": 1,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 18,
+      "smiting": 0
    },
    "Dragonbone Lute": {
       "type": "weapon",
@@ -503,7 +604,12 @@
       "requirements": {
          "level": 6,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 27,
+      "smiting": 0
    },
    "Skyfall Lyre": {
       "type": "weapon",
@@ -516,11 +622,16 @@
       "requirements": {
          "level": 6,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 28,
+      "smiting": 0
    },
-   "Hämmelson's Legendary Flute": {
+   "H\u00e4mmelson's Legendary Flute": {
       "type": "weapon",
-      "description": "The masterpiece of the legendary bard Hämmelson, each note carries the power to move mountains.",
+      "description": "The masterpiece of the legendary bard H\u00e4mmelson, each note carries the power to move mountains.",
       "attack_bonus": 175,
       "mp_bonus": 50,
       "speed_bonus": 3,
@@ -530,11 +641,16 @@
       "requirements": {
          "level": 6,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 28,
+      "smiting": 0
    },
-   "War Drum of The god of Thunder Zâesltral": {
+   "War Drum of The god of Thunder Z\u00e2esltral": {
       "type": "weapon",
-      "description": "The sacred war drum of the storm god Zâesltral, its beating shakes the very foundations of reality.",
+      "description": "The sacred war drum of the storm god Z\u00e2esltral, its beating shakes the very foundations of reality.",
       "attack_bonus": 195,
       "mp_bonus": 35,
       "magic_weapon": true,
@@ -545,7 +661,13 @@
       "requirements": {
          "level": 6,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 29,
+      "smiting": 0,
+      "lightning_attack": 29
    },
    "Wooden Flute": {
       "type": "weapon",
@@ -558,7 +680,12 @@
       "requirements": {
          "level": 1,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 18,
+      "smiting": 0
    },
    "Silver Lyre": {
       "type": "weapon",
@@ -571,7 +698,12 @@
       "requirements": {
          "level": 2,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 19,
+      "smiting": 18
    },
    "Oak Harp": {
       "type": "weapon",
@@ -584,7 +716,12 @@
       "requirements": {
          "level": 2,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 19,
+      "smiting": 0
    },
    "Rhythm Drum": {
       "type": "weapon",
@@ -598,7 +735,12 @@
       "requirements": {
          "level": 1,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 18,
+      "smiting": 0
    },
    "Celestial Harp": {
       "type": "weapon",
@@ -611,7 +753,12 @@
       "requirements": {
          "level": 4,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 22,
+      "smiting": 22
    },
    "Crystal Flute": {
       "type": "weapon",
@@ -624,7 +771,13 @@
       "requirements": {
          "level": 3,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 21,
+      "smiting": 0,
+      "ice_attack": 26
    },
    "Golden Lyre": {
       "type": "weapon",
@@ -637,7 +790,12 @@
       "requirements": {
          "level": 4,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 22,
+      "smiting": 0
    },
    "Warfare Drum": {
       "type": "weapon",
@@ -650,7 +808,12 @@
       "requirements": {
          "level": 3,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 21,
+      "smiting": 0
    },
    "Songsmith's Lyre": {
       "type": "weapon",
@@ -663,7 +826,12 @@
       "requirements": {
          "level": 5,
          "class": "Bard"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 23,
+      "smiting": 0
    },
    "Silken Robes": {
       "type": "armor",
@@ -727,9 +895,9 @@
          "class": "Bard"
       }
    },
-   "The Poetry god Äepleollo's Robe": {
+   "The Poetry god \u00c4epleollo's Robe": {
       "type": "armor",
-      "description": "The divine robes of the Poetry god Äepleollo, woven from verses of pure inspiration. Wearing it grants the power to turn words into reality.",
+      "description": "The divine robes of the Poetry god \u00c4epleollo, woven from verses of pure inspiration. Wearing it grants the power to turn words into reality.",
       "defense_bonus": 15,
       "mp_bonus": 55,
       "attack_bonus": 8,
@@ -751,7 +919,12 @@
       "requirements": {
          "level": 1,
          "class": "Paladin"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 14,
+      "smiting": 13
    },
    "Druidic Staff": {
       "type": "weapon",
@@ -764,7 +937,12 @@
       "requirements": {
          "level": 1,
          "class": "Druid"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Crown of Wisdom": {
       "type": "accessory",
@@ -837,7 +1015,12 @@
       "requirements": {
          "level": 4,
          "class": "Druid"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 17,
+      "smiting": 0
    },
    "Gaea's Wrath": {
       "type": "weapon",
@@ -851,7 +1034,12 @@
       "requirements": {
          "level": 6,
          "class": "Druid"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 26,
+      "smiting": 0
    },
    "Sun-Blessed Mace": {
       "type": "weapon",
@@ -863,7 +1051,13 @@
       "requirements": {
          "level": 4,
          "class": "Paladin"
-      }
+      },
+      "weapon_type": "mace",
+      "aim_accuracy": 78,
+      "weight": 6,
+      "sharpness": 0,
+      "smiting": 17,
+      "fire_attack": 21
    },
    "Aegis of the Eternal Light": {
       "type": "weapon",
@@ -876,7 +1070,12 @@
       "requirements": {
          "level": 7,
          "class": "Paladin"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 27,
+      "smiting": 29
    },
    "Scepter of Divine Grace": {
       "type": "weapon",
@@ -889,7 +1088,12 @@
       "requirements": {
          "level": 4,
          "class": "Priest"
-      }
+      },
+      "weapon_type": "scepter",
+      "aim_accuracy": 85,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 15
    },
    "Relic of the First Saint": {
       "type": "weapon",
@@ -903,7 +1107,12 @@
       "requirements": {
          "level": 6,
          "class": "Priest"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 25,
+      "smiting": 0
    },
    "Ironwood Barkskin": {
       "type": "armor",
@@ -1048,7 +1257,12 @@
       "requirements": {
          "level": 3,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 21,
+      "smiting": 0
    },
    "Arcane Grimoire": {
       "type": "weapon",
@@ -1062,7 +1276,12 @@
       "requirements": {
          "level": 5,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 27,
+      "smiting": 0
    },
    "Titan's Hammer": {
       "type": "weapon",
@@ -1076,7 +1295,12 @@
          "level": 6,
          "class": "Warrior",
          "strength": 18
-      }
+      },
+      "weapon_type": "mace",
+      "aim_accuracy": 78,
+      "weight": 6,
+      "sharpness": 0,
+      "smiting": 8
    },
    "Venomstrike Dagger": {
       "type": "weapon",
@@ -1089,7 +1313,13 @@
       "requirements": {
          "level": 4,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 27,
+      "smiting": 0,
+      "poison_attack": 19
    },
    "Celestial Scepter": {
       "type": "weapon",
@@ -1103,7 +1333,12 @@
       "requirements": {
          "level": 5,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "scepter",
+      "aim_accuracy": 85,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 29
    },
    "Berserker's Axe": {
       "type": "weapon",
@@ -1116,7 +1351,12 @@
       "requirements": {
          "level": 5,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "axe",
+      "aim_accuracy": 80,
+      "weight": 5,
+      "sharpness": 30,
+      "smiting": 0
    },
    "Nightshade Armor": {
       "type": "armor",
@@ -1204,7 +1444,12 @@
       "requirements": {
          "level": 1,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Longbow": {
       "type": "weapon",
@@ -1216,7 +1461,12 @@
       "requirements": {
          "level": 2,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Composite Bow": {
       "type": "weapon",
@@ -1228,7 +1478,12 @@
       "requirements": {
          "level": 3,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Elven Bow": {
       "type": "weapon",
@@ -1240,7 +1495,12 @@
       "requirements": {
          "level": 5,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Light Crossbow": {
       "type": "weapon",
@@ -1251,7 +1511,12 @@
       "requirements": {
          "level": 2,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 12
    },
    "Heavy Crossbow": {
       "type": "weapon",
@@ -1263,7 +1528,12 @@
       "requirements": {
          "level": 3,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Repeating Crossbow": {
       "type": "weapon",
@@ -1275,7 +1545,12 @@
       "requirements": {
          "level": 4,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Hunting Spear": {
       "type": "weapon",
@@ -1285,7 +1560,12 @@
       "rarity": "common",
       "requirements": {
          "level": 1
-      }
+      },
+      "weapon_type": "spear",
+      "aim_accuracy": 88,
+      "weight": 4,
+      "sharpness": 12,
+      "smiting": 0
    },
    "Warrior Spear": {
       "type": "weapon",
@@ -1295,7 +1575,12 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 2
-      }
+      },
+      "weapon_type": "spear",
+      "aim_accuracy": 88,
+      "weight": 4,
+      "sharpness": 16,
+      "smiting": 0
    },
    "Tri-point Spear": {
       "type": "weapon",
@@ -1305,7 +1590,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 4
-      }
+      },
+      "weapon_type": "spear",
+      "aim_accuracy": 88,
+      "weight": 4,
+      "sharpness": 20,
+      "smiting": 0
    },
    "Dragon Spear": {
       "type": "weapon",
@@ -1315,7 +1605,12 @@
       "rarity": "legendary",
       "requirements": {
          "level": 5
-      }
+      },
+      "weapon_type": "spear",
+      "aim_accuracy": 88,
+      "weight": 4,
+      "sharpness": 26,
+      "smiting": 0
    },
    "Hunting Knife": {
       "type": "weapon",
@@ -1326,7 +1621,12 @@
       "rarity": "common",
       "requirements": {
          "level": 1
-      }
+      },
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 20,
+      "smiting": 0
    },
    "Steel Hunting Knife": {
       "type": "weapon",
@@ -1337,7 +1637,12 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 2
-      }
+      },
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 24,
+      "smiting": 0
    },
    "Assassin Hunting Knife": {
       "type": "weapon",
@@ -1349,7 +1654,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 3
-      }
+      },
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 27,
+      "smiting": 0
    },
    "Master Hunter's Knife": {
       "type": "weapon",
@@ -1361,7 +1671,12 @@
       "rarity": "legendary",
       "requirements": {
          "level": 5
-      }
+      },
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 30,
+      "smiting": 0
    },
    "Luck Charm": {
       "type": "accessory",
@@ -1433,7 +1748,12 @@
       "requirements": {
          "level": 4,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 21,
+      "smiting": 0
    },
    "Venom Sac": {
       "type": "material",
@@ -1486,7 +1806,12 @@
       "requirements": {
          "level": 5,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Soul Orb": {
       "type": "offhand",
@@ -1544,7 +1869,13 @@
       "requirements": {
          "level": 6,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "mace",
+      "aim_accuracy": 78,
+      "weight": 6,
+      "sharpness": 0,
+      "smiting": 8,
+      "lightning_attack": 28
    },
    "Storm Giant's Belt": {
       "type": "accessory",
@@ -1619,7 +1950,13 @@
       "requirements": {
          "level": 7,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 28,
+      "smiting": 0,
+      "poison_attack": 27
    },
    "Phylactery": {
       "type": "accessory",
@@ -1643,7 +1980,12 @@
       "requirements": {
          "level": 7,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 28,
+      "smiting": 0
    },
    "Lich King's Robes": {
       "type": "armor",
@@ -1678,7 +2020,13 @@
       "requirements": {
          "level": 8,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 29,
+      "smiting": 0,
+      "fire_attack": 37
    },
    "Hellfire Shield": {
       "type": "offhand",
@@ -1748,7 +2096,13 @@
       "requirements": {
          "level": 8,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 29,
+      "smiting": 0,
+      "lightning_attack": 29
    },
    "Sky Crown": {
       "type": "accessory",
@@ -1811,7 +2165,12 @@
       "requirements": {
          "level": 4,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "axe",
+      "aim_accuracy": 80,
+      "weight": 5,
+      "sharpness": 24,
+      "smiting": 0
    },
    "Sundered Earth Hammer": {
       "type": "weapon",
@@ -1823,7 +2182,13 @@
       "requirements": {
          "level": 5,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "mace",
+      "aim_accuracy": 78,
+      "weight": 6,
+      "sharpness": 0,
+      "smiting": 8,
+      "fire_attack": 28
    },
    "Colossus Slayer": {
       "type": "weapon",
@@ -1835,7 +2200,12 @@
       "requirements": {
          "level": 6,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 23,
+      "smiting": 0
    },
    "Vahnir's Greatsword": {
       "type": "weapon",
@@ -1848,7 +2218,12 @@
       "requirements": {
          "level": 10,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "greatsword",
+      "aim_accuracy": 76,
+      "weight": 8,
+      "sharpness": 30,
+      "smiting": 0
    },
    "Mage New Weapons lvl 4-7": "MAGE_WEAPONS_PLACEHOLDER",
    "Ebonwood Staff": {
@@ -1863,7 +2238,12 @@
       "requirements": {
          "level": 4,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Crystal Prism Staff": {
       "type": "weapon",
@@ -1876,7 +2256,13 @@
       "requirements": {
          "level": 5,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0,
+      "ice_attack": 27
    },
    "Phoenixfire Wand": {
       "type": "weapon",
@@ -1890,7 +2276,13 @@
       "requirements": {
          "level": 5,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "wand",
+      "aim_accuracy": 88,
+      "weight": 1,
+      "sharpness": 0,
+      "smiting": 0,
+      "fire_attack": 26
    },
    "Astral Beacon": {
       "type": "weapon",
@@ -1904,7 +2296,12 @@
       "requirements": {
          "level": 6,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 22,
+      "smiting": 0
    },
    "Howertz's Staff": {
       "type": "weapon",
@@ -1918,7 +2315,12 @@
       "requirements": {
          "level": 10,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Rogue New Weapons lvl 4-7": "ROGUE_WEAPONS_PLACEHOLDER",
    "Toxic Thorn": {
@@ -1931,7 +2333,13 @@
       "requirements": {
          "level": 4,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 21,
+      "smiting": 0,
+      "poison_attack": 19
    },
    "Whisperstep Daggers": {
       "type": "weapon",
@@ -1944,7 +2352,12 @@
       "requirements": {
          "level": 4,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 27,
+      "smiting": 0
    },
    "Midnight Cleaver": {
       "type": "weapon",
@@ -1956,7 +2369,12 @@
       "requirements": {
          "level": 5,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "axe",
+      "aim_accuracy": 80,
+      "weight": 5,
+      "sharpness": 24,
+      "smiting": 0
    },
    "Phantom Strike": {
       "type": "weapon",
@@ -1968,7 +2386,12 @@
       "requirements": {
          "level": 6,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 22,
+      "smiting": 0
    },
    "Infiltration Shadow": {
       "type": "weapon",
@@ -1982,7 +2405,12 @@
       "requirements": {
          "level": 10,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 28,
+      "smiting": 0
    },
    "Hunter New Weapons lvl 4-7": "HUNTER_WEAPONS_PLACEHOLDER",
    "Thornshot Bow": {
@@ -1995,7 +2423,12 @@
       "requirements": {
          "level": 4,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Ranger's Crossbow": {
       "type": "weapon",
@@ -2007,7 +2440,12 @@
       "requirements": {
          "level": 4,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Venomspitter": {
       "type": "weapon",
@@ -2019,7 +2457,13 @@
       "requirements": {
          "level": 5,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 22,
+      "smiting": 0,
+      "poison_attack": 20
    },
    "Stormcaller": {
       "type": "weapon",
@@ -2031,7 +2475,13 @@
       "requirements": {
          "level": 6,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 22,
+      "smiting": 0,
+      "lightning_attack": 20
    },
    "Phyla's Root Longbow": {
       "type": "weapon",
@@ -2044,7 +2494,12 @@
       "requirements": {
          "level": 10,
          "class": "Hunter"
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Demonforged Plate": {
       "type": "armor",
@@ -2372,7 +2827,12 @@
       "requirements": {
          "level": 7,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 29,
+      "smiting": 0
    },
    "Dark Lord's Cloak": {
       "type": "armor",
@@ -2448,22 +2908,32 @@
       "requirements": {
          "level": 6,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
-   "Dälokurg's Warhammer": {
+   "D\u00e4lokurg's Warhammer": {
       "type": "weapon",
-      "description": "A huge warhammer that once belonged to the infamous bandit leader of Brïgadrak Oblast.",
+      "description": "A huge warhammer that once belonged to the infamous bandit leader of Br\u00efgadrak Oblast.",
       "attack_bonus": 192,
       "price": 320,
       "rarity": "legendary",
       "requirements": {
          "level": 7,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "warhammer",
+      "aim_accuracy": 72,
+      "weight": 9,
+      "sharpness": 0,
+      "smiting": 8
    },
    "Bandit Leader's Cloak": {
       "type": "armor",
-      "description": "A cloak worn by Dälokurg, providing stealth and agility.",
+      "description": "A cloak worn by D\u00e4lokurg, providing stealth and agility.",
       "defense_bonus": 120,
       "speed_bonus": 140,
       "price": 280,
@@ -2585,7 +3055,12 @@
       "requirements": {
          "level": 4,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "throwing",
+      "aim_accuracy": 86,
+      "weight": 1,
+      "sharpness": 14,
+      "smiting": 0
    },
    "Ninjato": {
       "type": "weapon",
@@ -2597,7 +3072,12 @@
       "requirements": {
          "level": 5,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 22,
+      "smiting": 0
    },
    "Bandit's Chain": {
       "type": "accessory",
@@ -2618,7 +3098,12 @@
       "rarity": "rare",
       "requirements": {
          "class": "Paladin"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 20,
+      "smiting": 20
    },
    "Holy Shield": {
       "type": "armor",
@@ -2653,7 +3138,12 @@
       "requirements": {
          "level": 4,
          "class": "Paladin"
-      }
+      },
+      "weapon_type": "mace",
+      "aim_accuracy": 78,
+      "weight": 6,
+      "sharpness": 0,
+      "smiting": 23
    },
    "Divine Essence": {
       "type": "material",
@@ -2683,7 +3173,12 @@
       "requirements": {
          "level": 4,
          "class": "Druid"
-      }
+      },
+      "weapon_type": "spear",
+      "aim_accuracy": 88,
+      "weight": 4,
+      "sharpness": 19,
+      "smiting": 0
    },
    "Beast Form Amulet": {
       "type": "accessory",
@@ -2719,7 +3214,12 @@
       "requirements": {
          "level": 2,
          "class": "Priest"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Devout's Robe": {
       "type": "armor",
@@ -2743,7 +3243,12 @@
       "requirements": {
          "level": 4,
          "class": "Priest"
-      }
+      },
+      "weapon_type": "wand",
+      "aim_accuracy": 88,
+      "weight": 1,
+      "sharpness": 0,
+      "smiting": 20
    },
    "Sacred Water": {
       "type": "material",
@@ -2770,7 +3275,12 @@
       "requirements": {
          "level": 4,
          "class": "Priest"
-      }
+      },
+      "weapon_type": "scepter",
+      "aim_accuracy": 85,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Saintly Robes": {
       "type": "armor",
@@ -2794,7 +3304,12 @@
       "requirements": {
          "level": 3,
          "class": "Paladin"
-      }
+      },
+      "weapon_type": "mace",
+      "aim_accuracy": 78,
+      "weight": 6,
+      "sharpness": 0,
+      "smiting": 8
    },
    "Elder Wood Armor": {
       "type": "armor",
@@ -2819,7 +3334,12 @@
       "requirements": {
          "level": 5,
          "class": "Druid"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Holy Vestment": {
       "type": "armor",
@@ -2849,7 +3369,12 @@
       "requirements": {
          "level": 4,
          "class": "Rogue"
-      }
+      },
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 26,
+      "smiting": 0
    },
    "Stolen Gold Necklace": {
       "type": "accessory",
@@ -2874,7 +3399,12 @@
       "requirements": {
          "level": 8,
          "class": "Warrior"
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 28,
+      "smiting": 30
    },
    "Supreme Artifact": {
       "type": "accessory",
@@ -3033,7 +3563,12 @@
       "rarity": "common",
       "requirements": {
          "level": 2
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Bone Hatchet": {
       "type": "weapon",
@@ -3044,7 +3579,12 @@
       "rarity": "common",
       "requirements": {
          "level": 2
-      }
+      },
+      "weapon_type": "axe",
+      "aim_accuracy": 80,
+      "weight": 5,
+      "sharpness": 16,
+      "smiting": 0
    },
    "Taiga Hunter's Bow": {
       "type": "weapon",
@@ -3055,7 +3595,12 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 4
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Frost Blade": {
       "type": "weapon",
@@ -3066,7 +3611,13 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 15,
+      "smiting": 0,
+      "ice_attack": 17
    },
    "Shaman's Totem Staff": {
       "type": "weapon",
@@ -3078,7 +3629,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Siberian War Axe": {
       "type": "weapon",
@@ -3089,7 +3645,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 6
-      }
+      },
+      "weapon_type": "axe",
+      "aim_accuracy": 80,
+      "weight": 5,
+      "sharpness": 18,
+      "smiting": 0
    },
    "Permafrost Spear": {
       "type": "weapon",
@@ -3100,7 +3661,13 @@
       "rarity": "rare",
       "requirements": {
          "level": 7
-      }
+      },
+      "weapon_type": "spear",
+      "aim_accuracy": 88,
+      "weight": 4,
+      "sharpness": 13,
+      "smiting": 0,
+      "ice_attack": 17
    },
    "Snowbinable Fang Sword": {
       "type": "weapon",
@@ -3112,7 +3679,13 @@
       "rarity": "legendary",
       "requirements": {
          "level": 12
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 17,
+      "smiting": 0,
+      "ice_attack": 20
    },
    "Siberian Wolf Fang": {
       "type": "material",
@@ -3197,7 +3770,12 @@
       "rarity": "common",
       "requirements": {
          "level": 3
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 15,
+      "smiting": 0
    },
    "Yatagan": {
       "type": "weapon",
@@ -3208,7 +3786,12 @@
       "rarity": "common",
       "requirements": {
          "level": 2
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 15,
+      "smiting": 0
    },
    "Ottoman Bow": {
       "type": "weapon",
@@ -3219,7 +3802,12 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 4
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Ottoman Lance": {
       "type": "weapon",
@@ -3230,7 +3818,12 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 5
-      }
+      },
+      "weapon_type": "spear",
+      "aim_accuracy": 88,
+      "weight": 4,
+      "sharpness": 14,
+      "smiting": 0
    },
    "Corsair Cutlass": {
       "type": "weapon",
@@ -3241,7 +3834,12 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 3
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 15,
+      "smiting": 0
    },
    "Desert Serpent Blade": {
       "type": "weapon",
@@ -3252,7 +3850,13 @@
       "rarity": "rare",
       "requirements": {
          "level": 6
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 15,
+      "smiting": 0,
+      "poison_attack": 12
    },
    "Vizier Staff": {
       "type": "weapon",
@@ -3264,7 +3868,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 6
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Janissary Carbine": {
       "type": "weapon",
@@ -3275,7 +3884,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 7
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 16,
+      "smiting": 0
    },
    "Sultan's Blade": {
       "type": "weapon",
@@ -3287,7 +3901,12 @@
       "rarity": "legendary",
       "requirements": {
          "level": 10
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 17,
+      "smiting": 0
    },
    "Blade of Yildirim": {
       "type": "weapon",
@@ -3299,7 +3918,12 @@
       "rarity": "legendary",
       "requirements": {
          "level": 14
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 18,
+      "smiting": 0
    },
    "Ottoman Chainmail": {
       "type": "armor",
@@ -3359,7 +3983,7 @@
    },
    "Sultan's Signet Ring": {
       "type": "accessory",
-      "description": "A heavy gold ring bearing the seal of the Ottoman Sultan. Commands respect — and fear.",
+      "description": "A heavy gold ring bearing the seal of the Ottoman Sultan. Commands respect \u2014 and fear.",
       "attack_bonus": 5,
       "defense_bonus": 5,
       "gold_bonus": 0,
@@ -3416,7 +4040,7 @@
    },
    "Janissary Badge": {
       "type": "material",
-      "description": "The insignia badge of a Janissary soldier — proof of a hard-won fight.",
+      "description": "The insignia badge of a Janissary soldier \u2014 proof of a hard-won fight.",
       "price": 30,
       "rarity": "common"
    },
@@ -3484,7 +4108,7 @@
    "The New Order: Life in Kostantora": {
       "type": "book",
       "book_key": "new_order_of_kostantora",
-      "description": "A personal account of Kostantora fifteen years after the conquest — the slave markets, faith, and survival. By Miriam of the Lower City.",
+      "description": "A personal account of Kostantora fifteen years after the conquest \u2014 the slave markets, faith, and survival. By Miriam of the Lower City.",
       "price": 70,
       "rarity": "rare"
    },
@@ -3512,7 +4136,7 @@
    "The Origin of Eldenmoor": {
       "type": "book",
       "book_key": "origin_of_eldermoor",
-      "description": "A scholarly transcription of the Primordial Scriptures — texts said to record how Andrew, the Primordial One, created the world using sacred commands no mortal has ever understood. Cheap because everyone assumes it's fiction.",
+      "description": "A scholarly transcription of the Primordial Scriptures \u2014 texts said to record how Andrew, the Primordial One, created the world using sacred commands no mortal has ever understood. Cheap because everyone assumes it's fiction.",
       "price": 5,
       "rarity": "common"
    },
@@ -3546,7 +4170,7 @@
    },
    "Talisman of Andy": {
       "type": "weapon",
-      "description": "A sacred talisman forged in the heart of the Eternal Flame, blessed by ancient spirits. Wielded only by those chosen by destiny itself. Gifted freely on the day of its creator’s birth.",
+      "description": "A sacred talisman forged in the heart of the Eternal Flame, blessed by ancient spirits. Wielded only by those chosen by destiny itself. Gifted freely on the day of its creator\u2019s birth.",
       "attack_bonus": 99,
       "magic_weapon": true,
       "mp_bonus": 50,
@@ -3556,7 +4180,12 @@
       "rarity": "legendary",
       "requirements": {
          "level": 1
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 21,
+      "smiting": 0
    },
    "The River Kingdoms of Yixuan": {
       "type": "book",
@@ -3596,7 +4225,7 @@
    "Origia: A History of the First Settlement": {
       "type": "book",
       "book_key": "origia_first_settlement",
-      "description": "A Bureau of Historical Records account of the village most call Starting Village — its true name, its founding, and why the world keeps forgetting what it is actually called.",
+      "description": "A Bureau of Historical Records account of the village most call Starting Village \u2014 its true name, its founding, and why the world keeps forgetting what it is actually called.",
       "price": 35,
       "rarity": "uncommon"
    },
@@ -3607,10 +4236,10 @@
       "price": 25,
       "rarity": "common"
    },
-   "A History of the Kingdom of Ænglia": {
+   "A History of the Kingdom of \u00c6nglia": {
       "type": "book",
       "book_key": "history_of_aenglia",
-      "description": "High Archivist Pellan's definitive account of Ænglia — from the first settlements and the founding of the Nevrolian dynasty to the Byzantra incursion and the rise of Eldenmoor as the royal capital.",
+      "description": "High Archivist Pellan's definitive account of \u00c6nglia \u2014 from the first settlements and the founding of the Nevrolian dynasty to the Byzantra incursion and the rise of Eldenmoor as the royal capital.",
       "price": 60,
       "rarity": "uncommon"
    },
@@ -3640,7 +4269,7 @@
    },
    "Barbarian Iron Chunk": {
       "type": "material",
-      "description": "Crudely smelted iron from the northern clans — impure, but their smiths know tricks with it",
+      "description": "Crudely smelted iron from the northern clans \u2014 impure, but their smiths know tricks with it",
       "price": 18,
       "rarity": "common"
    },
@@ -3689,7 +4318,12 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 3
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 15,
+      "smiting": 0
    },
    "Jade Spear": {
       "type": "weapon",
@@ -3700,11 +4334,16 @@
       "rarity": "rare",
       "requirements": {
          "level": 5
-      }
+      },
+      "weapon_type": "spear",
+      "aim_accuracy": 88,
+      "weight": 4,
+      "sharpness": 13,
+      "smiting": 0
    },
    "Bamboo Staff": {
       "type": "weapon",
-      "description": "A seasoned bamboo staff reinforced with iron bands — light, fast, and deceptively powerful",
+      "description": "A seasoned bamboo staff reinforced with iron bands \u2014 light, fast, and deceptively powerful",
       "attack_bonus": 14,
       "speed_bonus": 5,
       "mp_bonus": 10,
@@ -3712,7 +4351,12 @@
       "rarity": "common",
       "requirements": {
          "level": 2
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Serpent Fang Dagger": {
       "type": "weapon",
@@ -3723,7 +4367,13 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 4
-      }
+      },
+      "weapon_type": "dagger",
+      "aim_accuracy": 92,
+      "weight": 1,
+      "sharpness": 21,
+      "smiting": 0,
+      "poison_attack": 11
    },
    "Silk-Wrapped Yari": {
       "type": "weapon",
@@ -3734,7 +4384,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 6
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 16,
+      "smiting": 0
    },
    "Jade Dragon Sword": {
       "type": "weapon",
@@ -3747,29 +4402,44 @@
       "rarity": "legendary",
       "requirements": {
          "level": 10
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 19,
+      "smiting": 0
    },
    "Clan Greataxe": {
       "type": "weapon",
-      "description": "A massive double-headed axe from the northern clans — brutal, heavy, and extraordinarily effective",
+      "description": "A massive double-headed axe from the northern clans \u2014 brutal, heavy, and extraordinarily effective",
       "attack_bonus": 30,
       "speed_bonus": -2,
       "price": 180,
       "rarity": "uncommon",
       "requirements": {
          "level": 5
-      }
+      },
+      "weapon_type": "axe",
+      "aim_accuracy": 80,
+      "weight": 5,
+      "sharpness": 18,
+      "smiting": 0
    },
    "Warbrand": {
       "type": "weapon",
-      "description": "A long, heavy two-handed sword used by Varak clan champions — massive reach, devastating power",
+      "description": "A long, heavy two-handed sword used by Varak clan champions \u2014 massive reach, devastating power",
       "attack_bonus": 38,
       "speed_bonus": -1,
       "price": 250,
       "rarity": "rare",
       "requirements": {
          "level": 7
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 17,
+      "smiting": 0
    },
    "Skull-Crusher Maul": {
       "type": "weapon",
@@ -3780,7 +4450,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 6
-      }
+      },
+      "weapon_type": "warhammer",
+      "aim_accuracy": 72,
+      "weight": 9,
+      "sharpness": 0,
+      "smiting": 8
    },
    "Iron Horde Axe": {
       "type": "weapon",
@@ -3792,7 +4467,12 @@
       "rarity": "legendary",
       "requirements": {
          "level": 9
-      }
+      },
+      "weapon_type": "axe",
+      "aim_accuracy": 80,
+      "weight": 5,
+      "sharpness": 20,
+      "smiting": 0
    },
    "Bear-Claw Gauntlet": {
       "type": "weapon",
@@ -3804,7 +4484,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 7
-      }
+      },
+      "weapon_type": "fist",
+      "aim_accuracy": 90,
+      "weight": 0,
+      "sharpness": 6,
+      "smiting": 0
    },
    "Yixuan Silk Robe": {
       "type": "armor",
@@ -3864,7 +4549,7 @@
    },
    "Jade Tea": {
       "type": "consumable",
-      "description": "A calming eastern tea brewed from chrysanthemum and wolfberry — restores MP and steadies the mind",
+      "description": "A calming eastern tea brewed from chrysanthemum and wolfberry \u2014 restores MP and steadies the mind",
       "effect": "mp_restore",
       "value": 45,
       "price": 55,
@@ -3897,7 +4582,7 @@
    },
    "Pepper Tonic": {
       "type": "consumable",
-      "description": "A concentrated dose of eastern black pepper in tonic water — improves circulation and speed",
+      "description": "A concentrated dose of eastern black pepper in tonic water \u2014 improves circulation and speed",
       "effect": "speed_boost",
       "value": 5,
       "duration": 6,
@@ -3906,14 +4591,19 @@
    },
    "Kalovar Sabre": {
       "type": "weapon",
-      "description": "A curved cavalry sabre favoured by Kalovar mounted soldiers — fast, single-edged, and lethal at range",
+      "description": "A curved cavalry sabre favoured by Kalovar mounted soldiers \u2014 fast, single-edged, and lethal at range",
       "attack_bonus": 20,
       "speed_bonus": 4,
       "price": 140,
       "rarity": "uncommon",
       "requirements": {
          "level": 4
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 15,
+      "smiting": 0
    },
    "Corsair's Cutlass": {
       "type": "weapon",
@@ -3924,29 +4614,44 @@
       "rarity": "uncommon",
       "requirements": {
          "level": 3
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 15,
+      "smiting": 0
    },
    "Kalovar War Lance": {
       "type": "weapon",
-      "description": "A long cavalry lance used by Kalovar heavy horse — devastating on the charge, unwieldy on foot",
+      "description": "A long cavalry lance used by Kalovar heavy horse \u2014 devastating on the charge, unwieldy on foot",
       "attack_bonus": 35,
       "defense_bonus": 3,
       "price": 280,
       "rarity": "rare",
       "requirements": {
          "level": 7
-      }
+      },
+      "weapon_type": "spear",
+      "aim_accuracy": 88,
+      "weight": 4,
+      "sharpness": 14,
+      "smiting": 0
    },
    "Steppe Recurve Bow": {
       "type": "weapon",
-      "description": "A short but powerful recurve bow made from layered bone and sinew — the Varak steppe archer's weapon of choice",
+      "description": "A short but powerful recurve bow made from layered bone and sinew \u2014 the Varak steppe archer's weapon of choice",
       "attack_bonus": 18,
       "speed_bonus": 5,
       "price": 160,
       "rarity": "uncommon",
       "requirements": {
          "level": 4
-      }
+      },
+      "weapon_type": "bow",
+      "aim_accuracy": 82,
+      "weight": 2,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Bear Warrior Axe": {
       "type": "weapon",
@@ -3957,7 +4662,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 6
-      }
+      },
+      "weapon_type": "axe",
+      "aim_accuracy": 80,
+      "weight": 5,
+      "sharpness": 18,
+      "smiting": 0
    },
    "Yixuan River Blade": {
       "type": "weapon",
@@ -3969,7 +4679,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 6
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 16,
+      "smiting": 0
    },
    "Jade Court Rapier": {
       "type": "weapon",
@@ -3980,7 +4695,12 @@
       "rarity": "rare",
       "requirements": {
          "level": 8
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 16,
+      "smiting": 0
    },
    "Constanplea Ghost Blade": {
       "type": "weapon",
@@ -3993,7 +4713,12 @@
       "rarity": "legendary",
       "requirements": {
          "level": 10
-      }
+      },
+      "weapon_type": "sword",
+      "aim_accuracy": 85,
+      "weight": 3,
+      "sharpness": 17,
+      "smiting": 0
    },
    "Kalovar Grand Vizier's Staff": {
       "type": "weapon",
@@ -4007,11 +4732,16 @@
       "requirements": {
          "level": 12,
          "class": "Mage"
-      }
+      },
+      "weapon_type": "staff",
+      "aim_accuracy": 84,
+      "weight": 3,
+      "sharpness": 0,
+      "smiting": 0
    },
    "Iron Horde Standard": {
       "type": "offhand",
-      "description": "A clan battle standard of the Iron Horde. Inspires Varak warriors to near-supernatural ferocity — and terrifies everyone else.",
+      "description": "A clan battle standard of the Iron Horde. Inspires Varak warriors to near-supernatural ferocity \u2014 and terrifies everyone else.",
       "defense_bonus": 8,
       "attack_bonus": 10,
       "fear_factor": 0.12,
@@ -4034,7 +4764,7 @@
    },
    "Primordial Birthday Cake": {
       "type": "consumable",
-      "description": "A towering, multi-layered cake baked by the cosmos itself in honour of Andrew — The Primordial One's birthday. The frosting shimmers with stardust, the candles burn with the light of newborn stars, and each slice tastes of every good thing ever created. It fully restores your health and mana, fills you with a profound sense of celebratory joy, and grants a generous helping of experience — because on Andrew's birthday, everyone levels up a little.",
+      "description": "A towering, multi-layered cake baked by the cosmos itself in honour of Andrew \u2014 The Primordial One's birthday. The frosting shimmers with stardust, the candles burn with the light of newborn stars, and each slice tastes of every good thing ever created. It fully restores your health and mana, fills you with a profound sense of celebratory joy, and grants a generous helping of experience \u2014 because on Andrew's birthday, everyone levels up a little.",
       "effect": "birthday_cake",
       "heal_pct": 100,
       "mp_restore_pct": 100,
@@ -4045,7 +4775,7 @@
    },
    "Primordial Essence": {
       "type": "consumable",
-      "description": "A crystallized fragment of the cosmos itself, bestowed by a being older than time. Its inner light pulses with the weight of countless ages. Consuming it floods your very soul with an incomprehensible surge of experience — the lifetime of a god compressed into a single breath. Extremely rare and impossibly expensive.",
+      "description": "A crystallized fragment of the cosmos itself, bestowed by a being older than time. Its inner light pulses with the weight of countless ages. Consuming it floods your very soul with an incomprehensible surge of experience \u2014 the lifetime of a god compressed into a single breath. Extremely rare and impossibly expensive.",
       "effect": "grant_exp",
       "value": 100000000000,
       "price": 9999999999,

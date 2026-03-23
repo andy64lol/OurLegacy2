@@ -318,6 +318,13 @@ const raceData  = {{ data.races  | tojson }};
                         <div class="stat-mini"><span>DEF</span><strong>{{ enemy.defense }}</strong></div>
                         <div class="stat-mini"><span>SPD</span><strong>{{ enemy.speed }}</strong></div>
                     </div>
+                    {% if enemy.tags %}
+                    <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;">
+                        {% for tag in enemy.tags %}
+                        <span style="font-size:0.65rem;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,0.08);color:var(--text-dim);letter-spacing:0.04em;text-transform:uppercase;">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     {% if enemy_effects %}
                     <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
                         {% for eff_key, eff_info in enemy_effects.items() %}
@@ -760,6 +767,9 @@ const raceData  = {{ data.races  | tojson }};
                             {% if equipped_details.get(slot) %}
                             {% set eq = equipped_details[slot] %}
                             <div class="equip-slot-item rarity-{{ eq.rarity }}">{{ eq.name }}</div>
+                            {% if eq.weapon_type %}
+                            <div style="font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">{{ eq.weapon_type.replace('_',' ') }}</div>
+                            {% endif %}
                             {% if eq.stats %}
                             <div class="equip-slot-stats">{{ eq.stats }}</div>
                             {% endif %}

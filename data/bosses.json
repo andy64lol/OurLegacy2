@@ -74,7 +74,13 @@
     "dialogues": {
       "on_start_battle": "dragon.boss.start",
       "on_defeat": "dragon.boss.defeat"
-    }
+    },
+    "tags": [
+      "dragon",
+      "fire",
+      "flying",
+      "large"
+    ]
   },
   "troll_king": {
     "name": "Troll King",
@@ -120,7 +126,12 @@
       "missions_required": [
         "undead_horde"
       ]
-    }
+    },
+    "tags": [
+      "giant",
+      "humanoid",
+      "regenerating"
+    ]
   },
   "shadow_lord": {
     "name": "Shadow Lord",
@@ -188,7 +199,13 @@
       "missions_required": [
         "ancient_artifact"
       ]
-    }
+    },
+    "tags": [
+      "undead",
+      "void",
+      "spectral",
+      "spellcaster"
+    ]
   },
   "ice_queen": {
     "name": "Ice Queen",
@@ -256,7 +273,13 @@
       "missions_required": [
         "crystal_guardian"
       ]
-    }
+    },
+    "tags": [
+      "humanoid",
+      "ice",
+      "cold",
+      "spellcaster"
+    ]
   },
   "orc_chieftain": {
     "name": "Orc Chieftain",
@@ -307,7 +330,12 @@
       "missions_required": [
         "orc_invasion"
       ]
-    }
+    },
+    "tags": [
+      "humanoid",
+      "strong",
+      "armored"
+    ]
   },
   "void_tyrant": {
     "name": "Void Tyrant Kael'dor",
@@ -330,7 +358,12 @@
         "void_walker",
         "dragon_slayer"
       ]
-    }
+    },
+    "tags": [
+      "void",
+      "spellcaster",
+      "large"
+    ]
   },
   "swamp_hydra": {
     "name": "Swamp Hydra",
@@ -408,7 +441,12 @@
         "orc_invasion",
         "forest_cleaning"
       ]
-    }
+    },
+    "tags": [
+      "beast",
+      "poisonous",
+      "large"
+    ]
   },
   "necromancer_lord": {
     "name": "Necromancer Lord Vorthak",
@@ -487,7 +525,12 @@
         "undead_horde",
         "temple_protector"
       ]
-    }
+    },
+    "tags": [
+      "humanoid",
+      "undead",
+      "spellcaster"
+    ]
   },
   "storm_giant": {
     "name": "Thunder Lord Thorigar",
@@ -563,7 +606,12 @@
         "crystal_guardian",
         "inferno_slayer"
       ]
-    }
+    },
+    "tags": [
+      "giant",
+      "lightning",
+      "armored"
+    ]
   },
   "lich_king": {
     "name": "Lich King Malachar",
@@ -662,7 +710,11 @@
         "shadow_plague",
         "troll_slayer"
       ]
-    }
+    },
+    "tags": [
+      "undead",
+      "spellcaster"
+    ]
   },
   "demon_prince": {
     "name": "Demon Prince Azgorath",
@@ -761,7 +813,12 @@
         "demon_gate",
         "lich_king_defeat"
       ]
-    }
+    },
+    "tags": [
+      "demon",
+      "fire",
+      "large"
+    ]
   },
   "elder_dragon": {
     "name": "Elder Dragon Zephyr",
@@ -876,19 +933,25 @@
         "storm_giant_defeat",
         "demon_prince_defeat"
       ]
-    }
+    },
+    "tags": [
+      "dragon",
+      "flying",
+      "large",
+      "armored"
+    ]
   },
   "Dalokurg": {
-    "name": "The infamous bandit leader, Dälokurg",
+    "name": "The infamous bandit leader, D\u00e4lokurg",
     "hp": 1360,
     "attack": 320,
     "defense": 256,
     "speed": 28,
-    "description": "Dälokurg, the notorious bandit leader known for his cunning and ruthlessness. He commands a large group of bandits and has a reputation for ambushing travelers on the roads.",
+    "description": "D\u00e4lokurg, the notorious bandit leader known for his cunning and ruthlessness. He commands a large group of bandits and has a reputation for ambushing travelers on the roads.",
     "special_abilities": [
       {
         "name": "Ambush Strike",
-        "description": "A surprise attack that deals extra damage when Dälokurg is at full health",
+        "description": "A surprise attack that deals extra damage when D\u00e4lokurg is at full health",
         "damage": 50,
         "mp_cost": 15,
         "cooldown": 3
@@ -913,8 +976,13 @@
     "experience_reward": 100,
     "gold_reward": 50,
     "unique_loot": [
-      "Dälokurg's Warhammer",
+      "D\u00e4lokurg's Warhammer",
       "Bandit Leader's Cloak"
+    ],
+    "tags": [
+      "humanoid",
+      "outlaw",
+      "armored"
     ]
   },
   "purple_sandworm": {
@@ -965,6 +1033,11 @@
       "Sandworm Scale",
       "Desert Crystal",
       "Burrower's Fang"
+    ],
+    "tags": [
+      "beast",
+      "large",
+      "burrowing"
     ]
   },
   "goblin_king": {
@@ -1032,7 +1105,12 @@
       "missions_required": [
         "goblin_hunt"
       ]
-    }
+    },
+    "tags": [
+      "humanoid",
+      "small",
+      "spellcaster"
+    ]
   },
   "fire_elemental_lord": {
     "name": "Fire Elemental Lord Ignaros",
@@ -1118,7 +1196,12 @@
         "fire_dragon_defeat",
         "crystal_caves_clear"
       ]
-    }
+    },
+    "tags": [
+      "elemental",
+      "fire",
+      "large"
+    ]
   },
   "ice_giant_king": {
     "name": "Ice Giant King Thrym",
@@ -1203,7 +1286,13 @@
         "ice_queen_defeat",
         "frozen_peaks_explore"
       ]
-    }
+    },
+    "tags": [
+      "giant",
+      "ice",
+      "cold",
+      "armored"
+    ]
   },
   "celestial_guardian": {
     "name": "Celestial Guardian Auriel",
@@ -1297,7 +1386,12 @@
         "void_tyrant_defeat",
         "dragon_slayer_master"
       ]
-    }
+    },
+    "tags": [
+      "holy",
+      "construct",
+      "flying"
+    ]
   },
   "supreme_being": {
     "name": "Supreme Being Eternus",
@@ -1421,7 +1515,12 @@
         "all_dungeons_clear",
         "legend_achieved"
       ]
-    }
+    },
+    "tags": [
+      "void",
+      "holy",
+      "large"
+    ]
   },
   "archdruid_malfurion": {
     "name": "Corrupted Archdruid Malfurion",
@@ -1439,7 +1538,12 @@
     ],
     "unlock_conditions": {
       "level": 6
-    }
+    },
+    "tags": [
+      "humanoid",
+      "nature",
+      "spellcaster"
+    ]
   },
   "high_inquisitor_whitemane": {
     "name": "High Inquisitor Whitemane",
@@ -1457,7 +1561,13 @@
     ],
     "unlock_conditions": {
       "level": 6
-    }
+    },
+    "tags": [
+      "humanoid",
+      "holy",
+      "armored",
+      "spellcaster"
+    ]
   },
   "uther_the_fallen": {
     "name": "Uther the Fallen",
@@ -1475,7 +1585,13 @@
     ],
     "unlock_conditions": {
       "level": 7
-    }
+    },
+    "tags": [
+      "undead",
+      "humanoid",
+      "armored",
+      "holy"
+    ]
   },
   "snowbinable": {
     "name": "Snowbinable",
@@ -1483,7 +1599,7 @@
     "attack": 640,
     "defense": 400,
     "speed": 12,
-    "description": "A colossus born from the soul of the taiga itself. Part beast, part blizzard — it has haunted the permafrost for a thousand years. No hunter who tracked it ever returned.",
+    "description": "A colossus born from the soul of the taiga itself. Part beast, part blizzard \u2014 it has haunted the permafrost for a thousand years. No hunter who tracked it ever returned.",
     "special_abilities": [
       {
         "name": "Blizzard Breath",
@@ -1557,7 +1673,13 @@
     ],
     "unlock_conditions": {
       "level": 12
-    }
+    },
+    "tags": [
+      "beast",
+      "ice",
+      "cold",
+      "large"
+    ]
   },
   "ottoman_pirate_lord": {
     "name": "Pirate Lord Barbaros",
@@ -1583,7 +1705,7 @@
       },
       {
         "name": "Cannon Volley",
-        "description": "Calls in ship cannons — devastating ranged bombardment",
+        "description": "Calls in ship cannons \u2014 devastating ranged bombardment",
         "damage": 55,
         "stun_chance": 0.25,
         "cooldown": 5
@@ -1621,7 +1743,12 @@
     ],
     "unlock_conditions": {
       "level": 8
-    }
+    },
+    "tags": [
+      "humanoid",
+      "outlaw",
+      "armored"
+    ]
   },
   "grand_vizier_karamanli": {
     "name": "Grand Vizier Karamanli",
@@ -1629,7 +1756,7 @@
     "attack": 576,
     "defense": 288,
     "speed": 13,
-    "description": "The cunning Grand Vizier of the Osmanoğlu Empire, Karamanli controls the Sultan's court through manipulation, sorcery, and iron will. He fights with a forbidden blend of court magic and political ruthlessness.",
+    "description": "The cunning Grand Vizier of the Osmano\u011flu Empire, Karamanli controls the Sultan's court through manipulation, sorcery, and iron will. He fights with a forbidden blend of court magic and political ruthlessness.",
     "special_abilities": [
       {
         "name": "Court Sorcery",
@@ -1654,7 +1781,7 @@
       },
       {
         "name": "Grand Seal",
-        "description": "Channels the full power of the empire through his seal — an overwhelming magical surge",
+        "description": "Channels the full power of the empire through his seal \u2014 an overwhelming magical surge",
         "damage": 70,
         "cooldown": 6
       }
@@ -1702,7 +1829,12 @@
     ],
     "unlock_conditions": {
       "level": 11
-    }
+    },
+    "tags": [
+      "humanoid",
+      "spellcaster",
+      "armored"
+    ]
   },
   "sultan_yildirim": {
     "name": "Sultan Yildirim",
@@ -1710,17 +1842,17 @@
     "attack": 960,
     "defense": 600,
     "speed": 14,
-    "description": "The thunderous Sultan of the Osmanoğlu Empire — Yildirim, The Lightning. He has conquered thirty kingdoms and his empire stretches to the horizon in every direction. He does not merely fight; he annihilates.",
+    "description": "The thunderous Sultan of the Osmano\u011flu Empire \u2014 Yildirim, The Lightning. He has conquered thirty kingdoms and his empire stretches to the horizon in every direction. He does not merely fight; he annihilates.",
     "special_abilities": [
       {
         "name": "Lightning Decree",
-        "description": "Calls down a bolt of divine power granted by the heavens — punishment for those who defy the Sultan",
+        "description": "Calls down a bolt of divine power granted by the heavens \u2014 punishment for those who defy the Sultan",
         "damage": 65,
         "cooldown": 3
       },
       {
         "name": "Imperial Wrath",
-        "description": "The Sultan's fury given form — a brutal barrage of strikes",
+        "description": "The Sultan's fury given form \u2014 a brutal barrage of strikes",
         "damage": 50,
         "stun_chance": 0.4,
         "cooldown": 4
@@ -1735,7 +1867,7 @@
       },
       {
         "name": "Thunderstrike of Yildirim",
-        "description": "The Sultan's legendary finishing strike — strikes with the force of a lightning bolt",
+        "description": "The Sultan's legendary finishing strike \u2014 strikes with the force of a lightning bolt",
         "damage": 90,
         "stun_chance": 0.5,
         "cooldown": 6
@@ -1765,7 +1897,7 @@
       },
       {
         "hp_threshold": 0.2,
-        "description": "The Sultan rises to his full, terrifying power — the storm made flesh",
+        "description": "The Sultan rises to his full, terrifying power \u2014 the storm made flesh",
         "attack_multiplier": 1.65,
         "defense_multiplier": 0.75,
         "special_abilities_unlocked": [
@@ -1785,6 +1917,11 @@
     ],
     "unlock_conditions": {
       "level": 14
-    }
+    },
+    "tags": [
+      "humanoid",
+      "armored",
+      "humanoid"
+    ]
   }
 }
