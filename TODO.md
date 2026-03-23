@@ -6,17 +6,18 @@
   - `_autosave()` fires at: character creation, area travel, battle end (win/loss), quest completion, dungeon completion, logout
   - `/game` route auto-loads from `ol2_characters` when user is logged in but has no session player
   - Encrypted blob cloud save (`ol2_saves`) kept as manual export/import feature
-  - ⚠️ **Requires Supabase migration** — create `ol2_characters` table (see README for SQL)
-- [x] Add a dedicated server-side world tick loop independent of player sessions (`_world_tick` gevent greenlet, 30s interval, started via `before_request` guard + `post_fork` for gunicorn/Render)
-  - ⚠️ **Caveat — multiple workers**: With >1 Gunicorn worker, each spawns its own `_world_tick`, so the world ticks N× as fast. Fix: DB/Redis lock so only one "leader" worker runs the authoritative tick.
-  - ⚠️ **Caveat — timing jitter**: When using `before_request`, each worker's first tick depends on when it receives its first request. Acceptable for casual uptime-bot pings; not for precision scheduling.
-  - ⚠️ **Caveat — not truly global**: For a single authoritative 30s tick across all workers (proper MMO), need Redis `SET NX` or a Supabase-backed distributed lock so only one worker executes tick logic at a time.
-  - ✅ **Current state** (`workers = 1`): Single worker, no coordination needed — `post_fork` + greenlet is correct and sufficient.
+  - ⚠️ **Requires Supabase migration** — create `ol2_characters` table (SQL in README)
+- [x] Add a dedicated server-side world tick loop independent of player sessions (`_world_tick` gevent greenlet, 30s interval)
+  - ⚠️ Multiple workers: each spawns its own tick — fix with Redis/Supabase distributed lock when scaling past 1 worker
+  - ✅ Current state (`workers = 1`): single worker, no coordination needed
   - [ ] Future: add Redis/Supabase distributed lock when scaling past 1 worker
 - [ ] Server shards per region to handle large concurrent player counts
 
 ## 2. Real-Time World Presence
-- [ ] "Who is here" — show a text list of players currently in the same area as you
+- [x] Online user tracking — who is connected shown in global chat sidebar
+- [x] Global chat with SocketIO (area-agnostic, server-wide)
+- [x] Real-time trade system via SocketIO (offer/counter/confirm flow)
+- [ ] "Who is here" — show players currently in the same area as you
 - [ ] Area-based SocketIO rooms so events only broadcast to players in the relevant zone
 - [ ] Real-time text announcements for world events ("A dragon has been spotted in the Dark Forest!")
 - [ ] Player arrival/departure messages per area ("Thorin has entered Stonekeep.")
@@ -39,6 +40,9 @@
 - [ ] Rare resource nodes in zones that multiple players compete to gather
 
 ## 5. Guilds & Social
+- [x] Friends system — send/accept/reject/remove friend requests (stored in Supabase `ol2_friends`)
+- [x] Private messaging — DMs between players with unread counts (stored in Supabase `ol2_dms`)
+- [x] Block / blacklist system — block users from sending DMs or friend requests
 - [ ] Guild creation, invites, member ranks, and a guild-only chat channel
 - [ ] Guild hall — a shared text-based land/housing space owned by the guild
 - [ ] Guild quests with shared progress tracked as a text log
@@ -47,6 +51,8 @@
 - [ ] Achievements system with badges shown on profile
 
 ## 6. World Events & Quests
+- [x] Weekly challenges with progress tracking (stored per player, reset on world tick)
+- [x] Timed world events with reward claiming (server-side tick loop)
 - [ ] Quests with server-wide impact (completing a quest changes area descriptions for everyone)
 - [ ] Server-wide story arcs that advance as players hit collective milestones
 - [ ] Repeatable daily/weekly quests with server-shared completion counts shown as a progress bar
@@ -54,12 +60,17 @@
 - [ ] Dynamic random events triggered by player activity (too many goblins killed? an orcish war band invades)
 
 ## 7. Character & Progression Persistence
+- [x] Character data persists across sessions via Supabase `ol2_characters` (Phase 1)
+- [x] Boss cooldowns stored per player (in player dict, now auto-saved to Supabase)
 - [ ] Death penalty — XP loss and gold drop on death, respawn at last visited town
 - [ ] Deeper skill trees with long-term progression past current level cap
 - [ ] Bank / shared storage per player (deposit items not needed in active inventory)
-- [ ] All cooldowns (boss fights, world events) stored in Supabase instead of session memory
+- [ ] All cooldowns (boss fights, world events) stored in dedicated Supabase columns instead of player JSONB
 
 ## 8. Moderation & Safety
+- [x] Rate limiting on auth endpoints (register: 5/hr, login: 10/min) via flask-limiter
+- [x] Profanity filtering on chat messages and usernames
+- [x] Block system preventing unwanted DMs and friend requests
 - [ ] Admin text console for viewing online players, issuing bans, cancelling trades
 - [ ] In-game /report command with Supabase-backed report queue
 - [ ] Mute system with duration, stored per user in DB
@@ -67,6 +78,8 @@
 - [ ] Rate limiting on all game actions — combat, crafting, trading
 
 ## 9. Infrastructure & DevOps
+- [x] Gunicorn + gevent single-worker deployment (Render-ready via `render.yaml`)
+- [x] ProxyFix middleware for correct IP detection behind reverse proxy
 - [ ] Redis pub/sub or Supabase Realtime to sync SocketIO events across multiple workers
 - [ ] Supabase Row Level Security (RLS) policies on all tables
 - [ ] Automated database backups and point-in-time recovery
@@ -75,6 +88,8 @@
 - [ ] Horizontal scaling on a platform that supports it (Fly.io, Railway, AWS ECS)
 
 ## 10. Quality of Life for MMO Scale
+- [x] Cloud save / cloud load with encrypted blob backup (`ol2_saves`)
+- [x] Local encrypted save file export and import
 - [ ] Notification center — trade results, friend activity, guild events, persistent across sessions
 - [ ] Party / group text HUD visible during combat and exploration
 - [ ] Configurable text filters and chat tabs (Global, Area, Guild, Party, DMs)
