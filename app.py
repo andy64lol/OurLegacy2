@@ -4924,10 +4924,21 @@ def action_customize_character():
     if new_class and new_class in valid_classes:
         player["class"] = new_class
         changes.append(f"class to {new_class}")
+        equipment = player.get("equipment", {})
+        unequipped = []
+        for slot, item in equipment.items():
+            if item:
+                player["inventory"].append(item)
+                equipment[slot] = None
+                unequipped.append(item)
+        player["equipment"] = equipment
+        if unequipped:
+            add_message(f"All gear unequipped on class change: {', '.join(unequipped)}.", "var(--text-dim)")
     if not changes:
         return jsonify({"ok": False, "message": "No valid changes provided."})
     player["gold"] -= cost
     save_player(player)
+    _autosave()
     add_message(f"Character updated ({', '.join(changes)}). -{cost:,} gold.", "var(--gold)")
     return jsonify({"ok": True, "message": f"Character updated: {', '.join(changes)}."})
 
