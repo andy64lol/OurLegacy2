@@ -528,3 +528,88 @@ def get_chat_history(limit: int = 60) -> List[Dict[str, Any]]:
         return _run(_do)
     except Exception:
         return []
+
+
+# ─── Persistent Character (Phase 1 MMO) ───────────────────────────────────────
+
+def character_autosave(user_id: str, game_state: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Persist the full structured game state for a logged-in character.
+    Uses an upsert on user_id so each account has exactly one live character row.
+    Returns {'ok': bool, 'message': str}
+    """
+    import json as _json
+
+    player = game_state.get("player") or {}
+    row = {
+        "user_id": user_id,
+        "player_name": player.get("name", ""),
+        "level": player.get("level", 1),
+        "character_class": player.get("class", ""),
+        "current_area": game_state.get("current_area", "starting_village"),
+        "game_state": _json.dumps(game_state),
+    }
+
+    def _do():
+        client = _get_client()
+        client.table("ol2_characters").upsert(row, on_conflict="user_id").execute()
+        return {"ok": True, "message": "Character auto-saved."}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Character autosave failed: {e}"}
+
+
+def character_autoload(user_id: str) -> Dict[str, Any]:
+    """
+    Load the persistent game state for a logged-in user.
+    Returns {'ok': bool, 'message': str, 'data': dict|None}
+    """
+    import json as _json
+
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_characters")
+            .select("player_name, level, game_state, updated_at")
+            .eq("user_id", user_id)
+            .execute()
+        )
+        return result.data
+
+    try:
+        rows = _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Character load failed: {e}", "data": None}
+
+    if not rows:
+        return {"ok": False, "message": "No persistent character found.", "data": None}
+
+    row = rows[0]
+    try:
+        raw = row["game_state"]
+        if isinstance(raw, str):
+            state = _json.loads(raw)
+        else:
+            state = dict(raw)
+        return {
+            "ok": True,
+            "message": f"Loaded {row['player_name']} (Lv.{row['level']})",
+            "data": state,
+        }
+    except Exception as e:
+        return {"ok": False, "message": f"Character load failed: {e}", "data": None}
+
+
+def character_delete(user_id: str) -> Dict[str, Any]:
+    """Delete the persistent character for a user (e.g. when starting a new character)."""
+    def _do():
+        client = _get_client()
+        client.table("ol2_characters").delete().eq("user_id", user_id).execute()
+        return {"ok": True, "message": "Character deleted."}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Delete failed: {e}"}

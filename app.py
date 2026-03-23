@@ -93,6 +93,9 @@ from utilities.supabase_db import (
     unblock_user,
     is_blocked,
     get_blocked_by_me,
+    character_autosave,
+    character_autoload,
+    character_delete,
 )
 
 app = Flask(__name__)
@@ -627,6 +630,72 @@ def get_player() -> dict[str, Any] | None:
 def save_player(player: dict[str, Any]) -> None:
     session["player"] = player
     session.modified = True
+
+
+# ─── Persistent character helpers (Phase 1 MMO) ──────────────────────────────
+
+def _build_game_state() -> dict[str, Any]:
+    """Bundle all persistent session data into a dict for Supabase storage."""
+    player = session.get("player")
+    if not player:
+        return {}
+    from utilities.stats import ensure_attributes
+    ensure_attributes(player)
+    return {
+        "player": player,
+        "current_area": session.get("current_area", "starting_village"),
+        "completed_missions": session.get("completed_missions", []),
+        "visited_areas": session.get("visited_areas", []),
+        "quest_progress": session.get("quest_progress", {}),
+        "seen_cutscenes": session.get("seen_cutscenes", []),
+        "current_weather": session.get("current_weather", "sunny"),
+        "messages": session.get("messages", [])[-20:],
+        "diary": session.get("diary", []),
+        "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
+        "save_version": "7.1",
+    }
+
+
+def _apply_game_state(data: dict[str, Any]) -> None:
+    """Apply a loaded game state dict to the current session."""
+    player = data.get("player")
+    if not player:
+        return
+    _ensure_equipment_slots(player)
+    player.setdefault("game_ticks", 0)
+    player.setdefault("weekly_challenges_progress", {})
+    player.setdefault("boss_cooldowns", {})
+    player.setdefault("race", "Descendants from another world")
+    from utilities.stats import ensure_attributes
+    ensure_attributes(player)
+    session["player"] = player
+    session["current_area"] = data.get("current_area", "starting_village")
+    session["completed_missions"] = data.get("completed_missions", [])
+    session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
+    session["quest_progress"] = data.get("quest_progress", {})
+    session["seen_cutscenes"] = data.get("seen_cutscenes", [])
+    session["current_weather"] = data.get("current_weather", "sunny")
+    session["messages"] = data.get("messages", [])
+    session["diary"] = data.get("diary", [])
+    session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
+    session.modified = True
+
+
+def _autosave() -> None:
+    """
+    Fire-and-forget autosave to Supabase for logged-in users.
+    Silently skips if the user isn't logged in or has no active character.
+    """
+    user_id = session.get("online_user_id")
+    if not user_id:
+        return
+    state = _build_game_state()
+    if not state:
+        return
+    try:
+        character_autosave(user_id, state)
+    except Exception:
+        pass
 
 
 def get_messages():
@@ -1709,12 +1778,20 @@ def create():
             "You stand at the gates of the Starting Village. Adventure awaits.",
             "var(--text-light)",
         )
+        _autosave()
         return redirect(url_for("game"))
 
 
 @app.route("/game")
 def game():
     player = get_player()
+    if not player:
+        user_id = session.get("online_user_id")
+        if user_id:
+            result = character_autoload(user_id)
+            if result["ok"] and result.get("data"):
+                _apply_game_state(result["data"])
+                player = session.get("player")
     if not player:
         create_error = session.pop("create_error", None)
         session.modified = True
@@ -2640,6 +2717,7 @@ def action_travel():
         add_message("That path is not accessible from here.", "var(--red)")
 
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 
@@ -3118,6 +3196,7 @@ def action_complete_mission():
     session["quest_progress"] = quest_progress
 
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 
@@ -3799,6 +3878,7 @@ def _handle_victory(player, enemy, log):
     session["battle_log"] = log
     session["battle_enemy"] = None
     save_player(player)
+    _autosave()
 
     # If inside a dungeon, return there instead of showing victory screen
     active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}
@@ -3856,6 +3936,7 @@ def _handle_defeat(player, enemy, log):
     session["battle_log"] = log
     session["battle_enemy"] = None
     save_player(player)
+    _autosave()
 
     return render_template("defeat.html", player=player, enemy=enemy, log=log)
 
@@ -4273,6 +4354,7 @@ def dungeon_complete():
         # Update weekly challenge
         update_weekly_challenge(player, "dungeon_complete", 1)
         save_player(player)
+        _autosave()
 
     return redirect(url_for("game") + "?tab=dungeons")
 
@@ -4449,6 +4531,7 @@ def api_online_login():
 
 @app.route("/api/online/logout", methods=["POST"])
 def api_online_logout():
+    _autosave()
     game_keys = [
         "player", "current_area", "completed_missions", "visited_areas",
         "quest_progress", "seen_cutscenes", "current_weather", "messages",

@@ -1,7 +1,12 @@
 # Our Legacy 2 — MMO Roadmap
 
 ## 1. Persistent World & Server Architecture
-- [ ] Replace the per-user session model with a persistent character model stored entirely in Supabase (local save/export kept for single-player)
+- [x] Replace the per-user session model with a persistent character model stored entirely in Supabase (local save/export kept for single-player)
+  - Implemented via `ol2_characters` table (upsert per user_id) storing full game state as JSONB
+  - `_autosave()` fires at: character creation, area travel, battle end (win/loss), quest completion, dungeon completion, logout
+  - `/game` route auto-loads from `ol2_characters` when user is logged in but has no session player
+  - Encrypted blob cloud save (`ol2_saves`) kept as manual export/import feature
+  - ⚠️ **Requires Supabase migration** — create `ol2_characters` table (see README for SQL)
 - [x] Add a dedicated server-side world tick loop independent of player sessions (`_world_tick` gevent greenlet, 30s interval, started via `before_request` guard + `post_fork` for gunicorn/Render)
   - ⚠️ **Caveat — multiple workers**: With >1 Gunicorn worker, each spawns its own `_world_tick`, so the world ticks N× as fast. Fix: DB/Redis lock so only one "leader" worker runs the authoritative tick.
   - ⚠️ **Caveat — timing jitter**: When using `before_request`, each worker's first tick depends on when it receives its first request. Acceptable for casual uptime-bot pings; not for precision scheduling.
