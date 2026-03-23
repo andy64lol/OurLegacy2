@@ -4,7 +4,12 @@
 - [ ] Migrate from filesystem sessions to a database-backed session store (Redis or Supabase)
 - [ ] Support multiple concurrent game server workers with shared state (replace in-memory dicts with Supabase tables)
 - [ ] Replace the per-user session model with a persistent character model stored entirely in Supabase (local save/export kept for single-player)
-- [x] Add a dedicated server-side world tick loop independent of player sessions (`_world_tick` gevent greenlet, 30s interval, started via `before_request` guard)
+- [x] Add a dedicated server-side world tick loop independent of player sessions (`_world_tick` gevent greenlet, 30s interval, started via `before_request` guard + `post_fork` for gunicorn/Render)
+  - ⚠️ **Caveat — multiple workers**: With >1 Gunicorn worker, each spawns its own `_world_tick`, so the world ticks N× as fast. Fix: DB/Redis lock so only one "leader" worker runs the authoritative tick.
+  - ⚠️ **Caveat — timing jitter**: When using `before_request`, each worker's first tick depends on when it receives its first request. Acceptable for casual uptime-bot pings; not for precision scheduling.
+  - ⚠️ **Caveat — not truly global**: For a single authoritative 30s tick across all workers (proper MMO), need Redis `SET NX` or a Supabase-backed distributed lock so only one worker executes tick logic at a time.
+  - ✅ **Current state** (`workers = 1`): Single worker, no coordination needed — `post_fork` + greenlet is correct and sufficient.
+  - [ ] Future: add Redis/Supabase distributed lock when scaling past 1 worker
 - [ ] Server shards per region to handle large concurrent player counts
 
 ## 2. Real-Time World Presence
