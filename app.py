@@ -32,6 +32,7 @@ import json
 import random
 import os
 import time as _time_module
+import uuid
 from typing import Any
 
 from utilities.dice import Dice
@@ -125,6 +126,13 @@ DM_COOLDOWN_SECS = 2
 DM_MAX_LEN = 500
 FR_MAX_PER_MINUTE = 5
 
+# ─── In-memory trade state ────────────────────────────────────────────────────
+# trade_id → {id, player_a, player_b, offer_a, offer_b, confirmed_a, confirmed_b,
+#              status, applied_a, applied_b}
+_active_trades: dict = {}
+TRADE_MAX_ITEMS = 10
+TRADE_MAX_GOLD = 9_999_999
+
 
 @app.context_processor
 def _inject_chat_globals():
@@ -147,8 +155,16 @@ def _on_chat_connect():
 
 @socketio.on("disconnect")
 def _on_chat_disconnect():
-    _chat_online.pop(request.sid, None)
+    username = _chat_online.pop(request.sid, None)
     socketio_emit("online_users", sorted(set(_chat_online.values())), broadcast=True)
+    if username:
+        for tid, trade in list(_active_trades.items()):
+            if trade["status"] in ("pending", "active") and username in (trade["player_a"], trade["player_b"]):
+                other = trade["player_b"] if username == trade["player_a"] else trade["player_a"]
+                other_sids = [s for s, u in _chat_online.items() if u == other]
+                for s in other_sids:
+                    socketio.emit("trade_cancelled", {"message": f"{username} disconnected. Trade cancelled."}, to=s)
+                _active_trades.pop(tid, None)
 
 
 @socketio.on("chat_send")
@@ -181,6 +197,256 @@ def _on_chat_send(data):
         }, broadcast=True)
     else:
         socketio_emit("chat_error", {"message": "Failed to send message. Try again."})
+
+
+# ─── SocketIO Trade Events ─────────────────────────────────────────────────────
+
+def _get_trade_for_user(trade_id: str, username: str):
+    """Return trade dict if trade_id exists and username is a participant."""
+    trade = _active_trades.get(trade_id)
+    if not trade:
+        return None
+    if username not in (trade["player_a"], trade["player_b"]):
+        return None
+    return trade
+
+
+def _trade_payload(trade: dict, viewer: str) -> dict:
+    """Build the trade_update payload for a viewer."""
+    other = trade["player_b"] if viewer == trade["player_a"] else trade["player_a"]
+    my_offer = trade["offer_a"] if viewer == trade["player_a"] else trade["offer_b"]
+    their_offer = trade["offer_b"] if viewer == trade["player_a"] else trade["offer_a"]
+    my_confirmed = trade["confirmed_a"] if viewer == trade["player_a"] else trade["confirmed_b"]
+    their_confirmed = trade["confirmed_b"] if viewer == trade["player_a"] else trade["confirmed_a"]
+    return {
+        "trade_id": trade["id"],
+        "other": other,
+        "my_offer": my_offer,
+        "their_offer": their_offer,
+        "my_confirmed": my_confirmed,
+        "their_confirmed": their_confirmed,
+        "status": trade["status"],
+    }
+
+
+def _emit_trade_update(trade: dict):
+    """Emit trade_update to both participants."""
+    a_sids = [s for s, u in _chat_online.items() if u == trade["player_a"]]
+    b_sids = [s for s, u in _chat_online.items() if u == trade["player_b"]]
+    for s in a_sids:
+        socketio.emit("trade_update", _trade_payload(trade, trade["player_a"]), to=s)
+    for s in b_sids:
+        socketio.emit("trade_update", _trade_payload(trade, trade["player_b"]), to=s)
+
+
+@socketio.on("trade_request")
+def _on_trade_request(data):
+    username = session.get("online_username")
+    if not username:
+        return
+    target = str(data.get("target", "")).strip().lower()
+    if not target or target == username:
+        socketio_emit("trade_error", {"message": "Invalid trade target."})
+        return
+    target_sids = [s for s, u in _chat_online.items() if u == target]
+    if not target_sids:
+        socketio_emit("trade_error", {"message": f"{target} is not online."})
+        return
+    for t in _active_trades.values():
+        if t["status"] in ("pending", "active") and username in (t["player_a"], t["player_b"]):
+            socketio_emit("trade_error", {"message": "You already have an active trade."})
+            return
+        if t["status"] in ("pending", "active") and target in (t["player_a"], t["player_b"]):
+            socketio_emit("trade_error", {"message": f"{target} is already in a trade."})
+            return
+    trade_id = str(uuid.uuid4())[:8]
+    _active_trades[trade_id] = {
+        "id": trade_id,
+        "player_a": username,
+        "player_b": target,
+        "offer_a": {"items": [], "gold": 0},
+        "offer_b": {"items": [], "gold": 0},
+        "confirmed_a": False,
+        "confirmed_b": False,
+        "status": "pending",
+        "applied_a": False,
+        "applied_b": False,
+        "created_at": _time_module.time(),
+    }
+    for s in target_sids:
+        socketio.emit("trade_invite", {"trade_id": trade_id, "from": username}, to=s)
+    socketio_emit("trade_invite_sent", {"trade_id": trade_id, "to": target})
+
+
+@socketio.on("trade_accept")
+def _on_trade_accept(data):
+    username = session.get("online_username")
+    if not username:
+        return
+    trade_id = str(data.get("trade_id", ""))
+    trade = _get_trade_for_user(trade_id, username)
+    if not trade or trade["status"] != "pending":
+        socketio_emit("trade_error", {"message": "Trade not found or already started."})
+        return
+    if trade["player_b"] != username:
+        socketio_emit("trade_error", {"message": "Only the recipient can accept."})
+        return
+    trade["status"] = "active"
+    _emit_trade_update(trade)
+
+
+@socketio.on("trade_decline")
+def _on_trade_decline(data):
+    username = session.get("online_username")
+    if not username:
+        return
+    trade_id = str(data.get("trade_id", ""))
+    trade = _get_trade_for_user(trade_id, username)
+    if not trade:
+        return
+    other = trade["player_b"] if username == trade["player_a"] else trade["player_a"]
+    other_sids = [s for s, u in _chat_online.items() if u == other]
+    for s in other_sids:
+        socketio.emit("trade_cancelled", {"message": f"{username} declined the trade."}, to=s)
+    socketio_emit("trade_cancelled", {"message": "You declined the trade."})
+    _active_trades.pop(trade_id, None)
+
+
+@socketio.on("trade_add_item")
+def _on_trade_add_item(data):
+    username = session.get("online_username")
+    if not username:
+        return
+    trade_id = str(data.get("trade_id", ""))
+    item_name = str(data.get("item_name", "")).strip()
+    trade = _get_trade_for_user(trade_id, username)
+    if not trade or trade["status"] != "active":
+        socketio_emit("trade_error", {"message": "Trade not active."})
+        return
+    my_offer_key = "offer_a" if username == trade["player_a"] else "offer_b"
+    my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
+    if trade[my_confirmed_key]:
+        socketio_emit("trade_error", {"message": "Unconfirm your offer first to make changes."})
+        return
+    if len(trade[my_offer_key]["items"]) >= TRADE_MAX_ITEMS:
+        socketio_emit("trade_error", {"message": f"Maximum {TRADE_MAX_ITEMS} items per trade."})
+        return
+    player = session.get("player")
+    if not player:
+        socketio_emit("trade_error", {"message": "No active character."})
+        return
+    inventory = list(player.get("inventory", []))
+    already_offered = list(trade[my_offer_key]["items"])
+    for offered in already_offered:
+        if offered in inventory:
+            inventory.remove(offered)
+    if item_name not in inventory:
+        socketio_emit("trade_error", {"message": f"You don't have '{item_name}'."})
+        return
+    trade[my_offer_key]["items"].append(item_name)
+    _emit_trade_update(trade)
+
+
+@socketio.on("trade_remove_item")
+def _on_trade_remove_item(data):
+    username = session.get("online_username")
+    if not username:
+        return
+    trade_id = str(data.get("trade_id", ""))
+    item_name = str(data.get("item_name", "")).strip()
+    trade = _get_trade_for_user(trade_id, username)
+    if not trade or trade["status"] != "active":
+        return
+    my_offer_key = "offer_a" if username == trade["player_a"] else "offer_b"
+    my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
+    if trade[my_confirmed_key]:
+        socketio_emit("trade_error", {"message": "Unconfirm your offer first to make changes."})
+        return
+    items = trade[my_offer_key]["items"]
+    if item_name in items:
+        items.remove(item_name)
+    _emit_trade_update(trade)
+
+
+@socketio.on("trade_set_gold")
+def _on_trade_set_gold(data):
+    username = session.get("online_username")
+    if not username:
+        return
+    trade_id = str(data.get("trade_id", ""))
+    try:
+        amount = max(0, min(int(data.get("gold", 0)), TRADE_MAX_GOLD))
+    except (ValueError, TypeError):
+        amount = 0
+    trade = _get_trade_for_user(trade_id, username)
+    if not trade or trade["status"] != "active":
+        return
+    my_offer_key = "offer_a" if username == trade["player_a"] else "offer_b"
+    my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
+    if trade[my_confirmed_key]:
+        socketio_emit("trade_error", {"message": "Unconfirm your offer first to make changes."})
+        return
+    player = session.get("player")
+    if not player:
+        return
+    already_offered_items = trade[my_offer_key]["items"]
+    if amount > player.get("gold", 0):
+        amount = player.get("gold", 0)
+    trade[my_offer_key]["gold"] = amount
+    _emit_trade_update(trade)
+
+
+@socketio.on("trade_confirm")
+def _on_trade_confirm(data):
+    username = session.get("online_username")
+    if not username:
+        return
+    trade_id = str(data.get("trade_id", ""))
+    confirmed = bool(data.get("confirmed", True))
+    trade = _get_trade_for_user(trade_id, username)
+    if not trade or trade["status"] != "active":
+        return
+    my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
+    trade[my_confirmed_key] = confirmed
+    if trade["confirmed_a"] and trade["confirmed_b"]:
+        trade["status"] = "approved"
+        a_sids = [s for s, u in _chat_online.items() if u == trade["player_a"]]
+        b_sids = [s for s, u in _chat_online.items() if u == trade["player_b"]]
+        for s in a_sids:
+            socketio.emit("trade_approved", {
+                "trade_id": trade_id,
+                "receive_items": trade["offer_b"]["items"],
+                "receive_gold": trade["offer_b"]["gold"],
+                "give_items": trade["offer_a"]["items"],
+                "give_gold": trade["offer_a"]["gold"],
+            }, to=s)
+        for s in b_sids:
+            socketio.emit("trade_approved", {
+                "trade_id": trade_id,
+                "receive_items": trade["offer_a"]["items"],
+                "receive_gold": trade["offer_a"]["gold"],
+                "give_items": trade["offer_b"]["items"],
+                "give_gold": trade["offer_b"]["gold"],
+            }, to=s)
+    else:
+        _emit_trade_update(trade)
+
+
+@socketio.on("trade_cancel")
+def _on_trade_cancel(data):
+    username = session.get("online_username")
+    if not username:
+        return
+    trade_id = str(data.get("trade_id", ""))
+    trade = _get_trade_for_user(trade_id, username)
+    if not trade or trade["status"] not in ("pending", "active"):
+        return
+    other = trade["player_b"] if username == trade["player_a"] else trade["player_a"]
+    other_sids = [s for s, u in _chat_online.items() if u == other]
+    for s in other_sids:
+        socketio.emit("trade_cancelled", {"message": f"{username} cancelled the trade."}, to=s)
+    socketio_emit("trade_cancelled", {"message": "You cancelled the trade."})
+    _active_trades.pop(trade_id, None)
 
 
 @app.errorhandler(429)
@@ -4391,6 +4657,74 @@ def api_block_list():
     if not username:
         return jsonify({"blocked": []})
     return jsonify({"ok": True, "blocked": get_blocked_by_me(username)})
+
+
+# ─── Trade REST Routes ────────────────────────────────────────────────────────
+
+@app.route("/api/player/inventory")
+def api_player_inventory():
+    player = session.get("player")
+    if not player:
+        return jsonify({"ok": False, "inventory": [], "gold": 0})
+    return jsonify({
+        "ok": True,
+        "inventory": player.get("inventory", []),
+        "gold": player.get("gold", 0),
+    })
+
+
+@app.route("/api/trade/apply", methods=["POST"])
+def api_trade_apply():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."}), 401
+    player = session.get("player")
+    if not player:
+        return jsonify({"ok": False, "message": "No active character."}), 400
+    data = request.json or {}
+    trade_id = str(data.get("trade_id", ""))
+    trade = _active_trades.get(trade_id)
+    if not trade:
+        return jsonify({"ok": False, "message": "Trade not found."}), 404
+    if trade["status"] != "approved":
+        return jsonify({"ok": False, "message": "Trade not approved yet."}), 400
+    if username not in (trade["player_a"], trade["player_b"]):
+        return jsonify({"ok": False, "message": "Not a participant."}), 403
+    is_a = username == trade["player_a"]
+    applied_key = "applied_a" if is_a else "applied_b"
+    if trade[applied_key]:
+        return jsonify({"ok": True, "message": "Already applied."})
+    my_offer = trade["offer_a"] if is_a else trade["offer_b"]
+    their_offer = trade["offer_b"] if is_a else trade["offer_a"]
+    inventory = list(player.get("inventory", []))
+    current_gold = player.get("gold", 0)
+    give_items = list(my_offer["items"])
+    give_gold = int(my_offer["gold"])
+    receive_items = list(their_offer["items"])
+    receive_gold = int(their_offer["gold"])
+    if current_gold < give_gold:
+        return jsonify({"ok": False, "message": "Not enough gold."}), 400
+    for item in give_items:
+        if item not in inventory:
+            return jsonify({"ok": False, "message": f"Item '{item}' not found in inventory."}), 400
+        inventory.remove(item)
+    current_gold -= give_gold
+    for item in receive_items:
+        inventory.append(item)
+    current_gold += receive_gold
+    player["inventory"] = inventory
+    player["gold"] = current_gold
+    session["player"] = player
+    session.modified = True
+    trade[applied_key] = True
+    if trade.get("applied_a") and trade.get("applied_b"):
+        _active_trades.pop(trade_id, None)
+    return jsonify({
+        "ok": True,
+        "message": f"Trade complete! Received {len(receive_items)} item(s) and {receive_gold:,} gold.",
+        "received_items": receive_items,
+        "received_gold": receive_gold,
+    })
 
 
 @app.route("/api/dm/unread", methods=["GET"])
