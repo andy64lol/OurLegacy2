@@ -1,74 +1,74 @@
-# Our Legacy 2 — MMO Roadmap
+# Our Legacy 2 — MMO Roadmap (Text-Based)
 
 ## 1. Persistent World & Server Architecture
-- [ ] Migrate from filesystem sessions to a proper database-backed session store (Redis or Supabase)
+- [ ] Migrate from filesystem sessions to a database-backed session store (Redis or Supabase)
 - [ ] Support multiple concurrent game server workers with shared state (replace in-memory dicts with Supabase tables)
-- [ ] Introduce server shards / zones so large player counts are distributed across regions
-- [ ] Replace the per-user session model with a persistent character model stored entirely in Supabase
-- [ ] Add a dedicated game tick / world event loop running server-side (not tied to player sessions)
+- [ ] Replace the per-user session model with a persistent character model stored entirely in Supabase (no local save files needed)
+- [ ] Add a dedicated server-side world tick loop independent of player sessions
+- [ ] Server shards per region to handle large concurrent player counts
 
 ## 2. Real-Time World Presence
-- [ ] Broadcast player movement and location to others in the same area (area-based SocketIO rooms)
-- [ ] Show other players as visible entities on the area/map screen
-- [ ] Area capacity limits and overflow routing to alternate instances
-- [ ] Live "who is in this area" list per zone, not just a global online list
-- [ ] Real-time notifications for rare world events (dragon attacks, meteor showers, etc.)
+- [ ] "Who is here" — show a text list of players currently in the same area as you
+- [ ] Area-based SocketIO rooms so events only broadcast to players in the relevant zone
+- [ ] Real-time text announcements for world events ("A dragon has been spotted in the Dark Forest!")
+- [ ] Player arrival/departure messages per area ("Thorin has entered Stonekeep.")
+- [ ] Area capacity limits with overflow routing to alternate instances
 
 ## 3. Multiplayer Combat
-- [ ] Co-op dungeon parties — form a group of 2–4 players, share a dungeon instance
-- [ ] Party health/MP bars visible to all party members in real time
-- [ ] Group loot rolling system (Need / Greed / Pass)
-- [ ] World bosses that require multiple players to defeat (spawn on a schedule)
-- [ ] PvP arena — opt-in dueling in designated zones with ELO-style ranking
-- [ ] Guild vs guild wars with territory control
+- [ ] Co-op dungeon parties — form a group of 2–4 players and share a dungeon run
+- [ ] Turn order display showing all party members and enemies in a text-based initiative list
+- [ ] Party member HP/MP visible as text bars during combat
+- [ ] Group loot rolling — Need / Greed / Pass text prompts after defeating enemies
+- [ ] World bosses that require multiple players (text-based raid encounters, scheduled spawns)
+- [ ] Opt-in PvP dueling in designated zones with ELO-style ranking
+- [ ] Assist attacks — party members can act on another player's turn to combo
 
 ## 4. Persistent Economy
-- [ ] Player-to-player auction house (list items with a buyout price, stored in Supabase)
-- [ ] Marketplace history / price charts for popular items
-- [ ] Server-wide gold sink events to prevent inflation (taxes, gambling, crafting costs)
-- [ ] Cross-player crafting orders — post a crafting request, let another player fulfill it for a fee
-- [ ] Rare resource nodes in the world that multiple players compete over
+- [ ] Player-to-player auction house (list items with a gold buyout price, stored in Supabase)
+- [ ] Recent sale history and average price display per item
+- [ ] Server-wide gold sink events to prevent inflation (taxes, gambling, high-cost crafting)
+- [ ] Crafting order board — post a request for a crafted item, another player fulfills it for a fee
+- [ ] Rare resource nodes in zones that multiple players compete to gather
 
 ## 5. Guilds & Social
-- [ ] Guild creation, invites, ranks, and a guild chat channel (Supabase `ol2_guilds` table)
-- [ ] Guild hall — a shared housing/land space owned by the guild
-- [ ] Guild quests with shared progress and rewards
-- [ ] Leaderboards: level, gold, PvP wins, dungeons completed (updated in real time)
-- [ ] Player profiles / inspect — click a player to see their class, level, equipped gear
-- [ ] Achievements system with public badges on profile
+- [ ] Guild creation, invites, member ranks, and a guild-only chat channel
+- [ ] Guild hall — a shared text-based land/housing space owned by the guild
+- [ ] Guild quests with shared progress tracked as a text log
+- [ ] Text-based leaderboards: level, gold, dungeons cleared, PvP wins (updated live)
+- [ ] Player inspect — type a player's name to see their class, level, and equipped gear
+- [ ] Achievements system with badges shown on profile
 
-## 6. Persistent Quests & World Events
-- [ ] Quests with world-state impact (killing a boss changes the world map for everyone)
-- [ ] Server-wide story arcs that progress as players complete milestones
-- [ ] Repeatable daily/weekly quests with server-shared completion counts
-- [ ] Seasonal events tied to real calendar dates (holidays, anniversaries)
-- [ ] Dynamic world events triggered by player activity thresholds
+## 6. World Events & Quests
+- [ ] Quests with server-wide impact (completing a quest changes area descriptions for everyone)
+- [ ] Server-wide story arcs that advance as players hit collective milestones
+- [ ] Repeatable daily/weekly quests with server-shared completion counts shown as a progress bar
+- [ ] Seasonal text events tied to real-world calendar dates
+- [ ] Dynamic random events triggered by player activity (too many goblins killed? an orcish war band invades)
 
 ## 7. Character & Progression Persistence
-- [ ] Move all character data fully off sessions and into Supabase (no local save files needed)
-- [ ] Death penalty system (XP loss, durability damage) with respawn at last checkpoint
-- [ ] Skill trees with long-term progression beyond level cap
-- [ ] Bank / shared storage per player (store items not in active inventory)
-- [ ] Cross-session cooldowns for boss fights and world events stored in DB
+- [ ] Death penalty — XP loss and gold drop on death, respawn at last visited town
+- [ ] Deeper skill trees with long-term progression past current level cap
+- [ ] Bank / shared storage per player (deposit items not needed in active inventory)
+- [ ] All cooldowns (boss fights, world events) stored in Supabase instead of session memory
 
 ## 8. Moderation & Safety
-- [ ] Admin dashboard for viewing online players, banning accounts, resetting trades
-- [ ] Report player button with Supabase-backed report queue
-- [ ] Automated rate limiting on all game actions (combat, crafting, trading)
-- [ ] Anti-cheat: server-side validation of all stat changes (never trust the client for gold/items)
-- [ ] Chat moderation: mute system with duration, stored per user in DB
+- [ ] Admin text console for viewing online players, issuing bans, cancelling trades
+- [ ] In-game /report command with Supabase-backed report queue
+- [ ] Mute system with duration, stored per user in DB
+- [ ] Server-side validation of all gold and item changes (never trust the client)
+- [ ] Rate limiting on all game actions — combat, crafting, trading
 
 ## 9. Infrastructure & DevOps
-- [ ] Move deployment to a horizontally scalable platform (e.g. Fly.io, Railway, AWS ECS)
-- [ ] Use Redis pub/sub or Supabase Realtime to sync SocketIO events across multiple workers
-- [ ] Supabase Row Level Security (RLS) policies for all tables
+- [ ] Redis pub/sub or Supabase Realtime to sync SocketIO events across multiple workers
+- [ ] Supabase Row Level Security (RLS) policies on all tables
 - [ ] Automated database backups and point-in-time recovery
-- [ ] Health check endpoint + uptime monitoring
+- [ ] Health check endpoint and uptime monitoring
 - [ ] Staging environment separate from production
+- [ ] Horizontal scaling on a platform that supports it (Fly.io, Railway, AWS ECS)
 
-## 10. Client / UX Improvements for MMO Scale
-- [ ] Map screen showing the world with player dots in each area
-- [ ] Minimap overlay while exploring
-- [ ] Party / group HUD panel visible during combat and exploration
-- [ ] Notification center (trade results, friend activity, guild events) with persistence
-- [ ] Mobile-friendly layout improvements for the expanded MMO UI
+## 10. Quality of Life for MMO Scale
+- [ ] Notification center — trade results, friend activity, guild events, persistent across sessions
+- [ ] Party / group text HUD visible during combat and exploration
+- [ ] Configurable text filters and chat tabs (Global, Area, Guild, Party, DMs)
+- [ ] Command shortcuts (e.g. `/trade username`, `/party invite username`, `/who area`)
+- [ ] Session replay / combat log export so players can review past fights
