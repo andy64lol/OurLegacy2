@@ -4073,5 +4073,11 @@
       "price": 100000,
       "rarity": "legendary",
       "event_item": true
+   },
+   "Venom Sacs": {
+      "type": "material",
+      "description": "A pouch of venom sacs from the Swamp Hydra, dripping with deadly toxins.",
+      "price": 120,
+      "rarity": "rare"
    }
 }
