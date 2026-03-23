@@ -9,6 +9,8 @@ worker_class = "gevent"
 workers = 1
 
 
-# You can keep post_fork if needed, but don't patch here
 def post_fork(server, worker):
-    pass
+    import app as _app
+    if not _app._bg_started:
+        _app._bg_started = True
+        _app.socketio.start_background_task(_app._world_tick)
