@@ -1,8 +1,6 @@
 # Our Legacy 2 — MMO Roadmap
 
 ## 1. Persistent World & Server Architecture
-- [ ] Migrate from filesystem sessions to a database-backed session store (Redis or Supabase)
-- [ ] Support multiple concurrent game server workers with shared state (replace in-memory dicts with Supabase tables)
 - [ ] Replace the per-user session model with a persistent character model stored entirely in Supabase (local save/export kept for single-player)
 - [x] Add a dedicated server-side world tick loop independent of player sessions (`_world_tick` gevent greenlet, 30s interval, started via `before_request` guard + `post_fork` for gunicorn/Render)
   - ⚠️ **Caveat — multiple workers**: With >1 Gunicorn worker, each spawns its own `_world_tick`, so the world ticks N× as fast. Fix: DB/Redis lock so only one "leader" worker runs the authoritative tick.
