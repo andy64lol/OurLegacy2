@@ -6,36 +6,50 @@ import random
 from typing import Dict, List, Any, Optional
 
 
-def get_available_dungeons(dungeons_data: Dict[str, Any], _current_area: str,
-                           player_level: int) -> List[Dict[str, Any]]:
-    """Return all dungeons, accessible by player level (not area restricted)."""
+def get_available_dungeons(dungeons_data: Dict[str, Any], current_area: str,
+                           player_level: int,
+                           visited_areas: Optional[List[str]] = None,
+                           areas_data: Optional[Dict[str, Any]] = None
+                           ) -> List[Dict[str, Any]]:
+    """Return all dungeons with discovery and area-access flags.
+
+    A dungeon is *discovered* only if the player has visited at least one of
+    its allowed_areas.  It can only be *entered* from one of those areas.
+    """
     all_dungeons = dungeons_data.get('dungeons', [])
+    visited_set = set(visited_areas or [])
+    areas_data = areas_data or {}
     result = []
     for dungeon in all_dungeons:
         difficulty = dungeon.get('difficulty', [1, 3])
         min_level = max(1, difficulty[0] * 2)
+        allowed = dungeon.get('allowed_areas', [])
+
+        discovered = any(a in visited_set for a in allowed)
+        in_area = current_area in allowed
+        level_ok = player_level >= min_level
+
+        # Build a human-readable hint name from the first allowed area
+        hint_area_id = allowed[0] if allowed else ""
+        area_info = areas_data.get(hint_area_id, {})
+        hint_area_name = (area_info.get("name") or
+                          hint_area_id.replace("_", " ").title())
+
         result.append({
-            'id':
-            dungeon.get('id',
-                        dungeon.get('name', '').lower().replace(' ', '_')),
-            'name':
-            dungeon.get('name', 'Unknown Dungeon'),
-            'description':
-            dungeon.get('description', ''),
-            'difficulty':
-            difficulty,
-            'rooms':
-            dungeon.get('rooms', 5),
-            'min_level':
-            min_level,
-            'available':
-            player_level >= min_level,
-            'allowed_areas':
-            dungeon.get('allowed_areas', []),
-            'completion_reward':
-            dungeon.get('completion_reward', {}),
-            'boss_id':
-            dungeon.get('boss_id', ''),
+            'id': dungeon.get('id', dungeon.get('name', '').lower().replace(' ', '_')),
+            'name': dungeon.get('name', 'Unknown Dungeon'),
+            'description': dungeon.get('description', ''),
+            'difficulty': difficulty,
+            'rooms': dungeon.get('rooms', 5),
+            'min_level': min_level,
+            'allowed_areas': allowed,
+            'completion_reward': dungeon.get('completion_reward', {}),
+            'boss_id': dungeon.get('boss_id', ''),
+            'discovered': discovered,
+            'in_area': in_area,
+            'available': discovered and in_area and level_ok,
+            'hint_area_name': hint_area_name,
+            'hint_area_id': hint_area_id,
         })
     result.sort(key=lambda d: d['min_level'])
     return result

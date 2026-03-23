@@ -1676,6 +1676,7 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
 .dungeon-open      { border-color: var(--wood-mid); }
 .dungeon-locked    { opacity: 0.6; }
 .dungeon-completed { border-color: var(--green); }
+.dungeon-fog       { opacity: 0.55; filter: blur(0.3px); border-style: dashed; }
 
 .dungeon-info { flex: 1; }
 .dungeon-name {

@@ -2338,8 +2338,11 @@ def game():
     # Dungeon data for inline tab
     dungeons_data: dict[str, Any] = GAME_DATA.get("dungeons", {})
     completed_dungeons_set = set(player.get("completed_dungeons", []))
+    visited_areas_list = session.get("visited_areas", [area_key])
     dungeon_list = get_available_dungeons(
-        dungeons_data, area_key, player.get("level", 1)
+        dungeons_data, area_key, player.get("level", 1),
+        visited_areas=visited_areas_list,
+        areas_data=GAME_DATA.get("areas", {}),
     )
     for d in dungeon_list:
         d["completed"] = d.get("id", "") in completed_dungeons_set
@@ -4117,6 +4120,18 @@ def dungeon_enter():
 
     if not dungeon:
         add_message("Unknown dungeon.", "var(--red)")
+        return redirect(url_for("game") + "?tab=dungeons")
+
+    allowed_areas = dungeon.get("allowed_areas", [])
+    current_area_key = session.get("current_area", "starting_village")
+    visited = session.get("visited_areas", [])
+    if not any(a in visited for a in allowed_areas):
+        add_message("You haven't discovered this dungeon yet.", "var(--red)")
+        return redirect(url_for("game") + "?tab=dungeons")
+    if current_area_key not in allowed_areas:
+        area_info = GAME_DATA.get("areas", {}).get(allowed_areas[0], {})
+        area_name = area_info.get("name") or allowed_areas[0].replace("_", " ").title()
+        add_message(f"You must travel to {area_name} to enter this dungeon.", "var(--red)")
         return redirect(url_for("game") + "?tab=dungeons")
 
     difficulty = dungeon.get("difficulty", [1, 3])
