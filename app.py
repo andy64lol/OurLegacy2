@@ -674,7 +674,8 @@ def _apply_game_state(data: dict[str, Any]) -> None:
     session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
-    session["current_weather"] = data.get("current_weather", "sunny")
+    _raw_weather = data.get("current_weather") or "sunny"
+    session["current_weather"] = _raw_weather if GAME_DATA["weather"].get(_raw_weather) else "sunny"
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
@@ -2178,9 +2179,11 @@ def game():
     # Time and weather
     game_time = get_game_time(player)
     game_time_icon = TIME_ICONS.get(game_time, "")
-    current_weather = session.get("current_weather", "sunny")
+    current_weather = session.get("current_weather") or "sunny"
+    if not GAME_DATA["weather"].get(current_weather):
+        current_weather = "sunny"
     weather_def = GAME_DATA["weather"].get(current_weather, {})
-    weather_display = current_weather.title()
+    weather_display = current_weather.replace("_", " ").title()
     weather_icon = ""
     weather_bonus_exp = int(weather_def.get("bonuses", {}).get("exp_bonus", 0) * 100)
     weather_bonus_gold = int(weather_def.get("bonuses", {}).get("gold_bonus", 0) * 100)
@@ -2818,6 +2821,7 @@ def action_buy():
             add_message(f"You purchase {item_name} for {price} gold.", "var(--gold)")
 
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 
@@ -2842,6 +2846,7 @@ def action_sell():
         add_message("You do not have that item.", "var(--red)")
 
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=inventory")
 
 
@@ -3052,6 +3057,7 @@ def action_use_item():
         add_message(f"You cannot use {item_name} outside of battle.", "var(--text-dim)")
 
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 
@@ -3277,6 +3283,7 @@ def land_buy_housing():
     player["housing_owned"] = owned
     add_message(f"You purchase {h_data.get('name', h_key)} for {price} gold.", "var(--gold)")
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=land")
 
 
@@ -3492,6 +3499,7 @@ def land_buy_pet():
             add_message(f"Pet bonus: {boost_str}", "var(--green-bright)")
 
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=land")
 
 
@@ -3817,16 +3825,18 @@ def _handle_victory(player, enemy, log):
     gold = enemy.get("gold_reward", 10)
 
     # Apply weather bonuses
-    current_weather = session.get("current_weather", "sunny")
+    current_weather = session.get("current_weather") or "sunny"
+    if not GAME_DATA["weather"].get(current_weather):
+        current_weather = "sunny"
     exp_bonus_pct, gold_bonus_pct = get_weather_bonuses(current_weather)
     if exp_bonus_pct > 0:
         bonus_exp = int(exp * exp_bonus_pct)
         exp += bonus_exp
-        log.append(f"Weather bonus: +{bonus_exp} EXP ({current_weather.title()})!")
+        log.append(f"Weather bonus: +{bonus_exp} EXP ({current_weather.replace('_', ' ').title()})!")
     if gold_bonus_pct > 0:
         bonus_gold = int(gold * gold_bonus_pct)
         gold += bonus_gold
-        log.append(f"Weather bonus: +{bonus_gold} gold ({current_weather.title()})!")
+        log.append(f"Weather bonus: +{bonus_gold} gold ({current_weather.replace('_', ' ').title()})!")
 
     log.append(f"You gain {exp} experience and {gold} gold.")
 
@@ -4014,7 +4024,8 @@ def api_load():
     session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
-    session["current_weather"] = data.get("current_weather", "sunny")
+    _raw_weather = data.get("current_weather") or "sunny"
+    session["current_weather"] = _raw_weather if GAME_DATA["weather"].get(_raw_weather) else "sunny"
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
@@ -4042,6 +4053,7 @@ def action_craft():
     color = "var(--green-bright)" if result["ok"] else "var(--red)"
     add_message(result["message"], color)
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=crafting")
 
 
@@ -4437,6 +4449,7 @@ def market_buy():
         )
 
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=market")
 
 
@@ -4601,7 +4614,8 @@ def api_cloud_load():
     session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
-    session["current_weather"] = data.get("current_weather", "sunny")
+    _raw_weather = data.get("current_weather") or "sunny"
+    session["current_weather"] = _raw_weather if GAME_DATA["weather"].get(_raw_weather) else "sunny"
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
