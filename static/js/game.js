@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     initToastContainer();
     initTabs();
+    initTabOverflow();
+    initSidebarToggle();
     initPagination();
     scrollLogsToBottom();
     checkUrlTab();
@@ -681,4 +683,150 @@ async function settingsDownloadCloud() {
     } catch(e) {
         showToast('Download failed: ' + e.message, 'var(--red)', 3000);
     }
+}
+
+/* ── Tab Overflow (three-dot menu) ─────────────────────────────────────────── */
+function initTabOverflow() {
+    var nav = document.getElementById('main-tabs');
+    var wrap = nav && nav.closest('.tab-nav-wrap');
+    if (!nav || !wrap) return;
+
+    // Create the ••• button inside the nav
+    var moreBtn = document.createElement('button');
+    moreBtn.className = 'tab-btn tab-more-btn';
+    moreBtn.innerHTML = '&bull;&bull;&bull;';
+    moreBtn.setAttribute('aria-label', 'More tabs');
+    nav.appendChild(moreBtn);
+
+    // Create the dropdown container inside the wrap
+    var dropdown = document.createElement('div');
+    dropdown.className = 'tab-overflow-dropdown';
+    wrap.appendChild(dropdown);
+
+    moreBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+    });
+    document.addEventListener('click', function() {
+        dropdown.classList.remove('open');
+    });
+
+    function updateOverflow() {
+        var allBtns = Array.from(nav.querySelectorAll('.tab-btn:not(.tab-more-btn)'));
+
+        // Temporarily show all to measure natural widths
+        allBtns.forEach(function(b) { b.style.display = ''; });
+        moreBtn.style.display = 'none';
+
+        var navW = nav.offsetWidth;
+        var totalW = 0;
+        allBtns.forEach(function(b) { totalW += b.offsetWidth; });
+
+        if (totalW <= navW) {
+            // Everything fits — no overflow needed
+            dropdown.innerHTML = '';
+            dropdown.classList.remove('open');
+            return;
+        }
+
+        // Need the ••• button — reserve its space
+        moreBtn.style.display = '';
+        var moreBtnW = moreBtn.offsetWidth || 52;
+        var available = navW - moreBtnW;
+
+        // Walk from left; first button that would exceed available goes to overflow
+        var used = 0;
+        var overflowBtns = [];
+        allBtns.forEach(function(b) {
+            used += b.offsetWidth;
+            if (used > available) {
+                overflowBtns.push(b);
+            }
+        });
+
+        // If the active button is in overflow, swap it with the last visible one
+        var activeBtn = null;
+        allBtns.forEach(function(b) {
+            if (b.classList.contains('active')) activeBtn = b;
+        });
+        if (activeBtn && overflowBtns.indexOf(activeBtn) !== -1) {
+            var visibleBtns = allBtns.filter(function(b) {
+                return overflowBtns.indexOf(b) === -1;
+            });
+            if (visibleBtns.length) {
+                var last = visibleBtns[visibleBtns.length - 1];
+                overflowBtns.splice(overflowBtns.indexOf(activeBtn), 1);
+                overflowBtns.push(last);
+            }
+        }
+
+        // Apply visibility
+        allBtns.forEach(function(b) {
+            b.style.display = overflowBtns.indexOf(b) !== -1 ? 'none' : '';
+        });
+
+        // Build dropdown items
+        dropdown.innerHTML = '';
+        overflowBtns.forEach(function(btn) {
+            var item = document.createElement('button');
+            item.className = 'tab-overflow-item' + (btn.classList.contains('active') ? ' active' : '');
+            item.innerHTML = btn.innerHTML;
+            item.addEventListener('click', function() {
+                var tabName = btn.getAttribute('data-tab');
+                if (tabName) switchTab(tabName, false);
+                dropdown.classList.remove('open');
+            });
+            dropdown.appendChild(item);
+        });
+    }
+
+    updateOverflow();
+
+    var resizeObs = window.ResizeObserver
+        ? new ResizeObserver(function() { updateOverflow(); })
+        : null;
+    if (resizeObs) resizeObs.observe(nav);
+    else window.addEventListener('resize', updateOverflow);
+
+    // Re-run after tab switches so the active indicator in dropdown stays right
+    document.addEventListener('tabChanged', function() {
+        updateOverflow();
+    });
+}
+
+/* ── Sidebar Toggle ─────────────────────────────────────────────────────────── */
+function initSidebarToggle() {
+    var layout = document.querySelector('.game-layout');
+    if (!layout) return;
+
+    var btn = document.createElement('button');
+    btn.className = 'sidebar-toggle-btn';
+    btn.title = 'Toggle sidebar';
+    btn.setAttribute('aria-label', 'Toggle sidebar');
+    document.body.appendChild(btn);
+
+    function setCollapsed(collapsed) {
+        if (collapsed) {
+            layout.classList.add('sidebar-collapsed');
+            btn.classList.add('collapsed');
+            btn.innerHTML = '&#9654;'; // ▶
+            btn.style.left = '0px';
+        } else {
+            layout.classList.remove('sidebar-collapsed');
+            btn.classList.remove('collapsed');
+            btn.innerHTML = '&#9664;'; // ◀
+            btn.style.left = '250px';
+        }
+        try { localStorage.setItem('ol2-sidebar-collapsed', collapsed ? '1' : '0'); } catch(e) {}
+    }
+
+    // Read saved preference; default collapsed on narrow screens
+    var saved;
+    try { saved = localStorage.getItem('ol2-sidebar-collapsed'); } catch(e) {}
+    var startCollapsed = saved !== null ? saved === '1' : window.innerWidth < 900;
+    setCollapsed(startCollapsed);
+
+    btn.addEventListener('click', function() {
+        setCollapsed(!layout.classList.contains('sidebar-collapsed'));
+    });
 }

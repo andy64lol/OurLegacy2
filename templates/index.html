@@ -629,6 +629,7 @@ const raceData  = {{ data.races  | tojson }};
     <!-- Main content -->
     <main class="main-content">
 
+        <div class="tab-nav-wrap">
         <nav class="tab-nav" id="main-tabs">
             <button class="tab-btn active" data-tab="explore">Explore</button>
             <button class="tab-btn" data-tab="inventory">Equipment</button>
@@ -673,6 +674,7 @@ const raceData  = {{ data.races  | tojson }};
             <button class="tab-btn" data-tab="friends">&#10024; Friends</button>
             {% endif %}
         </nav>
+        </div><!-- end .tab-nav-wrap -->
 
         <!-- ── Explore ── -->
         <div class="tab-content active" id="tab-explore">

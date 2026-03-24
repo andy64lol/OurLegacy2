@@ -748,8 +748,17 @@ body.ol2-bg-4 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24
 }
 
 /* ─── Game Layout ────────────────────────────────────────── */
-.game-layout { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
-@media (max-width: 700px) { .game-layout { grid-template-columns: 1fr; } }
+.game-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    min-height: 100vh;
+    transition: grid-template-columns 0.22s ease;
+}
+.game-layout.sidebar-collapsed { grid-template-columns: 0px 1fr; }
+@media (max-width: 700px) {
+    .game-layout { grid-template-columns: 1fr; }
+    .game-layout.sidebar-collapsed { grid-template-columns: 0px 1fr; }
+}
 
 .sidebar {
     background: var(--bg-panel-dark);
@@ -758,10 +767,46 @@ body.ol2-bg-4 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24
     flex-direction: column;
     max-height: 100vh;
     overflow-y: auto;
+    overflow-x: hidden;
     position: sticky;
     top: 0;
+    min-width: 0;
+    transition: border-right-width 0.22s;
+}
+.game-layout.sidebar-collapsed .sidebar {
+    overflow: hidden;
+    border-right-width: 0;
 }
 .sidebar-panel { border: none; border-bottom: 2px solid var(--border); border-radius: 0; }
+
+/* ─── Sidebar Toggle Button ──────────────────────────────── */
+.sidebar-toggle-btn {
+    position: fixed;
+    top: 50%;
+    left: 250px;
+    transform: translate(-50%, -50%);
+    z-index: 300;
+    width: 20px;
+    height: 44px;
+    background: var(--wood-dark);
+    border: 2px solid var(--border);
+    border-radius: 0 4px 4px 0;
+    color: var(--gold);
+    font-family: 'Tiny5', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: left 0.22s ease, background 0.1s;
+    line-height: 1;
+    padding: 0;
+}
+.sidebar-toggle-btn:hover { background: var(--wood-mid); }
+.sidebar-toggle-btn.collapsed { left: 0px; border-radius: 0 4px 4px 0; }
+@media (max-width: 700px) {
+    .sidebar-toggle-btn { display: none; }
+}
 
 .char-class   { font-size: 13px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
 .char-level   { font-size: 15px; color: var(--gold); margin-bottom: 14px; font-weight: 500; }
@@ -858,28 +903,33 @@ body.ol2-bg-4 .main-content { background-image: url('/game_assets/backgrounds/4.
 .music-vol-label{ font-size: 12px; color: var(--text-dim); width: 32px; text-align: right; flex-shrink: 0; }
 
 /* ─── Tabs ───────────────────────────────────────────────── */
+.tab-nav-wrap {
+    position: relative;
+    margin-bottom: 18px;
+}
 .tab-nav {
     display: flex;
     gap: 0;
     border-bottom: 2px solid var(--border);
-    margin-bottom: 18px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow: hidden;
 }
 .tab-btn {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     text-align: center;
-    padding: 9px 12px;
+    padding: 9px 11px;
     background: var(--slate-dark);
     border: none;
     border-right: 1px solid var(--border);
     color: var(--text-dim);
     font-family: 'Tiny5', monospace;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     cursor: pointer;
     transition: background 0.1s, color 0.1s;
+    white-space: nowrap;
 }
 .tab-btn:hover { background: var(--slate-mid); color: var(--text-light); }
 .tab-btn.active {
@@ -887,6 +937,51 @@ body.ol2-bg-4 .main-content { background-image: url('/game_assets/backgrounds/4.
     color: var(--gold);
     border-bottom: 2px solid var(--wood-bright);
 }
+/* Three-dot overflow button */
+.tab-more-btn {
+    flex-shrink: 0 !important;
+    margin-left: auto;
+    padding: 9px 14px;
+    background: var(--slate-mid);
+    border-left: 1px solid var(--border);
+    letter-spacing: 0.01em;
+    font-size: 15px;
+    display: none;
+}
+.tab-more-btn:hover { background: var(--slate-light); color: var(--text-bright); }
+/* Overflow dropdown */
+.tab-overflow-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% - 2px);
+    right: 0;
+    z-index: 500;
+    background: var(--bg-panel);
+    border: 2px solid var(--border);
+    border-top: none;
+    min-width: 160px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    flex-direction: column;
+}
+.tab-overflow-dropdown.open { display: flex; }
+.tab-overflow-item {
+    padding: 9px 16px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Tiny5', monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.1s, color 0.1s;
+    white-space: nowrap;
+}
+.tab-overflow-item:last-child { border-bottom: none; }
+.tab-overflow-item:hover { background: var(--slate-mid); color: var(--text-light); }
+.tab-overflow-item.active { color: var(--gold); background: var(--wood-dark); }
 .tab-content        { display: none; }
 .tab-content.active { display: block; }
 @keyframes tabFadeIn {
