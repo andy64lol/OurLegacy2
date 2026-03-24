@@ -378,6 +378,13 @@ def process_battle_room(_player: Dict[str, Any], room: Dict[str, Any],
         int(scaled.get('gold_reward', 10)) + random.randint(-2, 8))
     scaled['loot_table'] = scaled.get('loot_table', [])
 
+    player_level = player.get('level', 1)
+    if player_level >= 10:
+        level_buff = 1.0 + (player_level - 10) * 0.05
+        scaled['hp'] = int(scaled['hp'] * level_buff)
+        scaled['max_hp'] = scaled['hp']
+        scaled['attack'] = int(scaled['attack'] * level_buff)
+
     return {
         'type':
         'battle',
@@ -470,6 +477,13 @@ def process_ambush_room(_player: Dict[str, Any], room: Dict[str, Any],
     scaled['gold_reward'] = max(1, int(scaled.get('gold_reward', 10) * 1.5) + random.randint(5, 15))
     scaled['loot_table'] = scaled.get('loot_table', [])
     scaled['is_ambush'] = True
+
+    player_level = _player.get('level', 1)
+    if player_level >= 10:
+        level_buff = 1.0 + (player_level - 10) * 0.05
+        scaled['hp'] = int(scaled['hp'] * level_buff)
+        scaled['max_hp'] = scaled['hp']
+        scaled['attack'] = int(scaled['attack'] * level_buff)
 
     return {
         'type': 'ambush',
