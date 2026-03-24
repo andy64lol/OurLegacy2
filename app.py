@@ -791,13 +791,17 @@ import datetime as _dt
 
 
 def check_and_award_events(player):
-    """Check all active events and award unclaimed rewards to the player."""
+    """Check all active events and award unclaimed rewards to the player.
+
+    Returns True if at least one event reward was awarded this call.
+    """
     events = GAME_DATA.get("events", [])
     if not events:
-        return
+        return False
 
     today_str = _dt.date.today().isoformat()
     claimed = player.setdefault("claimed_events", [])
+    awarded_any = False
 
     for event in events:
         event_id = event.get("id", "")
@@ -840,6 +844,9 @@ def check_and_award_events(player):
 
         claimed.append(event_id)
         add_message(f"[EVENT] {event.get('name', 'Event')}: {msg}", "var(--gold)")
+        awarded_any = True
+
+    return awarded_any
 
 
 def advance_crops(player):
@@ -2080,8 +2087,10 @@ def game():
         )
 
     # ── Timed events ──────────────────────────────────────────────────────────
-    check_and_award_events(player)
+    events_awarded = check_and_award_events(player)
     save_player(player)
+    if events_awarded:
+        _autosave()
 
     # ── Battle state: show battle view inline ──────────────.g�───────────────
     _ensure_companion_hp(player)
@@ -4015,6 +4024,7 @@ def action_claim_challenge():
         )
 
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "#challenges")
 
 
@@ -4201,6 +4211,7 @@ def land_harvest():
         "var(--gold)",
     )
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=land")
 
 
@@ -4321,6 +4332,7 @@ def land_train():
         "var(--green-bright)",
     )
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=land")
 
 
