@@ -131,6 +131,20 @@ DM_COOLDOWN_SECS = 2
 DM_MAX_LEN = 500
 FR_MAX_PER_MINUTE = 5
 
+# ─── World events feed (online only) ─────────────────────────────────────────
+# A rolling log of recent world events visible to online players.
+_world_events: list = []
+_WORLD_EVENTS_MAX = 40
+
+
+def push_world_event(text: str) -> None:
+    """Append a timestamped event to the global world feed, trimming old ones."""
+    import time as _time
+    _world_events.append({"t": int(_time.time()), "msg": text})
+    if len(_world_events) > _WORLD_EVENTS_MAX:
+        del _world_events[: len(_world_events) - _WORLD_EVENTS_MAX]
+
+
 # ─── In-memory trade state ────────────────────────────────────────────────────
 # trade_id → {id, player_a, player_b, offer_a, offer_b, confirmed_a, confirmed_b,
 #              status, applied_a, applied_b}
@@ -2621,6 +2635,8 @@ def game():
         events_data=events_data,
         game_classes=list(GAME_DATA.get("classes", {}).keys()),
         game_races=list(GAME_DATA.get("races", {}).keys()),
+        world_events=list(reversed(_world_events[-10:])) if session.get("online_username") else [],
+        online_count=len(set(_chat_online.values())),
     )
 
 
@@ -4748,6 +4764,9 @@ def _handle_victory(player, enemy, log):
             f"Level Up! You are now level {player['level']}! You gained 3 attribute points (Equipment tab).",
             "var(--gold)",
         )
+        if session.get("online_username"):
+            _ln = player.get("name", session.get("online_username", "Someone"))
+            push_world_event(f"{_ln} reached level {player['level']}!")
 
     add_message(
         f"Defeated the {enemy['name']}. +{exp} EXP, +{gold} gold.",
@@ -4788,6 +4807,15 @@ def _handle_victory(player, enemy, log):
     session["battle_enemy"] = None
     save_player(player)
     _autosave()
+
+    # World events feed (online players only)
+    if session.get("online_username"):
+        _pname = player.get("name", session.get("online_username", "Someone"))
+        _aname = GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "the wilds")
+        if enemy.get("is_boss"):
+            push_world_event(f"{_pname} defeated {enemy['name']} in {_aname}!")
+        else:
+            push_world_event(f"{_pname} slew a {enemy['name']} in {_aname}.")
 
     # If inside a dungeon, return there instead of showing victory screen
     active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}

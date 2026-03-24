@@ -48,6 +48,9 @@
     --bg-panel:       #282420;
     --bg-panel-dark:  #201c18;
 
+    /* Aliases for legacy usage */
+    --panel-bg:       #282420;
+
     /* Rarity */
     --rarity-common:    #a0a0a0;
     --rarity-uncommon:  #60c060;
@@ -144,6 +147,7 @@ strong { font-weight: 600; }
     padding: 15px 12px;
     font-size: 15px;
     font-family: 'Tiny5', monospace;
+    position: relative;
 }
 .btn-attack { background: var(--red-dark);      color: #f8c0a0; border-color: var(--red); }
 .btn-attack:hover  { background: var(--red); }
@@ -153,6 +157,23 @@ strong { font-weight: 600; }
 .btn-item:hover:not(.btn-disabled) { background: var(--wood-mid); }
 .btn-flee   { background: var(--slate-darkest);  color: var(--text-dim); border-color: var(--border); }
 .btn-flee:hover { background: var(--slate-dark); color: var(--text-light); }
+
+/* Keyboard shortcut badge on battle buttons */
+.battle-btn-wrap {
+    position: relative;
+    display: block;
+}
+.kb-hint {
+    position: absolute;
+    top: 5px;
+    right: 7px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.30);
+    font-family: 'Tiny5', monospace;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    line-height: 1;
+}
 
 /* ─── Panels ─────────────────────────────────────────────── */
 .panel {
@@ -291,9 +312,21 @@ body.ol2-bg-4 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24
     border: 2px solid var(--border);
     padding: 16px;
     text-align: center;
+    transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.feature-tile:hover {
+    border-color: var(--gold-dim);
+    background: var(--bg-panel-dark);
+    transform: translateY(-2px);
 }
 .feature-title { font-size: 15px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px; }
 .feature-desc  { font-size: 14px; color: var(--text-dim); }
+@media (max-width: 580px) {
+    .welcome-features { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 380px) {
+    .welcome-features { grid-template-columns: 1fr; }
+}
 
 /* Save/load controls on welcome */
 .save-load-bar {
@@ -774,7 +807,7 @@ body.ol2-bg-4 .main-content { background-image: url('/game_assets/backgrounds/4.
     border-radius: 10px;
     padding: 13px 20px;
     font-size: 14px;
-    color: var(--text-main);
+    color: var(--text-light);
     box-shadow: 0 6px 28px rgba(0,0,0,0.65);
     opacity: 0;
     transform: translateY(16px);
@@ -924,6 +957,32 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
 
 /* ─── Area & Actions ─────────────────────────────────────── */
 .area-description { font-size: 15px; color: var(--text-light); line-height: 1.65; margin-bottom: 14px; }
+
+/* ─── World Pulse Panel ──────────────────────────────────── */
+.world-online-badge {
+    font-size: 12px;
+    color: var(--green-bright);
+    letter-spacing: 0.04em;
+    animation: worldPulseDot 2s ease-in-out infinite;
+}
+@keyframes worldPulseDot {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+}
+.world-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.world-feed-entry {
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.4;
+}
+.world-feed-entry:first-child { color: var(--mana-bright); }
+.world-feed-entry:last-child  { border-bottom: none; }
 .danger-notice {
     font-size: 14px;
     color: var(--red);

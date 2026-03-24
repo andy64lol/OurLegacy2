@@ -360,11 +360,11 @@ const raceData  = {{ data.races  | tojson }};
 
         <div class="battle-action-grid">
             <form method="post" action="/battle/attack">
-                <button type="submit" class="btn btn-battle btn-attack" title="Keyboard: 1">Strike</button>
+                <button type="submit" class="btn btn-battle btn-attack" title="Keyboard: 1">Strike<span class="kb-hint">[1]</span></button>
             </form>
 
             <form method="post" action="/battle/defend">
-                <button type="submit" class="btn btn-battle btn-defend" title="Keyboard: 2">Defend</button>
+                <button type="submit" class="btn btn-battle btn-defend" title="Keyboard: 2">Defend<span class="kb-hint">[2]</span></button>
             </form>
 
             <form method="post" action="/battle/use_item">
@@ -375,7 +375,7 @@ const raceData  = {{ data.races  | tojson }};
                         <option value="{{ item }}">{{ item }}</option>
                         {% endfor %}
                     </select>
-                    <button type="submit" class="btn btn-battle btn-item" title="Keyboard: 3">Use Item</button>
+                    <button type="submit" class="btn btn-battle btn-item" title="Keyboard: 3">Use Item<span class="kb-hint">[3]</span></button>
                     {% else %}
                     <button type="button" class="btn btn-battle btn-item btn-disabled" disabled>No Items</button>
                     {% endif %}
@@ -383,7 +383,7 @@ const raceData  = {{ data.races  | tojson }};
             </form>
 
             <form method="post" action="/battle/flee">
-                <button type="submit" class="btn btn-battle btn-flee" title="Keyboard: 4">{% if enemy.is_boss %}Retreat{% else %}Flee{% endif %}</button>
+                <button type="submit" class="btn btn-battle btn-flee" title="Keyboard: 4">{% if enemy.is_boss %}Retreat{% else %}Flee{% endif %}<span class="kb-hint">[4]</span></button>
             </form>
         </div>
 
@@ -708,6 +708,26 @@ const raceData  = {{ data.races  | tojson }};
                     </div>
                 </div>
             </div>
+
+            {% if online_user %}
+            <div class="panel world-pulse-panel" style="margin-bottom:14px;">
+                <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+                    <span>&#127758; World Pulse</span>
+                    <span class="world-online-badge">&#9679; {{ online_count }} online</span>
+                </div>
+                <div class="panel-body" style="padding:10px 16px;">
+                    {% if world_events %}
+                    <div class="world-feed">
+                        {% for ev in world_events %}
+                        <div class="world-feed-entry">{{ ev.msg }}</div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div style="font-size:13px;color:var(--text-dim);font-style:italic;">The world is quiet... for now.</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
 
             {% if available_bosses %}
             <div class="panel" style="margin-bottom:14px;">
