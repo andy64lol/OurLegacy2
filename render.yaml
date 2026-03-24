@@ -3,7 +3,7 @@ services:
     name: ourlegacy2
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn -k gevent -w 1 --bind 0.0.0.0:$PORT app:app
+    startCommand: gunicorn -c gunicorn.conf.py --bind 0.0.0.0:$PORT app:app
     envVars:
       - key: SECRET_KEY
         generateValue: true
