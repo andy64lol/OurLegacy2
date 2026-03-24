@@ -613,3 +613,49 @@ def character_delete(user_id: str) -> Dict[str, Any]:
         return _run(_do)
     except Exception as e:
         return {"ok": False, "message": f"Delete failed: {e}"}
+
+
+def get_all_activities(exclude_user_id: str = None) -> List[Dict[str, Any]]:
+    """
+    Return a list of {player_name, activity_status, current_area} for all
+    characters saved within the last 60 minutes.  Used to show online players'
+    current activity in the travel feed.
+    """
+    import json as _json
+    from datetime import datetime, timezone, timedelta
+
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+
+    def _do():
+        client = _get_client()
+        q = (
+            client.table("ol2_characters")
+            .select("user_id, player_name, current_area, game_state")
+            .gte("updated_at", cutoff)
+        )
+        if exclude_user_id:
+            q = q.neq("user_id", exclude_user_id)
+        result = q.execute()
+        return result.data or []
+
+    try:
+        rows = _run(_do)
+    except Exception:
+        return []
+
+    out: List[Dict[str, Any]] = []
+    for row in rows:
+        try:
+            gs = row.get("game_state") or {}
+            if isinstance(gs, str):
+                gs = _json.loads(gs)
+            player_data = gs.get("player") or {}
+            activity = player_data.get("activity_status", "exploring")
+        except Exception:
+            activity = "exploring"
+        out.append({
+            "player_name": row.get("player_name", "Unknown"),
+            "current_area": row.get("current_area", ""),
+            "activity_status": activity,
+        })
+    return out

@@ -705,6 +705,11 @@ def _autosave() -> None:
         pass
 
 
+def _set_activity(player: dict, status: str) -> None:
+    """Store a short activity string on the player dict (persisted in autosave)."""
+    player["activity_status"] = status
+
+
 def get_messages():
     return session.get("messages", [])
 
@@ -3076,6 +3081,7 @@ def action_explore():
             session["battle_player_effects"] = {}
             session["battle_enemy_effects"] = {}
             session["battle_companions"] = _build_battle_companions(player)
+            _set_activity(player, f"battling {enemy['name']} [Boss]")
             session.modified = True
             save_player(player)
             return redirect(url_for("game"))
@@ -3110,6 +3116,7 @@ def action_explore():
         session["battle_player_effects"] = {}
         session["battle_enemy_effects"] = {}
         session["battle_companions"] = _build_battle_companions(player)
+        _set_activity(player, f"fighting a {enemy['name']}")
         session.modified = True
         save_player(player)
         return redirect(url_for("game"))
@@ -3268,6 +3275,8 @@ def action_rest():
             "var(--green-bright)",
         )
 
+    area_name = area.get("name", area_key.replace("_", " ").title())
+    _set_activity(player, f"resting in {area_name}")
     save_player(player)
     return redirect(url_for("game"))
 
@@ -3296,20 +3305,32 @@ def action_travel():
             if cs_id:
                 trigger_cutscene(cs_id)
         add_message(f"You travel to {dest_name}.", "var(--wood-light)")
+        _set_activity(player, f"wandering {dest_name}")
 
-        # Show up to 3 random online players as "spotted here"
+        # Show up to 3 random online players with their current activity
         my_username = session.get("online_username")
-        online_users = sorted(set(_chat_online.values()))
-        others = [u for u in online_users if u != my_username]
-        if others:
-            spotted = random.sample(others, min(3, len(others)))
-            if len(spotted) == 1:
-                who = spotted[0]
-            elif len(spotted) == 2:
-                who = f"{spotted[0]} and {spotted[1]}"
-            else:
-                who = f"{spotted[0]}, {spotted[1]}, and {spotted[2]}"
-            add_message(f"You spot {who} here.", "var(--mana-bright)")
+        online_usernames = set(_chat_online.values()) - {my_username}
+        if online_usernames:
+            try:
+                from utilities.supabase_db import get_all_activities
+                activities = get_all_activities(exclude_user_id=session.get("online_user_id"))
+                # Filter to only currently connected users
+                active = [a for a in activities if a["player_name"] in online_usernames]
+                random.shuffle(active)
+                for entry in active[:3]:
+                    name = entry["player_name"]
+                    status = entry.get("activity_status", "exploring")
+                    add_message(f"You spot {name} — {status}.", "var(--mana-bright)")
+            except Exception:
+                # Fallback: just show names without activity
+                spotted = random.sample(sorted(online_usernames), min(3, len(online_usernames)))
+                if len(spotted) == 1:
+                    who = spotted[0]
+                elif len(spotted) == 2:
+                    who = f"{spotted[0]} and {spotted[1]}"
+                else:
+                    who = f"{spotted[0]}, {spotted[1]}, and {spotted[2]}"
+                add_message(f"You spot {who} here.", "var(--mana-bright)")
 
         session.modified = True
     else:
@@ -4992,6 +5013,7 @@ def dungeon_enter():
         f"You enter {dungeon.get('name', 'the dungeon')}! Steel yourself.",
         "var(--gold)",
     )
+    _set_activity(player, f"delving {dungeon.get('name', 'a dungeon')}")
     save_player(player)
     return redirect(url_for("dungeon_room"))
 
