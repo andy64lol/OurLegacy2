@@ -2358,3 +2358,184 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     display: flex;
     justify-content: flex-end;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   MOBILE UI IMPROVEMENTS
+   ───────────────────────────────────────────────────────────── */
+
+/* ── Sidebar backdrop (shown when mobile drawer is open) ── */
+#mobile-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 4900;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+#mobile-sidebar-backdrop.active { display: block; }
+
+/* ── Mobile bottom navigation bar (hidden on desktop) ── */
+.mobile-bottom-nav { display: none; }
+
+/* tab-btn: ensure it won't shrink on any viewport */
+.tab-btn { flex-shrink: 0; }
+
+@media (max-width: 700px) {
+
+    /* ── Game layout: single column + bottom padding for nav bar ── */
+    .game-layout {
+        grid-template-columns: 1fr !important;
+        padding-bottom: 58px;
+    }
+
+    /* ── Sidebar: slide-in drawer from the left ── */
+    .sidebar {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        width: 280px;
+        max-width: 88vw;
+        height: 100% !important;
+        max-height: 100vh;
+        max-height: 100dvh;
+        z-index: 5000;
+        transform: translateX(-100%);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 4px 0 32px rgba(0, 0, 0, 0.75);
+        overflow-y: auto;
+    }
+    .sidebar.mobile-open {
+        transform: translateX(0) !important;
+    }
+    /* Keep collapsed state working when explicitly set */
+    .game-layout.sidebar-collapsed .sidebar {
+        transform: translateX(-100%) !important;
+    }
+
+    /* ── Mobile bottom nav bar ── */
+    .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 58px;
+        background: var(--bg-panel-dark);
+        border-top: 2px solid var(--border);
+        z-index: 4000;
+        align-items: stretch;
+        justify-content: space-around;
+    }
+    .mobile-nav-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        flex: 1;
+        background: none;
+        border: none;
+        border-right: 1px solid var(--border);
+        color: var(--text-dim);
+        font-family: 'Tiny5', monospace;
+        font-size: 9px;
+        cursor: pointer;
+        padding: 6px 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        transition: background 0.1s, color 0.1s;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+    .mobile-nav-btn:last-child { border-right: none; }
+    .mobile-nav-btn:active { background: rgba(255,255,255,0.07); color: var(--gold); }
+    .mobile-nav-btn.mob-active { color: var(--gold-bright); }
+    .mobile-nav-btn img {
+        width: 22px;
+        height: 22px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+    }
+
+    /* ── Tab bar: horizontally scrollable (hides overflow dropdown on mobile) ── */
+    .tab-nav {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-more-btn { display: none !important; }
+
+    /* ── Main content: tighter padding ── */
+    .main-content { padding: 10px 10px 12px; }
+
+    /* ── Hide desktop sidebar toggle ── */
+    .sidebar-toggle-btn { display: none !important; }
+
+    /* ── Hide keyboard shortcut hints (no physical keyboard) ── */
+    .kb-hint { display: none !important; }
+
+    /* ── Battle: larger touch targets ── */
+    .btn-battle { min-height: 54px !important; }
+    .battle-action-grid { gap: 8px !important; }
+
+    /* ── Chat: full-width, above bottom nav ── */
+    #chat-widget {
+        right: 10px !important;
+        left: 10px !important;
+        bottom: 66px !important;
+    }
+    #chat-panel { width: 100% !important; }
+
+    /* ── Toast: above bottom nav ── */
+    #toast-container { bottom: 68px !important; }
+
+    /* ── Autosave indicator: above bottom nav ── */
+    #autosave-indicator { bottom: 68px !important; }
+
+    /* ── Travel cards: stack on mobile ── */
+    .connection-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    /* ── Dungeon entries: stack on mobile ── */
+    .dungeon-entry { flex-direction: column; gap: 8px; }
+    .dungeon-action { padding-top: 0; }
+
+    /* ── Quest cards: stack on mobile ── */
+    .mission-card { flex-direction: column; gap: 8px; }
+
+    /* ── Trade overlay: full-width sheet on mobile ── */
+    #trade-overlay { align-items: flex-end !important; }
+    #trade-panel {
+        width: 100% !important;
+        border-radius: 14px 14px 0 0 !important;
+        max-height: 92vh !important;
+    }
+    #trade-panel > div:first-child {
+        border-radius: 14px 14px 0 0 !important;
+    }
+    #trade-panel > div:nth-child(2) {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* ── Scroll panel (welcome): tighter padding ── */
+    .scroll-panel { padding: 18px 16px; }
+
+    /* ── Wizard bubble: slightly smaller font ── */
+    .wizard-bubble { font-size: 15px; padding: 14px 16px; }
+
+    /* ── Page wrap: tighter padding ── */
+    .page-wrap { padding: 18px 12px; }
+}
+
+@media (max-width: 400px) {
+    .battle-action-grid { grid-template-columns: 1fr 1fr !important; }
+    .stat-mini { min-width: 36px; }
+    .mobile-nav-btn { font-size: 8px; gap: 2px; }
+    .mobile-nav-btn img { width: 20px; height: 20px; }
+}

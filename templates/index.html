@@ -498,8 +498,16 @@ const raceData  = {{ data.races  | tojson }};
 {% else %}
 <div class="game-layout">
 
+    <!-- Mobile sidebar backdrop -->
+    <div id="mobile-sidebar-backdrop" onclick="mobileCloseSidebar()"></div>
+
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="main-sidebar">
+        <!-- Mobile close button (only visible on mobile) -->
+        <button onclick="mobileCloseSidebar()" id="mobile-sidebar-close"
+            style="display:none;position:absolute;top:8px;right:8px;z-index:10;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;color:var(--text-dim);font-size:16px;cursor:pointer;line-height:1;align-items:center;justify-content:center;"
+            aria-label="Close menu">&times;</button>
+
         <div class="sidebar-top">
             <img src="/game_assets/game_title_our_legacy_2_720px_300px.png" alt="Our Legacy 2" class="sidebar-banner">
         </div>
@@ -1959,7 +1967,78 @@ const raceData  = {{ data.races  | tojson }};
         {% endif %}
 
     </main>
+
+    <!-- Mobile bottom navigation bar (only visible on mobile screens) -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+        <button class="mobile-nav-btn" onclick="mobileToggleSidebar()" id="mob-nav-char" aria-label="Character panel">
+            <img src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png" alt="Character">
+            <span>{{ player.name | truncate(8, True, '') }}</span>
+        </button>
+        <button class="mobile-nav-btn" onclick="switchTab('explore',false);mobileCloseSidebar();" aria-label="Explore">
+            <img src="/game_assets/glyphs/fight.png" alt="Explore">
+            <span>Explore</span>
+        </button>
+        <button class="mobile-nav-btn" onclick="switchTab('inventory',false);mobileCloseSidebar();" aria-label="Inventory">
+            <img src="/game_assets/glyphs/armor.png" alt="Equipment">
+            <span>Equip</span>
+        </button>
+        <button class="mobile-nav-btn" onclick="switchTab('travel',false);mobileCloseSidebar();" aria-label="Travel">
+            <img src="/game_assets/glyphs/book.png" alt="Travel">
+            <span>Travel</span>
+        </button>
+        <button class="mobile-nav-btn" onclick="openSettings();mobileCloseSidebar();" aria-label="Settings">
+            <img src="/game_assets/glyphs/settings.png" alt="Settings">
+            <span>Settings</span>
+        </button>
+    </nav>
+
 </div>
+
+<script>
+/* ── Mobile sidebar helpers ────────────────────────────────── */
+function mobileToggleSidebar() {
+    var sidebar = document.getElementById('main-sidebar');
+    var backdrop = document.getElementById('mobile-sidebar-backdrop');
+    var closeBtn = document.getElementById('mobile-sidebar-close');
+    if (!sidebar) return;
+    var isOpen = sidebar.classList.contains('mobile-open');
+    if (isOpen) {
+        sidebar.classList.remove('mobile-open');
+        if (backdrop) backdrop.classList.remove('active');
+        if (closeBtn) closeBtn.style.display = 'none';
+    } else {
+        sidebar.classList.add('mobile-open');
+        if (backdrop) backdrop.classList.add('active');
+        if (closeBtn) closeBtn.style.display = 'flex';
+    }
+}
+
+function mobileCloseSidebar() {
+    var sidebar = document.getElementById('main-sidebar');
+    var backdrop = document.getElementById('mobile-sidebar-backdrop');
+    var closeBtn = document.getElementById('mobile-sidebar-close');
+    if (!sidebar) return;
+    sidebar.classList.remove('mobile-open');
+    if (backdrop) backdrop.classList.remove('active');
+    if (closeBtn) closeBtn.style.display = 'none';
+}
+
+/* Show mobile close button when screen is narrow */
+(function() {
+    function checkMobile() {
+        var closeBtn = document.getElementById('mobile-sidebar-close');
+        if (!closeBtn) return;
+        closeBtn.style.display = window.innerWidth <= 700 ? 'flex' : 'none';
+        /* Also ensure sidebar is closed on mobile on load */
+        if (window.innerWidth <= 700) {
+            var sidebar = document.getElementById('main-sidebar');
+            if (sidebar) sidebar.classList.remove('mobile-open');
+        }
+    }
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+})();
+</script>
 
 {% if pending_cutscene %}
 <div id="cutscene-overlay" class="cutscene-overlay" style="display:flex;">
