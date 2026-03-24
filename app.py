@@ -3296,6 +3296,21 @@ def action_travel():
             if cs_id:
                 trigger_cutscene(cs_id)
         add_message(f"You travel to {dest_name}.", "var(--wood-light)")
+
+        # Show up to 3 random online players as "spotted here"
+        my_username = session.get("online_username")
+        online_users = sorted(set(_chat_online.values()))
+        others = [u for u in online_users if u != my_username]
+        if others:
+            spotted = random.sample(others, min(3, len(others)))
+            if len(spotted) == 1:
+                who = spotted[0]
+            elif len(spotted) == 2:
+                who = f"{spotted[0]} and {spotted[1]}"
+            else:
+                who = f"{spotted[0]}, {spotted[1]}, and {spotted[2]}"
+            add_message(f"You spot {who} here.", "var(--mana-bright)")
+
         session.modified = True
     else:
         add_message("That path is not accessible from here.", "var(--red)")
