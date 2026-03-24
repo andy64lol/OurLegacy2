@@ -702,10 +702,24 @@ def _apply_game_state(data: dict[str, Any]) -> None:
     session.modified = True
 
 
+def _diary_append(text: str, color: str = "var(--text-light)") -> None:
+    """Append an entry to the diary (activity log) without showing it in the message feed."""
+    diary = session.get("diary", [])
+    diary.append({"text": text, "color": color})
+    if len(diary) > 500:
+        diary = diary[-500:]
+    session["diary"] = diary
+    session.modified = True
+
+
+_AUTOSAVE_DIARY_INTERVAL = 300  # seconds between autosave diary entries
+
+
 def _autosave() -> None:
     """
     Fire-and-forget autosave to Supabase for logged-in users.
     Silently skips if the user isn't logged in or has no active character.
+    Also logs a diary entry at most once every 5 minutes to avoid flooding.
     """
     user_id = session.get("online_user_id")
     if not user_id:
@@ -717,6 +731,14 @@ def _autosave() -> None:
         character_autosave(user_id, state)
     except Exception:
         pass
+
+    # Log to activities (diary) with throttling so it doesn't flood
+    now = _time_module.time()
+    last_log = session.get("_last_autosave_diary_log", 0)
+    if now - last_log >= _AUTOSAVE_DIARY_INTERVAL:
+        _diary_append("Progress autosaved.", color="var(--muted)")
+        session["_last_autosave_diary_log"] = now
+        session.modified = True
 
 
 def _set_activity(player: dict, status: str) -> None:
@@ -5551,6 +5573,8 @@ def api_cloud_save():
         "game_version": GAME_VERSION,
     }
     result = cloud_save(user_id, save_data)
+    if result.get("ok"):
+        add_message("Game saved to cloud.", color="var(--accent)")
     return jsonify(result), 200 if result["ok"] else 500
 
 
