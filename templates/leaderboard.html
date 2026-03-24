@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard — Our Legacy 2</title>
+    <link rel="icon" href="/game_assets/game_title_our_legacy_2.png" type="image/png">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { min-height: 100%; background: var(--bg-main); color: var(--text-light); font-family: 'Tiny5', monospace; }
+
+        #lb-page {
+            max-width: 900px;
+            margin: 0 auto;
+            min-height: 100vh;
+            border-left: 1px solid rgba(180,130,255,0.15);
+            border-right: 1px solid rgba(180,130,255,0.15);
+            background: linear-gradient(160deg, rgba(14,10,30,0.98), rgba(8,5,20,0.98));
+            display: flex;
+            flex-direction: column;
+        }
+
+        #lb-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: rgba(60,30,100,0.55);
+            border-bottom: 1px solid rgba(180,130,255,0.25);
+        }
+        #lb-header .title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.06em;
+        }
+        .hdr-links { display: flex; gap: 8px; }
+        .hdr-links a {
+            font-size: 13px;
+            color: var(--text-dim);
+            text-decoration: none;
+            padding: 5px 12px;
+            border: 1px solid rgba(180,130,255,0.25);
+            border-radius: 6px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .hdr-links a:hover { color: var(--gold); border-color: rgba(230,180,60,0.4); }
+
+        #lb-body {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .lb-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .lb-section-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gold);
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(230,180,60,0.25);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lb-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(180,130,255,0.15);
+            border-radius: 8px;
+            padding: 10px 12px;
+            transition: border-color 0.15s;
+        }
+        .lb-card:hover { border-color: rgba(180,130,255,0.35); }
+        .lb-card.rank-1 { border-color: rgba(230,180,60,0.5); background: rgba(230,180,60,0.06); }
+        .lb-card.rank-2 { border-color: rgba(180,180,180,0.4); }
+        .lb-card.rank-3 { border-color: rgba(180,100,40,0.4); }
+
+        .lb-rank {
+            font-size: 16px;
+            font-weight: 700;
+            width: 28px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .rank-1 .lb-rank { color: var(--gold); }
+        .rank-2 .lb-rank { color: #c0c0c0; }
+        .rank-3 .lb-rank { color: #cd7f32; }
+        .lb-rank-num { color: var(--text-dim); font-size: 14px; }
+
+        .lb-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(80,50,150,0.7), rgba(40,20,80,0.7));
+            border: 1px solid rgba(180,130,255,0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gold);
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .lb-info { flex: 1; min-width: 0; }
+        .lb-name { font-size: 14px; font-weight: 700; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lb-sub { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+
+        .lb-level {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .lb-level-num { font-size: 16px; font-weight: 700; color: var(--exp-purple); }
+        .lb-level-label { font-size: 10px; color: var(--text-dim); }
+
+        .lb-members-badge {
+            font-size: 10px;
+            color: var(--mana-bright);
+            background: rgba(68,136,255,0.12);
+            border: 1px solid rgba(68,136,255,0.3);
+            border-radius: 4px;
+            padding: 1px 6px;
+            flex-shrink: 0;
+        }
+
+        #lb-loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            #lb-body { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div id="lb-page">
+
+    <div id="lb-header">
+        <div class="title">🏆 Leaderboard</div>
+        <div class="hdr-links">
+            <a href="/groups">⚔ My Group</a>
+            <a href="/game">← Game</a>
+        </div>
+    </div>
+
+    <div id="lb-body">
+        <div id="lb-loading">Loading leaderboard...</div>
+    </div>
+
+</div>
+
+<script>
+function rankIcon(r) {
+    if (r === 1) return '🥇';
+    if (r === 2) return '🥈';
+    if (r === 3) return '🥉';
+    return r;
+}
+
+function rankClass(r) {
+    if (r <= 3) return `rank-${r}`;
+    return '';
+}
+
+function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function loadLeaderboard() {
+    const body = document.getElementById('lb-body');
+    try {
+        const res = await fetch('/api/leaderboard');
+        const data = await res.json();
+
+        if (!data.ok) {
+            body.innerHTML = '<div style="color:var(--red);text-align:center;padding:40px;">Failed to load leaderboard.</div>';
+            return;
+        }
+
+        const groups = data.groups || [];
+        const players = data.players || [];
+
+        let groupsHtml = `<div class="lb-section">
+            <div class="lb-section-title">⚔ Top Adventure Groups</div>`;
+
+        if (groups.length === 0) {
+            groupsHtml += '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:20px 0;">No groups yet. Be the first!</div>';
+        } else {
+            for (const g of groups) {
+                const pct = g.xp_to_next > 0 ? Math.min(100, Math.round(g.xp / g.xp_to_next * 100)) : 0;
+                groupsHtml += `
+                <div class="lb-card ${rankClass(g.rank)}">
+                    <div class="lb-rank">${typeof rankIcon(g.rank) === 'number' ? `<span class="lb-rank-num">#${g.rank}</span>` : rankIcon(g.rank)}</div>
+                    <div class="lb-avatar">${escHtml(g.name[0])}</div>
+                    <div class="lb-info">
+                        <div class="lb-name">${escHtml(g.name)}</div>
+                        <div class="lb-sub">Led by ${escHtml(g.leader)} &bull; ${pct}% to Lv ${g.level + 1}</div>
+                    </div>
+                    <span class="lb-members-badge">${g.member_count}/6</span>
+                    <div class="lb-level">
+                        <div class="lb-level-num">${g.level}</div>
+                        <div class="lb-level-label">Group Lv</div>
+                    </div>
+                </div>`;
+            }
+        }
+        groupsHtml += '</div>';
+
+        let playersHtml = `<div class="lb-section">
+            <div class="lb-section-title">⚡ Top Adventurers</div>`;
+
+        if (players.length === 0) {
+            playersHtml += '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:20px 0;">No players found yet.</div>';
+        } else {
+            for (const p of players) {
+                playersHtml += `
+                <div class="lb-card ${rankClass(p.rank)}">
+                    <div class="lb-rank">${typeof rankIcon(p.rank) === 'number' ? `<span class="lb-rank-num">#${p.rank}</span>` : rankIcon(p.rank)}</div>
+                    <div class="lb-avatar">${escHtml(p.player_name[0])}</div>
+                    <div class="lb-info">
+                        <div class="lb-name">${escHtml(p.player_name)}</div>
+                        <div class="lb-sub">${escHtml(p.character_class)} &bull; ${escHtml(p.player_rank || 'Adventurer')}</div>
+                    </div>
+                    <div class="lb-level">
+                        <div class="lb-level-num">${p.level}</div>
+                        <div class="lb-level-label">Level</div>
+                    </div>
+                </div>`;
+            }
+        }
+        playersHtml += '</div>';
+
+        body.innerHTML = groupsHtml + playersHtml;
+
+    } catch (e) {
+        body.innerHTML = '<div style="color:var(--red);text-align:center;padding:40px;">Error loading leaderboard.</div>';
+    }
+}
+
+loadLeaderboard();
+</script>
+</body>
+</html>

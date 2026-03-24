@@ -98,6 +98,15 @@ from utilities.supabase_db import (
     character_autosave,
     character_autoload,
     character_delete,
+    create_group,
+    join_group,
+    leave_group,
+    kick_group_member,
+    get_user_group,
+    contribute_to_group,
+    collect_group_gold,
+    get_group_leaderboard,
+    get_player_leaderboard,
 )
 
 app = Flask(__name__)
@@ -744,6 +753,34 @@ def _autosave() -> None:
 def _set_activity(player: dict, status: str) -> None:
     """Store a short activity string on the player dict (persisted in autosave)."""
     player["activity_status"] = status
+
+
+def _group_contribute(xp_gained: int, gold_gained: int, action: str) -> None:
+    """
+    Contribute a share of XP/gold to the player's group (if they're in one).
+    Silently skips for offline or non-grouped players.
+    Broadcasts group_level_up to all online group members on level-up.
+    """
+    username = session.get("online_username")
+    if not username:
+        return
+    xp_share = max(1, int(xp_gained * 0.10)) if xp_gained > 0 else 0
+    gold_share = max(1, int(gold_gained * 0.05)) if gold_gained > 0 else 0
+    if xp_share <= 0 and gold_share <= 0:
+        return
+    try:
+        result = contribute_to_group(username, xp_share, gold_share, action)
+        if result.get("ok") and result.get("leveled_up"):
+            new_level = result["new_level"]
+            bonus_xp = result.get("bonus_xp", 0)
+            bonus_gold = result.get("bonus_gold", 0)
+            members = result.get("members", [])
+            payload = {"level": new_level, "bonus_xp": bonus_xp, "bonus_gold": bonus_gold}
+            for member in members:
+                for sid in [s for s, u in _chat_online.items() if u == member]:
+                    socketio.emit("group_level_up", payload, to=sid)
+    except Exception:
+        pass
 
 
 def get_messages():
@@ -3984,6 +4021,7 @@ def action_complete_mission():
 
     player["gold"] += gold
     leveled = gain_experience(player, exp)
+    _group_contribute(exp, gold, f"completed quest: {mission.get('name', mission_id)}")
 
     for item in item_rewards:
         player["inventory"].append(item)
@@ -4043,6 +4081,7 @@ def action_claim_challenge():
     gold = ch_def.get("reward_gold", 0)
     player["gold"] += gold
     leveled = gain_experience(player, exp)
+    _group_contribute(exp, gold, f"completed challenge: {ch_def.get('name', ch_id)}")
     ch_prog[ch_id]["claimed"] = True
 
     add_message(f"Challenge Complete: {ch_def.get('name', ch_id)}!", "var(--gold)")
@@ -4792,6 +4831,7 @@ def _handle_victory(player, enemy, log):
 
     player["gold"] += gold
     leveled = gain_experience(player, exp)
+    _group_contribute(exp, gold, f"defeated {enemy.get('name', 'an enemy')} in battle")
 
     loot = enemy.get("loot_table", [])
     loot_item = None
@@ -5346,6 +5386,7 @@ def dungeon_complete():
         result = complete_dungeon(player, dungeon)
         for msg in result.get("messages", []):
             add_message(msg["text"], msg.get("color", "var(--gold)"))
+        _group_contribute(result.get("exp", 0), result.get("gold", 0), f"cleared dungeon: {dungeon.get('name', 'a dungeon')}")
         # Mark dungeon as completed in player data
         dungeon_id = dungeon.get("id", "")
         if dungeon_id:
@@ -5932,6 +5973,146 @@ def action_customize_character():
     _autosave()
     add_message(f"Character updated ({', '.join(changes)}). -{cost:,} gold.", "var(--gold)")
     return jsonify({"ok": True, "message": f"Character updated: {', '.join(changes)}."})
+
+
+# ─── Adventure Groups ────────────────────────────────────────────────────────
+
+GROUP_CHAT_COOLDOWN = 5
+_group_chat_cooldowns: dict = {}
+
+
+@socketio.on("group_chat_send")
+def on_group_chat_send(data):
+    username = session.get("online_username")
+    if not username:
+        socketio_emit("group_chat_error", {"message": "Not logged in."})
+        return
+    message = (data.get("message") or "").strip()
+    if not message:
+        return
+    if len(message) > 200:
+        socketio_emit("group_chat_error", {"message": "Message too long (max 200 chars)."})
+        return
+    now = _time_module.time()
+    if now - _group_chat_cooldowns.get(username, 0) < GROUP_CHAT_COOLDOWN:
+        socketio_emit("group_chat_error", {"message": f"Wait {GROUP_CHAT_COOLDOWN}s between messages."})
+        return
+    _group_chat_cooldowns[username] = now
+    message = censor_text(message)
+    group_result = get_user_group(username)
+    if not group_result.get("ok") or not group_result.get("group"):
+        socketio_emit("group_chat_error", {"message": "You are not in a group."})
+        return
+    group = group_result["group"]
+    members = [m["username"] for m in group.get("members", [])]
+    payload = {"username": username, "message": message, "ts": int(now)}
+    for member in members:
+        for sid in [s for s, u in _chat_online.items() if u == member]:
+            socketio.emit("group_chat_message", payload, to=sid)
+
+
+@app.route("/groups")
+def groups_page():
+    online_username = session.get("online_username")
+    if not online_username:
+        return redirect(url_for("index"))
+    group_data = None
+    try:
+        res = get_user_group(online_username)
+        if res.get("ok"):
+            group_data = res.get("group")
+    except Exception:
+        pass
+    return render_template("groups.html", online_username=online_username, group=group_data)
+
+
+@app.route("/api/groups/my")
+def api_groups_my():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    try:
+        res = get_user_group(username)
+        return jsonify(res)
+    except Exception as e:
+        return jsonify({"ok": False, "message": str(e)})
+
+
+@app.route("/api/groups/create", methods=["POST"])
+@limiter.limit("5 per hour")
+def api_groups_create():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    data = request.get_json(force=True, silent=True) or {}
+    name = (data.get("name") or "").strip()
+    description = (data.get("description") or "").strip()
+    result = create_group(username, name, description)
+    return jsonify(result), 200 if result["ok"] else 400
+
+
+@app.route("/api/groups/join", methods=["POST"])
+@limiter.limit("10 per hour")
+def api_groups_join():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    data = request.get_json(force=True, silent=True) or {}
+    invite_code = (data.get("invite_code") or "").strip()
+    result = join_group(username, invite_code)
+    return jsonify(result), 200 if result["ok"] else 400
+
+
+@app.route("/api/groups/leave", methods=["POST"])
+def api_groups_leave():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    result = leave_group(username)
+    return jsonify(result), 200 if result["ok"] else 400
+
+
+@app.route("/api/groups/kick", methods=["POST"])
+def api_groups_kick():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    data = request.get_json(force=True, silent=True) or {}
+    target = (data.get("target") or "").strip().lower()
+    result = kick_group_member(username, target)
+    return jsonify(result), 200 if result["ok"] else 400
+
+
+@app.route("/api/groups/collect_gold", methods=["POST"])
+def api_groups_collect_gold():
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Not logged in."})
+    result = collect_group_gold(username)
+    if result.get("ok"):
+        player = get_player()
+        if player:
+            gold = result.get("gold", 0)
+            player["gold"] = player.get("gold", 0) + gold
+            save_player(player)
+            _autosave()
+            add_message(f"Collected {gold} gold from the group treasury!", "var(--gold)")
+    return jsonify(result), 200 if result["ok"] else 400
+
+
+# ─── Leaderboard ─────────────────────────────────────────────────────────────
+
+@app.route("/leaderboard")
+def leaderboard_page():
+    online_username = session.get("online_username")
+    return render_template("leaderboard.html", online_username=online_username)
+
+
+@app.route("/api/leaderboard")
+def api_leaderboard():
+    groups = get_group_leaderboard()
+    players = get_player_leaderboard()
+    return jsonify({"ok": True, "groups": groups, "players": players})
 
 
 port = int(os.environ.get("PORT", 5000))

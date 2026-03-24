@@ -615,6 +615,306 @@ def character_delete(user_id: str) -> Dict[str, Any]:
         return {"ok": False, "message": f"Delete failed: {e}"}
 
 
+# ─── Adventure Groups ─────────────────────────────────────────────────────────
+
+_GROUP_MAX_MEMBERS = 6
+_GROUP_XP_CURVE_FACTOR = 1.4
+
+
+def _group_xp_to_next(level: int) -> int:
+    """XP needed to reach the next group level."""
+    return int(100 * (_GROUP_XP_CURVE_FACTOR ** (level - 1)))
+
+
+def create_group(leader: str, name: str, description: str = "") -> Dict[str, Any]:
+    """Create a new adventure group. Returns invite_code on success."""
+    name = name.strip()
+    if not name or len(name) < 2 or len(name) > 32:
+        return {"ok": False, "message": "Group name must be 2–32 characters."}
+    if contains_profanity(name):
+        return {"ok": False, "message": "Group name contains inappropriate language."}
+
+    def _do():
+        client = _get_client()
+        # Check player is not already in a group
+        existing = client.table("ol2_group_members").select("group_id").eq("username", leader).execute()
+        if existing.data:
+            return {"ok": False, "message": "You are already in a group. Leave it first."}
+        # Check group name not taken
+        taken = client.table("ol2_groups").select("id").eq("name", name).execute()
+        if taken.data:
+            return {"ok": False, "message": "A group with that name already exists."}
+        invite_code = secrets.token_hex(4).upper()
+        group_res = client.table("ol2_groups").insert({
+            "name": name,
+            "leader": leader,
+            "level": 1,
+            "xp": 0,
+            "xp_to_next": _group_xp_to_next(1),
+            "gold_pool": 0,
+            "invite_code": invite_code,
+            "description": description.strip()[:200],
+        }).execute()
+        group_id = group_res.data[0]["id"]
+        client.table("ol2_group_members").insert({"group_id": group_id, "username": leader, "contribution_xp": 0}).execute()
+        client.table("ol2_group_log").insert({"group_id": group_id, "username": leader, "action": f"founded the group \"{name}\"!", "xp_awarded": 0, "gold_awarded": 0}).execute()
+        return {"ok": True, "message": f"Group \"{name}\" created!", "invite_code": invite_code, "group_id": group_id}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Failed to create group: {e}"}
+
+
+def join_group(username: str, invite_code: str) -> Dict[str, Any]:
+    """Join a group by its invite code."""
+    invite_code = invite_code.strip().upper()
+
+    def _do():
+        client = _get_client()
+        existing = client.table("ol2_group_members").select("group_id").eq("username", username).execute()
+        if existing.data:
+            return {"ok": False, "message": "You are already in a group. Leave it first."}
+        group_res = client.table("ol2_groups").select("id, name, leader, level").eq("invite_code", invite_code).execute()
+        if not group_res.data:
+            return {"ok": False, "message": "Invalid invite code."}
+        group = group_res.data[0]
+        group_id = group["id"]
+        member_count = client.table("ol2_group_members").select("id", count="exact").eq("group_id", group_id).execute()
+        if (member_count.count or 0) >= _GROUP_MAX_MEMBERS:
+            return {"ok": False, "message": f"Group is full (max {_GROUP_MAX_MEMBERS} members)."}
+        client.table("ol2_group_members").insert({"group_id": group_id, "username": username, "contribution_xp": 0}).execute()
+        client.table("ol2_group_log").insert({"group_id": group_id, "username": username, "action": "joined the group!", "xp_awarded": 0, "gold_awarded": 0}).execute()
+        return {"ok": True, "message": f"Joined group \"{group['name']}\"!", "group_id": group_id, "group_name": group["name"]}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Failed to join group: {e}"}
+
+
+def leave_group(username: str) -> Dict[str, Any]:
+    """Leave current group. If leader and other members remain, promotes the next member."""
+    def _do():
+        client = _get_client()
+        mem_res = client.table("ol2_group_members").select("group_id").eq("username", username).execute()
+        if not mem_res.data:
+            return {"ok": False, "message": "You are not in a group."}
+        group_id = mem_res.data[0]["group_id"]
+        group_res = client.table("ol2_groups").select("id, name, leader").eq("id", group_id).execute()
+        group = group_res.data[0]
+        client.table("ol2_group_members").delete().eq("username", username).execute()
+        all_members = client.table("ol2_group_members").select("username").eq("group_id", group_id).execute()
+        if not all_members.data:
+            client.table("ol2_groups").delete().eq("id", group_id).execute()
+            return {"ok": True, "message": "You left and the group was disbanded (no members remaining)."}
+        if group["leader"] == username:
+            new_leader = all_members.data[0]["username"]
+            client.table("ol2_groups").update({"leader": new_leader}).eq("id", group_id).execute()
+            client.table("ol2_group_log").insert({"group_id": group_id, "username": new_leader, "action": f"became the new leader (previous leader left).", "xp_awarded": 0, "gold_awarded": 0}).execute()
+        else:
+            client.table("ol2_group_log").insert({"group_id": group_id, "username": username, "action": "left the group.", "xp_awarded": 0, "gold_awarded": 0}).execute()
+        return {"ok": True, "message": f"You left the group \"{group['name']}\"."}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Failed to leave group: {e}"}
+
+
+def kick_group_member(leader: str, target: str) -> Dict[str, Any]:
+    """Leader kicks a member from the group."""
+    if leader == target:
+        return {"ok": False, "message": "You cannot kick yourself."}
+
+    def _do():
+        client = _get_client()
+        mem_res = client.table("ol2_group_members").select("group_id").eq("username", leader).execute()
+        if not mem_res.data:
+            return {"ok": False, "message": "You are not in a group."}
+        group_id = mem_res.data[0]["group_id"]
+        group_res = client.table("ol2_groups").select("leader, name").eq("id", group_id).execute()
+        if group_res.data[0]["leader"] != leader:
+            return {"ok": False, "message": "Only the group leader can kick members."}
+        target_res = client.table("ol2_group_members").select("id").eq("group_id", group_id).eq("username", target).execute()
+        if not target_res.data:
+            return {"ok": False, "message": f"{target} is not in your group."}
+        client.table("ol2_group_members").delete().eq("username", target).eq("group_id", group_id).execute()
+        client.table("ol2_group_log").insert({"group_id": group_id, "username": target, "action": f"was kicked by the leader.", "xp_awarded": 0, "gold_awarded": 0}).execute()
+        return {"ok": True, "message": f"{target} was removed from the group."}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Failed: {e}"}
+
+
+def get_user_group(username: str) -> Dict[str, Any]:
+    """Return full group info for the user's current group, or None."""
+    def _do():
+        client = _get_client()
+        mem_res = client.table("ol2_group_members").select("group_id, contribution_xp, joined_at").eq("username", username).execute()
+        if not mem_res.data:
+            return {"ok": False, "group": None}
+        group_id = mem_res.data[0]["group_id"]
+        group_res = client.table("ol2_groups").select("*").eq("id", group_id).execute()
+        if not group_res.data:
+            return {"ok": False, "group": None}
+        group = group_res.data[0]
+        members = client.table("ol2_group_members").select("username, contribution_xp, joined_at").eq("group_id", group_id).execute()
+        log = client.table("ol2_group_log").select("username, action, xp_awarded, gold_awarded, created_at").eq("group_id", group_id).order("created_at", desc=True).limit(30).execute()
+        return {"ok": True, "group": {**group, "members": members.data or [], "log": log.data or []}}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "group": None}
+
+
+def contribute_to_group(username: str, xp: int, gold: int, action: str) -> Dict[str, Any]:
+    """
+    Add XP and gold to the user's group. Handles group leveling.
+    Returns {ok, leveled_up, new_level, bonus_xp, bonus_gold}.
+    """
+    if xp <= 0 and gold <= 0:
+        return {"ok": False}
+
+    def _do():
+        client = _get_client()
+        mem_res = client.table("ol2_group_members").select("group_id, contribution_xp").eq("username", username).execute()
+        if not mem_res.data:
+            return {"ok": False}
+        group_id = mem_res.data[0]["group_id"]
+        contrib_xp = mem_res.data[0]["contribution_xp"] + xp
+        client.table("ol2_group_members").update({"contribution_xp": contrib_xp}).eq("username", username).eq("group_id", group_id).execute()
+        group_res = client.table("ol2_groups").select("level, xp, xp_to_next, gold_pool").eq("id", group_id).execute()
+        g = group_res.data[0]
+        new_xp = g["xp"] + xp
+        new_gold_pool = g["gold_pool"] + gold
+        level = g["level"]
+        xp_to_next = g["xp_to_next"]
+        leveled_up = False
+        while new_xp >= xp_to_next:
+            new_xp -= xp_to_next
+            level += 1
+            xp_to_next = _group_xp_to_next(level)
+            leveled_up = True
+        client.table("ol2_groups").update({"xp": new_xp, "xp_to_next": xp_to_next, "level": level, "gold_pool": new_gold_pool}).eq("id", group_id).execute()
+        if xp > 0 or gold > 0:
+            client.table("ol2_group_log").insert({"group_id": group_id, "username": username, "action": action, "xp_awarded": xp, "gold_awarded": gold}).execute()
+        bonus_xp = 20 * level if leveled_up else 0
+        bonus_gold = 30 * level if leveled_up else 0
+        member_usernames: List[str] = []
+        if leveled_up:
+            mres = client.table("ol2_group_members").select("username").eq("group_id", group_id).execute()
+            member_usernames = [m["username"] for m in (mres.data or [])]
+            client.table("ol2_group_log").insert({"group_id": group_id, "username": "System", "action": f"Group reached level {level}! All members receive a bonus.", "xp_awarded": bonus_xp, "gold_awarded": bonus_gold}).execute()
+        return {"ok": True, "leveled_up": leveled_up, "new_level": level, "group_id": group_id, "bonus_xp": bonus_xp, "bonus_gold": bonus_gold, "members": member_usernames}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False}
+
+
+def collect_group_gold(username: str) -> Dict[str, Any]:
+    """Distribute an equal share of the group gold pool to all members (capped per call)."""
+    def _do():
+        client = _get_client()
+        mem_res = client.table("ol2_group_members").select("group_id").eq("username", username).execute()
+        if not mem_res.data:
+            return {"ok": False, "message": "You are not in a group."}
+        group_id = mem_res.data[0]["group_id"]
+        group_res = client.table("ol2_groups").select("gold_pool, leader, name").eq("id", group_id).execute()
+        g = group_res.data[0]
+        if g["gold_pool"] <= 0:
+            return {"ok": False, "message": "The group treasury is empty."}
+        member_count = client.table("ol2_group_members").select("id", count="exact").eq("group_id", group_id).execute()
+        count = max(1, member_count.count or 1)
+        share = g["gold_pool"] // count
+        if share < 1:
+            return {"ok": False, "message": "Not enough gold to distribute yet."}
+        client.table("ol2_groups").update({"gold_pool": 0}).eq("id", group_id).execute()
+        client.table("ol2_group_log").insert({"group_id": group_id, "username": username, "action": f"triggered a treasury distribution ({share} gold per member).", "xp_awarded": 0, "gold_awarded": share}).execute()
+        return {"ok": True, "message": f"You collected {share} gold from the group treasury!", "gold": share, "group_id": group_id}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Failed: {e}"}
+
+
+def get_group_leaderboard() -> List[Dict[str, Any]]:
+    """Return top 10 groups by level, then XP."""
+    def _do():
+        client = _get_client()
+        res = client.table("ol2_groups").select("name, leader, level, xp, xp_to_next, gold_pool").order("level", desc=True).order("xp", desc=True).limit(10).execute()
+        rows = res.data or []
+        enriched = []
+        for i, row in enumerate(rows):
+            member_count = client.table("ol2_group_members").select("id", count="exact").eq("group_id", row.get("id", "")).execute() if row.get("id") else None
+            enriched.append({**row, "rank": i + 1, "member_count": 0})
+        return enriched
+
+    def _do_simple():
+        client = _get_client()
+        res = client.table("ol2_groups").select("id, name, leader, level, xp, xp_to_next").order("level", desc=True).order("xp", desc=True).limit(10).execute()
+        rows = res.data or []
+        result = []
+        for i, row in enumerate(rows):
+            mc = client.table("ol2_group_members").select("username", count="exact").eq("group_id", row["id"]).execute()
+            result.append({**row, "rank": i + 1, "member_count": mc.count or 0})
+        return result
+
+    try:
+        return _run(_do_simple)
+    except Exception:
+        return []
+
+
+def get_player_leaderboard() -> List[Dict[str, Any]]:
+    """Return top 10 players by level from the ol2_characters table."""
+    def _do():
+        client = _get_client()
+        import json as _json
+        res = (
+            client.table("ol2_characters")
+            .select("player_name, level, current_area, game_state")
+            .order("level", desc=True)
+            .limit(10)
+            .execute()
+        )
+        result = []
+        for i, row in enumerate(res.data or []):
+            try:
+                gs = row.get("game_state") or {}
+                if isinstance(gs, str):
+                    gs = _json.loads(gs)
+                player_data = gs.get("player") or {}
+                character_class = player_data.get("character_class", "Adventurer")
+                rank = player_data.get("rank", "")
+                experience = player_data.get("experience", 0)
+            except Exception:
+                character_class = "Adventurer"
+                rank = ""
+                experience = 0
+            result.append({
+                "rank": i + 1,
+                "player_name": row.get("player_name", "Unknown"),
+                "level": row.get("level", 1),
+                "character_class": character_class,
+                "player_rank": rank,
+                "experience": experience,
+                "current_area": row.get("current_area", ""),
+            })
+        return result
+
+    try:
+        return _run(_do)
+    except Exception:
+        return []
+
+
 def get_all_activities(exclude_user_id: str = None) -> List[Dict[str, Any]]:
     """
     Return a list of {player_name, activity_status, current_area} for all
