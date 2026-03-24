@@ -804,6 +804,9 @@ const raceData  = {{ data.races  | tojson }};
                         {% if player.dodge_chance %}
                         <div class="stat-mini"><span>Dodge</span><strong>{{ (player.dodge_chance * 100) | int }}%</strong></div>
                         {% endif %}
+                        {% if player.attr_crit_chance %}
+                        <div class="stat-mini"><span>Crit Chance</span><strong>+{{ player.attr_crit_chance }}%</strong></div>
+                        {% endif %}
                         {% if player.attr_gold_discount %}
                         <div class="stat-mini"><span>Shop Discount</span><strong>{{ (player.attr_gold_discount * 100) | int }}%</strong></div>
                         {% endif %}
@@ -851,6 +854,14 @@ const raceData  = {{ data.races  | tojson }};
                 <div class="panel-title">
                     Inventory
                     <span class="panel-subtitle">({{ player.inventory|length }} items &mdash; {{ player.gold }}g)</span>
+                </div>
+                <div style="display:flex;gap:8px;padding:8px 12px 0;flex-wrap:wrap;">
+                    <form method="post" action="/action/quick_heal" style="margin:0;">
+                        <button type="submit" class="btn btn-small btn-primary" title="Use your best available healing item">&#10084; Quick Heal</button>
+                    </form>
+                    <form method="post" action="/action/sort_inventory" style="margin:0;">
+                        <button type="submit" class="btn btn-small btn-secondary" title="Sort inventory by item type then name">&#8645; Sort Items</button>
+                    </form>
                 </div>
                 <div class="panel-body">
                     {% if inventory_items %}

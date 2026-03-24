@@ -99,7 +99,8 @@
          "physical",
          "piercing",
          "finesse",
-         "one-handed"
+         "one-handed",
+         "outlaw"
       ]
    },
    "Magic Staff": {
@@ -477,7 +478,8 @@
          "physical",
          "piercing",
          "finesse",
-         "one-handed"
+         "one-handed",
+         "outlaw"
       ]
    },
    "Wooden Wand": {
@@ -608,7 +610,8 @@
          "physical",
          "piercing",
          "finesse",
-         "one-handed"
+         "one-handed",
+         "outlaw"
       ]
    },
    "Ninja Kunai": {
@@ -633,7 +636,8 @@
       "tags": [
          "physical",
          "ranged",
-         "finesse"
+         "finesse",
+         "outlaw"
       ]
    },
    "Shadow Blade": {
@@ -2122,7 +2126,8 @@
          "piercing",
          "finesse",
          "one-handed",
-         "poison"
+         "poison",
+         "outlaw"
       ]
    },
    "Celestial Scepter": {
@@ -2348,7 +2353,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Longbow": {
@@ -2373,7 +2379,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Composite Bow": {
@@ -2398,7 +2405,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Elven Bow": {
@@ -2423,7 +2431,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Light Crossbow": {
@@ -2448,7 +2457,8 @@
          "physical",
          "ranged",
          "two-handed",
-         "holy"
+         "holy",
+         "outlaw"
       ]
    },
    "Heavy Crossbow": {
@@ -2473,7 +2483,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Repeating Crossbow": {
@@ -2498,7 +2509,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Hunting Spear": {
@@ -2595,7 +2607,8 @@
          "physical",
          "piercing",
          "finesse",
-         "one-handed"
+         "one-handed",
+         "outlaw"
       ]
    },
    "Steel Hunting Knife": {
@@ -2620,7 +2633,8 @@
          "physical",
          "piercing",
          "finesse",
-         "one-handed"
+         "one-handed",
+         "outlaw"
       ]
    },
    "Assassin Hunting Knife": {
@@ -2646,7 +2660,8 @@
          "physical",
          "piercing",
          "finesse",
-         "one-handed"
+         "one-handed",
+         "outlaw"
       ]
    },
    "Master Hunter's Knife": {
@@ -2672,7 +2687,8 @@
          "physical",
          "piercing",
          "finesse",
-         "one-handed"
+         "one-handed",
+         "outlaw"
       ]
    },
    "Luck Charm": {
@@ -3685,7 +3701,8 @@
          "physical",
          "piercing",
          "finesse",
-         "one-handed"
+         "one-handed",
+         "outlaw"
       ]
    },
    "Midnight Cleaver": {
@@ -3787,7 +3804,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Ranger's Crossbow": {
@@ -3812,7 +3830,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Venomspitter": {
@@ -3890,7 +3909,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Demonforged Plate": {
@@ -4769,7 +4789,8 @@
       "tags": [
          "physical",
          "ranged",
-         "finesse"
+         "finesse",
+         "outlaw"
       ]
    },
    "Ninjato": {
@@ -5283,7 +5304,8 @@
          "physical",
          "piercing",
          "finesse",
-         "one-handed"
+         "one-handed",
+         "outlaw"
       ]
    },
    "Stolen Gold Necklace": {
@@ -5608,7 +5630,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Frost Blade": {
@@ -5916,7 +5939,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Ottoman Lance": {
@@ -6717,7 +6741,8 @@
          "piercing",
          "finesse",
          "one-handed",
-         "poison"
+         "poison",
+         "outlaw"
       ]
    },
    "Silk-Wrapped Yari": {
@@ -7166,7 +7191,8 @@
       "tags": [
          "physical",
          "ranged",
-         "two-handed"
+         "two-handed",
+         "outlaw"
       ]
    },
    "Bear Warrior Axe": {

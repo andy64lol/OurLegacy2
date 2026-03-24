@@ -1473,6 +1473,15 @@ def apply_item_bonuses(player, item_data, direction=1):
             current = player.get(rk, 0.0)
             player[rk] = max(0.0, min(0.9, current + val * direction))
 
+    # Outlaw tag on bows/daggers: grant dodge_chance bonus
+    if item_data.get("type") == "weapon":
+        tags = item_data.get("tags", [])
+        if "outlaw" in tags:
+            dodge_bonus = 0.06
+            player["dodge_chance"] = round(
+                max(0.0, player.get("dodge_chance", 0.0) + dodge_bonus * direction), 4
+            )
+
 
 def _ensure_equipment_slots(player):
     """Ensure player has all equipment slots including 3 accessory slots."""
@@ -3688,6 +3697,73 @@ def action_use_item():
     save_player(player)
     _autosave()
     return redirect(url_for("game"))
+
+
+@app.route("/action/quick_heal", methods=["POST"])
+def action_quick_heal():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+
+    inventory = player.get("inventory", [])
+    heal_keywords = ["health", "elixir", "tears", "tonic"]
+    potions = [
+        i for i in inventory
+        if any(x in i.lower() for x in heal_keywords)
+        and "mana" not in i.lower()
+    ]
+
+    if not potions:
+        add_message("You have no healing items to use.", "var(--red)")
+        save_player(player)
+        return redirect(url_for("game"))
+
+    def potion_priority(name):
+        n = name.lower()
+        if "large" in n or "greater" in n or "elixir" in n or "tears" in n:
+            return 2
+        return 1
+
+    best = max(potions, key=potion_priority)
+    lower = best.lower()
+    if "elixir" in lower or "tears" in lower:
+        heal = dice.between(50, 100)
+    elif "large" in lower or "greater" in lower:
+        heal = dice.between(70, 130)
+    else:
+        heal = dice.between(40, 70)
+
+    player["hp"] = min(player["max_hp"], player["hp"] + heal)
+    player["inventory"].remove(best)
+    add_message(f"Quick Heal: used {best} and recovered {heal} HP.", "var(--green-bright)")
+    save_player(player)
+    _autosave()
+    return redirect(url_for("game"))
+
+
+@app.route("/action/sort_inventory", methods=["POST"])
+def action_sort_inventory():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+
+    items_data = GAME_DATA["items"]
+
+    def sort_key(name):
+        data = items_data.get(name, {})
+        if not isinstance(data, dict):
+            return (99, name)
+        type_order = {
+            "weapon": 0, "armor": 1, "offhand": 2, "accessory": 3,
+            "consumable": 4, "book": 5, "material": 6
+        }
+        t = data.get("type", "misc")
+        return (type_order.get(t, 10), name.lower())
+
+    player["inventory"] = sorted(player.get("inventory", []), key=sort_key)
+    add_message("Inventory sorted by type.", "var(--text-dim)")
+    save_player(player)
+    return redirect(url_for("game") + "?tab=character")
 
 
 @app.route("/action/read_book", methods=["GET", "POST"])
