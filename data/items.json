@@ -58,7 +58,7 @@
    "Iron Sword": {
       "type": "weapon",
       "description": "A sturdy iron blade, reliable and well-balanced",
-      "attack_bonus": 8,
+      "attack_bonus": 10,
       "price": 50,
       "rarity": "common",
       "requirements": {
@@ -80,7 +80,7 @@
    "Steel Dagger": {
       "type": "weapon",
       "description": "A sharp steel dagger favored by rogues for its speed",
-      "attack_bonus": 6,
+      "attack_bonus": 8,
       "speed_bonus": 3,
       "price": 45,
       "rarity": "common",
@@ -105,7 +105,7 @@
    "Magic Staff": {
       "type": "weapon",
       "description": "A mystical staff that enhances magical abilities",
-      "attack_bonus": 55,
+      "attack_bonus": 69,
       "magic_weapon": true,
       "mp_bonus": 20,
       "price": 70,
@@ -131,7 +131,7 @@
    "Greatsword": {
       "type": "weapon",
       "description": "A massive two-handed sword that deals devastating blows",
-      "attack_bonus": 100,
+      "attack_bonus": 125,
       "defense_penalty": 2,
       "price": 120,
       "rarity": "rare",
@@ -427,7 +427,7 @@
    "Troll Club": {
       "type": "weapon",
       "description": "A massive club wielded by trolls, incredibly heavy",
-      "attack_bonus": 105,
+      "attack_bonus": 131,
       "speed_penalty": 3,
       "price": 150,
       "rarity": "rare",
@@ -462,7 +462,7 @@
    "Rusty Dagger": {
       "type": "weapon",
       "description": "An old, rusty dagger found in ancient ruins",
-      "attack_bonus": 3,
+      "attack_bonus": 4,
       "price": 15,
       "rarity": "junk",
       "weapon_type": "dagger",
@@ -509,7 +509,7 @@
    "Crystalline Wand": {
       "type": "weapon",
       "description": "A wand topped with a radiant crystal, amplifies magic",
-      "attack_bonus": 52,
+      "attack_bonus": 65,
       "magic_weapon": true,
       "mp_bonus": 30,
       "price": 85,
@@ -537,7 +537,7 @@
    "Spellsword": {
       "type": "weapon",
       "description": "A blade infused with magical energy, bridging combat and spells",
-      "attack_bonus": 95,
+      "attack_bonus": 119,
       "magic_weapon": true,
       "mp_bonus": 20,
       "price": 110,
@@ -562,7 +562,7 @@
    "Ethereal Staff": {
       "type": "weapon",
       "description": "A legendary staff wreathed in arcane energy",
-      "attack_bonus": 175,
+      "attack_bonus": 219,
       "magic_weapon": true,
       "mp_bonus": 50,
       "price": 180,
@@ -588,7 +588,7 @@
    "Rogue's Dagger": {
       "type": "weapon",
       "description": "A perfectly balanced dagger for swift, deadly strikes",
-      "attack_bonus": 50,
+      "attack_bonus": 62,
       "speed_bonus": 4,
       "price": 55,
       "rarity": "uncommon",
@@ -614,7 +614,7 @@
    "Ninja Kunai": {
       "type": "weapon",
       "description": "A throwing weapon favored by shadows and assassins",
-      "attack_bonus": 58,
+      "attack_bonus": 72,
       "speed_bonus": 5,
       "price": 65,
       "rarity": "uncommon",
@@ -639,7 +639,7 @@
    "Shadow Blade": {
       "type": "weapon",
       "description": "A dark blade that seems to absorb light itself",
-      "attack_bonus": 98,
+      "attack_bonus": 122,
       "speed_bonus": 6,
       "price": 140,
       "rarity": "rare",
@@ -663,7 +663,7 @@
    "Obsidian Edge": {
       "type": "weapon",
       "description": "A legendary blade of pure shadow and power",
-      "attack_bonus": 180,
+      "attack_bonus": 225,
       "speed_bonus": 8,
       "defense_bonus": 2,
       "price": 250,
@@ -688,7 +688,7 @@
    "Iron Axe": {
       "type": "weapon",
       "description": "A heavy axe for devastating sweeping attacks",
-      "attack_bonus": 60,
+      "attack_bonus": 75,
       "defense_penalty": 1,
       "price": 95,
       "rarity": "uncommon",
@@ -714,7 +714,7 @@
    "Chieftain's Axe": {
       "type": "weapon",
       "description": "The massive war axe wielded by the Orc Chieftain, dripping with ancient power",
-      "attack_bonus": 185,
+      "attack_bonus": 231,
       "defense_penalty": 2,
       "fear_factor": 0.15,
       "price": 280,
@@ -741,7 +741,7 @@
    "Warhammer": {
       "type": "weapon",
       "description": "A massive two-handed hammer that crushes all in its path",
-      "attack_bonus": 105,
+      "attack_bonus": 131,
       "defense_penalty": 2,
       "price": 130,
       "rarity": "rare",
@@ -770,7 +770,7 @@
    "Dragonsoul Blade": {
       "type": "weapon",
       "description": "A legendary sword forged with dragon essence itself",
-      "attack_bonus": 182,
+      "attack_bonus": 228,
       "magic_weapon": true,
       "defense_bonus": 3,
       "mp_bonus": 20,
@@ -797,7 +797,7 @@
    "Mourning Blade": {
       "type": "weapon",
       "description": "A blade forged in sorrow, dealing extra damage to undead",
-      "attack_bonus": 100,
+      "attack_bonus": 125,
       "price": 160,
       "rarity": "rare",
       "requirements": {
@@ -945,7 +945,7 @@
    "Enchanting Lute": {
       "type": "weapon",
       "description": "A beautifully crafted lute that enchants allies with its melodies.",
-      "attack_bonus": 62,
+      "attack_bonus": 78,
       "mp_bonus": 15,
       "price": 60,
       "magic_weapon": true,
@@ -972,7 +972,7 @@
    "Dragonbone Lute": {
       "type": "weapon",
       "description": "A magnificent lute forged from ancient dragon bone, resonating with primordial power.",
-      "attack_bonus": 170,
+      "attack_bonus": 212,
       "mp_bonus": 40,
       "magic_weapon": true,
       "price": 350,
@@ -999,7 +999,7 @@
    "Skyfall Lyre": {
       "type": "weapon",
       "description": "A celestial lyre said to have fallen from the heavens, woven with starlight and cosmic energy.",
-      "attack_bonus": 185,
+      "attack_bonus": 231,
       "mp_bonus": 45,
       "magic_weapon": true,
       "price": 400,
@@ -1026,7 +1026,7 @@
    "H\u00e4mmelson's Legendary Flute": {
       "type": "weapon",
       "description": "The masterpiece of the legendary bard H\u00e4mmelson, each note carries the power to move mountains.",
-      "attack_bonus": 175,
+      "attack_bonus": 219,
       "mp_bonus": 50,
       "speed_bonus": 3,
       "magic_weapon": true,
@@ -1054,7 +1054,7 @@
    "War Drum of The god of Thunder Z\u00e2esltral": {
       "type": "weapon",
       "description": "The sacred war drum of the storm god Z\u00e2esltral, its beating shakes the very foundations of reality.",
-      "attack_bonus": 195,
+      "attack_bonus": 244,
       "mp_bonus": 35,
       "magic_weapon": true,
       "lightning_damage": 12,
@@ -1084,7 +1084,7 @@
    "Wooden Flute": {
       "type": "weapon",
       "description": "A simple wooden flute, perfect for learning basic melodies.",
-      "attack_bonus": 50,
+      "attack_bonus": 62,
       "mp_bonus": 10,
       "price": 25,
       "magic_weapon": true,
@@ -1111,7 +1111,7 @@
    "Silver Lyre": {
       "type": "weapon",
       "description": "A lyre with silver strings that produce clear, enchanting tones.",
-      "attack_bonus": 65,
+      "attack_bonus": 81,
       "mp_bonus": 18,
       "price": 75,
       "magic_weapon": true,
@@ -1138,7 +1138,7 @@
    "Oak Harp": {
       "type": "weapon",
       "description": "A sturdy harp carved from oak, resonant and reliable.",
-      "attack_bonus": 68,
+      "attack_bonus": 85,
       "mp_bonus": 20,
       "price": 90,
       "magic_weapon": true,
@@ -1165,7 +1165,7 @@
    "Rhythm Drum": {
       "type": "weapon",
       "description": "A hand drum that keeps time for any performance.",
-      "attack_bonus": 55,
+      "attack_bonus": 69,
       "mp_bonus": 12,
       "speed_bonus": 2,
       "price": 55,
@@ -1193,7 +1193,7 @@
    "Celestial Harp": {
       "type": "weapon",
       "description": "A golden harp said to capture the music of the heavens.",
-      "attack_bonus": 100,
+      "attack_bonus": 125,
       "mp_bonus": 30,
       "price": 150,
       "magic_weapon": true,
@@ -1220,7 +1220,7 @@
    "Crystal Flute": {
       "type": "weapon",
       "description": "A flute crafted from enchanted crystal, amplifying magical melodies.",
-      "attack_bonus": 95,
+      "attack_bonus": 119,
       "mp_bonus": 28,
       "price": 130,
       "magic_weapon": true,
@@ -1248,7 +1248,7 @@
    "Golden Lyre": {
       "type": "weapon",
       "description": "An ornate lyre with golden strings, beloved by royalty.",
-      "attack_bonus": 105,
+      "attack_bonus": 131,
       "mp_bonus": 35,
       "price": 200,
       "magic_weapon": true,
@@ -1275,7 +1275,7 @@
    "Warfare Drum": {
       "type": "weapon",
       "description": "A powerful drum that rouses warriors with its beat.",
-      "attack_bonus": 98,
+      "attack_bonus": 122,
       "mp_bonus": 22,
       "price": 140,
       "magic_weapon": true,
@@ -1302,7 +1302,7 @@
    "Songsmith's Lyre": {
       "type": "weapon",
       "description": "The masterwork of a legendary songsmith, perfect in every way.",
-      "attack_bonus": 115,
+      "attack_bonus": 144,
       "mp_bonus": 42,
       "price": 280,
       "magic_weapon": true,
@@ -1484,7 +1484,7 @@
    "Paladin's Shortsword": {
       "type": "weapon",
       "description": "A balanced shortsword for holy warriors, slightly less powerful than its predecessor.",
-      "attack_bonus": 10,
+      "attack_bonus": 12,
       "price": 100,
       "rarity": "uncommon",
       "requirements": {
@@ -1508,7 +1508,7 @@
    "Druidic Staff": {
       "type": "weapon",
       "description": "A gnarled staff hums with nature's power, exclusive to Druids.",
-      "attack_bonus": 12,
+      "attack_bonus": 15,
       "magic_weapon": true,
       "mp_bonus": 20,
       "price": 120,
@@ -1622,7 +1622,7 @@
    "Nature's Embrace": {
       "type": "weapon",
       "description": "A staff woven from living roots that pulses with the heartbeat of the forest.",
-      "attack_bonus": 45,
+      "attack_bonus": 56,
       "magic_weapon": true,
       "mp_bonus": 40,
       "hp_bonus": 20,
@@ -1649,7 +1649,7 @@
    "Gaea's Wrath": {
       "type": "weapon",
       "description": "A legendary scythe forged from petrified world-tree wood, capable of rending the earth.",
-      "attack_bonus": 160,
+      "attack_bonus": 200,
       "magic_weapon": true,
       "mp_bonus": 60,
       "speed_bonus": 5,
@@ -1676,7 +1676,7 @@
    "Sun-Blessed Mace": {
       "type": "weapon",
       "description": "A heavy mace that glows with the intensity of the midday sun, scorching the wicked.",
-      "attack_bonus": 55,
+      "attack_bonus": 69,
       "defense_bonus": 5,
       "price": 240,
       "rarity": "rare",
@@ -1704,7 +1704,7 @@
    "Aegis of the Eternal Light": {
       "type": "weapon",
       "description": "The ultimate holy hammer, said to be a shard of the heavens themselves.",
-      "attack_bonus": 170,
+      "attack_bonus": 212,
       "defense_bonus": 15,
       "hp_bonus": 50,
       "price": 500,
@@ -1730,7 +1730,7 @@
    "Scepter of Divine Grace": {
       "type": "weapon",
       "description": "An ornate scepter that amplifies the purity of the wielder's prayers.",
-      "attack_bonus": 35,
+      "attack_bonus": 44,
       "magic_weapon": true,
       "mp_bonus": 70,
       "price": 260,
@@ -1756,7 +1756,7 @@
    "Relic of the First Saint": {
       "type": "weapon",
       "description": "A legendary artifact that bridges the gap between the mortal realm and the divine.",
-      "attack_bonus": 140,
+      "attack_bonus": 175,
       "magic_weapon": true,
       "mp_bonus": 100,
       "hp_bonus": 30,
@@ -2020,7 +2020,7 @@
    "Assassin's Blade": {
       "type": "weapon",
       "description": "A razor-sharp dagger designed for silent kills",
-      "attack_bonus": 92,
+      "attack_bonus": 115,
       "speed_bonus": 5,
       "critical_chance": 0.1,
       "price": 80,
@@ -2045,7 +2045,7 @@
    "Arcane Grimoire": {
       "type": "weapon",
       "description": "A powerful spellbook containing forbidden knowledge",
-      "attack_bonus": 172,
+      "attack_bonus": 215,
       "magic_weapon": true,
       "mp_bonus": 40,
       "spell_power": 15,
@@ -2072,7 +2072,7 @@
    "Titan's Hammer": {
       "type": "weapon",
       "description": "A massive hammer said to have been wielded by giants",
-      "attack_bonus": 188,
+      "attack_bonus": 235,
       "defense_penalty": 3,
       "stun_chance": 0.15,
       "price": 280,
@@ -2099,7 +2099,7 @@
    "Venomstrike Dagger": {
       "type": "weapon",
       "description": "A poisoned blade that causes lingering damage",
-      "attack_bonus": 98,
+      "attack_bonus": 122,
       "speed_bonus": 4,
       "poison_damage": 3,
       "price": 120,
@@ -2128,7 +2128,7 @@
    "Celestial Scepter": {
       "type": "weapon",
       "description": "A divine instrument channeling cosmic energies",
-      "attack_bonus": 178,
+      "attack_bonus": 222,
       "magic_weapon": true,
       "mp_bonus": 45,
       "healing_power": 20,
@@ -2155,7 +2155,7 @@
    "Berserker's Axe": {
       "type": "weapon",
       "description": "A bloodthirsty weapon that grows stronger with each kill",
-      "attack_bonus": 176,
+      "attack_bonus": 220,
       "defense_penalty": 4,
       "rage_bonus": 0.05,
       "price": 190,
@@ -2329,7 +2329,7 @@
    "Hunter's Bow": {
       "type": "weapon",
       "description": "A well-crafted bow favored by hunters for its reliability",
-      "attack_bonus": 50,
+      "attack_bonus": 62,
       "speed_bonus": 2,
       "price": 60,
       "rarity": "common",
@@ -2354,7 +2354,7 @@
    "Longbow": {
       "type": "weapon",
       "description": "A tall bow that provides excellent range and precision",
-      "attack_bonus": 55,
+      "attack_bonus": 69,
       "speed_bonus": 1,
       "price": 85,
       "rarity": "uncommon",
@@ -2379,7 +2379,7 @@
    "Composite Bow": {
       "type": "weapon",
       "description": "A sophisticated bow made of layered materials for maximum power",
-      "attack_bonus": 95,
+      "attack_bonus": 119,
       "speed_bonus": 3,
       "price": 120,
       "rarity": "rare",
@@ -2404,7 +2404,7 @@
    "Elven Bow": {
       "type": "weapon",
       "description": "An elegant bow crafted by elven masters, imbued with natural magic",
-      "attack_bonus": 175,
+      "attack_bonus": 219,
       "speed_bonus": 5,
       "price": 200,
       "rarity": "legendary",
@@ -2429,7 +2429,7 @@
    "Light Crossbow": {
       "type": "weapon",
       "description": "A compact crossbow that's easy to reload and aim",
-      "attack_bonus": 9,
+      "attack_bonus": 11,
       "price": 75,
       "rarity": "common",
       "requirements": {
@@ -2454,7 +2454,7 @@
    "Heavy Crossbow": {
       "type": "weapon",
       "description": "A powerful crossbow that delivers devastating bolts",
-      "attack_bonus": 60,
+      "attack_bonus": 75,
       "speed_penalty": 2,
       "price": 110,
       "rarity": "uncommon",
@@ -2479,7 +2479,7 @@
    "Repeating Crossbow": {
       "type": "weapon",
       "description": "An innovative crossbow that can fire multiple bolts rapidly",
-      "attack_bonus": 98,
+      "attack_bonus": 122,
       "speed_bonus": 4,
       "price": 140,
       "rarity": "rare",
@@ -2504,7 +2504,7 @@
    "Hunting Spear": {
       "type": "weapon",
       "description": "A sturdy spear perfect for hunting large game",
-      "attack_bonus": 11,
+      "attack_bonus": 14,
       "price": 70,
       "rarity": "common",
       "requirements": {
@@ -2522,7 +2522,7 @@
    "Warrior Spear": {
       "type": "weapon",
       "description": "A battle-tested spear favored by warriors and hunters alike",
-      "attack_bonus": 58,
+      "attack_bonus": 72,
       "price": 95,
       "rarity": "uncommon",
       "requirements": {
@@ -2540,7 +2540,7 @@
    "Tri-point Spear": {
       "type": "weapon",
       "description": "A specialized spear with three prongs for maximum piercing power",
-      "attack_bonus": 102,
+      "attack_bonus": 128,
       "price": 130,
       "rarity": "rare",
       "requirements": {
@@ -2558,7 +2558,7 @@
    "Dragon Spear": {
       "type": "weapon",
       "description": "A legendary spear forged with dragon bone and steel",
-      "attack_bonus": 182,
+      "attack_bonus": 228,
       "price": 250,
       "rarity": "legendary",
       "requirements": {
@@ -2576,7 +2576,7 @@
    "Hunting Knife": {
       "type": "weapon",
       "description": "A sharp knife essential for any hunter's toolkit",
-      "attack_bonus": 6,
+      "attack_bonus": 8,
       "speed_bonus": 3,
       "price": 40,
       "rarity": "common",
@@ -2601,7 +2601,7 @@
    "Steel Hunting Knife": {
       "type": "weapon",
       "description": "A finely crafted steel knife with superior edge retention",
-      "attack_bonus": 52,
+      "attack_bonus": 65,
       "speed_bonus": 4,
       "price": 65,
       "rarity": "uncommon",
@@ -2626,7 +2626,7 @@
    "Assassin Hunting Knife": {
       "type": "weapon",
       "description": "A razor-sharp knife favored by assassins and master hunters",
-      "attack_bonus": 92,
+      "attack_bonus": 115,
       "speed_bonus": 6,
       "critical_chance": 0.08,
       "price": 95,
@@ -2652,7 +2652,7 @@
    "Master Hunter's Knife": {
       "type": "weapon",
       "description": "The ultimate hunting knife, passed down through generations of masters",
-      "attack_bonus": 178,
+      "attack_bonus": 222,
       "speed_bonus": 8,
       "critical_chance": 0.12,
       "price": 180,
@@ -2773,7 +2773,7 @@
    "Hydra Fang": {
       "type": "weapon",
       "description": "A fang extracted from the Swamp Hydra, dripping with venom",
-      "attack_bonus": 92,
+      "attack_bonus": 115,
       "poison_damage": 4,
       "price": 180,
       "rarity": "rare",
@@ -2872,7 +2872,7 @@
    "Skull Staff": {
       "type": "weapon",
       "description": "A staff topped with a skull, channeling necromantic power",
-      "attack_bonus": 95,
+      "attack_bonus": 119,
       "magic_weapon": true,
       "mp_bonus": 35,
       "price": 200,
@@ -2955,7 +2955,7 @@
    "Thunder Hammer": {
       "type": "weapon",
       "description": "A massive hammer forged from storm metal, crackling with lightning",
-      "attack_bonus": 188,
+      "attack_bonus": 235,
       "lightning_damage": 15,
       "stun_chance": 0.15,
       "price": 280,
@@ -3080,7 +3080,7 @@
    "Necrotic Blade": {
       "type": "weapon",
       "description": "A blade infused with death magic that drains life",
-      "attack_bonus": 176,
+      "attack_bonus": 220,
       "life_drain": 8,
       "price": 300,
       "rarity": "legendary",
@@ -3121,7 +3121,7 @@
    "Soul Reaver": {
       "type": "weapon",
       "description": "A blade that consumes the souls of those it strikes",
-      "attack_bonus": 182,
+      "attack_bonus": 228,
       "soul_damage": 10,
       "mp_bonus": 20,
       "price": 380,
@@ -3188,7 +3188,7 @@
    "Infernal Blade": {
       "type": "weapon",
       "description": "A sword forged in the eternal flames of hell",
-      "attack_bonus": 188,
+      "attack_bonus": 235,
       "fire_damage": 20,
       "price": 420,
       "rarity": "legendary",
@@ -3296,7 +3296,7 @@
    "Stormbreaker": {
       "type": "weapon",
       "description": "A legendary weapon said to be able to shatter storms themselves",
-      "attack_bonus": 190,
+      "attack_bonus": 238,
       "lightning_damage": 25,
       "wind_damage": 15,
       "price": 550,
@@ -3393,7 +3393,7 @@
    "Obsidian Waraxe": {
       "type": "weapon",
       "description": "An axe made of volcanic glass, sharper than steel",
-      "attack_bonus": 102,
+      "attack_bonus": 128,
       "fire_damage": 8,
       "price": 190,
       "rarity": "rare",
@@ -3419,7 +3419,7 @@
    "Sundered Earth Hammer": {
       "type": "weapon",
       "description": "A hammer that cracks the ground with each strike",
-      "attack_bonus": 110,
+      "attack_bonus": 138,
       "stun_chance": 0.12,
       "price": 220,
       "rarity": "rare",
@@ -3446,7 +3446,7 @@
    "Colossus Slayer": {
       "type": "weapon",
       "description": "A blade designed to fell giant enemies",
-      "attack_bonus": 115,
+      "attack_bonus": 144,
       "giant_killer": 20,
       "price": 260,
       "rarity": "rare",
@@ -3470,7 +3470,7 @@
    "Vahnir's Greatsword": {
       "type": "weapon",
       "description": "The legendary sword of the ancient hero Vahnir, said to have slain gods",
-      "attack_bonus": 200,
+      "attack_bonus": 250,
       "divine_damage": 20,
       "hp_steal": 10,
       "price": 800,
@@ -3499,7 +3499,7 @@
    "Ebonwood Staff": {
       "type": "weapon",
       "description": "A staff carved from dark oak, enhancing shadow magic",
-      "attack_bonus": 90,
+      "attack_bonus": 112,
       "magic_weapon": true,
       "mp_bonus": 35,
       "shadow_magic": 15,
@@ -3526,7 +3526,7 @@
    "Crystal Prism Staff": {
       "type": "weapon",
       "description": "A staff topped with a prism that splits magical energy",
-      "attack_bonus": 105,
+      "attack_bonus": 131,
       "magic_weapon": true,
       "mp_bonus": 40,
       "price": 180,
@@ -3554,7 +3554,7 @@
    "Phoenixfire Wand": {
       "type": "weapon",
       "description": "A wand channeling the power of rebirth and flame",
-      "attack_bonus": 95,
+      "attack_bonus": 119,
       "magic_weapon": true,
       "mp_bonus": 45,
       "fire_magic": 20,
@@ -3583,7 +3583,7 @@
    "Astral Beacon": {
       "type": "weapon",
       "description": "A crystal that channels cosmic energy",
-      "attack_bonus": 100,
+      "attack_bonus": 125,
       "magic_weapon": true,
       "mp_bonus": 55,
       "cosmic_magic": 25,
@@ -3610,7 +3610,7 @@
    "Howertz's Staff": {
       "type": "weapon",
       "description": "The ancient staff of the archmage Howertz, containing forbidden knowledge",
-      "attack_bonus": 180,
+      "attack_bonus": 225,
       "magic_weapon": true,
       "mp_bonus": 80,
       "arcane_mastery": 30,
@@ -3638,7 +3638,7 @@
    "Toxic Thorn": {
       "type": "weapon",
       "description": "A blade coated with natural toxins",
-      "attack_bonus": 92,
+      "attack_bonus": 115,
       "poison_damage": 5,
       "price": 140,
       "rarity": "rare",
@@ -3664,7 +3664,7 @@
    "Whisperstep Daggers": {
       "type": "weapon",
       "description": "Twin daggers that make no sound when drawn",
-      "attack_bonus": 98,
+      "attack_bonus": 122,
       "speed_bonus": 6,
       "critical_chance": 0.08,
       "price": 170,
@@ -3691,7 +3691,7 @@
    "Midnight Cleaver": {
       "type": "weapon",
       "description": "A curved blade that hides in shadows",
-      "attack_bonus": 105,
+      "attack_bonus": 131,
       "stealth_bonus": 20,
       "price": 200,
       "rarity": "rare",
@@ -3717,7 +3717,7 @@
    "Phantom Strike": {
       "type": "weapon",
       "description": "A blade that phases between dimensions",
-      "attack_bonus": 110,
+      "attack_bonus": 138,
       "dodge_chance": 0.12,
       "price": 240,
       "rarity": "rare",
@@ -3741,7 +3741,7 @@
    "Infiltration Shadow": {
       "type": "weapon",
       "description": "The ultimate assassin blade, said to be forged from pure darkness",
-      "attack_bonus": 185,
+      "attack_bonus": 231,
       "speed_bonus": 10,
       "critical_chance": 0.15,
       "assassination": 25,
@@ -3768,7 +3768,7 @@
    "Thornshot Bow": {
       "type": "weapon",
       "description": "A bow that launches thorn-tipped arrows",
-      "attack_bonus": 92,
+      "attack_bonus": 115,
       "nature_damage": 8,
       "price": 140,
       "rarity": "rare",
@@ -3793,7 +3793,7 @@
    "Ranger's Crossbow": {
       "type": "weapon",
       "description": "A precise crossbow favored by forest rangers",
-      "attack_bonus": 95,
+      "attack_bonus": 119,
       "critical_chance": 0.08,
       "price": 160,
       "rarity": "rare",
@@ -3818,7 +3818,7 @@
    "Venomspitter": {
       "type": "weapon",
       "description": "A specialized crossbow that injects poison",
-      "attack_bonus": 100,
+      "attack_bonus": 125,
       "poison_damage": 6,
       "price": 190,
       "rarity": "rare",
@@ -3844,7 +3844,7 @@
    "Stormcaller": {
       "type": "weapon",
       "description": "A bow that channels lightning with each shot",
-      "attack_bonus": 108,
+      "attack_bonus": 135,
       "lightning_damage": 12,
       "price": 230,
       "rarity": "rare",
@@ -3870,7 +3870,7 @@
    "Phyla's Root Longbow": {
       "type": "weapon",
       "description": "An ancient bow grown from the World Tree's roots, imbued with nature's wrath",
-      "attack_bonus": 182,
+      "attack_bonus": 228,
       "nature_damage": 20,
       "hp_regen": 3,
       "price": 700,
@@ -4401,7 +4401,7 @@
    "Boreas": {
       "type": "weapon",
       "description": "A legendary sword that commands the power of the north wind.",
-      "attack_bonus": 188,
+      "attack_bonus": 235,
       "wind_damage": 10,
       "speed_bonus": 5,
       "price": 350,
@@ -4515,7 +4515,7 @@
    "Staff of Power": {
       "type": "weapon",
       "description": "A legendary staff that channels immense magical energy.",
-      "attack_bonus": 178,
+      "attack_bonus": 222,
       "magic_weapon": true,
       "mp_bonus": 60,
       "price": 300,
@@ -4541,7 +4541,7 @@
    "D\u00e4lokurg's Warhammer": {
       "type": "weapon",
       "description": "A huge warhammer that once belonged to the infamous bandit leader of Br\u00efgadrak Oblast.",
-      "attack_bonus": 192,
+      "attack_bonus": 240,
       "price": 320,
       "rarity": "legendary",
       "requirements": {
@@ -4750,7 +4750,7 @@
    "Ninja's Shuriken": {
       "type": "weapon",
       "description": "A sharp shuriken used by ninjas for quick attacks.",
-      "attack_bonus": 50,
+      "attack_bonus": 62,
       "speed_bonus": 40,
       "price": 100,
       "rarity": "uncommon",
@@ -4775,7 +4775,7 @@
    "Ninjato": {
       "type": "weapon",
       "description": "A lightweight sword favored by ninjas for swift strikes.",
-      "attack_bonus": 110,
+      "attack_bonus": 138,
       "speed_bonus": 90,
       "price": 220,
       "rarity": "rare",
@@ -4813,7 +4813,7 @@
    "Paladin's Sword": {
       "type": "weapon",
       "description": "A holy blade blessed by ancient priests, radiating divine light",
-      "attack_bonus": 85,
+      "attack_bonus": 106,
       "defense_bonus": 5,
       "price": 150,
       "rarity": "rare",
@@ -4882,7 +4882,7 @@
    "Divine Hammer": {
       "type": "weapon",
       "description": "A massive hammer blessed by the gods, dealing holy damage",
-      "attack_bonus": 110,
+      "attack_bonus": 138,
       "defense_bonus": 8,
       "price": 250,
       "rarity": "rare",
@@ -4943,7 +4943,7 @@
    "Druid's Spear": {
       "type": "weapon",
       "description": "A spear of thorned wood infused with nature magic",
-      "attack_bonus": 95,
+      "attack_bonus": 119,
       "defense_bonus": 4,
       "price": 200,
       "rarity": "rare",
@@ -4999,7 +4999,7 @@
    "Priest's Staff": {
       "type": "weapon",
       "description": "A sacred staff topped with a glowing crystal, channeling divine healing",
-      "attack_bonus": 65,
+      "attack_bonus": 81,
       "mp_bonus": 25,
       "price": 160,
       "rarity": "uncommon",
@@ -5050,7 +5050,7 @@
    "Holy Wand": {
       "type": "weapon",
       "description": "An ornate wand that amplifies divine magic",
-      "attack_bonus": 80,
+      "attack_bonus": 100,
       "mp_bonus": 30,
       "price": 210,
       "rarity": "rare",
@@ -5101,7 +5101,7 @@
    "High Priest's Scepter": {
       "type": "weapon",
       "description": "An ornate scepter that radiates holy light.",
-      "attack_bonus": 15,
+      "attack_bonus": 19,
       "magic_weapon": true,
       "mp_bonus": 50,
       "price": 350,
@@ -5153,7 +5153,7 @@
    "Guardian Hammer": {
       "type": "weapon",
       "description": "A heavy hammer for Paladins who prefer blunt force with their divinity.",
-      "attack_bonus": 18,
+      "attack_bonus": 22,
       "defense_bonus": 4,
       "price": 250,
       "rarity": "uncommon",
@@ -5202,7 +5202,7 @@
    "Ancient Oak Staff": {
       "type": "weapon",
       "description": "A staff carved from the heart of an ancient oak tree.",
-      "attack_bonus": 20,
+      "attack_bonus": 25,
       "magic_weapon": true,
       "mp_bonus": 40,
       "price": 400,
@@ -5263,7 +5263,7 @@
    "Goblin King's Dagger": {
       "type": "weapon",
       "description": "A crude but deadly dagger wielded by the Goblin King, made from stolen treasures",
-      "attack_bonus": 85,
+      "attack_bonus": 106,
       "speed_bonus": 5,
       "price": 160,
       "rarity": "rare",
@@ -5306,7 +5306,7 @@
    "Divine Sword": {
       "type": "weapon",
       "description": "A blade blessed by the gods themselves, radiating holy power",
-      "attack_bonus": 185,
+      "attack_bonus": 231,
       "magic_weapon": true,
       "holy_damage": 20,
       "price": 450,
@@ -5540,7 +5540,7 @@
    "Birch Staff": {
       "type": "weapon",
       "description": "A staff carved from ancient Siberian birch. Channels cold forest magic.",
-      "attack_bonus": 12,
+      "attack_bonus": 15,
       "magic_weapon": true,
       "mp_bonus": 10,
       "price": 80,
@@ -5565,7 +5565,7 @@
    "Bone Hatchet": {
       "type": "weapon",
       "description": "A small hatchet with a bone-inlaid handle, quickly thrown or drawn in close quarters",
-      "attack_bonus": 12,
+      "attack_bonus": 15,
       "speed_bonus": 4,
       "price": 65,
       "rarity": "common",
@@ -5590,7 +5590,7 @@
    "Taiga Hunter's Bow": {
       "type": "weapon",
       "description": "A composite bow crafted from layered horn and sinew by Siberian hunters.",
-      "attack_bonus": 18,
+      "attack_bonus": 22,
       "speed_bonus": 4,
       "price": 130,
       "rarity": "uncommon",
@@ -5614,7 +5614,7 @@
    "Frost Blade": {
       "type": "weapon",
       "description": "A blade tempered in permafrost. Its edge holds a piercing cold that numbs on contact.",
-      "attack_bonus": 22,
+      "attack_bonus": 28,
       "speed_bonus": 2,
       "price": 180,
       "rarity": "rare",
@@ -5639,7 +5639,7 @@
    "Shaman's Totem Staff": {
       "type": "weapon",
       "description": "A totem staff carved with taiga spirits. Greatly amplifies elemental spells.",
-      "attack_bonus": 20,
+      "attack_bonus": 25,
       "magic_weapon": true,
       "mp_bonus": 25,
       "price": 200,
@@ -5664,7 +5664,7 @@
    "Siberian War Axe": {
       "type": "weapon",
       "description": "A heavy double-headed axe wielded by the warrior clans of the taiga.",
-      "attack_bonus": 28,
+      "attack_bonus": 35,
       "defense_penalty": 3,
       "price": 220,
       "rarity": "rare",
@@ -5689,7 +5689,7 @@
    "Permafrost Spear": {
       "type": "weapon",
       "description": "A long spear with a tip carved from solid permafrost. Keeps its edge in any cold.",
-      "attack_bonus": 24,
+      "attack_bonus": 30,
       "speed_bonus": 3,
       "price": 240,
       "rarity": "rare",
@@ -5710,7 +5710,7 @@
    "Snowbinable Fang Sword": {
       "type": "weapon",
       "description": "A sword forged from the legendary fang of the Snowbinable. Radiates an aura of deep permafrost.",
-      "attack_bonus": 45,
+      "attack_bonus": 56,
       "speed_bonus": 5,
       "hp_bonus": 20,
       "price": 850,
@@ -5852,7 +5852,7 @@
    "Ottoman Scimitar": {
       "type": "weapon",
       "description": "A elegantly curved blade forged in the Ottoman tradition. Light and brutally sharp.",
-      "attack_bonus": 16,
+      "attack_bonus": 20,
       "speed_bonus": 3,
       "price": 120,
       "rarity": "common",
@@ -5875,7 +5875,7 @@
    "Yatagan": {
       "type": "weapon",
       "description": "A short Ottoman sword with an inward-curved blade, favoured by the Janissaries.",
-      "attack_bonus": 14,
+      "attack_bonus": 18,
       "speed_bonus": 5,
       "price": 105,
       "rarity": "common",
@@ -5898,7 +5898,7 @@
    "Ottoman Bow": {
       "type": "weapon",
       "description": "A powerful recurve bow used by Ottoman cavalry and desert raiders alike.",
-      "attack_bonus": 19,
+      "attack_bonus": 24,
       "speed_bonus": 3,
       "price": 140,
       "rarity": "uncommon",
@@ -5922,7 +5922,7 @@
    "Ottoman Lance": {
       "type": "weapon",
       "description": "A long cavalry lance used in Ottoman charges. Devastating on the first strike.",
-      "attack_bonus": 26,
+      "attack_bonus": 32,
       "speed_bonus": 1,
       "price": 190,
       "rarity": "uncommon",
@@ -5941,7 +5941,7 @@
    "Corsair Cutlass": {
       "type": "weapon",
       "description": "A curved sabre used by Ottoman corsairs. The blade is notched from countless sea battles.",
-      "attack_bonus": 18,
+      "attack_bonus": 22,
       "speed_bonus": 4,
       "price": 130,
       "rarity": "uncommon",
@@ -5964,7 +5964,7 @@
    "Desert Serpent Blade": {
       "type": "weapon",
       "description": "A sinuous blade shaped like a coiled serpent. Its tip is coated in desert venom.",
-      "attack_bonus": 23,
+      "attack_bonus": 29,
       "speed_bonus": 3,
       "price": 200,
       "rarity": "rare",
@@ -5989,7 +5989,7 @@
    "Vizier Staff": {
       "type": "weapon",
       "description": "The ornate staff of an Ottoman court mage, set with sapphires and gilded in gold leaf.",
-      "attack_bonus": 22,
+      "attack_bonus": 28,
       "magic_weapon": true,
       "mp_bonus": 30,
       "price": 250,
@@ -6014,7 +6014,7 @@
    "Janissary Carbine": {
       "type": "weapon",
       "description": "An early firearm used by elite Janissary troops. Loud, dangerous, and slow to reload.",
-      "attack_bonus": 35,
+      "attack_bonus": 44,
       "speed_penalty": 3,
       "price": 320,
       "rarity": "rare",
@@ -6037,7 +6037,7 @@
    "Sultan's Blade": {
       "type": "weapon",
       "description": "The ceremonial sword of the Sultan. Its golden hilt is encrusted with rubies and its edge never dulls.",
-      "attack_bonus": 42,
+      "attack_bonus": 52,
       "speed_bonus": 4,
       "mp_bonus": 15,
       "price": 750,
@@ -6061,7 +6061,7 @@
    "Blade of Yildirim": {
       "type": "weapon",
       "description": "Sultan Yildirim's personal war sword, said to have tasted a thousand victories. Radiates commanding energy.",
-      "attack_bonus": 55,
+      "attack_bonus": 69,
       "speed_bonus": 6,
       "hp_bonus": 30,
       "price": 1200,
@@ -6445,7 +6445,7 @@
    "Talisman of Andy": {
       "type": "weapon",
       "description": "A sacred talisman forged in the heart of the Eternal Flame, blessed by ancient spirits. Wielded only by those chosen by destiny itself. Gifted freely on the day of its creator\u2019s birth.",
-      "attack_bonus": 99,
+      "attack_bonus": 124,
       "magic_weapon": true,
       "mp_bonus": 50,
       "speed_bonus": 10,
@@ -6629,7 +6629,7 @@
    "Dao Blade": {
       "type": "weapon",
       "description": "A gracefully curved eastern sword with a single cutting edge, fast and precise",
-      "attack_bonus": 18,
+      "attack_bonus": 22,
       "speed_bonus": 3,
       "price": 120,
       "rarity": "uncommon",
@@ -6652,7 +6652,7 @@
    "Jade Spear": {
       "type": "weapon",
       "description": "A long thrusting spear tipped with hardened jade, its shaft wrapped in silk cord",
-      "attack_bonus": 22,
+      "attack_bonus": 28,
       "defense_bonus": 3,
       "price": 160,
       "rarity": "rare",
@@ -6671,7 +6671,7 @@
    "Bamboo Staff": {
       "type": "weapon",
       "description": "A seasoned bamboo staff reinforced with iron bands \u2014 light, fast, and deceptively powerful",
-      "attack_bonus": 14,
+      "attack_bonus": 18,
       "speed_bonus": 5,
       "mp_bonus": 10,
       "price": 85,
@@ -6696,7 +6696,7 @@
    "Serpent Fang Dagger": {
       "type": "weapon",
       "description": "A curved dagger shaped like a serpent's fang, favoured by Yixuan river-clan assassins",
-      "attack_bonus": 16,
+      "attack_bonus": 20,
       "speed_bonus": 6,
       "price": 140,
       "rarity": "uncommon",
@@ -6723,7 +6723,7 @@
    "Silk-Wrapped Yari": {
       "type": "weapon",
       "description": "An elegant eastern polearm with a cross-guard, its grip wrapped in layered silk",
-      "attack_bonus": 28,
+      "attack_bonus": 35,
       "defense_bonus": 2,
       "price": 220,
       "rarity": "rare",
@@ -6746,7 +6746,7 @@
    "Jade Dragon Sword": {
       "type": "weapon",
       "description": "A masterwork blade from the forges of River's Crown, with a jade-inlaid dragon hilt. Legendary in the east.",
-      "attack_bonus": 65,
+      "attack_bonus": 81,
       "speed_bonus": 8,
       "mp_bonus": 25,
       "magic_weapon": true,
@@ -6772,7 +6772,7 @@
    "Clan Greataxe": {
       "type": "weapon",
       "description": "A massive double-headed axe from the northern clans \u2014 brutal, heavy, and extraordinarily effective",
-      "attack_bonus": 30,
+      "attack_bonus": 38,
       "speed_bonus": -2,
       "price": 180,
       "rarity": "uncommon",
@@ -6797,7 +6797,7 @@
    "Warbrand": {
       "type": "weapon",
       "description": "A long, heavy two-handed sword used by Varak clan champions \u2014 massive reach, devastating power",
-      "attack_bonus": 38,
+      "attack_bonus": 48,
       "speed_bonus": -1,
       "price": 250,
       "rarity": "rare",
@@ -6820,7 +6820,7 @@
    "Skull-Crusher Maul": {
       "type": "weapon",
       "description": "An iron-shod wooden war-maul. Not elegant. Very effective.",
-      "attack_bonus": 35,
+      "attack_bonus": 44,
       "speed_bonus": -3,
       "price": 200,
       "rarity": "rare",
@@ -6848,7 +6848,7 @@
    "Iron Horde Axe": {
       "type": "weapon",
       "description": "A ceremonial war-axe of the Iron Horde confederation, marked with clan-binding runes",
-      "attack_bonus": 55,
+      "attack_bonus": 69,
       "defense_bonus": 5,
       "fear_factor": 0.08,
       "price": 600,
@@ -6874,7 +6874,7 @@
    "Bear-Claw Gauntlet": {
       "type": "weapon",
       "description": "Iron gauntlets ending in sharpened bear-claw blades, worn by the Varak Bear Warrior order",
-      "attack_bonus": 20,
+      "attack_bonus": 25,
       "defense_bonus": 8,
       "speed_bonus": 2,
       "price": 320,
@@ -7083,7 +7083,7 @@
    "Kalovar Sabre": {
       "type": "weapon",
       "description": "A curved cavalry sabre favoured by Kalovar mounted soldiers \u2014 fast, single-edged, and lethal at range",
-      "attack_bonus": 20,
+      "attack_bonus": 25,
       "speed_bonus": 4,
       "price": 140,
       "rarity": "uncommon",
@@ -7106,7 +7106,7 @@
    "Corsair's Cutlass": {
       "type": "weapon",
       "description": "A heavy-bladed seafarer's sword, nicked from years of use but still razor sharp where it counts",
-      "attack_bonus": 22,
+      "attack_bonus": 28,
       "speed_bonus": 2,
       "price": 120,
       "rarity": "uncommon",
@@ -7129,7 +7129,7 @@
    "Kalovar War Lance": {
       "type": "weapon",
       "description": "A long cavalry lance used by Kalovar heavy horse \u2014 devastating on the charge, unwieldy on foot",
-      "attack_bonus": 35,
+      "attack_bonus": 44,
       "defense_bonus": 3,
       "price": 280,
       "rarity": "rare",
@@ -7148,7 +7148,7 @@
    "Steppe Recurve Bow": {
       "type": "weapon",
       "description": "A short but powerful recurve bow made from layered bone and sinew \u2014 the Varak steppe archer's weapon of choice",
-      "attack_bonus": 18,
+      "attack_bonus": 22,
       "speed_bonus": 5,
       "price": 160,
       "rarity": "uncommon",
@@ -7172,7 +7172,7 @@
    "Bear Warrior Axe": {
       "type": "weapon",
       "description": "A specially weighted axe used by initiates of the Varak Bear Warrior order, bearing the First Mother's mark",
-      "attack_bonus": 28,
+      "attack_bonus": 35,
       "defense_bonus": 4,
       "price": 240,
       "rarity": "rare",
@@ -7197,7 +7197,7 @@
    "Yixuan River Blade": {
       "type": "weapon",
       "description": "A thin, flexible sword forged in the workshops of River's Crown from Yixuan river-stone and folded steel",
-      "attack_bonus": 25,
+      "attack_bonus": 31,
       "speed_bonus": 5,
       "mp_bonus": 15,
       "price": 300,
@@ -7221,7 +7221,7 @@
    "Jade Court Rapier": {
       "type": "weapon",
       "description": "A slim and elegant thrusting sword used by Jade Court Assassins. Almost too beautiful to be so deadly.",
-      "attack_bonus": 32,
+      "attack_bonus": 40,
       "speed_bonus": 8,
       "price": 400,
       "rarity": "rare",
@@ -7244,7 +7244,7 @@
    "Constanplea Ghost Blade": {
       "type": "weapon",
       "description": "An ancient sword excavated from the Constanplea ruins, still bearing a faint blue light. The dead recognise it.",
-      "attack_bonus": 40,
+      "attack_bonus": 50,
       "defense_bonus": 6,
       "magic_weapon": true,
       "mp_bonus": 20,
@@ -7270,7 +7270,7 @@
    "Kalovar Grand Vizier's Staff": {
       "type": "weapon",
       "description": "The ceremonial war-staff of a Kalovar Grand Vizier, crackling with court magic and political authority",
-      "attack_bonus": 55,
+      "attack_bonus": 69,
       "magic_weapon": true,
       "mp_bonus": 45,
       "speed_bonus": 3,
