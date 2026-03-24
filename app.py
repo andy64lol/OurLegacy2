@@ -631,6 +631,10 @@ def get_player() -> dict[str, Any] | None:
 
 
 def save_player(player: dict[str, Any]) -> None:
+    # Keep visited_areas in sync inside the player dict so it persists with the character
+    player["visited_areas"] = list(set(
+        player.get("visited_areas", []) + session.get("visited_areas", [])
+    ))
     session["player"] = player
     session.modified = True
 
@@ -673,7 +677,9 @@ def _apply_game_state(data: dict[str, Any]) -> None:
     session["player"] = player
     session["current_area"] = data.get("current_area", "starting_village")
     session["completed_missions"] = data.get("completed_missions", [])
-    session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
+    _va_top = data.get("visited_areas", [])
+    _va_player = (data.get("player") or {}).get("visited_areas", [])
+    session["visited_areas"] = list(set(_va_top + _va_player)) or [session["current_area"]]
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
     session["messages"] = data.get("messages", [])
@@ -2133,17 +2139,20 @@ def game():
     area = GAME_DATA["areas"].get(area_key, {})
     area_name = area.get("name", area_key.replace("_", " ").title())
 
+    visited_areas = session.get("visited_areas", [area_key])
     connections = []
     for conn_key in area.get("connections", []):
         conn_area = GAME_DATA["areas"].get(conn_key, {})
         difficulty = conn_area.get("difficulty", 0)
+        is_visited = conn_key in visited_areas
         connections.append(
             {
                 "key": conn_key,
-                "name": conn_area.get("name", conn_key.replace("_", " ").title()),
-                "has_danger": bool(conn_area.get("possible_enemies")),
-                "visited": conn_key in session.get("visited_areas", []),
-                "difficulty": difficulty,
+                # FOW: reveal name and details only for visited areas
+                "name": conn_area.get("name", conn_key.replace("_", " ").title()) if is_visited else "???",
+                "has_danger": bool(conn_area.get("possible_enemies")) if is_visited else None,
+                "visited": is_visited,
+                "difficulty": difficulty if is_visited else -1,
             }
         )
 
@@ -4876,7 +4885,9 @@ def api_load():
     session["player"] = player
     session["current_area"] = data.get("current_area", "starting_village")
     session["completed_missions"] = data.get("completed_missions", [])
-    session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
+    _va_top = data.get("visited_areas", [])
+    _va_player = (data.get("player") or {}).get("visited_areas", [])
+    session["visited_areas"] = list(set(_va_top + _va_player)) or [session["current_area"]]
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
     session["messages"] = data.get("messages", [])
@@ -5480,7 +5491,9 @@ def api_cloud_load():
     session["player"] = player
     session["current_area"] = data.get("current_area", "starting_village")
     session["completed_missions"] = data.get("completed_missions", [])
-    session["visited_areas"] = data.get("visited_areas", [session["current_area"]])
+    _va_top = data.get("visited_areas", [])
+    _va_player = (data.get("player") or {}).get("visited_areas", [])
+    session["visited_areas"] = list(set(_va_top + _va_player)) or [session["current_area"]]
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
     session["messages"] = data.get("messages", [])

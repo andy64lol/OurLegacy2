@@ -934,28 +934,38 @@ const raceData  = {{ data.races  | tojson }};
                     <p class="panel-note">Destinations reachable from {{ area_name }}.</p>
                     <div class="connection-list">
                         {% for conn in connections %}
-                        <div class="connection-card {% if conn.visited %}visited{% endif %}">
+                        <div class="connection-card {% if conn.visited %}visited{% else %}fow-unknown{% endif %}">
                             <div class="conn-info">
                                 <div class="conn-name">
-                                    {{ conn.name }}
-                                    {% if conn.visited %}<span class="visited-badge">Visited</span>{% endif %}
+                                    {% if conn.visited %}
+                                        {{ conn.name }}
+                                        <span class="visited-badge">Visited</span>
+                                    {% else %}
+                                        <span style="color:var(--text-dim);font-style:italic;letter-spacing:0.08em;">??? &mdash; Unexplored</span>
+                                    {% endif %}
                                 </div>
                                 <div style="display:flex;gap:10px;align-items:center;margin-top:3px;">
-                                    <div class="conn-danger {% if conn.has_danger %}danger{% else %}safe{% endif %}">
-                                        {% if conn.has_danger %}Dangerous{% else %}Peaceful{% endif %}
-                                    </div>
-                                    {% if conn.difficulty > 0 %}
-                                    <div style="font-size:12px;color:var(--text-dim);">
-                                        Difficulty: <span style="color:{% if conn.difficulty <= 2 %}var(--green-bright){% elif conn.difficulty <= 3 %}var(--gold){% else %}var(--red){% endif %}">
-                                            {% for i in range(conn.difficulty) %}<img class="diff-glyph" src="/game_assets/glyphs/fight.png" alt="*">{% endfor %}{% for i in range(5 - conn.difficulty) %}<span class="diff-empty">-</span>{% endfor %}
-                                        </span>
-                                    </div>
+                                    {% if conn.visited %}
+                                        <div class="conn-danger {% if conn.has_danger %}danger{% else %}safe{% endif %}">
+                                            {% if conn.has_danger %}Dangerous{% else %}Peaceful{% endif %}
+                                        </div>
+                                        {% if conn.difficulty > 0 %}
+                                        <div style="font-size:12px;color:var(--text-dim);">
+                                            Difficulty: <span style="color:{% if conn.difficulty <= 2 %}var(--green-bright){% elif conn.difficulty <= 3 %}var(--gold){% else %}var(--red){% endif %}">
+                                                {% for i in range(conn.difficulty) %}<img class="diff-glyph" src="/game_assets/glyphs/fight.png" alt="*">{% endfor %}{% for i in range(5 - conn.difficulty) %}<span class="diff-empty">-</span>{% endfor %}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div style="font-size:12px;color:var(--text-dim);font-style:italic;">Venture forth to reveal this area</div>
                                     {% endif %}
                                 </div>
                             </div>
                             <form method="post" action="/action/travel">
                                 <input type="hidden" name="dest" value="{{ conn.key }}">
-                                <button type="submit" class="btn btn-secondary btn-small">Travel</button>
+                                <button type="submit" class="btn {% if conn.visited %}btn-secondary{% else %}btn-primary{% endif %} btn-small">
+                                    {% if conn.visited %}Travel{% else %}Explore{% endif %}
+                                </button>
                             </form>
                         </div>
                         {% endfor %}
