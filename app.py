@@ -2065,6 +2065,7 @@ def create():
             "You stand at the gates of the Starting Village. Adventure awaits.",
             "var(--text-light)",
         )
+        _set_activity(player, f"beginning their legend as {cls}")
         _autosave()
         return redirect(url_for("game"))
 
@@ -2090,6 +2091,7 @@ def game():
     events_awarded = check_and_award_events(player)
     save_player(player)
     if events_awarded:
+        _set_activity(player, "claiming an event reward")
         _autosave()
 
     # ── Battle state: show battle view inline ──────────────.g�───────────────
@@ -3464,6 +3466,8 @@ def action_buy():
         else:
             add_message(f"You purchase {item_name} for {price} gold.", "var(--gold)")
 
+    area_name = GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "a shop")
+    _set_activity(player, f"shopping in {area_name}")
     save_player(player)
     _autosave()
     return redirect(url_for("game"))
@@ -3489,6 +3493,7 @@ def action_sell():
     else:
         add_message("You do not have that item.", "var(--red)")
 
+    _set_activity(player, "selling gear at the shop")
     save_player(player)
     _autosave()
     return redirect(url_for("game") + "?tab=inventory")
@@ -3764,6 +3769,7 @@ def action_use_item():
     else:
         add_message(f"You cannot use {item_name} outside of battle.", "var(--text-dim)")
 
+    _set_activity(player, "using a consumable item")
     save_player(player)
     _autosave()
     return redirect(url_for("game"))
@@ -3806,6 +3812,7 @@ def action_quick_heal():
     player["hp"] = min(player["max_hp"], player["hp"] + heal)
     player["inventory"].remove(best)
     add_message(f"Quick Heal: used {best} and recovered {heal} HP.", "var(--green-bright)")
+    _set_activity(player, "healing up between battles")
     save_player(player)
     _autosave()
     return redirect(url_for("game"))
@@ -3976,6 +3983,7 @@ def action_complete_mission():
     quest_progress.pop(mission_id, None)
     session["quest_progress"] = quest_progress
 
+    _set_activity(player, f"completing quest: {mission.get('name', mission_id)}")
     save_player(player)
     _autosave()
     return redirect(url_for("game"))
@@ -4023,6 +4031,7 @@ def action_claim_challenge():
             "var(--gold)",
         )
 
+    _set_activity(player, f"claiming challenge: {ch_def.get('name', ch_id)}")
     save_player(player)
     _autosave()
     return redirect(url_for("game") + "#challenges")
@@ -4058,6 +4067,7 @@ def land_buy_housing():
     owned.append(h_key)
     player["housing_owned"] = owned
     add_message(f"You purchase {h_data.get('name', h_key)} for {price} gold.", "var(--gold)")
+    _set_activity(player, f"building {h_data.get('name', h_key)} on their land")
     save_player(player)
     _autosave()
     return redirect(url_for("game") + "?tab=land")
