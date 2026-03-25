@@ -257,10 +257,22 @@
             document.body.appendChild(overlay);
         }
 
+        function _finalSaveThenKick() {
+            if (_sessionKicked) return;
+            _sessionKicked = true; // block any further checks while save is in flight
+            // Attempt one last save before showing the kicked modal.
+            fetch('/api/online/autosave', { method: 'POST' })
+                .catch(function() {})
+                .finally(function() {
+                    _sessionKicked = false; // let _showKickedModal run its own guard
+                    _showKickedModal();
+                });
+        }
+
         function checkSession() {
             if (!CURRENT_USER || _sessionKicked) return;
             fetch('/api/session/check').then(function(res) { return res.json(); }).then(function(data) {
-                if (data && data.valid === false) { _showKickedModal(); }
+                if (data && data.valid === false) { _finalSaveThenKick(); }
             }).catch(function() {});
         }
 
@@ -270,6 +282,7 @@
                 return res.json();
             }).then(function(data) {
                 if (data && data.session_expired) {
+                    // Server already did the grace save (or session is fully gone). Show kicked modal.
                     _showKickedModal();
                     return;
                 }

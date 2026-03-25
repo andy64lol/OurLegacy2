@@ -139,6 +139,8 @@ _chat_cooldowns: dict = {}  # {username: last_sent_timestamp}
 # Single-session enforcement: maps user_id -> session_token
 # When a user logs in from a new location, the token changes and the old session is invalidated.
 _active_sessions: dict = {}
+# Grace slot: maps user_id -> old_token so the kicked session can do one final save.
+_dying_sessions: dict = {}
 CHAT_COOLDOWN_SECS = 10
 CHAT_MAX_LEN = 200
 
@@ -1042,6 +1044,17 @@ def _is_session_valid() -> bool:
     if not token:
         return False
     return _active_sessions.get(user_id) == token
+
+
+def _is_dying_session() -> bool:
+    """Return True if this session has been superseded but is still in the grace slot."""
+    user_id = session.get("online_user_id")
+    if not user_id:
+        return False
+    token = session.get("session_token")
+    if not token:
+        return False
+    return _dying_sessions.get(user_id) == token
 
 
 def _autosave() -> None:
@@ -6139,6 +6152,10 @@ def api_online_login():
     if result["ok"]:
         user_id = result["user_id"]
         session_token = str(uuid.uuid4())
+        # Move the old token to the grace slot so the kicked session can save one last time.
+        old_token = _active_sessions.get(user_id)
+        if old_token:
+            _dying_sessions[user_id] = old_token
         _active_sessions[user_id] = session_token
         session["online_username"] = username.lower()
         session["online_user_id"] = user_id
@@ -6193,10 +6210,15 @@ def api_session_check():
 @app.route("/api/online/autosave", methods=["POST"])
 def api_online_autosave():
     """Frontend-triggered autosave — validates session then saves character state."""
-    if not _is_session_valid():
-        return jsonify({"ok": False, "session_expired": True}), 401
-    _autosave()
-    return jsonify({"ok": True})
+    if _is_session_valid():
+        _autosave()
+        return jsonify({"ok": True})
+    if _is_dying_session():
+        # Grace save: kicked session gets one last save, then the grace slot is cleared.
+        _autosave()
+        _dying_sessions.pop(session.get("online_user_id"), None)
+        return jsonify({"ok": True, "session_expired": True})
+    return jsonify({"ok": False, "session_expired": True}), 401
 
 
 @app.route("/api/online/cloud_save", methods=["POST"])
