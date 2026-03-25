@@ -135,6 +135,10 @@ socketio = SocketIO(
 # Online users: {sid: username}  (in-memory, single worker)
 _chat_online: dict = {}
 _chat_cooldowns: dict = {}  # {username: last_sent_timestamp}
+
+# Single-session enforcement: maps user_id -> session_token
+# When a user logs in from a new location, the token changes and the old session is invalidated.
+_active_sessions: dict = {}
 CHAT_COOLDOWN_SECS = 10
 CHAT_MAX_LEN = 200
 
@@ -1024,6 +1028,20 @@ def _diary_append(text: str, color: str = "var(--text-light)") -> None:
 
 
 _AUTOSAVE_DIARY_INTERVAL = 300  # seconds between autosave diary entries
+
+
+def _is_session_valid() -> bool:
+    """
+    Return True if the current Flask session's token matches the active session for this user.
+    Returns True (passes) when the user is not logged in online (offline play is fine).
+    """
+    user_id = session.get("online_user_id")
+    if not user_id:
+        return True
+    token = session.get("session_token")
+    if not token:
+        return False
+    return _active_sessions.get(user_id) == token
 
 
 def _autosave() -> None:
@@ -6119,8 +6137,12 @@ def api_online_login():
     password = data.get("password", "")
     result = login_user(username, password)
     if result["ok"]:
+        user_id = result["user_id"]
+        session_token = str(uuid.uuid4())
+        _active_sessions[user_id] = session_token
         session["online_username"] = username.lower()
-        session["online_user_id"] = result["user_id"]
+        session["online_user_id"] = user_id
+        session["session_token"] = session_token
         session.modified = True
         return jsonify(
             {"ok": True, "message": result["message"], "username": username.lower()}
@@ -6130,6 +6152,9 @@ def api_online_login():
 
 @app.route("/api/online/logout", methods=["POST"])
 def api_online_logout():
+    user_id = session.get("online_user_id")
+    if user_id and _active_sessions.get(user_id) == session.get("session_token"):
+        _active_sessions.pop(user_id, None)
     _autosave()
     game_keys = [
         "player",
@@ -6152,8 +6177,26 @@ def api_online_logout():
         session.pop(key, None)
     session.pop("online_username", None)
     session.pop("online_user_id", None)
+    session.pop("session_token", None)
     session.modified = True
     return jsonify({"ok": True, "message": "Logged out."})
+
+
+@app.route("/api/session/check", methods=["GET"])
+def api_session_check():
+    """Check if this browser's session is still the active session for this user."""
+    if not _is_session_valid():
+        return jsonify({"valid": False}), 200
+    return jsonify({"valid": True}), 200
+
+
+@app.route("/api/online/autosave", methods=["POST"])
+def api_online_autosave():
+    """Frontend-triggered autosave — validates session then saves character state."""
+    if not _is_session_valid():
+        return jsonify({"ok": False, "session_expired": True}), 401
+    _autosave()
+    return jsonify({"ok": True})
 
 
 @app.route("/api/online/cloud_save", methods=["POST"])

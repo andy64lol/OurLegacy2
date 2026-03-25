@@ -236,15 +236,44 @@
         var socket = null;
 
         // ── Auto-save state ──────────────────────────────────────────────────
-        var AUTO_SAVE_INTERVAL_MS = 120000;
+        var AUTO_SAVE_INTERVAL_MS = 300000; // 5 minutes
+        var SESSION_CHECK_INTERVAL_MS = 60000; // 1 minute
         var _autoSaveTimer = null;
+        var _sessionCheckTimer = null;
+        var _sessionKicked = false;
+
+        function _showKickedModal() {
+            if (_sessionKicked) return;
+            _sessionKicked = true;
+            if (_autoSaveTimer) clearInterval(_autoSaveTimer);
+            if (_sessionCheckTimer) clearInterval(_sessionCheckTimer);
+            var overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;';
+            overlay.innerHTML = '<div style="background:#0d1f0d;border:1px solid rgba(180,130,255,0.4);border-radius:12px;padding:32px 40px;max-width:380px;text-align:center;color:#e8e0d0;">'
+                + '<div style="font-size:22px;color:#c084fc;margin-bottom:12px;">Session Ended</div>'
+                + '<div style="font-size:14px;color:#a0926a;margin-bottom:20px;">Your account was logged in from another location. Your progress has been saved.</div>'
+                + '<button onclick="window.location.reload()" style="background:linear-gradient(135deg,#6a0dad,#c084fc);border:none;color:#fff;padding:10px 28px;border-radius:8px;cursor:pointer;font-size:14px;">Return to Login</button>'
+                + '</div>';
+            document.body.appendChild(overlay);
+        }
+
+        function checkSession() {
+            if (!CURRENT_USER || _sessionKicked) return;
+            fetch('/api/session/check').then(function(res) { return res.json(); }).then(function(data) {
+                if (data && data.valid === false) { _showKickedModal(); }
+            }).catch(function() {});
+        }
 
         function autoSaveCloud() {
-            if (!CURRENT_USER) return;
-            fetch('/api/online/cloud_save', { method: 'POST' }).then(function(res) {
+            if (!CURRENT_USER || _sessionKicked) return;
+            fetch('/api/online/autosave', { method: 'POST' }).then(function(res) {
                 return res.json();
             }).then(function(data) {
-                if (data.ok) {
+                if (data && data.session_expired) {
+                    _showKickedModal();
+                    return;
+                }
+                if (data && data.ok) {
                     var el = document.getElementById('autosave-indicator');
                     if (!el) return;
                     el.textContent = '✦ Auto-saved';
@@ -256,7 +285,9 @@
 
         function startAutoSave() {
             if (_autoSaveTimer) clearInterval(_autoSaveTimer);
+            if (_sessionCheckTimer) clearInterval(_sessionCheckTimer);
             _autoSaveTimer = setInterval(autoSaveCloud, AUTO_SAVE_INTERVAL_MS);
+            _sessionCheckTimer = setInterval(checkSession, SESSION_CHECK_INTERVAL_MS);
         }
 
         // ── Trade state ───────────────────────────────────────────────────────
