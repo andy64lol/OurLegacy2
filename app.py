@@ -187,6 +187,52 @@ def _update_area_presence(username: str, area: str, text: str) -> None:
         _area_presence[username] = {"area": area, "text": text, "t": _time2.time()}
 
 
+# ─── Narrative helpers for area presence ─────────────────────────────────────
+import re as _re
+
+_NARRATIVE_PATTERNS = [
+    (r"^battling (.+?) \[Boss\]$",         lambda m: f"facing the fearsome {m.group(1)}"),
+    (r"^fighting a (.+)$",                  lambda m: f"locked in combat with a {m.group(1)}"),
+    (r"^wandering (.+)$",                   lambda m: f"wandering the roads of {m.group(1)}"),
+    (r"^resting in (.+)$",                  lambda m: f"taking shelter in {m.group(1)}"),
+    (r"^shopping in (.+)$",                 lambda m: f"browsing the market in {m.group(1)}"),
+    (r"^selling gear",                      lambda m: "selling hard-won gear at the market"),
+    (r"^using a consumable",                lambda m: "tending to their wounds"),
+    (r"^healing up",                        lambda m: "recovering strength between battles"),
+    (r"^completing quest: (.+)$",           lambda m: f'pursuing the quest "{m.group(1)}"'),
+    (r"^claiming challenge: (.+)$",         lambda m: f'claiming their reward for "{m.group(1)}"'),
+    (r"^delving (.+)$",                     lambda m: f"delving deep into {m.group(1)}"),
+    (r"^building (.+) on their land$",      lambda m: f"hard at work building {m.group(1)}"),
+    (r"^beginning their legend as (.+)$",   lambda m: f"taking their first steps as a {m.group(1)}"),
+    (r"^claiming an event reward$",         lambda m: "claiming a rare event reward"),
+]
+
+
+def _narrativize(status: str) -> str:
+    """Convert a raw activity_status into an evocative present-tense description."""
+    for pattern, fmt in _NARRATIVE_PATTERNS:
+        m = _re.match(pattern, status.strip(), _re.IGNORECASE)
+        if m:
+            return fmt(m)
+    return status.strip()
+
+
+def _narrative_when(ago_secs: int) -> str:
+    """Return a prose time-ago string."""
+    if ago_secs < 30:
+        return "moments ago"
+    elif ago_secs < 90:
+        return "just a moment past"
+    elif ago_secs < 150:
+        return "a minute past"
+    elif ago_secs < 3600:
+        return f"{ago_secs // 60} minutes past"
+    elif ago_secs < 7200:
+        return "an hour past"
+    else:
+        return f"{ago_secs // 3600} hours past"
+
+
 def _clear_area_presence(username: str) -> None:
     """Remove a player from the presence tracker (called on disconnect / logout)."""
     _area_presence.pop(username, None)
@@ -3548,7 +3594,7 @@ def action_travel():
         ]
         random.shuffle(here)
         for uname, status in here[:3]:
-            add_message(f"You spot {uname} here — {status}.", "var(--mana-bright)")
+            add_message(f"You notice {uname} here — {_narrativize(status)}.", "var(--mana-bright)")
 
         session.modified = True
     else:
@@ -6264,13 +6310,11 @@ def api_area_activity():
         if entry["t"] < cutoff:
             continue
         ago = int(now - entry["t"])
-        if ago < 60:
-            when = "just now"
-        elif ago < 3600:
-            when = f"{ago // 60}m ago"
-        else:
-            when = f"{ago // 3600}h ago"
-        results.append({"username": uname, "text": entry["text"], "when": when})
+        results.append({
+            "username": uname,
+            "narrative": _narrativize(entry["text"]),
+            "when": _narrative_when(ago),
+        })
 
     results.sort(key=lambda x: x["when"])
     return jsonify({"ok": True, "area": area, "players": results})

@@ -741,8 +741,11 @@ const raceData  = {{ data.races  | tojson }};
 
             {% if online_username %}
             <div class="panel" id="nearby-panel" style="margin-bottom:14px;display:none;">
-                <div class="panel-title">&#128100; Nearby Adventurers</div>
-                <div class="panel-body" id="nearby-body" style="padding:8px 16px;"></div>
+                <div class="panel-title" style="display:flex;align-items:center;gap:8px;">
+                    <span>&#128065; Sightings</span>
+                    <span style="font-size:11px;font-weight:400;color:var(--text-dim);font-style:italic;">Others have been seen here recently</span>
+                </div>
+                <div class="panel-body" id="nearby-body" style="padding:4px 16px 10px;"></div>
             </div>
             {% endif %}
 
@@ -808,11 +811,15 @@ const raceData  = {{ data.races  | tojson }};
                     }
                     panel.style.display = '';
                     var html = '';
-                    data.players.forEach(function(p) {
-                        html += '<div style="display:flex;align-items:baseline;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
-                            + '<span style="font-weight:600;color:var(--mana-bright);font-size:13px;min-width:80px;">' + _esc(p.username) + '</span>'
-                            + '<span style="font-size:13px;color:var(--text-light);flex:1;">' + _esc(p.text) + '</span>'
-                            + '<span style="font-size:11px;color:var(--text-dim);white-space:nowrap;">' + _esc(p.when) + '</span>'
+                    data.players.forEach(function(p, i) {
+                        var border = i < data.players.length - 1
+                            ? 'border-bottom:1px solid rgba(255,255,255,0.05);'
+                            : '';
+                        html += '<div style="padding:8px 0;' + border + 'line-height:1.55;">'
+                            + '<span style="font-weight:700;color:var(--gold);font-size:13px;">' + _esc(p.username) + '</span>'
+                            + '<span style="color:var(--text-dim);font-size:13px;"> was seen </span>'
+                            + '<span style="color:var(--text-light);font-size:13px;font-style:italic;">' + _esc(p.narrative) + '</span>'
+                            + '<span style="color:var(--text-dim);font-size:11px;"> &mdash; ' + _esc(p.when) + '</span>'
                             + '</div>';
                     });
                     body.innerHTML = html;
