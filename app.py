@@ -154,6 +154,27 @@ def push_world_event(text: str) -> None:
         del _world_events[: len(_world_events) - _WORLD_EVENTS_MAX]
 
 
+# ─── Activity tracker (feeds _world_tick dynamic world events) ────────────────
+import threading as _threading
+
+_activity_counts: dict = {
+    "battles": 0,
+    "boss_kills": 0,
+    "deaths": 0,
+    "quests": 0,
+    "dungeons": 0,
+    "challenges": 0,
+}
+_activity_lock = _threading.Lock()
+
+
+def _record_activity(category: str, amount: int = 1) -> None:
+    """Thread-safe increment of an activity counter consumed by _world_tick."""
+    with _activity_lock:
+        if category in _activity_counts:
+            _activity_counts[category] += amount
+
+
 # ─── In-memory trade state ────────────────────────────────────────────────────
 # trade_id → {id, player_a, player_b, offer_a, offer_b, confirmed_a, confirmed_b,
 #              status, applied_a, applied_b}
@@ -504,12 +525,99 @@ def _expire_stale_trades():
             _active_trades.pop(tid, None)
 
 
+def _tick_world_events() -> None:
+    """Drain activity counters and push thematic world-event messages."""
+    with _activity_lock:
+        counts = dict(_activity_counts)
+        for k in _activity_counts:
+            _activity_counts[k] = 0
+
+    battles    = counts["battles"]
+    boss_kills = counts["boss_kills"]
+    deaths     = counts["deaths"]
+    quests     = counts["quests"]
+    dungeons   = counts["dungeons"]
+    challenges = counts["challenges"]
+
+    if sum(counts.values()) == 0:
+        return  # quiet interval — nothing to announce
+
+    messages: list[str] = []
+
+    # Boss kills — always announce
+    if boss_kills:
+        messages.append(random.choice([
+            "Legends are written this day. A fell power has been vanquished.",
+            "The realm trembles — a great evil has been brought low by bold hands.",
+            "Word spreads of a mighty foe slain. Bards scramble to record the tale.",
+            "Darkness retreats as a terrible beast falls before the brave.",
+        ]))
+
+    # Heavy casualties
+    if deaths >= 3:
+        messages.append(random.choice([
+            "The darkness claims its toll. Many brave souls have fallen this hour.",
+            "The roads run red — adventurers fall to horrors unseen and unforgiving.",
+            "Grim tidings from all corners: the monsters grow relentless.",
+            "Death walks the land. Even the boldest blades are not enough today.",
+        ]))
+    elif deaths >= 1 and not boss_kills:
+        messages.append(random.choice([
+            "A brave adventurer has fallen. The realm mourns.",
+            "Death walks the land today. Stay sharp, wanderer.",
+            "Another soul lost to the wilds. The darkness grows bolder.",
+        ]))
+
+    # Heroic deeds
+    deeds = quests + dungeons + challenges
+    if deeds >= 3:
+        messages.append(random.choice([
+            "A wave of heroism sweeps the realm — quests fulfilled, dungeons breached, challenges met.",
+            "The chronicles grow thick with deeds of valour. This is an hour of heroes.",
+            "Word of great accomplishments fills every tavern. The realm rings with legend.",
+        ]))
+    elif quests:
+        messages.append(random.choice([
+            "Acts of heroism ripple across the realm. The people take heart.",
+            "Word spreads of great deeds — quests fulfilled, wrongs set right.",
+            "The notice boards grow light as bold adventurers answer every call.",
+        ]))
+    elif dungeons:
+        messages.append(random.choice([
+            "Ancient depths have been breached. Secrets long buried see the light.",
+            "Dungeon delvers return triumphant, laden with hard-won spoils.",
+            "The dark places of the world yield to those bold enough to enter.",
+        ]))
+    elif challenges:
+        messages.append(random.choice([
+            "Champions rise to the call — the realm's greatest trials are met.",
+            "The proving grounds ring with victory. Bold adventurers claim their honours.",
+        ]))
+
+    # Pure combat surge (no boss, no deeds)
+    if not messages and battles >= 5:
+        messages.append(random.choice([
+            "Blood is spilled across the realm. Warriors clash with darkness on every road.",
+            "The monsters grow bold — combat echoes from every corner of the land.",
+            "A fearsome tide of beasts assails the realm. Adventurers hold the line.",
+            "Steel rings and spells crack. This day belongs to the fighters.",
+        ]))
+
+    # Push at most 2 messages to avoid flooding
+    for msg in messages[:2]:
+        push_world_event(msg)
+
+
 def _world_tick():
     """Background greenlet: fires every 30 s for housekeeping tasks."""
     while True:
         socketio.sleep(30)
         try:
             _expire_stale_trades()
+        except Exception:
+            pass
+        try:
+            _tick_world_events()
         except Exception:
             pass
 
@@ -4022,6 +4130,7 @@ def action_complete_mission():
     player["gold"] += gold
     leveled = gain_experience(player, exp)
     _group_contribute(exp, gold, f"completed quest: {mission.get('name', mission_id)}")
+    _record_activity("quests")
 
     for item in item_rewards:
         player["inventory"].append(item)
@@ -4082,6 +4191,7 @@ def action_claim_challenge():
     player["gold"] += gold
     leveled = gain_experience(player, exp)
     _group_contribute(exp, gold, f"completed challenge: {ch_def.get('name', ch_id)}")
+    _record_activity("challenges")
     ch_prog[ch_id]["claimed"] = True
 
     add_message(f"Challenge Complete: {ch_def.get('name', ch_id)}!", "var(--gold)")
@@ -4874,6 +4984,7 @@ def _handle_victory(player, enemy, log):
 
     # Update weekly challenges
     update_weekly_challenge(player, "kill_count", 1)
+    _record_activity("boss_kills" if enemy.get("is_boss") else "battles")
     if enemy.get("is_boss"):
         update_weekly_challenge(player, "boss_kill", 1)
         player["total_bosses_defeated"] = player.get("total_bosses_defeated", 0) + 1
@@ -4950,6 +5061,7 @@ def _handle_defeat(player, enemy, log):
 
     player["hp"] = max(1, int(player["max_hp"] * 0.25))
     log.append(f"You awaken later, battered. HP: {player['hp']}")
+    _record_activity("deaths")
     add_message(f"You were defeated by the {enemy['name']}.", "var(--red)")
     add_message("You recover with a fraction of your health.", "var(--text-dim)")
 
@@ -5387,6 +5499,7 @@ def dungeon_complete():
         for msg in result.get("messages", []):
             add_message(msg["text"], msg.get("color", "var(--gold)"))
         _group_contribute(result.get("exp", 0), result.get("gold", 0), f"cleared dungeon: {dungeon.get('name', 'a dungeon')}")
+        _record_activity("dungeons")
         # Mark dungeon as completed in player data
         dungeon_id = dungeon.get("id", "")
         if dungeon_id:
