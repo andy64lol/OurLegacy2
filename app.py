@@ -175,6 +175,23 @@ def _record_activity(category: str, amount: int = 1) -> None:
             _activity_counts[category] += amount
 
 
+# ─── Per-area presence tracker ────────────────────────────────────────────────
+# Maps username → {area, text, t} so the explore tab can show who else is here.
+_area_presence: dict = {}
+
+
+def _update_area_presence(username: str, area: str, text: str) -> None:
+    """Record that *username* is in *area* doing *text* right now."""
+    import time as _time2
+    if username:
+        _area_presence[username] = {"area": area, "text": text, "t": _time2.time()}
+
+
+def _clear_area_presence(username: str) -> None:
+    """Remove a player from the presence tracker (called on disconnect / logout)."""
+    _area_presence.pop(username, None)
+
+
 # ─── In-memory trade state ────────────────────────────────────────────────────
 # trade_id → {id, player_a, player_b, offer_a, offer_b, confirmed_a, confirmed_b,
 #              status, applied_a, applied_b}
@@ -209,6 +226,7 @@ def _on_chat_disconnect():
     username = _chat_online.pop(request.sid, None)
     socketio_emit("online_users", sorted(set(_chat_online.values())), broadcast=True)
     if username:
+        _clear_area_presence(username)
         for tid, trade in list(_active_trades.items()):
             if trade["status"] in ("pending", "active") and username in (trade["player_a"], trade["player_b"]):
                 other = trade["player_b"] if username == trade["player_a"] else trade["player_a"]
@@ -608,6 +626,16 @@ def _tick_world_events() -> None:
         push_world_event(msg)
 
 
+def _prune_area_presence() -> None:
+    """Remove presence entries older than 15 min or for players no longer online."""
+    import time as _tp
+    cutoff = _tp.time() - 900
+    online_set = set(_chat_online.values())
+    stale = [u for u, e in _area_presence.items() if e["t"] < cutoff or u not in online_set]
+    for u in stale:
+        _area_presence.pop(u, None)
+
+
 def _world_tick():
     """Background greenlet: fires every 30 s for housekeeping tasks."""
     while True:
@@ -618,6 +646,10 @@ def _world_tick():
             pass
         try:
             _tick_world_events()
+        except Exception:
+            pass
+        try:
+            _prune_area_presence()
         except Exception:
             pass
 
@@ -861,6 +893,10 @@ def _autosave() -> None:
 def _set_activity(player: dict, status: str) -> None:
     """Store a short activity string on the player dict (persisted in autosave)."""
     player["activity_status"] = status
+    username = session.get("online_username")
+    area = session.get("current_area", "")
+    if username and area:
+        _update_area_presence(username, area, status)
 
 
 def _group_contribute(xp_gained: int, gold_gained: int, action: str) -> None:
@@ -3501,30 +3537,18 @@ def action_travel():
         add_message(f"You travel to {dest_name}.", "var(--wood-light)")
         _set_activity(player, f"wandering {dest_name}")
 
-        # Show up to 3 random online players with their current activity
+        # Show players already in the destination area
         my_username = session.get("online_username")
-        online_usernames = set(_chat_online.values()) - {my_username}
-        if online_usernames:
-            try:
-                from utilities.supabase_db import get_all_activities
-                activities = get_all_activities(exclude_user_id=session.get("online_user_id"))
-                # Filter to only currently connected users
-                active = [a for a in activities if a["player_name"] in online_usernames]
-                random.shuffle(active)
-                for entry in active[:3]:
-                    name = entry["player_name"]
-                    status = entry.get("activity_status", "exploring")
-                    add_message(f"You spot {name} — {status}.", "var(--mana-bright)")
-            except Exception:
-                # Fallback: just show names without activity
-                spotted = random.sample(sorted(online_usernames), min(3, len(online_usernames)))
-                if len(spotted) == 1:
-                    who = spotted[0]
-                elif len(spotted) == 2:
-                    who = f"{spotted[0]} and {spotted[1]}"
-                else:
-                    who = f"{spotted[0]}, {spotted[1]}, and {spotted[2]}"
-                add_message(f"You spot {who} here.", "var(--mana-bright)")
+        online_set = set(_chat_online.values()) - {my_username}
+        import time as _tv
+        cutoff = _tv.time() - 900
+        here = [
+            (u, e["text"]) for u, e in _area_presence.items()
+            if u in online_set and e["area"] == dest_key and e["t"] >= cutoff
+        ]
+        random.shuffle(here)
+        for uname, status in here[:3]:
+            add_message(f"You spot {uname} here — {status}.", "var(--mana-bright)")
 
         session.modified = True
     else:
@@ -6211,6 +6235,45 @@ def api_groups_collect_gold():
             _autosave()
             add_message(f"Collected {gold} gold from the group treasury!", "var(--gold)")
     return jsonify(result), 200 if result["ok"] else 400
+
+
+# ─── Area activity feed ───────────────────────────────────────────────────────
+
+
+@app.route("/api/area_activity")
+def api_area_activity():
+    """Return other online players in the same area with their last activity."""
+    import time as _ta
+    username = session.get("online_username")
+    area = session.get("current_area", "")
+    if not username or not area:
+        return jsonify({"ok": False, "players": []})
+
+    now = _ta.time()
+    cutoff = now - 900  # 15 minutes
+    online_set = set(_chat_online.values())
+
+    results = []
+    for uname, entry in list(_area_presence.items()):
+        if uname == username:
+            continue
+        if uname not in online_set:
+            continue
+        if entry["area"] != area:
+            continue
+        if entry["t"] < cutoff:
+            continue
+        ago = int(now - entry["t"])
+        if ago < 60:
+            when = "just now"
+        elif ago < 3600:
+            when = f"{ago // 60}m ago"
+        else:
+            when = f"{ago // 3600}h ago"
+        results.append({"username": uname, "text": entry["text"], "when": when})
+
+    results.sort(key=lambda x: x["when"])
+    return jsonify({"ok": True, "area": area, "players": results})
 
 
 # ─── Leaderboard ─────────────────────────────────────────────────────────────

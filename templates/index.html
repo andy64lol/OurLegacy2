@@ -739,6 +739,13 @@ const raceData  = {{ data.races  | tojson }};
             </div>
             {% endif %}
 
+            {% if online_username %}
+            <div class="panel" id="nearby-panel" style="margin-bottom:14px;display:none;">
+                <div class="panel-title">&#128100; Nearby Adventurers</div>
+                <div class="panel-body" id="nearby-body" style="padding:8px 16px;"></div>
+            </div>
+            {% endif %}
+
             {% if available_bosses %}
             <div class="panel" style="margin-bottom:14px;">
                 <div class="panel-title">Boss Challenges</div>
@@ -783,6 +790,39 @@ const raceData  = {{ data.races  | tojson }};
         <script>
         window._gameMessages = {{ messages | tojson }};
         </script>
+
+        {% if online_username %}
+        <script>
+        (function() {
+            function _esc(s) {
+                return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            }
+            function loadNearby() {
+                fetch('/api/area_activity').then(function(r){ return r.json(); }).then(function(data) {
+                    var panel = document.getElementById('nearby-panel');
+                    var body = document.getElementById('nearby-body');
+                    if (!panel || !body) return;
+                    if (!data.ok || !data.players || data.players.length === 0) {
+                        panel.style.display = 'none';
+                        return;
+                    }
+                    panel.style.display = '';
+                    var html = '';
+                    data.players.forEach(function(p) {
+                        html += '<div style="display:flex;align-items:baseline;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+                            + '<span style="font-weight:600;color:var(--mana-bright);font-size:13px;min-width:80px;">' + _esc(p.username) + '</span>'
+                            + '<span style="font-size:13px;color:var(--text-light);flex:1;">' + _esc(p.text) + '</span>'
+                            + '<span style="font-size:11px;color:var(--text-dim);white-space:nowrap;">' + _esc(p.when) + '</span>'
+                            + '</div>';
+                    });
+                    body.innerHTML = html;
+                }).catch(function(){});
+            }
+            loadNearby();
+            setInterval(loadNearby, 20000);
+        })();
+        </script>
+        {% endif %}
 
         <!-- ── Equipment & Inventory ── -->
         <div class="tab-content" id="tab-inventory">
