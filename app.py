@@ -1,12 +1,8 @@
-import sys as _sys
+from gevent import monkey
 
-# Patch the standard library with gevent when running directly (python app.py).
-# When running under gunicorn, the gevent worker handles patching via post_fork
-# (see gunicorn.conf.py). Patching in the gunicorn master process causes the
-# "no running event loop" crash when workers are forked.
-if "gunicorn" not in _sys.modules:
-    from gevent import monkey as _monkey
-    _monkey.patch_all()
+monkey.patch_all()
+
+import sys
 
 """
 Our Legacy 2 - Flask Web Interface
@@ -27,7 +23,11 @@ from flask import (
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_socketio import SocketIO, emit as socketio_emit, disconnect as socketio_disconnect
+from flask_socketio import (
+    SocketIO,
+    emit as socketio_emit,
+    disconnect as socketio_disconnect,
+)
 import json
 import random
 import os
@@ -110,7 +110,7 @@ from utilities.supabase_db import (
 )
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)  # type: ignore
 app.secret_key = os.environ.get("SECRET_KEY", "ol2-default-dev-key-change-in-prod")
 
 limiter = Limiter(
@@ -121,12 +121,16 @@ limiter = Limiter(
 )
 
 app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_FILE_DIR"] = os.path.join(os.path.dirname(__file__), ".flask_sessions")
+app.config["SESSION_FILE_DIR"] = os.path.join(
+    os.path.dirname(__file__), ".flask_sessions"
+)
 app.config["SESSION_PERMANENT"] = False
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", manage_session=False)
+socketio = SocketIO(
+    app, cors_allowed_origins="*", async_mode="gevent", manage_session=False
+)
 
 # Online users: {sid: username}  (in-memory, single worker)
 _chat_online: dict = {}
@@ -134,8 +138,8 @@ _chat_cooldowns: dict = {}  # {username: last_sent_timestamp}
 CHAT_COOLDOWN_SECS = 10
 CHAT_MAX_LEN = 200
 
-_dm_cooldowns: dict = {}      # {username: last_dm_timestamp}
-_fr_cooldowns: dict = {}      # {username: [timestamps]} — friend request rate limiting
+_dm_cooldowns: dict = {}  # {username: last_dm_timestamp}
+_fr_cooldowns: dict = {}  # {username: [timestamps]} — friend request rate limiting
 DM_COOLDOWN_SECS = 2
 DM_MAX_LEN = 500
 FR_MAX_PER_MINUTE = 5
@@ -149,6 +153,7 @@ _WORLD_EVENTS_MAX = 40
 def push_world_event(text: str) -> None:
     """Append a timestamped event to the global world feed, trimming old ones."""
     import time as _time
+
     _world_events.append({"t": int(_time.time()), "msg": text})
     if len(_world_events) > _WORLD_EVENTS_MAX:
         del _world_events[: len(_world_events) - _WORLD_EVENTS_MAX]
@@ -183,6 +188,7 @@ _area_presence: dict = {}
 def _update_area_presence(username: str, area: str, text: str) -> None:
     """Record that *username* is in *area* doing *text* right now."""
     import time as _time2
+
     if username:
         _area_presence[username] = {"area": area, "text": text, "t": _time2.time()}
 
@@ -191,20 +197,26 @@ def _update_area_presence(username: str, area: str, text: str) -> None:
 import re as _re
 
 _NARRATIVE_PATTERNS = [
-    (r"^battling (.+?) \[Boss\]$",         lambda m: f"facing the fearsome {m.group(1)}"),
-    (r"^fighting a (.+)$",                  lambda m: f"locked in combat with a {m.group(1)}"),
-    (r"^wandering (.+)$",                   lambda m: f"wandering the roads of {m.group(1)}"),
-    (r"^resting in (.+)$",                  lambda m: f"taking shelter in {m.group(1)}"),
-    (r"^shopping in (.+)$",                 lambda m: f"browsing the market in {m.group(1)}"),
-    (r"^selling gear",                      lambda m: "selling hard-won gear at the market"),
-    (r"^using a consumable",                lambda m: "tending to their wounds"),
-    (r"^healing up",                        lambda m: "recovering strength between battles"),
-    (r"^completing quest: (.+)$",           lambda m: f'pursuing the quest "{m.group(1)}"'),
-    (r"^claiming challenge: (.+)$",         lambda m: f'claiming their reward for "{m.group(1)}"'),
-    (r"^delving (.+)$",                     lambda m: f"delving deep into {m.group(1)}"),
-    (r"^building (.+) on their land$",      lambda m: f"hard at work building {m.group(1)}"),
-    (r"^beginning their legend as (.+)$",   lambda m: f"taking their first steps as a {m.group(1)}"),
-    (r"^claiming an event reward$",         lambda m: "claiming a rare event reward"),
+    (r"^battling (.+?) \[Boss\]$", lambda m: f"facing the fearsome {m.group(1)}"),
+    (r"^fighting a (.+)$", lambda m: f"locked in combat with a {m.group(1)}"),
+    (r"^wandering (.+)$", lambda m: f"wandering the roads of {m.group(1)}"),
+    (r"^resting in (.+)$", lambda m: f"taking shelter in {m.group(1)}"),
+    (r"^shopping in (.+)$", lambda m: f"browsing the market in {m.group(1)}"),
+    (r"^selling gear", lambda m: "selling hard-won gear at the market"),
+    (r"^using a consumable", lambda m: "tending to their wounds"),
+    (r"^healing up", lambda m: "recovering strength between battles"),
+    (r"^completing quest: (.+)$", lambda m: f'pursuing the quest "{m.group(1)}"'),
+    (
+        r"^claiming challenge: (.+)$",
+        lambda m: f'claiming their reward for "{m.group(1)}"',
+    ),
+    (r"^delving (.+)$", lambda m: f"delving deep into {m.group(1)}"),
+    (r"^building (.+) on their land$", lambda m: f"hard at work building {m.group(1)}"),
+    (
+        r"^beginning their legend as (.+)$",
+        lambda m: f"taking their first steps as a {m.group(1)}",
+    ),
+    (r"^claiming an event reward$", lambda m: "claiming a rare event reward"),
 ]
 
 
@@ -244,7 +256,7 @@ def _clear_area_presence(username: str) -> None:
 _active_trades: dict = {}
 TRADE_MAX_ITEMS = 10
 TRADE_MAX_GOLD = 9_999_999
-TRADE_TIMEOUT_SECS = 300   # 5 min inactivity → auto-cancel
+TRADE_TIMEOUT_SECS = 300  # 5 min inactivity → auto-cancel
 _bg_started = False
 
 
@@ -253,7 +265,8 @@ def _inject_chat_globals():
     return {"online_username": session.get("online_username")}
 
 
-# ─── SocketIO Chat Events ──────────────────────────────────────────────────────
+# ─── SocketIO Chat Events ───────────────────────────────────── u�────────────────
+
 
 @socketio.on("connect")
 def _on_chat_connect():
@@ -261,7 +274,8 @@ def _on_chat_connect():
     if not username:
         socketio_disconnect()
         return
-    _chat_online[request.sid] = username
+    _chat_online[request.sid] = username  # type: ignore
+    # SHUT UP
     socketio_emit("online_users", sorted(set(_chat_online.values())), broadcast=True)
     history = get_chat_history(60)
     socketio_emit("chat_history", history)
@@ -269,16 +283,28 @@ def _on_chat_connect():
 
 @socketio.on("disconnect")
 def _on_chat_disconnect():
-    username = _chat_online.pop(request.sid, None)
+    username = _chat_online.pop(request.sid, None)  # type: ignore
+    # SHUSH
     socketio_emit("online_users", sorted(set(_chat_online.values())), broadcast=True)
     if username:
         _clear_area_presence(username)
         for tid, trade in list(_active_trades.items()):
-            if trade["status"] in ("pending", "active") and username in (trade["player_a"], trade["player_b"]):
-                other = trade["player_b"] if username == trade["player_a"] else trade["player_a"]
+            if trade["status"] in ("pending", "active") and username in (
+                trade["player_a"],
+                trade["player_b"],
+            ):
+                other = (
+                    trade["player_b"]
+                    if username == trade["player_a"]
+                    else trade["player_a"]
+                )
                 other_sids = [s for s, u in _chat_online.items() if u == other]
                 for s in other_sids:
-                    socketio.emit("trade_cancelled", {"message": f"{username} disconnected. Trade cancelled."}, to=s)
+                    socketio.emit(
+                        "trade_cancelled",
+                        {"message": f"{username} disconnected. Trade cancelled."},
+                        to=s,
+                    )
                 _active_trades.pop(tid, None)
 
 
@@ -292,29 +318,38 @@ def _on_chat_send(data):
     if not raw:
         return
     if len(raw) > CHAT_MAX_LEN:
-        socketio_emit("chat_error", {"message": f"Message too long (max {CHAT_MAX_LEN} chars)."})
+        socketio_emit(
+            "chat_error", {"message": f"Message too long (max {CHAT_MAX_LEN} chars)."}
+        )
         return
     now = _time_module.time()
     last = _chat_cooldowns.get(username, 0)
     remaining = int(CHAT_COOLDOWN_SECS - (now - last))
     if remaining > 0:
-        socketio_emit("chat_error", {"message": f"Please wait {remaining}s before sending again."})
+        socketio_emit(
+            "chat_error", {"message": f"Please wait {remaining}s before sending again."}
+        )
         return
     censored = censor_text(raw)
     _chat_cooldowns[username] = now
     result = send_chat_message(username, censored)
     if result["ok"]:
         row = result["row"]
-        socketio_emit("chat_message", {
-            "username": username,
-            "message": censored,
-            "created_at": row.get("created_at", ""),
-        }, broadcast=True)
+        socketio_emit(
+            "chat_message",
+            {
+                "username": username,
+                "message": censored,
+                "created_at": row.get("created_at", ""),
+            },
+            broadcast=True,
+        )
     else:
         socketio_emit("chat_error", {"message": "Failed to send message. Try again."})
 
 
 # ─── SocketIO Trade Events ─────────────────────────────────────────────────────
+
 
 def _get_trade_for_user(trade_id: str, username: str):
     """Return trade dict if trade_id exists and username is a participant."""
@@ -331,8 +366,12 @@ def _trade_payload(trade: dict, viewer: str) -> dict:
     other = trade["player_b"] if viewer == trade["player_a"] else trade["player_a"]
     my_offer = trade["offer_a"] if viewer == trade["player_a"] else trade["offer_b"]
     their_offer = trade["offer_b"] if viewer == trade["player_a"] else trade["offer_a"]
-    my_confirmed = trade["confirmed_a"] if viewer == trade["player_a"] else trade["confirmed_b"]
-    their_confirmed = trade["confirmed_b"] if viewer == trade["player_a"] else trade["confirmed_a"]
+    my_confirmed = (
+        trade["confirmed_a"] if viewer == trade["player_a"] else trade["confirmed_b"]
+    )
+    their_confirmed = (
+        trade["confirmed_b"] if viewer == trade["player_a"] else trade["confirmed_a"]
+    )
     return {
         "trade_id": trade["id"],
         "other": other,
@@ -368,11 +407,21 @@ def _on_trade_request(data):
         socketio_emit("trade_error", {"message": f"{target} is not online."})
         return
     for t in _active_trades.values():
-        if t["status"] in ("pending", "active") and username in (t["player_a"], t["player_b"]):
-            socketio_emit("trade_error", {"message": "You already have an active trade."})
+        if t["status"] in ("pending", "active") and username in (
+            t["player_a"],
+            t["player_b"],
+        ):
+            socketio_emit(
+                "trade_error", {"message": "You already have an active trade."}
+            )
             return
-        if t["status"] in ("pending", "active") and target in (t["player_a"], t["player_b"]):
-            socketio_emit("trade_error", {"message": f"{target} is already in a trade."})
+        if t["status"] in ("pending", "active") and target in (
+            t["player_a"],
+            t["player_b"],
+        ):
+            socketio_emit(
+                "trade_error", {"message": f"{target} is already in a trade."}
+            )
             return
     trade_id = str(uuid.uuid4())[:8]
     _active_trades[trade_id] = {
@@ -424,7 +473,9 @@ def _on_trade_decline(data):
     other = trade["player_b"] if username == trade["player_a"] else trade["player_a"]
     other_sids = [s for s, u in _chat_online.items() if u == other]
     for s in other_sids:
-        socketio.emit("trade_cancelled", {"message": f"{username} declined the trade."}, to=s)
+        socketio.emit(
+            "trade_cancelled", {"message": f"{username} declined the trade."}, to=s
+        )
     socketio_emit("trade_cancelled", {"message": "You declined the trade."})
     _active_trades.pop(trade_id, None)
 
@@ -443,10 +494,14 @@ def _on_trade_add_item(data):
     my_offer_key = "offer_a" if username == trade["player_a"] else "offer_b"
     my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
     if trade[my_confirmed_key]:
-        socketio_emit("trade_error", {"message": "Unconfirm your offer first to make changes."})
+        socketio_emit(
+            "trade_error", {"message": "Unconfirm your offer first to make changes."}
+        )
         return
     if len(trade[my_offer_key]["items"]) >= TRADE_MAX_ITEMS:
-        socketio_emit("trade_error", {"message": f"Maximum {TRADE_MAX_ITEMS} items per trade."})
+        socketio_emit(
+            "trade_error", {"message": f"Maximum {TRADE_MAX_ITEMS} items per trade."}
+        )
         return
     player = session.get("player")
     if not player:
@@ -478,7 +533,9 @@ def _on_trade_remove_item(data):
     my_offer_key = "offer_a" if username == trade["player_a"] else "offer_b"
     my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
     if trade[my_confirmed_key]:
-        socketio_emit("trade_error", {"message": "Unconfirm your offer first to make changes."})
+        socketio_emit(
+            "trade_error", {"message": "Unconfirm your offer first to make changes."}
+        )
         return
     items = trade[my_offer_key]["items"]
     if item_name in items:
@@ -503,7 +560,9 @@ def _on_trade_set_gold(data):
     my_offer_key = "offer_a" if username == trade["player_a"] else "offer_b"
     my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
     if trade[my_confirmed_key]:
-        socketio_emit("trade_error", {"message": "Unconfirm your offer first to make changes."})
+        socketio_emit(
+            "trade_error", {"message": "Unconfirm your offer first to make changes."}
+        )
         return
     player = session.get("player")
     if not player:
@@ -534,21 +593,29 @@ def _on_trade_confirm(data):
         a_sids = [s for s, u in _chat_online.items() if u == trade["player_a"]]
         b_sids = [s for s, u in _chat_online.items() if u == trade["player_b"]]
         for s in a_sids:
-            socketio.emit("trade_approved", {
-                "trade_id": trade_id,
-                "receive_items": trade["offer_b"]["items"],
-                "receive_gold": trade["offer_b"]["gold"],
-                "give_items": trade["offer_a"]["items"],
-                "give_gold": trade["offer_a"]["gold"],
-            }, to=s)
+            socketio.emit(
+                "trade_approved",
+                {
+                    "trade_id": trade_id,
+                    "receive_items": trade["offer_b"]["items"],
+                    "receive_gold": trade["offer_b"]["gold"],
+                    "give_items": trade["offer_a"]["items"],
+                    "give_gold": trade["offer_a"]["gold"],
+                },
+                to=s,
+            )
         for s in b_sids:
-            socketio.emit("trade_approved", {
-                "trade_id": trade_id,
-                "receive_items": trade["offer_a"]["items"],
-                "receive_gold": trade["offer_a"]["gold"],
-                "give_items": trade["offer_b"]["items"],
-                "give_gold": trade["offer_b"]["gold"],
-            }, to=s)
+            socketio.emit(
+                "trade_approved",
+                {
+                    "trade_id": trade_id,
+                    "receive_items": trade["offer_a"]["items"],
+                    "receive_gold": trade["offer_a"]["gold"],
+                    "give_items": trade["offer_b"]["items"],
+                    "give_gold": trade["offer_b"]["gold"],
+                },
+                to=s,
+            )
     else:
         _emit_trade_update(trade)
 
@@ -565,12 +632,15 @@ def _on_trade_cancel(data):
     other = trade["player_b"] if username == trade["player_a"] else trade["player_a"]
     other_sids = [s for s, u in _chat_online.items() if u == other]
     for s in other_sids:
-        socketio.emit("trade_cancelled", {"message": f"{username} cancelled the trade."}, to=s)
+        socketio.emit(
+            "trade_cancelled", {"message": f"{username} cancelled the trade."}, to=s
+        )
     socketio_emit("trade_cancelled", {"message": "You cancelled the trade."})
     _active_trades.pop(trade_id, None)
 
 
 # ─── Background World Tick ─────────────────────────────────────────────────────
+
 
 def _expire_stale_trades():
     """Cancel trades that have been inactive beyond TRADE_TIMEOUT_SECS."""
@@ -583,9 +653,13 @@ def _expire_stale_trades():
             for p in (trade["player_a"], trade["player_b"]):
                 for s, u in list(_chat_online.items()):
                     if u == p:
-                        socketio.emit("trade_cancelled", {
-                            "message": "Trade expired due to inactivity (5 min timeout)."
-                        }, to=s)
+                        socketio.emit(
+                            "trade_cancelled",
+                            {
+                                "message": "Trade expired due to inactivity (5 min timeout)."
+                            },
+                            to=s,
+                        )
             _active_trades.pop(tid, None)
 
 
@@ -596,11 +670,11 @@ def _tick_world_events() -> None:
         for k in _activity_counts:
             _activity_counts[k] = 0
 
-    battles    = counts["battles"]
+    battles = counts["battles"]
     boss_kills = counts["boss_kills"]
-    deaths     = counts["deaths"]
-    quests     = counts["quests"]
-    dungeons   = counts["dungeons"]
+    deaths = counts["deaths"]
+    quests = counts["quests"]
+    dungeons = counts["dungeons"]
     challenges = counts["challenges"]
 
     if sum(counts.values()) == 0:
@@ -610,62 +684,94 @@ def _tick_world_events() -> None:
 
     # Boss kills — always announce
     if boss_kills:
-        messages.append(random.choice([
-            "Legends are written this day. A fell power has been vanquished.",
-            "The realm trembles — a great evil has been brought low by bold hands.",
-            "Word spreads of a mighty foe slain. Bards scramble to record the tale.",
-            "Darkness retreats as a terrible beast falls before the brave.",
-        ]))
+        messages.append(
+            random.choice(
+                [
+                    "Legends are written this day. A fell power has been vanquished.",
+                    "The realm trembles — a great evil has been brought low by bold hands.",
+                    "Word spreads of a mighty foe slain. Bards scramble to record the tale.",
+                    "Darkness retreats as a terrible beast falls before the brave.",
+                ]
+            )
+        )
 
     # Heavy casualties
     if deaths >= 3:
-        messages.append(random.choice([
-            "The darkness claims its toll. Many brave souls have fallen this hour.",
-            "The roads run red — adventurers fall to horrors unseen and unforgiving.",
-            "Grim tidings from all corners: the monsters grow relentless.",
-            "Death walks the land. Even the boldest blades are not enough today.",
-        ]))
+        messages.append(
+            random.choice(
+                [
+                    "The darkness claims its toll. Many brave souls have fallen this hour.",
+                    "The roads run red — adventurers fall to horrors unseen and unforgiving.",
+                    "Grim tidings from all corners: the monsters grow relentless.",
+                    "Death walks the land. Even the boldest blades are not enough today.",
+                ]
+            )
+        )
     elif deaths >= 1 and not boss_kills:
-        messages.append(random.choice([
-            "A brave adventurer has fallen. The realm mourns.",
-            "Death walks the land today. Stay sharp, wanderer.",
-            "Another soul lost to the wilds. The darkness grows bolder.",
-        ]))
+        messages.append(
+            random.choice(
+                [
+                    "A brave adventurer has fallen. The realm mourns.",
+                    "Death walks the land today. Stay sharp, wanderer.",
+                    "Another soul lost to the wilds. The darkness grows bolder.",
+                ]
+            )
+        )
 
     # Heroic deeds
     deeds = quests + dungeons + challenges
     if deeds >= 3:
-        messages.append(random.choice([
-            "A wave of heroism sweeps the realm — quests fulfilled, dungeons breached, challenges met.",
-            "The chronicles grow thick with deeds of valour. This is an hour of heroes.",
-            "Word of great accomplishments fills every tavern. The realm rings with legend.",
-        ]))
+        messages.append(
+            random.choice(
+                [
+                    "A wave of heroism sweeps the realm — quests fulfilled, dungeons breached, challenges met.",
+                    "The chronicles grow thick with deeds of valour. This is an hour of heroes.",
+                    "Word of great accomplishments fills every tavern. The realm rings with legend.",
+                ]
+            )
+        )
     elif quests:
-        messages.append(random.choice([
-            "Acts of heroism ripple across the realm. The people take heart.",
-            "Word spreads of great deeds — quests fulfilled, wrongs set right.",
-            "The notice boards grow light as bold adventurers answer every call.",
-        ]))
+        messages.append(
+            random.choice(
+                [
+                    "Acts of heroism ripple across the realm. The people take heart.",
+                    "Word spreads of great deeds — quests fulfilled, wrongs set right.",
+                    "The notice boards grow light as bold adventurers answer every call.",
+                ]
+            )
+        )
     elif dungeons:
-        messages.append(random.choice([
-            "Ancient depths have been breached. Secrets long buried see the light.",
-            "Dungeon delvers return triumphant, laden with hard-won spoils.",
-            "The dark places of the world yield to those bold enough to enter.",
-        ]))
+        messages.append(
+            random.choice(
+                [
+                    "Ancient depths have been breached. Secrets long buried see the light.",
+                    "Dungeon delvers return triumphant, laden with hard-won spoils.",
+                    "The dark places of the world yield to those bold enough to enter.",
+                ]
+            )
+        )
     elif challenges:
-        messages.append(random.choice([
-            "Champions rise to the call — the realm's greatest trials are met.",
-            "The proving grounds ring with victory. Bold adventurers claim their honours.",
-        ]))
+        messages.append(
+            random.choice(
+                [
+                    "Champions rise to the call — the realm's greatest trials are met.",
+                    "The proving grounds ring with victory. Bold adventurers claim their honours.",
+                ]
+            )
+        )
 
     # Pure combat surge (no boss, no deeds)
     if not messages and battles >= 5:
-        messages.append(random.choice([
-            "Blood is spilled across the realm. Warriors clash with darkness on every road.",
-            "The monsters grow bold — combat echoes from every corner of the land.",
-            "A fearsome tide of beasts assails the realm. Adventurers hold the line.",
-            "Steel rings and spells crack. This day belongs to the fighters.",
-        ]))
+        messages.append(
+            random.choice(
+                [
+                    "Blood is spilled across the realm. Warriors clash with darkness on every road.",
+                    "The monsters grow bold — combat echoes from every corner of the land.",
+                    "A fearsome tide of beasts assails the realm. Adventurers hold the line.",
+                    "Steel rings and spells crack. This day belongs to the fighters.",
+                ]
+            )
+        )
 
     # Push at most 2 messages to avoid flooding
     for msg in messages[:2]:
@@ -675,9 +781,12 @@ def _tick_world_events() -> None:
 def _prune_area_presence() -> None:
     """Remove presence entries older than 15 min or for players no longer online."""
     import time as _tp
+
     cutoff = _tp.time() - 900
     online_set = set(_chat_online.values())
-    stale = [u for u, e in _area_presence.items() if e["t"] < cutoff or u not in online_set]
+    stale = [
+        u for u, e in _area_presence.items() if e["t"] < cutoff or u not in online_set
+    ]
     for u in stale:
         _area_presence.pop(u, None)
 
@@ -710,10 +819,12 @@ def _ensure_background_tasks():
 
 @app.errorhandler(429)
 def ratelimit_handler(e):
-    return jsonify({
-        "ok": False,
-        "message": "Too many attempts. Please wait a moment and try again.",
-    }), 429
+    return jsonify(
+        {
+            "ok": False,
+            "message": "Too many attempts. Please wait a moment and try again.",
+        }
+    ), 429
 
 
 dice = Dice()
@@ -841,14 +952,15 @@ def get_player() -> dict[str, Any] | None:
 
 def save_player(player: dict[str, Any]) -> None:
     # Keep visited_areas in sync inside the player dict so it persists with the character
-    player["visited_areas"] = list(set(
-        player.get("visited_areas", []) + session.get("visited_areas", [])
-    ))
+    player["visited_areas"] = list(
+        set(player.get("visited_areas", []) + session.get("visited_areas", []))
+    )
     session["player"] = player
     session.modified = True
 
 
 # ─── Persistent character helpers (Phase 1 MMO) ──────────────────────────────
+
 
 def _build_game_state() -> dict[str, Any]:
     """Bundle all persistent session data into a dict for Supabase storage."""
@@ -856,6 +968,7 @@ def _build_game_state() -> dict[str, Any]:
     if not player:
         return {}
     from utilities.stats import ensure_attributes
+
     ensure_attributes(player)
     return {
         "player": player,
@@ -882,13 +995,16 @@ def _apply_game_state(data: dict[str, Any]) -> None:
     player.setdefault("boss_cooldowns", {})
     player.setdefault("race", "Descendants from another world")
     from utilities.stats import ensure_attributes
+
     ensure_attributes(player)
     session["player"] = player
     session["current_area"] = data.get("current_area", "starting_village")
     session["completed_missions"] = data.get("completed_missions", [])
     _va_top = data.get("visited_areas", [])
     _va_player = (data.get("player") or {}).get("visited_areas", [])
-    session["visited_areas"] = list(set(_va_top + _va_player)) or [session["current_area"]]
+    session["visited_areas"] = list(set(_va_top + _va_player)) or [
+        session["current_area"]
+    ]
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
     session["messages"] = data.get("messages", [])
@@ -965,7 +1081,11 @@ def _group_contribute(xp_gained: int, gold_gained: int, action: str) -> None:
             bonus_xp = result.get("bonus_xp", 0)
             bonus_gold = result.get("bonus_gold", 0)
             members = result.get("members", [])
-            payload = {"level": new_level, "bonus_xp": bonus_xp, "bonus_gold": bonus_gold}
+            payload = {
+                "level": new_level,
+                "bonus_xp": bonus_xp,
+                "bonus_gold": bonus_gold,
+            }
             for member in members:
                 for sid in [s for s, u in _chat_online.items() if u == member]:
                     socketio.emit("group_level_up", payload, to=sid)
@@ -1081,7 +1201,10 @@ def check_and_award_events(player):
 
         # ── Award reward ───────────────────────────────────────────────────
         rtype = event.get("reward_type", "")
-        msg = event.get("reward_message", f"You received a reward from the event '{event.get('name', '')}'!")
+        msg = event.get(
+            "reward_message",
+            f"You received a reward from the event '{event.get('name', '')}'!",
+        )
 
         if rtype == "item":
             item_name = event.get("reward_item", "")
@@ -1115,6 +1238,7 @@ def get_game_time(player=None):
     """Return current time period name based on real London local time."""
     import datetime as _dt2
     import zoneinfo
+
     london_now = _dt2.datetime.now(_dt2.timezone.utc).astimezone(
         zoneinfo.ZoneInfo("Europe/London")
     )
@@ -1162,7 +1286,8 @@ def apply_regen_effects(player):
             remaining.append(eff)
         else:
             add_message(
-                f"The {eff.get('source', 'regeneration')} effect has faded.", "var(--text-dim)"
+                f"The {eff.get('source', 'regeneration')} effect has faded.",
+                "var(--text-dim)",
             )
     player["regen_effects"] = remaining
 
@@ -1171,16 +1296,34 @@ def apply_regen_effects(player):
 
 # WMO weather interpretation codes → game weather types
 _WMO_TO_GAME_WEATHER = {
-    0: "sunny", 1: "sunny", 2: "sunny", 3: "sunny",
-    45: "rainy", 48: "rainy",
-    51: "rainy", 53: "rainy", 55: "rainy",
-    56: "rainy", 57: "rainy",
-    61: "rainy", 63: "rainy", 65: "rainy",
-    66: "rainy", 67: "rainy",
-    71: "snowy", 73: "snowy", 75: "snowy", 77: "snowy",
-    80: "rainy", 81: "rainy", 82: "rainy",
-    85: "snowy", 86: "snowy",
-    95: "stormy", 96: "stormy", 99: "stormy",
+    0: "sunny",
+    1: "sunny",
+    2: "sunny",
+    3: "sunny",
+    45: "rainy",
+    48: "rainy",
+    51: "rainy",
+    53: "rainy",
+    55: "rainy",
+    56: "rainy",
+    57: "rainy",
+    61: "rainy",
+    63: "rainy",
+    65: "rainy",
+    66: "rainy",
+    67: "rainy",
+    71: "snowy",
+    73: "snowy",
+    75: "snowy",
+    77: "snowy",
+    80: "rainy",
+    81: "rainy",
+    82: "rainy",
+    85: "snowy",
+    86: "snowy",
+    95: "stormy",
+    96: "stormy",
+    99: "stormy",
 }
 
 _real_weather_cache: dict = {"weather": "sunny", "fetched_at": 0.0}
@@ -1492,18 +1635,27 @@ def boss_take_turn(enemy, player, player_effects, log):
 # ─── Companion combat helpers ─────────────────────────────────────────────────
 
 _COMPANION_RANK_HP = {
-    "common": 400, "uncommon": 700, "rare": 1100,
-    "epic": 1800, "legendary": 3000,
+    "common": 400,
+    "uncommon": 700,
+    "rare": 1100,
+    "epic": 1800,
+    "legendary": 3000,
 }
 
 _COMPANION_RANK_ATK_CAP = {
-    "common": 120, "uncommon": 180, "rare": 260,
-    "epic": 380, "legendary": 520,
+    "common": 120,
+    "uncommon": 180,
+    "rare": 260,
+    "epic": 380,
+    "legendary": 520,
 }
 
 _COMPANION_RANK_DEF_CAP = {
-    "common": 40, "uncommon": 60, "rare": 90,
-    "epic": 130, "legendary": 180,
+    "common": 40,
+    "uncommon": 60,
+    "rare": 90,
+    "epic": 130,
+    "legendary": 180,
 }
 
 
@@ -1555,7 +1707,9 @@ def _companion_take_action(battle_companions, enemy, log):
         comp_crit_rate = 0.08 + comp.get("crit_chance", 0.0)
         if random.random() < comp_crit_rate:
             dmg = int(dmg * 1.75)
-            log.append(f"[{comp['name']} lands a critical blow on {enemy['name']} for {dmg}!]")
+            log.append(
+                f"[{comp['name']} lands a critical blow on {enemy['name']} for {dmg}!]"
+            )
         else:
             log.append(f"[{comp['name']} attacks {enemy['name']} for {dmg} damage.]")
         enemy["hp"] = max(0, enemy["hp"] - dmg)
@@ -1674,7 +1828,9 @@ def process_turn_effects(entity, effects_dict, log, entity_label):
             dmg = eff_info.get("damage", 6)
             entity["hp"] = max(0, entity["hp"] - dmg)
             turns_left = max(0, eff_info["turns"] - 1)
-            log.append(f"{entity_label} bleeds for {dmg} damage! ({turns_left} turns left)")
+            log.append(
+                f"{entity_label} bleeds for {dmg} damage! ({turns_left} turns left)"
+            )
 
         elif eff_key == "daze":
             stunned = True
@@ -1684,7 +1840,9 @@ def process_turn_effects(entity, effects_dict, log, entity_label):
             # Weaken reduces effective defense — tracked in effect, applied in damage calc
             turns_left = max(0, eff_info["turns"] - 1)
             if turns_left > 0:
-                log.append(f"{entity_label}'s defences remain weakened! ({turns_left} turns left)")
+                log.append(
+                    f"{entity_label}'s defences remain weakened! ({turns_left} turns left)"
+                )
 
         elif eff_key == "shaken":
             turns_left = max(0, eff_info["turns"] - 1)
@@ -1694,7 +1852,9 @@ def process_turn_effects(entity, effects_dict, log, entity_label):
         elif eff_key == "armor_crushed":
             turns_left = max(0, eff_info["turns"] - 1)
             if turns_left > 0:
-                log.append(f"{entity_label}'s armour remains crushed! ({turns_left} turns left)")
+                log.append(
+                    f"{entity_label}'s armour remains crushed! ({turns_left} turns left)"
+                )
 
         eff_info["turns"] -= 1
         if eff_info["turns"] <= 0:
@@ -1746,8 +1906,14 @@ def apply_item_bonuses(player, item_data, direction=1):
         player["mp"] = min(player["mp"] + mp_bonus, player["max_mp"])
 
     # Elemental resistances (armor only) — clamp to [0, 0.9]
-    res_keys = ("physical_resistance", "fire_resistance", "ice_resistance",
-                "lightning_resistance", "poison_resistance", "magic_resistance")
+    res_keys = (
+        "physical_resistance",
+        "fire_resistance",
+        "ice_resistance",
+        "lightning_resistance",
+        "poison_resistance",
+        "magic_resistance",
+    )
     for rk in res_keys:
         val = item_data.get(rk, 0.0)
         if val:
@@ -2354,7 +2520,8 @@ def game():
             i
             for i in player.get("inventory", [])
             if any(x in i.lower() for x in ["potion", "elixir", "tears", "tonic"])
-            or isinstance(_items_data.get(i), dict) and _items_data[i].get("event_item")
+            or isinstance(_items_data.get(i), dict)
+            and _items_data[i].get("event_item")
         ]
         weapon = player.get("equipment", {}).get("weapon")
         available_spells = get_available_spells(
@@ -2428,8 +2595,12 @@ def game():
             {
                 "key": conn_key,
                 # FOW: reveal name and details only for visited areas
-                "name": conn_area.get("name", conn_key.replace("_", " ").title()) if is_visited else "???",
-                "has_danger": bool(conn_area.get("possible_enemies")) if is_visited else None,
+                "name": conn_area.get("name", conn_key.replace("_", " ").title())
+                if is_visited
+                else "???",
+                "has_danger": bool(conn_area.get("possible_enemies"))
+                if is_visited
+                else None,
                 "visited": is_visited,
                 "difficulty": difficulty if is_visited else -1,
             }
@@ -2531,7 +2702,9 @@ def game():
                     "rarity": item_data.get("rarity", "common"),
                     "description": item_data.get("description", ""),
                     "stats": _item_stat_summary(item_data),
-                    "weapon_type": item_data.get("weapon_type", "") if slot == "weapon" else "",
+                    "weapon_type": item_data.get("weapon_type", "")
+                    if slot == "weapon"
+                    else "",
                 }
 
     # Missions
@@ -2733,7 +2906,9 @@ def game():
     # Time and weather
     game_time = get_game_time()
     game_time_icon = TIME_ICONS.get(game_time, "")
-    area_name_for_weather = GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "")
+    area_name_for_weather = (
+        GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "")
+    )
     current_weather = get_real_weather(area_name_for_weather)
     weather_def = GAME_DATA["weather"].get(current_weather, {})
     weather_display = current_weather.replace("_", " ").title()
@@ -2840,6 +3015,7 @@ def game():
             elif is_upcoming:
                 upcoming_evts.append(info)
         return {"active": active_evts, "upcoming": upcoming_evts}
+
     events_data = _get_events_display(player)
 
     # Dungeon data for inline tab
@@ -2847,7 +3023,9 @@ def game():
     completed_dungeons_set = set(player.get("completed_dungeons", []))
     visited_areas_list = session.get("visited_areas", [area_key])
     dungeon_list = get_available_dungeons(
-        dungeons_data, area_key, player.get("level", 1),
+        dungeons_data,
+        area_key,
+        player.get("level", 1),
         visited_areas=visited_areas_list,
         areas_data=GAME_DATA.get("areas", {}),
     )
@@ -2897,7 +3075,9 @@ def game():
         events_data=events_data,
         game_classes=list(GAME_DATA.get("classes", {}).keys()),
         game_races=list(GAME_DATA.get("races", {}).keys()),
-        world_events=list(reversed(_world_events[-10:])) if session.get("online_username") else [],
+        world_events=list(reversed(_world_events[-10:]))
+        if session.get("online_username")
+        else [],
         online_count=len(set(_chat_online.values())),
     )
 
@@ -2959,7 +3139,13 @@ def _item_stat_summary(item_data):
         ]:
             val = item_data.get(proc_key)
             if val:
-                parts.append(f"{val}% {label}" if "chance" in proc_key or proc_key == "armor_penetration" or proc_key == "mana_efficiency" else f"+{val} {label}")
+                parts.append(
+                    f"{val}% {label}"
+                    if "chance" in proc_key
+                    or proc_key == "armor_penetration"
+                    or proc_key == "mana_efficiency"
+                    else f"+{val} {label}"
+                )
 
     # Armor-specific stats
     elif itype == "armor":
@@ -3043,10 +3229,14 @@ def _get_weapon_combat_effects(player, enemy):
     if sharpness:
         if "humanoid" in enemy_tags or "beast" in enemy_tags:
             bonus = int(sharpness * 1.5)
-            effects.append((bonus, f"Your blade bites deep! +{bonus} sharpness damage."))
+            effects.append(
+                (bonus, f"Your blade bites deep! +{bonus} sharpness damage.")
+            )
         elif "armored" in enemy_tags or "construct" in enemy_tags:
             bonus = max(1, int(sharpness * 0.4))
-            effects.append((bonus, f"Your blade skips off the armour. +{bonus} damage."))
+            effects.append(
+                (bonus, f"Your blade skips off the armour. +{bonus} damage.")
+            )
         else:
             bonus = sharpness
             effects.append((bonus, f"Your weapon's edge adds {bonus} cutting damage."))
@@ -3056,7 +3246,12 @@ def _get_weapon_combat_effects(player, enemy):
     if smiting:
         if "undead" in enemy_tags or "demon" in enemy_tags:
             bonus = int(smiting * 2.5)
-            effects.append((bonus, f"Holy power surges! +{bonus} smiting damage vs {enemy['name']}!"))
+            effects.append(
+                (
+                    bonus,
+                    f"Holy power surges! +{bonus} smiting damage vs {enemy['name']}!",
+                )
+            )
         elif "holy" in enemy_tags:
             bonus = 0
             effects.append((0, f"Smiting has no effect on holy beings."))
@@ -3073,7 +3268,9 @@ def _get_weapon_combat_effects(player, enemy):
         elif "fire" in enemy_tags:
             bonus = max(0, int(fire_atk * 0.2))
             if bonus:
-                effects.append((bonus, f"The flame barely stings. +{bonus} fire damage."))
+                effects.append(
+                    (bonus, f"The flame barely stings. +{bonus} fire damage.")
+                )
         else:
             bonus = fire_atk
             effects.append((bonus, f"Your weapon blazes! +{bonus} fire damage."))
@@ -3097,22 +3294,31 @@ def _get_weapon_combat_effects(player, enemy):
     if lightning_atk:
         if "armored" in enemy_tags or "construct" in enemy_tags:
             bonus = int(lightning_atk * 1.8)
-            effects.append((bonus, f"Lightning conducts through armour! +{bonus} lightning damage!"))
+            effects.append(
+                (
+                    bonus,
+                    f"Lightning conducts through armour! +{bonus} lightning damage!",
+                )
+            )
         elif "elemental" in enemy_tags and "lightning" in enemy_tags:
             bonus = max(0, int(lightning_atk * 0.2))
             if bonus:
-                effects.append((bonus, f"Lightning feeds the elemental. +{bonus} damage."))
+                effects.append(
+                    (bonus, f"Lightning feeds the elemental. +{bonus} damage.")
+                )
         else:
             bonus = lightning_atk
             effects.append((bonus, f"A bolt of lightning! +{bonus} lightning damage."))
 
-    # ── Poison attack ────────────────────────────────────────────────────────
+    # ── Poison attack ───────────────────────────────────────────────── [�──────
     poison_atk = weapon.get("poison_attack", 0)
     if poison_atk:
         if "construct" in enemy_tags or "undead" in enemy_tags:
             bonus = max(0, int(poison_atk * 0.3))
             if bonus:
-                effects.append((bonus, f"The poison has little effect. +{bonus} damage."))
+                effects.append(
+                    (bonus, f"The poison has little effect. +{bonus} damage.")
+                )
         elif "beast" in enemy_tags or "humanoid" in enemy_tags:
             bonus = int(poison_atk * 1.4)
             effects.append((bonus, f"Venom courses through! +{bonus} poison damage!"))
@@ -3150,8 +3356,14 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
     if bleed_chance and _roll(bleed_chance):
         if "construct" not in enemy_tags and "undead" not in enemy_tags:
             stacks = enemy_effects.get("bleed", {}).get("stacks", 0)
-            enemy_effects["bleed"] = {"turns": 4, "damage": 6 + stacks * 2, "stacks": min(stacks + 1, 3)}
-            messages.append(f"Your blade opens a deep wound! [{enemy.get('name', 'Enemy')} is bleeding]")
+            enemy_effects["bleed"] = {
+                "turns": 4,
+                "damage": 6 + stacks * 2,
+                "stacks": min(stacks + 1, 3),
+            }
+            messages.append(
+                f"Your blade opens a deep wound! [{enemy.get('name', 'Enemy')} is bleeding]"
+            )
 
     # ── Stun / Daze (maces, warhammers) ──────────────────────────────────────
     stun_chance = weapon.get("stun_chance", 0)
@@ -3159,28 +3371,41 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
         if "construct" not in enemy_tags:
             existing = enemy_effects.get("daze", {}).get("turns", 0)
             enemy_effects["daze"] = {"turns": max(1, existing + 1)}
-            messages.append(f"Your crushing blow dazes {enemy.get('name', 'the enemy')}! [Dazed — loses next action]")
+            messages.append(
+                f"Your crushing blow dazes {enemy.get('name', 'the enemy')}! [Dazed — loses next action]"
+            )
 
     # ── Weaken (axes — armor penetration leaves target exposed) ──────────────
     cleave_chance = weapon.get("cleave_chance", 0)
     if cleave_chance and _roll(cleave_chance):
         pen = weapon.get("armor_penetration", 10)
         existing = enemy_effects.get("weaken", {}).get("turns", 0)
-        enemy_effects["weaken"] = {"turns": max(existing, 4), "def_reduction": max(enemy_effects.get("weaken", {}).get("def_reduction", 0), int(pen * 0.6))}
-        messages.append(f"Your cleaving strike weakens {enemy.get('name', 'the enemy')}'s defences! [-{int(pen * 0.6)} DEF for 4 turns]")
+        enemy_effects["weaken"] = {
+            "turns": max(existing, 4),
+            "def_reduction": max(
+                enemy_effects.get("weaken", {}).get("def_reduction", 0), int(pen * 0.6)
+            ),
+        }
+        messages.append(
+            f"Your cleaving strike weakens {enemy.get('name', 'the enemy')}'s defences! [-{int(pen * 0.6)} DEF for 4 turns]"
+        )
 
     # ── Knockback / Shaken (greatswords, warhammers) ──────────────────────────
     knockback_chance = weapon.get("knockback_chance", 0)
     if knockback_chance and _roll(knockback_chance):
         enemy_effects["shaken"] = {"turns": 3, "acc_penalty": 20}
-        messages.append(f"{enemy.get('name', 'The enemy')} is knocked back and shaken! [-20% accuracy for 3 turns]")
+        messages.append(
+            f"{enemy.get('name', 'The enemy')} is knocked back and shaken! [-20% accuracy for 3 turns]"
+        )
 
     # ── Sweep damage (greatswords, warhammers — bonus hit) ────────────────────
     sweep_chance = weapon.get("sweep_chance", 0)
     if sweep_chance and _roll(sweep_chance):
         sweep_dmg = max(1, int(player.get("attack", 10) * 0.35))
         enemy["hp"] = max(0, enemy.get("hp", 1) - sweep_dmg)
-        messages.append(f"Your sweeping blow strikes again for {sweep_dmg} bonus damage!")
+        messages.append(
+            f"Your sweeping blow strikes again for {sweep_dmg} bonus damage!"
+        )
 
     # ── Multi-hit (throwing weapons) ──────────────────────────────────────────
     multi_hit_chance = weapon.get("multi_hit_chance", 0)
@@ -3193,31 +3418,57 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
     parry_chance = weapon.get("parry_chance", 0)
     if parry_chance and _roll(parry_chance):
         existing_buffs = player.get("active_buffs", [])
-        existing_buffs.append({"name": "Parry", "duration": 2, "modifiers": {"defense_bonus": 10, "absorb_amount": 15}})
+        existing_buffs.append(
+            {
+                "name": "Parry",
+                "duration": 2,
+                "modifiers": {"defense_bonus": 10, "absorb_amount": 15},
+            }
+        )
         player["active_buffs"] = existing_buffs
-        messages.append("You deflect the next blow with expert swordsmanship! [Parry: +10 DEF, absorbs 15 dmg for 2 turns]")
+        messages.append(
+            "You deflect the next blow with expert swordsmanship! [Parry: +10 DEF, absorbs 15 dmg for 2 turns]"
+        )
 
     # ── Inspire (bard instruments) ────────────────────────────────────────────
     inspire_chance = weapon.get("inspire_chance", 0)
     if inspire_chance and _roll(inspire_chance):
         inspire_bonus = weapon.get("harmony_bonus", 8)
         existing_buffs = player.get("active_buffs", [])
-        existing_buffs.append({"name": "Inspire", "duration": 6, "modifiers": {"attack_bonus": inspire_bonus, "speed_bonus": int(inspire_bonus * 0.5)}})
+        existing_buffs.append(
+            {
+                "name": "Inspire",
+                "duration": 6,
+                "modifiers": {
+                    "attack_bonus": inspire_bonus,
+                    "speed_bonus": int(inspire_bonus * 0.5),
+                },
+            }
+        )
         player["active_buffs"] = existing_buffs
-        messages.append(f"Your melody inspires courage! [+{inspire_bonus} ATK, +{int(inspire_bonus * 0.5)} SPD for 6 turns]")
+        messages.append(
+            f"Your melody inspires courage! [+{inspire_bonus} ATK, +{int(inspire_bonus * 0.5)} SPD for 6 turns]"
+        )
 
     # ── Armor Crush (maces — reduces enemy effective defense) ─────────────────
     armor_crush = weapon.get("armor_crush", 0)
     if armor_crush and _roll(20):
         existing = enemy_effects.get("armor_crushed", {}).get("def_reduction", 0)
-        enemy_effects["armor_crushed"] = {"turns": 5, "def_reduction": existing + armor_crush}
-        messages.append(f"You crush through the armour! [{enemy.get('name', 'Enemy')} defence -{armor_crush} for 5 turns]")
+        enemy_effects["armor_crushed"] = {
+            "turns": 5,
+            "def_reduction": existing + armor_crush,
+        }
+        messages.append(
+            f"You crush through the armour! [{enemy.get('name', 'Enemy')} defence -{armor_crush} for 5 turns]"
+        )
 
     # ── Backstab (daggers — only if enemy is not yet in combat or is shaken) ──
     backstab_bonus = weapon.get("backstab_bonus", 0)
     if backstab_bonus and ("shaken" in enemy_effects or "daze" in enemy_effects):
         enemy["hp"] = max(0, enemy.get("hp", 1) - backstab_bonus)
-        messages.append(f"You exploit the opening for a deadly backstab! +{backstab_bonus} bonus damage!")
+        messages.append(
+            f"You exploit the opening for a deadly backstab! +{backstab_bonus} bonus damage!"
+        )
 
     return messages
 
@@ -3589,14 +3840,19 @@ def action_travel():
         my_username = session.get("online_username")
         online_set = set(_chat_online.values()) - {my_username}
         import time as _tv
+
         cutoff = _tv.time() - 900
         here = [
-            (u, e["text"]) for u, e in _area_presence.items()
+            (u, e["text"])
+            for u, e in _area_presence.items()
             if u in online_set and e["area"] == dest_key and e["t"] >= cutoff
         ]
         random.shuffle(here)
         for uname, status in here[:3]:
-            add_message(f"You notice {uname} here — {_narrativize(status)}.", "var(--mana-bright)")
+            add_message(
+                f"You notice {uname} here — {_narrativize(status)}.",
+                "var(--mana-bright)",
+            )
 
         session.modified = True
     else:
@@ -3705,7 +3961,11 @@ def action_buy():
         else:
             add_message(f"You purchase {item_name} for {price} gold.", "var(--gold)")
 
-    area_name = GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "a shop")
+    area_name = (
+        GAME_DATA["areas"]
+        .get(session.get("current_area", ""), {})
+        .get("name", "a shop")
+    )
     _set_activity(player, f"shopping in {area_name}")
     save_player(player)
     _autosave()
@@ -3794,24 +4054,36 @@ def action_hire_companion():
             player[stat] = player.get(stat, 0) + bonus
             player[f"max_{stat}"] = player.get(f"max_{stat}", 0) + bonus
     if comp_data.get("spell_power_bonus", 0):
-        player["attr_spell_power"] = player.get("attr_spell_power", 0) + comp_data["spell_power_bonus"]
+        player["attr_spell_power"] = (
+            player.get("attr_spell_power", 0) + comp_data["spell_power_bonus"]
+        )
     if comp_data.get("crit_chance", 0):
-        player["attr_crit_chance"] = player.get("attr_crit_chance", 0) + comp_data["crit_chance"]
+        player["attr_crit_chance"] = (
+            player.get("attr_crit_chance", 0) + comp_data["crit_chance"]
+        )
     if comp_data.get("crit_damage_bonus", 0):
-        player["attr_crit_damage"] = player.get("attr_crit_damage", 0) + comp_data["crit_damage_bonus"]
+        player["attr_crit_damage"] = (
+            player.get("attr_crit_damage", 0) + comp_data["crit_damage_bonus"]
+        )
     if comp_data.get("healing_bonus", 0):
-        player["attr_healing_bonus"] = player.get("attr_healing_bonus", 0) + comp_data["healing_bonus"]
+        player["attr_healing_bonus"] = (
+            player.get("attr_healing_bonus", 0) + comp_data["healing_bonus"]
+        )
     if comp_data.get("post_battle_heal", 0):
-        player["attr_post_battle_heal"] = player.get("attr_post_battle_heal", 0) + comp_data["post_battle_heal"]
+        player["attr_post_battle_heal"] = (
+            player.get("attr_post_battle_heal", 0) + comp_data["post_battle_heal"]
+        )
 
     rank = comp_data.get("rank", "common")
     comp_max_hp = _COMPANION_RANK_HP.get(rank, 400)
-    companions.append({
-        "id": comp_id,
-        "name": comp_data.get("name", comp_id),
-        "hp": comp_max_hp,
-        "max_hp": comp_max_hp,
-    })
+    companions.append(
+        {
+            "id": comp_id,
+            "name": comp_data.get("name", comp_id),
+            "hp": comp_max_hp,
+            "max_hp": comp_max_hp,
+        }
+    )
     add_message(f"{comp_data.get('name')} joins your party!", "var(--gold)")
     save_player(player)
     return redirect(url_for("game"))
@@ -3847,15 +4119,25 @@ def action_dismiss_companion():
             player[stat] = max(1, player.get(stat, 0) - bonus)
             player[f"max_{stat}"] = max(1, player.get(f"max_{stat}", 1) - bonus)
     if comp_data.get("spell_power_bonus", 0):
-        player["attr_spell_power"] = max(0, player.get("attr_spell_power", 0) - comp_data["spell_power_bonus"])
+        player["attr_spell_power"] = max(
+            0, player.get("attr_spell_power", 0) - comp_data["spell_power_bonus"]
+        )
     if comp_data.get("crit_chance", 0):
-        player["attr_crit_chance"] = max(0, player.get("attr_crit_chance", 0) - comp_data["crit_chance"])
+        player["attr_crit_chance"] = max(
+            0, player.get("attr_crit_chance", 0) - comp_data["crit_chance"]
+        )
     if comp_data.get("crit_damage_bonus", 0):
-        player["attr_crit_damage"] = max(0, player.get("attr_crit_damage", 0) - comp_data["crit_damage_bonus"])
+        player["attr_crit_damage"] = max(
+            0, player.get("attr_crit_damage", 0) - comp_data["crit_damage_bonus"]
+        )
     if comp_data.get("healing_bonus", 0):
-        player["attr_healing_bonus"] = max(0, player.get("attr_healing_bonus", 0) - comp_data["healing_bonus"])
+        player["attr_healing_bonus"] = max(
+            0, player.get("attr_healing_bonus", 0) - comp_data["healing_bonus"]
+        )
     if comp_data.get("post_battle_heal", 0):
-        player["attr_post_battle_heal"] = max(0, player.get("attr_post_battle_heal", 0) - comp_data["post_battle_heal"])
+        player["attr_post_battle_heal"] = max(
+            0, player.get("attr_post_battle_heal", 0) - comp_data["post_battle_heal"]
+        )
 
     companions.remove(to_remove)
     player["companions"] = companions
@@ -3953,12 +4235,14 @@ def action_use_item():
         regen_hp = int(item_data.get("regen_hp", 50))
         regen_mp = int(item_data.get("regen_mp", 30))
         regen_turns = int(item_data.get("regen_turns", 10))
-        player.setdefault("regen_effects", []).append({
-            "hp_per_turn": regen_hp,
-            "mp_per_turn": regen_mp,
-            "turns_remaining": regen_turns,
-            "source": item_name,
-        })
+        player.setdefault("regen_effects", []).append(
+            {
+                "hp_per_turn": regen_hp,
+                "mp_per_turn": regen_mp,
+                "turns_remaining": regen_turns,
+                "source": item_name,
+            }
+        )
         player["inventory"].remove(item_name)
         add_message(
             f"You devour the {item_name} — a divine banquet fit for the gods! Fully restored "
@@ -3981,27 +4265,50 @@ def action_use_item():
         if effect == "heal":
             heal = dice.between(min_v, max_v) if min_v != max_v else value
             player["hp"] = min(player["max_hp"], player["hp"] + heal)
-            add_message(f"You use the {item_name} and recover {heal} HP.", "var(--green-bright)")
+            add_message(
+                f"You use the {item_name} and recover {heal} HP.", "var(--green-bright)"
+            )
         elif effect == "mp_restore":
             restore = dice.between(min_v, max_v) if min_v != max_v else value
             player["mp"] = min(player["max_mp"], player["mp"] + restore)
-            add_message(f"You use the {item_name} and restore {restore} MP.", "var(--mana-bright)")
+            add_message(
+                f"You use the {item_name} and restore {restore} MP.",
+                "var(--mana-bright)",
+            )
         elif effect == "full_restore":
             healed = player["max_hp"] - player["hp"]
             mped = player["max_mp"] - player["mp"]
             player["hp"] = player["max_hp"]
             player["mp"] = player["max_mp"]
-            add_message(f"You use the {item_name}. Fully restored! (+{healed} HP, +{mped} MP)", "var(--gold)")
+            add_message(
+                f"You use the {item_name}. Fully restored! (+{healed} HP, +{mped} MP)",
+                "var(--gold)",
+            )
         elif on_use_buff:
             effects_data = GAME_DATA.get("effects", {})
             buff_def = effects_data.get(on_use_buff, {})
             dur = duration or buff_def.get("duration", 5)
-            mods = {k: v for k, v in buff_def.items() if k not in ("description", "type", "duration", "tags")}
-            player.setdefault("active_buffs", []).append({"name": on_use_buff.replace("_", " ").title(), "duration": dur, "modifiers": mods})
-            add_message(f"You use the {item_name}. {buff_def.get('description', 'A buff is applied!')} ({dur} turns)", "var(--green-bright)")
+            mods = {
+                k: v
+                for k, v in buff_def.items()
+                if k not in ("description", "type", "duration", "tags")
+            }
+            player.setdefault("active_buffs", []).append(
+                {
+                    "name": on_use_buff.replace("_", " ").title(),
+                    "duration": dur,
+                    "modifiers": mods,
+                }
+            )
+            add_message(
+                f"You use the {item_name}. {buff_def.get('description', 'A buff is applied!')} ({dur} turns)",
+                "var(--green-bright)",
+            )
         else:
             consumed = False
-            add_message(f"You cannot use {item_name} outside of battle.", "var(--text-dim)")
+            add_message(
+                f"You cannot use {item_name} outside of battle.", "var(--text-dim)"
+            )
 
         if consumed:
             player["inventory"].remove(item_name)
@@ -4023,9 +4330,9 @@ def action_quick_heal():
     inventory = player.get("inventory", [])
     heal_keywords = ["health", "elixir", "tears", "tonic"]
     potions = [
-        i for i in inventory
-        if any(x in i.lower() for x in heal_keywords)
-        and "mana" not in i.lower()
+        i
+        for i in inventory
+        if any(x in i.lower() for x in heal_keywords) and "mana" not in i.lower()
     ]
 
     if not potions:
@@ -4050,7 +4357,9 @@ def action_quick_heal():
 
     player["hp"] = min(player["max_hp"], player["hp"] + heal)
     player["inventory"].remove(best)
-    add_message(f"Quick Heal: used {best} and recovered {heal} HP.", "var(--green-bright)")
+    add_message(
+        f"Quick Heal: used {best} and recovered {heal} HP.", "var(--green-bright)"
+    )
     _set_activity(player, "healing up between battles")
     save_player(player)
     _autosave()
@@ -4070,8 +4379,13 @@ def action_sort_inventory():
         if not isinstance(data, dict):
             return (99, name)
         type_order = {
-            "weapon": 0, "armor": 1, "offhand": 2, "accessory": 3,
-            "consumable": 4, "book": 5, "material": 6
+            "weapon": 0,
+            "armor": 1,
+            "offhand": 2,
+            "accessory": 3,
+            "consumable": 4,
+            "book": 5,
+            "material": 6,
         }
         t = data.get("type", "misc")
         return (type_order.get(t, 10), name.lower())
@@ -4114,7 +4428,9 @@ def action_read_book():
     already_read = book_key and book_key in read_books
     if book_key and not already_read:
         read_books.append(book_key)
-        add_message(f"You read \"{item_name}\" and add it to your library.", "var(--gold)")
+        add_message(
+            f'You read "{item_name}" and add it to your library.', "var(--gold)"
+        )
 
     save_player(player)
     return render_template(
@@ -4240,7 +4556,9 @@ def action_claim_challenge():
         return redirect(url_for("index"))
 
     ch_id = request.form.get("challenge_id", "")
-    ch_def = next((c for c in GAME_DATA["weekly_challenges"] if c.get("id") == ch_id), None)
+    ch_def = next(
+        (c for c in GAME_DATA["weekly_challenges"] if c.get("id") == ch_id), None
+    )
     if not ch_def:
         add_message("Unknown challenge.", "var(--red)")
         return redirect(url_for("game") + "#challenges")
@@ -4300,7 +4618,8 @@ def land_buy_housing():
     price = max(1, int(base_price * (1.0 - discount)))
     if player["gold"] < price:
         add_message(
-            f"Not enough gold. {h_data.get('name', h_key)} costs {price} gold.", "var(--red)"
+            f"Not enough gold. {h_data.get('name', h_key)} costs {price} gold.",
+            "var(--red)",
         )
         save_player(player)
         return redirect(url_for("game"))
@@ -4309,7 +4628,9 @@ def land_buy_housing():
     owned = player.get("housing_owned", [])
     owned.append(h_key)
     player["housing_owned"] = owned
-    add_message(f"You purchase {h_data.get('name', h_key)} for {price} gold.", "var(--gold)")
+    add_message(
+        f"You purchase {h_data.get('name', h_key)} for {price} gold.", "var(--gold)"
+    )
     _set_activity(player, f"building {h_data.get('name', h_key)} on their land")
     save_player(player)
     _autosave()
@@ -4485,7 +4806,8 @@ def land_buy_pet():
     price = pet_data.get("price", 500)
     if player["gold"] < price:
         add_message(
-            f"Not enough gold. {pet_data.get('name', pet_key)} costs {price} gold.", "var(--red)"
+            f"Not enough gold. {pet_data.get('name', pet_key)} costs {price} gold.",
+            "var(--red)",
         )
         save_player(player)
         return redirect(url_for("game") + "?tab=land")
@@ -4520,7 +4842,9 @@ def land_buy_pet():
             player["max_mp"] = player.get("max_mp", 0) + val
             player["mp"] = min(player["mp"] + val, player["max_mp"])
 
-    add_message(f"You adopt {pet_data.get('name', pet_key)} as your companion!", "var(--gold)")
+    add_message(
+        f"You adopt {pet_data.get('name', pet_key)} as your companion!", "var(--gold)"
+    )
     if boosts:
         boost_str = ", ".join(
             f"+{v} {k}" for k, v in boosts.items() if isinstance(v, int)
@@ -4702,14 +5026,20 @@ def battle_attack():
             eff_enemy_def = enemy["defense"]
             weaken_eff = enemy_effects.get("weaken", {})
             if weaken_eff.get("turns", 0) > 0:
-                eff_enemy_def = max(0, eff_enemy_def - weaken_eff.get("def_reduction", 0))
+                eff_enemy_def = max(
+                    0, eff_enemy_def - weaken_eff.get("def_reduction", 0)
+                )
             armor_crush_eff = enemy_effects.get("armor_crushed", {})
             if armor_crush_eff.get("turns", 0) > 0:
-                eff_enemy_def = max(0, eff_enemy_def - armor_crush_eff.get("def_reduction", 0))
+                eff_enemy_def = max(
+                    0, eff_enemy_def - armor_crush_eff.get("def_reduction", 0)
+                )
 
             # Armor penetration ignores a % of remaining defense
             armor_pen_pct = 0
-            eq_weapon = GAME_DATA["items"].get(player.get("equipment", {}).get("weapon", ""), {})
+            eq_weapon = GAME_DATA["items"].get(
+                player.get("equipment", {}).get("weapon", ""), {}
+            )
             if isinstance(eq_weapon, dict):
                 armor_pen_pct = eq_weapon.get("armor_penetration", 0)
             if armor_pen_pct:
@@ -4721,7 +5051,9 @@ def battle_attack():
             if crit:
                 crit_mult = 1.6 + player.get("attr_crit_damage", 0) / 100.0
                 p_dmg = int(p_dmg * crit_mult)
-                log.append(f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy_name}!")
+                log.append(
+                    f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy_name}!"
+                )
             else:
                 log.append(f"You attack the {enemy_name} for {p_dmg} damage.")
             enemy["hp"] = max(0, enemy["hp"] - p_dmg)
@@ -4893,14 +5225,28 @@ def battle_use_item():
             mped = player["max_mp"] - player["mp"]
             player["hp"] = player["max_hp"]
             player["mp"] = player["max_mp"]
-            log.append(f"You use the {item_name}. Fully restored! (+{healed} HP, +{mped} MP)")
+            log.append(
+                f"You use the {item_name}. Fully restored! (+{healed} HP, +{mped} MP)"
+            )
         elif on_use_buff:
             effects_data = GAME_DATA.get("effects", {})
             buff_def = effects_data.get(on_use_buff, {})
             dur = duration or buff_def.get("duration", 5)
-            mods = {k: v for k, v in buff_def.items() if k not in ("description", "type", "duration", "tags")}
-            player.setdefault("active_buffs", []).append({"name": on_use_buff.replace("_", " ").title(), "duration": dur, "modifiers": mods})
-            log.append(f"You use the {item_name}. {buff_def.get('description', 'A buff is applied!')} ({dur} turns)")
+            mods = {
+                k: v
+                for k, v in buff_def.items()
+                if k not in ("description", "type", "duration", "tags")
+            }
+            player.setdefault("active_buffs", []).append(
+                {
+                    "name": on_use_buff.replace("_", " ").title(),
+                    "duration": dur,
+                    "modifiers": mods,
+                }
+            )
+            log.append(
+                f"You use the {item_name}. {buff_def.get('description', 'A buff is applied!')} ({dur} turns)"
+            )
         elif item_data.get("type") == "consumable":
             # Fallback: name-based healing
             lower = item_name.lower()
@@ -4997,17 +5343,23 @@ def _handle_victory(player, enemy, log):
     gold = enemy.get("gold_reward", 10)
 
     # Apply weather bonuses
-    _area_name_bw = GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "")
+    _area_name_bw = (
+        GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "")
+    )
     current_weather = get_real_weather(_area_name_bw)
     exp_bonus_pct, gold_bonus_pct = get_weather_bonuses(current_weather)
     if exp_bonus_pct > 0:
         bonus_exp = int(exp * exp_bonus_pct)
         exp += bonus_exp
-        log.append(f"Weather bonus: +{bonus_exp} EXP ({current_weather.replace('_', ' ').title()})!")
+        log.append(
+            f"Weather bonus: +{bonus_exp} EXP ({current_weather.replace('_', ' ').title()})!"
+        )
     if gold_bonus_pct > 0:
         bonus_gold = int(gold * gold_bonus_pct)
         gold += bonus_gold
-        log.append(f"Weather bonus: +{bonus_gold} gold ({current_weather.replace('_', ' ').title()})!")
+        log.append(
+            f"Weather bonus: +{bonus_gold} gold ({current_weather.replace('_', ' ').title()})!"
+        )
 
     log.append(f"You gain {exp} experience and {gold} gold.")
 
@@ -5078,7 +5430,11 @@ def _handle_victory(player, enemy, log):
     # World events feed (online players only)
     if session.get("online_username"):
         _pname = player.get("name", session.get("online_username", "Someone"))
-        _aname = GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "the wilds")
+        _aname = (
+            GAME_DATA["areas"]
+            .get(session.get("current_area", ""), {})
+            .get("name", "the wilds")
+        )
         if enemy.get("is_boss"):
             push_world_event(f"{_pname} defeated {enemy['name']} in {_aname}!")
         else:
@@ -5219,7 +5575,9 @@ def api_load():
     session["completed_missions"] = data.get("completed_missions", [])
     _va_top = data.get("visited_areas", [])
     _va_player = (data.get("player") or {}).get("visited_areas", [])
-    session["visited_areas"] = list(set(_va_top + _va_player)) or [session["current_area"]]
+    session["visited_areas"] = list(set(_va_top + _va_player)) or [
+        session["current_area"]
+    ]
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
     session["messages"] = data.get("messages", [])
@@ -5285,7 +5643,9 @@ def dungeon_enter():
     if current_area_key not in allowed_areas:
         area_info = GAME_DATA.get("areas", {}).get(allowed_areas[0], {})
         area_name = area_info.get("name") or allowed_areas[0].replace("_", " ").title()
-        add_message(f"You must travel to {area_name} to enter this dungeon.", "var(--red)")
+        add_message(
+            f"You must travel to {area_name} to enter this dungeon.", "var(--red)"
+        )
         return redirect(url_for("game") + "?tab=dungeons")
 
     difficulty = dungeon.get("difficulty", [1, 3])
@@ -5379,7 +5739,9 @@ def dungeon_proceed():
     area_key = session.get("current_area", "starting_village")
 
     if room_type == "battle":
-        result = process_battle_room(player, room, enemies_data, areas_data, area_key, dungeon=dungeon)
+        result = process_battle_room(
+            player, room, enemies_data, areas_data, area_key, dungeon=dungeon
+        )
         if result["type"] == "battle":
             enemy = result["enemy"]
             session["battle_enemy"] = enemy
@@ -5399,7 +5761,9 @@ def dungeon_proceed():
                 add_message(msg["text"], msg.get("color", "var(--text-light)"))
 
     elif room_type == "ambush":
-        result = process_ambush_room(player, room, enemies_data, areas_data, area_key, dungeon=dungeon)
+        result = process_ambush_room(
+            player, room, enemies_data, areas_data, area_key, dungeon=dungeon
+        )
         if result["type"] == "ambush":
             enemy = result["enemy"]
             session["battle_enemy"] = enemy
@@ -5570,7 +5934,11 @@ def dungeon_complete():
         result = complete_dungeon(player, dungeon)
         for msg in result.get("messages", []):
             add_message(msg["text"], msg.get("color", "var(--gold)"))
-        _group_contribute(result.get("exp", 0), result.get("gold", 0), f"cleared dungeon: {dungeon.get('name', 'a dungeon')}")
+        _group_contribute(
+            result.get("exp", 0),
+            result.get("gold", 0),
+            f"cleared dungeon: {dungeon.get('name', 'a dungeon')}",
+        )
         _record_activity("dungeons")
         # Mark dungeon as completed in player data
         dungeon_id = dungeon.get("id", "")
@@ -5754,7 +6122,9 @@ def api_online_login():
         session["online_username"] = username.lower()
         session["online_user_id"] = result["user_id"]
         session.modified = True
-        return jsonify({"ok": True, "message": result["message"], "username": username.lower()})
+        return jsonify(
+            {"ok": True, "message": result["message"], "username": username.lower()}
+        )
     return jsonify({"ok": False, "message": result["message"]}), 401
 
 
@@ -5762,10 +6132,20 @@ def api_online_login():
 def api_online_logout():
     _autosave()
     game_keys = [
-        "player", "current_area", "completed_missions", "visited_areas",
-        "quest_progress", "seen_cutscenes", "messages",
-        "diary", "npc_unlocked_quests", "battle_enemy", "battle_player_effects",
-        "battle_enemy_effects", "active_dungeon", "pending_cutscene",
+        "player",
+        "current_area",
+        "completed_missions",
+        "visited_areas",
+        "quest_progress",
+        "seen_cutscenes",
+        "messages",
+        "diary",
+        "npc_unlocked_quests",
+        "battle_enemy",
+        "battle_player_effects",
+        "battle_enemy_effects",
+        "active_dungeon",
+        "pending_cutscene",
         "weekly_challenges_progress",
     ]
     for key in game_keys:
@@ -5830,14 +6210,18 @@ def api_cloud_load():
     session["completed_missions"] = data.get("completed_missions", [])
     _va_top = data.get("visited_areas", [])
     _va_player = (data.get("player") or {}).get("visited_areas", [])
-    session["visited_areas"] = list(set(_va_top + _va_player)) or [session["current_area"]]
+    session["visited_areas"] = list(set(_va_top + _va_player)) or [
+        session["current_area"]
+    ]
     session["quest_progress"] = data.get("quest_progress", {})
     session["seen_cutscenes"] = data.get("seen_cutscenes", [])
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
     session.modified = True
-    return jsonify({"ok": True, "message": result["message"], "player_name": player.get("name")})
+    return jsonify(
+        {"ok": True, "message": result["message"], "player_name": player.get("name")}
+    )
 
 
 @app.route("/api/online/cloud_meta")
@@ -5870,6 +6254,7 @@ def api_cloud_download():
 
 
 # ─── Friends & DM Routes ──────────────────────────────────────────────────────
+
 
 @app.route("/friends")
 def friends_page():
@@ -5906,7 +6291,9 @@ def api_friend_request():
     timestamps = _fr_cooldowns.get(username, [])
     timestamps = [t for t in timestamps if now - t < 60]
     if len(timestamps) >= FR_MAX_PER_MINUTE:
-        return jsonify({"ok": False, "message": f"Too many requests. Try again in a moment."})
+        return jsonify(
+            {"ok": False, "message": f"Too many requests. Try again in a moment."}
+        )
     timestamps.append(now)
     _fr_cooldowns[username] = timestamps
     if is_blocked(username, target):
@@ -5970,12 +6357,19 @@ def api_dm_send():
     if not recipient or not message:
         return jsonify({"ok": False, "message": "Missing fields."})
     if len(message) > DM_MAX_LEN:
-        return jsonify({"ok": False, "message": f"Message too long (max {DM_MAX_LEN} chars)."})
+        return jsonify(
+            {"ok": False, "message": f"Message too long (max {DM_MAX_LEN} chars)."}
+        )
     now = _time_module.time()
     last_dm = _dm_cooldowns.get(username, 0)
     if now - last_dm < DM_COOLDOWN_SECS:
         wait = int(DM_COOLDOWN_SECS - (now - last_dm)) + 1
-        return jsonify({"ok": False, "message": f"Please wait {wait}s before sending another message."})
+        return jsonify(
+            {
+                "ok": False,
+                "message": f"Please wait {wait}s before sending another message.",
+            }
+        )
     _dm_cooldowns[username] = now
     if is_blocked(username, recipient):
         return jsonify({"ok": False, "message": "You cannot message this user."})
@@ -6020,6 +6414,7 @@ def api_block_list():
 
 # ─── Trade REST Routes ────────────────────────────────────────────────────────
 
+
 @app.route("/api/player/inventory")
 def api_player_inventory():
     username = session.get("online_username")
@@ -6030,20 +6425,26 @@ def api_player_inventory():
     offered_gold = 0
     active_trade_id = None
     for tid, trade in _active_trades.items():
-        if username and username in (trade["player_a"], trade["player_b"]) and trade["status"] == "active":
+        if (
+            username
+            and username in (trade["player_a"], trade["player_b"])
+            and trade["status"] == "active"
+        ):
             key = "offer_a" if username == trade["player_a"] else "offer_b"
             offered_items = list(trade[key]["items"])
             offered_gold = trade[key]["gold"]
             active_trade_id = tid
             break
-    return jsonify({
-        "ok": True,
-        "inventory": player.get("inventory", []),
-        "gold": player.get("gold", 0),
-        "offered_items": offered_items,
-        "offered_gold": offered_gold,
-        "active_trade_id": active_trade_id,
-    })
+    return jsonify(
+        {
+            "ok": True,
+            "inventory": player.get("inventory", []),
+            "gold": player.get("gold", 0),
+            "offered_items": offered_items,
+            "offered_gold": offered_gold,
+            "active_trade_id": active_trade_id,
+        }
+    )
 
 
 @app.route("/api/trade/apply", methods=["POST"])
@@ -6079,7 +6480,9 @@ def api_trade_apply():
         return jsonify({"ok": False, "message": "Not enough gold."}), 400
     for item in give_items:
         if item not in inventory:
-            return jsonify({"ok": False, "message": f"Item '{item}' not found in inventory."}), 400
+            return jsonify(
+                {"ok": False, "message": f"Item '{item}' not found in inventory."}
+            ), 400
         inventory.remove(item)
     current_gold -= give_gold
     for item in receive_items:
@@ -6092,12 +6495,14 @@ def api_trade_apply():
     trade[applied_key] = True
     if trade.get("applied_a") and trade.get("applied_b"):
         _active_trades.pop(trade_id, None)
-    return jsonify({
-        "ok": True,
-        "message": f"Trade complete! Received {len(receive_items)} item(s) and {receive_gold:,} gold.",
-        "received_items": receive_items,
-        "received_gold": receive_gold,
-    })
+    return jsonify(
+        {
+            "ok": True,
+            "message": f"Trade complete! Received {len(receive_items)} item(s) and {receive_gold:,} gold.",
+            "received_items": receive_items,
+            "received_gold": receive_gold,
+        }
+    )
 
 
 @app.route("/api/dm/unread", methods=["GET"])
@@ -6115,7 +6520,12 @@ def action_customize_character():
         return jsonify({"ok": False, "message": "No active character."})
     cost = 10000
     if player.get("gold", 0) < cost:
-        return jsonify({"ok": False, "message": f"You need {cost:,} gold to change your character."})
+        return jsonify(
+            {
+                "ok": False,
+                "message": f"You need {cost:,} gold to change your character.",
+            }
+        )
     online_user = session.get("online_username")
     data = request.json or {}
     new_name = data.get("name", "").strip()
@@ -6150,13 +6560,18 @@ def action_customize_character():
                 unequipped.append(item)
         player["equipment"] = equipment
         if unequipped:
-            add_message(f"All gear unequipped on class change: {', '.join(unequipped)}.", "var(--text-dim)")
+            add_message(
+                f"All gear unequipped on class change: {', '.join(unequipped)}.",
+                "var(--text-dim)",
+            )
     if not changes:
         return jsonify({"ok": False, "message": "No valid changes provided."})
     player["gold"] -= cost
     save_player(player)
     _autosave()
-    add_message(f"Character updated ({', '.join(changes)}). -{cost:,} gold.", "var(--gold)")
+    add_message(
+        f"Character updated ({', '.join(changes)}). -{cost:,} gold.", "var(--gold)"
+    )
     return jsonify({"ok": True, "message": f"Character updated: {', '.join(changes)}."})
 
 
@@ -6176,11 +6591,16 @@ def on_group_chat_send(data):
     if not message:
         return
     if len(message) > 200:
-        socketio_emit("group_chat_error", {"message": "Message too long (max 200 chars)."})
+        socketio_emit(
+            "group_chat_error", {"message": "Message too long (max 200 chars)."}
+        )
         return
     now = _time_module.time()
     if now - _group_chat_cooldowns.get(username, 0) < GROUP_CHAT_COOLDOWN:
-        socketio_emit("group_chat_error", {"message": f"Wait {GROUP_CHAT_COOLDOWN}s between messages."})
+        socketio_emit(
+            "group_chat_error",
+            {"message": f"Wait {GROUP_CHAT_COOLDOWN}s between messages."},
+        )
         return
     _group_chat_cooldowns[username] = now
     message = censor_text(message)
@@ -6208,7 +6628,9 @@ def groups_page():
             group_data = res.get("group")
     except Exception:
         pass
-    return render_template("groups.html", online_username=online_username, group=group_data)
+    return render_template(
+        "groups.html", online_username=online_username, group=group_data
+    )
 
 
 @app.route("/api/groups/my")
@@ -6281,7 +6703,9 @@ def api_groups_collect_gold():
             player["gold"] = player.get("gold", 0) + gold
             save_player(player)
             _autosave()
-            add_message(f"Collected {gold} gold from the group treasury!", "var(--gold)")
+            add_message(
+                f"Collected {gold} gold from the group treasury!", "var(--gold)"
+            )
     return jsonify(result), 200 if result["ok"] else 400
 
 
@@ -6292,6 +6716,7 @@ def api_groups_collect_gold():
 def api_area_activity():
     """Return other online players in the same area with their last activity."""
     import time as _ta
+
     username = session.get("online_username")
     area = session.get("current_area", "")
     if not username or not area:
@@ -6312,17 +6737,20 @@ def api_area_activity():
         if entry["t"] < cutoff:
             continue
         ago = int(now - entry["t"])
-        results.append({
-            "username": uname,
-            "narrative": _narrativize(entry["text"]),
-            "when": _narrative_when(ago),
-        })
+        results.append(
+            {
+                "username": uname,
+                "narrative": _narrativize(entry["text"]),
+                "when": _narrative_when(ago),
+            }
+        )
 
     results.sort(key=lambda x: x["when"])
     return jsonify({"ok": True, "area": area, "players": results})
 
 
 # ─── Leaderboard ─────────────────────────────────────────────────────────────
+
 
 @app.route("/leaderboard")
 def leaderboard_page():
