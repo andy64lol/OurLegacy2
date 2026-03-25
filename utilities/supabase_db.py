@@ -994,3 +994,101 @@ def get_all_activities(exclude_user_id: str = None) -> List[Dict[str, Any]]:
             "activity_status": activity,
         })
     return out
+
+
+# ─── Password Reset ───────────────────────────────────────────────────────────
+
+RESET_TOKEN_EXPIRY_SECONDS = 3600  # 1 hour
+
+
+def create_password_reset_token(email: str) -> Dict[str, Any]:
+    """
+    Look up a user by email, generate a secure reset token, store it, and
+    return {'ok': bool, 'message': str, 'token': str|None, 'email': str|None}.
+    Always returns ok=True with a generic message to avoid user-enumeration.
+    """
+    email_clean = email.strip().lower()
+    if not email_clean:
+        return {"ok": False, "message": "Please enter your email address.", "token": None, "email": None}
+
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_users")
+            .select("id, email")
+            .eq("email", email_clean)
+            .execute()
+        )
+        if not result.data:
+            return {"ok": True, "message": "sent", "token": None, "email": None}
+
+        user = result.data[0]
+        token = secrets.token_urlsafe(32)
+        client.table("ol2_password_resets").insert({
+            "user_id": user["id"],
+            "token": token,
+            "used": False,
+        }).execute()
+        return {"ok": True, "message": "sent", "token": token, "email": email_clean}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Reset request failed: {e}", "token": None, "email": None}
+
+
+def reset_password_with_token(token: str, new_password: str) -> Dict[str, Any]:
+    """
+    Validate a reset token and update the user's password.
+    Returns {'ok': bool, 'message': str}
+    """
+    import datetime
+
+    token = token.strip()
+    if not token:
+        return {"ok": False, "message": "Invalid reset link."}
+    if not new_password or len(new_password) < 6:
+        return {"ok": False, "message": "Password must be at least 6 characters."}
+
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_password_resets")
+            .select("id, user_id, created_at, used")
+            .eq("token", token)
+            .execute()
+        )
+        if not result.data:
+            return {"ok": False, "message": "Reset link is invalid or has expired."}
+
+        row = result.data[0]
+        if row["used"]:
+            return {"ok": False, "message": "This reset link has already been used."}
+
+        created_at_str = row["created_at"]
+        try:
+            created_at = datetime.datetime.fromisoformat(
+                created_at_str.replace("Z", "+00:00")
+            )
+            now = datetime.datetime.now(datetime.timezone.utc)
+            age = (now - created_at).total_seconds()
+            if age > RESET_TOKEN_EXPIRY_SECONDS:
+                return {"ok": False, "message": "Reset link has expired. Please request a new one."}
+        except Exception:
+            pass
+
+        pw_hash, salt = _hash_password(new_password)
+        client.table("ol2_users").update(
+            {"pw_hash": pw_hash, "salt": salt}
+        ).eq("id", row["user_id"]).execute()
+
+        client.table("ol2_password_resets").update(
+            {"used": True}
+        ).eq("id", row["id"]).execute()
+
+        return {"ok": True, "message": "Password updated successfully. You can now sign in."}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Password reset failed: {e}"}

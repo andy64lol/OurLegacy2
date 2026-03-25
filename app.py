@@ -107,7 +107,10 @@ from utilities.supabase_db import (
     collect_group_gold,
     get_group_leaderboard,
     get_player_leaderboard,
+    create_password_reset_token,
+    reset_password_with_token,
 )
+from utilities.email_sender import send_email as _send_email, is_configured as _email_configured
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)  # type: ignore
@@ -6831,6 +6834,78 @@ def api_leaderboard():
     groups = get_group_leaderboard()
     players = get_player_leaderboard()
     return jsonify({"ok": True, "groups": groups, "players": players})
+
+
+# ─── Password Reset ───────────────────────────────────────────────────────────
+
+
+@app.route("/api/online/forgot-password", methods=["POST"])
+@limiter.limit("3 per hour")
+def api_forgot_password():
+    data = request.get_json(force=True, silent=True) or {}
+    email = data.get("email", "").strip()
+    if not email:
+        return jsonify({"ok": False, "message": "Please enter your email address."}), 400
+
+    result = create_password_reset_token(email)
+    if not result["ok"]:
+        return jsonify({"ok": False, "message": result["message"]}), 500
+
+    if result["token"] and result["email"]:
+        base_url = request.host_url.rstrip("/")
+        reset_url = f"{base_url}/reset-password?token={result['token']}"
+        html_body = f"""
+<html><body style="background:#0a0618;color:#e8deff;font-family:sans-serif;padding:32px;">
+  <div style="max-width:480px;margin:0 auto;background:rgba(18,12,38,0.98);border:1px solid rgba(180,130,255,0.4);border-radius:14px;padding:32px;">
+    <h2 style="color:#b87fff;margin-top:0;">Our Legacy 2 — Password Reset</h2>
+    <p>Hello, Adventurer!</p>
+    <p>We received a request to reset the password for your account. Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.</p>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="{reset_url}" style="background:linear-gradient(135deg,#6030c0,#3a1a80);color:#fff;text-decoration:none;padding:13px 28px;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:0.05em;">Reset My Password</a>
+    </div>
+    <p style="font-size:12px;color:#888;">If you did not request a password reset, you can safely ignore this email. Your password will not change.</p>
+    <p style="font-size:12px;color:#888;">Link: <a href="{reset_url}" style="color:#b87fff;">{reset_url}</a></p>
+  </div>
+</body></html>
+"""
+        text_body = (
+            f"Our Legacy 2 — Password Reset\n\n"
+            f"Click the link below to reset your password (expires in 1 hour):\n{reset_url}\n\n"
+            f"If you did not request this, ignore this email."
+        )
+        _send_email(
+            to=result["email"],
+            subject="Our Legacy 2 — Password Reset",
+            body_html=html_body,
+            body_text=text_body,
+        )
+
+    return jsonify({"ok": True, "message": "If that email is registered, you'll receive a reset link shortly."})
+
+
+@app.route("/reset-password")
+def reset_password_page():
+    token = request.args.get("token", "").strip()
+    return render_template("reset_password.html", token=token)
+
+
+@app.route("/api/online/reset-password", methods=["POST"])
+@limiter.limit("10 per hour")
+def api_reset_password():
+    data = request.get_json(force=True, silent=True) or {}
+    token = data.get("token", "").strip()
+    new_password = data.get("password", "")
+    confirm_password = data.get("confirm", "")
+    if not token:
+        return jsonify({"ok": False, "message": "Invalid reset link."}), 400
+    if not new_password or len(new_password) < 6:
+        return jsonify({"ok": False, "message": "Password must be at least 6 characters."}), 400
+    if new_password != confirm_password:
+        return jsonify({"ok": False, "message": "Passwords do not match."}), 400
+    result = reset_password_with_token(token, new_password)
+    if result["ok"]:
+        return jsonify(result), 200
+    return jsonify(result), 400
 
 
 port = int(os.environ.get("PORT", 5000))
