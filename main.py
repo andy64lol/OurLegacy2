@@ -1,6 +1,4 @@
-def main():
-    print("Hello from repl-nix-workspace!")
+import os
 
-
-if __name__ == "__main__":
-    main()
+print("Starting...")
+os.system("python3 app.py")

@@ -10,7 +10,6 @@ import hashlib
 import base64
 from datetime import datetime
 from typing import Dict, Any, List, Optional
-
 from cryptography.fernet import Fernet, InvalidToken
 
 SAVES_DIR = "data/saves"
@@ -19,14 +18,18 @@ GAME_VERSION = "1.0.0"
 
 SAVE_MAGIC = b'OL2S'
 SALT_SIZE = 16
-APP_SAVE_SECRET = "our_legacy_2_eternal_save_secret_v5"
+
+APP_SAVE_SECRET = os.environ.get("SECRET_SALT", "")
+if not APP_SAVE_SECRET:
+    raise RuntimeError("SECRET_SALT environment variable is required")
+# Old secret (fallback, only until Oct 31)
+OLD_APP_SAVE_SECRET = "our_legacy_2_eternal_save_secret_v5"
 
 # ─── Encrypted Pickle Helpers ─────────────────────────────────────────────────
 
 
-def _derive_key(salt: bytes) -> bytes:
-    """Derive a Fernet key from a salt using SHA-256."""
-    raw = hashlib.sha256(salt + APP_SAVE_SECRET.encode('utf-8')).digest()
+def _derive_key(salt: bytes, secret: str) -> bytes:
+    raw = hashlib.sha256(salt + secret.encode("utf-8")).digest()
     return base64.urlsafe_b64encode(raw)
 
 
@@ -36,7 +39,7 @@ def encrypt_save(save_data: Dict[str, Any]) -> bytes:
     Returns binary: MAGIC(4) + SALT(16) + fernet_token(variable).
     """
     salt = os.urandom(SALT_SIZE)
-    key = _derive_key(salt)
+    key = _derive_key(salt, APP_SAVE_SECRET)
     f = Fernet(key)
     pickled = pickle.dumps(save_data, protocol=4)
     token = f.encrypt(pickled)
@@ -46,23 +49,36 @@ def encrypt_save(save_data: Dict[str, Any]) -> bytes:
 def decrypt_save(data: bytes) -> Dict[str, Any]:
     """
     Decrypt and deserialize encrypted save bytes.
+    Temporarily accepts OLD_APP_SAVE_SECRET until Oct 31, 2026.
     Returns save_data dict.
     Raises ValueError on bad format or decryption failure.
     """
     if not data.startswith(SAVE_MAGIC):
         raise ValueError("Not a valid Our Legacy 2 save file.")
+    
     payload = data[len(SAVE_MAGIC):]
     if len(payload) < SALT_SIZE:
         raise ValueError("Save file is too short or corrupted.")
+    
     salt = payload[:SALT_SIZE]
     token = payload[SALT_SIZE:]
-    key = _derive_key(salt)
-    f = Fernet(key)
-    try:
-        pickled = f.decrypt(token)
-    except InvalidToken as exc:
-        raise ValueError("Save file is corrupted or was modified.") from exc
-    return pickle.loads(pickled)
+    
+    # Secrets to try
+    secrets_to_try = [APP_SAVE_SECRET]
+    if datetime.now() <= datetime(2026, 10, 31, 23, 59, 59):
+        secrets_to_try.append(OLD_APP_SAVE_SECRET)
+    
+    # Attempt decryption
+    for secret in secrets_to_try:
+        key = _derive_key(salt, secret)
+        f = Fernet(key)
+        try:
+            pickled = f.decrypt(token)
+            return pickle.loads(pickled)
+        except InvalidToken:
+            continue
+    
+    raise ValueError("Save file is corrupted or secret mismatch")
 
 
 # ─── Server-Side JSON Helpers (legacy) ───────────────────────────────────────
