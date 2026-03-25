@@ -2865,6 +2865,8 @@ def game():
         area_key=area_key,
         area_name=area_name,
         connections=connections,
+        areas_data=GAME_DATA.get("areas", {}),
+        visited_areas=visited_areas,
         shop_items=shop_items,
         shop_name=shop_name,
         inventory_items=inventory_items,

@@ -718,13 +718,13 @@
 
         <div class="sidebar-nav">
             {% if online_user %}
-            <button class="btn btn-danger btn-small" onclick="logoutAndSave()" style="border-color:var(--mana-bright);">
-                Logout and Save
+            <button class="btn btn-danger btn-small" onclick="logoutAndSave()">
+                Save to Exit
             </button>
             <div id="cloud-save-status" style="font-size:11px;text-align:center;min-height:14px;margin-top:2px;"></div>
             {% else %}
             <button class="btn btn-danger btn-small" onclick="saveAndQuit()">
-                Save and Quit to Main Menu
+                Save to Exit
             </button>
             {% endif %}
             <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;"><img
@@ -740,6 +740,7 @@
                 <button class="tab-btn active" data-tab="explore">Explore</button>
                 <button class="tab-btn" data-tab="inventory">Equipment</button>
                 <button class="tab-btn" data-tab="travel">Travel</button>
+                <button class="tab-btn" data-tab="map">Map</button>
                 {% if shop_items %}
                 <button class="tab-btn" data-tab="shop">{{ shop_name or 'Shop' }}</button>
                 {% endif %}
@@ -1185,6 +1186,19 @@
                     {% else %}
                     <p class="empty-notice">No paths lead onward from here.</p>
                     {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Map ── -->
+        <div class="tab-content" id="tab-map">
+            <div class="panel">
+                <div class="panel-title">World Map</div>
+                <div class="panel-body" style="padding:8px 0 0;">
+                    <p class="panel-note" style="margin-bottom:10px;">
+                        Fog of war hides unexplored areas. Current location is highlighted in gold.
+                    </p>
+                    <canvas id="world-map-canvas" style="display:block;width:100%;border-radius:8px;background:rgba(0,0,0,0.35);cursor:grab;touch-action:none;"></canvas>
                 </div>
             </div>
         </div>
@@ -2332,6 +2346,51 @@
 </div>
 {% endif %}
 
+<!-- Settings Modal -->
+<div id="settings-modal" onclick="settingsOverlayClick(event)"
+    style="display:none;position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,0.78);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+    <div style="background:linear-gradient(160deg,rgba(18,12,38,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.35);border-radius:14px;padding:26px 24px;width:100%;max-width:380px;position:relative;box-shadow:0 0 40px rgba(140,90,255,0.2);">
+        <button onclick="closeSettings()"
+            style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;">&times;</button>
+        <div style="text-align:center;margin-bottom:18px;font-size:18px;font-weight:700;color:var(--gold);">&#9881; Settings</div>
+
+        <div style="margin-bottom:16px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Music</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <button id="settings-music-toggle" class="btn btn-secondary btn-small" onclick="settingsToggleMusic()" style="min-width:48px;">On</button>
+                <input id="settings-music-slider" type="range" min="0" max="100" value="30"
+                    oninput="settingsSetVolume(this.value)"
+                    style="flex:1;accent-color:var(--gold);">
+                <span id="settings-music-vol" style="font-size:12px;color:var(--text-dim);min-width:32px;text-align:right;">30%</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Background</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="1" onclick="applyBackground('1')">Forest</button>
+                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="2" onclick="applyBackground('2')">Ruins</button>
+                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="3" onclick="applyBackground('3')">Dungeon</button>
+                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="4" onclick="applyBackground('4')">Tavern</button>
+                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="none" onclick="applyBackground('none')">None</button>
+            </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Display</div>
+            <button id="settings-fs-btn" class="btn btn-secondary btn-small" onclick="settingsToggleFullscreen()" style="width:100%;">Go Fullscreen</button>
+        </div>
+
+        {% if online_user %}
+        <div style="margin-top:8px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Account</div>
+            <button class="btn btn-secondary btn-small" onclick="closeSettings();onlineLogout();"
+                style="width:100%;opacity:0.7;font-size:12px;">Log Out (without saving)</button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
 <!-- Character Customization Modal -->
 <div id="customize-modal-overlay" onclick="closeCustomizeModal(event)"
     style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.78);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
@@ -2716,6 +2775,217 @@
             if (btn) btn.disabled = false;
         }
     };
+</script>
+
+<!-- World Map Script -->
+<script>
+(function() {
+    var AREAS_DATA    = {{ areas_data | tojson }};
+    var VISITED       = new Set({{ visited_areas | tojson }});
+    var CURRENT_AREA  = {{ area_key | tojson }};
+
+    var canvas  = null;
+    var ctx     = null;
+    var nodes   = {};
+    var pan     = {x: 0, y: 0};
+    var scale   = 1;
+    var dragging = false;
+    var lastMouse = {x: 0, y: 0};
+
+    var NODE_R    = 18;
+    var H_GAP     = 130;
+    var V_GAP     = 90;
+
+    /* BFS layout */
+    function buildLayout() {
+        var levels   = {};
+        var visited  = {};
+        var queue    = ['starting_village'];
+        var levelMap = {'starting_village': 0};
+        visited['starting_village'] = true;
+
+        while (queue.length) {
+            var cur = queue.shift();
+            var lv  = levelMap[cur];
+            if (!levels[lv]) levels[lv] = [];
+            levels[lv].push(cur);
+            var conns = (AREAS_DATA[cur] || {}).connections || [];
+            conns.forEach(function(nb) {
+                if (!visited[nb] && AREAS_DATA[nb]) {
+                    visited[nb]   = true;
+                    levelMap[nb]  = lv + 1;
+                    queue.push(nb);
+                }
+            });
+        }
+
+        var maxLevel = Object.keys(levels).reduce(function(a,b){return Math.max(a,+b);}, 0);
+
+        Object.keys(levels).forEach(function(lv) {
+            var row = levels[lv];
+            var totalW = (row.length - 1) * H_GAP;
+            row.forEach(function(key, i) {
+                nodes[key] = {
+                    x: i * H_GAP - totalW / 2,
+                    y: +lv * V_GAP
+                };
+            });
+        });
+
+        return maxLevel;
+    }
+
+    function initCanvas() {
+        canvas = document.getElementById('world-map-canvas');
+        if (!canvas) return;
+        ctx = canvas.getContext('2d');
+        buildLayout();
+
+        var maxLevel = Object.keys(nodes).reduce(function(a,k){return Math.max(a, nodes[k].y);}, 0);
+        var maxX     = Object.keys(nodes).reduce(function(a,k){return Math.max(a, Math.abs(nodes[k].x));}, 0);
+
+        var W = Math.max(600, (maxX * 2) + 200);
+        var H = Math.min(480, Math.max(300, maxLevel + 100));
+        canvas.width  = W;
+        canvas.height = H;
+        canvas.style.height = H + 'px';
+
+        pan.x = W / 2;
+        pan.y = 40;
+
+        draw();
+        bindEvents();
+    }
+
+    function draw() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(pan.x, pan.y);
+        ctx.scale(scale, scale);
+
+        /* Draw edges */
+        Object.keys(AREAS_DATA).forEach(function(key) {
+            if (!nodes[key]) return;
+            var conns = (AREAS_DATA[key] || {}).connections || [];
+            conns.forEach(function(nb) {
+                if (!nodes[nb]) return;
+                ctx.beginPath();
+                ctx.moveTo(nodes[key].x, nodes[key].y);
+                ctx.lineTo(nodes[nb].x,  nodes[nb].y);
+                var bothVisited = VISITED.has(key) || VISITED.has(nb);
+                ctx.strokeStyle = bothVisited ? 'rgba(200,168,75,0.22)' : 'rgba(255,255,255,0.06)';
+                ctx.lineWidth   = 1.5;
+                ctx.stroke();
+            });
+        });
+
+        /* Draw nodes */
+        Object.keys(nodes).forEach(function(key) {
+            var n = nodes[key];
+            var isCurrent  = key === CURRENT_AREA;
+            var isVisited  = VISITED.has(key);
+
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, NODE_R, 0, Math.PI * 2);
+
+            if (isCurrent) {
+                var grd = ctx.createRadialGradient(n.x, n.y, 2, n.x, n.y, NODE_R);
+                grd.addColorStop(0, '#ffe76a');
+                grd.addColorStop(1, '#c8a84b');
+                ctx.fillStyle = grd;
+                ctx.shadowColor = '#ffdb4a';
+                ctx.shadowBlur  = 14;
+            } else if (isVisited) {
+                ctx.fillStyle   = 'rgba(80,160,100,0.55)';
+                ctx.shadowBlur  = 0;
+            } else {
+                ctx.fillStyle   = 'rgba(40,40,60,0.8)';
+                ctx.shadowBlur  = 0;
+            }
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.strokeStyle = isCurrent ? '#ffe76a' : isVisited ? 'rgba(120,200,140,0.6)' : 'rgba(100,100,140,0.4)';
+            ctx.lineWidth   = isCurrent ? 2.5 : 1.5;
+            ctx.stroke();
+
+            /* Label */
+            var area     = AREAS_DATA[key] || {};
+            var label    = isVisited ? (area.name || key.replace(/_/g, ' ')) : '???';
+            ctx.font     = isCurrent ? 'bold 9px sans-serif' : '8.5px sans-serif';
+            ctx.fillStyle= isCurrent ? '#ffe76a' : isVisited ? '#b8d8b8' : '#555577';
+            ctx.textAlign= 'center';
+
+            var words = label.split(' ');
+            var lines  = [];
+            var cur2   = '';
+            words.forEach(function(w) {
+                var test = cur2 ? cur2 + ' ' + w : w;
+                if (ctx.measureText(test).width > NODE_R * 2.6) {
+                    if (cur2) lines.push(cur2);
+                    cur2 = w;
+                } else { cur2 = test; }
+            });
+            if (cur2) lines.push(cur2);
+
+            var lineH = 9;
+            var startY = n.y + NODE_R + 12;
+            lines.forEach(function(ln, li) {
+                ctx.fillText(ln, n.x, startY + li * lineH);
+            });
+        });
+
+        ctx.restore();
+    }
+
+    function bindEvents() {
+        canvas.addEventListener('mousedown', function(e) {
+            dragging = true;
+            lastMouse = {x: e.clientX, y: e.clientY};
+            canvas.style.cursor = 'grabbing';
+        });
+        window.addEventListener('mouseup', function() {
+            dragging = false;
+            canvas.style.cursor = 'grab';
+        });
+        window.addEventListener('mousemove', function(e) {
+            if (!dragging) return;
+            pan.x += e.clientX - lastMouse.x;
+            pan.y += e.clientY - lastMouse.y;
+            lastMouse = {x: e.clientX, y: e.clientY};
+            draw();
+        });
+        canvas.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            var delta = e.deltaY < 0 ? 1.1 : 0.9;
+            scale = Math.min(3, Math.max(0.3, scale * delta));
+            draw();
+        }, {passive: false});
+        canvas.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 1) {
+                dragging = true;
+                lastMouse = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+            }
+        }, {passive: true});
+        canvas.addEventListener('touchmove', function(e) {
+            if (!dragging || e.touches.length !== 1) return;
+            pan.x += e.touches[0].clientX - lastMouse.x;
+            pan.y += e.touches[0].clientY - lastMouse.y;
+            lastMouse = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+            draw();
+        }, {passive: true});
+        canvas.addEventListener('touchend', function() { dragging = false; });
+    }
+
+    /* Initialize when map tab becomes visible */
+    document.addEventListener('tabChanged', function(e) {
+        if (e.detail === 'map') {
+            if (!canvas) initCanvas();
+            else draw();
+        }
+    });
+})();
 </script>
 {% endif %}
 {% if show_create %}
