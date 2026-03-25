@@ -6136,7 +6136,8 @@ def api_online_register():
     data = request.get_json(force=True, silent=True) or {}
     username = data.get("username", "").strip()
     password = data.get("password", "")
-    result = register_user(username, password)
+    email = data.get("email", "").strip() or None
+    result = register_user(username, password, email=email)
     if result["ok"]:
         return jsonify(result), 200
     return jsonify(result), 400
@@ -6151,18 +6152,20 @@ def api_online_login():
     result = login_user(username, password)
     if result["ok"]:
         user_id = result["user_id"]
+        # Use the actual stored username (the user may have logged in via email)
+        actual_username = result.get("username") or username.lower()
         session_token = str(uuid.uuid4())
         # Move the old token to the grace slot so the kicked session can save one last time.
         old_token = _active_sessions.get(user_id)
         if old_token:
             _dying_sessions[user_id] = old_token
         _active_sessions[user_id] = session_token
-        session["online_username"] = username.lower()
+        session["online_username"] = actual_username
         session["online_user_id"] = user_id
         session["session_token"] = session_token
         session.modified = True
         return jsonify(
-            {"ok": True, "message": result["message"], "username": username.lower()}
+            {"ok": True, "message": result["message"], "username": actual_username}
         )
     return jsonify({"ok": False, "message": result["message"]}), 401
 

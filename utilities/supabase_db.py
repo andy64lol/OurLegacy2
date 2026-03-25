@@ -68,9 +68,16 @@ def _hash_password(password: str, salt: Optional[str] = None) -> tuple[str, str]
 
 # ─── Account Management ───────────────────────────────────────────────────────
 
-def register_user(username: str, password: str) -> Dict[str, Any]:
+def _is_valid_email(email: str) -> bool:
+    """Basic email format check."""
+    import re
+    return bool(re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email))
+
+
+def register_user(username: str, password: str, email: Optional[str] = None) -> Dict[str, Any]:
     """
     Register a new user account.
+    Email is optional but must be unique and valid if provided.
     Returns {'ok': bool, 'message': str}
     """
     username = username.strip().lower()
@@ -83,6 +90,12 @@ def register_user(username: str, password: str) -> Dict[str, Any]:
     if contains_profanity(username):
         return {"ok": False, "message": "Username contains inappropriate language."}
 
+    email_clean: Optional[str] = None
+    if email:
+        email_clean = email.strip().lower()
+        if not _is_valid_email(email_clean):
+            return {"ok": False, "message": "Invalid email address."}
+
     def _do():
         client = _get_client()
         existing = (
@@ -93,10 +106,22 @@ def register_user(username: str, password: str) -> Dict[str, Any]:
         )
         if existing.data:
             return {"ok": False, "message": "Username already taken."}
+
+        if email_clean:
+            email_taken = (
+                client.table("ol2_users")
+                .select("id")
+                .eq("email", email_clean)
+                .execute()
+            )
+            if email_taken.data:
+                return {"ok": False, "message": "An account with that email already exists."}
+
         pw_hash, salt = _hash_password(password)
-        client.table("ol2_users").insert(
-            {"username": username, "pw_hash": pw_hash, "salt": salt}
-        ).execute()
+        row: Dict[str, Any] = {"username": username, "pw_hash": pw_hash, "salt": salt}
+        if email_clean:
+            row["email"] = email_clean
+        client.table("ol2_users").insert(row).execute()
         return {"ok": True, "message": f"Account '{username}' created successfully!"}
 
     try:
@@ -105,33 +130,43 @@ def register_user(username: str, password: str) -> Dict[str, Any]:
         return {"ok": False, "message": f"Registration failed: {e}"}
 
 
-def login_user(username: str, password: str) -> Dict[str, Any]:
+def login_user(username_or_email: str, password: str) -> Dict[str, Any]:
     """
-    Authenticate a user.
-    Returns {'ok': bool, 'message': str, 'user_id': str|None}
+    Authenticate a user by username or email.
+    Returns {'ok': bool, 'message': str, 'user_id': str|None, 'username': str|None}
     """
-    username = username.strip().lower()
+    identifier = username_or_email.strip().lower()
+    by_email = "@" in identifier
 
     def _do():
         client = _get_client()
-        result = (
-            client.table("ol2_users")
-            .select("id, pw_hash, salt")
-            .eq("username", username)
-            .execute()
-        )
+        if by_email:
+            result = (
+                client.table("ol2_users")
+                .select("id, username, pw_hash, salt")
+                .eq("email", identifier)
+                .execute()
+            )
+        else:
+            result = (
+                client.table("ol2_users")
+                .select("id, username, pw_hash, salt")
+                .eq("username", identifier)
+                .execute()
+            )
         if not result.data:
-            return {"ok": False, "message": "Invalid username or password.", "user_id": None}
+            return {"ok": False, "message": "Invalid username/email or password.", "user_id": None, "username": None}
         row = result.data[0]
         pw_hash, _ = _hash_password(password, salt=row["salt"])
         if pw_hash != row["pw_hash"]:
-            return {"ok": False, "message": "Invalid username or password.", "user_id": None}
-        return {"ok": True, "message": f"Welcome back, {username}!", "user_id": str(row["id"])}
+            return {"ok": False, "message": "Invalid username/email or password.", "user_id": None, "username": None}
+        actual_username = row["username"]
+        return {"ok": True, "message": f"Welcome back, {actual_username}!", "user_id": str(row["id"]), "username": actual_username}
 
     try:
         return _run(_do)
     except Exception as e:
-        return {"ok": False, "message": f"Login failed: {e}", "user_id": None}
+        return {"ok": False, "message": f"Login failed: {e}", "user_id": None, "username": None}
 
 
 # ─── Cloud Save / Load ────────────────────────────────────────────────────────

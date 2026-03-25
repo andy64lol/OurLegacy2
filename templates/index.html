@@ -170,8 +170,8 @@
                 style="flex:1;font-size:12px;opacity:0.5;">Register</button>
         </div>
         <form id="online-login-form" onsubmit="onlineLogin();return false;" autocomplete="on">
-            <input type="text" id="ol-username" name="username" placeholder="Username" autocomplete="username"
-                maxlength="20"
+            <input type="text" id="ol-username" name="username" placeholder="Username or Email" autocomplete="username"
+                maxlength="100"
                 style="width:100%;box-sizing:border-box;margin-bottom:8px;padding:9px 12px;background:rgba(0,0,0,0.45);border:1px solid rgba(180,130,255,0.4);border-radius:7px;color:var(--text-light);font-size:13px;"
                 onkeydown="if(event.key==='Enter')onlineLogin()">
             <input type="password" id="ol-password" name="password" placeholder="Password"
@@ -185,6 +185,9 @@
             style="display:none;">
             <input type="text" id="ol-reg-username" name="username" placeholder="Choose username (3–20 chars)"
                 autocomplete="username" maxlength="20"
+                style="width:100%;box-sizing:border-box;margin-bottom:8px;padding:9px 12px;background:rgba(0,0,0,0.45);border:1px solid rgba(180,130,255,0.4);border-radius:7px;color:var(--text-light);font-size:13px;">
+            <input type="email" id="ol-reg-email" name="email" placeholder="Email address (optional)"
+                autocomplete="email"
                 style="width:100%;box-sizing:border-box;margin-bottom:8px;padding:9px 12px;background:rgba(0,0,0,0.45);border:1px solid rgba(180,130,255,0.4);border-radius:7px;color:var(--text-light);font-size:13px;">
             <input type="password" id="ol-reg-password" name="password" placeholder="Choose password (min 6 chars)"
                 autocomplete="new-password"
@@ -2592,6 +2595,7 @@
     }
     async function onlineRegister() {
         var u = (document.getElementById('ol-reg-username') || {}).value || '';
+        var e = (document.getElementById('ol-reg-email') || {}).value || '';
         var p = (document.getElementById('ol-reg-password') || {}).value || '';
         var c = (document.getElementById('ol-reg-confirm') || {}).value || '';
         if (!u || !p) {setOnlineStatus('Fill in all fields.', false); return;}
@@ -2599,10 +2603,12 @@
         setOnlineStatus('Creating account...', true);
         setLoginBtnsDisabled(true);
         try {
+            var body = {username: u, password: p};
+            if (e) body.email = e;
             var res = await fetch('/api/online/register', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: u, password: p})
+                body: JSON.stringify(body)
             });
             var json = await res.json();
             if (json.ok) {
