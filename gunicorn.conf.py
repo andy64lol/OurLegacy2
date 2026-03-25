@@ -1,22 +1,15 @@
 # gunicorn.conf.py
-
-# Patch the master process with gevent so the app module can be imported in
-# post_fork (workers inherit the patched stdlib via fork).
-from gevent import monkey
-monkey.patch_all()
+#
+# Do NOT call monkey.patch_all() here (master process).
+# The gevent worker class patches each worker automatically in its own process.
+# Patching in the master causes gunicorn's internal Timer threads to become
+# greenlets; when those timers finish they try to remove themselves from
+# threading._active but gevent has already cleaned them up, producing:
+#   KeyError: <ident>  in threading._delete
+# Removing the master-level patch eliminates that error entirely.
 
 worker_class = "gevent"
 workers = 1
-
-# Disable the gunicorn control-socket server.  In newer gunicorn versions the
-# control server tries to use asyncio inside a gevent worker where no asyncio
-# event loop exists, which produces:
-#   [ERROR] Control server error: no running event loop
-# followed by a threading KeyError when the Timer it creates is cleaned up.
-# The control socket is only needed for live-reload / signal forwarding via
-# `gunicorn --reload`, which we don't use.  Disabling it silences both errors
-# with no loss of functionality.
-control_socket_disable = True
 
 
 def post_fork(server, worker):

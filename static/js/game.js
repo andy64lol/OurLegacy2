@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
     initLowHpWarning();
     initBattleKeys();
     checkMobile();
+    initAmbientParticles();
+    hookParticleEvents();
 });
 
 function gameConfirm(message, onConfirm) {
@@ -828,5 +830,93 @@ function initSidebarToggle() {
 
     btn.addEventListener('click', function() {
         setCollapsed(!layout.classList.contains('sidebar-collapsed'));
+    });
+}
+
+/* ── Ambient Particle System ── */
+
+function initAmbientParticles() {
+    var layer = document.createElement('div');
+    layer.id = 'ambient-particle-layer';
+    document.body.appendChild(layer);
+
+    var COLORS = ['#c8a84b', '#a076d4', '#4bbcff', '#e0e0e0', '#7cffb2'];
+    var count = 28;
+
+    for (var i = 0; i < count; i++) {
+        (function(idx) {
+            var delay = Math.random() * 18;
+            setTimeout(function() { spawnAmbient(layer, COLORS); }, delay * 1000);
+        })(i);
+    }
+
+    setInterval(function() {
+        if (layer.childElementCount < count) spawnAmbient(layer, COLORS);
+    }, 700);
+}
+
+function spawnAmbient(layer, colors) {
+    var p = document.createElement('div');
+    p.className = 'ambient-particle';
+    var size    = 3 + Math.random() * 5;
+    var startX  = Math.random() * 100;
+    var dur     = 8 + Math.random() * 14;
+    var drift   = (Math.random() - 0.5) * 120;
+    var color   = colors[Math.floor(Math.random() * colors.length)];
+    p.style.cssText = [
+        'left:' + startX + 'vw',
+        'width:' + size + 'px',
+        'height:' + size + 'px',
+        'background:' + color,
+        'animation-duration:' + dur + 's',
+        '--drift:' + drift + 'px'
+    ].join(';');
+    layer.appendChild(p);
+    p.addEventListener('animationend', function() { p.remove(); });
+}
+
+function burstParticles(x, y, color, count) {
+    color = color || '#c8a84b';
+    count = count || 18;
+    var layer = document.getElementById('ambient-particle-layer') || document.body;
+    for (var i = 0; i < count; i++) {
+        var p = document.createElement('div');
+        p.className = 'burst-particle';
+        var angle = (360 / count) * i + (Math.random() * 20 - 10);
+        var dist  = 40 + Math.random() * 80;
+        var size  = 4 + Math.random() * 6;
+        p.style.cssText = [
+            'left:' + x + 'px',
+            'top:' + y + 'px',
+            'width:' + size + 'px',
+            'height:' + size + 'px',
+            'background:' + color,
+            '--angle:' + angle + 'deg',
+            '--dist:' + dist + 'px'
+        ].join(';');
+        layer.appendChild(p);
+        p.addEventListener('animationend', function() { p.remove(); });
+    }
+}
+
+function hookParticleEvents() {
+    var origShowToast = showToast;
+    showToast = function(text, color, duration) {
+        origShowToast(text, color, duration);
+        var lc = (text || '').toLowerCase();
+        var burstColor = null;
+        if (lc.indexOf('level') !== -1 && lc.indexOf('up') !== -1)       burstColor = '#c8a84b';
+        else if (lc.indexOf('victory') !== -1 || lc.indexOf('defeated') !== -1) burstColor = '#7cffb2';
+        else if (lc.indexOf('legendary') !== -1 || lc.indexOf('epic') !== -1)   burstColor = '#a076d4';
+        else if (lc.indexOf('gold') !== -1)                                       burstColor = '#ffd700';
+        else if (lc.indexOf('craft') !== -1)                                      burstColor = '#4bbcff';
+        if (burstColor) {
+            burstParticles(window.innerWidth / 2, window.innerHeight / 2, burstColor, 22);
+        }
+    };
+
+    document.querySelectorAll('.level-up-banner, .victory-banner, [class*="level-up"]').forEach(function(el) {
+        var rect = el.getBoundingClientRect();
+        burstParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, '#c8a84b', 24);
     });
 }

@@ -701,6 +701,45 @@ body.ol2-bg-4 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24
     100% { transform: translate(-50%,-50%) rotate(var(--angle)) translateX(var(--dist)) scale(0); opacity: 0; }
 }
 
+/* Ambient floating particles */
+#ambient-particle-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+.ambient-particle {
+    position: absolute;
+    bottom: -10px;
+    border-radius: 50%;
+    opacity: 0;
+    animation-name: ambientRise;
+    animation-duration: 12s;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+}
+@keyframes ambientRise {
+    0%   { transform: translateX(0)              translateY(0)    scale(0.6); opacity: 0; }
+    10%  { opacity: 0.55; }
+    80%  { opacity: 0.35; }
+    100% { transform: translateX(var(--drift,0)) translateY(-110vh) scale(1.1); opacity: 0; }
+}
+
+/* Burst particles */
+.burst-particle {
+    position: fixed;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+    animation: burstFly 0.75s ease-out forwards;
+}
+@keyframes burstFly {
+    0%   { transform: translate(-50%,-50%) rotate(var(--angle)) translateX(0)           scale(1);   opacity: 1; }
+    100% { transform: translate(-50%,-50%) rotate(var(--angle)) translateX(var(--dist)) scale(0);   opacity: 0; }
+}
+
 .portal-label {
     position: absolute;
     bottom: 25%;
