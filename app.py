@@ -150,7 +150,7 @@ _active_sessions: dict = {}
 _dying_sessions: dict = {}
 # Inactivity tracking: maps user_id -> last_activity_timestamp
 _session_last_activity: dict = {}
-ONLINE_SESSION_TIMEOUT = 600  # 10 minutes of inactivity
+ONLINE_SESSION_TIMEOUT = 1800  # 30 minutes of inactivity
 CHAT_COOLDOWN_SECS = 10
 CHAT_MAX_LEN = 200
 
@@ -1040,6 +1040,17 @@ def _diary_append(text: str, color: str = "var(--text-light)") -> None:
 
 
 _AUTOSAVE_DIARY_INTERVAL = 300  # seconds between autosave diary entries
+
+
+def _effective_mob_level(player_level: int) -> int:
+    """
+    Return the effective level used to scale mob stats.
+    When the player is level 10+, mobs are nerfed to player_level // 10 (min 1).
+    Below level 10 normal level is used so early combat is still meaningful.
+    """
+    if player_level >= 10:
+        return max(1, player_level // 10)
+    return player_level
 
 
 def _is_session_valid() -> bool:
@@ -3652,7 +3663,7 @@ def action_explore():
         boss_key = random.choice(possible_bosses)
         boss_data = GAME_DATA.get("bosses", {}).get(boss_key, {})
         if boss_data:
-            lvl = player["level"]
+            lvl = _effective_mob_level(player["level"])
             scale = 1 + (lvl - 1) * 0.12
             enemy = {
                 "key": boss_key,
@@ -3689,7 +3700,7 @@ def action_explore():
         enemy_data = GAME_DATA["enemies"].get(enemy_key, {})
         if not isinstance(enemy_data, dict):
             enemy_data = {}
-        lvl = player["level"]
+        lvl = _effective_mob_level(player["level"])
         scale = 1 + (lvl - 1) * 0.12
         enemy = {
             "key": enemy_key,
@@ -3971,7 +3982,7 @@ def action_challenge_boss():
     boss_cooldowns[boss_key] = now_ts + BOSS_CHALLENGE_COOLDOWN
     player["boss_cooldowns"] = boss_cooldowns
 
-    lvl = player["level"]
+    lvl = _effective_mob_level(player["level"])
     scale = 1 + (lvl - 1) * 0.12
     enemy = {
         "key": boss_key,

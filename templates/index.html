@@ -3401,6 +3401,58 @@
 </script>
 {% endif %}
 
+{% if online_user is defined and online_user %}
+<!-- Session Timeout Warning Overlay -->
+<div id="session-expired-overlay"
+    style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.88);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+    <div style="background:linear-gradient(160deg,rgba(22,10,40,0.99),rgba(10,4,20,0.99));border:2px solid rgba(255,80,80,0.55);border-radius:14px;padding:36px 28px;width:100%;max-width:360px;box-shadow:0 0 60px rgba(200,40,40,0.4);text-align:center;">
+        <div style="font-size:36px;margin-bottom:12px;">&#9200;</div>
+        <div style="font-size:16px;font-weight:bold;color:#ff6060;margin-bottom:10px;letter-spacing:0.03em;">Session Expired</div>
+        <p style="font-size:13px;color:var(--text-dim);line-height:1.6;margin:0 0 20px 0;">
+            You have been inactive for 30 minutes. Returning to the main page&hellip;
+        </p>
+        <div id="session-expired-countdown" style="font-size:22px;font-weight:bold;color:#ff6060;"></div>
+    </div>
+</div>
+<script>
+(function () {
+    var SESSION_CHECK_INTERVAL = 60000; // poll every 60s
+    var REDIRECT_DELAY = 5000; // 5s warning then redirect
+    var countdownTimer = null;
+    var redirectTimer = null;
+
+    function showExpiredOverlay() {
+        var overlay = document.getElementById('session-expired-overlay');
+        if (!overlay) return;
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        var remaining = REDIRECT_DELAY / 1000;
+        var cd = document.getElementById('session-expired-countdown');
+        if (cd) cd.textContent = remaining + 's';
+        countdownTimer = setInterval(function () {
+            remaining -= 1;
+            if (cd) cd.textContent = remaining + 's';
+        }, 1000);
+        redirectTimer = setTimeout(function () {
+            clearInterval(countdownTimer);
+            window.location.href = '/';
+        }, REDIRECT_DELAY);
+    }
+
+    async function checkSession() {
+        try {
+            var res = await fetch('/api/session/check', { method: 'GET', cache: 'no-store' });
+            if (!res.ok) { showExpiredOverlay(); return; }
+            var json = await res.json();
+            if (!json.valid) { showExpiredOverlay(); }
+        } catch (e) { /* network issue — skip this check */ }
+    }
+
+    setInterval(checkSession, SESSION_CHECK_INTERVAL);
+})();
+</script>
+{% endif %}
+
 {% if online_user is defined and online_user and user_has_email is defined and not user_has_email %}
 <!-- Email Setup / Verification Modal -->
 <div id="email-setup-overlay"
