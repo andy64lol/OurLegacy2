@@ -996,6 +996,60 @@ def get_all_activities(exclude_user_id: str = None) -> List[Dict[str, Any]]:
     return out
 
 
+# ─── Email Management ────────────────────────────────────────────────────────
+
+
+def get_user_email(user_id: str) -> Optional[str]:
+    """Return the email address for the given user_id, or None if unset."""
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_users")
+            .select("email")
+            .eq("id", user_id)
+            .execute()
+        )
+        if result.data:
+            return result.data[0].get("email") or None
+        return None
+
+    try:
+        return _run(_do)
+    except Exception:
+        return None
+
+
+def update_user_email(user_id: str, email: str) -> Dict[str, Any]:
+    """
+    Set or update the email address for a user.
+    Returns {'ok': bool, 'message': str}
+    """
+    email_clean = email.strip().lower()
+    if not email_clean:
+        return {"ok": False, "message": "Please enter an email address."}
+    if not _is_valid_email(email_clean):
+        return {"ok": False, "message": "Invalid email address format."}
+
+    def _do():
+        client = _get_client()
+        taken = (
+            client.table("ol2_users")
+            .select("id")
+            .eq("email", email_clean)
+            .neq("id", user_id)
+            .execute()
+        )
+        if taken.data:
+            return {"ok": False, "message": "That email is already linked to another account."}
+        client.table("ol2_users").update({"email": email_clean}).eq("id", user_id).execute()
+        return {"ok": True, "message": "Email address saved."}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Could not save email: {e}"}
+
+
 # ─── Password Reset ───────────────────────────────────────────────────────────
 
 RESET_TOKEN_EXPIRY_SECONDS = 3600  # 1 hour

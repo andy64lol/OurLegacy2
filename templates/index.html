@@ -735,6 +735,12 @@
                 style="font-size:11px;color:var(--mana-bright);text-align:center;padding:3px 0;opacity:0.85;display:flex;align-items:center;justify-content:center;gap:4px;">
                 <img src="/game_assets/glyphs/chat.png" alt="chat"
                     style="width:22px;height:22px;image-rendering:pixelated;"> {{ online_user }}</div>
+            {% if user_has_email is defined and not user_has_email %}
+            <button onclick="openEmailSetupModal()" title="Add an email address for password recovery"
+                style="width:100%;background:rgba(180,100,20,0.25);border:1px solid rgba(220,150,40,0.6);border-radius:6px;color:#e8a020;font-size:11px;padding:4px 8px;cursor:pointer;margin-top:3px;display:flex;align-items:center;justify-content:center;gap:4px;">
+                &#9888; Add email address
+            </button>
+            {% endif %}
             {% endif %}
         </div>
 
@@ -3392,6 +3398,76 @@
             if (log) log.scrollTop = log.scrollHeight;
         });
     })();
+</script>
+{% endif %}
+
+{% if online_user is defined and online_user and user_has_email is defined and not user_has_email %}
+<!-- Email Setup Modal -->
+<div id="email-setup-overlay"
+    style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+    <div style="background:linear-gradient(160deg,rgba(22,14,44,0.99),rgba(10,6,24,0.99));border:1px solid rgba(220,150,40,0.55);border-radius:14px;padding:32px 26px;width:100%;max-width:380px;box-shadow:0 0 50px rgba(180,100,0,0.3);position:relative;">
+        <div style="text-align:center;margin-bottom:18px;">
+            <div style="font-size:30px;margin-bottom:8px;">&#9888;</div>
+            <div style="font-size:15px;font-weight:bold;color:#e8a020;letter-spacing:0.03em;">Add an Email Address</div>
+        </div>
+        <p style="font-size:13px;color:var(--text-dim);margin:0 0 16px 0;text-align:center;line-height:1.6;">
+            Your account <strong style="color:var(--text-light);">{{ online_user }}</strong> has no email linked.<br>
+            Without an email you cannot reset your password if you forget it.
+        </p>
+        <input type="email" id="email-setup-input" placeholder="your@email.com" autocomplete="email"
+            style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px 13px;background:rgba(0,0,0,0.45);border:1px solid rgba(220,150,40,0.5);border-radius:8px;color:var(--text-light);font-size:13px;"
+            onkeydown="if(event.key==='Enter')saveEmailSetup()">
+        <button id="email-setup-btn" onclick="saveEmailSetup()" class="btn btn-primary"
+            style="width:100%;font-size:14px;background:linear-gradient(135deg,rgba(140,80,10,0.8),rgba(100,55,5,0.8));border-color:#c07010;">
+            Save Email &amp; Secure Account
+        </button>
+        <button onclick="dismissEmailSetup()"
+            style="width:100%;background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;margin-top:10px;opacity:0.6;padding:4px;">
+            Remind me later
+        </button>
+        <div id="email-setup-status" style="margin-top:10px;text-align:center;font-size:12px;min-height:16px;"></div>
+    </div>
+</div>
+<script>
+    function openEmailSetupModal() {
+        var el = document.getElementById('email-setup-overlay');
+        if (el) { el.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+        setTimeout(function () { var i = document.getElementById('email-setup-input'); if (i) i.focus(); }, 80);
+    }
+    function dismissEmailSetup() {
+        var el = document.getElementById('email-setup-overlay');
+        if (el) { el.style.display = 'none'; document.body.style.overflow = ''; }
+    }
+    async function saveEmailSetup() {
+        var input = document.getElementById('email-setup-input');
+        var status = document.getElementById('email-setup-status');
+        var btn = document.getElementById('email-setup-btn');
+        var email = input ? input.value.trim() : '';
+        if (!email) { if (status) { status.textContent = 'Please enter an email address.'; status.style.color = 'var(--red)'; } return; }
+        if (btn) btn.disabled = true;
+        if (status) { status.textContent = 'Saving...'; status.style.color = 'var(--text-dim)'; }
+        try {
+            var res = await fetch('/api/online/set_email', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email: email})
+            });
+            var json = await res.json();
+            if (json.ok) {
+                if (status) { status.textContent = 'Email saved!'; status.style.color = 'var(--green-bright)'; }
+                setTimeout(function () { window.location.reload(); }, 900);
+            } else {
+                if (status) { status.textContent = json.message || 'Could not save email.'; status.style.color = 'var(--red)'; }
+                if (btn) btn.disabled = false;
+            }
+        } catch(e) {
+            if (status) { status.textContent = 'Network error: ' + e.message; status.style.color = 'var(--red)'; }
+            if (btn) btn.disabled = false;
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        openEmailSetupModal();
+    });
 </script>
 {% endif %}
 {% endblock %}

@@ -651,20 +651,17 @@ async function logoutAndSave() {
         var saveJson = await saveRes.json();
         if (saveJson.ok) {
             saveOk = true;
-            if (statusEl) { statusEl.textContent = 'Saved! Logging out...'; statusEl.style.color = 'var(--green-bright)'; }
+            if (statusEl) { statusEl.textContent = 'Saved! Returning to menu...'; statusEl.style.color = 'var(--green-bright)'; }
         } else {
             if (statusEl) { statusEl.textContent = 'Save failed: ' + saveJson.message; statusEl.style.color = 'var(--red)'; }
-            showToast('Cloud save failed: ' + saveJson.message + '. Logging out anyway...', 'var(--red)', 3500);
+            showToast('Cloud save failed: ' + saveJson.message, 'var(--red)', 3500);
         }
     } catch(e) {
-        if (statusEl) { statusEl.textContent = 'Save error. Logging out anyway...'; statusEl.style.color = 'var(--red)'; }
-        showToast('Save error: ' + e.message + '. Logging out anyway...', 'var(--red)', 3500);
+        if (statusEl) { statusEl.textContent = 'Save error.'; statusEl.style.color = 'var(--red)'; }
+        showToast('Save error: ' + e.message, 'var(--red)', 3500);
     }
-    try {
-        await fetch('/api/online/logout', { method: 'POST' });
-    } catch(e) { /* ignore logout errors */ }
     var delay = saveOk ? 1200 : 3500;
-    if (saveOk) showToast('Saved and logged out. Returning to menu...', 'var(--green-bright)', 2000);
+    if (saveOk) showToast('Saved! Returning to menu...', 'var(--green-bright)', 2000);
     setTimeout(function() { window.location.href = '/'; }, delay);
 }
 

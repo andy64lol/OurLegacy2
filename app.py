@@ -109,6 +109,8 @@ from utilities.supabase_db import (
     get_player_leaderboard,
     create_password_reset_token,
     reset_password_with_token,
+    get_user_email,
+    update_user_email,
 )
 from utilities.email_sender import send_email as _send_email, is_configured as _email_configured
 
@@ -2536,6 +2538,12 @@ def game():
             "index.html", show_create=True, data=GAME_DATA, create_error=create_error
         )
 
+    # ── Email check (online users must have an email for password recovery) ───
+    _game_user_id = session.get("online_user_id")
+    _user_has_email = True
+    if _game_user_id:
+        _user_has_email = bool(get_user_email(_game_user_id))
+
     # ── Timed events ──────────────────────────────────────────────────────────
     events_awarded = check_and_award_events(player)
     save_player(player)
@@ -2611,6 +2619,8 @@ def game():
             boss_phase_info=boss_phase_info,
             boss_abilities_info=boss_abilities_info,
             battle_companions=battle_companions,
+            online_user=session.get("online_username"),
+            user_has_email=_user_has_email,
         )
 
     _ensure_equipment_slots(player)
@@ -3113,6 +3123,7 @@ def game():
         if session.get("online_username")
         else [],
         online_count=len(set(_chat_online.values())),
+        user_has_email=_user_has_email,
     )
 
 
@@ -6837,6 +6848,19 @@ def api_leaderboard():
 
 
 # ─── Password Reset ───────────────────────────────────────────────────────────
+
+
+@app.route("/api/online/set_email", methods=["POST"])
+def api_online_set_email():
+    user_id = session.get("online_user_id")
+    if not user_id:
+        return jsonify({"ok": False, "message": "Not logged in."}), 401
+    data = request.get_json(force=True, silent=True) or {}
+    email = data.get("email", "").strip()
+    result = update_user_email(user_id, email)
+    if result["ok"]:
+        return jsonify(result), 200
+    return jsonify(result), 400
 
 
 @app.route("/api/online/forgot-password", methods=["POST"])
