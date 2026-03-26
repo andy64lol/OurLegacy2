@@ -75,7 +75,7 @@
         </div>
     </div>
 
-    <!-- ── Global Chat Widget (online users only) ───────────────────── -->
+    <!-- ── Global Chat Widget + Groups Widget (online users only) ─── -->
     {% if online_username %}
     <style>
         #chat-panel {
@@ -91,12 +91,9 @@
             height: 5px;
             cursor: ns-resize;
             background: transparent;
-            border-radius: 12px 12px 0 0;
             z-index: 10;
         }
-        #chat-resize-handle:hover {
-            background: rgba(180,130,255,0.25);
-        }
+        #chat-resize-handle:hover { background: rgba(120,80,40,0.3); }
         #chat-resize-lr {
             position: absolute;
             top: 5px;
@@ -107,91 +104,157 @@
             background: transparent;
             z-index: 10;
         }
-        #chat-resize-lr:hover {
-            background: rgba(180,130,255,0.2);
+        #chat-resize-lr:hover { background: rgba(120,80,40,0.25); }
+
+        .widget-fab {
+            width: 46px;
+            height: 46px;
+            background: var(--wood-dark);
+            border: 2px solid var(--wood-bright);
+            color: var(--gold);
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Tiny5', monospace;
+            transition: background 0.15s;
+        }
+        .widget-fab:hover { background: var(--wood-mid); }
+
+        #groups-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 8500;
+            background: rgba(0,0,0,0.75);
+            align-items: center;
+            justify-content: center;
+        }
+        #groups-overlay-panel {
+            width: min(980px, 96vw);
+            height: min(700px, 92vh);
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #groups-overlay-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 14px;
+            background: var(--wood-dark);
+            border-bottom: 2px solid var(--border);
+            flex-shrink: 0;
+        }
+        #groups-overlay iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: var(--bg-main);
         }
     </style>
 
-    <div id="chat-widget" style="position:fixed;bottom:20px;right:20px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:0;">
+    <!-- Groups Overlay Modal -->
+    <div id="groups-overlay" onclick="if(event.target===this)closeGroupsOverlay()">
+        <div id="groups-overlay-panel">
+            <div id="groups-overlay-header">
+                <span style="font-size:13px;font-weight:700;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">&#9876; Adventure Group</span>
+                <button onclick="closeGroupsOverlay()" style="background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;" title="Close">&times;</button>
+            </div>
+            <iframe id="groups-overlay-frame" src="" title="Adventure Group"></iframe>
+        </div>
+    </div>
+
+    <div id="chat-widget" style="position:fixed;bottom:20px;right:20px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
 
         <!-- Chat Panel -->
-        <div id="chat-panel" style="display:none;width:320px;height:480px;background:linear-gradient(160deg,rgba(14,10,30,0.97),rgba(8,5,20,0.97));border:1px solid rgba(180,130,255,0.4);border-radius:12px;box-shadow:0 4px 32px rgba(80,40,160,0.4);overflow:hidden;flex-direction:column;margin-bottom:8px;">
+        <div id="chat-panel" style="display:none;width:320px;height:480px;background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.5);overflow:hidden;flex-direction:column;margin-bottom:0;">
 
             <!-- Resize handles -->
             <div id="chat-resize-handle" title="Drag to resize"></div>
             <div id="chat-resize-lr" title="Drag to resize"></div>
 
             <!-- Header -->
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(60,30,100,0.5);border-bottom:1px solid rgba(180,130,255,0.2);">
-                <span style="font-size:13px;font-weight:600;color:var(--mana-bright);letter-spacing:0.05em;display:flex;align-items:center;gap:5px;"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:24px;height:24px;image-rendering:pixelated;"> Global Chat</span>
-                <div style="display:flex;gap:6px;align-items:center;">
-                    <button id="chat-users-btn" onclick="toggleOnlineUsers()" style="background:none;border:none;color:var(--text-dim);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid rgba(180,130,255,0.25);">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--wood-dark);border-bottom:2px solid var(--border);flex-shrink:0;">
+                <span style="font-size:12px;font-weight:700;color:var(--gold);letter-spacing:0.07em;text-transform:uppercase;display:flex;align-items:center;gap:5px;"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;"> Global Chat</span>
+                <div style="display:flex;gap:5px;align-items:center;">
+                    <button id="chat-users-btn" onclick="toggleOnlineUsers()" style="background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-dim);font-size:11px;cursor:pointer;padding:2px 6px;font-family:'Tiny5',monospace;">
                         <span id="chat-online-count">0</span> online
                     </button>
-                    <a href="/chat" target="_blank" title="Open in new tab" style="background:none;border:none;color:var(--text-dim);font-size:14px;cursor:pointer;padding:2px 5px;text-decoration:none;line-height:1;border-radius:4px;border:1px solid rgba(180,130,255,0.2);" onmouseover="this.style.color='var(--mana-bright)'" onmouseout="this.style.color='var(--text-dim)'">&#8599;</a>
-                    <button onclick="toggleChat()" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;line-height:1;padding:0;">&times;</button>
+                    <a href="/chat" target="_blank" title="Open full chat" style="background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-dim);font-size:13px;cursor:pointer;padding:2px 5px;text-decoration:none;line-height:1;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-dim)'">&#8599;</a>
+                    <button onclick="toggleChat()" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;line-height:1;padding:0;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-dim)'">&times;</button>
                 </div>
             </div>
 
             <!-- Online Users Dropdown -->
-            <div id="chat-users-list" style="display:none;padding:8px 14px;background:rgba(40,20,70,0.6);border-bottom:1px solid rgba(180,130,255,0.15);max-height:100px;overflow-y:auto;">
-                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:5px;">Online Players</div>
-                <div id="chat-users-inner" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+            <div id="chat-users-list" style="display:none;padding:6px 12px;background:var(--bg-panel-dark);border-bottom:1px solid var(--border);max-height:90px;overflow-y:auto;">
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:4px;">Online Players</div>
+                <div id="chat-users-inner" style="display:flex;flex-wrap:wrap;gap:3px;"></div>
             </div>
 
             <!-- Messages -->
-            <div id="chat-messages" style="flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;">
+            <div id="chat-messages" style="flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:3px;background:var(--bg-main);">
                 <div style="text-align:center;font-size:11px;color:var(--text-dim);padding:20px 0;" id="chat-loading">Connecting...</div>
             </div>
 
             <!-- Input -->
-            <div style="padding:10px 12px;border-top:1px solid rgba(180,130,255,0.15);background:rgba(20,10,40,0.5);flex-shrink:0;">
-                <div style="display:flex;gap:6px;align-items:center;position:relative;">
+            <div style="padding:8px 10px;border-top:2px solid var(--border);background:var(--bg-panel);flex-shrink:0;">
+                <div style="display:flex;gap:5px;align-items:center;position:relative;">
                     <!-- Glyph picker popover -->
-                    <div id="glyph-picker" style="display:none;position:absolute;bottom:calc(100% + 6px);left:0;background:linear-gradient(160deg,rgba(18,10,36,0.98),rgba(10,5,24,0.98));border:1px solid rgba(180,130,255,0.4);border-radius:10px;padding:10px;box-shadow:0 4px 24px rgba(80,40,160,0.5);z-index:20;width:230px;">
-                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-dim);margin-bottom:7px;">Click to insert glyph</div>
-                        <div id="glyph-picker-grid" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+                    <div id="glyph-picker" style="display:none;position:absolute;bottom:calc(100% + 5px);left:0;background:var(--bg-panel);border:2px solid var(--border);box-shadow:3px 3px 0 rgba(0,0,0,0.5);padding:9px;z-index:20;width:220px;">
+                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:6px;">Insert Glyph</div>
+                        <div id="glyph-picker-grid" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
                     </div>
-                    <button onclick="toggleGlyphPicker()" title="Insert glyph" style="padding:5px 7px;background:rgba(60,30,100,0.5);border:1px solid rgba(180,130,255,0.3);border-radius:6px;color:var(--mana-bright);font-size:13px;cursor:pointer;line-height:1;flex-shrink:0;">✦</button>
+                    <button onclick="toggleGlyphPicker()" title="Insert glyph" style="padding:4px 6px;background:var(--slate-dark);border:1px solid var(--border);color:var(--gold);font-size:12px;cursor:pointer;line-height:1;flex-shrink:0;">&#10022;</button>
                     <input id="chat-input" type="text" maxlength="200" placeholder="Message the realm..." autocomplete="off"
-                        style="flex:1;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.35);border-radius:6px;color:var(--text-light);font-size:12px;outline:none;"
+                        style="flex:1;padding:6px 8px;background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-light);font-size:12px;outline:none;font-family:'Tiny5',monospace;"
                         onkeydown="if(event.key==='Enter')chatSend()">
-                    <button onclick="chatSend()" style="padding:7px 12px;background:linear-gradient(135deg,rgba(80,50,150,0.8),rgba(50,30,100,0.8));border:1px solid var(--mana-bright);border-radius:6px;color:var(--mana-bright);font-size:12px;cursor:pointer;white-space:nowrap;">Send</button>
+                    <button onclick="chatSend()" style="padding:6px 10px;background:var(--wood-dark);border:2px solid var(--wood-bright);color:var(--gold-bright);font-size:12px;cursor:pointer;white-space:nowrap;font-family:'Tiny5',monospace;text-transform:uppercase;" onmouseover="this.style.background='var(--wood-mid)'" onmouseout="this.style.background='var(--wood-dark)'">Send</button>
                 </div>
-                <div id="chat-error" style="font-size:11px;color:var(--red);min-height:14px;margin-top:4px;"></div>
-                <div id="chat-cooldown" style="font-size:11px;color:var(--text-dim);min-height:14px;display:none;text-align:center;"></div>
+                <div id="chat-error" style="font-size:11px;color:var(--red);min-height:13px;margin-top:3px;"></div>
+                <div id="chat-cooldown" style="font-size:11px;color:var(--text-dim);min-height:13px;display:none;text-align:center;"></div>
             </div>
         </div>
 
-        <!-- Toggle Button -->
-        <button id="chat-toggle-btn" onclick="toggleChat()" title="Global Chat"
-            style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(80,50,150,0.9),rgba(40,20,90,0.9));border:2px solid rgba(180,130,255,0.5);color:var(--mana-bright);font-size:20px;cursor:pointer;box-shadow:0 2px 12px rgba(100,50,200,0.4);position:relative;display:flex;align-items:center;justify-content:center;">
-            <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:24px;height:24px;image-rendering:pixelated;">
-            <span id="chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;line-height:16px;text-align:center;font-weight:700;"></span>
+        <!-- Groups FAB -->
+        <button class="widget-fab" onclick="openGroupsOverlay()" title="Adventure Group">&#9876;
+            <span id="groups-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--bg-main);width:14px;height:14px;font-size:9px;line-height:14px;text-align:center;font-weight:700;"></span>
+        </button>
+
+        <!-- Chat FAB -->
+        <button class="widget-fab" id="chat-toggle-btn" onclick="toggleChat()" title="Global Chat">
+            <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
+            <span id="chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;width:15px;height:15px;font-size:9px;line-height:15px;text-align:center;font-weight:700;"></span>
         </button>
     </div>
 
     <!-- Trade Panel Modal -->
-    <div id="trade-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;">
-        <div id="trade-panel" style="background:linear-gradient(160deg,rgba(18,10,36,0.99),rgba(8,4,20,0.99));border:1px solid rgba(180,130,255,0.5);border-radius:14px;width:min(700px,96vw);max-height:90vh;overflow-y:auto;box-shadow:0 8px 48px rgba(80,30,160,0.6);">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(180,130,255,0.25);background:rgba(60,30,100,0.4);border-radius:14px 14px 0 0;">
-                <span id="trade-title" style="font-size:14px;font-weight:700;color:var(--gold);letter-spacing:0.07em;">⇄ TRADE</span>
+    <div id="trade-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;">
+        <div id="trade-panel" style="background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.6);width:min(700px,96vw);max-height:90vh;overflow-y:auto;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:2px solid var(--border);background:var(--wood-dark);">
+                <span id="trade-title" style="font-size:14px;font-weight:700;color:var(--gold);letter-spacing:0.07em;text-transform:uppercase;">&#8644; Trade</span>
                 <div style="display:flex;gap:8px;align-items:center;">
                     <span id="trade-status-label" style="font-size:11px;color:var(--text-dim);"></span>
-                    <button id="trade-cancel-btn" onclick="tradeCancel()" style="padding:4px 10px;background:rgba(150,30,30,0.5);border:1px solid rgba(220,80,80,0.4);border-radius:6px;color:var(--red);font-size:12px;cursor:pointer;">Cancel</button>
+                    <button id="trade-cancel-btn" onclick="tradeCancel()" style="padding:4px 10px;background:var(--red-dark);border:1px solid var(--red);color:#f8c0a0;font-size:12px;cursor:pointer;font-family:'Tiny5',monospace;">Cancel</button>
                 </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:320px;">
                 <!-- My offer -->
-                <div style="padding:14px 16px;border-right:1px solid rgba(180,130,255,0.2);">
-                    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--mana-bright);margin-bottom:10px;">Your Offer</div>
+                <div style="padding:14px 16px;border-right:1px solid var(--border);">
+                    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:10px;">Your Offer</div>
                     <div id="trade-my-items" style="min-height:80px;display:flex;flex-direction:column;gap:4px;margin-bottom:10px;"></div>
                     <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
-                        <button onclick="tradeOpenItemPicker()" id="trade-add-item-btn" style="flex:1;padding:6px 10px;background:rgba(60,30,100,0.5);border:1px solid rgba(180,130,255,0.35);border-radius:6px;color:var(--mana-bright);font-size:11px;cursor:pointer;">+ Add Item</button>
+                        <button onclick="tradeOpenItemPicker()" id="trade-add-item-btn" style="flex:1;padding:6px 10px;background:var(--slate-dark);border:1px solid var(--border);color:var(--text-light);font-size:11px;cursor:pointer;font-family:'Tiny5',monospace;">+ Add Item</button>
                     </div>
                     <div style="display:flex;gap:6px;align-items:center;">
-                        <input id="trade-gold-input" type="number" min="0" placeholder="Gold to offer" style="flex:1;padding:6px 8px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.3);border-radius:6px;color:var(--gold);font-size:12px;outline:none;" oninput="tradeSetGold(this.value)">
-                        <span style="font-size:12px;color:var(--gold);">🪙</span>
+                        <input id="trade-gold-input" type="number" min="0" placeholder="Gold to offer" style="flex:1;padding:6px 8px;background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--gold);font-size:12px;outline:none;font-family:'Tiny5',monospace;" oninput="tradeSetGold(this.value)">
+                        <img src="/game_assets/glyphs/gold.png" alt="gold" style="width:18px;height:18px;image-rendering:pixelated;">
                     </div>
                     <div id="trade-my-gold-label" style="font-size:10px;color:var(--text-dim);margin-top:4px;"></div>
                 </div>
@@ -203,27 +266,27 @@
                 </div>
             </div>
             <!-- Confirm bar -->
-            <div style="padding:12px 18px;border-top:1px solid rgba(180,130,255,0.2);display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(20,10,40,0.5);border-radius:0 0 14px 14px;">
+            <div style="padding:10px 16px;border-top:2px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg-panel-dark);">
                 <div id="trade-error-label" style="font-size:11px;color:var(--red);flex:1;"></div>
                 <div style="display:flex;gap:8px;align-items:center;">
                     <span id="trade-their-confirm-label" style="font-size:11px;color:var(--text-dim);"></span>
-                    <button id="trade-confirm-btn" onclick="tradeToggleConfirm()" style="padding:7px 18px;background:linear-gradient(135deg,rgba(80,150,50,0.7),rgba(40,100,30,0.7));border:1px solid var(--green-bright);border-radius:8px;color:var(--green-bright);font-size:13px;font-weight:700;cursor:pointer;">Confirm Trade</button>
+                    <button id="trade-confirm-btn" onclick="tradeToggleConfirm()" style="padding:7px 18px;background:var(--green);border:2px solid var(--green-bright);color:var(--gold-bright);font-size:13px;font-weight:700;cursor:pointer;font-family:'Tiny5',monospace;text-transform:uppercase;">Confirm Trade</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Item Picker Modal -->
-    <div id="trade-item-picker" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
-        <div style="background:linear-gradient(160deg,rgba(18,10,36,0.99),rgba(8,4,20,0.99));border:1px solid rgba(180,130,255,0.4);border-radius:12px;width:min(440px,94vw);max-height:80vh;overflow-y:auto;padding:16px;">
-            <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">Choose Item to Offer <button onclick="document.getElementById('trade-item-picker').style.display='none'" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;">&times;</button></div>
-            <input id="trade-item-search" type="text" placeholder="Search items..." style="width:100%;box-sizing:border-box;padding:7px 10px;background:rgba(0,0,0,0.4);border:1px solid rgba(180,130,255,0.3);border-radius:6px;color:var(--text-light);font-size:12px;outline:none;margin-bottom:10px;" oninput="tradeFilterItems(this.value)">
+    <div id="trade-item-picker" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+        <div style="background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.5);width:min(440px,94vw);max-height:80vh;overflow-y:auto;padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;text-transform:uppercase;letter-spacing:0.06em;">Choose Item to Offer <button onclick="document.getElementById('trade-item-picker').style.display='none'" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;">&times;</button></div>
+            <input id="trade-item-search" type="text" placeholder="Search items..." style="width:100%;box-sizing:border-box;padding:7px 10px;background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-light);font-size:12px;outline:none;margin-bottom:10px;font-family:'Tiny5',monospace;" oninput="tradeFilterItems(this.value)">
             <div id="trade-item-list" style="display:flex;flex-direction:column;gap:4px;"></div>
         </div>
     </div>
 
     <!-- Auto-save indicator -->
-    <div id="autosave-indicator" style="display:none;position:fixed;bottom:80px;right:20px;z-index:7500;font-size:11px;color:var(--green-bright);background:rgba(10,30,10,0.85);border:1px solid rgba(50,180,50,0.3);border-radius:6px;padding:4px 10px;pointer-events:none;"></div>
+    <div id="autosave-indicator" style="display:none;position:fixed;bottom:82px;right:20px;z-index:7500;font-size:11px;color:var(--green-bright);background:var(--bg-panel);border:1px solid var(--green);padding:3px 9px;pointer-events:none;font-family:'Tiny5',monospace;"></div>
 
     <!-- SocketIO client -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -355,9 +418,9 @@
                     users.forEach(function(u) {
                         var isMe = (u === CURRENT_USER);
                         var wrap = document.createElement('span');
-                        wrap.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 7px;border-radius:10px;background:' +
-                            (isMe ? 'rgba(80,150,80,0.3);border:1px solid var(--green-bright);color:var(--green-bright)' :
-                                    'rgba(80,60,120,0.3);border:1px solid rgba(180,130,255,0.3);color:var(--mana-bright)') + ';';
+                        wrap.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 7px;background:' +
+                            (isMe ? 'rgba(96,136,88,0.2);border:1px solid var(--green);color:var(--green-bright)' :
+                                    'var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-light)') + ';font-family:Tiny5,monospace;';
                         wrap.textContent = u + (isMe ? ' (you)' : '');
                         if (!isMe) {
                             var tradeBtn = document.createElement('button');
@@ -447,10 +510,9 @@
                 } catch(e) {}
             }
             div.innerHTML =
-                '<div style="max-width:240px;padding:5px 10px;border-radius:' + (isMe ? '10px 10px 2px 10px' : '10px 10px 10px 2px') +
-                ';background:' + (isMe ? 'rgba(70,40,130,0.6)' : 'rgba(30,20,60,0.7)') +
-                ';border:1px solid ' + (isMe ? 'rgba(160,100,255,0.4)' : 'rgba(100,80,180,0.3)') + ';word-break:break-word;">' +
-                '<span style="font-size:10px;font-weight:700;color:' + (isMe ? 'var(--mana-bright)' : 'var(--gold)') + ';">' +
+                '<div style="max-width:240px;padding:5px 10px;background:' + (isMe ? 'var(--wood-dark)' : 'var(--bg-panel)') +
+                ';border:1px solid ' + (isMe ? 'var(--wood-bright)' : 'var(--border)') + ';word-break:break-word;">' +
+                '<span style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.04em;">' +
                 escHtml(msg.username) + '</span>' +
                 '<div style="font-size:12px;color:var(--text-light);margin-top:2px;">' + renderMsg(msg.message) + '</div>' +
                 (time ? '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;text-align:right;">' + time + '</div>' : '') +
@@ -530,7 +592,7 @@
                 seen[file] = true;
                 var btn = document.createElement('button');
                 btn.title = ':' + key + ':';
-                btn.style.cssText = 'background:rgba(60,30,100,0.4);border:1px solid rgba(180,130,255,0.25);border-radius:6px;padding:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+                btn.style.cssText = 'background:var(--slate-dark);border:1px solid var(--border);padding:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
                 btn.innerHTML = '<img src="/game_assets/glyphs/' + file + '" style="width:20px;height:20px;image-rendering:pixelated;" alt=":' + key + ':">';
                 btn.addEventListener('click', function() {
                     var inp = document.getElementById('chat-input');
@@ -594,6 +656,24 @@
             inp.value = '';
         };
 
+        window.openGroupsOverlay = function() {
+            var overlay = document.getElementById('groups-overlay');
+            var frame = document.getElementById('groups-overlay-frame');
+            if (!overlay || !frame) return;
+            if (!frame.src || frame.src === window.location.href) {
+                frame.src = '/groups';
+            }
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeGroupsOverlay = function() {
+            var overlay = document.getElementById('groups-overlay');
+            if (!overlay) return;
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        };
+
         // ── Trade functions ───────────────────────────────────────
         function tradeSendRequest(targetUser) {
             if (!socket) return;
@@ -606,10 +686,10 @@
             if (existing) existing.remove();
             var bar = document.createElement('div');
             bar.id = 'trade-invite-bar';
-            bar.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9600;background:linear-gradient(135deg,rgba(30,15,60,0.98),rgba(15,8,40,0.98));border:1px solid rgba(220,180,50,0.6);border-radius:10px;padding:12px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 24px rgba(100,60,200,0.5);min-width:260px;max-width:90vw;';
-            bar.innerHTML = '<span style="font-size:13px;color:var(--gold);">⇄ <b>' + escHtml(fromUser) + '</b> wants to trade with you!</span>' +
-                '<button onclick="tradeAcceptInvite(\'' + tradeId + '\')" style="padding:5px 14px;background:rgba(40,120,40,0.7);border:1px solid var(--green-bright);border-radius:6px;color:var(--green-bright);font-size:12px;cursor:pointer;white-space:nowrap;">Accept</button>' +
-                '<button onclick="tradeDeclineInvite(\'' + tradeId + '\')" style="padding:5px 14px;background:rgba(120,30,30,0.7);border:1px solid var(--red);border-radius:6px;color:var(--red);font-size:12px;cursor:pointer;white-space:nowrap;">Decline</button>';
+            bar.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9600;background:var(--bg-panel);border:2px solid var(--gold-dim);padding:10px 18px;display:flex;align-items:center;gap:14px;box-shadow:3px 3px 0 rgba(0,0,0,0.5);min-width:260px;max-width:90vw;font-family:Tiny5,monospace;';
+            bar.innerHTML = '<span style="font-size:13px;color:var(--gold);">&#8644; <b>' + escHtml(fromUser) + '</b> wants to trade with you!</span>' +
+                '<button onclick="tradeAcceptInvite(\'' + tradeId + '\')" style="padding:5px 12px;background:var(--green);border:1px solid var(--green-bright);color:var(--gold-bright);font-size:12px;cursor:pointer;white-space:nowrap;font-family:Tiny5,monospace;">Accept</button>' +
+                '<button onclick="tradeDeclineInvite(\'' + tradeId + '\')" style="padding:5px 12px;background:var(--red-dark);border:1px solid var(--red);color:#f8c0a0;font-size:12px;cursor:pointer;white-space:nowrap;font-family:Tiny5,monospace;">Decline</button>';
             document.body.appendChild(bar);
             setTimeout(function() { if (document.getElementById('trade-invite-bar') === bar) bar.remove(); }, 20000);
         }
@@ -661,7 +741,7 @@
                 myItemsEl.innerHTML = '';
                 (data.my_offer.items || []).forEach(function(item) {
                     var row = document.createElement('div');
-                    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:4px 8px;background:rgba(60,30,100,0.4);border-radius:6px;font-size:12px;color:var(--text-light);';
+                    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:4px 8px;background:var(--bg-panel-dark);border:1px solid var(--border);font-size:12px;color:var(--text-light);font-family:Tiny5,monospace;';
                     row.innerHTML = '<span>' + escHtml(item) + '</span>' + (!data.my_confirmed ? '<button onclick="tradeRemoveItem(\'' + item.replace(/'/g, "\\'") + '\')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;line-height:1;">×</button>' : '');
                     myItemsEl.appendChild(row);
                 });
@@ -680,7 +760,7 @@
                 theirItemsEl.innerHTML = '';
                 (data.their_offer.items || []).forEach(function(item) {
                     var row = document.createElement('div');
-                    row.style.cssText = 'display:flex;align-items:center;padding:4px 8px;background:rgba(30,20,60,0.5);border-radius:6px;font-size:12px;color:var(--text-light);';
+                    row.style.cssText = 'display:flex;align-items:center;padding:4px 8px;background:var(--bg-panel-dark);border:1px solid var(--border);font-size:12px;color:var(--text-light);font-family:Tiny5,monospace;';
                     row.textContent = item;
                     theirItemsEl.appendChild(row);
                 });
@@ -753,11 +833,11 @@
                 } else {
                     unique.forEach(function(item) {
                         var row = document.createElement('button');
-                        row.style.cssText = 'width:100%;text-align:left;padding:8px 10px;background:rgba(40,20,80,0.5);border:1px solid rgba(180,130,255,0.2);border-radius:6px;color:var(--text-light);font-size:12px;cursor:pointer;margin:0;';
+                        row.style.cssText = 'width:100%;text-align:left;padding:7px 10px;background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-light);font-size:12px;cursor:pointer;margin:0;font-family:Tiny5,monospace;';
                         row.textContent = item + (counts[item] > 1 ? ' (x' + counts[item] + ')' : '');
                         row.setAttribute('data-item', item);
-                        row.onmouseover = function() { this.style.background = 'rgba(80,40,140,0.7)'; };
-                        row.onmouseout = function() { this.style.background = 'rgba(40,20,80,0.5)'; };
+                        row.onmouseover = function() { this.style.background = 'var(--slate-dark)'; this.style.color = 'var(--gold)'; };
+                        row.onmouseout = function() { this.style.background = 'var(--bg-panel-dark)'; this.style.color = 'var(--text-light)'; };
                         row.onclick = function() {
                             if (!socket || !_tradeId) return;
                             socket.emit('trade_add_item', { trade_id: _tradeId, item_name: item });

@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; background: var(--bg-dark, #0a0614); color: var(--text-light, #e0d8f0); font-family: 'Segoe UI', sans-serif; }
+        html, body { height: 100%; background: var(--bg-main); color: var(--text-light); font-family: 'Tiny5', monospace; }
 
         #chat-page {
             display: flex;
@@ -18,95 +18,144 @@
             height: 100vh;
             max-width: 860px;
             margin: 0 auto;
-            border-left: 1px solid rgba(180,130,255,0.15);
-            border-right: 1px solid rgba(180,130,255,0.15);
-            background: linear-gradient(160deg, rgba(14,10,30,0.98), rgba(8,5,20,0.98));
+            border-left: 2px solid var(--border);
+            border-right: 2px solid var(--border);
         }
 
         #chat-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 20px;
-            background: rgba(60,30,100,0.55);
-            border-bottom: 1px solid rgba(180,130,255,0.25);
+            padding: 10px 16px;
+            background: var(--wood-dark);
+            border-bottom: 2px solid var(--border);
             flex-shrink: 0;
         }
 
         #chat-header .title {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 16px;
+            gap: 8px;
+            font-size: 15px;
             font-weight: 700;
-            color: var(--mana-bright, #c084fc);
-            letter-spacing: 0.06em;
+            color: var(--gold);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
         #chat-header .back-link {
             font-size: 13px;
-            color: var(--text-dim, #8878aa);
+            color: var(--text-dim);
             text-decoration: none;
-            padding: 5px 12px;
-            border: 1px solid rgba(180,130,255,0.25);
-            border-radius: 6px;
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-panel-dark);
             transition: color 0.15s, border-color 0.15s;
         }
-        #chat-header .back-link:hover { color: var(--mana-bright, #c084fc); border-color: rgba(180,130,255,0.5); }
+        #chat-header .back-link:hover { color: var(--gold); border-color: var(--gold-dim); }
 
         #online-bar {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 20px;
-            background: rgba(40,20,70,0.5);
-            border-bottom: 1px solid rgba(180,130,255,0.12);
+            padding: 6px 16px;
+            background: var(--bg-panel-dark);
+            border-bottom: 1px solid var(--border);
             flex-shrink: 0;
             flex-wrap: wrap;
         }
-        #online-bar .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim, #8878aa); }
-        #chat-users-inner-page { display: flex; flex-wrap: wrap; gap: 5px; }
+        #online-bar .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+        }
+        #chat-users-inner-page { display: flex; flex-wrap: wrap; gap: 4px; }
 
         #chat-messages-page {
             flex: 1;
             overflow-y: auto;
-            padding: 16px 20px;
+            padding: 12px 16px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
+            background: var(--bg-main);
         }
 
         #chat-input-bar {
-            padding: 14px 20px;
-            border-top: 1px solid rgba(180,130,255,0.15);
-            background: rgba(20,10,40,0.6);
+            padding: 10px 16px;
+            border-top: 2px solid var(--border);
+            background: var(--bg-panel);
             flex-shrink: 0;
         }
-        #chat-input-bar .row { display: flex; gap: 8px; align-items: center; }
+        #chat-input-bar .row { display: flex; gap: 6px; align-items: center; }
         #chat-input-page {
             flex: 1;
-            padding: 10px 14px;
-            background: rgba(0,0,0,0.45);
-            border: 1px solid rgba(180,130,255,0.35);
-            border-radius: 8px;
-            color: var(--text-light, #e0d8f0);
+            padding: 8px 12px;
+            background: var(--bg-panel-dark);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            font-family: 'Tiny5', monospace;
             font-size: 14px;
             outline: none;
         }
-        #chat-input-page:focus { border-color: rgba(180,130,255,0.65); }
+        #chat-input-page:focus { border-color: var(--wood-bright); }
         #chat-send-page {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, rgba(80,50,150,0.85), rgba(50,30,100,0.85));
-            border: 1px solid var(--mana-bright, #c084fc);
-            border-radius: 8px;
-            color: var(--mana-bright, #c084fc);
+            padding: 8px 18px;
+            background: var(--wood-dark);
+            border: 2px solid var(--wood-bright);
+            color: var(--gold-bright);
+            font-family: 'Tiny5', monospace;
             font-size: 14px;
             cursor: pointer;
             white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
-        #chat-send-page:hover { background: linear-gradient(135deg, rgba(100,65,170,0.9), rgba(65,40,120,0.9)); }
-        #chat-error-page { font-size: 12px; color: var(--red, #f87171); min-height: 16px; margin-top: 6px; }
-        #chat-cooldown-page { font-size: 12px; color: var(--text-dim, #8878aa); min-height: 16px; display: none; text-align: center; margin-top: 4px; }
+        #chat-send-page:hover { background: var(--wood-mid); }
+        #chat-error-page { font-size: 12px; color: var(--red); min-height: 15px; margin-top: 5px; }
+        #chat-cooldown-page { font-size: 12px; color: var(--text-dim); min-height: 15px; display: none; text-align: center; margin-top: 4px; }
+
+        .glyph-btn-page {
+            padding: 6px 8px;
+            background: var(--slate-dark);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            font-size: 14px;
+            cursor: pointer;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .glyph-btn-page:hover { background: var(--slate-mid); }
+
+        #glyph-picker-page {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            margin-bottom: 5px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+            padding: 10px;
+            z-index: 20;
+            width: 300px;
+        }
+
+        .user-pill {
+            font-size: 11px;
+            padding: 2px 8px;
+            background: var(--slate-dark);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            text-decoration: none;
+        }
+        .user-pill:hover { border-color: var(--gold-dim); color: var(--gold); }
+        .user-pill-me {
+            background: rgba(96,136,88,0.25);
+            border: 1px solid var(--green);
+            color: var(--green-bright);
+        }
     </style>
 </head>
 <body>
@@ -114,10 +163,10 @@
 
     <div id="chat-header">
         <div class="title">
-            <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:28px;height:28px;image-rendering:pixelated;">
+            <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:24px;height:24px;image-rendering:pixelated;">
             Global Chat
         </div>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:6px;">
             <a class="back-link" href="/friends">&#10024; Friends</a>
             <a class="back-link" href="/game">&#8592; Game</a>
         </div>
@@ -133,13 +182,12 @@
     </div>
 
     <div id="chat-input-bar" style="position:relative;">
-        <!-- Glyph picker popover -->
-        <div id="glyph-picker" style="display:none;position:absolute;bottom:100%;left:0;margin-bottom:6px;background:linear-gradient(160deg,rgba(18,10,36,0.98),rgba(10,5,24,0.98));border:1px solid rgba(180,130,255,0.4);border-radius:10px;padding:12px;box-shadow:0 4px 24px rgba(80,40,160,0.5);z-index:20;width:320px;">
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-dim,#8878aa);margin-bottom:8px;">Click to insert glyph</div>
-            <div id="glyph-picker-grid" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        <div id="glyph-picker-page">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Insert Glyph</div>
+            <div id="glyph-picker-grid" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
         </div>
         <div class="row">
-            <button onclick="toggleGlyphPicker()" title="Insert glyph" style="padding:8px 10px;background:rgba(60,30,100,0.5);border:1px solid rgba(180,130,255,0.3);border-radius:8px;color:var(--mana-bright,#c084fc);font-size:15px;cursor:pointer;line-height:1;flex-shrink:0;">✦</button>
+            <button onclick="toggleGlyphPicker()" title="Insert glyph" class="glyph-btn-page">&#10022;</button>
             <input id="chat-input-page" type="text" maxlength="200" placeholder="Message the realm... (use :warrior: for glyphs)" autocomplete="off"
                 onkeydown="if(event.key==='Enter')chatSend()">
             <button id="chat-send-page" onclick="chatSend()">Send</button>
@@ -187,9 +235,9 @@
                 innerEl.innerHTML = users.map(function(u) {
                     var isMe = (u === CURRENT_USER);
                     if (isMe) {
-                        return '<span style="font-size:11px;padding:2px 9px;border-radius:12px;background:rgba(80,150,80,0.3);border:1px solid var(--green-bright,#4ade80);color:var(--green-bright,#4ade80);">' + escHtml(u) + ' (you)</span>';
+                        return '<span class="user-pill user-pill-me">' + escHtml(u) + ' (you)</span>';
                     }
-                    return '<a href="/friends?dm=' + encodeURIComponent(u) + '" title="Message or add ' + escHtml(u) + '" style="font-size:11px;padding:2px 9px;border-radius:12px;background:rgba(80,60,120,0.3);border:1px solid rgba(180,130,255,0.3);color:var(--mana-bright,#c084fc);text-decoration:none;cursor:pointer;" onmouseover="this.style.borderColor=\'rgba(180,130,255,0.7)\'" onmouseout="this.style.borderColor=\'rgba(180,130,255,0.3)\'">' + escHtml(u) + '</a>';
+                    return '<a href="/friends?dm=' + encodeURIComponent(u) + '" title="Message or add ' + escHtml(u) + '" class="user-pill">' + escHtml(u) + '</a>';
                 }).join('');
             }
         });
@@ -218,14 +266,16 @@
                 time = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             } catch(e) {}
         }
+        var bubbleBg = isMe ? 'var(--wood-dark)' : 'var(--bg-panel)';
+        var bubbleBorder = isMe ? 'var(--wood-bright)' : 'var(--border)';
+        var nameColor = isMe ? 'var(--gold-bright)' : 'var(--gold)';
         div.innerHTML =
-            '<div style="max-width:560px;padding:7px 14px;border-radius:' + (isMe ? '12px 12px 3px 12px' : '12px 12px 12px 3px') +
-            ';background:' + (isMe ? 'rgba(70,40,130,0.6)' : 'rgba(30,20,60,0.7)') +
-            ';border:1px solid ' + (isMe ? 'rgba(160,100,255,0.4)' : 'rgba(100,80,180,0.3)') + ';word-break:break-word;">' +
-            '<span style="font-size:11px;font-weight:700;color:' + (isMe ? 'var(--mana-bright,#c084fc)' : 'var(--gold,#f6c90e)') + ';">' +
+            '<div style="max-width:560px;padding:6px 12px;background:' + bubbleBg +
+            ';border:1px solid ' + bubbleBorder + ';word-break:break-word;">' +
+            '<span style="font-size:11px;font-weight:700;color:' + nameColor + ';text-transform:uppercase;letter-spacing:0.05em;">' +
             escHtml(msg.username) + '</span>' +
-            '<div style="font-size:14px;color:var(--text-light,#e0d8f0);margin-top:3px;">' + renderMsg(msg.message) + '</div>' +
-            (time ? '<div style="font-size:10px;color:var(--text-dim,#8878aa);margin-top:3px;text-align:right;">' + time + '</div>' : '') +
+            '<div style="font-size:13px;color:var(--text-light);margin-top:2px;">' + renderMsg(msg.message) + '</div>' +
+            (time ? '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;text-align:right;">' + time + '</div>' : '') +
             '</div>';
         if (animate) div.style.opacity = '0';
         box.appendChild(div);
@@ -301,8 +351,8 @@
             seen[file] = true;
             var btn = document.createElement('button');
             btn.title = ':' + key + ':';
-            btn.style.cssText = 'background:rgba(60,30,100,0.4);border:1px solid rgba(180,130,255,0.25);border-radius:6px;padding:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
-            btn.innerHTML = '<img src="/game_assets/glyphs/' + file + '" style="width:22px;height:22px;image-rendering:pixelated;" alt=":' + key + ':">';
+            btn.style.cssText = 'background:var(--slate-dark);border:1px solid var(--border);padding:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+            btn.innerHTML = '<img src="/game_assets/glyphs/' + file + '" style="width:20px;height:20px;image-rendering:pixelated;" alt=":' + key + ':">';
             btn.addEventListener('click', function() {
                 var inp = document.getElementById('chat-input-page');
                 if (!inp) return;
@@ -311,14 +361,14 @@
                 inp.value = inp.value.slice(0, pos) + code + inp.value.slice(inp.selectionEnd);
                 inp.selectionStart = inp.selectionEnd = pos + code.length;
                 inp.focus();
-                document.getElementById('glyph-picker').style.display = 'none';
+                document.getElementById('glyph-picker-page').style.display = 'none';
             });
             grid.appendChild(btn);
         });
     }
 
     window.toggleGlyphPicker = function() {
-        var picker = document.getElementById('glyph-picker');
+        var picker = document.getElementById('glyph-picker-page');
         if (!picker) return;
         var open = picker.style.display !== 'none';
         picker.style.display = open ? 'none' : 'block';
@@ -326,9 +376,9 @@
     };
 
     document.addEventListener('click', function(e) {
-        var picker = document.getElementById('glyph-picker');
+        var picker = document.getElementById('glyph-picker-page');
         if (!picker || picker.style.display === 'none') return;
-        if (!picker.contains(e.target) && !e.target.closest('[onclick="toggleGlyphPicker()"]')) {
+        if (!picker.contains(e.target) && !e.target.closest('.glyph-btn-page')) {
             picker.style.display = 'none';
         }
     });
