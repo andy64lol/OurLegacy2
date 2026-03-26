@@ -714,14 +714,6 @@
                     style="text-align:center;">Crafting</button>
                 <button onclick="switchTab('market',false)" class="btn btn-secondary btn-small"
                     style="text-align:center;">Elite Market</button>
-                {% if online_user %}
-                <button onclick="toggleChat()" class="btn btn-secondary btn-small"
-                    style="text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;"><img
-                        src="/game_assets/glyphs/chat.png" alt="chat"
-                        style="width:22px;height:22px;image-rendering:pixelated;"> Global Chat</button>
-                <button onclick="openGroupsOverlay()" class="btn btn-secondary btn-small"
-                    style="text-align:center;">&#9876; Adventure Group</button>
-                {% endif %}
                 <button onclick="openCustomizeModal()" class="btn btn-secondary btn-small"
                     style="text-align:center;border-color:var(--gold-dim);color:var(--gold-dim);"
                     title="10,000 gold">&#9997; Change Character</button>
@@ -808,6 +800,8 @@
                     {% endif %}
                 </button>
                 {% if online_username %}
+                <button class="tab-btn" onclick="openGroupsOverlay()">&#9876; Adventure Group</button>
+                <button class="tab-btn" onclick="toggleChat()"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:16px;height:16px;image-rendering:pixelated;vertical-align:middle;margin-right:3px;">Chat</button>
                 <button class="tab-btn" data-tab="friends">&#10024; Friends</button>
                 {% endif %}
             </nav>
