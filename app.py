@@ -110,7 +110,9 @@ from utilities.supabase_db import (
     create_password_reset_token,
     reset_password_with_token,
     get_user_email,
-    update_user_email,
+    get_pending_email_verification,
+    request_email_verification,
+    verify_email_token,
 )
 from utilities.email_sender import send_email as _send_email, is_configured as _email_configured
 
@@ -146,6 +148,9 @@ _chat_cooldowns: dict = {}  # {username: last_sent_timestamp}
 _active_sessions: dict = {}
 # Grace slot: maps user_id -> old_token so the kicked session can do one final save.
 _dying_sessions: dict = {}
+# Inactivity tracking: maps user_id -> last_activity_timestamp
+_session_last_activity: dict = {}
+ONLINE_SESSION_TIMEOUT = 600  # 10 minutes of inactivity
 CHAT_COOLDOWN_SECS = 10
 CHAT_MAX_LEN = 200
 
@@ -1039,7 +1044,8 @@ _AUTOSAVE_DIARY_INTERVAL = 300  # seconds between autosave diary entries
 
 def _is_session_valid() -> bool:
     """
-    Return True if the current Flask session's token matches the active session for this user.
+    Return True if the current Flask session's token matches the active session for this user
+    AND the session has not been inactive for more than ONLINE_SESSION_TIMEOUT seconds.
     Returns True (passes) when the user is not logged in online (offline play is fine).
     """
     user_id = session.get("online_user_id")
@@ -1048,7 +1054,19 @@ def _is_session_valid() -> bool:
     token = session.get("session_token")
     if not token:
         return False
-    return _active_sessions.get(user_id) == token
+    if _active_sessions.get(user_id) != token:
+        return False
+    # Inactivity timeout check
+    now = _time_module.time()
+    last = _session_last_activity.get(user_id, 0)
+    if now - last > ONLINE_SESSION_TIMEOUT:
+        # Session expired — clear it
+        _active_sessions.pop(user_id, None)
+        _session_last_activity.pop(user_id, None)
+        return False
+    # Refresh activity timestamp on every valid check
+    _session_last_activity[user_id] = now
+    return True
 
 
 def _is_dying_session() -> bool:
@@ -2538,11 +2556,14 @@ def game():
             "index.html", show_create=True, data=GAME_DATA, create_error=create_error
         )
 
-    # ── Email check (online users must have an email for password recovery) ───
+    # ── Email check (online users must have a verified email) ────────────────
     _game_user_id = session.get("online_user_id")
     _user_has_email = True
+    _user_email_pending = None
     if _game_user_id:
         _user_has_email = bool(get_user_email(_game_user_id))
+        if not _user_has_email:
+            _user_email_pending = get_pending_email_verification(_game_user_id)
 
     # ── Timed events ──────────────────────────────────────────────────────────
     events_awarded = check_and_award_events(player)
@@ -2621,6 +2642,7 @@ def game():
             battle_companions=battle_companions,
             online_user=session.get("online_username"),
             user_has_email=_user_has_email,
+            user_email_pending=_user_email_pending,
         )
 
     _ensure_equipment_slots(player)
@@ -3124,6 +3146,7 @@ def game():
         else [],
         online_count=len(set(_chat_online.values())),
         user_has_email=_user_has_email,
+        user_email_pending=_user_email_pending,
     )
 
 
@@ -6174,6 +6197,7 @@ def api_online_login():
         if old_token:
             _dying_sessions[user_id] = old_token
         _active_sessions[user_id] = session_token
+        _session_last_activity[user_id] = _time_module.time()
         session["online_username"] = actual_username
         session["online_user_id"] = user_id
         session["session_token"] = session_token
@@ -6189,6 +6213,7 @@ def api_online_logout():
     user_id = session.get("online_user_id")
     if user_id and _active_sessions.get(user_id) == session.get("session_token"):
         _active_sessions.pop(user_id, None)
+        _session_last_activity.pop(user_id, None)
     _autosave()
     game_keys = [
         "player",
@@ -6851,16 +6876,63 @@ def api_leaderboard():
 
 
 @app.route("/api/online/set_email", methods=["POST"])
+@limiter.limit("5 per hour")
 def api_online_set_email():
     user_id = session.get("online_user_id")
     if not user_id:
         return jsonify({"ok": False, "message": "Not logged in."}), 401
     data = request.get_json(force=True, silent=True) or {}
     email = data.get("email", "").strip()
-    result = update_user_email(user_id, email)
-    if result["ok"]:
-        return jsonify(result), 200
-    return jsonify(result), 400
+    result = request_email_verification(user_id, email)
+    if not result["ok"]:
+        return jsonify(result), 400
+
+    # Send verification email if token was created and email is configured
+    if result["token"] and result["email"]:
+        base_url = request.host_url.rstrip("/")
+        verify_url = f"{base_url}/verify-email?token={result['token']}"
+        html_body = f"""
+<html><body style="background:#0a0618;color:#e8deff;font-family:sans-serif;padding:32px;">
+  <div style="max-width:480px;margin:0 auto;background:rgba(18,12,38,0.98);border:1px solid rgba(180,130,255,0.4);border-radius:14px;padding:32px;">
+    <h2 style="color:#b87fff;margin-top:0;">Our Legacy 2 — Verify Your Email</h2>
+    <p>Hello, Adventurer!</p>
+    <p>Please confirm this email address is yours by clicking the button below. The link expires in <strong>24 hours</strong>.</p>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="{verify_url}" style="background:linear-gradient(135deg,#6030c0,#3a1a80);color:#fff;text-decoration:none;padding:13px 28px;border-radius:8px;font-size:15px;font-weight:bold;letter-spacing:0.05em;">Verify My Email</a>
+    </div>
+    <p style="font-size:12px;color:#888;">If you did not request this, you can safely ignore it.</p>
+    <p style="font-size:12px;color:#888;">Link: <a href="{verify_url}" style="color:#b87fff;">{verify_url}</a></p>
+  </div>
+</body></html>
+"""
+        text_body = (
+            f"Our Legacy 2 — Verify Your Email\n\n"
+            f"Click the link below to verify your email (expires in 24 hours):\n{verify_url}\n\n"
+            f"If you did not request this, ignore this email."
+        )
+        _send_email(
+            to=result["email"],
+            subject="Our Legacy 2 — Verify Your Email",
+            body_html=html_body,
+            body_text=text_body,
+        )
+
+    return jsonify({"ok": True, "message": f"Verification email sent to {result['email']}. Check your inbox and click the link to confirm."})
+
+
+@app.route("/verify-email")
+def verify_email_page():
+    token = request.args.get("token", "").strip()
+    if not token:
+        return render_template("verify_email.html", token=None, result=None)
+    result = verify_email_token(token)
+    # If verification succeeded and the user is currently logged in as the verified user,
+    # trigger an autosave so their progress is secured.
+    if result["ok"] and result.get("user_id"):
+        verified_user_id = result["user_id"]
+        if session.get("online_user_id") == verified_user_id:
+            _autosave()
+    return render_template("verify_email.html", token=token, result=result)
 
 
 @app.route("/api/online/forgot-password", methods=["POST"])

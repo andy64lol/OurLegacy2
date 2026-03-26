@@ -736,9 +736,9 @@
                 <img src="/game_assets/glyphs/chat.png" alt="chat"
                     style="width:22px;height:22px;image-rendering:pixelated;"> {{ online_user }}</div>
             {% if user_has_email is defined and not user_has_email %}
-            <button onclick="openEmailSetupModal()" title="Add an email address for password recovery"
+            <button onclick="openEmailSetupModal()" title="{% if user_email_pending %}Verify your email address{% else %}Add an email address for password recovery{% endif %}"
                 style="width:100%;background:rgba(180,100,20,0.25);border:1px solid rgba(220,150,40,0.6);border-radius:6px;color:#e8a020;font-size:11px;padding:4px 8px;cursor:pointer;margin-top:3px;display:flex;align-items:center;justify-content:center;gap:4px;">
-                &#9888; Add email address
+                {% if user_email_pending %}&#9993; Verify email{% else %}&#9888; Add email address{% endif %}
             </button>
             {% endif %}
             {% endif %}
@@ -3402,10 +3402,34 @@
 {% endif %}
 
 {% if online_user is defined and online_user and user_has_email is defined and not user_has_email %}
-<!-- Email Setup Modal -->
+<!-- Email Setup / Verification Modal -->
 <div id="email-setup-overlay"
     style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
-    <div style="background:linear-gradient(160deg,rgba(22,14,44,0.99),rgba(10,6,24,0.99));border:1px solid rgba(220,150,40,0.55);border-radius:14px;padding:32px 26px;width:100%;max-width:380px;box-shadow:0 0 50px rgba(180,100,0,0.3);position:relative;">
+    <div style="background:linear-gradient(160deg,rgba(22,14,44,0.99),rgba(10,6,24,0.99));border:1px solid rgba(220,150,40,0.55);border-radius:14px;padding:32px 26px;width:100%;max-width:400px;box-shadow:0 0 50px rgba(180,100,0,0.3);position:relative;">
+
+        {% if user_email_pending %}
+        <!-- ── Pending verification state ── -->
+        <div style="text-align:center;margin-bottom:18px;">
+            <div style="font-size:30px;margin-bottom:8px;">&#9993;</div>
+            <div style="font-size:15px;font-weight:bold;color:#e8a020;letter-spacing:0.03em;">Check Your Email</div>
+        </div>
+        <p style="font-size:13px;color:var(--text-dim);margin:0 0 16px 0;text-align:center;line-height:1.6;">
+            A verification link was sent to<br>
+            <strong style="color:var(--text-light);">{{ user_email_pending }}</strong><br>
+            Click the link in that email to confirm your address. It expires in <strong>24 hours</strong>.
+        </p>
+        <p style="font-size:12px;color:var(--text-dim);text-align:center;margin:0 0 16px 0;opacity:0.75;">
+            Wrong address? Enter a new one below to resend.
+        </p>
+        <input type="email" id="email-setup-input" placeholder="{{ user_email_pending }}" autocomplete="email"
+            style="width:100%;box-sizing:border-box;margin-bottom:12px;padding:10px 13px;background:rgba(0,0,0,0.45);border:1px solid rgba(220,150,40,0.5);border-radius:8px;color:var(--text-light);font-size:13px;"
+            onkeydown="if(event.key==='Enter')saveEmailSetup()">
+        <button id="email-setup-btn" onclick="saveEmailSetup()" class="btn btn-primary"
+            style="width:100%;font-size:14px;background:linear-gradient(135deg,rgba(140,80,10,0.8),rgba(100,55,5,0.8));border-color:#c07010;">
+            Resend Verification Email
+        </button>
+        {% else %}
+        <!-- ── No email set state ── -->
         <div style="text-align:center;margin-bottom:18px;">
             <div style="font-size:30px;margin-bottom:8px;">&#9888;</div>
             <div style="font-size:15px;font-weight:bold;color:#e8a020;letter-spacing:0.03em;">Add an Email Address</div>
@@ -3419,8 +3443,10 @@
             onkeydown="if(event.key==='Enter')saveEmailSetup()">
         <button id="email-setup-btn" onclick="saveEmailSetup()" class="btn btn-primary"
             style="width:100%;font-size:14px;background:linear-gradient(135deg,rgba(140,80,10,0.8),rgba(100,55,5,0.8));border-color:#c07010;">
-            Save Email &amp; Secure Account
+            Send Verification Email
         </button>
+        {% endif %}
+
         <button onclick="dismissEmailSetup()"
             style="width:100%;background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;margin-top:10px;opacity:0.6;padding:4px;">
             Remind me later
@@ -3432,7 +3458,9 @@
     function openEmailSetupModal() {
         var el = document.getElementById('email-setup-overlay');
         if (el) { el.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+        {% if not user_email_pending %}
         setTimeout(function () { var i = document.getElementById('email-setup-input'); if (i) i.focus(); }, 80);
+        {% endif %}
     }
     function dismissEmailSetup() {
         var el = document.getElementById('email-setup-overlay');
@@ -3443,9 +3471,12 @@
         var status = document.getElementById('email-setup-status');
         var btn = document.getElementById('email-setup-btn');
         var email = input ? input.value.trim() : '';
+        {% if user_email_pending %}
+        if (!email) email = '{{ user_email_pending }}';
+        {% endif %}
         if (!email) { if (status) { status.textContent = 'Please enter an email address.'; status.style.color = 'var(--red)'; } return; }
         if (btn) btn.disabled = true;
-        if (status) { status.textContent = 'Saving...'; status.style.color = 'var(--text-dim)'; }
+        if (status) { status.textContent = 'Sending...'; status.style.color = 'var(--text-dim)'; }
         try {
             var res = await fetch('/api/online/set_email', {
                 method: 'POST',
@@ -3454,10 +3485,10 @@
             });
             var json = await res.json();
             if (json.ok) {
-                if (status) { status.textContent = 'Email saved!'; status.style.color = 'var(--green-bright)'; }
-                setTimeout(function () { window.location.reload(); }, 900);
+                if (status) { status.textContent = json.message || 'Verification email sent! Check your inbox.'; status.style.color = 'var(--green-bright)'; }
+                setTimeout(function () { window.location.reload(); }, 2200);
             } else {
-                if (status) { status.textContent = json.message || 'Could not save email.'; status.style.color = 'var(--red)'; }
+                if (status) { status.textContent = json.message || 'Could not send email.'; status.style.color = 'var(--red)'; }
                 if (btn) btn.disabled = false;
             }
         } catch(e) {

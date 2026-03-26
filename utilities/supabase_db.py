@@ -999,18 +999,23 @@ def get_all_activities(exclude_user_id: str = None) -> List[Dict[str, Any]]:
 # ─── Email Management ────────────────────────────────────────────────────────
 
 
+EMAIL_VERIFICATION_EXPIRY = 86400  # 24 hours
+
+
 def get_user_email(user_id: str) -> Optional[str]:
-    """Return the email address for the given user_id, or None if unset."""
+    """Return the verified email address for the given user_id, or None."""
     def _do():
         client = _get_client()
         result = (
             client.table("ol2_users")
-            .select("email")
+            .select("email, email_verified")
             .eq("id", user_id)
             .execute()
         )
         if result.data:
-            return result.data[0].get("email") or None
+            row = result.data[0]
+            if row.get("email_verified") and row.get("email"):
+                return row["email"]
         return None
 
     try:
@@ -1019,16 +1024,49 @@ def get_user_email(user_id: str) -> Optional[str]:
         return None
 
 
-def update_user_email(user_id: str, email: str) -> Dict[str, Any]:
+def get_pending_email_verification(user_id: str) -> Optional[str]:
+    """Return the pending (unverified) email if there is an active verification request."""
+    import datetime
+
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_email_verifications")
+            .select("email, created_at")
+            .eq("user_id", user_id)
+            .eq("verified", False)
+            .order("created_at", desc=True)
+            .limit(1)
+            .execute()
+        )
+        if not result.data:
+            return None
+        row = result.data[0]
+        try:
+            created_at = datetime.datetime.fromisoformat(row["created_at"].replace("Z", "+00:00"))
+            age = (datetime.datetime.now(datetime.timezone.utc) - created_at).total_seconds()
+            if age > EMAIL_VERIFICATION_EXPIRY:
+                return None
+        except Exception:
+            pass
+        return row["email"]
+
+    try:
+        return _run(_do)
+    except Exception:
+        return None
+
+
+def request_email_verification(user_id: str, email: str) -> Dict[str, Any]:
     """
-    Set or update the email address for a user.
-    Returns {'ok': bool, 'message': str}
+    Create a pending email verification token. Does NOT save the email yet.
+    Returns {'ok': bool, 'message': str, 'token': str|None, 'email': str|None}
     """
     email_clean = email.strip().lower()
     if not email_clean:
-        return {"ok": False, "message": "Please enter an email address."}
+        return {"ok": False, "message": "Please enter an email address.", "token": None, "email": None}
     if not _is_valid_email(email_clean):
-        return {"ok": False, "message": "Invalid email address format."}
+        return {"ok": False, "message": "Invalid email address format.", "token": None, "email": None}
 
     def _do():
         client = _get_client()
@@ -1036,18 +1074,88 @@ def update_user_email(user_id: str, email: str) -> Dict[str, Any]:
             client.table("ol2_users")
             .select("id")
             .eq("email", email_clean)
+            .eq("email_verified", True)
             .neq("id", user_id)
             .execute()
         )
         if taken.data:
-            return {"ok": False, "message": "That email is already linked to another account."}
-        client.table("ol2_users").update({"email": email_clean}).eq("id", user_id).execute()
-        return {"ok": True, "message": "Email address saved."}
+            return {"ok": False, "message": "That email is already linked to another account.", "token": None, "email": None}
+
+        token = secrets.token_urlsafe(32)
+        client.table("ol2_email_verifications").insert({
+            "user_id": user_id,
+            "email": email_clean,
+            "token": token,
+            "verified": False,
+        }).execute()
+        return {"ok": True, "message": "Verification email sent.", "token": token, "email": email_clean}
 
     try:
         return _run(_do)
     except Exception as e:
-        return {"ok": False, "message": f"Could not save email: {e}"}
+        return {"ok": False, "message": f"Could not create verification: {e}", "token": None, "email": None}
+
+
+def verify_email_token(token: str) -> Dict[str, Any]:
+    """
+    Validate an email verification token and save the email as verified on the user's account.
+    Returns {'ok': bool, 'message': str, 'user_id': str|None}
+    """
+    import datetime
+
+    token = token.strip()
+    if not token:
+        return {"ok": False, "message": "Invalid verification link.", "user_id": None}
+
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_email_verifications")
+            .select("id, user_id, email, created_at, verified")
+            .eq("token", token)
+            .execute()
+        )
+        if not result.data:
+            return {"ok": False, "message": "Verification link is invalid or has expired.", "user_id": None}
+
+        row = result.data[0]
+        if row["verified"]:
+            return {"ok": False, "message": "This email has already been verified.", "user_id": None}
+
+        try:
+            created_at = datetime.datetime.fromisoformat(row["created_at"].replace("Z", "+00:00"))
+            age = (datetime.datetime.now(datetime.timezone.utc) - created_at).total_seconds()
+            if age > EMAIL_VERIFICATION_EXPIRY:
+                return {"ok": False, "message": "Verification link has expired. Please request a new one.", "user_id": None}
+        except Exception:
+            pass
+
+        user_id = row["user_id"]
+        email = row["email"]
+
+        taken = (
+            client.table("ol2_users")
+            .select("id")
+            .eq("email", email)
+            .neq("id", user_id)
+            .execute()
+        )
+        if taken.data:
+            return {"ok": False, "message": "That email is already linked to another account.", "user_id": None}
+
+        client.table("ol2_users").update({
+            "email": email,
+            "email_verified": True,
+        }).eq("id", user_id).execute()
+
+        client.table("ol2_email_verifications").update({"verified": True}).eq("id", row["id"]).execute()
+
+        return {"ok": True, "message": "Email verified successfully!", "user_id": user_id}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "message": f"Verification failed: {e}", "user_id": None}
 
 
 # ─── Password Reset ───────────────────────────────────────────────────────────
