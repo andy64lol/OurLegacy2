@@ -188,6 +188,61 @@ _activity_counts: dict = {
 }
 _activity_lock = _threading.Lock()
 
+# ── Admin system ───────────────────────────────────────────────────────────────
+_ADMINS_PATH = os.path.join(os.path.dirname(__file__), "admins.json")
+_admins_lock = _threading.Lock()
+
+
+def _load_admins() -> dict:
+    try:
+        with open(_ADMINS_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {"owner": "ThePrimordialOne", "admins": [], "banned_users": {}, "muted_users": {}}
+
+
+def _save_admins(data: dict) -> None:
+    with open(_ADMINS_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+def _is_owner(username: str) -> bool:
+    data = _load_admins()
+    return username.lower() == data.get("owner", "").lower()
+
+
+def _is_admin_user(username: str) -> bool:
+    """Returns True for the owner and any listed admin."""
+    data = _load_admins()
+    if username.lower() == data.get("owner", "").lower():
+        return True
+    return username.lower() in [a.lower() for a in data.get("admins", [])]
+
+
+def _is_banned(username: str) -> bool:
+    data = _load_admins()
+    return username.lower() in {k.lower() for k in data.get("banned_users", {})}
+
+
+def _is_muted(username: str) -> bool:
+    import time as _tadmin
+    data = _load_admins()
+    muted = {k.lower(): v for k, v in data.get("muted_users", {}).items()}
+    entry = muted.get(username.lower())
+    if not entry:
+        return False
+    expires = entry.get("expires_at")
+    if expires and _tadmin.time() > expires:
+        # Auto-expire: clean up
+        with _admins_lock:
+            fresh = _load_admins()
+            to_del = [k for k in fresh.get("muted_users", {}) if k.lower() == username.lower()]
+            for k in to_del:
+                del fresh["muted_users"][k]
+            _save_admins(fresh)
+        return False
+    return True
+
 
 def _record_activity(category: str, amount: int = 1) -> None:
     """Thread-safe increment of an activity counter consumed by _world_tick."""
@@ -329,6 +384,9 @@ def _on_chat_send(data):
     username = session.get("online_username")
     if not username:
         socketio_emit("chat_error", {"message": "You must be logged in to chat."})
+        return
+    if _is_muted(username):
+        socketio_emit("chat_error", {"message": "You are muted and cannot send messages."})
         return
     raw = str(data.get("message", "")).strip()
     if not raw:
@@ -6202,6 +6260,9 @@ def api_online_login():
         user_id = result["user_id"]
         # Use the actual stored username (the user may have logged in via email)
         actual_username = result.get("username") or username.lower()
+        # Ban check — do not allow banned accounts to log in.
+        if _is_banned(actual_username):
+            return jsonify({"ok": False, "message": "Your account has been banned."}), 403
         # Server cap: reject if 100 other players are already online.
         other_active = [uid for uid in _active_sessions if uid != user_id]
         if len(other_active) >= 100:
@@ -7021,6 +7082,170 @@ def api_reset_password():
     if result["ok"]:
         return jsonify(result), 200
     return jsonify(result), 400
+
+
+# ── Admin API ─────────────────────────────────────────────────────────────────
+
+def _require_admin():
+    """Return the calling username if they are an admin/owner, else None."""
+    return session.get("online_username") if _is_admin_user(session.get("online_username", "")) else None
+
+
+@app.route("/api/admin/status", methods=["GET"])
+def api_admin_status():
+    """Return the caller's admin role and the current ban/mute lists (admins only)."""
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    data = _load_admins()
+    return jsonify({
+        "ok": True,
+        "is_owner": _is_owner(caller),
+        "owner": data.get("owner"),
+        "admins": data.get("admins", []),
+        "banned_users": data.get("banned_users", {}),
+        "muted_users": data.get("muted_users", {}),
+    })
+
+
+@app.route("/api/admin/ban", methods=["POST"])
+def api_admin_ban():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("username", "").strip()
+    reason = body.get("reason", "").strip() or "No reason given."
+    if not target:
+        return jsonify({"ok": False, "message": "No username provided."}), 400
+    if target.lower() == caller.lower():
+        return jsonify({"ok": False, "message": "You cannot ban yourself."}), 400
+    if _is_owner(target) and not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Only the owner can ban the owner."}), 403
+    with _admins_lock:
+        data = _load_admins()
+        data.setdefault("banned_users", {})[target] = {
+            "reason": reason,
+            "banned_by": caller,
+            "banned_at": _time_module.time(),
+        }
+        _save_admins(data)
+    # The banned user will be blocked on their next login attempt.
+    # Their current session will expire naturally or when they next make a request.
+    return jsonify({"ok": True, "message": f"{target} has been banned."})
+
+
+@app.route("/api/admin/unban", methods=["POST"])
+def api_admin_unban():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("username", "").strip()
+    if not target:
+        return jsonify({"ok": False, "message": "No username provided."}), 400
+    with _admins_lock:
+        data = _load_admins()
+        removed = {k: v for k, v in data.get("banned_users", {}).items() if k.lower() == target.lower()}
+        if not removed:
+            return jsonify({"ok": False, "message": f"{target} is not banned."}), 404
+        data["banned_users"] = {k: v for k, v in data["banned_users"].items() if k.lower() != target.lower()}
+        _save_admins(data)
+    return jsonify({"ok": True, "message": f"{target} has been unbanned."})
+
+
+@app.route("/api/admin/mute", methods=["POST"])
+def api_admin_mute():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("username", "").strip()
+    reason = body.get("reason", "").strip() or "No reason given."
+    duration_minutes = body.get("duration_minutes")  # None = permanent
+    if not target:
+        return jsonify({"ok": False, "message": "No username provided."}), 400
+    if target.lower() == caller.lower():
+        return jsonify({"ok": False, "message": "You cannot mute yourself."}), 400
+    if _is_owner(target) and not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Only the owner can mute the owner."}), 403
+    expires_at = None
+    if duration_minutes:
+        try:
+            expires_at = _time_module.time() + int(duration_minutes) * 60
+        except (ValueError, TypeError):
+            return jsonify({"ok": False, "message": "Invalid duration."}), 400
+    with _admins_lock:
+        data = _load_admins()
+        data.setdefault("muted_users", {})[target] = {
+            "reason": reason,
+            "muted_by": caller,
+            "muted_at": _time_module.time(),
+            "expires_at": expires_at,
+        }
+        _save_admins(data)
+    msg = f"{target} has been muted"
+    msg += f" for {duration_minutes} minute(s)." if duration_minutes else " permanently."
+    return jsonify({"ok": True, "message": msg})
+
+
+@app.route("/api/admin/unmute", methods=["POST"])
+def api_admin_unmute():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("username", "").strip()
+    if not target:
+        return jsonify({"ok": False, "message": "No username provided."}), 400
+    with _admins_lock:
+        data = _load_admins()
+        removed = {k: v for k, v in data.get("muted_users", {}).items() if k.lower() == target.lower()}
+        if not removed:
+            return jsonify({"ok": False, "message": f"{target} is not muted."}), 404
+        data["muted_users"] = {k: v for k, v in data["muted_users"].items() if k.lower() != target.lower()}
+        _save_admins(data)
+    return jsonify({"ok": True, "message": f"{target} has been unmuted."})
+
+
+@app.route("/api/admin/add_admin", methods=["POST"])
+def api_admin_add_admin():
+    """Owner-only: promote a player to admin."""
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Only the owner can promote admins."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("username", "").strip()
+    if not target:
+        return jsonify({"ok": False, "message": "No username provided."}), 400
+    with _admins_lock:
+        data = _load_admins()
+        admins = data.setdefault("admins", [])
+        if any(a.lower() == target.lower() for a in admins):
+            return jsonify({"ok": False, "message": f"{target} is already an admin."}), 409
+        admins.append(target)
+        _save_admins(data)
+    return jsonify({"ok": True, "message": f"{target} is now an admin."})
+
+
+@app.route("/api/admin/remove_admin", methods=["POST"])
+def api_admin_remove_admin():
+    """Owner-only: demote an admin."""
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Only the owner can demote admins."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("username", "").strip()
+    if not target:
+        return jsonify({"ok": False, "message": "No username provided."}), 400
+    with _admins_lock:
+        data = _load_admins()
+        before = len(data.get("admins", []))
+        data["admins"] = [a for a in data.get("admins", []) if a.lower() != target.lower()]
+        if len(data["admins"]) == before:
+            return jsonify({"ok": False, "message": f"{target} is not an admin."}), 404
+        _save_admins(data)
+    return jsonify({"ok": True, "message": f"{target} has been removed from admins."})
 
 
 port = int(os.environ.get("PORT", 5000))
