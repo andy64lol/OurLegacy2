@@ -251,16 +251,22 @@
             overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;';
             overlay.innerHTML = '<div style="background:#0d1f0d;border:1px solid rgba(180,130,255,0.4);border-radius:12px;padding:32px 40px;max-width:380px;text-align:center;color:#e8e0d0;">'
                 + '<div style="font-size:22px;color:#c084fc;margin-bottom:12px;">Session Ended</div>'
-                + '<div style="font-size:14px;color:#a0926a;margin-bottom:20px;">Your account was logged in from another location. Your progress has been saved.</div>'
-                + '<button onclick="window.location.reload()" style="background:linear-gradient(135deg,#6a0dad,#c084fc);border:none;color:#fff;padding:10px 28px;border-radius:8px;cursor:pointer;font-size:14px;">Return to Login</button>'
+                + '<div style="font-size:14px;color:#a0926a;margin-bottom:16px;">Your account was logged in from another location. Your progress has been saved.</div>'
+                + '<div style="font-size:12px;color:#6b7280;">Returning to home...</div>'
                 + '</div>';
             document.body.appendChild(overlay);
+            // Log out server-side then redirect home.
+            fetch('/api/online/logout', { method: 'POST' })
+                .catch(function() {})
+                .finally(function() {
+                    setTimeout(function() { window.location.href = '/'; }, 2000);
+                });
         }
 
         function _finalSaveThenKick() {
             if (_sessionKicked) return;
             _sessionKicked = true; // block any further checks while save is in flight
-            // Attempt one last save before showing the kicked modal.
+            // Attempt one last save before logging out and redirecting.
             fetch('/api/online/autosave', { method: 'POST' })
                 .catch(function() {})
                 .finally(function() {
