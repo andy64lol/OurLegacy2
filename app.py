@@ -6202,13 +6202,13 @@ def api_online_login():
         user_id = result["user_id"]
         # Use the actual stored username (the user may have logged in via email)
         actual_username = result.get("username") or username.lower()
-        # 2-player server cap: reject if two *other* players are already online.
+        # Server cap: reject if 100 other players are already online.
         other_active = [uid for uid in _active_sessions if uid != user_id]
-        if len(other_active) >= 2:
+        if len(other_active) >= 100:
             return jsonify({
                 "ok": False,
                 "server_full": True,
-                "message": "The server is full — only 2 players can be online at once. Please try again later.",
+                "message": "The server is full (100 players max). Please try again later.",
             }), 503
         session_token = str(uuid.uuid4())
         # Move the old token to the grace slot so the kicked session can save one last time.
