@@ -78,6 +78,9 @@
     <!-- ── Global Chat Widget + Groups Widget (online users only) ─── -->
     {% if online_username %}
     <style>
+        /* Floating chat widget is hidden everywhere — global chat lives only in the Chat tab */
+        #chat-widget { display: none !important; }
+
         #chat-panel {
             position: relative;
             min-width: 260px;

@@ -944,6 +944,7 @@ body.ol2-bg-4 .main-content { background-image: url('/game_assets/backgrounds/4.
 /* ─── Tabs ───────────────────────────────────────────────── */
 .tab-nav-wrap {
     position: relative;
+    z-index: 200;
     margin-bottom: 18px;
 }
 .tab-nav {
