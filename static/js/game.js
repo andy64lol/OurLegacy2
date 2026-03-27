@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initPagination();
     scrollLogsToBottom();
     checkUrlTab();
+    checkAutosaved();
     initLoadFileInput();
     initMusic();
     initPageTransitions();
@@ -16,6 +17,17 @@ document.addEventListener('DOMContentLoaded', function () {
     initAmbientParticles();
     hookParticleEvents();
 });
+
+function checkAutosaved() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('autosaved') !== '1') return;
+    history.replaceState(null, '', window.location.pathname);
+    var el = document.getElementById('autosave-indicator');
+    if (!el) return;
+    el.textContent = '\u2756 Progress saved';
+    el.style.display = 'block';
+    setTimeout(function () { el.style.display = 'none'; }, 2500);
+}
 
 function gameConfirm(message, onConfirm) {
     var overlay = document.getElementById('game-confirm-overlay');

@@ -3997,7 +3997,7 @@ def action_travel():
 
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return redirect(url_for("game") + "?autosaved=1")
 
 
 # ─── Manual Boss Challenge ─────────────em�t��──────────────────────────────────────
