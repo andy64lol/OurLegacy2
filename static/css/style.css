@@ -2014,8 +2014,9 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
     padding: 14px;
     position: relative;
 }
-.active-comp { border-color: var(--gold); }
-.comp-hired  { opacity: 0.65; }
+.active-comp  { border-color: var(--gold); }
+.comp-fallen  { border-color: var(--red) !important; opacity: 0.75; filter: grayscale(0.4); }
+.comp-hired   { opacity: 0.65; }
 
 .comp-header {
     display: flex;

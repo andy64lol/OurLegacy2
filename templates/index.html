@@ -1690,27 +1690,33 @@
                     {% if active_companions %}
                     <div class="companion-grid">
                         {% for comp in active_companions %}
-                        <div class="companion-card active-comp rank-{{ comp.rank }}">
+                        <div class="companion-card active-comp rank-{{ comp.rank }}{% if comp.fallen %} comp-fallen{% endif %}">
                             <div class="comp-header">
                                 <span class="comp-name">{{ comp.name }}</span>
                                 <span class="comp-class rank-badge rank-{{ comp.rank }}">{{ comp.rank|title }}</span>
                             </div>
                             <div class="comp-class-label">{{ comp.class }}</div>
+                            {% if comp.fallen %}
+                            <div style="margin:6px 0;padding:5px 8px;background:rgba(180,30,30,0.25);border:1px solid var(--red);font-size:0.75rem;color:var(--red);text-align:center;letter-spacing:0.06em;text-transform:uppercase;">
+                                &#9760; Fallen — Rest at an inn to revive
+                            </div>
+                            {% else %}
                             {% if comp.description %}
                             <div class="comp-desc">{{ comp.description }}</div>
                             {% endif %}
                             {% if comp.stat_summary %}
                             <div class="comp-stats">{{ comp.stat_summary }}</div>
                             {% endif %}
+                            {% endif %}
                             <div class="comp-hp-bar" style="margin-top:6px;">
                                 <div
                                     style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text-dim);margin-bottom:2px;">
                                     <span>HP</span>
-                                    <span>{{ comp.hp }} / {{ comp.max_hp }}</span>
+                                    <span>{% if comp.fallen %}0{% else %}{{ comp.hp }}{% endif %} / {{ comp.max_hp }}</span>
                                 </div>
                                 <div style="background:rgba(0,0,0,0.35);border-radius:4px;height:6px;overflow:hidden;">
                                     <div
-                                        style="width:{{ comp.hp_pct }}%;height:100%;background:{% if comp.hp_pct > 60 %}var(--green-bright){% elif comp.hp_pct > 25 %}var(--gold){% else %}var(--red){% endif %};border-radius:4px;transition:width 0.3s;">
+                                        style="width:{% if comp.fallen %}0{% else %}{{ comp.hp_pct }}{% endif %}%;height:100%;background:{% if comp.fallen %}var(--red){% elif comp.hp_pct > 60 %}var(--green-bright){% elif comp.hp_pct > 25 %}var(--gold){% else %}var(--red){% endif %};border-radius:4px;transition:width 0.3s;">
                                     </div>
                                 </div>
                             </div>

@@ -1758,27 +1758,27 @@ def boss_take_turn(enemy, player, player_effects, log):
 # ─── Companion combat helpers ─────────────────────────────────────────────────
 
 _COMPANION_RANK_HP = {
-    "common": 400,
-    "uncommon": 700,
-    "rare": 1100,
-    "epic": 1800,
-    "legendary": 3000,
+    "common": 1200,
+    "uncommon": 2200,
+    "rare": 3500,
+    "epic": 5500,
+    "legendary": 9000,
 }
 
 _COMPANION_RANK_ATK_CAP = {
-    "common": 120,
-    "uncommon": 180,
-    "rare": 260,
-    "epic": 380,
-    "legendary": 520,
+    "common": 320,
+    "uncommon": 520,
+    "rare": 780,
+    "epic": 1100,
+    "legendary": 1600,
 }
 
 _COMPANION_RANK_DEF_CAP = {
-    "common": 40,
-    "uncommon": 60,
-    "rare": 90,
-    "epic": 130,
-    "legendary": 180,
+    "common": 120,
+    "uncommon": 200,
+    "rare": 300,
+    "epic": 440,
+    "legendary": 620,
 }
 
 
@@ -1793,8 +1793,8 @@ def _get_companion_combat_stats(comp_entry):
     atk_bonus = comp_data.get("attack_bonus", 0)
     def_bonus = comp_data.get("defense_bonus", 0)
     crit_bonus = comp_data.get("crit_damage_bonus", 0)
-    base_atk = atk_bonus * 8 + 60 + crit_bonus // 5
-    base_def = def_bonus * 5 + 12
+    base_atk = atk_bonus * 18 + 120 + crit_bonus // 3
+    base_def = def_bonus * 14 + 45
     return {
         "id": comp_id,
         "name": comp_entry.get("name", comp_data.get("name", "Companion")),
@@ -1802,17 +1802,18 @@ def _get_companion_combat_stats(comp_entry):
         "max_hp": comp_entry.get("max_hp", max_hp),
         "attack": min(atk_cap, base_atk),
         "defense": min(def_cap, base_def),
-        "action_chance": comp_data.get("action_chance", 0.40),
-        "crit_chance": min(0.35, comp_data.get("crit_chance", 0) / 100.0),
+        "action_chance": comp_data.get("action_chance", 0.65),
+        "crit_chance": min(0.50, comp_data.get("crit_chance", 0) / 100.0),
+        "fallen": comp_entry.get("fallen", False),
     }
 
 
 def _build_battle_companions(player):
-    """Build session battle_companions list from player's hired companions."""
+    """Build session battle_companions list from player's hired companions (excludes fallen)."""
     return [
         _get_companion_combat_stats(c)
         for c in player.get("companions", [])
-        if isinstance(c, dict)
+        if isinstance(c, dict) and not c.get("fallen", False)
     ]
 
 
@@ -1827,9 +1828,9 @@ def _companion_take_action(battle_companions, enemy, log):
         if random.random() > comp.get("action_chance", 0.40):
             continue
         dmg = max(1, comp["attack"] - enemy["defense"] + dice.between(-3, 6))
-        comp_crit_rate = 0.08 + comp.get("crit_chance", 0.0)
+        comp_crit_rate = 0.15 + comp.get("crit_chance", 0.0)
         if random.random() < comp_crit_rate:
-            dmg = int(dmg * 1.75)
+            dmg = int(dmg * 2.5)
             log.append(
                 f"[{comp['name']} lands a critical blow on {enemy['name']} for {dmg}!]"
             )
@@ -1871,29 +1872,51 @@ def _companion_last_stand(battle_companions, enemy, log):
 
 
 def _sync_companion_hp_to_player(player, battle_companions):
-    """Write battle HP from session companions back into the player's companion list."""
+    """Write battle HP from session companions back into the player's companion list.
+    Marks companions as fallen if they reach 0 HP."""
     hp_map = {c["id"]: c["hp"] for c in battle_companions}
     for comp in player.get("companions", []):
         if isinstance(comp, dict) and comp.get("id") in hp_map:
-            comp["hp"] = max(0, hp_map[comp["id"]])
+            new_hp = max(0, hp_map[comp["id"]])
+            comp["hp"] = new_hp
+            if new_hp <= 0:
+                comp["fallen"] = True
 
 
 def _restore_companion_hp(player):
-    """Restore all companions to full HP after any battle outcome."""
+    """Restore living (non-fallen) companions to full HP after any battle outcome."""
     for comp in player.get("companions", []):
-        if isinstance(comp, dict) and "max_hp" in comp:
+        if isinstance(comp, dict) and "max_hp" in comp and not comp.get("fallen", False):
             comp["hp"] = comp["max_hp"]
 
 
-def _ensure_companion_hp(player):
-    """Migration: assign HP/max_hp to companions hired before this system existed."""
+def _revive_companions(player):
+    """Revive all fallen companions to full HP (called on inn rest)."""
+    revived = []
     for comp in player.get("companions", []):
-        if not isinstance(comp, dict):
-            continue
-        if "max_hp" not in comp:
+        if isinstance(comp, dict) and comp.get("fallen", False):
+            comp["fallen"] = False
             stats = _get_companion_combat_stats(comp)
             comp["hp"] = stats["max_hp"]
             comp["max_hp"] = stats["max_hp"]
+            revived.append(comp.get("name", "Companion"))
+    return revived
+
+
+def _ensure_companion_hp(player):
+    """Migration: assign/refresh HP/max_hp to companions with updated buffed values."""
+    for comp in player.get("companions", []):
+        if not isinstance(comp, dict):
+            continue
+        stats = _get_companion_combat_stats(comp)
+        new_max = stats["max_hp"]
+        if "max_hp" not in comp:
+            comp["hp"] = new_max
+            comp["max_hp"] = new_max
+        elif comp.get("max_hp", 0) < new_max and not comp.get("fallen", False):
+            # Refresh to the new buffed max_hp
+            comp["max_hp"] = new_max
+            comp["hp"] = new_max
 
 
 # ─── Cutscenes ────────────────────────────────────────────────────────────────
@@ -3015,6 +3038,7 @@ def game():
                     "hp": cur_hp,
                     "max_hp": max_hp,
                     "hp_pct": hp_pct,
+                    "fallen": comp.get("fallen", False),
                 }
             )
 
@@ -3930,6 +3954,8 @@ def action_rest():
     advance_game_time(player)
     apply_regen_effects(player)
 
+    revived = _revive_companions(player)
+
     if cost > 0:
         add_message(
             f"You rest for {cost} gold. HP and MP fully restored.",
@@ -3939,6 +3965,13 @@ def action_rest():
         add_message(
             "You rest peacefully on your land. HP and MP restored.",
             "var(--green-bright)",
+        )
+
+    if revived:
+        names = ", ".join(revived)
+        add_message(
+            f"&#9876; Your fallen companions have recovered: {names}!",
+            "var(--gold)",
         )
 
     area_name = area.get("name", area_key.replace("_", " ").title())
