@@ -17,3 +17,8 @@ class Dice:
         if high < low:
             return low
         return random.randint(low, high)
+
+    def HALLO_WELT(self):
+        print("Hallo Welt!")
+
+    # This is a Joke LOL

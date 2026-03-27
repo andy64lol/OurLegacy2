@@ -3,6 +3,7 @@ Save/Load System for Our Legacy 2 - Flask Edition
 Functions for serializing/deserializing game state (Flask session dicts).
 Supports encrypted pickle saves (download/upload) and server-side JSON saves.
 """
+
 import json
 import os
 import pickle
@@ -16,7 +17,7 @@ SAVES_DIR = "data/saves"
 SAVE_VERSION = "4.0"
 GAME_VERSION = "1.0.0"
 
-SAVE_MAGIC = b'OL2S'
+SAVE_MAGIC = b"OL2S"
 SALT_SIZE = 16
 
 APP_SAVE_SECRET = os.environ.get("SECRET_SALT", "")
@@ -55,19 +56,19 @@ def decrypt_save(data: bytes) -> Dict[str, Any]:
     """
     if not data.startswith(SAVE_MAGIC):
         raise ValueError("Not a valid Our Legacy 2 save file.")
-    
-    payload = data[len(SAVE_MAGIC):]
+
+    payload = data[len(SAVE_MAGIC) :]
     if len(payload) < SALT_SIZE:
         raise ValueError("Save file is too short or corrupted.")
-    
+
     salt = payload[:SALT_SIZE]
     token = payload[SALT_SIZE:]
-    
+
     # Secrets to try
     secrets_to_try = [APP_SAVE_SECRET]
     if datetime.now() <= datetime(2026, 10, 31, 23, 59, 59):
         secrets_to_try.append(OLD_APP_SAVE_SECRET)
-    
+
     # Attempt decryption
     for secret in secrets_to_try:
         key = _derive_key(salt, secret)
@@ -77,19 +78,21 @@ def decrypt_save(data: bytes) -> Dict[str, Any]:
             return pickle.loads(pickled)
         except InvalidToken:
             continue
-    
+
     raise ValueError("Save file is corrupted or secret mismatch")
 
 
 # ─── Server-Side JSON Helpers (legacy) ───────────────────────────────────────
 
 
-def build_save_data(player: Dict[str, Any],
-                    current_area: str,
-                    visited_areas: List[str],
-                    completed_missions: List[str],
-                    achievements: Optional[List] = None,
-                    npc_unlocked_quests: Optional[List] = None) -> Dict[str, Any]:
+def build_save_data(
+    player: Dict[str, Any],
+    current_area: str,
+    visited_areas: List[str],
+    completed_missions: List[str],
+    achievements: Optional[List] = None,
+    npc_unlocked_quests: Optional[List] = None,
+) -> Dict[str, Any]:
     """Build a save data dict from current game state."""
     return {
         "player": player,
@@ -104,45 +107,50 @@ def build_save_data(player: Dict[str, Any],
     }
 
 
-def save_game(player: Dict[str, Any],
-              current_area: str,
-              visited_areas: List[str],
-              completed_missions: List[str],
-              achievements: Optional[List] = None,
-              filename_prefix: str = "",
-              npc_unlocked_quests: Optional[List] = None) -> Dict[str, Any]:
+def save_game(
+    player: Dict[str, Any],
+    current_area: str,
+    visited_areas: List[str],
+    completed_missions: List[str],
+    achievements: Optional[List] = None,
+    filename_prefix: str = "",
+    npc_unlocked_quests: Optional[List] = None,
+) -> Dict[str, Any]:
     """
     Save game to a JSON file.
     Returns {'ok': bool, 'message': str, 'filename': str}
     """
     try:
         os.makedirs(SAVES_DIR, exist_ok=True)
-        save_data = build_save_data(player, current_area, visited_areas,
-                                    completed_missions, achievements,
-                                    npc_unlocked_quests)
+        save_data = build_save_data(
+            player,
+            current_area,
+            visited_areas,
+            completed_missions,
+            achievements,
+            npc_unlocked_quests,
+        )
 
-        name = player.get('name', 'unknown').replace('/', '_')
-        pid = player.get('uuid', 'xxxx')[:8]
-        cls = player.get('class', player.get('character_class', 'unknown'))
-        level = player.get('level', 1)
+        name = player.get("name", "unknown").replace("/", "_")
+        pid = player.get("uuid", "xxxx")[:8]
+        cls = player.get("class", player.get("character_class", "unknown"))
+        level = player.get("level", 1)
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        safe_prefix = (filename_prefix or "").replace('/', '_')
-        filename = f"{SAVES_DIR}/{safe_prefix}{name}_{pid}_save_{timestamp}_{cls}_{level}.json"
+        safe_prefix = (filename_prefix or "").replace("/", "_")
+        filename = (
+            f"{SAVES_DIR}/{safe_prefix}{name}_{pid}_save_{timestamp}_{cls}_{level}.json"
+        )
 
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(save_data, f, indent=2)
 
         return {
-            'ok': True,
-            'message': f'Game saved: {os.path.basename(filename)}',
-            'filename': filename
+            "ok": True,
+            "message": f"Game saved: {os.path.basename(filename)}",
+            "filename": filename,
         }
     except (OSError, TypeError, ValueError) as e:
-        return {
-            'ok': False,
-            'message': f'Error saving game: {e}',
-            'filename': ''
-        }
+        return {"ok": False, "message": f"Error saving game: {e}", "filename": ""}
 
 
 def list_saves() -> List[Dict[str, Any]]:
@@ -152,31 +160,27 @@ def list_saves() -> List[Dict[str, Any]]:
 
     saves = []
     for fname in sorted(os.listdir(SAVES_DIR)):
-        if not fname.endswith('.json'):
+        if not fname.endswith(".json"):
             continue
         fpath = os.path.join(SAVES_DIR, fname)
         try:
-            with open(fpath, 'r', encoding='utf-8') as f:
+            with open(fpath, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            player = data.get('player', {})
-            saves.append({
-                'filename':
-                fname,
-                'filepath':
-                fpath,
-                'player_name':
-                player.get('name', '?'),
-                'character_class':
-                player.get('class', player.get('character_class', '?')),
-                'level':
-                player.get('level', 1),
-                'save_time':
-                data.get('save_time', ''),
-                'save_version':
-                data.get('save_version', '?'),
-                'current_area':
-                data.get('current_area', ''),
-            })
+            player = data.get("player", {})
+            saves.append(
+                {
+                    "filename": fname,
+                    "filepath": fpath,
+                    "player_name": player.get("name", "?"),
+                    "character_class": player.get(
+                        "class", player.get("character_class", "?")
+                    ),
+                    "level": player.get("level", 1),
+                    "save_time": data.get("save_time", ""),
+                    "save_version": data.get("save_version", "?"),
+                    "current_area": data.get("current_area", ""),
+                }
+            )
         except (OSError, ValueError):
             continue
     return saves
@@ -189,50 +193,57 @@ def load_save(filepath: str) -> Dict[str, Any]:
      'visited_areas': list, 'completed_missions': list, 'achievements': list}
     """
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        player = data.get('player', {})
-        current_area = data.get('current_area', 'starting_village')
-        visited_areas = data.get('visited_areas', [current_area])
-        completed_missions = data.get('completed_missions', [])
-        achievements = data.get('achievements', [])
-        npc_unlocked_quests = data.get('npc_unlocked_quests', [])
+        player = data.get("player", {})
+        current_area = data.get("current_area", "starting_village")
+        visited_areas = data.get("visited_areas", [current_area])
+        completed_missions = data.get("completed_missions", [])
+        achievements = data.get("achievements", [])
+        npc_unlocked_quests = data.get("npc_unlocked_quests", [])
 
-        if not player or not player.get('name'):
-            return {
-                'ok': False,
-                'message': 'Invalid save file: missing player data.'
-            }
+        if not player or not player.get("name"):
+            return {"ok": False, "message": "Invalid save file: missing player data."}
 
         return {
-            'ok': True,
-            'message': f'Welcome back, {player.get("name")}!',
-            'player': player,
-            'current_area': current_area,
-            'visited_areas': visited_areas,
-            'completed_missions': completed_missions,
-            'achievements': achievements,
-            'npc_unlocked_quests': npc_unlocked_quests,
+            "ok": True,
+            "message": f"Welcome back, {player.get('name')}!",
+            "player": player,
+            "current_area": current_area,
+            "visited_areas": visited_areas,
+            "completed_missions": completed_missions,
+            "achievements": achievements,
+            "npc_unlocked_quests": npc_unlocked_quests,
         }
     except FileNotFoundError:
-        return {'ok': False, 'message': 'Save file not found.'}
+        return {"ok": False, "message": "Save file not found."}
     except (OSError, ValueError, KeyError) as e:
-        return {'ok': False, 'message': f'Error loading save: {e}'}
+        return {"ok": False, "message": f"Error loading save: {e}"}
 
 
 def load_save_by_index(index: int) -> Dict[str, Any]:
     """Load a save file by its list index."""
     saves = list_saves()
     if not saves or not (0 <= index < len(saves)):
-        return {'ok': False, 'message': 'Invalid save file selection.'}
-    return load_save(saves[index]['filepath'])
+        return {"ok": False, "message": "Invalid save file selection."}
+    return load_save(saves[index]["filepath"])
 
 
 def delete_save(filepath: str) -> Dict[str, Any]:
     """Delete a save file."""
     try:
         os.remove(filepath)
-        return {'ok': True, 'message': 'Save file deleted.'}
+        return {"ok": True, "message": "Save file deleted."}
     except OSError as e:
-        return {'ok': False, 'message': f'Error deleting save: {e}'}
+        return {"ok": False, "message": f"Error deleting save: {e}"}
+
+
+def THISBREAKSITALL():
+    """This function breaks everything."""
+    a = []
+    while True:
+        a.append(
+            "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890" * 10**6
+        )
+    # This will eventually crash the server because it eats ALL of DER RAM HAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHA
