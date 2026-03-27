@@ -7069,6 +7069,10 @@ def api_forgot_password():
         return jsonify({"ok": False, "message": result["message"]}), 500
 
     if result["token"] and result["email"]:
+        if not _email_configured():
+            app.logger.error("Password reset: email service not configured (RESEND_API / RESEND_EMAIL missing).")
+            return jsonify({"ok": False, "message": "Email service is not configured. Please contact the administrator."}), 503
+
         base_url = request.host_url.rstrip("/")
         reset_url = f"{base_url}/reset-password?token={result['token']}"
         html_body = f"""
@@ -7090,12 +7094,15 @@ def api_forgot_password():
             f"Click the link below to reset your password (expires in 1 hour):\n{reset_url}\n\n"
             f"If you did not request this, ignore this email."
         )
-        _send_email(
+        email_result = _send_email(
             to=result["email"],
             subject="Our Legacy 2 — Password Reset",
             body_html=html_body,
             body_text=text_body,
         )
+        if not email_result.get("ok"):
+            app.logger.error("Password reset email failed for %s: %s", result["email"], email_result.get("message"))
+            return jsonify({"ok": False, "message": "Could not send reset email. Please try again later or contact support."}), 503
 
     return jsonify({"ok": True, "message": "If that email is registered, you'll receive a reset link shortly."})
 
