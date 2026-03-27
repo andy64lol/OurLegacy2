@@ -800,8 +800,8 @@
                     {% endif %}
                 </button>
                 {% if online_username %}
-                <button class="tab-btn" onclick="openGroupsOverlay()">&#9876; Adventure Group</button>
-                <button class="tab-btn" onclick="toggleChat()"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:16px;height:16px;image-rendering:pixelated;vertical-align:middle;margin-right:3px;">Chat</button>
+                <button class="tab-btn" data-tab="adventure-group">&#9876; Group</button>
+                <button class="tab-btn" data-tab="global-chat"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:16px;height:16px;image-rendering:pixelated;vertical-align:middle;margin-right:3px;">Chat</button>
                 <button class="tab-btn" data-tab="friends">&#10024; Friends</button>
                 {% endif %}
             </nav>
@@ -2280,6 +2280,498 @@
                     efLoad();
                 }
             })();
+        </script>
+        {% endif %}
+
+        <!-- ── Global Chat (inline tab, online only) ── -->
+        {% if online_username %}
+        <div class="tab-content" id="tab-global-chat" style="padding:0;display:flex;flex-direction:column;height:100%;">
+            <style>
+                #tab-global-chat { min-height: 0; }
+                #inline-chat-wrap { display:flex;flex-direction:column;height:560px;background:var(--bg-panel);border:2px solid var(--border); }
+                #inline-chat-online { display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--bg-panel-dark);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap; }
+                #inline-chat-messages { flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:4px;background:var(--bg-main); }
+                #inline-chat-input-bar { padding:10px 14px;border-top:2px solid var(--border);background:var(--bg-panel);flex-shrink:0; }
+            </style>
+            <div class="panel" style="margin-bottom:0;">
+                <div class="panel-title"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:20px;height:20px;image-rendering:pixelated;vertical-align:middle;margin-right:5px;"> Global Chat</div>
+            </div>
+            <div id="inline-chat-wrap">
+                <div id="inline-chat-online">
+                    <span style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);">Online:</span>
+                    <div id="inline-chat-users"></div>
+                </div>
+                <div id="inline-chat-messages">
+                    <div style="text-align:center;font-size:12px;color:var(--text-dim);padding:20px 0;" id="inline-chat-loading">Connecting...</div>
+                </div>
+                <div id="inline-chat-input-bar" style="position:relative;">
+                    <div id="inline-glyph-picker" style="display:none;position:absolute;bottom:100%;left:0;margin-bottom:4px;background:var(--bg-panel);border:2px solid var(--border);box-shadow:3px 3px 0 rgba(0,0,0,0.5);padding:9px;z-index:20;width:260px;">
+                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:6px;">Insert Glyph</div>
+                        <div id="inline-glyph-grid" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <button onclick="inlineToggleGlyph()" style="padding:5px 8px;background:var(--slate-dark);border:1px solid var(--border);color:var(--gold);font-size:13px;cursor:pointer;line-height:1;flex-shrink:0;font-family:'Tiny5',monospace;">&#10022;</button>
+                        <input id="inline-chat-input" type="text" maxlength="200" placeholder="Message the realm..." autocomplete="off"
+                            style="flex:1;padding:7px 10px;background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-light);font-size:13px;font-family:'Tiny5',monospace;outline:none;"
+                            onkeydown="if(event.key==='Enter')inlineChatSend()">
+                        <button onclick="inlineChatSend()" style="padding:7px 16px;background:var(--wood-dark);border:2px solid var(--wood-bright);color:var(--gold-bright);font-size:13px;cursor:pointer;font-family:'Tiny5',monospace;text-transform:uppercase;">Send</button>
+                    </div>
+                    <div id="inline-chat-error" style="font-size:11px;color:var(--red);min-height:13px;margin-top:3px;"></div>
+                    <div id="inline-chat-cooldown" style="display:none;font-size:11px;color:var(--text-dim);margin-top:3px;text-align:center;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Adventure Group (inline tab, online only) ── -->
+        <div class="tab-content" id="tab-adventure-group" style="padding:0;">
+            <style>
+                #ag-wrap { display:flex;flex-direction:column;min-height:500px; }
+                #ag-body { display:flex;flex:1;min-height:0; }
+                #ag-left { width:280px;flex-shrink:0;border-right:2px solid var(--border);display:flex;flex-direction:column;gap:10px;padding:12px;background:var(--bg-panel-dark);overflow-y:auto; }
+                #ag-right { flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-main); }
+                #ag-tab-bar { display:flex;border-bottom:2px solid var(--border);flex-shrink:0;background:var(--bg-panel-dark); }
+                .ag-tab-btn { padding:8px 14px;font-size:12px;font-family:'Tiny5',monospace;color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;text-transform:uppercase;letter-spacing:0.05em; }
+                .ag-tab-btn.active { color:var(--gold);border-bottom-color:var(--gold); }
+                .ag-panel { display:none;flex:1;overflow-y:auto;padding:12px 14px;flex-direction:column;gap:6px; }
+                .ag-panel.active { display:flex; }
+                .ag-card { background:var(--bg-panel);border:2px solid var(--border);box-shadow:2px 2px 0 rgba(0,0,0,0.3); }
+                .ag-card-title { background:var(--wood-dark);border-bottom:2px solid var(--border);padding:6px 12px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold); }
+                .ag-card-body { padding:10px 12px; }
+                .ag-member-row { display:flex;align-items:center;gap:6px;padding:5px 7px;background:var(--bg-panel-dark);border:1px solid var(--border);margin-bottom:4px; }
+                .ag-form-input { width:100%;padding:7px 10px;background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-light);font-size:13px;font-family:'Tiny5',monospace;margin-bottom:6px;outline:none;box-sizing:border-box; }
+                .ag-form-input:focus { border-color:var(--wood-bright); }
+                .ag-btn { padding:6px 12px;border:2px solid;font-family:'Tiny5',monospace;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:0.05em; }
+                .ag-btn-primary { background:var(--wood-dark);border-color:var(--wood-bright);color:var(--gold-bright); }
+                .ag-btn-primary:hover { background:var(--wood-mid); }
+                .ag-btn-danger { background:var(--red-dark);border-color:var(--red);color:#f8c0a0; }
+                .ag-btn-danger:hover { background:var(--red); }
+                .ag-btn-sm { padding:3px 8px;font-size:11px; }
+                #ag-group-chat-msgs { flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:4px; }
+                #ag-group-chat-input-row { display:flex;gap:6px;padding:10px 14px;border-top:2px solid var(--border);background:var(--bg-panel);flex-shrink:0; }
+            </style>
+            <div class="panel" style="margin-bottom:0;">
+                <div class="panel-title">&#9876; Adventure Group</div>
+            </div>
+            <div id="ag-wrap">
+                <div id="ag-loading" style="padding:30px;text-align:center;color:var(--text-dim);font-size:13px;">Loading group data...</div>
+                <div id="ag-has-group" style="display:none;flex:1;">
+                    <div id="ag-body">
+                        <div id="ag-left">
+                            <div class="ag-card">
+                                <div class="ag-card-title">&#9876; <span id="ag-name"></span></div>
+                                <div class="ag-card-body">
+                                    <div id="ag-desc" style="font-size:12px;color:var(--text-dim);margin-bottom:6px;"></div>
+                                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                        <span id="ag-level-badge" style="background:rgba(232,196,96,0.12);border:1px solid var(--gold-dim);padding:2px 7px;font-size:12px;color:var(--gold);font-weight:700;"></span>
+                                        <span style="font-size:12px;color:var(--text-dim);">Led by <span id="ag-leader" style="color:var(--gold);"></span></span>
+                                    </div>
+                                    <div style="background:var(--slate-darkest);border:1px solid var(--border);height:9px;overflow:hidden;margin:4px 0 2px;">
+                                        <div id="ag-xp-bar" style="height:100%;background:var(--exp-purple);transition:width 0.4s;"></div>
+                                    </div>
+                                    <div id="ag-xp-label" style="font-size:11px;color:var(--text-dim);"></div>
+                                </div>
+                            </div>
+                            <div class="ag-card">
+                                <div class="ag-card-title"><img src="/game_assets/glyphs/gold.png" alt="gold" style="width:16px;height:16px;image-rendering:pixelated;vertical-align:middle;"> Treasury</div>
+                                <div class="ag-card-body">
+                                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                                        <span id="ag-gold" style="font-size:14px;color:var(--gold);font-weight:700;"></span>
+                                        <button class="ag-btn ag-btn-primary ag-btn-sm" onclick="agCollectGold()">Collect Share</button>
+                                    </div>
+                                    <div id="ag-collect-msg" style="font-size:11px;min-height:14px;margin-top:4px;"></div>
+                                </div>
+                            </div>
+                            <div class="ag-card" id="ag-invite-card" style="display:none;">
+                                <div class="ag-card-title">&#128273; Invite Code</div>
+                                <div class="ag-card-body">
+                                    <div style="display:flex;align-items:center;gap:8px;background:var(--bg-panel-dark);border:1px solid var(--gold-dim);padding:7px 10px;">
+                                        <span id="ag-invite-code" style="font-size:18px;font-weight:700;color:var(--gold);letter-spacing:0.2em;flex:1;text-align:center;"></span>
+                                        <button class="ag-btn ag-btn-primary ag-btn-sm" onclick="agCopyInvite()">Copy</button>
+                                    </div>
+                                    <div style="font-size:11px;color:var(--text-dim);margin-top:5px;">Share this code to invite friends.</div>
+                                </div>
+                            </div>
+                            <div class="ag-card">
+                                <div class="ag-card-title">&#128100; Members (<span id="ag-member-count"></span>)</div>
+                                <div class="ag-card-body" id="ag-members"></div>
+                            </div>
+                            <button class="ag-btn ag-btn-danger" onclick="agLeave()" style="width:100%;" id="ag-leave-btn"></button>
+                            <div id="ag-leave-msg" style="font-size:11px;min-height:14px;"></div>
+                        </div>
+                        <div id="ag-right">
+                            <div id="ag-tab-bar">
+                                <button class="ag-tab-btn active" onclick="agShowTab('log',this)">&#128220; Activity Log</button>
+                                <button class="ag-tab-btn" onclick="agShowTab('gchat',this)">&#128172; Group Chat</button>
+                            </div>
+                            <div class="ag-panel active" id="ag-panel-log"></div>
+                            <div class="ag-panel" id="ag-panel-gchat" style="padding:0;overflow:hidden;flex-direction:column;">
+                                <div id="ag-group-chat-msgs"></div>
+                                <div id="ag-gchat-error" style="font-size:11px;color:var(--red);padding:0 14px 3px;min-height:13px;"></div>
+                                <div id="ag-group-chat-input-row">
+                                    <input id="ag-gchat-input" type="text" maxlength="200" placeholder="Message your group..." autocomplete="off"
+                                        style="flex:1;padding:7px 10px;background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-light);font-size:13px;font-family:'Tiny5',monospace;outline:none;"
+                                        onkeydown="if(event.key==='Enter')agGroupChatSend()">
+                                    <button onclick="agGroupChatSend()" style="padding:7px 14px;background:var(--wood-dark);border:2px solid var(--wood-bright);color:var(--gold-bright);font-family:'Tiny5',monospace;font-size:13px;cursor:pointer;text-transform:uppercase;">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="ag-no-group" style="display:none;flex:1;align-items:center;justify-content:center;padding:30px;">
+                    <div style="max-width:440px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                        <div style="text-align:center;margin-bottom:8px;">
+                            <div style="font-size:40px;margin-bottom:6px;">&#9876;</div>
+                            <div style="font-size:16px;color:var(--gold);font-weight:700;margin-bottom:4px;letter-spacing:0.06em;text-transform:uppercase;">Adventure Groups</div>
+                            <div style="font-size:13px;color:var(--text-dim);line-height:1.6;">Form a party of up to 6. Complete quests, dungeons, and battles together to earn group XP!</div>
+                        </div>
+                        <div class="ag-card">
+                            <div class="ag-card-title">&#9876; Create a Group</div>
+                            <div class="ag-card-body">
+                                <input class="ag-form-input" id="ag-create-name" type="text" maxlength="32" placeholder="Group name (2–32 chars)">
+                                <input class="ag-form-input" id="ag-create-desc" type="text" maxlength="200" placeholder="Description (optional)">
+                                <button class="ag-btn ag-btn-primary" style="width:100%;" onclick="agCreateGroup()">Create Group</button>
+                                <div id="ag-create-msg" style="font-size:11px;min-height:14px;margin-top:4px;"></div>
+                            </div>
+                        </div>
+                        <div class="ag-card">
+                            <div class="ag-card-title">&#128273; Join a Group</div>
+                            <div class="ag-card-body">
+                                <input class="ag-form-input" id="ag-join-code" type="text" maxlength="16" placeholder="Enter invite code" style="text-transform:uppercase;letter-spacing:0.15em;">
+                                <button class="ag-btn ag-btn-primary" style="width:100%;" onclick="agJoinGroup()">Join Group</button>
+                                <div id="ag-join-msg" style="font-size:11px;min-height:14px;margin-top:4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        (function() {
+            var _AG_USER = {{ online_username | tojson }};
+            var _agSocket = null;
+            var _agGroup = null;
+            var _agLoaded = false;
+
+            /* ── Inline Global Chat ── */
+            var _inlineChatInit = false;
+            var _inlineSocket = null;
+            var _inlineCooldown = null;
+
+            var CHAT_GLYPHS = {
+                'warrior':'warrior.png','mage':'mage.png','rogue':'rouge.png','rouge':'rouge.png',
+                'hunter':'hunter.png','bard':'bard.png','paladin':'paladin.png','druid':'druid.png',
+                'priest':'priest.png','hp':'hp.png','mana':'mana.png','gold':'gold.png',
+                'exp':'exp.png','level':'level.gif','weapon':'weapon.png','armor':'armor.png',
+                'offhand':'offhand.png','accessories':'accessories.png','book':'book.png',
+                'food':'food.png','materials':'materials.png','spell':'spell.png',
+                'chat':'chat.png','settings':'settings.png','sparkles':'sparkles.png',
+                'fight':'fight.png','day':'time_day.png','night':'time_night.png',
+                'male':'male.png','female':'female.png','non_binary':'non_binary.png'
+            };
+
+            function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+            function _renderMsg(text) {
+                var parts = text.split(/:([a-z_]+):/);
+                var out = '';
+                for (var i = 0; i < parts.length; i++) {
+                    if (i % 2 === 0) { out += _esc(parts[i]); }
+                    else {
+                        var key = parts[i];
+                        if (CHAT_GLYPHS[key]) out += '<img src="/game_assets/glyphs/' + CHAT_GLYPHS[key] + '" alt=":' + key + ':" style="width:18px;height:18px;vertical-align:middle;image-rendering:pixelated;margin:0 2px;">';
+                        else out += _esc(':' + key + ':');
+                    }
+                }
+                return out;
+            }
+
+            function _inlineAppendMsg(msg, animate) {
+                var box = document.getElementById('inline-chat-messages');
+                if (!box) return;
+                var isMe = (msg.username === _AG_USER);
+                var div = document.createElement('div');
+                div.style.cssText = 'display:flex;flex-direction:column;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
+                var time = '';
+                if (msg.created_at) { try { time = new Date(msg.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); } catch(e){} }
+                div.innerHTML = '<div style="max-width:520px;padding:5px 10px;background:' + (isMe ? 'var(--wood-dark)' : 'var(--bg-panel)') + ';border:1px solid ' + (isMe ? 'var(--wood-bright)' : 'var(--border)') + ';word-break:break-word;">' +
+                    '<span style="font-size:11px;font-weight:700;color:' + (isMe ? 'var(--gold-bright)' : 'var(--gold)') + ';text-transform:uppercase;letter-spacing:0.05em;">' + _esc(msg.username) + '</span>' +
+                    '<div style="font-size:13px;color:var(--text-light);margin-top:2px;">' + _renderMsg(msg.message) + '</div>' +
+                    (time ? '<div style="font-size:10px;color:var(--text-dim);margin-top:1px;text-align:right;">' + time + '</div>' : '') + '</div>';
+                if (animate) div.style.opacity = '0';
+                box.appendChild(div);
+                box.scrollTop = box.scrollHeight;
+                if (animate) setTimeout(function(){ div.style.transition='opacity 0.2s'; div.style.opacity='1'; }, 10);
+            }
+
+            function _initInlineChat() {
+                if (_inlineChatInit) return;
+                _inlineChatInit = true;
+                _inlineSocket = typeof io !== 'undefined' ? io({ transports: ['polling','websocket'] }) : null;
+                if (!_inlineSocket) return;
+                _inlineSocket.on('connect', function() {
+                    var l = document.getElementById('inline-chat-loading');
+                    if (l) l.remove();
+                });
+                _inlineSocket.on('chat_history', function(msgs) {
+                    var box = document.getElementById('inline-chat-messages');
+                    if (!box) return;
+                    box.innerHTML = '';
+                    if (!msgs || !msgs.length) { box.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--text-dim);padding:20px 0;">No messages yet.</div>'; return; }
+                    msgs.forEach(function(m){ _inlineAppendMsg(m, false); });
+                    box.scrollTop = box.scrollHeight;
+                });
+                _inlineSocket.on('chat_message', function(msg){ _inlineAppendMsg(msg, true); });
+                _inlineSocket.on('online_users', function(users) {
+                    var el = document.getElementById('inline-chat-users');
+                    if (!el) return;
+                    el.innerHTML = users.map(function(u){
+                        return u === _AG_USER
+                            ? '<span style="font-size:11px;padding:2px 8px;background:rgba(96,136,88,0.25);border:1px solid var(--green);color:var(--green-bright);">' + _esc(u) + ' (you)</span>'
+                            : '<span style="font-size:11px;padding:2px 8px;background:var(--slate-dark);border:1px solid var(--border);color:var(--text-light);">' + _esc(u) + '</span>';
+                    }).join(' ');
+                });
+                _inlineSocket.on('chat_error', function(data){
+                    var el = document.getElementById('inline-chat-error');
+                    if (el) { el.textContent = data.message || 'Error.'; setTimeout(function(){ el.textContent=''; }, 4000); }
+                });
+            }
+
+            window.inlineChatSend = function() {
+                var inp = document.getElementById('inline-chat-input');
+                if (!inp || !_inlineSocket) return;
+                var msg = inp.value.trim();
+                if (!msg) return;
+                _inlineSocket.emit('chat_send', { message: msg });
+                inp.value = '';
+            };
+
+            window.inlineToggleGlyph = function() {
+                var p = document.getElementById('inline-glyph-picker');
+                if (!p) return;
+                var open = p.style.display !== 'none';
+                p.style.display = open ? 'none' : 'block';
+                if (!open) {
+                    var grid = document.getElementById('inline-glyph-grid');
+                    if (grid && !grid.dataset.built) {
+                        grid.dataset.built = '1';
+                        var seen = {};
+                        Object.keys(CHAT_GLYPHS).forEach(function(key) {
+                            var file = CHAT_GLYPHS[key];
+                            if (seen[file]) return; seen[file] = true;
+                            var btn = document.createElement('button');
+                            btn.title = ':' + key + ':';
+                            btn.style.cssText = 'background:var(--slate-dark);border:1px solid var(--border);padding:4px;cursor:pointer;';
+                            btn.innerHTML = '<img src="/game_assets/glyphs/' + file + '" style="width:18px;height:18px;image-rendering:pixelated;">';
+                            btn.addEventListener('click', function(){
+                                var inp = document.getElementById('inline-chat-input');
+                                if (!inp) return;
+                                var code = ':' + key + ':';
+                                var pos = inp.selectionStart;
+                                inp.value = inp.value.slice(0,pos) + code + inp.value.slice(inp.selectionEnd);
+                                inp.selectionStart = inp.selectionEnd = pos + code.length;
+                                inp.focus();
+                                p.style.display = 'none';
+                            });
+                            grid.appendChild(btn);
+                        });
+                    }
+                }
+            };
+
+            /* ── Adventure Group tab ── */
+            function agEsc(s) { return _esc(s); }
+
+            function agLoad() {
+                document.getElementById('ag-loading').style.display = '';
+                document.getElementById('ag-has-group').style.display = 'none';
+                document.getElementById('ag-no-group').style.display = 'none';
+                fetch('/api/groups/my').then(function(r){ return r.json(); }).then(function(data){
+                    document.getElementById('ag-loading').style.display = 'none';
+                    if (data.ok && data.group) {
+                        _agGroup = data.group;
+                        agRender(data.group);
+                        document.getElementById('ag-has-group').style.display = 'flex';
+                        if (!_agSocket) agInitSocket();
+                    } else {
+                        document.getElementById('ag-no-group').style.display = 'flex';
+                    }
+                }).catch(function(){
+                    document.getElementById('ag-loading').style.display = 'none';
+                    document.getElementById('ag-no-group').style.display = 'flex';
+                });
+            }
+
+            function agRender(g) {
+                document.getElementById('ag-name').textContent = g.name || '';
+                document.getElementById('ag-desc').textContent = g.description || '';
+                document.getElementById('ag-desc').style.display = g.description ? '' : 'none';
+                document.getElementById('ag-level-badge').textContent = 'Lv ' + (g.level || 1);
+                document.getElementById('ag-leader').textContent = g.leader || '';
+                var pct = g.xp_to_next ? Math.min(100, Math.round(g.xp / g.xp_to_next * 100)) : 0;
+                document.getElementById('ag-xp-bar').style.width = pct + '%';
+                document.getElementById('ag-xp-label').textContent = (g.xp || 0) + ' / ' + (g.xp_to_next || 0) + ' Group XP';
+                document.getElementById('ag-gold').textContent = (g.gold_pool || 0) + ' gold';
+                var isLeader = g.leader === _AG_USER;
+                var invCard = document.getElementById('ag-invite-card');
+                if (isLeader && g.invite_code) {
+                    invCard.style.display = '';
+                    document.getElementById('ag-invite-code').textContent = g.invite_code;
+                } else { invCard.style.display = 'none'; }
+                document.getElementById('ag-member-count').textContent = (g.members ? g.members.length : 0) + '/6';
+                var membersEl = document.getElementById('ag-members');
+                membersEl.innerHTML = '';
+                (g.members || []).forEach(function(m) {
+                    var row = document.createElement('div');
+                    row.className = 'ag-member-row';
+                    var avatar = '<div style="width:24px;height:24px;background:var(--slate-dark);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;flex-shrink:0;">' + agEsc(m.username.charAt(0)) + '</div>';
+                    var name = '<span style="flex:1;font-size:12px;color:var(--text-light);">' + agEsc(m.username) + '</span>';
+                    var contrib = '<span style="font-size:10px;color:var(--exp-purple);">+' + (m.contribution_xp||0) + ' xp</span>';
+                    var badge = '';
+                    if (m.username === g.leader) badge = '<span style="font-size:10px;background:rgba(232,196,96,0.15);color:var(--gold);border:1px solid var(--gold-dim);padding:1px 5px;">Leader</span>';
+                    else if (isLeader) badge = '<button class="ag-btn ag-btn-danger ag-btn-sm" onclick="agKick(\'' + agEsc(m.username) + '\')">Kick</button>';
+                    row.innerHTML = avatar + name + contrib + badge;
+                    membersEl.appendChild(row);
+                });
+                var leaveBtn = document.getElementById('ag-leave-btn');
+                leaveBtn.textContent = isLeader ? 'Disband / Leave' : 'Leave Group';
+                var logEl = document.getElementById('ag-panel-log');
+                logEl.innerHTML = '';
+                if (g.log && g.log.length) {
+                    g.log.forEach(function(entry) {
+                        var div = document.createElement('div');
+                        div.style.cssText = 'display:flex;flex-direction:column;gap:2px;padding:7px 10px;background:var(--bg-panel);border:1px solid var(--border);border-left:3px solid var(--wood-mid);margin-bottom:4px;';
+                        var ts = entry.created_at ? entry.created_at.slice(0,16).replace('T',' ') : '';
+                        div.innerHTML = '<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;font-weight:700;color:var(--gold);">' + agEsc(entry.username) + '</span><span style="font-size:12px;color:var(--text-light);">' + agEsc(entry.action||'') + '</span></div>' +
+                            '<div style="display:flex;gap:10px;align-items:center;">' +
+                            (entry.xp_awarded ? '<span style="color:var(--exp-purple);font-size:11px;">+' + entry.xp_awarded + ' group XP</span>' : '') +
+                            (entry.gold_awarded ? '<span style="color:var(--gold);font-size:11px;">+' + entry.gold_awarded + ' gold</span>' : '') +
+                            (ts ? '<span style="font-size:10px;color:var(--text-dim);">' + agEsc(ts) + '</span>' : '') + '</div>';
+                        logEl.appendChild(div);
+                    });
+                } else {
+                    logEl.innerHTML = '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:30px 0;">No activity yet.</div>';
+                }
+            }
+
+            function agInitSocket() {
+                if (_agSocket) return;
+                _agSocket = typeof io !== 'undefined' ? io({ transports: ['websocket','polling'] }) : null;
+                if (!_agSocket) return;
+                _agSocket.on('group_chat_message', function(data) {
+                    var container = document.getElementById('ag-group-chat-msgs');
+                    if (!container) return;
+                    var div = document.createElement('div');
+                    div.style.cssText = 'font-size:12px;line-height:1.5;padding:4px 8px;border-left:2px solid var(--border);background:var(--bg-panel);border-bottom:1px solid var(--bg-panel-dark);';
+                    var time = data.ts ? new Date(data.ts * 1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+                    div.innerHTML = '<span style="color:var(--gold);font-weight:700;">' + agEsc(data.username) + ':</span> <span style="color:var(--text-light);">' + agEsc(data.message) + '</span><span style="color:var(--text-dim);font-size:10px;margin-left:4px;">' + time + '</span>';
+                    container.appendChild(div);
+                    container.scrollTop = container.scrollHeight;
+                });
+                _agSocket.on('group_chat_error', function(data) {
+                    var el = document.getElementById('ag-gchat-error');
+                    if (el) { el.textContent = data.message; setTimeout(function(){ el.textContent=''; }, 3000); }
+                });
+                _agSocket.on('group_level_up', function(data) {
+                    var banner = document.createElement('div');
+                    banner.style.cssText = 'position:fixed;top:30px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--wood-dark);border:2px solid var(--gold);padding:16px 28px;text-align:center;box-shadow:4px 4px 0 rgba(0,0,0,0.5);font-family:Tiny5,monospace;';
+                    banner.innerHTML = '<div style="font-size:20px;color:var(--gold);text-transform:uppercase;">&#9876; Group Level Up!</div><div style="color:var(--gold-bright);font-size:15px;">Level ' + data.level + '!</div><div style="font-size:13px;color:var(--green-bright);margin-top:6px;">+' + data.bonus_xp + ' XP  +' + data.bonus_gold + ' Gold!</div>';
+                    document.body.appendChild(banner);
+                    setTimeout(function(){ banner.remove(); }, 6000);
+                });
+            }
+
+            window.agGroupChatSend = function() {
+                var inp = document.getElementById('ag-gchat-input');
+                if (!inp || !_agSocket) return;
+                var msg = inp.value.trim();
+                if (!msg) return;
+                _agSocket.emit('group_chat_send', { message: msg });
+                inp.value = '';
+            };
+
+            window.agShowTab = function(name, btn) {
+                document.querySelectorAll('.ag-panel').forEach(function(p){ p.classList.remove('active'); });
+                document.querySelectorAll('.ag-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+                var panel = document.getElementById('ag-panel-' + name);
+                if (panel) panel.classList.add('active');
+                if (btn) btn.classList.add('active');
+                if (name === 'gchat') {
+                    var msgs = document.getElementById('ag-group-chat-msgs');
+                    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+                }
+            };
+
+            window.agCollectGold = function() {
+                var msg = document.getElementById('ag-collect-msg');
+                msg.textContent = 'Collecting...';
+                fetch('/api/groups/collect_gold', { method:'POST', headers:{'Content-Type':'application/json'} })
+                    .then(function(r){ return r.json(); }).then(function(data) {
+                        msg.textContent = data.message;
+                        msg.style.color = data.ok ? 'var(--green-bright)' : 'var(--red)';
+                        if (data.ok) setTimeout(agLoad, 1200);
+                    });
+            };
+
+            window.agLeave = function() {
+                if (!confirm('Are you sure you want to leave this group?')) return;
+                var msg = document.getElementById('ag-leave-msg');
+                msg.textContent = 'Leaving...';
+                fetch('/api/groups/leave', { method:'POST', headers:{'Content-Type':'application/json'} })
+                    .then(function(r){ return r.json(); }).then(function(data) {
+                        msg.textContent = data.message;
+                        if (data.ok) setTimeout(agLoad, 1000);
+                    });
+            };
+
+            window.agKick = function(target) {
+                if (!confirm('Kick ' + target + ' from the group?')) return;
+                fetch('/api/groups/kick', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ target: target }) })
+                    .then(function(r){ return r.json(); }).then(function(data) {
+                        alert(data.message);
+                        if (data.ok) agLoad();
+                    });
+            };
+
+            window.agCopyInvite = function() {
+                var code = document.getElementById('ag-invite-code').textContent;
+                navigator.clipboard.writeText(code).then(function(){ alert('Invite code copied!'); }).catch(function(){ alert('Code: ' + code); });
+            };
+
+            window.agCreateGroup = function() {
+                var name = document.getElementById('ag-create-name').value.trim();
+                var desc = document.getElementById('ag-create-desc').value.trim();
+                var msg = document.getElementById('ag-create-msg');
+                if (!name) { msg.textContent = 'Enter a group name.'; msg.style.color = 'var(--red)'; return; }
+                msg.textContent = 'Creating...'; msg.style.color = '';
+                fetch('/api/groups/create', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: name, description: desc }) })
+                    .then(function(r){ return r.json(); }).then(function(data) {
+                        msg.textContent = data.message;
+                        msg.style.color = data.ok ? 'var(--green-bright)' : 'var(--red)';
+                        if (data.ok) setTimeout(agLoad, 1000);
+                    });
+            };
+
+            window.agJoinGroup = function() {
+                var code = document.getElementById('ag-join-code').value.trim().toUpperCase();
+                var msg = document.getElementById('ag-join-msg');
+                if (!code) { msg.textContent = 'Enter an invite code.'; msg.style.color = 'var(--red)'; return; }
+                msg.textContent = 'Joining...'; msg.style.color = '';
+                fetch('/api/groups/join', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ invite_code: code }) })
+                    .then(function(r){ return r.json(); }).then(function(data) {
+                        msg.textContent = data.message;
+                        msg.style.color = data.ok ? 'var(--green-bright)' : 'var(--red)';
+                        if (data.ok) setTimeout(agLoad, 1000);
+                    });
+            };
+
+            /* ── Tab change listener ── */
+            document.addEventListener('tabChanged', function(e) {
+                if (e.detail === 'global-chat' && !_inlineChatInit) _initInlineChat();
+                if (e.detail === 'adventure-group' && !_agLoaded) { _agLoaded = true; agLoad(); }
+            });
+
+        })();
         </script>
         {% endif %}
 
