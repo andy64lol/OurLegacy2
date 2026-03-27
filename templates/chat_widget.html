@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            height: 100%;
+            background: var(--bg-main);
+            color: var(--text-light);
+            font-family: 'Tiny5', monospace;
+            overflow: hidden;
+        }
+
+        #widget-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        #online-strip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--bg-panel-dark);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        #online-strip .lbl {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+        }
+        #online-count {
+            font-size: 10px;
+            color: var(--gold);
+            font-weight: 700;
+        }
+        #online-users-inner { display: flex; flex-wrap: wrap; gap: 3px; }
+        .user-pill {
+            font-size: 10px;
+            padding: 1px 6px;
+            background: var(--slate-dark);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            text-decoration: none;
+        }
+        .user-pill:hover { border-color: var(--gold-dim); color: var(--gold); }
+        .user-pill-me {
+            background: rgba(96,136,88,0.25);
+            border: 1px solid var(--green);
+            color: var(--green-bright);
+        }
+
+        #chat-messages-w {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            background: var(--bg-main);
+        }
+
+        #input-area {
+            padding: 6px 8px;
+            border-top: 2px solid var(--border);
+            background: var(--bg-panel);
+            flex-shrink: 0;
+            position: relative;
+        }
+        #input-row { display: flex; gap: 4px; align-items: center; }
+        #chat-input-w {
+            flex: 1;
+            padding: 5px 7px;
+            background: var(--bg-panel-dark);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            font-family: 'Tiny5', monospace;
+            font-size: 12px;
+            outline: none;
+        }
+        #chat-input-w:focus { border-color: var(--wood-bright); }
+        #chat-send-w {
+            padding: 5px 9px;
+            background: var(--wood-dark);
+            border: 2px solid var(--wood-bright);
+            color: var(--gold-bright);
+            font-family: 'Tiny5', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+        #chat-send-w:hover { background: var(--wood-mid); }
+        #chat-error-w { font-size: 10px; color: var(--red); min-height: 12px; margin-top: 3px; }
+        #chat-cooldown-w { font-size: 10px; color: var(--text-dim); min-height: 12px; display: none; text-align: center; margin-top: 2px; }
+
+        .glyph-btn-w {
+            padding: 4px 6px;
+            background: var(--slate-dark);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            font-size: 12px;
+            cursor: pointer;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .glyph-btn-w:hover { background: var(--slate-mid); }
+
+        #glyph-picker-w {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            margin-bottom: 3px;
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+            padding: 8px;
+            z-index: 20;
+            width: 210px;
+        }
+    </style>
+</head>
+<body>
+<div id="widget-wrap">
+
+    <div id="online-strip">
+        <span class="lbl">Online:</span>
+        <span id="online-count">0</span>
+        <div id="online-users-inner"></div>
+    </div>
+
+    <div id="chat-messages-w">
+        <div style="text-align:center;font-size:11px;color:var(--text-dim);padding:16px 0;" id="chat-loading-w">Connecting...</div>
+    </div>
+
+    <div id="input-area">
+        <div id="glyph-picker-w">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:5px;">Insert Glyph</div>
+            <div id="glyph-grid-w" style="display:flex;flex-wrap:wrap;gap:3px;"></div>
+        </div>
+        <div id="input-row">
+            <button class="glyph-btn-w" onclick="toggleGlyphPicker()" title="Insert glyph">&#10022;</button>
+            <input id="chat-input-w" type="text" maxlength="200" placeholder="Message the realm..." autocomplete="off"
+                onkeydown="if(event.key==='Enter')chatSend()">
+            <button id="chat-send-w" onclick="chatSend()">Send</button>
+        </div>
+        <div id="chat-error-w"></div>
+        <div id="chat-cooldown-w"></div>
+    </div>
+
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+(function() {
+    var CURRENT_USER = {{ online_username | tojson }};
+    var socket = null;
+    var cooldownTimer = null;
+    var hasFocus = true;
+
+    window.addEventListener('blur', function() { hasFocus = false; });
+    window.addEventListener('focus', function() { hasFocus = true; });
+
+    var GLYPHS = {
+        'warrior':'warrior.png','mage':'mage.png','rogue':'rouge.png','rouge':'rouge.png',
+        'hunter':'hunter.png','bard':'bard.png','paladin':'paladin.png','druid':'druid.png',
+        'priest':'priest.png','hp':'hp.png','mana':'mana.png','gold':'gold.png',
+        'exp':'exp.png','level':'level.gif','weapon':'weapon.png','armor':'armor.png',
+        'offhand':'offhand.png','accessories':'accessories.png','book':'book.png',
+        'food':'food.png','materials':'materials.png','spell':'spell.png',
+        'chat':'chat.png','settings':'settings.png','sparkles':'sparkles.png',
+        'fight':'fight.png','day':'time_day.png','night':'time_night.png',
+        'male':'male.png','female':'female.png','non_binary':'non_binary.png'
+    };
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function renderMsg(text) {
+        var parts = text.split(/:([a-z_]+):/);
+        var out = '';
+        for (var i = 0; i < parts.length; i++) {
+            if (i % 2 === 0) {
+                out += escHtml(parts[i]);
+            } else {
+                var key = parts[i];
+                if (GLYPHS[key]) {
+                    out += '<img src="/game_assets/glyphs/' + GLYPHS[key] + '" alt=":' + key + ':" title=":' + key + ':" style="width:16px;height:16px;vertical-align:middle;image-rendering:pixelated;margin:0 1px;">';
+                } else {
+                    out += escHtml(':' + key + ':');
+                }
+            }
+        }
+        return out;
+    }
+
+    function appendMessage(msg, animate) {
+        var box = document.getElementById('chat-messages-w');
+        if (!box) return;
+        var loading = document.getElementById('chat-loading-w');
+        if (loading) loading.remove();
+
+        var isMe = (msg.username === CURRENT_USER);
+        var div = document.createElement('div');
+        div.style.cssText = 'display:flex;flex-direction:column;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
+        var time = '';
+        if (msg.created_at) {
+            try {
+                var d = new Date(msg.created_at);
+                time = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            } catch(e) {}
+        }
+        div.innerHTML =
+            '<div style="max-width:230px;padding:4px 9px;background:' + (isMe ? 'var(--wood-dark)' : 'var(--bg-panel)') +
+            ';border:1px solid ' + (isMe ? 'var(--wood-bright)' : 'var(--border)') + ';word-break:break-word;">' +
+            '<span style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.04em;">' +
+            escHtml(msg.username) + '</span>' +
+            '<div style="font-size:12px;color:var(--text-light);margin-top:1px;">' + renderMsg(msg.message) + '</div>' +
+            (time ? '<div style="font-size:9px;color:var(--text-dim);margin-top:1px;text-align:right;">' + time + '</div>' : '') +
+            '</div>';
+        if (animate) div.style.opacity = '0';
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+        if (animate) {
+            setTimeout(function() { div.style.transition = 'opacity 0.2s'; div.style.opacity = '1'; }, 10);
+        }
+    }
+
+    function startCooldownDisplay(msg) {
+        var cd = document.getElementById('chat-cooldown-w');
+        var inp = document.getElementById('chat-input-w');
+        if (!cd) return;
+        var match = msg.match(/(\d+)s/);
+        var secs = match ? parseInt(match[1]) : 10;
+        cd.style.display = 'block';
+        if (inp) inp.disabled = true;
+        var interval = setInterval(function() {
+            secs--;
+            if (secs <= 0) {
+                clearInterval(interval);
+                cd.style.display = 'none';
+                cd.textContent = '';
+                if (inp) inp.disabled = false;
+            } else {
+                cd.textContent = 'Next message in ' + secs + 's';
+            }
+        }, 1000);
+    }
+
+    function buildGlyphPicker() {
+        var grid = document.getElementById('glyph-grid-w');
+        if (!grid || grid.dataset.built) return;
+        grid.dataset.built = '1';
+        var seen = {};
+        Object.keys(GLYPHS).forEach(function(key) {
+            var file = GLYPHS[key];
+            if (seen[file]) return;
+            seen[file] = true;
+            var btn = document.createElement('button');
+            btn.title = ':' + key + ':';
+            btn.style.cssText = 'background:var(--slate-dark);border:1px solid var(--border);padding:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+            btn.innerHTML = '<img src="/game_assets/glyphs/' + file + '" style="width:18px;height:18px;image-rendering:pixelated;" alt=":' + key + ':">';
+            btn.addEventListener('click', function() {
+                var inp = document.getElementById('chat-input-w');
+                if (!inp) return;
+                var code = ':' + key + ':';
+                var pos = inp.selectionStart;
+                inp.value = inp.value.slice(0, pos) + code + inp.value.slice(inp.selectionEnd);
+                inp.selectionStart = inp.selectionEnd = pos + code.length;
+                inp.focus();
+                document.getElementById('glyph-picker-w').style.display = 'none';
+            });
+            grid.appendChild(btn);
+        });
+    }
+
+    window.toggleGlyphPicker = function() {
+        var picker = document.getElementById('glyph-picker-w');
+        if (!picker) return;
+        var open = picker.style.display !== 'none';
+        picker.style.display = open ? 'none' : 'block';
+        if (!open) buildGlyphPicker();
+    };
+
+    document.addEventListener('click', function(e) {
+        var picker = document.getElementById('glyph-picker-w');
+        if (!picker || picker.style.display === 'none') return;
+        if (!picker.contains(e.target) && !e.target.closest('.glyph-btn-w')) {
+            picker.style.display = 'none';
+        }
+    });
+
+    window.chatSend = function() {
+        if (!socket) return;
+        var inp = document.getElementById('chat-input-w');
+        if (!inp) return;
+        var msg = inp.value.trim();
+        if (!msg) return;
+        socket.emit('chat_send', { message: msg });
+        inp.value = '';
+    };
+
+    function initChat() {
+        socket = io({ transports: ['polling', 'websocket'] });
+
+        socket.on('connect', function() {
+            var l = document.getElementById('chat-loading-w');
+            if (l) l.textContent = '';
+        });
+
+        socket.on('chat_history', function(msgs) {
+            var box = document.getElementById('chat-messages-w');
+            if (!box) return;
+            box.innerHTML = '';
+            if (!msgs || !msgs.length) {
+                box.innerHTML = '<div style="text-align:center;font-size:11px;color:var(--text-dim);padding:16px 0;">No messages yet. Be the first!</div>';
+                return;
+            }
+            msgs.forEach(function(m) { appendMessage(m, false); });
+            box.scrollTop = box.scrollHeight;
+        });
+
+        socket.on('chat_message', function(msg) {
+            appendMessage(msg, true);
+            try { window.parent.postMessage({ type: 'chat_unread' }, '*'); } catch(e) {}
+        });
+
+        socket.on('online_users', function(users) {
+            var countEl = document.getElementById('online-count');
+            var innerEl = document.getElementById('online-users-inner');
+            if (countEl) countEl.textContent = users.length;
+            if (innerEl) {
+                innerEl.innerHTML = users.map(function(u) {
+                    var isMe = (u === CURRENT_USER);
+                    if (isMe) return '<span class="user-pill user-pill-me">' + escHtml(u) + ' (you)</span>';
+                    return '<a href="/friends?dm=' + encodeURIComponent(u) + '" target="_parent" class="user-pill">' + escHtml(u) + '</a>';
+                }).join('');
+            }
+        });
+
+        socket.on('chat_error', function(data) {
+            var el = document.getElementById('chat-error-w');
+            if (!el) return;
+            el.textContent = data.message || 'Error.';
+            if (data.message && data.message.indexOf('Wait') !== -1) {
+                startCooldownDisplay(data.message);
+            }
+            setTimeout(function() { if (el) el.textContent = ''; }, 4000);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initChat();
+        var inp = document.getElementById('chat-input-w');
+        if (inp) inp.focus();
+    });
+})();
+</script>
+</body>
+</html>

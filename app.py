@@ -176,7 +176,7 @@ def push_world_event(text: str) -> None:
 
 
 # ─── Activity tracker (feeds _world_tick dynamic world events) ────────────────
-import threading as _threading
+from gevent.lock import RLock as _RLock
 
 _activity_counts: dict = {
     "battles": 0,
@@ -186,11 +186,11 @@ _activity_counts: dict = {
     "dungeons": 0,
     "challenges": 0,
 }
-_activity_lock = _threading.Lock()
+_activity_lock = _RLock()
 
 # ── Admin system ───────────────────────────────────────────────────────────────
 _ADMINS_PATH = os.path.join(os.path.dirname(__file__), "admins.json")
-_admins_lock = _threading.Lock()
+_admins_lock = _RLock()
 
 
 def _load_admins() -> dict:
@@ -2445,6 +2445,14 @@ def chat_page():
     if not username:
         return redirect(url_for("index"))
     return render_template("chat.html", online_username=username)
+
+
+@app.route("/chat_widget")
+def chat_widget_page():
+    username = session.get("online_username")
+    if not username:
+        return ("Unauthorized", 401)
+    return render_template("chat_widget.html", online_username=username)
 
 
 @app.route("/")

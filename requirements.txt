@@ -94,3 +94,4 @@ werkzeug
 flask-limiter
 flask-socketio
 gevent
+gevent
