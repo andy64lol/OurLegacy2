@@ -8,8 +8,8 @@ from typing import Optional
 
 import resend
 
-RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "")
+RESEND_API_KEY = os.environ.get("RESEND_API", "")
+SENDER_EMAIL = os.environ.get("RESEND_EMAIL", "")
 
 logger = logging.getLogger(__name__)
 

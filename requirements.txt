@@ -88,6 +88,7 @@ gevent
 gevent-websocket
 gunicorn
 python-dotenv
+resend
 supabase
 werkzeug
 flask-limiter
