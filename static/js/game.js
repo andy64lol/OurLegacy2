@@ -1,7 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
     initToastContainer();
     initTabs();
-    initTabOverflow();
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function() { initTabOverflow(); });
+    } else {
+        setTimeout(initTabOverflow, 300);
+    }
     initSidebarToggle();
     initPagination();
     scrollLogsToBottom();
@@ -741,8 +745,10 @@ function initTabOverflow() {
         }
 
         // Need the ••• button — reserve its space
-        moreBtn.style.display = '';
+        moreBtn.style.flexGrow = '0';
+        moreBtn.style.display = 'block';
         var moreBtnW = moreBtn.offsetWidth || 52;
+        moreBtn.style.flexGrow = '1';
         var available = navW - moreBtnW;
 
         // Walk from left; first button that would exceed available goes to overflow

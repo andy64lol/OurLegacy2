@@ -6,6 +6,10 @@
     const raceData = {{data.races  | tojson }};
 </script>
 {% endif %}
+<style>
+    /* On game page, Chat and Group are accessible as tabs — hide the redundant floating FABs */
+    .widget-fab { display: none !important; }
+</style>
 {% endblock %}
 {% block content %}
 {% set _cg =

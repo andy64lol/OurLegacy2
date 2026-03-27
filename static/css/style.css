@@ -979,13 +979,14 @@ body.ol2-bg-4 .main-content { background-image: url('/game_assets/backgrounds/4.
 /* Three-dot overflow button */
 .tab-more-btn {
     flex-shrink: 0 !important;
-    margin-left: auto;
+    flex-grow: 1;
     padding: 9px 14px;
     background: var(--slate-mid);
     border-left: 1px solid var(--border);
     letter-spacing: 0.01em;
     font-size: 15px;
     display: none;
+    text-align: center;
 }
 .tab-more-btn:hover { background: var(--slate-light); color: var(--text-bright); }
 /* Overflow dropdown */
