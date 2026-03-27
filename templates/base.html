@@ -78,6 +78,10 @@
     <!-- ── Global Chat Widget + Groups Widget (online users only) ─── -->
     {% if online_username %}
     <style>
+        /* Chat widget FAB and panel are hidden everywhere — global chat lives only at /chat */
+        #chat-toggle-btn { display: none !important; }
+        #chat-panel { display: none !important; }
+
         #chat-panel {
             position: relative;
             min-width: 260px;
