@@ -1,3 +1,9 @@
+from gevent import monkey
+
+monkey.patch_all()
+
+import sys
+
 """
 Our Legacy 2 - Flask Web Interface
 Medieval fantasy RPG playable in the browser.
