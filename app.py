@@ -1,6 +1,13 @@
-from gevent import monkey
+"""
+Apply gevent monkey-patching only when running the app directly.
 
-monkey.patch_all()
+Do NOT call monkey.patch_all() at module import time: when Gunicorn
+imports this module in the master process, patching there converts
+internal Gunicorn Timer threads into greenlets which later attempt to
+remove themselves from `threading._active` and can raise KeyError
+because gevent has already cleaned them up. The gevent worker class
+performs the necessary patching inside each worker process.
+"""
 
 import sys
 
@@ -7298,4 +7305,11 @@ def api_admin_remove_admin():
 
 port = int(os.environ.get("PORT", 5000))
 if __name__ == "__main__":
+    # When running directly (not under Gunicorn), apply gevent's monkey patching
+    # so that networking and timers are cooperative.
+    try:
+        from gevent import monkey as _monkey
+        _monkey.patch_all()
+    except Exception:
+        pass
     socketio.run(app, host="0.0.0.0", port=port, debug=False)
