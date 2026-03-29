@@ -833,6 +833,20 @@
         };
     })();
     </script>
+    <script>
+    (function() {
+        // If the game page provides an inline global chat tab, hide the floating chat widget
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                if (document.getElementById('tab-global-chat') || document.querySelector('.game-layout')) {
+                    var cw = document.getElementById('chat-widget');
+                    if (cw) cw.style.display = 'none';
+                    document.querySelectorAll('.widget-fab').forEach(function(b) { b.style.display = 'none'; });
+                }
+            } catch (e) { /* no-op */ }
+        });
+    })();
+    </script>
     {% endif %}
 </body>
 </html>
