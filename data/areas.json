@@ -42,7 +42,8 @@
         ],
         "quest_unlock": "stolen_ore"
       }
-    ]
+    ],
+    "map_image": "starting_village.png"
   },
   "your_land": {
     "name": "Your Land",
@@ -57,7 +58,8 @@
       "starting_village"
     ],
     "rest_cost": 0,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "your_land.png"
   },
   "forest_path": {
     "name": "Dark Forest",
@@ -89,7 +91,8 @@
         ],
         "quest_unlock": "goblin_cache"
       }
-    ]
+    ],
+    "map_image": "forest_path.png"
   },
   "deep_woods": {
     "name": "Deep Woods",
@@ -124,7 +127,8 @@
         ],
         "quest_unlock": "witchs_bargain"
       }
-    ]
+    ],
+    "map_image": "deep_woods.png"
   },
   "ancient_ruins": {
     "name": "Ancient Ruins",
@@ -161,7 +165,8 @@
         ],
         "quest_unlock": "shadow_seal"
       }
-    ]
+    ],
+    "map_image": "ancient_ruins.png"
   },
   "underground_tombs": {
     "name": "Underground Tombs",
@@ -181,7 +186,8 @@
       "void_cavern"
     ],
     "difficulty": 3,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "underground_tombs.png"
   },
   "crystal_caves": {
     "name": "Crystal Caves",
@@ -213,7 +219,8 @@
         ],
         "quest_unlock": "crystal_bounty"
       }
-    ]
+    ],
+    "map_image": "crystal_caves.png"
   },
   "dragon_lair": {
     "name": "Dragon's Lair",
@@ -231,7 +238,8 @@
     ],
     "difficulty": 5,
     "boss_area": true,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "dragon_lair.png"
   },
   "moonlit_glade": {
     "name": "Moonlit Glade",
@@ -262,7 +270,8 @@
         ],
         "quest_unlock": "spirit_at_rest"
       }
-    ]
+    ],
+    "map_image": "moonlit_glade.png"
   },
   "spire_of_sorcery": {
     "name": "Spire of Sorcery",
@@ -279,7 +288,8 @@
       "moonlit_glade"
     ],
     "difficulty": 4,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "spire_of_sorcery.png"
   },
   "obsidian_temple": {
     "name": "Obsidian Temple",
@@ -297,7 +307,8 @@
       "void_cavern"
     ],
     "difficulty": 3,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "obsidian_temple.png"
   },
   "void_cavern": {
     "name": "Void Cavern",
@@ -316,7 +327,8 @@
       "abyss_gate"
     ],
     "difficulty": 4,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "void_cavern.png"
   },
   "abyss_gate": {
     "name": "Abyss Gate",
@@ -336,7 +348,8 @@
     "difficulty": 5,
     "rest_cost": 25,
     "can_rest": false,
-    "boss_area": true
+    "boss_area": true,
+    "map_image": "abyss_gate.png"
   },
   "echoing_void": {
     "name": "Echoing Void",
@@ -357,7 +370,8 @@
     "difficulty": 6,
     "rest_cost": 40,
     "can_rest": false,
-    "boss_area": false
+    "boss_area": false,
+    "map_image": "echoing_void.png"
   },
   "crystal_peaks": {
     "name": "Crystal Peaks",
@@ -378,7 +392,8 @@
     "difficulty": 4,
     "rest_cost": 20,
     "can_rest": true,
-    "boss_area": false
+    "boss_area": false,
+    "map_image": "crystal_peaks.png"
   },
   "tavern": {
     "name": "The Rusty Tankard",
@@ -414,7 +429,8 @@
           "If you're looking for work outside the law... seek the shadow market."
         ]
       }
-    ]
+    ],
+    "map_image": "tavern.png"
   },
   "swamp_of_shadows": {
     "name": "Swamp of Shadows",
@@ -448,7 +464,8 @@
           "I traded my name for solitude. Don't make the same deal I did."
         ]
       }
-    ]
+    ],
+    "map_image": "swamp_of_shadows.png"
   },
   "haunted_cemetery": {
     "name": "Haunted Cemetery",
@@ -469,7 +486,8 @@
     ],
     "difficulty": 4,
     "rest_cost": 10,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "haunted_cemetery.png"
   },
   "thunder_peak": {
     "name": "Thunder Peak",
@@ -489,7 +507,8 @@
       "sky_sanctuary"
     ],
     "difficulty": 4,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "thunder_peak.png"
   },
   "crypt_of_eternity": {
     "name": "Crypt of Eternity",
@@ -510,7 +529,8 @@
     ],
     "difficulty": 5,
     "boss_area": true,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "crypt_of_eternity.png"
   },
   "hellfire_citadel": {
     "name": "Hellfire Citadel",
@@ -531,7 +551,8 @@
     ],
     "difficulty": 5,
     "boss_area": true,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "hellfire_citadel.png"
   },
   "sky_sanctuary": {
     "name": "Sky Sanctuary",
@@ -550,7 +571,8 @@
     ],
     "difficulty": 6,
     "boss_area": true,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "sky_sanctuary.png"
   },
   "mountain_base": {
     "name": "Mountain Base",
@@ -573,7 +595,8 @@
     ],
     "difficulty": 2,
     "rest_cost": 12,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "mountain_base.png"
   },
   "port_lesben": {
     "name": "Port Lesbèn",
@@ -606,7 +629,8 @@
         ],
         "quest_unlock": "sea_route_cleared"
       }
-    ]
+    ],
+    "map_image": "port_lesben.png"
   },
   "port_urkilsh": {
     "name": "Port Ûrk'ilsh",
@@ -626,7 +650,8 @@
     ],
     "difficulty": 3,
     "rest_cost": 20,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "port_urkilsh.png"
   },
   "elmenburg": {
     "name": "Ëlmenburg",
@@ -646,7 +671,8 @@
     ],
     "difficulty": 3,
     "rest_cost": 25,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "elmenburg.png"
   },
   "lenbenburg": {
     "name": "Lenbënburg",
@@ -668,7 +694,8 @@
     ],
     "difficulty": 4,
     "rest_cost": 30,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "lenbenburg.png"
   },
   "outskirts_lenbenburg": {
     "name": "Outskirts of Lenbënburg",
@@ -688,7 +715,8 @@
     ],
     "difficulty": 3,
     "rest_cost": 15,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "outskirts_lenbenburg.png"
   },
   "albeitirt_peak": {
     "name": "Albéitirt Peak",
@@ -706,7 +734,8 @@
       "outskirts_lenbenburg"
     ],
     "difficulty": 5,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "albeitirt_peak.png"
   },
   "windswept_flower_valley": {
     "name": "Windswept flower valley",
@@ -724,7 +753,8 @@
     ],
     "difficulty": 3,
     "rest_cost": 10,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "windswept_flower_valley.png"
   },
   "whispering_canyon": {
     "name": "Whispering Canyon",
@@ -743,7 +773,8 @@
     ],
     "difficulty": 4,
     "rest_cost": 18,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "whispering_canyon.png"
   },
   "forgotten_oasis": {
     "name": "Forgotten Oasis",
@@ -766,7 +797,8 @@
     ],
     "difficulty": 3,
     "rest_cost": 5,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "forgotten_oasis.png"
   },
   "desert_of_aukrahama": {
     "name": "Desert of Aukrahama",
@@ -786,7 +818,8 @@
     ],
     "difficulty": 4,
     "rest_cost": 15,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "desert_of_aukrahama.png"
   },
   "outlaw_lands_of_bridagrak_oblast": {
     "name": "Outlaw Lands of Brîdagrak Oblast",
@@ -804,7 +837,8 @@
     ],
     "difficulty": 4,
     "rest_cost": 20,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "outlaw_lands_of_bridagrak_oblast.png"
   },
   "port_nova_terrabla": {
     "name": "Port Nova Terrabla",
@@ -824,7 +858,8 @@
     ],
     "difficulty": 3,
     "rest_cost": 15,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "port_nova_terrabla.png"
   },
   "port_lianghai": {
     "name": "Port LiangHai",
@@ -845,7 +880,8 @@
     ],
     "difficulty": 3,
     "rest_cost": 15,
-    "can_rest": true
+    "can_rest": true,
+    "map_image": "port_lianghai.png"
   },
   "temple_of_eternity": {
     "name": "Temple of Eternity",
@@ -869,7 +905,8 @@
     "rest_cost": 20,
     "can_rest": true,
     "has_dungeon": true,
-    "dungeon_type": "temple"
+    "dungeon_type": "temple",
+    "map_image": "temple_of_eternity.png"
   },
   "bamboo_forest": {
     "name": "Misty Bamboo Forest",
@@ -894,7 +931,8 @@
     "rest_cost": 18,
     "can_rest": true,
     "has_dungeon": true,
-    "dungeon_type": "forest"
+    "dungeon_type": "forest",
+    "map_image": "bamboo_forest.png"
   },
   "sacred_lake": {
     "name": "Lake of Reflection",
@@ -920,7 +958,8 @@
     "rest_cost": 22,
     "can_rest": true,
     "has_dungeon": true,
-    "dungeon_type": "lake"
+    "dungeon_type": "lake",
+    "map_image": "sacred_lake.png"
   },
   "dragon_temple": {
     "name": "Celestial Dragon Temple",
@@ -944,7 +983,8 @@
     "rest_cost": 25,
     "can_rest": false,
     "has_dungeon": true,
-    "dungeon_type": "temple"
+    "dungeon_type": "temple",
+    "map_image": "dragon_temple.png"
   },
   "thunder_mountain": {
     "name": "Shattered Peaks",
@@ -968,7 +1008,8 @@
     "rest_cost": 20,
     "can_rest": false,
     "has_dungeon": true,
-    "dungeon_type": "mountain"
+    "dungeon_type": "mountain",
+    "map_image": "thunder_mountain.png"
   },
   "crystal_palace": {
     "name": "Crystal Palace of Yixuan",
@@ -995,7 +1036,8 @@
     "rest_cost": 30,
     "can_rest": true,
     "has_dungeon": true,
-    "dungeon_type": "palace"
+    "dungeon_type": "palace",
+    "map_image": "crystal_palace.png"
   },
   "floating_islands": {
     "name": "Floating Isles of Paradise",
@@ -1021,7 +1063,8 @@
     "rest_cost": 25,
     "can_rest": true,
     "has_dungeon": true,
-    "dungeon_type": "sky"
+    "dungeon_type": "sky",
+    "map_image": "floating_islands.png"
   },
   "ancient_battlefield": {
     "name": "Fields of Eternal Battle",
@@ -1045,7 +1088,8 @@
     "rest_cost": 20,
     "can_rest": false,
     "has_dungeon": true,
-    "dungeon_type": "battlefield"
+    "dungeon_type": "battlefield",
+    "map_image": "ancient_battlefield.png"
   },
   "forbidden_city": {
     "name": "Forbidden City of Shadows",
@@ -1069,7 +1113,8 @@
     "rest_cost": 25,
     "can_rest": false,
     "has_dungeon": true,
-    "dungeon_type": "city"
+    "dungeon_type": "city",
+    "map_image": "forbidden_city.png"
   },
   "paradise_garden": {
     "name": "Garden of Eternal Blossoms",
@@ -1094,7 +1139,8 @@
     "rest_cost": 20,
     "can_rest": true,
     "has_dungeon": true,
-    "dungeon_type": "garden"
+    "dungeon_type": "garden",
+    "map_image": "paradise_garden.png"
   },
   "paradise_sanctum": {
     "name": "Sanctum of Enlightenment",
@@ -1117,7 +1163,8 @@
     "rest_cost": 30,
     "can_rest": true,
     "has_dungeon": true,
-    "dungeon_type": "sanctum"
+    "dungeon_type": "sanctum",
+    "map_image": "paradise_sanctum.png"
   },
   "paradise_summit": {
     "name": "Summit of the Immortals",
@@ -1140,7 +1187,8 @@
     "rest_cost": 35,
     "can_rest": false,
     "has_dungeon": true,
-    "dungeon_type": "summit"
+    "dungeon_type": "summit",
+    "map_image": "paradise_summit.png"
   },
   "shadow_realm": {
     "name": "Realm of Eternal Night",
@@ -1163,7 +1211,8 @@
     "rest_cost": 25,
     "can_rest": false,
     "has_dungeon": true,
-    "dungeon_type": "shadow"
+    "dungeon_type": "shadow",
+    "map_image": "shadow_realm.png"
   },
   "void_gateway": {
     "name": "Gateway to the Void",
@@ -1187,7 +1236,8 @@
     "rest_cost": 30,
     "can_rest": false,
     "has_dungeon": true,
-    "dungeon_type": "void"
+    "dungeon_type": "void",
+    "map_image": "void_gateway.png"
   },
   "true_void": {
     "name": "The True Void",
@@ -1209,7 +1259,8 @@
     "rest_cost": 50,
     "can_rest": false,
     "has_dungeon": true,
-    "dungeon_type": "cosmic"
+    "dungeon_type": "cosmic",
+    "map_image": "true_void.png"
   },
   "heavenly_gate": {
     "name": "Heavenly Gate",
@@ -1232,7 +1283,8 @@
     "rest_cost": 40,
     "can_rest": false,
     "has_dungeon": true,
-    "dungeon_type": "heaven"
+    "dungeon_type": "heaven",
+    "map_image": "heavenly_gate.png"
   },
   "celestial_realm": {
     "name": "Celestial Realm",
@@ -1256,7 +1308,8 @@
     "rest_cost": 50,
     "can_rest": true,
     "has_dungeon": true,
-    "dungeon_type": "divine"
+    "dungeon_type": "divine",
+    "map_image": "celestial_realm.png"
   },
   "golden_temple": {
     "name": "Golden Temple of Wealth",
@@ -1281,7 +1334,8 @@
     "rest_cost": 25,
     "can_rest": true,
     "has_dungeon": true,
-    "dungeon_type": "treasure"
+    "dungeon_type": "treasure",
+    "map_image": "golden_temple.png"
   },
   "mountain_treasury": {
     "name": "Hidden Treasury",
@@ -1304,7 +1358,8 @@
     "rest_cost": 20,
     "can_rest": false,
     "has_dungeon": true,
-    "dungeon_type": "treasure"
+    "dungeon_type": "treasure",
+    "map_image": "mountain_treasury.png"
   },
   "sacred_grove": {
     "name": "Sacred Grove",
@@ -1323,7 +1378,8 @@
       "cathedral_of_light"
     ],
     "difficulty": 6,
-    "can_rest": false
+    "can_rest": false,
+    "map_image": "sacred_grove.png"
   },
   "cathedral_of_light": {
     "name": "Cathedral of Light",
@@ -1344,7 +1400,8 @@
     ],
     "difficulty": 7,
     "can_rest": true,
-    "rest_cost": 30
+    "rest_cost": 30,
+    "map_image": "cathedral_of_light.png"
   },
   "taiga_outskirts": {
     "name": "Taiga Outskirts",
@@ -1391,7 +1448,8 @@
           "Heard a rumour of a great beast in the permafrost caverns. The Snowbinable, they call it."
         ]
       }
-    ]
+    ],
+    "map_image": "taiga_outskirts.png"
   },
   "frozen_river": {
     "name": "Frozen River",
@@ -1427,7 +1485,8 @@
           "The river flows to the caverns eventually. I'd not follow it if I were you."
         ]
       }
-    ]
+    ],
+    "map_image": "frozen_river.png"
   },
   "deep_taiga": {
     "name": "Deep Taiga",
@@ -1462,7 +1521,8 @@
           "To face it, you must first survive the permafrost caverns. Few have."
         ]
       }
-    ]
+    ],
+    "map_image": "deep_taiga.png"
   },
   "permafrost_cavern": {
     "name": "Permafrost Cavern",
@@ -1483,7 +1543,8 @@
     "can_rest": false,
     "weather_probabilities": {
       "null": 100
-    }
+    },
+    "map_image": "permafrost_cavern.png"
   },
   "snowbinable_lair": {
     "name": "Snowbinable's Lair",
@@ -1504,7 +1565,8 @@
     "can_rest": false,
     "weather_probabilities": {
       "null": 100
-    }
+    },
+    "map_image": "snowbinable_lair.png"
   },
   "port_kostantora": {
     "name": "Port Kostantora",
@@ -1555,7 +1617,8 @@
           "Ships come and go, but the chains here are permanent for most. Welcome to Kostantora."
         ]
       }
-    ]
+    ],
+    "map_image": "port_kostantora.png"
   },
   "kostantora_docks": {
     "name": "Kostantora Docks",
@@ -1590,7 +1653,8 @@
           "The best ships in the world are right here in this harbour. None of them are mine anymore."
         ]
       }
-    ]
+    ],
+    "map_image": "kostantora_docks.png"
   },
   "kostantora_city": {
     "name": "Kostantora: The Imperial City",
@@ -1641,7 +1705,8 @@
           "If you're heading to the Sultan's throne room, you're either the bravest person alive or the most foolish."
         ]
       }
-    ]
+    ],
+    "map_image": "kostantora_city.png"
   },
   "grand_bazaar_district": {
     "name": "The Grand Bazaar",
@@ -1680,7 +1745,8 @@
           "Word is the Sultan has closed the eastern gates. Bad for business. Very bad."
         ]
       }
-    ]
+    ],
+    "map_image": "grand_bazaar_district.png"
   },
   "kazhari_quarter": {
     "name": "The Kazhari Quarter",
@@ -1713,7 +1779,8 @@
           "If you're going to the palace, the captain knows you're here. They always do."
         ]
       }
-    ]
+    ],
+    "map_image": "kazhari_quarter.png"
   },
   "vizier_palace": {
     "name": "The Grand Vizier's Palace",
@@ -1750,7 +1817,8 @@
           "There is a passage behind the tapestry in the east hall. I never told you that."
         ]
       }
-    ]
+    ],
+    "map_image": "vizier_palace.png"
   },
   "karastani_plains": {
     "name": "The Karastani Plains",
@@ -1787,7 +1855,8 @@
           "The desert beyond the mountains hides ruins older than any empire. Strange things live there."
         ]
       }
-    ]
+    ],
+    "map_image": "karastani_plains.png"
   },
   "kapali_mountains": {
     "name": "The Kapali Mountains",
@@ -1812,7 +1881,8 @@
       "rainy": 30,
       "stormy": 25,
       "snowy": 10
-    }
+    },
+    "map_image": "kapali_mountains.png"
   },
   "desert_of_ankhara": {
     "name": "The Desert of Ankhara",
@@ -1836,7 +1906,8 @@
       "sunny": 80,
       "stormy": 15,
       "rainy": 5
-    }
+    },
+    "map_image": "desert_of_ankhara.png"
   },
   "sultan_hunting_grounds": {
     "name": "The Sultan's Hunting Grounds",
@@ -1860,7 +1931,8 @@
       "sunny": 65,
       "rainy": 20,
       "stormy": 15
-    }
+    },
+    "map_image": "sultan_hunting_grounds.png"
   },
   "sultan_palace": {
     "name": "The Sultan's Throne Room",
@@ -1884,7 +1956,8 @@
       "sunny": 70,
       "rainy": 20,
       "stormy": 10
-    }
+    },
+    "map_image": "sultan_palace.png"
   },
   "the_coldwater_crossing": {
     "name": "The Coldwater Crossing",
@@ -1915,7 +1988,8 @@
         ],
         "quest_unlock": "coldwater_incursion"
       }
-    ]
+    ],
+    "map_image": "the_coldwater_crossing.png"
   },
   "varak_iron_steppe": {
     "name": "The Varak Iron Steppe",
@@ -1949,7 +2023,8 @@
         ],
         "quest_unlock": "test_of_the_steppe"
       }
-    ]
+    ],
+    "map_image": "varak_iron_steppe.png"
   },
   "greymount_clan_hold": {
     "name": "Greymount Clan Hold",
@@ -1981,7 +2056,8 @@
         ],
         "quest_unlock": "healers_request"
       }
-    ]
+    ],
+    "map_image": "greymount_clan_hold.png"
   },
   "rivers_crown": {
     "name": "River's Crown",
@@ -2024,7 +2100,8 @@
           "If you seek the Ghost River, go south along the eastern bank. But go in daylight."
         ]
       }
-    ]
+    ],
+    "map_image": "rivers_crown.png"
   },
   "ghost_river_stretch": {
     "name": "The Ghost River",
@@ -2056,7 +2133,8 @@
         ],
         "quest_unlock": "the_black_water_mystery"
       }
-    ]
+    ],
+    "map_image": "ghost_river_stretch.png"
   },
   "jade_examination_hall": {
     "name": "The Jade Examination Hall",
@@ -2085,7 +2163,8 @@
         ],
         "quest_unlock": "examination_corruption"
       }
-    ]
+    ],
+    "map_image": "jade_examination_hall.png"
   },
   "spine_of_heaven_pass": {
     "name": "Spine of Heaven Pass",
@@ -2115,7 +2194,8 @@
         ],
         "quest_unlock": "spine_crossing"
       }
-    ]
+    ],
+    "map_image": "spine_of_heaven_pass.png"
   },
   "ruins_of_constanplea": {
     "name": "Ruins of Constanplea",
@@ -2146,7 +2226,8 @@
         ],
         "quest_unlock": "recover_the_archive"
       }
-    ]
+    ],
+    "map_image": "ruins_of_constanplea.png"
   },
   "eldenmoor_city": {
     "name": "Eldenmoor City",
@@ -2199,6 +2280,7 @@
           "You feel it, don't you? That warmth. It's older than the stones around it."
         ]
       }
-    ]
+    ],
+    "map_image": "eldenmoor_city.png"
   }
 }

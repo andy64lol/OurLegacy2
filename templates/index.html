@@ -807,12 +807,14 @@
                 <div class="panel-body">
                     <p class="area-description">{{ area.description or 'A place of mystery and danger.' }}</p>
 
+                    {% if area.map_image %}
                     <div class="area-map-wrap" id="area-map-wrap">
-                        <img src="/data/assets/map/{{ area_key }}.png"
+                        <img src="/data/assets/map/{{ area.map_image }}"
                              alt="Map of {{ area_name }}"
                              class="area-map-img"
                              onerror="document.getElementById('area-map-wrap').style.display='none'">
                     </div>
+                    {% endif %}
 
                     {% if area.possible_enemies %}
                     <div class="danger-notice">
