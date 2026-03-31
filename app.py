@@ -120,6 +120,8 @@ from utilities.supabase_db import (
     get_pending_email_verification,
     request_email_verification,
     verify_email_token,
+    try_acquire_or_renew_world_tick_lock,
+    release_world_tick_lock,
 )
 from utilities.email_sender import send_email as _send_email, is_configured as _email_configured
 
@@ -336,6 +338,10 @@ TRADE_MAX_ITEMS = 10
 TRADE_MAX_GOLD = 9_999_999
 TRADE_TIMEOUT_SECS = 300  # 5 min inactivity → auto-cancel
 _bg_started = False
+
+# Unique identifier for this worker process — used by the distributed tick lock.
+import uuid as _uuid_mod
+_WORLD_TICK_WORKER_ID: str = _uuid_mod.uuid4().hex
 
 
 @app.context_processor
@@ -873,9 +879,23 @@ def _prune_area_presence() -> None:
 
 
 def _world_tick():
-    """Background greenlet: fires every 30 s for housekeeping tasks."""
+    """Background greenlet: fires every 30 s for housekeeping tasks.
+
+    Uses a Supabase-backed distributed lock so that only one worker runs the
+    tick when Gunicorn is scaled beyond a single worker.  The lock TTL is 90 s
+    (3× the tick interval), so a crashed worker's lease expires automatically
+    and another worker takes over within one tick period.
+    """
     while True:
         socketio.sleep(30)
+
+        # Distributed lock — skip this tick if another worker holds the lease.
+        try:
+            if not try_acquire_or_renew_world_tick_lock(_WORLD_TICK_WORKER_ID, ttl_seconds=90):
+                continue
+        except Exception:
+            pass  # Lock system unavailable — proceed anyway (safe degradation).
+
         try:
             _expire_stale_trades()
         except Exception:

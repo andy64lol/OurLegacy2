@@ -10,9 +10,11 @@
 - [x] Add a dedicated server-side world tick loop independent of player sessions (`_world_tick` gevent greenlet, 30s interval)
   - ⚠️ Multiple workers: each spawns its own tick — fix with Redis/Supabase distributed lock when scaling past 1 worker
   - ✅ Current state (`workers = 1`): single worker, no coordination needed
-  - [ ] Future: add Redis/Supabase distributed lock when scaling past 1 worker
+  - [x] Future: add Redis/Supabase distributed lock when scaling past 1 worker — implemented via `ol2_tick_lock` Supabase table; lease TTL 90 s, auto-failover on worker crash
 - [x] Activity diary — all game events written to a persistent 500-entry per-player log; autosave throttled to one diary entry per 5 min; manual cloud saves surface a visible notification
 - [ ] Server shards per region to handle large concurrent player counts
+- [ ] Remove singleplayer mode
+- [ ] Replace Gevent with AsyncIO
 
 ## 2. Real-Time World Presence
 - [x] Online user tracking — who is connected shown in global chat sidebar

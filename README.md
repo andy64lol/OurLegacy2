@@ -374,6 +374,39 @@ Examples:
 
 ---
 
+## Supabase Database Migrations
+
+Run these SQL statements once in your Supabase project's SQL editor before starting the server.
+
+### Core tables (accounts, saves, chat)
+
+These are created automatically by the Supabase dashboard or via the migrations documented in earlier setup. Ensure the following tables exist:
+- `ol2_users` — player accounts
+- `ol2_saves` — encrypted cloud save blobs
+- `ol2_chat` — global chat history
+- `ol2_dms` — private messages
+- `ol2_friends` — friend relationships
+- `ol2_characters` — persistent character state (MMO Phase 1)
+- `ol2_groups`, `ol2_group_members`, `ol2_group_log` — Adventure Groups
+
+### Distributed world-tick lock (required when `workers > 1`)
+
+```sql
+CREATE TABLE IF NOT EXISTS ol2_tick_lock (
+    lock_name  TEXT PRIMARY KEY,
+    worker_id  TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL
+);
+```
+
+This table holds at most one row (`lock_name = 'world_tick'`).  Whichever
+Gunicorn worker acquires the row runs the server tick; others skip their cycle
+until the lease expires (90 s) or the holder renews it.  Safe to create even
+when running a single worker — the lock logic falls back gracefully if Supabase
+is not configured.
+
+---
+
 ## File Structure
 
 ```

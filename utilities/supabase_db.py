@@ -1254,3 +1254,93 @@ def reset_password_with_token(token: str, new_password: str) -> Dict[str, Any]:
         return _run(_do)
     except Exception as e:
         return {"ok": False, "message": f"Password reset failed: {e}"}
+
+
+# ─── Distributed World-Tick Lock ──────────────────────────────────────────────
+# Prevents multiple Gunicorn workers from each running their own world tick when
+# the worker count is scaled above 1.  Uses a single row in `ol2_tick_lock` as
+# a lease: the holder renews its TTL every tick; if a worker crashes the lease
+# expires and another worker acquires it automatically.
+#
+# Required Supabase table (run once):
+#   CREATE TABLE IF NOT EXISTS ol2_tick_lock (
+#       lock_name  TEXT PRIMARY KEY,
+#       worker_id  TEXT NOT NULL,
+#       expires_at TIMESTAMPTZ NOT NULL
+#   );
+
+_TICK_LOCK_NAME = "world_tick"
+
+
+def try_acquire_or_renew_world_tick_lock(worker_id: str, ttl_seconds: int = 90) -> bool:
+    """
+    Try to acquire or renew the world-tick distributed lock.
+
+    Returns True  if this worker now holds the lock (newly acquired or renewed).
+    Returns False if a different worker currently holds a valid lease.
+    Falls back to True when Supabase is not configured (single-worker mode).
+    """
+    try:
+        client = _get_client()
+        now = datetime.datetime.now(datetime.timezone.utc)
+        expires_at = (now + datetime.timedelta(seconds=ttl_seconds)).isoformat()
+        now_str = now.isoformat()
+
+        def _do():
+            # 1. Renew if we already hold the lock — returns the updated row.
+            renew_res = (
+                client.table("ol2_tick_lock")
+                .update({"expires_at": expires_at})
+                .eq("lock_name", _TICK_LOCK_NAME)
+                .eq("worker_id", worker_id)
+                .execute()
+            )
+            if renew_res.data:
+                return True
+
+            # 2. Evict any expired lease so we can compete for it.
+            client.table("ol2_tick_lock").delete().eq(
+                "lock_name", _TICK_LOCK_NAME
+            ).lt("expires_at", now_str).execute()
+
+            # 3. Try to insert our lease; if another worker already holds a
+            #    valid one this INSERT is silently ignored (no upsert).
+            try:
+                ins_res = (
+                    client.table("ol2_tick_lock")
+                    .insert(
+                        {
+                            "lock_name": _TICK_LOCK_NAME,
+                            "worker_id": worker_id,
+                            "expires_at": expires_at,
+                        }
+                    )
+                    .execute()
+                )
+                return bool(ins_res.data)
+            except Exception:
+                return False
+
+        return _run(_do)
+
+    except RuntimeError:
+        # Supabase not configured — single-worker mode, always allow.
+        return True
+    except Exception:
+        # Network / transient error — allow the tick rather than starve it.
+        return True
+
+
+def release_world_tick_lock(worker_id: str) -> None:
+    """Release the world-tick lock if this worker currently holds it."""
+    try:
+        client = _get_client()
+        _run(
+            lambda: client.table("ol2_tick_lock")
+            .delete()
+            .eq("lock_name", _TICK_LOCK_NAME)
+            .eq("worker_id", worker_id)
+            .execute()
+        )
+    except Exception:
+        pass
