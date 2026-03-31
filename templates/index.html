@@ -32,7 +32,7 @@
         <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="title-banner">
         <div
             style="text-align:center;margin-top:-10px;margin-bottom:4px;font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">
-            v2.5.2 &mdash; Another update LOL &#10024;</div>
+            v2.6.0 &mdash; New Landscape soon &#10024;</div>
 
         {% if splash_text %}
         <div
@@ -227,6 +227,7 @@
             <span class="wizard-cursor" id="wizard-cursor">▌</span>
         </div>
     </div>
+    <div id="wiz-step-indicator" class="wiz-step-indicator" style="display:none;"></div>
     <div class="wizard-player-area" id="wizard-player-area"></div>
     <div class="wizard-cutscene" id="wizard-cutscene">
         <div class="portal-glow"></div>
@@ -3601,17 +3602,33 @@
         }
     }
 
+    /* ── Step Indicator ── */
+    const WIZ_TOTAL_STEPS = 6;
+    function showWizStep(n) {
+        const el = document.getElementById('wiz-step-indicator');
+        if (!el) return;
+        if (n < 1) { el.style.display = 'none'; return; }
+        el.style.display = 'flex';
+        let dots = '';
+        for (let i = 1; i <= WIZ_TOTAL_STEPS; i++) {
+            dots += `<span class="wiz-step-dot${i === n ? ' wiz-step-dot-active' : i < n ? ' wiz-step-dot-done' : ''}"></span>`;
+        }
+        el.innerHTML = `${dots}<span class="wiz-step-label">Step ${n} / ${WIZ_TOTAL_STEPS}</span>`;
+    }
+
     /* ── Steps ── */
     function wizStep(step) {
         const area = document.getElementById('wizard-player-area');
 
         if (step === 'greeting') {
+            showWizStep(1);
             showArea('');
             typeText('Hi there, wandering soul... I am the Keeper of Fates. I shall guide you into your new life.', () => {
                 showArea(`<button class="btn btn-primary" onclick="wizStep('name')">I am ready...</button>`);
             });
 
         } else if (step === 'name') {
+            showWizStep(2);
             typeText('May I know what is your name?', () => {
                 showArea(`
                 <div class="wiz-input-row">
@@ -3624,6 +3641,7 @@
             });
 
         } else if (step === 'name_confirm') {
+            showWizStep(2);
             const name = wizData.name;
             typeText(`Hmm... ${name}, correct?`, () => {
                 showArea(`
@@ -3646,6 +3664,7 @@
             });
 
         } else if (step === 'gender') {
+            showWizStep(3);
             typeText('What is your gender?', () => {
                 const cards = Object.entries(WIZ_GENDER).map(([k, v]) => makeWizCard('gender', k, v.label, v.desc)).join('');
                 showArea(`
@@ -3658,6 +3677,7 @@
             });
 
         } else if (step === 'class') {
+            showWizStep(4);
             typeText('What is your calling in life?', () => {
                 const cards = Object.keys(classData).map(cn =>
                     makeWizCard('class', cn, cn, (classData[cn].description || '').slice(0, 42) + '...')
@@ -3671,6 +3691,7 @@
             });
 
         } else if (step === 'race') {
+            showWizStep(5);
             typeText('May I know your race?', () => {
                 const cards = Object.keys(raceData).map(rn =>
                     makeWizCard('race', rn, rn, (raceData[rn].notes || '').slice(0, 40))
@@ -3699,6 +3720,7 @@
             });
 
         } else if (step === 'confirm') {
+            showWizStep(0);
             typeText('Is all you said correct?', () => {
                 showArea(`
                 <div class="wiz-summary">

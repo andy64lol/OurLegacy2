@@ -620,6 +620,37 @@ body.ol2-bg-4 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24
 
 .wiz-continue-btn { margin-top: 14px; }
 
+.wiz-step-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 8px 0 4px;
+}
+.wiz-step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s, transform 0.2s;
+    flex-shrink: 0;
+}
+.wiz-step-dot-done {
+    background: var(--wood-mid);
+}
+.wiz-step-dot-active {
+    background: var(--wood-bright);
+    transform: scale(1.35);
+    box-shadow: 0 0 6px rgba(200,140,60,0.55);
+}
+.wiz-step-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    margin-left: 4px;
+    text-transform: uppercase;
+}
+
 .wiz-fomo-bar {
     font-size: 12px;
     color: var(--gold);
