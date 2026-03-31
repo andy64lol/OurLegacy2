@@ -56,12 +56,6 @@
                 <a href="/create" class="btn btn-primary btn-large">Begin Your Journey</a>
             </div>
 
-            <div class="save-load-bar" style="margin-top:18px;">
-                <label for="load-file-input-main" class="btn btn-secondary" style="cursor:pointer;">Load Saved
-                    Game</label>
-                <input type="file" id="load-file-input-main" accept=".olsave" style="display:none;">
-            </div>
-
             <!-- Online Account Button -->
             <div class="save-load-bar" style="margin-top:8px;">
                 {% if online_user %}
@@ -2982,37 +2976,6 @@
 {% block extra_scripts %}
 {% if show_welcome %}
 <script>
-    (function () {
-        var input = document.getElementById('load-file-input-main');
-        var status = document.getElementById('save-status');
-        if (!input) return;
-        input.addEventListener('change', async function () {
-            var file = this.files[0];
-            if (!file) return;
-            status.style.display = 'block';
-            status.style.color = 'var(--text-dim)';
-            status.textContent = 'Loading save...';
-            try {
-                var formData = new FormData();
-                formData.append('save_file', file);
-                var res = await fetch('/api/load', {method: 'POST', body: formData});
-                var json = await res.json();
-                if (json.ok) {
-                    status.style.color = 'var(--green-bright)';
-                    status.textContent = 'Save loaded! Returning to your journey...';
-                    setTimeout(function () {window.location.href = '/game';}, 800);
-                } else {
-                    status.style.color = 'var(--red)';
-                    status.textContent = 'Failed to load: ' + (json.error || 'unknown error');
-                }
-            } catch (e) {
-                status.style.color = 'var(--red)';
-                status.textContent = 'Load error: ' + e.message;
-            }
-            this.value = '';
-        });
-    })();
-
     // ── Online Game panel ──────────────────────────────────────────────────────
     function openOnlineModal() {
         var overlay = document.getElementById('online-modal-overlay');

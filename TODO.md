@@ -81,7 +81,7 @@
 - [x] Block system preventing unwanted DMs and friend requests
 - [ ] Admin text console for viewing online players, issuing bans, cancelling trades
 - [ ] In-game /report command with Supabase-backed report queue
-- [ ] Mute system with duration, stored per user in DB
+- [x] Mute system with duration — `/api/admin/mute` (with `duration_minutes`), `/api/admin/unmute`; `_is_muted()` auto-expires; enforced on chat send (stored in `admins.json`, not Supabase)
 - [ ] Server-side validation of all gold and item changes (never trust the client)
 - [ ] Rate limiting on all game actions — combat, crafting, trading
 
