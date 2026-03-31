@@ -1130,6 +1130,7 @@ def _build_game_state() -> dict[str, Any]:
     from utilities.stats import ensure_attributes
 
     ensure_attributes(player)
+    user_id = session.get("online_user_id")
     return {
         "player": player,
         "current_area": session.get("current_area", "starting_village"),
@@ -1140,6 +1141,7 @@ def _build_game_state() -> dict[str, Any]:
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
         "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
+        "signed_in": bool(user_id and user_id in _active_sessions),
         "save_version": "7.1",
     }
 
@@ -2742,7 +2744,8 @@ def game():
         create_error = session.pop("create_error", None)
         session.modified = True
         return render_template(
-            "index.html", show_create=True, data=GAME_DATA, create_error=create_error
+            "index.html", show_create=True, data=GAME_DATA, create_error=create_error,
+            world_events=list(reversed(_world_events[-8:])),
         )
 
     # ── Email check (online users must have a verified email) ────────────────

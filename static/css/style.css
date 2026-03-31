@@ -688,6 +688,49 @@ body.ol2-bg-4 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24
     50% { opacity: 0.72; }
 }
 
+.wiz-we-section {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 12px;
+}
+.wiz-we-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 7px;
+}
+.wiz-we-feed { display: flex; flex-direction: column; gap: 4px; }
+.wiz-we-entry {
+    font-size: 12px;
+    color: var(--text-light);
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.wiz-we-entry:last-child { border-bottom: none; }
+.wiz-qp-list { display: flex; flex-direction: column; gap: 6px; }
+.wiz-qp-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+}
+.wiz-qp-type {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 4px;
+    padding: 2px 5px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    letter-spacing: 0.04em;
+}
+.wiz-qp-kill  { background: rgba(220,60,60,0.2); color: #ff6b6b; border: 1px solid rgba(220,60,60,0.3); }
+.wiz-qp-collect { background: rgba(60,160,60,0.2); color: var(--green-bright); border: 1px solid rgba(60,160,60,0.3); }
+.wiz-qp-name { color: var(--text-bright); font-weight: 600; margin-bottom: 1px; }
+.wiz-qp-desc { color: var(--text-dim); font-size: 11px; line-height: 1.4; }
+
 .wiz-lore {
     min-height: 22px;
     font-size: 13px;

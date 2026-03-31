@@ -3603,7 +3603,16 @@
     }
 
     /* ── Step Indicator ── */
-    const WIZ_TOTAL_STEPS = 6;
+    const WIZ_TOTAL_STEPS = 7;
+    const WIZ_WORLD_EVENTS = {{ world_events | tojson if world_events else '[]' }};
+    const WIZ_QUEST_PREVIEWS = [
+        {name: 'First Steps', desc: 'Defeat 3 goblins in the Dark Forest.', type: 'kill'},
+        {name: 'Bandit Capture', desc: 'Capture 3 bandits to bring them to justice.', type: 'kill'},
+        {name: 'Lost Relic', desc: 'Retrieve an ancient artifact stolen by bandits.', type: 'collect'},
+        {name: 'Undead Rising', desc: 'Clear out skeletons from the Underground Tombs.', type: 'kill'},
+        {name: 'Crystal Protector', desc: 'Defeat Ice Elementals in the Crystal Caves.', type: 'kill'},
+        {name: 'Sorcerer Hunt', desc: 'Track down a Dark Mage causing chaos in the woods.', type: 'kill'},
+    ];
     function showWizStep(n) {
         const el = document.getElementById('wiz-step-indicator');
         if (!el) return;
@@ -3704,7 +3713,37 @@
                 if (first) {wizData.race = first; wizCardChanged('race', first); document.querySelector('input[name="wiz-race"]').checked = true;}
             });
 
+        } else if (step === 'world_events') {
+            showWizStep(6);
+            typeText('Before you venture forth... take a look at what awaits you in the realm.', () => {
+                const evHtml = WIZ_WORLD_EVENTS.length
+                    ? WIZ_WORLD_EVENTS.map(ev => `<div class="wiz-we-entry">&#9675; ${ev.msg}</div>`).join('')
+                    : '<div class="wiz-we-entry" style="font-style:italic;opacity:0.6;">The realm stirs with new activity every hour...</div>';
+                const quests = WIZ_QUEST_PREVIEWS.slice(0, 3);
+                const qHtml = quests.map(q => `
+                    <div class="wiz-qp-row">
+                        <span class="wiz-qp-type wiz-qp-${q.type}">${q.type}</span>
+                        <div>
+                            <div class="wiz-qp-name">${q.name}</div>
+                            <div class="wiz-qp-desc">${q.desc}</div>
+                        </div>
+                    </div>`).join('');
+                const fomoCount = Math.floor(Math.random() * 300) + 600;
+                showArea(`
+                <div class="wiz-fomo-bar">&#128293; <strong>${fomoCount.toLocaleString()} adventurers</strong> are exploring Eldenmoor right now!</div>
+                <div class="wiz-we-section">
+                    <div class="wiz-we-label">&#127758; World Events</div>
+                    <div class="wiz-we-feed">${evHtml}</div>
+                </div>
+                <div class="wiz-we-section" style="margin-top:10px;">
+                    <div class="wiz-we-label">&#128220; Quests Awaiting You</div>
+                    <div class="wiz-qp-list">${qHtml}</div>
+                </div>
+                <button class="btn btn-primary wiz-continue-btn" onclick="wizSelectWorldEvents()">I'm Ready &rarr;</button>`);
+            });
+
         } else if (step === 'background') {
+            showWizStep(7);
             typeText('Hmm... what about your background? What have you done before all this?', () => {
                 const cards = Object.entries(WIZ_BACKGROUNDS).map(([k, v]) => makeWizCard('bg', k, v.label, v.desc, v.fomo, v.fomoClass)).join('');
                 const fomoCount = Math.floor(Math.random() * 400) + 800;
@@ -3776,6 +3815,10 @@
     function wizSelectRace() {
         const el = document.querySelector('input[name="wiz-race"]:checked');
         if (el) wizData.race = el.value;
+        wizStep('world_events');
+    }
+
+    function wizSelectWorldEvents() {
         wizStep('background');
     }
 
