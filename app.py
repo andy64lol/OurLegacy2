@@ -1141,7 +1141,7 @@ def _build_game_state() -> dict[str, Any]:
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
         "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
-        "signed_in": bool(user_id and user_id in _active_sessions),
+        "signed_in": bool(user_id and (user_id in _active_sessions or user_id in _dying_sessions)),
         "save_version": "7.1",
     }
 

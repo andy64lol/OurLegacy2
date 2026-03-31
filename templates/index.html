@@ -807,6 +807,13 @@
                 <div class="panel-body">
                     <p class="area-description">{{ area.description or 'A place of mystery and danger.' }}</p>
 
+                    <div class="area-map-wrap" id="area-map-wrap">
+                        <img src="/data/assets/map/{{ area_key }}.png"
+                             alt="Map of {{ area_name }}"
+                             class="area-map-img"
+                             onerror="document.getElementById('area-map-wrap').style.display='none'">
+                    </div>
+
                     {% if area.possible_enemies %}
                     <div class="danger-notice">
                         Known threats: {{ area.possible_enemies | map('replace','_',' ') | map('title') | join(', ') }}

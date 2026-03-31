@@ -1204,6 +1204,19 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
 
 /* ─── Area & Actions ─────────────────────────────────────── */
 .area-description { font-size: 15px; color: var(--text-light); line-height: 1.65; margin-bottom: 14px; }
+.area-map-wrap {
+    margin-bottom: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: rgba(0,0,0,0.3);
+}
+.area-map-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    image-rendering: pixelated;
+}
 
 /* ─── World Pulse Panel ──────────────────────────────────── */
 .world-online-badge {
