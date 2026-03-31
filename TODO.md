@@ -14,7 +14,7 @@
 - [x] Activity diary — all game events written to a persistent 500-entry per-player log; autosave throttled to one diary entry per 5 min; manual cloud saves surface a visible notification
 - [ ] Server shards per region to handle large concurrent player counts
 - [ ] Remove singleplayer mode
-- [ ] Replace Gevent with AsyncIO
+- [x] Replace Gevent with AsyncIO (python-socketio AsyncServer + asgiref + uvicorn)
 
 ## 2. Real-Time World Presence
 - [x] Online user tracking — who is connected shown in global chat sidebar

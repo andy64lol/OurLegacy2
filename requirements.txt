@@ -83,15 +83,10 @@ cryptography
 flask
 flask-limiter
 flask-session
-flask-socketio
-gevent
-gevent-websocket
 gunicorn
 python-dotenv
 resend
 supabase
+uvicorn[standard]
+asgiref
 werkzeug
-flask-limiter
-flask-socketio
-gevent
-gevent

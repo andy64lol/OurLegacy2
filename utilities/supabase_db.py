@@ -12,13 +12,9 @@ import base64
 import secrets
 from typing import Optional, Dict, Any, List
 
-try:
-    from gevent import tpool as _tpool
-    def _run(fn, *args, **kwargs):
-        return _tpool.execute(fn, *args, **kwargs)
-except ImportError:
-    def _run(fn, *args, **kwargs):
-        return fn(*args, **kwargs)
+def _run(fn, *args, **kwargs):
+    """Run a blocking function directly (no gevent tpool needed with asyncio)."""
+    return fn(*args, **kwargs)
 
 from supabase import create_client, Client
 from utilities.save_load import encrypt_save, decrypt_save

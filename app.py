@@ -30,11 +30,8 @@ from flask import (
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_socketio import (
-    SocketIO,
-    emit as socketio_emit,
-    disconnect as socketio_disconnect,
-)
+import socketio as _socketio_module
+import asyncio as _asyncio
 import json
 import random
 import os
@@ -144,9 +141,41 @@ app.config["SESSION_PERMANENT"] = False
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
 
-socketio = SocketIO(
-    app, cors_allowed_origins="*", async_mode="gevent", manage_session=False
-)
+sio = _socketio_module.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+
+# ── asyncio helpers ─────────────────────────────────────────────────────────
+_asyncio_loop: _asyncio.AbstractEventLoop | None = None
+_username_player: dict = {}  # {username: player_dict} kept fresh by _autosave
+
+def _emit_sync(event: str, data, **kwargs) -> None:
+    """Schedule a socket.io emit from a synchronous Flask-route context."""
+    if _asyncio_loop is not None and not _asyncio_loop.is_closed():
+        _asyncio.run_coroutine_threadsafe(sio.emit(event, data, **kwargs), _asyncio_loop)
+
+def _load_session_for_socket(environ: dict) -> dict:
+    """Read the Flask filesystem session for a socket.io connection."""
+    from http.cookies import SimpleCookie
+    import cachelib.file as _clf
+    cookie_str = environ.get("HTTP_COOKIE", "")
+    if not cookie_str:
+        return {}
+    cookie = SimpleCookie()
+    try:
+        cookie.load(cookie_str)
+    except Exception:
+        return {}
+    session_key = app.config.get("SESSION_COOKIE_NAME", "session")
+    if session_key not in cookie:
+        return {}
+    session_id = cookie[session_key].value
+    cache = _clf.FileSystemCache(
+        cache_dir=app.config["SESSION_FILE_DIR"], threshold=500, mode=0o600
+    )
+    try:
+        data = cache.get(session_id)
+        return dict(data) if isinstance(data, dict) else {}
+    except Exception:
+        return {}
 
 # Online users: {sid: username}  (in-memory, single worker)
 _chat_online: dict = {}
@@ -185,7 +214,7 @@ def push_world_event(text: str) -> None:
 
 
 # ─── Activity tracker (feeds _world_tick dynamic world events) ────────────────
-from gevent.lock import RLock as _RLock
+from threading import RLock as _RLock
 
 _activity_counts: dict = {
     "battles": 0,
@@ -349,27 +378,33 @@ def _inject_chat_globals():
     return {"online_username": session.get("online_username")}
 
 
-# ─── SocketIO Chat Events ───────────────────────────────────── u�────────────────
+# ─── SocketIO Chat Events ────────────────────────────────────────────────────
 
 
-@socketio.on("connect")
-def _on_chat_connect():
-    username = session.get("online_username")
+@sio.on("connect")
+async def _on_chat_connect(sid, environ, auth=None):
+    global _asyncio_loop, _bg_started
+    sess = await _asyncio.get_event_loop().run_in_executor(
+        None, _load_session_for_socket, environ
+    )
+    username = sess.get("online_username")
     if not username:
-        socketio_disconnect()
+        await sio.disconnect(sid)
         return
-    _chat_online[request.sid] = username  # type: ignore
-    # SHUT UP
-    socketio_emit("online_users", sorted(set(_chat_online.values())), broadcast=True)
-    history = get_chat_history(60)
-    socketio_emit("chat_history", history)
+    _asyncio_loop = _asyncio.get_event_loop()
+    if not _bg_started:
+        _bg_started = True
+        _asyncio.create_task(_world_tick())
+    _chat_online[sid] = username
+    await sio.emit("online_users", sorted(set(_chat_online.values())))
+    history = await _asyncio.get_event_loop().run_in_executor(None, get_chat_history, 60)
+    await sio.emit("chat_history", history, to=sid)
 
 
-@socketio.on("disconnect")
-def _on_chat_disconnect():
-    username = _chat_online.pop(request.sid, None)  # type: ignore
-    # SHUSH
-    socketio_emit("online_users", sorted(set(_chat_online.values())), broadcast=True)
+@sio.on("disconnect")
+async def _on_chat_disconnect(sid):
+    username = _chat_online.pop(sid, None)
+    await sio.emit("online_users", sorted(set(_chat_online.values())))
     if username:
         _clear_area_presence(username)
         for tid, trade in list(_active_trades.items()):
@@ -384,7 +419,7 @@ def _on_chat_disconnect():
                 )
                 other_sids = [s for s, u in _chat_online.items() if u == other]
                 for s in other_sids:
-                    socketio.emit(
+                    await sio.emit(
                         "trade_cancelled",
                         {"message": f"{username} disconnected. Trade cancelled."},
                         to=s,
@@ -392,47 +427,56 @@ def _on_chat_disconnect():
                 _active_trades.pop(tid, None)
 
 
-@socketio.on("chat_send")
-def _on_chat_send(data):
-    username = session.get("online_username")
+@sio.on("chat_send")
+async def _on_chat_send(sid, data):
+    username = _chat_online.get(sid)
     if not username:
-        socketio_emit("chat_error", {"message": "You must be logged in to chat."})
+        await sio.emit("chat_error", {"message": "You must be logged in to chat."}, to=sid)
         return
     if _is_muted(username):
-        socketio_emit("chat_error", {"message": "You are muted and cannot send messages."})
+        await sio.emit(
+            "chat_error", {"message": "You are muted and cannot send messages."}, to=sid
+        )
         return
     raw = str(data.get("message", "")).strip()
     if not raw:
         return
     if len(raw) > CHAT_MAX_LEN:
-        socketio_emit(
-            "chat_error", {"message": f"Message too long (max {CHAT_MAX_LEN} chars)."}
+        await sio.emit(
+            "chat_error",
+            {"message": f"Message too long (max {CHAT_MAX_LEN} chars)."},
+            to=sid,
         )
         return
     now = _time_module.time()
     last = _chat_cooldowns.get(username, 0)
     remaining = int(CHAT_COOLDOWN_SECS - (now - last))
     if remaining > 0:
-        socketio_emit(
-            "chat_error", {"message": f"Please wait {remaining}s before sending again."}
+        await sio.emit(
+            "chat_error",
+            {"message": f"Please wait {remaining}s before sending again."},
+            to=sid,
         )
         return
     censored = censor_text(raw)
     _chat_cooldowns[username] = now
-    result = send_chat_message(username, censored)
+    result = await _asyncio.get_event_loop().run_in_executor(
+        None, send_chat_message, username, censored
+    )
     if result["ok"]:
         row = result["row"]
-        socketio_emit(
+        await sio.emit(
             "chat_message",
             {
                 "username": username,
                 "message": censored,
                 "created_at": row.get("created_at", ""),
             },
-            broadcast=True,
         )
     else:
-        socketio_emit("chat_error", {"message": "Failed to send message. Try again."})
+        await sio.emit(
+            "chat_error", {"message": "Failed to send message. Try again."}, to=sid
+        )
 
 
 # ─── SocketIO Trade Events ─────────────────────────────────────────────────────
@@ -470,44 +514,46 @@ def _trade_payload(trade: dict, viewer: str) -> dict:
     }
 
 
-def _emit_trade_update(trade: dict):
+async def _emit_trade_update(trade: dict):
     """Emit trade_update to both participants."""
     a_sids = [s for s, u in _chat_online.items() if u == trade["player_a"]]
     b_sids = [s for s, u in _chat_online.items() if u == trade["player_b"]]
     for s in a_sids:
-        socketio.emit("trade_update", _trade_payload(trade, trade["player_a"]), to=s)
+        await sio.emit("trade_update", _trade_payload(trade, trade["player_a"]), to=s)
     for s in b_sids:
-        socketio.emit("trade_update", _trade_payload(trade, trade["player_b"]), to=s)
+        await sio.emit("trade_update", _trade_payload(trade, trade["player_b"]), to=s)
 
 
-@socketio.on("trade_request")
-def _on_trade_request(data):
-    username = session.get("online_username")
+@sio.on("trade_request")
+async def _on_trade_request(sid, data):
+    username = _chat_online.get(sid)
     if not username:
         return
     target = str(data.get("target", "")).strip().lower()
     if not target or target == username:
-        socketio_emit("trade_error", {"message": "Invalid trade target."})
+        await sio.emit("trade_error", {"message": "Invalid trade target."}, to=sid)
         return
     target_sids = [s for s, u in _chat_online.items() if u == target]
     if not target_sids:
-        socketio_emit("trade_error", {"message": f"{target} is not online."})
+        await sio.emit("trade_error", {"message": f"{target} is not online."}, to=sid)
         return
     for t in _active_trades.values():
         if t["status"] in ("pending", "active") and username in (
             t["player_a"],
             t["player_b"],
         ):
-            socketio_emit(
-                "trade_error", {"message": "You already have an active trade."}
+            await sio.emit(
+                "trade_error", {"message": "You already have an active trade."}, to=sid
             )
             return
         if t["status"] in ("pending", "active") and target in (
             t["player_a"],
             t["player_b"],
         ):
-            socketio_emit(
-                "trade_error", {"message": f"{target} is already in a trade."}
+            await sio.emit(
+                "trade_error",
+                {"message": f"{target} is already in a trade."},
+                to=sid,
             )
             return
     trade_id = str(uuid.uuid4())[:8]
@@ -526,31 +572,37 @@ def _on_trade_request(data):
         "last_activity": _time_module.time(),
     }
     for s in target_sids:
-        socketio.emit("trade_invite", {"trade_id": trade_id, "from": username}, to=s)
-    socketio_emit("trade_invite_sent", {"trade_id": trade_id, "to": target})
+        await sio.emit("trade_invite", {"trade_id": trade_id, "from": username}, to=s)
+    await sio.emit("trade_invite_sent", {"trade_id": trade_id, "to": target}, to=sid)
 
 
-@socketio.on("trade_accept")
-def _on_trade_accept(data):
-    username = session.get("online_username")
+@sio.on("trade_accept")
+async def _on_trade_accept(sid, data):
+    username = _chat_online.get(sid)
     if not username:
         return
     trade_id = str(data.get("trade_id", ""))
     trade = _get_trade_for_user(trade_id, username)
     if not trade or trade["status"] != "pending":
-        socketio_emit("trade_error", {"message": "Trade not found or already started."})
+        await sio.emit(
+            "trade_error",
+            {"message": "Trade not found or already started."},
+            to=sid,
+        )
         return
     if trade["player_b"] != username:
-        socketio_emit("trade_error", {"message": "Only the recipient can accept."})
+        await sio.emit(
+            "trade_error", {"message": "Only the recipient can accept."}, to=sid
+        )
         return
     trade["status"] = "active"
     trade["last_activity"] = _time_module.time()
-    _emit_trade_update(trade)
+    await _emit_trade_update(trade)
 
 
-@socketio.on("trade_decline")
-def _on_trade_decline(data):
-    username = session.get("online_username")
+@sio.on("trade_decline")
+async def _on_trade_decline(sid, data):
+    username = _chat_online.get(sid)
     if not username:
         return
     trade_id = str(data.get("trade_id", ""))
@@ -560,39 +612,43 @@ def _on_trade_decline(data):
     other = trade["player_b"] if username == trade["player_a"] else trade["player_a"]
     other_sids = [s for s, u in _chat_online.items() if u == other]
     for s in other_sids:
-        socketio.emit(
+        await sio.emit(
             "trade_cancelled", {"message": f"{username} declined the trade."}, to=s
         )
-    socketio_emit("trade_cancelled", {"message": "You declined the trade."})
+    await sio.emit("trade_cancelled", {"message": "You declined the trade."}, to=sid)
     _active_trades.pop(trade_id, None)
 
 
-@socketio.on("trade_add_item")
-def _on_trade_add_item(data):
-    username = session.get("online_username")
+@sio.on("trade_add_item")
+async def _on_trade_add_item(sid, data):
+    username = _chat_online.get(sid)
     if not username:
         return
     trade_id = str(data.get("trade_id", ""))
     item_name = str(data.get("item_name", "")).strip()
     trade = _get_trade_for_user(trade_id, username)
     if not trade or trade["status"] != "active":
-        socketio_emit("trade_error", {"message": "Trade not active."})
+        await sio.emit("trade_error", {"message": "Trade not active."}, to=sid)
         return
     my_offer_key = "offer_a" if username == trade["player_a"] else "offer_b"
     my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
     if trade[my_confirmed_key]:
-        socketio_emit(
-            "trade_error", {"message": "Unconfirm your offer first to make changes."}
+        await sio.emit(
+            "trade_error",
+            {"message": "Unconfirm your offer first to make changes."},
+            to=sid,
         )
         return
     if len(trade[my_offer_key]["items"]) >= TRADE_MAX_ITEMS:
-        socketio_emit(
-            "trade_error", {"message": f"Maximum {TRADE_MAX_ITEMS} items per trade."}
+        await sio.emit(
+            "trade_error",
+            {"message": f"Maximum {TRADE_MAX_ITEMS} items per trade."},
+            to=sid,
         )
         return
-    player = session.get("player")
+    player = _username_player.get(username)
     if not player:
-        socketio_emit("trade_error", {"message": "No active character."})
+        await sio.emit("trade_error", {"message": "No active character."}, to=sid)
         return
     inventory = list(player.get("inventory", []))
     already_offered = list(trade[my_offer_key]["items"])
@@ -600,16 +656,18 @@ def _on_trade_add_item(data):
         if offered in inventory:
             inventory.remove(offered)
     if item_name not in inventory:
-        socketio_emit("trade_error", {"message": f"You don't have '{item_name}'."})
+        await sio.emit(
+            "trade_error", {"message": f"You don't have '{item_name}'."}, to=sid
+        )
         return
     trade[my_offer_key]["items"].append(item_name)
     trade["last_activity"] = _time_module.time()
-    _emit_trade_update(trade)
+    await _emit_trade_update(trade)
 
 
-@socketio.on("trade_remove_item")
-def _on_trade_remove_item(data):
-    username = session.get("online_username")
+@sio.on("trade_remove_item")
+async def _on_trade_remove_item(sid, data):
+    username = _chat_online.get(sid)
     if not username:
         return
     trade_id = str(data.get("trade_id", ""))
@@ -620,20 +678,22 @@ def _on_trade_remove_item(data):
     my_offer_key = "offer_a" if username == trade["player_a"] else "offer_b"
     my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
     if trade[my_confirmed_key]:
-        socketio_emit(
-            "trade_error", {"message": "Unconfirm your offer first to make changes."}
+        await sio.emit(
+            "trade_error",
+            {"message": "Unconfirm your offer first to make changes."},
+            to=sid,
         )
         return
     items = trade[my_offer_key]["items"]
     if item_name in items:
         items.remove(item_name)
     trade["last_activity"] = _time_module.time()
-    _emit_trade_update(trade)
+    await _emit_trade_update(trade)
 
 
-@socketio.on("trade_set_gold")
-def _on_trade_set_gold(data):
-    username = session.get("online_username")
+@sio.on("trade_set_gold")
+async def _on_trade_set_gold(sid, data):
+    username = _chat_online.get(sid)
     if not username:
         return
     trade_id = str(data.get("trade_id", ""))
@@ -647,24 +707,25 @@ def _on_trade_set_gold(data):
     my_offer_key = "offer_a" if username == trade["player_a"] else "offer_b"
     my_confirmed_key = "confirmed_a" if username == trade["player_a"] else "confirmed_b"
     if trade[my_confirmed_key]:
-        socketio_emit(
-            "trade_error", {"message": "Unconfirm your offer first to make changes."}
+        await sio.emit(
+            "trade_error",
+            {"message": "Unconfirm your offer first to make changes."},
+            to=sid,
         )
         return
-    player = session.get("player")
+    player = _username_player.get(username)
     if not player:
         return
-    already_offered_items = trade[my_offer_key]["items"]
     if amount > player.get("gold", 0):
         amount = player.get("gold", 0)
     trade[my_offer_key]["gold"] = amount
     trade["last_activity"] = _time_module.time()
-    _emit_trade_update(trade)
+    await _emit_trade_update(trade)
 
 
-@socketio.on("trade_confirm")
-def _on_trade_confirm(data):
-    username = session.get("online_username")
+@sio.on("trade_confirm")
+async def _on_trade_confirm(sid, data):
+    username = _chat_online.get(sid)
     if not username:
         return
     trade_id = str(data.get("trade_id", ""))
@@ -680,7 +741,7 @@ def _on_trade_confirm(data):
         a_sids = [s for s, u in _chat_online.items() if u == trade["player_a"]]
         b_sids = [s for s, u in _chat_online.items() if u == trade["player_b"]]
         for s in a_sids:
-            socketio.emit(
+            await sio.emit(
                 "trade_approved",
                 {
                     "trade_id": trade_id,
@@ -692,7 +753,7 @@ def _on_trade_confirm(data):
                 to=s,
             )
         for s in b_sids:
-            socketio.emit(
+            await sio.emit(
                 "trade_approved",
                 {
                     "trade_id": trade_id,
@@ -704,12 +765,12 @@ def _on_trade_confirm(data):
                 to=s,
             )
     else:
-        _emit_trade_update(trade)
+        await _emit_trade_update(trade)
 
 
-@socketio.on("trade_cancel")
-def _on_trade_cancel(data):
-    username = session.get("online_username")
+@sio.on("trade_cancel")
+async def _on_trade_cancel(sid, data):
+    username = _chat_online.get(sid)
     if not username:
         return
     trade_id = str(data.get("trade_id", ""))
@@ -719,17 +780,17 @@ def _on_trade_cancel(data):
     other = trade["player_b"] if username == trade["player_a"] else trade["player_a"]
     other_sids = [s for s, u in _chat_online.items() if u == other]
     for s in other_sids:
-        socketio.emit(
+        await sio.emit(
             "trade_cancelled", {"message": f"{username} cancelled the trade."}, to=s
         )
-    socketio_emit("trade_cancelled", {"message": "You cancelled the trade."})
+    await sio.emit("trade_cancelled", {"message": "You cancelled the trade."}, to=sid)
     _active_trades.pop(trade_id, None)
 
 
 # ─── Background World Tick ─────────────────────────────────────────────────────
 
 
-def _expire_stale_trades():
+async def _expire_stale_trades():
     """Cancel trades that have been inactive beyond TRADE_TIMEOUT_SECS."""
     now = _time_module.time()
     for tid, trade in list(_active_trades.items()):
@@ -740,7 +801,7 @@ def _expire_stale_trades():
             for p in (trade["player_a"], trade["player_b"]):
                 for s, u in list(_chat_online.items()):
                     if u == p:
-                        socketio.emit(
+                        await sio.emit(
                             "trade_cancelled",
                             {
                                 "message": "Trade expired due to inactivity (5 min timeout)."
@@ -878,26 +939,32 @@ def _prune_area_presence() -> None:
         _area_presence.pop(u, None)
 
 
-def _world_tick():
-    """Background greenlet: fires every 30 s for housekeeping tasks.
+async def _world_tick():
+    """Background asyncio task: fires every 30 s for housekeeping.
 
     Uses a Supabase-backed distributed lock so that only one worker runs the
-    tick when Gunicorn is scaled beyond a single worker.  The lock TTL is 90 s
+    tick when uvicorn is scaled beyond a single worker.  The lock TTL is 90 s
     (3× the tick interval), so a crashed worker's lease expires automatically
     and another worker takes over within one tick period.
     """
     while True:
-        socketio.sleep(30)
+        await _asyncio.sleep(30)
 
         # Distributed lock — skip this tick if another worker holds the lease.
         try:
-            if not try_acquire_or_renew_world_tick_lock(_WORLD_TICK_WORKER_ID, ttl_seconds=90):
+            acquired = await _asyncio.get_event_loop().run_in_executor(
+                None,
+                try_acquire_or_renew_world_tick_lock,
+                _WORLD_TICK_WORKER_ID,
+                90,
+            )
+            if not acquired:
                 continue
         except Exception:
             pass  # Lock system unavailable — proceed anyway (safe degradation).
 
         try:
-            _expire_stale_trades()
+            await _expire_stale_trades()
         except Exception:
             pass
         try:
@@ -908,14 +975,6 @@ def _world_tick():
             _prune_area_presence()
         except Exception:
             pass
-
-
-@app.before_request
-def _ensure_background_tasks():
-    global _bg_started
-    if not _bg_started:
-        _bg_started = True
-        socketio.start_background_task(_world_tick)
 
 
 @app.errorhandler(429)
@@ -1188,6 +1247,9 @@ def _autosave() -> None:
     state = _build_game_state()
     if not state:
         return
+    username = session.get("online_username")
+    if username:
+        _username_player[username] = state.get("player", {})
     try:
         character_autosave(user_id, state)
     except Exception:
@@ -1238,7 +1300,7 @@ def _group_contribute(xp_gained: int, gold_gained: int, action: str) -> None:
             }
             for member in members:
                 for sid in [s for s, u in _chat_online.items() if u == member]:
-                    socketio.emit("group_level_up", payload, to=sid)
+                    _emit_sync("group_level_up", payload, to=sid)
     except Exception:
         pass
 
@@ -6558,9 +6620,9 @@ def api_friend_request():
         target_sids = [sid for sid, u in _chat_online.items() if u == target]
         for sid in target_sids:
             if result.get("accepted"):
-                socketio.emit("friend_accepted", {"from": username}, to=sid)
+                _emit_sync("friend_accepted", {"from": username}, to=sid)
             else:
-                socketio.emit("friend_request", {"from": username}, to=sid)
+                _emit_sync("friend_request", {"from": username}, to=sid)
     return jsonify(result)
 
 
@@ -6577,7 +6639,7 @@ def api_friend_respond():
         friend = result.get("friend", "")
         target_sids = [sid for sid, u in _chat_online.items() if u == friend]
         for sid in target_sids:
-            socketio.emit("friend_accepted", {"from": username}, to=sid)
+            _emit_sync("friend_accepted", {"from": username}, to=sid)
     return jsonify(result)
 
 
@@ -6640,7 +6702,7 @@ def api_dm_send():
         }
         target_sids = [sid for sid, u in _chat_online.items() if u == recipient]
         for sid in target_sids:
-            socketio.emit("dm_message", payload, to=sid)
+            _emit_sync("dm_message", payload, to=sid)
     return jsonify(result)
 
 
@@ -6836,39 +6898,44 @@ GROUP_CHAT_COOLDOWN = 5
 _group_chat_cooldowns: dict = {}
 
 
-@socketio.on("group_chat_send")
-def on_group_chat_send(data):
-    username = session.get("online_username")
+@sio.on("group_chat_send")
+async def on_group_chat_send(sid, data):
+    username = _chat_online.get(sid)
     if not username:
-        socketio_emit("group_chat_error", {"message": "Not logged in."})
+        await sio.emit("group_chat_error", {"message": "Not logged in."}, to=sid)
         return
     message = (data.get("message") or "").strip()
     if not message:
         return
     if len(message) > 200:
-        socketio_emit(
-            "group_chat_error", {"message": "Message too long (max 200 chars)."}
+        await sio.emit(
+            "group_chat_error",
+            {"message": "Message too long (max 200 chars)."},
+            to=sid,
         )
         return
     now = _time_module.time()
     if now - _group_chat_cooldowns.get(username, 0) < GROUP_CHAT_COOLDOWN:
-        socketio_emit(
+        await sio.emit(
             "group_chat_error",
             {"message": f"Wait {GROUP_CHAT_COOLDOWN}s between messages."},
+            to=sid,
         )
         return
     _group_chat_cooldowns[username] = now
     message = censor_text(message)
-    group_result = get_user_group(username)
+    group_result = await _asyncio.get_event_loop().run_in_executor(
+        None, get_user_group, username
+    )
     if not group_result.get("ok") or not group_result.get("group"):
-        socketio_emit("group_chat_error", {"message": "You are not in a group."})
+        await sio.emit("group_chat_error", {"message": "You are not in a group."}, to=sid)
         return
     group = group_result["group"]
     members = [m["username"] for m in group.get("members", [])]
     payload = {"username": username, "message": message, "ts": int(now)}
     for member in members:
-        for sid in [s for s, u in _chat_online.items() if u == member]:
-            socketio.emit("group_chat_message", payload, to=sid)
+        for s in [s for s, u in _chat_online.items() if u == member]:
+            await sio.emit("group_chat_message", payload, to=s)
 
 
 @app.route("/groups")
@@ -7323,13 +7390,24 @@ def api_admin_remove_admin():
     return jsonify({"ok": True, "message": f"{target} has been removed from admins."})
 
 
+from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi
+
+
+async def _on_startup():
+    global _asyncio_loop, _bg_started
+    _asyncio_loop = _asyncio.get_running_loop()
+    if not _bg_started:
+        _bg_started = True
+        _asyncio.create_task(_world_tick())
+
+
+asgi_app = _socketio_module.ASGIApp(
+    sio,
+    other_asgi_app=_WsgiToAsgi(app),
+    on_startup=_on_startup,
+)
+
 port = int(os.environ.get("PORT", 5000))
 if __name__ == "__main__":
-    # When running directly (not under Gunicorn), apply gevent's monkey patching
-    # so that networking and timers are cooperative.
-    try:
-        from gevent import monkey as _monkey
-        _monkey.patch_all()
-    except Exception:
-        pass
-    socketio.run(app, host="0.0.0.0", port=port, debug=False)
+    import uvicorn
+    uvicorn.run(asgi_app, host="0.0.0.0", port=port)
