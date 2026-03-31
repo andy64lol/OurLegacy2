@@ -3516,15 +3516,15 @@
 
     /* ── Wizard Data ── */
     const WIZ_BACKGROUNDS = {
-        soldier: {label: 'Soldier', desc: '+5 ATK · +5 DEF', lore: 'You served in the king\'s army, your body honed by years of drill.'},
-        scholar: {label: 'Scholar', desc: '+8 MP · +2 Spell Power', lore: 'Books were your weapons. Knowledge, your shield.'},
-        street_rat: {label: 'Street Rat', desc: '+3 SPD · +30 Gold', lore: 'You grew up in the alleys, quick fingers and quicker feet.'},
+        soldier: {label: 'Soldier', desc: '+5 ATK · +5 DEF', lore: 'You served in the king\'s army, your body honed by years of drill.', fomo: '&#128293; Most Popular', fomoClass: 'fomo-hot'},
+        scholar: {label: 'Scholar', desc: '+8 MP · +2 Spell Power', lore: 'Books were your weapons. Knowledge, your shield.', fomo: '&#9733; Top Pick', fomoClass: 'fomo-top'},
+        street_rat: {label: 'Street Rat', desc: '+3 SPD · +30 Gold', lore: 'You grew up in the alleys, quick fingers and quicker feet.', fomo: '&#128293; Trending', fomoClass: 'fomo-hot'},
         farmer: {label: 'Farmer', desc: '+20 HP · +2 DEF', lore: 'Hard soil and harder days made your body sturdy.'},
-        noble: {label: 'Noble', desc: '+60 Gold · 5% Discount', lore: 'Silver spoons and silk curtains — and a will to prove yourself.'},
-        wanderer: {label: 'Wanderer', desc: '+2 SPD · +10% EXP', lore: 'The road is your home. Every mile a lesson.'},
+        noble: {label: 'Noble', desc: '+60 Gold · 5% Discount', lore: 'Silver spoons and silk curtains — and a will to prove yourself.', fomo: '&#9733; Fan Favourite', fomoClass: 'fomo-top'},
+        wanderer: {label: 'Wanderer', desc: '+2 SPD · +10% EXP', lore: 'The road is your home. Every mile a lesson.', fomo: '&#128293; Hot Right Now', fomoClass: 'fomo-hot'},
         herbalist: {label: 'Herbalist', desc: '+12 HP · +5 MP', lore: 'You know which leaves heal and which ones kill.'},
         sailor: {label: 'Sailor', desc: '+3 ATK · +3 SPD', lore: 'Salt air and storm waves forged your reflexes.'},
-        mercenary: {label: 'Mercenary', desc: '+7 ATK', lore: 'You sold your sword to whoever paid most — and survived.'},
+        mercenary: {label: 'Mercenary', desc: '+7 ATK', lore: 'You sold your sword to whoever paid most — and survived.', fomo: '&#9733; Rising Fast', fomoClass: 'fomo-top'},
         acolyte: {label: 'Acolyte', desc: '+10 MP · +1 Spell Power', lore: 'Temple bells and midnight prayers left their mark on your soul.'},
         blacksmith: {label: 'Blacksmith', desc: '+2 ATK · +4 DEF', lore: 'Hammer and anvil shaped both steel and your spirit.'},
     };
@@ -3575,10 +3575,12 @@
         setTimeout(() => {area.style.opacity = '1';}, 80);
     }
 
-    function makeWizCard(group, value, label, sub) {
+    function makeWizCard(group, value, label, sub, fomo, fomoClass) {
+        const fomoTag = fomo ? `<div class="wiz-fomo-badge ${fomoClass || ''}">${fomo}</div>` : '';
         return `<label class="wiz-card" id="wcard-${group}-${value.replace(/[^a-z0-9]/g, '_')}">
         <input type="radio" name="wiz-${group}" value="${value}" onchange="wizCardChanged('${group}','${value}')">
         <div class="wiz-card-inner">
+            ${fomoTag}
             <div class="wiz-card-label">${label}</div>
             <div class="wiz-card-sub">${sub}</div>
         </div>
@@ -3683,8 +3685,10 @@
 
         } else if (step === 'background') {
             typeText('Hmm... what about your background? What have you done before all this?', () => {
-                const cards = Object.entries(WIZ_BACKGROUNDS).map(([k, v]) => makeWizCard('bg', k, v.label, v.desc)).join('');
+                const cards = Object.entries(WIZ_BACKGROUNDS).map(([k, v]) => makeWizCard('bg', k, v.label, v.desc, v.fomo, v.fomoClass)).join('');
+                const fomoCount = Math.floor(Math.random() * 400) + 800;
                 showArea(`
+                <div class="wiz-fomo-bar">&#128101; <strong>${fomoCount.toLocaleString()} adventurers</strong> began their journey in the last hour &mdash; don't miss out!</div>
                 <div class="wiz-grid-3">${cards}</div>
                 <div class="wiz-lore" id="wiz-lore-bg"></div>
                 <button class="btn btn-primary wiz-continue-btn" onclick="wizSelectBg()">Continue</button>`);

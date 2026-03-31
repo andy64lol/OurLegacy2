@@ -620,6 +620,43 @@ body.ol2-bg-4 .welcome-screen { background: linear-gradient(to bottom,rgba(28,24
 
 .wiz-continue-btn { margin-top: 14px; }
 
+.wiz-fomo-bar {
+    font-size: 12px;
+    color: var(--gold);
+    background: rgba(255,180,0,0.1);
+    border: 1px solid rgba(255,180,0,0.3);
+    border-radius: 6px;
+    padding: 7px 12px;
+    margin-bottom: 10px;
+    text-align: center;
+    animation: fomo-pulse 2.5s ease-in-out infinite;
+}
+.wiz-fomo-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    padding: 2px 5px;
+    margin-bottom: 4px;
+    display: inline-block;
+    line-height: 1.4;
+}
+.fomo-hot {
+    background: rgba(255,80,30,0.2);
+    color: #ff7043;
+    border: 1px solid rgba(255,80,30,0.35);
+}
+.fomo-top {
+    background: rgba(255,200,0,0.18);
+    color: var(--gold);
+    border: 1px solid rgba(255,200,0,0.35);
+}
+@keyframes fomo-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.72; }
+}
+
 .wiz-lore {
     min-height: 22px;
     font-size: 13px;
