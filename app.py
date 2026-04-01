@@ -1211,8 +1211,16 @@ def _is_session_valid() -> bool:
     token = session.get("session_token")
     if not token:
         return False
-    if _active_sessions.get(user_id) != token:
+    # If there IS an entry for this user but with a DIFFERENT token → legitimate kick
+    # (another device logged in and took over the session).
+    if user_id in _active_sessions and _active_sessions[user_id] != token:
         return False
+    # If there is NO entry at all → server was restarted and the in-memory dict was wiped.
+    # Auto-restore the session from the signed cookie so the user is not kicked.
+    if user_id not in _active_sessions:
+        _active_sessions[user_id] = token
+        _session_last_activity[user_id] = _time_module.time()
+        return True
     # Inactivity timeout check
     now = _time_module.time()
     last = _session_last_activity.get(user_id, 0)
