@@ -197,6 +197,39 @@
             border-top: 1px solid var(--border);
             letter-spacing: 0.04em;
         }
+
+        /* Owner command hint bar */
+        #owner-hint-bar {
+            display: none;
+            font-size: 10px;
+            color: var(--gold-dim);
+            padding: 3px 16px;
+            background: rgba(60,40,0,0.4);
+            border-top: 1px solid var(--gold-dim);
+            letter-spacing: 0.04em;
+        }
+
+        .owner-badge {
+            display: inline-block;
+            font-size: 9px;
+            background: rgba(60,40,0,0.6);
+            border: 1px solid var(--gold);
+            color: var(--gold-bright);
+            padding: 0 4px;
+            margin-left: 4px;
+            vertical-align: middle;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .user-pill-owner {
+            background: rgba(80,55,0,0.5);
+            border: 1px solid var(--gold);
+            color: var(--gold-bright);
+        }
+
+        /* Hide nav back links when inside iframe */
+        body.in-iframe #chat-header .back-link { display: none; }
     </style>
 </head>
 <body>
@@ -225,6 +258,9 @@
     <div id="mod-hint-bar">
         &#9876; Mod commands: /mute /unmute /ban /unban /warn /clearwarn /kick /announce &mdash; type /help for full list
     </div>
+    <div id="owner-hint-bar">
+        &#9733; Owner commands: /addmod /removemod /setowner /clearall /listbans /listmutes &mdash; type /help for full list
+    </div>
 
     <div id="chat-input-bar" style="position:relative;">
         <div id="glyph-picker-page">
@@ -250,7 +286,9 @@
 (function() {
     var CURRENT_USER = {{ online_username | tojson }};
     var IS_MOD = false;
+    var IS_OWNER = false;
     var MOD_LIST = [];
+    var OWNER_NAME = '';
     var socket = null;
     var cooldownTimer = null;
 
@@ -260,6 +298,23 @@
         socket.on('connect', function() {
             var l = document.getElementById('chat-loading-page');
             if (l) l.remove();
+        });
+
+        socket.on('user_flags', function(flags) {
+            IS_MOD = !!flags.is_mod;
+            IS_OWNER = !!flags.is_owner;
+            var ownerBar = document.getElementById('owner-hint-bar');
+            if (ownerBar) ownerBar.style.display = IS_OWNER ? 'block' : 'none';
+        });
+
+        socket.on('owner_name', function(name) {
+            OWNER_NAME = (name || '').toLowerCase();
+            renderOnlineBar(_lastOnlineUsers);
+        });
+
+        socket.on('chat_cleared', function() {
+            var box = document.getElementById('chat-messages-page');
+            if (box) box.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--text-dim);padding:30px 0;">Chat has been cleared.</div>';
         });
 
         socket.on('mod_list', function(mods) {
@@ -309,12 +364,16 @@
         if (!innerEl) return;
         innerEl.innerHTML = users.map(function(u) {
             var isMe = (u === CURRENT_USER);
-            var isMod = MOD_LIST.indexOf(u.toLowerCase()) !== -1;
-            var badge = isMod ? '<span style="font-size:9px;vertical-align:middle;margin-left:2px;">&#9876;</span>' : '';
+            var isOwner = OWNER_NAME && u.toLowerCase() === OWNER_NAME;
+            var isMod = !isOwner && MOD_LIST.indexOf(u.toLowerCase()) !== -1;
+            var badge = isOwner
+                ? '<span style="font-size:9px;vertical-align:middle;margin-left:2px;">&#9733;</span>'
+                : (isMod ? '<span style="font-size:9px;vertical-align:middle;margin-left:2px;">&#9876;</span>' : '');
+            var pillClass = 'user-pill' + (isOwner ? ' user-pill-owner' : (isMod ? ' user-pill-mod' : (isMe ? ' user-pill-me' : '')));
             if (isMe) {
-                return '<span class="user-pill ' + (isMod ? 'user-pill-mod' : 'user-pill-me') + '">' + escHtml(u) + badge + ' (you)</span>';
+                return '<span class="' + pillClass + '">' + escHtml(u) + badge + ' (you)</span>';
             }
-            return '<a href="/friends?dm=' + encodeURIComponent(u) + '" title="Message ' + escHtml(u) + '" class="user-pill' + (isMod ? ' user-pill-mod' : '') + '">' + escHtml(u) + badge + '</a>';
+            return '<a href="/friends?dm=' + encodeURIComponent(u) + '" title="Message ' + escHtml(u) + '" class="' + pillClass + '">' + escHtml(u) + badge + '</a>';
         }).join('');
     }
 
@@ -335,7 +394,8 @@
         }
 
         var isMe = (msg.username === CURRENT_USER);
-        var isMod = msg.is_mod || MOD_LIST.indexOf((msg.username || '').toLowerCase()) !== -1;
+        var isOwnerMsg = OWNER_NAME && (msg.username || '').toLowerCase() === OWNER_NAME;
+        var isMod = !isOwnerMsg && (msg.is_mod || MOD_LIST.indexOf((msg.username || '').toLowerCase()) !== -1);
         var isEmote = msg.is_emote;
 
         var div = document.createElement('div');
@@ -354,15 +414,17 @@
                 '<div style="font-size:12px;color:var(--text-dim);font-style:italic;padding:2px 0;">' +
                 escHtml(msg.message) + '</div>';
         } else {
-            var bubbleBg = isMe ? 'var(--wood-dark)' : (isMod ? 'rgba(80,55,10,0.4)' : 'var(--bg-panel)');
-            var bubbleBorder = isMe ? 'var(--wood-bright)' : (isMod ? 'var(--gold-dim)' : 'var(--border)');
-            var nameColor = isMe ? 'var(--gold-bright)' : (isMod ? 'var(--gold)' : 'var(--gold)');
-            var modBadgeHtml = isMod ? '<span class="mod-badge">&#9876; MOD</span>' : '';
+            var bubbleBg = isMe ? 'var(--wood-dark)' : (isOwnerMsg ? 'rgba(60,40,0,0.5)' : (isMod ? 'rgba(80,55,10,0.4)' : 'var(--bg-panel)'));
+            var bubbleBorder = isMe ? 'var(--wood-bright)' : (isOwnerMsg ? 'var(--gold)' : (isMod ? 'var(--gold-dim)' : 'var(--border)'));
+            var nameColor = isMe ? 'var(--gold-bright)' : 'var(--gold)';
+            var roleBadgeHtml = isOwnerMsg
+                ? '<span class="owner-badge">&#9733; OWNER</span>'
+                : (isMod ? '<span class="mod-badge">&#9876; MOD</span>' : '');
             div.innerHTML =
                 '<div style="max-width:560px;padding:6px 12px;background:' + bubbleBg +
                 ';border:1px solid ' + bubbleBorder + ';word-break:break-word;">' +
                 '<span style="font-size:11px;font-weight:700;color:' + nameColor + ';text-transform:uppercase;letter-spacing:0.05em;">' +
-                escHtml(msg.username) + '</span>' + modBadgeHtml +
+                escHtml(msg.username) + '</span>' + roleBadgeHtml +
                 '<div style="font-size:13px;color:var(--text-light);margin-top:2px;">' + renderMsg(msg.message) + '</div>' +
                 (time ? '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;text-align:right;">' + time + '</div>' : '') +
                 '</div>';
@@ -485,6 +547,9 @@
     };
 
     document.addEventListener('DOMContentLoaded', function() {
+        if (window.self !== window.top) {
+            document.body.classList.add('in-iframe');
+        }
         initChat();
         var inp = document.getElementById('chat-input-page');
         if (inp) inp.focus();

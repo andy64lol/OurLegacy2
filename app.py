@@ -85,6 +85,7 @@ from utilities.supabase_db import (
     get_cloud_save_meta,
     send_chat_message,
     get_chat_history,
+    clear_chat_history,
     censor_text,
     contains_profanity,
     send_friend_request,
@@ -339,6 +340,7 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
             lines.append("Mod: /announce <text>")
         if is_owner:
             lines.append("Owner: /addmod <user>  /removemod <user>")
+            lines.append("Owner: /setowner <user>  /clearall  /listbans  /listmutes")
         for line in lines:
             await _broadcast_system(line, to_sid=sid)
         return True
@@ -375,7 +377,8 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
 
     # ── Mod-only commands ─────────────────────────────────────────
     if cmd in ("/mute", "/unmute", "/ban", "/unban", "/warn", "/clearwarn",
-               "/kick", "/announce", "/addmod", "/removemod"):
+               "/kick", "/announce", "/addmod", "/removemod",
+               "/setowner", "/clearall", "/listbans", "/listmutes"):
         if not is_admin:
             await sio.emit(
                 "chat_error",
@@ -583,6 +586,75 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
                 await sio.emit("chat_error", {"message": f"{target} is not a moderator."}, to=sid)
         return True
 
+    if cmd == "/setowner":
+        if not is_owner:
+            await sio.emit("chat_error", {"message": "Only the owner can transfer ownership."}, to=sid)
+            return True
+        target = parts[1].strip() if len(parts) > 1 else ""
+        if not target:
+            await sio.emit("chat_error", {"message": "Usage: /setowner <username>"}, to=sid)
+            return True
+        with _admins_lock:
+            data = _load_admins()
+            old_owner = data.get("owner", "")
+            data["owner"] = target
+            admins = data.setdefault("admins", [])
+            if old_owner and old_owner.lower() not in [a.lower() for a in admins]:
+                admins.append(old_owner)
+            key = next((a for a in admins if a.lower() == target.lower()), None)
+            if key:
+                admins.remove(key)
+            _save_admins(data)
+        mods = _get_all_mods()
+        await sio.emit("mod_list", [m.lower() for m in mods])
+        await sio.emit("owner_name", target.lower())
+        await _broadcast_system(f"\u2605 {target} is now the server owner.", to_sid=sid)
+        return True
+
+    if cmd == "/clearall":
+        if not is_owner:
+            await sio.emit("chat_error", {"message": "Only the owner can clear the chat."}, to=sid)
+            return True
+        result = await _asyncio.get_event_loop().run_in_executor(None, clear_chat_history)
+        if result.get("ok"):
+            await sio.emit("chat_cleared", {})
+            await _broadcast_system("\u2605 Chat history has been cleared by the owner.")
+        else:
+            await sio.emit("chat_error", {"message": "Failed to clear chat history."}, to=sid)
+        return True
+
+    if cmd == "/listbans":
+        if not is_owner:
+            await sio.emit("chat_error", {"message": "Only the owner can list bans."}, to=sid)
+            return True
+        data = _load_admins()
+        banned = data.get("banned_users", {})
+        if not banned:
+            await _broadcast_system("No users are currently banned.", to_sid=sid)
+        else:
+            for name, info in banned.items():
+                reason = info.get("reason", "No reason")
+                by = info.get("by", "unknown")
+                await _broadcast_system(f"  Banned: {name} — {reason} (by {by})", to_sid=sid)
+        return True
+
+    if cmd == "/listmutes":
+        if not is_owner:
+            await sio.emit("chat_error", {"message": "Only the owner can list mutes."}, to=sid)
+            return True
+        import time as _tlist
+        data = _load_admins()
+        muted = data.get("muted_users", {})
+        active = {k: v for k, v in muted.items() if v.get("expires_at", 0) > _tlist.time()}
+        if not active:
+            await _broadcast_system("No users are currently muted.", to_sid=sid)
+        else:
+            for name, info in active.items():
+                reason = info.get("reason", "No reason")
+                mins_left = max(0, int((info.get("expires_at", 0) - _tlist.time()) / 60))
+                await _broadcast_system(f"  Muted: {name} — {reason} ({mins_left}m left)", to_sid=sid)
+        return True
+
     # Unknown command
     await sio.emit(
         "chat_error",
@@ -714,6 +786,12 @@ async def _on_chat_connect(sid, environ, auth=None):
     await sio.emit("online_users", sorted(set(_chat_online.values())))
     mods = _get_all_mods()
     await sio.emit("mod_list", [m.lower() for m in mods], to=sid)
+    owner_name = _load_admins().get("owner", "")
+    await sio.emit("owner_name", owner_name.lower(), to=sid)
+    await sio.emit("user_flags", {
+        "is_mod": _is_admin_user(username),
+        "is_owner": _is_owner(username),
+    }, to=sid)
     history = await _asyncio.get_event_loop().run_in_executor(None, get_chat_history, 60)
     await sio.emit("chat_history", history, to=sid)
 

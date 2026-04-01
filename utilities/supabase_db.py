@@ -561,6 +561,19 @@ def get_chat_history(limit: int = 60) -> List[Dict[str, Any]]:
         return []
 
 
+def clear_chat_history() -> Dict[str, Any]:
+    """Delete all messages from the global chat. Owner-only action."""
+    def _do():
+        client = _get_client()
+        client.table("ol2_chat").delete().gte("created_at", "1970-01-01T00:00:00").execute()
+        return {"ok": True}
+
+    try:
+        return _run(_do)
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 # ─── Persistent Character (Phase 1 MMO) ───────────────────────────────────────
 
 def character_autosave(user_id: str, game_state: Dict[str, Any]) -> Dict[str, Any]:
