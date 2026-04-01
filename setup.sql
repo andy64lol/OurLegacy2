@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS ol2_dms (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_dms_recipient_idx   ON ol2_dms (recipient, read);
+CREATE INDEX IF NOT EXISTS ol2_dms_recipient_idx    ON ol2_dms (recipient, read);
 CREATE INDEX IF NOT EXISTS ol2_dms_conversation_idx ON ol2_dms (sender, recipient, created_at);
 
 -- ── Friends ───────────────────────────────────────────────────
@@ -137,8 +137,8 @@ CREATE TABLE IF NOT EXISTS ol2_group_members (
     UNIQUE (group_id, username)
 );
 
-CREATE INDEX IF NOT EXISTS ol2_group_members_group_id_idx  ON ol2_group_members (group_id);
-CREATE INDEX IF NOT EXISTS ol2_group_members_username_idx  ON ol2_group_members (username);
+CREATE INDEX IF NOT EXISTS ol2_group_members_group_id_idx ON ol2_group_members (group_id);
+CREATE INDEX IF NOT EXISTS ol2_group_members_username_idx ON ol2_group_members (username);
 
 CREATE TABLE IF NOT EXISTS ol2_group_log (
     id           BIGSERIAL PRIMARY KEY,
@@ -152,35 +152,101 @@ CREATE TABLE IF NOT EXISTS ol2_group_log (
 
 CREATE INDEX IF NOT EXISTS ol2_group_log_group_id_idx ON ol2_group_log (group_id, created_at DESC);
 
--- ── Leaderboard (optional cached view) ────────────────────────
--- The app queries ol2_characters for the leaderboard; no extra
--- table is required.  Add a partial index for fast sorting:
+-- ── Leaderboard index ─────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS ol2_characters_level_idx
     ON ol2_characters (level DESC, player_name);
 
 -- ── Distributed world-tick lock ───────────────────────────────
--- Required when running more than one Gunicorn worker.
--- Whichever worker acquires the row runs the server tick;
--- others skip until the lease expires (90 s).
 CREATE TABLE IF NOT EXISTS ol2_tick_lock (
     lock_name  TEXT PRIMARY KEY,
     worker_id  TEXT NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL
 );
 
--- ── Row-level security (recommended for Supabase) ─────────────
--- Supabase enables RLS by default.  The app uses the service-role
--- key which bypasses RLS, so no policies are strictly required.
--- Uncomment below if you want to lock tables down to the service key only:
+
+-- =============================================================
+-- ROW LEVEL SECURITY
+-- The Flask backend connects with the service-role key, which
+-- automatically bypasses all RLS policies.  RLS is enabled here
+-- to prevent any anon/authenticated role from accessing the data
+-- directly (e.g. via the Supabase JS client with an anon key).
+-- =============================================================
+
+-- ── Enable RLS on every table ─────────────────────────────────
+ALTER TABLE ol2_users         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_saves         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_characters    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_chat          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_dms           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_friends       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_blocks        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_groups        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_group_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_group_log     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_tick_lock     ENABLE ROW LEVEL SECURITY;
+
+-- ── Policies ──────────────────────────────────────────────────
+-- The Flask backend uses the service-role key which bypasses RLS
+-- automatically, so these policies apply only to anon/authenticated
+-- role access (e.g. direct Supabase JS client calls).
 --
--- ALTER TABLE ol2_users       ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE ol2_saves       ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE ol2_characters  ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE ol2_chat        ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE ol2_dms         ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE ol2_friends     ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE ol2_blocks      ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE ol2_groups      ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE ol2_group_members ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE ol2_group_log   ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE ol2_tick_lock   ENABLE ROW LEVEL SECURITY;
+-- Strategy: deny all anon access, no authenticated-role policies
+-- (authenticated users have no access by default when RLS is on
+-- and no matching policy exists).
+--
+-- Use DROP ... IF EXISTS before CREATE so this script is re-runnable.
+
+-- ol2_users
+DROP POLICY IF EXISTS "ol2_users: deny anon" ON ol2_users;
+CREATE POLICY "ol2_users: deny anon"
+    ON ol2_users FOR ALL TO anon USING (false);
+
+-- ol2_saves
+DROP POLICY IF EXISTS "ol2_saves: deny anon" ON ol2_saves;
+CREATE POLICY "ol2_saves: deny anon"
+    ON ol2_saves FOR ALL TO anon USING (false);
+
+-- ol2_characters
+DROP POLICY IF EXISTS "ol2_characters: deny anon" ON ol2_characters;
+CREATE POLICY "ol2_characters: deny anon"
+    ON ol2_characters FOR ALL TO anon USING (false);
+
+-- ol2_chat
+DROP POLICY IF EXISTS "ol2_chat: deny anon" ON ol2_chat;
+CREATE POLICY "ol2_chat: deny anon"
+    ON ol2_chat FOR ALL TO anon USING (false);
+
+-- ol2_dms
+DROP POLICY IF EXISTS "ol2_dms: deny anon" ON ol2_dms;
+CREATE POLICY "ol2_dms: deny anon"
+    ON ol2_dms FOR ALL TO anon USING (false);
+
+-- ol2_friends
+DROP POLICY IF EXISTS "ol2_friends: deny anon" ON ol2_friends;
+CREATE POLICY "ol2_friends: deny anon"
+    ON ol2_friends FOR ALL TO anon USING (false);
+
+-- ol2_blocks
+DROP POLICY IF EXISTS "ol2_blocks: deny anon" ON ol2_blocks;
+CREATE POLICY "ol2_blocks: deny anon"
+    ON ol2_blocks FOR ALL TO anon USING (false);
+
+-- ol2_groups
+DROP POLICY IF EXISTS "ol2_groups: deny anon" ON ol2_groups;
+CREATE POLICY "ol2_groups: deny anon"
+    ON ol2_groups FOR ALL TO anon USING (false);
+
+-- ol2_group_members
+DROP POLICY IF EXISTS "ol2_group_members: deny anon" ON ol2_group_members;
+CREATE POLICY "ol2_group_members: deny anon"
+    ON ol2_group_members FOR ALL TO anon USING (false);
+
+-- ol2_group_log
+DROP POLICY IF EXISTS "ol2_group_log: deny anon" ON ol2_group_log;
+CREATE POLICY "ol2_group_log: deny anon"
+    ON ol2_group_log FOR ALL TO anon USING (false);
+
+-- ol2_tick_lock
+DROP POLICY IF EXISTS "ol2_tick_lock: deny anon" ON ol2_tick_lock;
+CREATE POLICY "ol2_tick_lock: deny anon"
+    ON ol2_tick_lock FOR ALL TO anon USING (false);

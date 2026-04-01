@@ -163,12 +163,6 @@
         <button class="widget-fab" id="groups-widget-fab" onclick="openGroupsOverlay()" title="Adventure Group">&#9876;
             <span id="groups-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--bg-main);width:14px;height:14px;font-size:9px;line-height:14px;text-align:center;font-weight:700;"></span>
         </button>
-
-        <!-- Chat FAB -->
-        <button class="widget-fab" id="chat-toggle-btn" onclick="toggleChat()" title="Global Chat">
-            <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
-            <span id="chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;width:15px;height:15px;font-size:9px;line-height:15px;text-align:center;font-weight:700;"></span>
-        </button>
     </div>
 
     <!-- Trade Panel Modal -->
@@ -602,5 +596,42 @@
     })();
     </script>
     {% endif %}
+
+    <!-- Chat FAB — always visible, works for all users -->
+    <style>
+        #chat-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 8100;
+            width: 50px;
+            height: 50px;
+            background: var(--wood-dark, #3a2510);
+            border: 2px solid var(--wood-bright, #c8843c);
+            color: var(--gold, #d4a843);
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+        }
+        #chat-toggle-btn:hover {
+            background: var(--wood-mid, #5a3a18);
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.65);
+        }
+        #chat-toggle-btn.chat-open {
+            background: var(--wood-bright, #c8843c);
+            box-shadow: 0 0 0 3px rgba(200,150,60,0.35), 0 4px 16px rgba(0,0,0,0.55);
+        }
+    </style>
+    <button id="chat-toggle-btn"
+            onclick="if(typeof toggleChat==='function'){toggleChat();}else{window.location.href='/chat';}"
+            title="Global Chat">
+        <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
+        <span id="chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red,#c0392b);color:#fff;width:15px;height:15px;font-size:9px;line-height:15px;text-align:center;font-weight:700;border-radius:50%;"></span>
+    </button>
 </body>
 </html>
