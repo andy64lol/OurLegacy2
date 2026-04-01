@@ -31,7 +31,6 @@
             border-bottom: 2px solid var(--border);
             flex-shrink: 0;
         }
-
         #chat-header .title {
             display: flex;
             align-items: center;
@@ -42,7 +41,6 @@
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
-
         #chat-header .back-link {
             font-size: 13px;
             color: var(--text-dim);
@@ -156,6 +154,49 @@
             border: 1px solid var(--green);
             color: var(--green-bright);
         }
+        .user-pill-mod {
+            background: rgba(120,90,30,0.3);
+            border: 1px solid var(--gold-dim);
+            color: var(--gold);
+        }
+
+        /* System message style */
+        .msg-system {
+            text-align: center;
+            font-size: 11px;
+            color: var(--gold-dim);
+            padding: 3px 0;
+            letter-spacing: 0.05em;
+            font-style: italic;
+        }
+
+        /* Mod badge */
+        .mod-badge {
+            display: inline-block;
+            font-size: 9px;
+            background: rgba(120,90,20,0.5);
+            border: 1px solid var(--gold-dim);
+            color: var(--gold);
+            padding: 0 4px;
+            margin-left: 4px;
+            vertical-align: middle;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Emote message style */
+        .msg-emote-text { color: var(--text-dim); font-style: italic; }
+
+        /* Mod command hint bar */
+        #mod-hint-bar {
+            display: none;
+            font-size: 10px;
+            color: var(--text-dim);
+            padding: 3px 16px;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid var(--border);
+            letter-spacing: 0.04em;
+        }
     </style>
 </head>
 <body>
@@ -181,6 +222,10 @@
         <div style="text-align:center;font-size:12px;color:var(--text-dim);padding:30px 0;" id="chat-loading-page">Connecting...</div>
     </div>
 
+    <div id="mod-hint-bar">
+        &#9876; Mod commands: /mute /unmute /ban /unban /warn /clearwarn /kick /announce &mdash; type /help for full list
+    </div>
+
     <div id="chat-input-bar" style="position:relative;">
         <div id="glyph-picker-page">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Insert Glyph</div>
@@ -188,7 +233,9 @@
         </div>
         <div class="row">
             <button onclick="toggleGlyphPicker()" title="Insert glyph" class="glyph-btn-page">&#10022;</button>
-            <input id="chat-input-page" type="text" maxlength="200" placeholder="Message the realm... (use :warrior: for glyphs)" autocomplete="off"
+            <input id="chat-input-page" type="text" maxlength="200"
+                placeholder="Message the realm... (/help for commands, :warrior: for glyphs)"
+                autocomplete="off"
                 onkeydown="if(event.key==='Enter')chatSend()">
             <button id="chat-send-page" onclick="chatSend()">Send</button>
         </div>
@@ -202,6 +249,8 @@
 <script>
 (function() {
     var CURRENT_USER = {{ online_username | tojson }};
+    var IS_MOD = false;
+    var MOD_LIST = [];
     var socket = null;
     var cooldownTimer = null;
 
@@ -211,6 +260,14 @@
         socket.on('connect', function() {
             var l = document.getElementById('chat-loading-page');
             if (l) l.remove();
+        });
+
+        socket.on('mod_list', function(mods) {
+            MOD_LIST = mods || [];
+            IS_MOD = CURRENT_USER && MOD_LIST.indexOf(CURRENT_USER.toLowerCase()) !== -1;
+            var bar = document.getElementById('mod-hint-bar');
+            if (bar) bar.style.display = IS_MOD ? 'block' : 'none';
+            renderOnlineBar(_lastOnlineUsers);
         });
 
         socket.on('chat_history', function(msgs) {
@@ -230,35 +287,60 @@
         });
 
         socket.on('online_users', function(users) {
-            var innerEl = document.getElementById('chat-users-inner-page');
-            if (innerEl) {
-                innerEl.innerHTML = users.map(function(u) {
-                    var isMe = (u === CURRENT_USER);
-                    if (isMe) {
-                        return '<span class="user-pill user-pill-me">' + escHtml(u) + ' (you)</span>';
-                    }
-                    return '<a href="/friends?dm=' + encodeURIComponent(u) + '" title="Message or add ' + escHtml(u) + '" class="user-pill">' + escHtml(u) + '</a>';
-                }).join('');
-            }
+            _lastOnlineUsers = users || [];
+            renderOnlineBar(_lastOnlineUsers);
         });
 
         socket.on('chat_error', function(data) {
             var el = document.getElementById('chat-error-page');
             if (!el) return;
             el.textContent = data.message || 'Error.';
-            if (data.message && data.message.indexOf('Wait') !== -1) {
+            if (data.message && data.message.match(/wait \d+s/i)) {
                 startCooldownDisplay(data.message);
             }
-            setTimeout(function() { if (el) el.textContent = ''; }, 4000);
+            setTimeout(function() { if (el) el.textContent = ''; }, 5000);
         });
+    }
+
+    var _lastOnlineUsers = [];
+
+    function renderOnlineBar(users) {
+        var innerEl = document.getElementById('chat-users-inner-page');
+        if (!innerEl) return;
+        innerEl.innerHTML = users.map(function(u) {
+            var isMe = (u === CURRENT_USER);
+            var isMod = MOD_LIST.indexOf(u.toLowerCase()) !== -1;
+            var badge = isMod ? '<span style="font-size:9px;vertical-align:middle;margin-left:2px;">&#9876;</span>' : '';
+            if (isMe) {
+                return '<span class="user-pill ' + (isMod ? 'user-pill-mod' : 'user-pill-me') + '">' + escHtml(u) + badge + ' (you)</span>';
+            }
+            return '<a href="/friends?dm=' + encodeURIComponent(u) + '" title="Message ' + escHtml(u) + '" class="user-pill' + (isMod ? ' user-pill-mod' : '') + '">' + escHtml(u) + badge + '</a>';
+        }).join('');
     }
 
     function appendMessage(msg, animate) {
         var box = document.getElementById('chat-messages-page');
         if (!box) return;
+
+        // System messages
+        if (msg.is_system || msg.username === 'SYSTEM') {
+            var sysDiv = document.createElement('div');
+            sysDiv.className = 'msg-system';
+            sysDiv.textContent = msg.message;
+            if (animate) sysDiv.style.opacity = '0';
+            box.appendChild(sysDiv);
+            box.scrollTop = box.scrollHeight;
+            if (animate) setTimeout(function() { sysDiv.style.transition = 'opacity 0.2s'; sysDiv.style.opacity = '1'; }, 10);
+            return;
+        }
+
         var isMe = (msg.username === CURRENT_USER);
+        var isMod = msg.is_mod || MOD_LIST.indexOf((msg.username || '').toLowerCase()) !== -1;
+        var isEmote = msg.is_emote;
+
         var div = document.createElement('div');
-        div.style.cssText = 'display:flex;flex-direction:column;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
+        div.style.cssText = 'display:flex;flex-direction:column;' + (isEmote ? 'align-items:center;' : isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
+
         var time = '';
         if (msg.created_at) {
             try {
@@ -266,17 +348,26 @@
                 time = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             } catch(e) {}
         }
-        var bubbleBg = isMe ? 'var(--wood-dark)' : 'var(--bg-panel)';
-        var bubbleBorder = isMe ? 'var(--wood-bright)' : 'var(--border)';
-        var nameColor = isMe ? 'var(--gold-bright)' : 'var(--gold)';
-        div.innerHTML =
-            '<div style="max-width:560px;padding:6px 12px;background:' + bubbleBg +
-            ';border:1px solid ' + bubbleBorder + ';word-break:break-word;">' +
-            '<span style="font-size:11px;font-weight:700;color:' + nameColor + ';text-transform:uppercase;letter-spacing:0.05em;">' +
-            escHtml(msg.username) + '</span>' +
-            '<div style="font-size:13px;color:var(--text-light);margin-top:2px;">' + renderMsg(msg.message) + '</div>' +
-            (time ? '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;text-align:right;">' + time + '</div>' : '') +
-            '</div>';
+
+        if (isEmote) {
+            div.innerHTML =
+                '<div style="font-size:12px;color:var(--text-dim);font-style:italic;padding:2px 0;">' +
+                escHtml(msg.message) + '</div>';
+        } else {
+            var bubbleBg = isMe ? 'var(--wood-dark)' : (isMod ? 'rgba(80,55,10,0.4)' : 'var(--bg-panel)');
+            var bubbleBorder = isMe ? 'var(--wood-bright)' : (isMod ? 'var(--gold-dim)' : 'var(--border)');
+            var nameColor = isMe ? 'var(--gold-bright)' : (isMod ? 'var(--gold)' : 'var(--gold)');
+            var modBadgeHtml = isMod ? '<span class="mod-badge">&#9876; MOD</span>' : '';
+            div.innerHTML =
+                '<div style="max-width:560px;padding:6px 12px;background:' + bubbleBg +
+                ';border:1px solid ' + bubbleBorder + ';word-break:break-word;">' +
+                '<span style="font-size:11px;font-weight:700;color:' + nameColor + ';text-transform:uppercase;letter-spacing:0.05em;">' +
+                escHtml(msg.username) + '</span>' + modBadgeHtml +
+                '<div style="font-size:13px;color:var(--text-light);margin-top:2px;">' + renderMsg(msg.message) + '</div>' +
+                (time ? '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;text-align:right;">' + time + '</div>' : '') +
+                '</div>';
+        }
+
         if (animate) div.style.opacity = '0';
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;

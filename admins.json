@@ -2,5 +2,6 @@
   "owner": "ThePrimordialOne",
   "admins": [],
   "banned_users": {},
-  "muted_users": {}
+  "muted_users": {},
+  "warned_users": {}
 }

@@ -179,7 +179,11 @@ def _load_session_for_socket(environ: dict) -> dict:
 
 # Online users: {sid: username}  (in-memory, single worker)
 _chat_online: dict = {}
-_chat_cooldowns: dict = {}  # {username: last_sent_timestamp}
+_chat_cooldowns: dict = {}   # {username: last_sent_timestamp}
+_chat_recent_msgs: dict = {} # {username: [timestamps...]} spam window
+_chat_last_content: dict = {} # {username: last_message_text} repeat guard
+_SPAM_WINDOW_SECS = 12       # rolling window for rate limiting
+_SPAM_MAX_MSGS = 5            # max messages in window before auto-mute
 
 # Single-session enforcement: maps user_id -> session_token
 # Tracks the active session token per user_id for multi-login detection.
@@ -276,6 +280,315 @@ def _is_muted(username: str) -> bool:
                 del fresh["muted_users"][k]
             _save_admins(fresh)
         return False
+    return True
+
+
+def _get_all_mods() -> list:
+    """Return owner + all admins as a list of canonical-case usernames."""
+    data = _load_admins()
+    owner = data.get("owner", "")
+    admins = data.get("admins", [])
+    return [m for m in ([owner] + admins) if m]
+
+
+def _warn_user_in_admins(username: str, reason: str) -> int:
+    """Increment and persist the warn count for a user. Returns new count."""
+    with _admins_lock:
+        data = _load_admins()
+        warned = data.setdefault("warned_users", {})
+        lname = username.lower()
+        entry = warned.get(lname, {"count": 0, "reasons": []})
+        entry["count"] += 1
+        entry["reasons"].append(reason or "No reason given")
+        warned[lname] = entry
+        _save_admins(data)
+        return entry["count"]
+
+
+async def _broadcast_system(message: str, to_sid=None) -> None:
+    """Emit a SYSTEM chat message to everyone or a single SID."""
+    payload = {
+        "username": "SYSTEM",
+        "message": message,
+        "created_at": _time_module.strftime("%Y-%m-%dT%H:%M:%SZ", _time_module.gmtime()),
+        "is_system": True,
+    }
+    if to_sid:
+        await sio.emit("chat_message", payload, to=to_sid)
+    else:
+        await sio.emit("chat_message", payload)
+
+
+async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
+    """Parse and execute a slash command.  Returns True if handled."""
+    if not raw.startswith("/"):
+        return False
+
+    parts = raw.split(None, 2)  # [cmd, target?, rest?]
+    cmd = parts[0].lower()
+    is_admin = _is_admin_user(username)
+    is_owner = _is_owner(username)
+
+    # ── Commands available to everyone ────────────────────────────
+    if cmd == "/help":
+        lines = ["Available commands: /me <action>  /mods  /help"]
+        if is_admin:
+            lines.append("Mod: /mute <user> [mins] [reason]  /unmute <user>")
+            lines.append("Mod: /ban <user> [reason]  /unban <user>")
+            lines.append("Mod: /warn <user> [reason]  /clearwarn <user>  /kick <user>")
+            lines.append("Mod: /announce <text>")
+        if is_owner:
+            lines.append("Owner: /addmod <user>  /removemod <user>")
+        for line in lines:
+            await _broadcast_system(line, to_sid=sid)
+        return True
+
+    if cmd == "/mods":
+        mods = _get_all_mods()
+        owner_name = _load_admins().get("owner", "")
+        mods_str = ", ".join(
+            (f"{m} [Owner]" if m.lower() == owner_name.lower() else f"{m} [Mod]")
+            for m in mods
+        ) or "No moderators listed."
+        await _broadcast_system(f"Moderators: {mods_str}", to_sid=sid)
+        return True
+
+    if cmd == "/me":
+        action = " ".join(parts[1:]) if len(parts) > 1 else ""
+        if not action:
+            await sio.emit("chat_error", {"message": "Usage: /me <action>"}, to=sid)
+            return True
+        emote = f"* {username} {action}"
+        result = await _asyncio.get_event_loop().run_in_executor(
+            None, send_chat_message, username, emote
+        )
+        if result["ok"]:
+            row = result["row"]
+            await sio.emit("chat_message", {
+                "username": username,
+                "message": emote,
+                "created_at": row.get("created_at", ""),
+                "is_mod": is_admin,
+                "is_emote": True,
+            })
+        return True
+
+    # ── Mod-only commands ─────────────────────────────────────────
+    if cmd in ("/mute", "/unmute", "/ban", "/unban", "/warn", "/clearwarn",
+               "/kick", "/announce", "/addmod", "/removemod"):
+        if not is_admin:
+            await sio.emit(
+                "chat_error",
+                {"message": "You do not have permission to use that command."},
+                to=sid,
+            )
+            return True
+
+    if cmd == "/announce":
+        text = " ".join(parts[1:]) if len(parts) > 1 else ""
+        if not text:
+            await sio.emit("chat_error", {"message": "Usage: /announce <text>"}, to=sid)
+            return True
+        await _broadcast_system(f"\u2605 ANNOUNCEMENT: {text}")
+        return True
+
+    # All remaining commands need a target username
+    if cmd in ("/mute", "/unmute", "/ban", "/unban", "/warn", "/clearwarn", "/kick"):
+        target = parts[1].strip() if len(parts) > 1 else ""
+        if not target:
+            await sio.emit(
+                "chat_error",
+                {"message": f"Usage: {cmd} <username>"},
+                to=sid,
+            )
+            return True
+        extra = parts[2].strip() if len(parts) > 2 else ""
+
+        if cmd == "/ban":
+            if _is_owner(target) or (_is_admin_user(target) and not is_owner):
+                await sio.emit("chat_error", {"message": "You cannot ban a moderator."}, to=sid)
+                return True
+            with _admins_lock:
+                data = _load_admins()
+                data.setdefault("banned_users", {})[target] = {
+                    "reason": extra or "No reason given",
+                    "by": username,
+                    "at": _time_module.time(),
+                }
+                _save_admins(data)
+            for s, u in list(_chat_online.items()):
+                if u.lower() == target.lower():
+                    await sio.emit("chat_error", {"message": "You have been banned from chat."}, to=s)
+                    await sio.disconnect(s)
+            await _broadcast_system(
+                f"{target} has been banned." + (f" Reason: {extra}" if extra else ""),
+                to_sid=sid,
+            )
+            return True
+
+        if cmd == "/unban":
+            with _admins_lock:
+                data = _load_admins()
+                banned = data.get("banned_users", {})
+                key = next((k for k in banned if k.lower() == target.lower()), None)
+                if key:
+                    del banned[key]
+                    _save_admins(data)
+                    await _broadcast_system(f"{target} has been unbanned.", to_sid=sid)
+                else:
+                    await sio.emit("chat_error", {"message": f"{target} is not banned."}, to=sid)
+            return True
+
+        if cmd == "/mute":
+            mins = 60
+            reason_text = extra
+            if extra:
+                tok = extra.split(None, 1)
+                if tok[0].isdigit():
+                    mins = max(1, int(tok[0]))
+                    reason_text = tok[1] if len(tok) > 1 else ""
+            with _admins_lock:
+                data = _load_admins()
+                data.setdefault("muted_users", {})[target] = {
+                    "expires_at": _time_module.time() + mins * 60,
+                    "reason": reason_text or "No reason given",
+                    "by": username,
+                }
+                _save_admins(data)
+            for s, u in list(_chat_online.items()):
+                if u.lower() == target.lower():
+                    await sio.emit(
+                        "chat_error",
+                        {"message": f"You have been muted for {mins} minutes." + (f" Reason: {reason_text}" if reason_text else "")},
+                        to=s,
+                    )
+            await _broadcast_system(
+                f"{target} has been muted for {mins} minutes." + (f" Reason: {reason_text}" if reason_text else ""),
+                to_sid=sid,
+            )
+            return True
+
+        if cmd == "/unmute":
+            with _admins_lock:
+                data = _load_admins()
+                muted = data.get("muted_users", {})
+                key = next((k for k in muted if k.lower() == target.lower()), None)
+                if key:
+                    del muted[key]
+                    _save_admins(data)
+                    await _broadcast_system(f"{target} has been unmuted.", to_sid=sid)
+                else:
+                    await sio.emit("chat_error", {"message": f"{target} is not muted."}, to=sid)
+            return True
+
+        if cmd == "/warn":
+            count = _warn_user_in_admins(target, extra)
+            for s, u in list(_chat_online.items()):
+                if u.lower() == target.lower():
+                    await sio.emit(
+                        "chat_error",
+                        {"message": f"\u26a0\ufe0f Warning {count}/3: {extra or 'Behaviour not acceptable.'}"},
+                        to=s,
+                    )
+            await _broadcast_system(
+                f"{target} has been warned ({count}/3)." + (f" Reason: {extra}" if extra else ""),
+                to_sid=sid,
+            )
+            if count >= 3:
+                with _admins_lock:
+                    data = _load_admins()
+                    data.setdefault("muted_users", {})[target] = {
+                        "expires_at": _time_module.time() + 30 * 60,
+                        "reason": "3 warnings accumulated",
+                        "by": "SYSTEM",
+                    }
+                    _save_admins(data)
+                for s, u in list(_chat_online.items()):
+                    if u.lower() == target.lower():
+                        await sio.emit(
+                            "chat_error",
+                            {"message": "You have been auto-muted for 30 minutes (3 warnings reached)."},
+                            to=s,
+                        )
+                await _broadcast_system(
+                    f"{target} has been auto-muted for 30 minutes (3 warnings).",
+                    to_sid=sid,
+                )
+            return True
+
+        if cmd == "/clearwarn":
+            with _admins_lock:
+                data = _load_admins()
+                warned = data.get("warned_users", {})
+                key = next((k for k in warned if k.lower() == target.lower()), None)
+                if key:
+                    del warned[key]
+                    _save_admins(data)
+                    await _broadcast_system(f"Warnings cleared for {target}.", to_sid=sid)
+                else:
+                    await sio.emit("chat_error", {"message": f"No warnings on record for {target}."}, to=sid)
+            return True
+
+        if cmd == "/kick":
+            kicked = [s for s, u in list(_chat_online.items()) if u.lower() == target.lower()]
+            if not kicked:
+                await sio.emit("chat_error", {"message": f"{target} is not online."}, to=sid)
+                return True
+            for s in kicked:
+                await sio.emit("chat_error", {"message": "You have been kicked from chat."}, to=s)
+                await sio.disconnect(s)
+            await _broadcast_system(f"{target} was kicked from chat.", to_sid=sid)
+            return True
+
+    if cmd == "/addmod":
+        if not is_owner:
+            await sio.emit("chat_error", {"message": "Only the owner can add moderators."}, to=sid)
+            return True
+        target = parts[1].strip() if len(parts) > 1 else ""
+        if not target:
+            await sio.emit("chat_error", {"message": "Usage: /addmod <username>"}, to=sid)
+            return True
+        with _admins_lock:
+            data = _load_admins()
+            admins = data.setdefault("admins", [])
+            if target.lower() not in [a.lower() for a in admins]:
+                admins.append(target)
+                _save_admins(data)
+                mods = _get_all_mods()
+                await sio.emit("mod_list", [m.lower() for m in mods])
+                await _broadcast_system(f"{target} has been made a moderator.", to_sid=sid)
+            else:
+                await sio.emit("chat_error", {"message": f"{target} is already a moderator."}, to=sid)
+        return True
+
+    if cmd == "/removemod":
+        if not is_owner:
+            await sio.emit("chat_error", {"message": "Only the owner can remove moderators."}, to=sid)
+            return True
+        target = parts[1].strip() if len(parts) > 1 else ""
+        if not target:
+            await sio.emit("chat_error", {"message": "Usage: /removemod <username>"}, to=sid)
+            return True
+        with _admins_lock:
+            data = _load_admins()
+            admins = data.get("admins", [])
+            key = next((a for a in admins if a.lower() == target.lower()), None)
+            if key:
+                admins.remove(key)
+                _save_admins(data)
+                mods = _get_all_mods()
+                await sio.emit("mod_list", [m.lower() for m in mods])
+                await _broadcast_system(f"{target} is no longer a moderator.", to_sid=sid)
+            else:
+                await sio.emit("chat_error", {"message": f"{target} is not a moderator."}, to=sid)
+        return True
+
+    # Unknown command
+    await sio.emit(
+        "chat_error",
+        {"message": f"Unknown command: {cmd}. Type /help for a list."},
+        to=sid,
+    )
     return True
 
 
@@ -388,12 +701,19 @@ async def _on_chat_connect(sid, environ, auth=None):
     if not username:
         await sio.disconnect(sid)
         return
+    # Refuse connection for banned users
+    if _is_banned(username):
+        await sio.emit("chat_error", {"message": "You are banned from chat."}, to=sid)
+        await sio.disconnect(sid)
+        return
     _asyncio_loop = _asyncio.get_event_loop()
     if not _bg_started:
         _bg_started = True
         _asyncio.create_task(_world_tick())
     _chat_online[sid] = username
     await sio.emit("online_users", sorted(set(_chat_online.values())))
+    mods = _get_all_mods()
+    await sio.emit("mod_list", [m.lower() for m in mods], to=sid)
     history = await _asyncio.get_event_loop().run_in_executor(None, get_chat_history, 60)
     await sio.emit("chat_history", history, to=sid)
 
@@ -430,14 +750,30 @@ async def _on_chat_send(sid, data):
     if not username:
         await sio.emit("chat_error", {"message": "You must be logged in to chat."}, to=sid)
         return
+
+    # Banned check (belt-and-suspenders: connection already refused banned users)
+    if _is_banned(username):
+        await sio.emit("chat_error", {"message": "You are banned from chat."}, to=sid)
+        await sio.disconnect(sid)
+        return
+
+    raw = str(data.get("message", "")).strip()
+    if not raw:
+        return
+
+    # Slash commands bypass mute/cooldown so mods can still act
+    if raw.startswith("/"):
+        handled = await _handle_mod_command(sid, username, raw)
+        if handled:
+            return
+
+    # Mute check (after command handling)
     if _is_muted(username):
         await sio.emit(
             "chat_error", {"message": "You are muted and cannot send messages."}, to=sid
         )
         return
-    raw = str(data.get("message", "")).strip()
-    if not raw:
-        return
+
     if len(raw) > CHAT_MAX_LEN:
         await sio.emit(
             "chat_error",
@@ -445,9 +781,44 @@ async def _on_chat_send(sid, data):
             to=sid,
         )
         return
+
     now = _time_module.time()
-    last = _chat_cooldowns.get(username, 0)
-    remaining = int(CHAT_COOLDOWN_SECS - (now - last))
+
+    # ── Repeat-message guard ───────────────────────────────────────
+    last_content = _chat_last_content.get(username, "")
+    if raw.lower() == last_content.lower():
+        await sio.emit(
+            "chat_error",
+            {"message": "Please don't send the same message twice."},
+            to=sid,
+        )
+        return
+
+    # ── Spam / flood detection ─────────────────────────────────────
+    recent = _chat_recent_msgs.get(username, [])
+    recent = [t for t in recent if now - t < _SPAM_WINDOW_SECS]
+    if len(recent) >= _SPAM_MAX_MSGS:
+        # Auto-mute for 5 minutes
+        with _admins_lock:
+            fresh = _load_admins()
+            fresh.setdefault("muted_users", {})[username] = {
+                "expires_at": now + 5 * 60,
+                "reason": "auto-muted for flooding",
+                "by": "SYSTEM",
+            }
+            _save_admins(fresh)
+        await sio.emit(
+            "chat_error",
+            {"message": "You have been auto-muted for 5 minutes for flooding."},
+            to=sid,
+        )
+        return
+    recent.append(now)
+    _chat_recent_msgs[username] = recent
+
+    # ── Cooldown ───────────────────────────────────────────────────
+    last_ts = _chat_cooldowns.get(username, 0)
+    remaining = int(CHAT_COOLDOWN_SECS - (now - last_ts))
     if remaining > 0:
         await sio.emit(
             "chat_error",
@@ -455,8 +826,11 @@ async def _on_chat_send(sid, data):
             to=sid,
         )
         return
+
     censored = censor_text(raw)
+    _chat_last_content[username] = raw
     _chat_cooldowns[username] = now
+
     result = await _asyncio.get_event_loop().run_in_executor(
         None, send_chat_message, username, censored
     )
@@ -468,6 +842,7 @@ async def _on_chat_send(sid, data):
                 "username": username,
                 "message": censored,
                 "created_at": row.get("created_at", ""),
+                "is_mod": _is_admin_user(username),
             },
         )
     else:

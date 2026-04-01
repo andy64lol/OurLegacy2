@@ -163,6 +163,7 @@
 <script>
 (function() {
     var CURRENT_USER = {{ online_username | tojson }};
+    var MOD_LIST = [];
     var socket = null;
     var cooldownTimer = null;
     var hasFocus = true;
@@ -210,24 +211,48 @@
         var loading = document.getElementById('chat-loading-w');
         if (loading) loading.remove();
 
-        var isMe = (msg.username === CURRENT_USER);
         var div = document.createElement('div');
-        div.style.cssText = 'display:flex;flex-direction:column;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
-        var time = '';
-        if (msg.created_at) {
-            try {
-                var d = new Date(msg.created_at);
-                time = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            } catch(e) {}
+
+        // System messages
+        if (msg.is_system || msg.username === 'SYSTEM') {
+            div.style.cssText = 'text-align:center;font-size:10px;color:var(--gold-dim);padding:2px 4px;font-style:italic;';
+            div.textContent = msg.message;
+            if (animate) div.style.opacity = '0';
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+            if (animate) setTimeout(function() { div.style.transition = 'opacity 0.2s'; div.style.opacity = '1'; }, 10);
+            return;
         }
-        div.innerHTML =
-            '<div style="max-width:230px;padding:4px 9px;background:' + (isMe ? 'var(--wood-dark)' : 'var(--bg-panel)') +
-            ';border:1px solid ' + (isMe ? 'var(--wood-bright)' : 'var(--border)') + ';word-break:break-word;">' +
-            '<span style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.04em;">' +
-            escHtml(msg.username) + '</span>' +
-            '<div style="font-size:12px;color:var(--text-light);margin-top:1px;">' + renderMsg(msg.message) + '</div>' +
-            (time ? '<div style="font-size:9px;color:var(--text-dim);margin-top:1px;text-align:right;">' + time + '</div>' : '') +
-            '</div>';
+
+        var isMe = (msg.username === CURRENT_USER);
+        var isMod = msg.is_mod || MOD_LIST.indexOf((msg.username || '').toLowerCase()) !== -1;
+        var isEmote = msg.is_emote;
+
+        if (isEmote) {
+            div.style.cssText = 'text-align:center;font-size:11px;color:var(--text-dim);font-style:italic;padding:1px 0;';
+            div.textContent = msg.message;
+        } else {
+            div.style.cssText = 'display:flex;flex-direction:column;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
+            var time = '';
+            if (msg.created_at) {
+                try {
+                    var d = new Date(msg.created_at);
+                    time = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                } catch(e) {}
+            }
+            var bgColor = isMe ? 'var(--wood-dark)' : (isMod ? 'rgba(80,55,10,0.4)' : 'var(--bg-panel)');
+            var borderColor = isMe ? 'var(--wood-bright)' : (isMod ? 'var(--gold-dim)' : 'var(--border)');
+            var modBadge = isMod ? '<span style="font-size:8px;background:rgba(120,90,20,0.5);border:1px solid var(--gold-dim);color:var(--gold);padding:0 3px;margin-left:3px;vertical-align:middle;">MOD</span>' : '';
+            div.innerHTML =
+                '<div style="max-width:230px;padding:4px 9px;background:' + bgColor +
+                ';border:1px solid ' + borderColor + ';word-break:break-word;">' +
+                '<span style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.04em;">' +
+                escHtml(msg.username) + '</span>' + modBadge +
+                '<div style="font-size:12px;color:var(--text-light);margin-top:1px;">' + renderMsg(msg.message) + '</div>' +
+                (time ? '<div style="font-size:9px;color:var(--text-dim);margin-top:1px;text-align:right;">' + time + '</div>' : '') +
+                '</div>';
+        }
+
         if (animate) div.style.opacity = '0';
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
@@ -330,9 +355,15 @@
             box.scrollTop = box.scrollHeight;
         });
 
+        socket.on('mod_list', function(mods) {
+            MOD_LIST = mods || [];
+        });
+
         socket.on('chat_message', function(msg) {
             appendMessage(msg, true);
-            try { window.parent.postMessage({ type: 'chat_unread' }, '*'); } catch(e) {}
+            if (!msg.is_system) {
+                try { window.parent.postMessage({ type: 'chat_unread' }, '*'); } catch(e) {}
+            }
         });
 
         socket.on('online_users', function(users) {
@@ -342,8 +373,10 @@
             if (innerEl) {
                 innerEl.innerHTML = users.map(function(u) {
                     var isMe = (u === CURRENT_USER);
-                    if (isMe) return '<span class="user-pill user-pill-me">' + escHtml(u) + ' (you)</span>';
-                    return '<a href="/friends?dm=' + encodeURIComponent(u) + '" target="_parent" class="user-pill">' + escHtml(u) + '</a>';
+                    var isMod = MOD_LIST.indexOf(u.toLowerCase()) !== -1;
+                    var badge = isMod ? ' &#9876;' : '';
+                    if (isMe) return '<span class="user-pill user-pill-me">' + escHtml(u) + badge + ' (you)</span>';
+                    return '<a href="/friends?dm=' + encodeURIComponent(u) + '" target="_parent" class="user-pill">' + escHtml(u) + badge + '</a>';
                 }).join('');
             }
         });
@@ -352,10 +385,10 @@
             var el = document.getElementById('chat-error-w');
             if (!el) return;
             el.textContent = data.message || 'Error.';
-            if (data.message && data.message.indexOf('Wait') !== -1) {
+            if (data.message && data.message.match(/wait \d+s/i)) {
                 startCooldownDisplay(data.message);
             }
-            setTimeout(function() { if (el) el.textContent = ''; }, 4000);
+            setTimeout(function() { if (el) el.textContent = ''; }, 5000);
         });
     }
 
