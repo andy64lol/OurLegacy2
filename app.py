@@ -124,7 +124,7 @@ from utilities.email_sender import send_email as _send_email, is_configured as _
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)  # type: ignore
-app.secret_key = os.environ.get("SECRET_KEY", "ol2-default-dev-key-change-in-prod")
+app.secret_key = os.environ.get("SECRET_KEY") or os.environ.get("SESSION_SECRET", "ol2-default-dev-key-change-in-prod")
 
 limiter = Limiter(
     app=app,
