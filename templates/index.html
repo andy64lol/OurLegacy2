@@ -798,7 +798,6 @@
                 </button>
                 {% if online_username %}
                 <button class="tab-btn" data-tab="adventure-group">&#9876; Group</button>
-                <button class="tab-btn" data-tab="global-chat"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:16px;height:16px;image-rendering:pixelated;vertical-align:middle;margin-right:3px;">Chat</button>
                 <button class="tab-btn" data-tab="friends">&#10024; Friends</button>
                 {% endif %}
             </nav>
@@ -2295,45 +2294,7 @@
         </script>
         {% endif %}
 
-        <!-- ── Global Chat (inline tab, online only) ── -->
         {% if online_username %}
-        <div class="tab-content" id="tab-global-chat" style="padding:0;display:flex;flex-direction:column;height:100%;">
-            <style>
-                #tab-global-chat { min-height: 0; }
-                #inline-chat-wrap { display:flex;flex-direction:column;height:560px;background:var(--bg-panel);border:2px solid var(--border); }
-                #inline-chat-online { display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--bg-panel-dark);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap; }
-                #inline-chat-messages { flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:4px;background:var(--bg-main); }
-                #inline-chat-input-bar { padding:10px 14px;border-top:2px solid var(--border);background:var(--bg-panel);flex-shrink:0; }
-            </style>
-            <div class="panel" style="margin-bottom:0;">
-                <div class="panel-title"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:20px;height:20px;image-rendering:pixelated;vertical-align:middle;margin-right:5px;"> Global Chat</div>
-            </div>
-            <div id="inline-chat-wrap">
-                <div id="inline-chat-online">
-                    <span style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);">Online:</span>
-                    <div id="inline-chat-users"></div>
-                </div>
-                <div id="inline-chat-messages">
-                    <div style="text-align:center;font-size:12px;color:var(--text-dim);padding:20px 0;" id="inline-chat-loading">Connecting...</div>
-                </div>
-                <div id="inline-chat-input-bar" style="position:relative;">
-                    <div id="inline-glyph-picker" style="display:none;position:absolute;bottom:100%;left:0;margin-bottom:4px;background:var(--bg-panel);border:2px solid var(--border);box-shadow:3px 3px 0 rgba(0,0,0,0.5);padding:9px;z-index:20;width:260px;">
-                        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:6px;">Insert Glyph</div>
-                        <div id="inline-glyph-grid" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
-                    </div>
-                    <div style="display:flex;gap:6px;align-items:center;">
-                        <button onclick="inlineToggleGlyph()" style="padding:5px 8px;background:var(--slate-dark);border:1px solid var(--border);color:var(--gold);font-size:13px;cursor:pointer;line-height:1;flex-shrink:0;font-family:'Tiny5',monospace;">&#10022;</button>
-                        <input id="inline-chat-input" type="text" maxlength="200" placeholder="Message the realm..." autocomplete="off"
-                            style="flex:1;padding:7px 10px;background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-light);font-size:13px;font-family:'Tiny5',monospace;outline:none;"
-                            onkeydown="if(event.key==='Enter')inlineChatSend()">
-                        <button onclick="inlineChatSend()" style="padding:7px 16px;background:var(--wood-dark);border:2px solid var(--wood-bright);color:var(--gold-bright);font-size:13px;cursor:pointer;font-family:'Tiny5',monospace;text-transform:uppercase;">Send</button>
-                    </div>
-                    <div id="inline-chat-error" style="font-size:11px;color:var(--red);min-height:13px;margin-top:3px;"></div>
-                    <div id="inline-chat-cooldown" style="display:none;font-size:11px;color:var(--text-dim);margin-top:3px;text-align:center;"></div>
-                </div>
-            </div>
-        </div>
-
         <!-- ── Adventure Group (inline tab, online only) ── -->
         <div class="tab-content" id="tab-adventure-group" style="padding:0;">
             <style>
@@ -2465,133 +2426,8 @@
             var _agGroup = null;
             var _agLoaded = false;
 
-            /* ── Inline Global Chat ── */
-            var _inlineChatInit = false;
-            var _inlineSocket = null;
-            var _inlineCooldown = null;
-
-            var CHAT_GLYPHS = {
-                'warrior':'warrior.png','mage':'mage.png','rogue':'rouge.png','rouge':'rouge.png',
-                'hunter':'hunter.png','bard':'bard.png','paladin':'paladin.png','druid':'druid.png',
-                'priest':'priest.png','hp':'hp.png','mana':'mana.png','gold':'gold.png',
-                'exp':'exp.png','level':'level.gif','weapon':'weapon.png','armor':'armor.png',
-                'offhand':'offhand.png','accessories':'accessories.png','book':'book.png',
-                'food':'food.png','materials':'materials.png','spell':'spell.png',
-                'chat':'chat.png','settings':'settings.png','sparkles':'sparkles.png',
-                'fight':'fight.png','day':'time_day.png','night':'time_night.png',
-                'male':'male.png','female':'female.png','non_binary':'non_binary.png'
-            };
-
-            function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-            function _renderMsg(text) {
-                var parts = text.split(/:([a-z_]+):/);
-                var out = '';
-                for (var i = 0; i < parts.length; i++) {
-                    if (i % 2 === 0) { out += _esc(parts[i]); }
-                    else {
-                        var key = parts[i];
-                        if (CHAT_GLYPHS[key]) out += '<img src="/game_assets/glyphs/' + CHAT_GLYPHS[key] + '" alt=":' + key + ':" style="width:18px;height:18px;vertical-align:middle;image-rendering:pixelated;margin:0 2px;">';
-                        else out += _esc(':' + key + ':');
-                    }
-                }
-                return out;
-            }
-
-            function _inlineAppendMsg(msg, animate) {
-                var box = document.getElementById('inline-chat-messages');
-                if (!box) return;
-                var isMe = (msg.username === _AG_USER);
-                var div = document.createElement('div');
-                div.style.cssText = 'display:flex;flex-direction:column;' + (isMe ? 'align-items:flex-end;' : 'align-items:flex-start;');
-                var time = '';
-                if (msg.created_at) { try { time = new Date(msg.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); } catch(e){} }
-                div.innerHTML = '<div style="max-width:520px;padding:5px 10px;background:' + (isMe ? 'var(--wood-dark)' : 'var(--bg-panel)') + ';border:1px solid ' + (isMe ? 'var(--wood-bright)' : 'var(--border)') + ';word-break:break-word;">' +
-                    '<span style="font-size:11px;font-weight:700;color:' + (isMe ? 'var(--gold-bright)' : 'var(--gold)') + ';text-transform:uppercase;letter-spacing:0.05em;">' + _esc(msg.username) + '</span>' +
-                    '<div style="font-size:13px;color:var(--text-light);margin-top:2px;">' + _renderMsg(msg.message) + '</div>' +
-                    (time ? '<div style="font-size:10px;color:var(--text-dim);margin-top:1px;text-align:right;">' + time + '</div>' : '') + '</div>';
-                if (animate) div.style.opacity = '0';
-                box.appendChild(div);
-                box.scrollTop = box.scrollHeight;
-                if (animate) setTimeout(function(){ div.style.transition='opacity 0.2s'; div.style.opacity='1'; }, 10);
-            }
-
-            function _initInlineChat() {
-                if (_inlineChatInit) return;
-                _inlineChatInit = true;
-                _inlineSocket = typeof io !== 'undefined' ? io({ transports: ['polling','websocket'] }) : null;
-                if (!_inlineSocket) return;
-                _inlineSocket.on('connect', function() {
-                    var l = document.getElementById('inline-chat-loading');
-                    if (l) l.remove();
-                });
-                _inlineSocket.on('chat_history', function(msgs) {
-                    var box = document.getElementById('inline-chat-messages');
-                    if (!box) return;
-                    box.innerHTML = '';
-                    if (!msgs || !msgs.length) { box.innerHTML = '<div style="text-align:center;font-size:12px;color:var(--text-dim);padding:20px 0;">No messages yet.</div>'; return; }
-                    msgs.forEach(function(m){ _inlineAppendMsg(m, false); });
-                    box.scrollTop = box.scrollHeight;
-                });
-                _inlineSocket.on('chat_message', function(msg){ _inlineAppendMsg(msg, true); });
-                _inlineSocket.on('online_users', function(users) {
-                    var el = document.getElementById('inline-chat-users');
-                    if (!el) return;
-                    el.innerHTML = users.map(function(u){
-                        return u === _AG_USER
-                            ? '<span style="font-size:11px;padding:2px 8px;background:rgba(96,136,88,0.25);border:1px solid var(--green);color:var(--green-bright);">' + _esc(u) + ' (you)</span>'
-                            : '<span style="font-size:11px;padding:2px 8px;background:var(--slate-dark);border:1px solid var(--border);color:var(--text-light);">' + _esc(u) + '</span>';
-                    }).join(' ');
-                });
-                _inlineSocket.on('chat_error', function(data){
-                    var el = document.getElementById('inline-chat-error');
-                    if (el) { el.textContent = data.message || 'Error.'; setTimeout(function(){ el.textContent=''; }, 4000); }
-                });
-            }
-
-            window.inlineChatSend = function() {
-                var inp = document.getElementById('inline-chat-input');
-                if (!inp || !_inlineSocket) return;
-                var msg = inp.value.trim();
-                if (!msg) return;
-                _inlineSocket.emit('chat_send', { message: msg });
-                inp.value = '';
-            };
-
-            window.inlineToggleGlyph = function() {
-                var p = document.getElementById('inline-glyph-picker');
-                if (!p) return;
-                var open = p.style.display !== 'none';
-                p.style.display = open ? 'none' : 'block';
-                if (!open) {
-                    var grid = document.getElementById('inline-glyph-grid');
-                    if (grid && !grid.dataset.built) {
-                        grid.dataset.built = '1';
-                        var seen = {};
-                        Object.keys(CHAT_GLYPHS).forEach(function(key) {
-                            var file = CHAT_GLYPHS[key];
-                            if (seen[file]) return; seen[file] = true;
-                            var btn = document.createElement('button');
-                            btn.title = ':' + key + ':';
-                            btn.style.cssText = 'background:var(--slate-dark);border:1px solid var(--border);padding:4px;cursor:pointer;';
-                            btn.innerHTML = '<img src="/game_assets/glyphs/' + file + '" style="width:18px;height:18px;image-rendering:pixelated;">';
-                            btn.addEventListener('click', function(){
-                                var inp = document.getElementById('inline-chat-input');
-                                if (!inp) return;
-                                var code = ':' + key + ':';
-                                var pos = inp.selectionStart;
-                                inp.value = inp.value.slice(0,pos) + code + inp.value.slice(inp.selectionEnd);
-                                inp.selectionStart = inp.selectionEnd = pos + code.length;
-                                inp.focus();
-                                p.style.display = 'none';
-                            });
-                            grid.appendChild(btn);
-                        });
-                    }
-                }
-            };
-
             /* ── Adventure Group tab ── */
+            function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
             function agEsc(s) { return _esc(s); }
 
             function agLoad() {
@@ -2779,7 +2615,6 @@
 
             /* ── Tab change listener ── */
             document.addEventListener('tabChanged', function(e) {
-                if (e.detail === 'global-chat' && !_inlineChatInit) _initInlineChat();
                 if (e.detail === 'adventure-group' && !_agLoaded) { _agLoaded = true; agLoad(); }
             });
 
