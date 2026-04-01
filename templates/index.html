@@ -7,8 +7,8 @@
 </script>
 {% endif %}
 <style>
-    /* On game page, Chat and Group are accessible as tabs — hide the redundant floating FABs */
-    .widget-fab { display: none !important; }
+    /* On game page, the Groups FAB is accessible as a tab — hide it to avoid duplication */
+    #groups-widget-fab { display: none !important; }
 </style>
 {% endblock %}
 {% block content %}

@@ -7,6 +7,8 @@ A browser-based medieval fantasy RPG built with Python and Flask. Play entirely 
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [Environment Variables](#environment-variables)
+- [Database Setup](#database-setup)
 - [Character Creation](#character-creation)
 - [Classes](#classes)
 - [Combat](#combat)
@@ -34,11 +36,74 @@ A browser-based medieval fantasy RPG built with Python and Flask. Play entirely 
 **Requirements:** Python 3.11+
 
 ```bash
-pip install flask cryptography gevent flask-socketio flask-session supabase
-python app.py
+# Clone the repo and install dependencies
+pip install -r requirements.txt
+
+# Set required environment variables (see below)
+cp .env.example .env   # or export them directly
+
+# Apply the database schema (once, see Database Setup below)
+
+# Start the server
+bash init.sh
 ```
 
 Open `http://localhost:5000` in your browser.
+
+The `init.sh` script handles dependency installation and server startup in one step. If `SUPABASE_DB_URL` is set and `psql` is available it will also apply the schema automatically.
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root (or set these in your hosting platform):
+
+| Variable | Required | Description |
+|---|---|---|
+| `SUPABASE_URL` | Yes | Your Supabase project URL (`https://<ref>.supabase.co`) |
+| `SUPABASE_SERVICE_KEY` | Yes | Supabase **service-role** secret key |
+| `SECRET_KEY` | Yes | Flask session secret (any long random string) |
+| `SUPABASE_DB_URL` | Optional | PostgreSQL connection string for auto-migration via `init.sh` |
+| `RESEND_API` | Optional | Resend API key (enables email verification / password reset) |
+| `RESEND_EMAIL` | Optional | Sender address for outbound email (`From: …`) |
+| `PORT` | Optional | Port to bind (default `5000`) |
+| `WEB_CONCURRENCY` | Optional | Number of Gunicorn workers (default `1`) |
+
+---
+
+## Database Setup
+
+The game uses **Supabase (PostgreSQL)** for user accounts, cloud saves, chat, and social features.
+
+### Option A — Supabase SQL Editor (recommended)
+
+1. Open your Supabase project → **SQL Editor**
+2. Paste the contents of [`setup.sql`](setup.sql) and run it
+3. All tables, indexes, and triggers are created with `IF NOT EXISTS` guards — safe to re-run
+
+### Option B — psql (command line)
+
+```bash
+psql "$SUPABASE_DB_URL" -f setup.sql
+```
+
+Or let `init.sh` do it automatically if `SUPABASE_DB_URL` is set and `psql` is installed.
+
+### Tables created by `setup.sql`
+
+| Table | Description |
+|---|---|
+| `ol2_users` | Player accounts (username, hashed password, optional email) |
+| `ol2_saves` | Encrypted cloud save blobs (one slot per user) |
+| `ol2_characters` | Persistent character state for the autosave / MMO system |
+| `ol2_chat` | Global chat messages |
+| `ol2_dms` | Private messages between players |
+| `ol2_friends` | Friend relationships and pending requests |
+| `ol2_blocks` | Blocked-user list |
+| `ol2_groups` | Adventure groups |
+| `ol2_group_members` | Group membership and XP contribution |
+| `ol2_group_log` | Activity log for each group |
+| `ol2_tick_lock` | Distributed world-tick lock (required for multiple workers) |
 
 ---
 
@@ -347,6 +412,7 @@ Sign in with a free online account to access:
 
 ### Global Chat
 - Chat with all online players in real time
+- Access via the chat button in the bottom-right corner of every page
 
 ### Block System
 - Block users to prevent messages and friend requests
@@ -374,44 +440,14 @@ Examples:
 
 ---
 
-## Supabase Database Migrations
-
-Run these SQL statements once in your Supabase project's SQL editor before starting the server.
-
-### Core tables (accounts, saves, chat)
-
-These are created automatically by the Supabase dashboard or via the migrations documented in earlier setup. Ensure the following tables exist:
-- `ol2_users` — player accounts
-- `ol2_saves` — encrypted cloud save blobs
-- `ol2_chat` — global chat history
-- `ol2_dms` — private messages
-- `ol2_friends` — friend relationships
-- `ol2_characters` — persistent character state (MMO Phase 1)
-- `ol2_groups`, `ol2_group_members`, `ol2_group_log` — Adventure Groups
-
-### Distributed world-tick lock (required when `workers > 1`)
-
-```sql
-CREATE TABLE IF NOT EXISTS ol2_tick_lock (
-    lock_name  TEXT PRIMARY KEY,
-    worker_id  TEXT NOT NULL,
-    expires_at TIMESTAMPTZ NOT NULL
-);
-```
-
-This table holds at most one row (`lock_name = 'world_tick'`).  Whichever
-Gunicorn worker acquires the row runs the server tick; others skip their cycle
-until the lease expires (90 s) or the holder renews it.  Safe to create even
-when running a single worker — the lock logic falls back gracefully if Supabase
-is not configured.
-
----
-
 ## File Structure
 
 ```
 our_legacy_2/
 ├── app.py                        # Main Flask application & all routes
+├── setup.sql                     # Full PostgreSQL/Supabase schema setup script
+├── init.sh                       # Server initialization script (install + migrate + start)
+├── requirements.txt              # Python dependencies
 ├── data/
 │   ├── areas.json                # World areas and connections
 │   ├── bosses.json               # Boss definitions and phases
@@ -433,24 +469,23 @@ our_legacy_2/
 ├── static/
 │   ├── css/style.css             # All game styling
 │   ├── js/game.js                # Client-side game logic
-│   └── game_assets/             # Images, icons, backgrounds
+│   └── game_assets/             # Images, icons, backgrounds, music
 ├── templates/
-│   ├── base.html                 # Base layout with nav and modals
+│   ├── base.html                 # Base layout with nav, modals, and chat FAB
 │   ├── index.html                # Main game screen
 │   ├── create.html               # Character creation
-│   ├── battle.html               # Battle screen
-│   ├── dungeon_room.html         # Dungeon room screen
-│   ├── crafting.html             # Crafting page
+│   ├── chat.html                 # Full-page global chat
 │   ├── friends.html              # Friends & DMs page
+│   ├── dungeon_room.html         # Dungeon room screen
+│   ├── groups.html               # Adventure groups page
 │   └── ...                       # Other pages
 └── utilities/
     ├── battle.py                 # Battle logic
-    ├── character.py              # Character management
-    ├── crafting.py               # Crafting logic
     ├── dungeons.py               # Dungeon generation
-    ├── market.py                 # Market logic
-    ├── spells.py                 # Spell system
-    ├── supabase_db.py            # Online account & cloud save
+    ├── email_sender.py           # Outbound email via Resend
+    ├── save_load.py              # Local save encryption/decryption
+    ├── spellcasting.py           # Spell system
+    ├── supabase_db.py            # Online account, cloud save & social features
     └── ...                       # Other utility modules
 ```
 

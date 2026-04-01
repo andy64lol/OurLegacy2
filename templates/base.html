@@ -75,33 +75,6 @@
         #chat-widget .widget-fab:not(#chat-toggle-btn) { display: none !important; }
         #groups-overlay { display: none !important; }
 
-        #chat-panel {
-            position: relative;
-            min-width: 260px;
-            min-height: 220px;
-        }
-        #chat-resize-handle {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            cursor: ns-resize;
-            background: transparent;
-            z-index: 10;
-        }
-        #chat-resize-handle:hover { background: rgba(120,80,40,0.3); }
-        #chat-resize-lr {
-            position: absolute;
-            top: 5px;
-            bottom: 0;
-            left: 0;
-            width: 5px;
-            cursor: ew-resize;
-            background: transparent;
-            z-index: 10;
-        }
-        #chat-resize-lr:hover { background: rgba(120,80,40,0.25); }
 
         .widget-fab {
             width: 50px;
@@ -179,28 +152,15 @@
 
     <div id="chat-widget" style="position:fixed;bottom:20px;right:20px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
 
-        <!-- Chat Panel (iframe-based) -->
-        <div id="chat-panel" style="display:none;width:320px;height:480px;background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.5);overflow:hidden;flex-direction:column;margin-bottom:0;">
-
-            <!-- Resize handles -->
-            <div id="chat-resize-handle" title="Drag to resize"></div>
-            <div id="chat-resize-lr" title="Drag to resize"></div>
-
-            <!-- Header -->
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--wood-dark);border-bottom:2px solid var(--border);flex-shrink:0;">
-                <span style="font-size:12px;font-weight:700;color:var(--gold);letter-spacing:0.07em;text-transform:uppercase;display:flex;align-items:center;gap:5px;"><img src="/game_assets/glyphs/chat.png" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;"> Global Chat</span>
-                <div style="display:flex;gap:5px;align-items:center;">
-                    <a href="/chat" target="_blank" title="Open full chat" style="background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-dim);font-size:13px;cursor:pointer;padding:2px 5px;text-decoration:none;line-height:1;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-dim)'">&#8599;</a>
-                    <button onclick="toggleChat()" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;line-height:1;padding:0;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-dim)'">&times;</button>
-                </div>
+        <!-- Chat Overlay Panel (full-screen modal, loads chat.html) -->
+        <div id="chat-panel" style="display:none;position:fixed;inset:0;z-index:8900;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;">
+            <div style="width:min(860px,98vw);height:min(700px,96vh);background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.6);display:flex;flex-direction:column;overflow:hidden;">
+                <iframe id="chat-widget-frame" src="" title="Global Chat" style="flex:1;width:100%;border:none;background:var(--bg-main);"></iframe>
             </div>
-
-            <!-- Chat iframe -->
-            <iframe id="chat-widget-frame" src="" title="Global Chat" style="flex:1;width:100%;border:none;background:var(--bg-main);"></iframe>
         </div>
 
         <!-- Groups FAB -->
-        <button class="widget-fab" onclick="openGroupsOverlay()" title="Adventure Group">&#9876;
+        <button class="widget-fab" id="groups-widget-fab" onclick="openGroupsOverlay()" title="Adventure Group">&#9876;
             <span id="groups-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--bg-main);width:14px;height:14px;font-size:9px;line-height:14px;text-align:center;font-weight:700;"></span>
         </button>
 
@@ -364,20 +324,25 @@
             chatOpen = !chatOpen;
             var panel = document.getElementById('chat-panel');
             panel.style.display = chatOpen ? 'flex' : 'none';
-            panel.style.flexDirection = 'column';
             var fab = document.getElementById('chat-toggle-btn');
             if (fab) fab.classList.toggle('chat-open', chatOpen);
             if (chatOpen) {
                 unreadCount = 0;
                 var badge = document.getElementById('chat-badge');
-                badge.style.display = 'none';
-                badge.textContent = '';
+                if (badge) { badge.style.display = 'none'; badge.textContent = ''; }
                 var frame = document.getElementById('chat-widget-frame');
                 if (frame && !frame.src) {
-                    frame.src = '/chat_widget';
+                    frame.src = '/chat';
                 }
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
             }
         };
+
+        document.getElementById('chat-panel').addEventListener('click', function(e) {
+            if (e.target === this) { chatOpen = false; this.style.display = 'none'; document.body.style.overflow = ''; var fab = document.getElementById('chat-toggle-btn'); if (fab) fab.classList.remove('chat-open'); }
+        });
 
         window.addEventListener('message', function(e) {
             if (e.data && e.data.type === 'chat_unread' && !chatOpen) {
@@ -618,52 +583,6 @@
         }
 
         window.tradeSendRequest = tradeSendRequest;
-
-        // ── Resize logic ──────────────────────────────────────────
-        (function() {
-            var panel, isResizingV, isResizingH, startY, startX, startH, startW;
-
-            function setupResize() {
-                panel = document.getElementById('chat-panel');
-                var handleV = document.getElementById('chat-resize-handle');
-                var handleH = document.getElementById('chat-resize-lr');
-                if (!panel || !handleV || !handleH) return;
-
-                handleV.addEventListener('mousedown', function(e) {
-                    isResizingV = true;
-                    startY = e.clientY;
-                    startH = panel.offsetHeight;
-                    e.preventDefault();
-                });
-
-                handleH.addEventListener('mousedown', function(e) {
-                    isResizingH = true;
-                    startX = e.clientX;
-                    startW = panel.offsetWidth;
-                    e.preventDefault();
-                });
-
-                document.addEventListener('mousemove', function(e) {
-                    if (isResizingV) {
-                        var dy = startY - e.clientY;
-                        var newH = Math.max(220, Math.min(window.innerHeight - 100, startH + dy));
-                        panel.style.height = newH + 'px';
-                    }
-                    if (isResizingH) {
-                        var dx = startX - e.clientX;
-                        var newW = Math.max(260, Math.min(700, startW + dx));
-                        panel.style.width = newW + 'px';
-                    }
-                });
-
-                document.addEventListener('mouseup', function() {
-                    isResizingV = false;
-                    isResizingH = false;
-                });
-            }
-
-            document.addEventListener('DOMContentLoaded', setupResize);
-        })();
 
         document.addEventListener('DOMContentLoaded', function() {
             initChat();
