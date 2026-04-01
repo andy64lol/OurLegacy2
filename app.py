@@ -182,13 +182,10 @@ _chat_online: dict = {}
 _chat_cooldowns: dict = {}  # {username: last_sent_timestamp}
 
 # Single-session enforcement: maps user_id -> session_token
-# When a user logs in from a new location, the token changes and the old session is invalidated.
+# Tracks the active session token per user_id for multi-login detection.
 _active_sessions: dict = {}
-# Grace slot: maps user_id -> old_token so the kicked session can do one final save.
-_dying_sessions: dict = {}
 # Inactivity tracking: maps user_id -> last_activity_timestamp
 _session_last_activity: dict = {}
-ONLINE_SESSION_TIMEOUT = 1800  # 30 minutes of inactivity
 CHAT_COOLDOWN_SECS = 10
 CHAT_MAX_LEN = 200
 
@@ -1141,7 +1138,7 @@ def _build_game_state() -> dict[str, Any]:
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
         "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
-        "signed_in": bool(user_id and (user_id in _active_sessions or user_id in _dying_sessions)),
+        "signed_in": bool(user_id and user_id in _active_sessions),
         "save_version": "7.1",
     }
 
@@ -1172,6 +1169,10 @@ def _apply_game_state(data: dict[str, Any]) -> None:
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
+    # Restore save slots if present
+    raw_slots = data.get("_save_slots")
+    if isinstance(raw_slots, list):
+        session["_save_slots"] = raw_slots
     session.modified = True
 
 
@@ -1219,36 +1220,38 @@ def _is_session_valid() -> bool:
     # Auto-restore the session from the signed cookie so the user is not kicked.
     if user_id not in _active_sessions:
         _active_sessions[user_id] = token
-        _session_last_activity[user_id] = _time_module.time()
-        return True
-    # Inactivity timeout check
-    now = _time_module.time()
-    last = _session_last_activity.get(user_id, 0)
-    if now - last > ONLINE_SESSION_TIMEOUT:
-        # Session expired — clear it
-        _active_sessions.pop(user_id, None)
-        _session_last_activity.pop(user_id, None)
-        return False
-    # Refresh activity timestamp on every valid check
-    _session_last_activity[user_id] = now
+    # Refresh activity timestamp
+    _session_last_activity[user_id] = _time_module.time()
     return True
 
 
-def _is_dying_session() -> bool:
-    """Return True if this session has been superseded but is still in the grace slot."""
-    user_id = session.get("online_user_id")
-    if not user_id:
-        return False
-    token = session.get("session_token")
-    if not token:
-        return False
-    return _dying_sessions.get(user_id) == token
+def _update_save_slot(slot: int, label: str, state: dict) -> None:
+    """Write a clean game state snapshot to save slot 1-5 in the session."""
+    slots = session.get("_save_slots") or [None] * 5
+    if not isinstance(slots, list):
+        slots = [None] * 5
+    slots = (list(slots) + [None] * 5)[:5]
+    player = state.get("player", {})
+    # Strip _save_slots from the snapshot to avoid recursion
+    snapshot = {k: v for k, v in state.items() if k != "_save_slots"}
+    slots[slot - 1] = {
+        "slot": slot,
+        "label": label,
+        "saved_at": _time_module.strftime("%Y-%m-%d %H:%M", _time_module.gmtime()) + " UTC",
+        "level": player.get("level", 1),
+        "area": state.get("current_area", ""),
+        "character_class": player.get("class", ""),
+        "player_name": player.get("name", ""),
+        "snapshot": snapshot,
+    }
+    session["_save_slots"] = slots
+    session.modified = True
 
 
 def _autosave() -> None:
     """
     Fire-and-forget autosave to Supabase for logged-in users.
-    Silently skips if the user isn't logged in or has no active character.
+    Always updates slot 1 (auto-save). Silently skips if not logged in.
     Also logs a diary entry at most once every 5 minutes to avoid flooding.
     """
     user_id = session.get("online_user_id")
@@ -1260,6 +1263,10 @@ def _autosave() -> None:
     username = session.get("online_username")
     if username:
         _username_player[username] = state.get("player", {})
+    # Update slot 1 (auto-save) in session
+    _update_save_slot(1, "Auto Save", state)
+    # Attach updated slots to state before persisting to Supabase
+    state["_save_slots"] = session.get("_save_slots", [None] * 5)
     try:
         character_autosave(user_id, state)
     except Exception:
@@ -6413,10 +6420,6 @@ def api_online_login():
                 "message": "The server is full (100 players max). Please try again later.",
             }), 503
         session_token = str(uuid.uuid4())
-        # Move the old token to the grace slot so the kicked session can save one last time.
-        old_token = _active_sessions.get(user_id)
-        if old_token:
-            _dying_sessions[user_id] = old_token
         _active_sessions[user_id] = session_token
         _session_last_activity[user_id] = _time_module.time()
         session["online_username"] = actual_username
@@ -6472,16 +6475,91 @@ def api_session_check():
 
 @app.route("/api/online/autosave", methods=["POST"])
 def api_online_autosave():
-    """Frontend-triggered autosave — validates session then saves character state."""
-    if _is_session_valid():
-        _autosave()
-        return jsonify({"ok": True})
-    if _is_dying_session():
-        # Grace save: kicked session gets one last save, then the grace slot is cleared.
-        _autosave()
-        _dying_sessions.pop(session.get("online_user_id"), None)
-        return jsonify({"ok": True, "session_expired": True})
-    return jsonify({"ok": False, "session_expired": True}), 401
+    """Frontend-triggered autosave — saves character state for logged-in users."""
+    if not _is_session_valid():
+        return jsonify({"ok": False}), 401
+    _autosave()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/saves/list", methods=["GET"])
+def api_saves_list():
+    """Return metadata for all 5 save slots (no snapshot data sent to client)."""
+    slots = session.get("_save_slots") or [None] * 5
+    if not isinstance(slots, list):
+        slots = [None] * 5
+    slots = (list(slots) + [None] * 5)[:5]
+    result = []
+    for i, s in enumerate(slots):
+        if s is None or not isinstance(s, dict):
+            result.append({"slot": i + 1, "empty": True})
+        else:
+            result.append({
+                "slot": i + 1,
+                "empty": False,
+                "label": s.get("label", ""),
+                "saved_at": s.get("saved_at", ""),
+                "level": s.get("level", 1),
+                "area": s.get("area", ""),
+                "character_class": s.get("character_class", ""),
+                "player_name": s.get("player_name", ""),
+            })
+    return jsonify({"ok": True, "slots": result})
+
+
+@app.route("/api/saves/write", methods=["POST"])
+def api_saves_write():
+    """Write current game state to a manual save slot (2-5)."""
+    if not _is_session_valid():
+        return jsonify({"ok": False, "message": "Not logged in."}), 401
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        slot = int(data.get("slot", 0))
+    except (TypeError, ValueError):
+        slot = 0
+    if slot < 2 or slot > 5:
+        return jsonify({"ok": False, "message": "Slot must be 2–5 (slot 1 is auto-save)."}), 400
+    label = str(data.get("label", f"Save {slot}")).strip()[:32] or f"Save {slot}"
+    state = _build_game_state()
+    if not state:
+        return jsonify({"ok": False, "message": "No active character."}), 400
+    _update_save_slot(slot, label, state)
+    # Persist to Supabase so slots survive server restarts
+    state["_save_slots"] = session.get("_save_slots", [None] * 5)
+    try:
+        user_id = session.get("online_user_id")
+        if user_id:
+            character_autosave(user_id, state)
+    except Exception:
+        pass
+    return jsonify({"ok": True, "message": f"Saved to slot {slot}!"})
+
+
+@app.route("/api/saves/restore", methods=["POST"])
+def api_saves_restore():
+    """Restore game state from a save slot."""
+    if not _is_session_valid():
+        return jsonify({"ok": False, "message": "Not logged in."}), 401
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        slot = int(data.get("slot", 0))
+    except (TypeError, ValueError):
+        slot = 0
+    if slot < 1 or slot > 5:
+        return jsonify({"ok": False, "message": "Invalid slot number."}), 400
+    slots = session.get("_save_slots") or []
+    if not isinstance(slots, list) or len(slots) < slot:
+        return jsonify({"ok": False, "message": "That slot is empty."}), 404
+    slot_data = slots[slot - 1]
+    if not slot_data or not isinstance(slot_data, dict) or not slot_data.get("snapshot"):
+        return jsonify({"ok": False, "message": "That slot is empty."}), 404
+    snapshot = slot_data["snapshot"]
+    # Apply snapshot — keeps current save slots intact (don't overwrite with old ones)
+    current_slots = slots
+    _apply_game_state(snapshot)
+    session["_save_slots"] = current_slots
+    session.modified = True
+    return jsonify({"ok": True, "message": f"Restored from slot {slot}!", "reload": True})
 
 
 @app.route("/api/online/cloud_save", methods=["POST"])

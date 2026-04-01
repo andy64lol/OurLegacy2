@@ -1,3 +1,7 @@
+function _esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     initToastContainer();
     initTabs();
@@ -544,6 +548,8 @@ function openSettings() {
 
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    // Load save slots if the list element exists (online mode only)
+    if (document.getElementById('saves-slot-list')) loadSaveSlots();
 }
 
 function closeSettings() {
@@ -554,6 +560,82 @@ function closeSettings() {
 
 function settingsOverlayClick(e) {
     if (e.target === document.getElementById('settings-modal')) closeSettings();
+}
+
+// ── Save Slots ──────────────────────────────────────────────────────────────
+
+function loadSaveSlots() {
+    var list = document.getElementById('saves-slot-list');
+    if (!list) return;
+    list.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:8px 0;">Loading…</div>';
+    fetch('/api/saves/list').then(function(r){ return r.json(); }).then(function(data) {
+        if (!data.ok) { list.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;">Could not load saves.</div>'; return; }
+        list.innerHTML = '';
+        data.slots.forEach(function(s) {
+            var isAuto = s.slot === 1;
+            var row = document.createElement('div');
+            row.style.cssText = 'display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);';
+            if (s.empty) {
+                row.innerHTML = '<div style="flex:1;font-size:12px;color:var(--text-dim);">' +
+                    '<span style="color:var(--gold);font-size:11px;font-weight:700;margin-right:6px;">' + (isAuto ? '&#128260; AUTO' : 'Slot ' + s.slot) + '</span>' +
+                    '<em>Empty</em></div>' +
+                    (isAuto ? '' : '<button class="btn btn-secondary btn-small" onclick="saveToSlot(' + s.slot + ')" style="font-size:11px;padding:3px 10px;">Save</button>');
+            } else {
+                var name = _esc(s.player_name || 'Unknown');
+                var cls = _esc(s.character_class || '');
+                var area = _esc(s.area || '');
+                var label = _esc(s.label || (isAuto ? 'Auto Save' : 'Save ' + s.slot));
+                var date = _esc(s.saved_at || '');
+                row.innerHTML = '<div style="flex:1;min-width:0;">' +
+                    '<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:2px;">' + (isAuto ? '&#128260; AUTO' : 'Slot ' + s.slot) + ' &mdash; <span style="color:var(--text-light);">' + label + '</span></div>' +
+                    '<div style="font-size:12px;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + name + ' &bull; Lv ' + s.level + ' ' + cls + '</div>' +
+                    '<div style="font-size:11px;color:var(--text-dim);">' + area + (date ? ' &middot; ' + date : '') + '</div>' +
+                    '</div>' +
+                    '<div style="display:flex;flex-direction:column;gap:4px;">' +
+                    (isAuto ? '' : '<button class="btn btn-secondary btn-small" onclick="saveToSlot(' + s.slot + ')" style="font-size:11px;padding:3px 10px;">Save</button>') +
+                    '<button class="btn btn-secondary btn-small" onclick="restoreFromSlot(' + s.slot + ')" style="font-size:11px;padding:3px 8px;opacity:0.8;">Restore</button>' +
+                    '</div>';
+            }
+            list.appendChild(row);
+        });
+    }).catch(function() {
+        list.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;">Network error.</div>';
+    });
+}
+
+function saveToSlot(slot) {
+    var label = prompt('Name this save (optional):', 'Save ' + slot);
+    if (label === null) return;
+    label = label.trim() || ('Save ' + slot);
+    fetch('/api/saves/write', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({slot: slot, label: label})
+    }).then(function(r){ return r.json(); }).then(function(d) {
+        if (d.ok) { showToast(d.message || 'Saved!'); loadSaveSlots(); }
+        else showToast(d.message || 'Save failed.', '#e06c75');
+    }).catch(function(){ showToast('Network error.', '#e06c75'); });
+}
+
+function restoreFromSlot(slot) {
+    var isAuto = slot === 1;
+    var confirm_msg = isAuto
+        ? 'Restore from the auto-save? Your current unsaved progress will be replaced.'
+        : 'Restore from slot ' + slot + '? Your current unsaved progress will be replaced.';
+    if (!confirm(confirm_msg)) return;
+    fetch('/api/saves/restore', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({slot: slot})
+    }).then(function(r){ return r.json(); }).then(function(d) {
+        if (d.ok) {
+            showToast(d.message || 'Restored!');
+            closeSettings();
+            setTimeout(function(){ location.reload(); }, 800);
+        } else {
+            showToast(d.message || 'Restore failed.', '#e06c75');
+        }
+    }).catch(function(){ showToast('Network error.', '#e06c75'); });
 }
 
 function settingsToggleFullscreen() {

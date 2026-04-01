@@ -275,63 +275,15 @@
         var cooldownTimer = null;
         var socket = null;
 
-        // ── Auto-save state ──────────────────────────────────────────────────
+        // ── Auto-save ────────────────────────────────────────────────────────
         var AUTO_SAVE_INTERVAL_MS = 300000; // 5 minutes
-        var SESSION_CHECK_INTERVAL_MS = 60000; // 1 minute
         var _autoSaveTimer = null;
-        var _sessionCheckTimer = null;
-        var _sessionKicked = false;
-
-        function _showKickedModal() {
-            if (_sessionKicked) return;
-            _sessionKicked = true;
-            if (_autoSaveTimer) clearInterval(_autoSaveTimer);
-            if (_sessionCheckTimer) clearInterval(_sessionCheckTimer);
-            var overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;';
-            overlay.innerHTML = '<div style="background:#0d1f0d;border:1px solid rgba(180,130,255,0.4);border-radius:12px;padding:32px 40px;max-width:380px;text-align:center;color:#e8e0d0;">'
-                + '<div style="font-size:22px;color:#c084fc;margin-bottom:12px;">Session Ended</div>'
-                + '<div style="font-size:14px;color:#a0926a;margin-bottom:16px;">Your account was logged in from another location. Your progress has been saved.</div>'
-                + '<div style="font-size:12px;color:#6b7280;">Returning to home...</div>'
-                + '</div>';
-            document.body.appendChild(overlay);
-            // Log out server-side then redirect home.
-            fetch('/api/online/logout', { method: 'POST' })
-                .catch(function() {})
-                .finally(function() {
-                    setTimeout(function() { window.location.href = '/'; }, 2000);
-                });
-        }
-
-        function _finalSaveThenKick() {
-            if (_sessionKicked) return;
-            _sessionKicked = true; // block any further checks while save is in flight
-            // Attempt one last save before logging out and redirecting.
-            fetch('/api/online/autosave', { method: 'POST' })
-                .catch(function() {})
-                .finally(function() {
-                    _sessionKicked = false; // let _showKickedModal run its own guard
-                    _showKickedModal();
-                });
-        }
-
-        function checkSession() {
-            if (!CURRENT_USER || _sessionKicked) return;
-            fetch('/api/session/check').then(function(res) { return res.json(); }).then(function(data) {
-                if (data && data.valid === false) { _finalSaveThenKick(); }
-            }).catch(function() {});
-        }
 
         function autoSaveCloud() {
-            if (!CURRENT_USER || _sessionKicked) return;
+            if (!CURRENT_USER) return;
             fetch('/api/online/autosave', { method: 'POST' }).then(function(res) {
                 return res.json();
             }).then(function(data) {
-                if (data && data.session_expired) {
-                    // Server already did the grace save (or session is fully gone). Show kicked modal.
-                    _showKickedModal();
-                    return;
-                }
                 if (data && data.ok) {
                     var el = document.getElementById('autosave-indicator');
                     if (!el) return;
@@ -344,9 +296,7 @@
 
         function startAutoSave() {
             if (_autoSaveTimer) clearInterval(_autoSaveTimer);
-            if (_sessionCheckTimer) clearInterval(_sessionCheckTimer);
             _autoSaveTimer = setInterval(autoSaveCloud, AUTO_SAVE_INTERVAL_MS);
-            _sessionCheckTimer = setInterval(checkSession, SESSION_CHECK_INTERVAL_MS);
         }
 
         // ── Trade state ───────────────────────────────────────────────────────
@@ -718,122 +668,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             initChat();
             startAutoSave();
-            _startAfkWatcher();
         });
     })();
     </script>
 
-    <!-- AFK watcher (online users only) -->
-    <script>
-    (function() {
-        var AFK_WARN_MS  = 20 * 60 * 1000;   // 20 minutes
-        var AFK_KICK_MS  = 30 * 60 * 1000;   // 30 minutes
-        var CHECK_INTERVAL_MS = 10000;         // check every 10 s
-        var _lastActivity = Date.now();
-        var _warnShown    = false;
-        var _kicked       = false;
-        var _warnOverlay  = null;
-        var _countdownInterval = null;
-        var _checkTimer   = null;
-
-        function _resetActivity() {
-            _lastActivity = Date.now();
-            if (_warnShown) _dismissAfkWarning();
-        }
-
-        function _dismissAfkWarning() {
-            _warnShown = false;
-            if (_countdownInterval) { clearInterval(_countdownInterval); _countdownInterval = null; }
-            if (_warnOverlay && _warnOverlay.parentNode) {
-                _warnOverlay.parentNode.removeChild(_warnOverlay);
-                _warnOverlay = null;
-            }
-        }
-
-        function _showAfkWarning(remainingMs) {
-            if (_warnShown || _kicked) return;
-            _warnShown = true;
-
-            var overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:199999;display:flex;align-items:center;justify-content:center;';
-            var remaining = Math.ceil(remainingMs / 1000);
-            overlay.innerHTML =
-                '<div style="background:linear-gradient(160deg,rgba(20,12,40,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.45);border-radius:12px;padding:32px 40px;max-width:380px;text-align:center;color:#e8e0d0;">'
-                + '<div style="font-size:26px;margin-bottom:10px;">&#128564;</div>'
-                + '<div style="font-size:18px;color:#c084fc;font-weight:600;margin-bottom:10px;">Are you still there?</div>'
-                + '<div style="font-size:13px;color:#a0926a;margin-bottom:6px;">You have been idle for 20 minutes.</div>'
-                + '<div style="font-size:13px;color:#a0926a;margin-bottom:20px;">You will be logged out in <span id="afk-countdown" style="color:#f87171;font-weight:700;">' + remaining + '</span> second(s).</div>'
-                + '<button id="afk-still-here-btn" style="background:linear-gradient(135deg,rgba(80,50,150,0.85),rgba(50,30,100,0.85));border:1px solid rgba(180,130,255,0.5);color:#c084fc;padding:10px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;">I\'m still here</button>'
-                + '</div>';
-
-            document.body.appendChild(overlay);
-            _warnOverlay = overlay;
-
-            overlay.querySelector('#afk-still-here-btn').addEventListener('click', function() {
-                _resetActivity();
-            });
-
-            _countdownInterval = setInterval(function() {
-                remaining--;
-                var el = document.getElementById('afk-countdown');
-                if (el) el.textContent = remaining;
-                if (remaining <= 0) {
-                    clearInterval(_countdownInterval);
-                    _countdownInterval = null;
-                }
-            }, 1000);
-        }
-
-        function _afkKick() {
-            if (_kicked) return;
-            _kicked = true;
-            _dismissAfkWarning();
-            if (_checkTimer) { clearInterval(_checkTimer); _checkTimer = null; }
-
-            var overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:199999;display:flex;align-items:center;justify-content:center;';
-            overlay.innerHTML =
-                '<div style="background:linear-gradient(160deg,rgba(20,12,40,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.45);border-radius:12px;padding:32px 40px;max-width:380px;text-align:center;color:#e8e0d0;">'
-                + '<div style="font-size:26px;margin-bottom:10px;">&#128564;</div>'
-                + '<div style="font-size:18px;color:#c084fc;font-weight:600;margin-bottom:12px;">Logged out due to inactivity</div>'
-                + '<div style="font-size:13px;color:#a0926a;margin-bottom:20px;">You were idle for 30 minutes. Your progress has been saved.</div>'
-                + '<div style="font-size:12px;color:#6b7280;">Redirecting to home...</div>'
-                + '</div>';
-            document.body.appendChild(overlay);
-
-            fetch('/api/online/autosave', { method: 'POST' })
-                .catch(function() {})
-                .finally(function() {
-                    fetch('/api/online/logout', { method: 'POST' })
-                        .catch(function() {})
-                        .finally(function() {
-                            setTimeout(function() { window.location.href = '/'; }, 2000);
-                        });
-                });
-        }
-
-        function _checkAfk() {
-            if (_kicked) return;
-            var idle = Date.now() - _lastActivity;
-            if (idle >= AFK_KICK_MS) {
-                _afkKick();
-            } else if (idle >= AFK_WARN_MS && !_warnShown) {
-                _showAfkWarning(AFK_KICK_MS - idle);
-            } else if (_warnShown) {
-                var remaining = Math.ceil((AFK_KICK_MS - idle) / 1000);
-                var el = document.getElementById('afk-countdown');
-                if (el) el.textContent = remaining;
-            }
-        }
-
-        window._startAfkWatcher = function() {
-            ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(function(evt) {
-                document.addEventListener(evt, _resetActivity, { passive: true });
-            });
-            _checkTimer = setInterval(_checkAfk, CHECK_INTERVAL_MS);
-        };
-    })();
-    </script>
     <script>
     (function() {
         document.addEventListener('DOMContentLoaded', function() {
