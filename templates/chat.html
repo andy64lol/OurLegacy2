@@ -228,8 +228,8 @@
             color: var(--gold-bright);
         }
 
-        /* Hide nav back links when inside iframe */
-        body.in-iframe #chat-header .back-link { display: none; }
+        /* Hide entire header bar when inside iframe (overlay has its own header) */
+        body.in-iframe #chat-header { display: none; }
     </style>
 </head>
 <body>
