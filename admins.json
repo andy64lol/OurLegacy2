@@ -1,6 +1,8 @@
 {
   "owner": "ThePrimordialOne",
-  "admins": [],
+  "admins": [
+    "andy64lol"
+  ],
   "banned_users": {},
   "muted_users": {},
   "warned_users": {}
