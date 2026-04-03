@@ -1613,27 +1613,28 @@ def _update_save_slot(slot: int, label: str, state: dict) -> None:
 
 def _autosave() -> None:
     """
-    Fire-and-forget autosave to Supabase for logged-in users.
-    Always updates slot 1 (auto-save). Silently skips if not logged in.
-    Also logs a diary entry at most once every 5 minutes to avoid flooding.
+    Autosave: always updates the in-session slot 1 ("Auto Save") for all users.
+    Also persists to Supabase for logged-in users.
+    Logs a diary entry at most once every 5 minutes to avoid flooding.
     """
-    user_id = session.get("online_user_id")
-    if not user_id:
-        return
     state = _build_game_state()
     if not state:
         return
-    username = session.get("online_username")
-    if username:
-        _username_player[username] = state.get("player", {})
-    # Update slot 1 (auto-save) in session
+
+    # Always update slot 1 (auto-save) in session, even for offline users
     _update_save_slot(1, "Auto Save", state)
-    # Attach updated slots to state before persisting to Supabase
-    state["_save_slots"] = session.get("_save_slots", [None] * 5)
-    try:
-        character_autosave(user_id, state)
-    except Exception:
-        pass
+
+    # Supabase persistence — online users only
+    user_id = session.get("online_user_id")
+    if user_id:
+        username = session.get("online_username")
+        if username:
+            _username_player[username] = state.get("player", {})
+        state["_save_slots"] = session.get("_save_slots", [None] * 5)
+        try:
+            character_autosave(user_id, state)
+        except Exception:
+            pass
 
     # Log to activities (diary) with throttling so it doesn't flood
     now = _time_module.time()
