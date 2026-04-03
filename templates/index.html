@@ -810,7 +810,13 @@
                 <div class="panel-body">
                     <p class="area-description">{{ area.description or 'A place of mystery and danger.' }}</p>
 
-                    {% if area.map_image %}
+                    {% if area.map_json %}
+                    <div class="area-map-wrap" id="area-map-wrap">
+                        <canvas id="area-tilemap-canvas"
+                                data-map="/game_assets/{{ area.map_json }}"
+                                class="area-map-img"></canvas>
+                    </div>
+                    {% elif area.map_image %}
                     <div class="area-map-wrap" id="area-map-wrap">
                         <img src="/data/assets/map/{{ area.map_image }}"
                              alt="Map of {{ area_name }}"

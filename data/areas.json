@@ -43,7 +43,8 @@
         "quest_unlock": "stolen_ore"
       }
     ],
-    "map_image": "starting_village.png"
+    "map_image": "starting_village.png",
+    "map_json": "maps/starting_village.json"
   },
   "your_land": {
     "name": "Your Land",

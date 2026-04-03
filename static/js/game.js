@@ -1017,3 +1017,73 @@ function hookParticleEvents() {
         burstParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, '#c8a84b', 24);
     });
 }
+
+// ── Tilemap Renderer ─────────────────────────────────────────────────────────
+(function () {
+    var canvas = document.getElementById('area-tilemap-canvas');
+    if (!canvas) return;
+    var mapUrl = canvas.dataset.map;
+    if (!mapUrl) return;
+
+    fetch(mapUrl)
+        .then(function (r) { return r.json(); })
+        .then(function (mapData) {
+            var layers   = mapData.layers   || [];
+            var tilesets = mapData.tilesets || [];
+            var meta     = mapData.canvas   || {};
+            var W        = meta.width  || 800;
+            var H        = meta.height || 608;
+            var TILE_W   = tilesets.length ? tilesets[0].tilewidth  : 32;
+            var TILE_H   = tilesets.length ? tilesets[0].tileheight : 32;
+            var COLS     = Math.round(W / TILE_W);
+
+            canvas.width  = W;
+            canvas.height = H;
+            var ctx = canvas.getContext('2d');
+
+            // Load all tileset images
+            var tsImages = {};
+            var loadPromises = tilesets.map(function (ts) {
+                return new Promise(function (resolve) {
+                    var img = new Image();
+                    img.src = '/game_assets/maps/tilemaps/' + ts.image;
+                    img.onload  = function () { tsImages[ts.name] = img; resolve(); };
+                    img.onerror = function () { resolve(); };
+                });
+            });
+
+            Promise.all(loadPromises).then(function () {
+                layers.forEach(function (layer) {
+                    var tsName = layer.tileset || '';
+                    var tsImg  = tsImages[tsName];
+                    var ts     = tilesets.find(function (t) { return t.name === tsName; });
+                    var tileW  = ts ? ts.tilewidth  : TILE_W;
+                    var tileH  = ts ? ts.tileheight : TILE_H;
+
+                    (layer.data || []).forEach(function (val, idx) {
+                        if (val === null || val === -1) return;
+
+                        var destX = (idx % COLS) * tileW;
+                        var destY = Math.floor(idx / COLS) * tileH;
+
+                        // Tile encoding: integer part = column in tileset,
+                        // first decimal digit * 10 = row in tileset.
+                        // e.g. 8.2 → col 8, row 2
+                        var tileCol = Math.trunc(val);
+                        var tileRow = Math.round((val - tileCol) * 10);
+                        var srcX    = tileCol * tileW;
+                        var srcY    = tileRow * tileH;
+
+                        if (tsImg) {
+                            ctx.drawImage(tsImg, srcX, srcY, tileW, tileH, destX, destY, tileW, tileH);
+                        }
+                    });
+                });
+            });
+        })
+        .catch(function (err) {
+            console.warn('Tilemap load error:', err);
+            var wrap = document.getElementById('area-map-wrap');
+            if (wrap) wrap.style.display = 'none';
+        });
+}());
