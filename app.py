@@ -173,7 +173,7 @@ def _load_session_for_socket(environ: dict) -> dict:
         cache_dir=app.config["SESSION_FILE_DIR"], threshold=500, mode=0o600
     )
     try:
-        data = cache.get(session_id)
+        data = cache.get("session:" + session_id)
         return dict(data) if isinstance(data, dict) else {}
     except Exception:
         return {}
