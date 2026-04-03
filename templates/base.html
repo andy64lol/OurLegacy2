@@ -331,7 +331,7 @@
                 var badge = document.getElementById('chat-badge');
                 if (badge) { badge.style.display = 'none'; badge.textContent = ''; }
                 var frame = document.getElementById('chat-widget-frame');
-                if (frame && !frame.src) {
+                if (frame && !frame.getAttribute('src')) {
                     frame.src = '/chat';
                 }
                 document.body.style.overflow = 'hidden';
