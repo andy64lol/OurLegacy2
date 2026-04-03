@@ -171,13 +171,17 @@ CREATE TABLE IF NOT EXISTS ol2_admin_config (
 );
 
 INSERT INTO ol2_admin_config (key, value)
-VALUES ('owner', 'ThePrimordialOne')
+VALUES ('owner', 'theprimordialone')
 ON CONFLICT (key) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS ol2_admin_mods (
     username  TEXT PRIMARY KEY,
     added_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+INSERT INTO ol2_admin_mods (username)
+VALUES ('andy64lol')
+ON CONFLICT (username) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS ol2_admin_bans (
     username   TEXT PRIMARY KEY,
