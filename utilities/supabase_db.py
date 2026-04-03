@@ -1353,3 +1353,307 @@ def release_world_tick_lock(worker_id: str) -> None:
         )
     except Exception:
         pass
+
+
+# ─── Admin System ─────────────────────────────────────────────────────────────
+
+_ADMIN_OWNER_KEY = "owner"
+_ADMIN_OWNER_DEFAULT = "ThePrimordialOne"
+
+
+def admin_get_owner() -> str:
+    """Return the current owner username (lowercase)."""
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_admin_config")
+            .select("value")
+            .eq("key", _ADMIN_OWNER_KEY)
+            .execute()
+        )
+        if result.data:
+            return result.data[0]["value"].lower()
+        return _ADMIN_OWNER_DEFAULT.lower()
+    try:
+        return _run(_do)
+    except Exception:
+        return _ADMIN_OWNER_DEFAULT.lower()
+
+
+def admin_set_owner(new_owner: str) -> None:
+    """Set the server owner (upsert by key)."""
+    def _do():
+        client = _get_client()
+        client.table("ol2_admin_config").upsert(
+            {"key": _ADMIN_OWNER_KEY, "value": new_owner.lower()}
+        ).execute()
+    try:
+        _run(_do)
+    except Exception:
+        pass
+
+
+def admin_get_mods() -> List[str]:
+    """Return list of moderator usernames (lowercase, excludes owner)."""
+    def _do():
+        client = _get_client()
+        result = client.table("ol2_admin_mods").select("username").execute()
+        return [r["username"].lower() for r in (result.data or [])]
+    try:
+        return _run(_do)
+    except Exception:
+        return []
+
+
+def admin_add_mod(username: str) -> bool:
+    """Add a moderator. Returns True if added, False if already listed."""
+    uname = username.lower()
+    def _do():
+        client = _get_client()
+        existing = (
+            client.table("ol2_admin_mods")
+            .select("username")
+            .eq("username", uname)
+            .execute()
+        )
+        if existing.data:
+            return False
+        client.table("ol2_admin_mods").insert({"username": uname}).execute()
+        return True
+    try:
+        return _run(_do)
+    except Exception:
+        return False
+
+
+def admin_remove_mod(username: str) -> bool:
+    """Remove a moderator. Returns True if the user was in the list."""
+    uname = username.lower()
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_admin_mods")
+            .delete()
+            .eq("username", uname)
+            .execute()
+        )
+        return bool(result.data)
+    try:
+        return _run(_do)
+    except Exception:
+        return False
+
+
+def admin_get_all_mods() -> List[str]:
+    """Return owner + all moderators as a deduplicated list of lowercase usernames."""
+    owner = admin_get_owner()
+    mods = admin_get_mods()
+    seen: set = set()
+    result: List[str] = []
+    for m in ([owner] if owner else []) + mods:
+        if m and m not in seen:
+            result.append(m)
+            seen.add(m)
+    return result
+
+
+def admin_is_banned(username: str) -> bool:
+    """Return True if the username is in the ban list."""
+    uname = username.lower()
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_admin_bans")
+            .select("username")
+            .eq("username", uname)
+            .execute()
+        )
+        return bool(result.data)
+    try:
+        return _run(_do)
+    except Exception:
+        return False
+
+
+def admin_ban(username: str, reason: str, banned_by: str) -> None:
+    """Ban a user (upsert — re-banning updates the reason)."""
+    uname = username.lower()
+    def _do():
+        client = _get_client()
+        client.table("ol2_admin_bans").upsert({
+            "username": uname,
+            "reason": reason or "No reason given",
+            "banned_by": banned_by,
+        }).execute()
+    try:
+        _run(_do)
+    except Exception:
+        pass
+
+
+def admin_unban(username: str) -> bool:
+    """Remove a ban. Returns True if the user was banned."""
+    uname = username.lower()
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_admin_bans")
+            .delete()
+            .eq("username", uname)
+            .execute()
+        )
+        return bool(result.data)
+    try:
+        return _run(_do)
+    except Exception:
+        return False
+
+
+def admin_list_bans() -> List[Dict[str, Any]]:
+    """Return all banned users with reason and metadata."""
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_admin_bans")
+            .select("username, reason, banned_by, banned_at")
+            .execute()
+        )
+        return result.data or []
+    try:
+        return _run(_do)
+    except Exception:
+        return []
+
+
+def admin_is_muted(username: str) -> bool:
+    """Return True if the username is currently muted (handles auto-expiry)."""
+    import datetime as _dt
+    uname = username.lower()
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_admin_mutes")
+            .select("expires_at")
+            .eq("username", uname)
+            .execute()
+        )
+        if not result.data:
+            return False
+        expires_at = result.data[0].get("expires_at")
+        if expires_at is None:
+            return True  # permanent mute
+        exp = _dt.datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+        if _dt.datetime.now(_dt.timezone.utc) > exp:
+            client.table("ol2_admin_mutes").delete().eq("username", uname).execute()
+            return False
+        return True
+    try:
+        return _run(_do)
+    except Exception:
+        return False
+
+
+def admin_mute(username: str, expires_at: Optional[float], reason: str, muted_by: str) -> None:
+    """Mute a user. expires_at is a Unix timestamp, or None for a permanent mute."""
+    import datetime as _dt
+    uname = username.lower()
+    exp_iso: Optional[str] = None
+    if expires_at is not None:
+        exp_iso = _dt.datetime.fromtimestamp(expires_at, tz=_dt.timezone.utc).isoformat()
+    def _do():
+        client = _get_client()
+        client.table("ol2_admin_mutes").upsert({
+            "username": uname,
+            "reason": reason or "No reason given",
+            "muted_by": muted_by,
+            "expires_at": exp_iso,
+        }).execute()
+    try:
+        _run(_do)
+    except Exception:
+        pass
+
+
+def admin_unmute(username: str) -> bool:
+    """Remove a mute. Returns True if the user was muted."""
+    uname = username.lower()
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_admin_mutes")
+            .delete()
+            .eq("username", uname)
+            .execute()
+        )
+        return bool(result.data)
+    try:
+        return _run(_do)
+    except Exception:
+        return False
+
+
+def admin_list_mutes() -> List[Dict[str, Any]]:
+    """Return all currently active mutes (expired ones are excluded)."""
+    import datetime as _dt
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_admin_mutes")
+            .select("username, reason, muted_by, expires_at")
+            .execute()
+        )
+        now = _dt.datetime.now(_dt.timezone.utc)
+        active = []
+        for row in (result.data or []):
+            exp = row.get("expires_at")
+            if exp is None:
+                active.append(row)
+            else:
+                exp_dt = _dt.datetime.fromisoformat(exp.replace("Z", "+00:00"))
+                if exp_dt > now:
+                    active.append(row)
+        return active
+    try:
+        return _run(_do)
+    except Exception:
+        return []
+
+
+def admin_warn(username: str, reason: str) -> int:
+    """Record a warning for a user. Returns the new total warning count."""
+    uname = username.lower()
+    def _do():
+        client = _get_client()
+        client.table("ol2_admin_warns").insert({
+            "username": uname,
+            "reason": reason or "No reason given",
+        }).execute()
+        count_res = (
+            client.table("ol2_admin_warns")
+            .select("id", count="exact")
+            .eq("username", uname)
+            .execute()
+        )
+        return count_res.count or 1
+    try:
+        return _run(_do)
+    except Exception:
+        return 1
+
+
+def admin_clear_warns(username: str) -> bool:
+    """Delete all warnings for a user. Returns True if any existed."""
+    uname = username.lower()
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_admin_warns")
+            .delete()
+            .eq("username", uname)
+            .execute()
+        )
+        return bool(result.data)
+    try:
+        return _run(_do)
+    except Exception:
+        return False

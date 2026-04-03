@@ -120,6 +120,22 @@ from utilities.supabase_db import (
     verify_email_token,
     try_acquire_or_renew_world_tick_lock,
     release_world_tick_lock,
+    admin_get_owner,
+    admin_set_owner,
+    admin_get_mods,
+    admin_add_mod,
+    admin_remove_mod,
+    admin_get_all_mods,
+    admin_is_banned,
+    admin_ban,
+    admin_unban,
+    admin_list_bans,
+    admin_is_muted,
+    admin_mute,
+    admin_unmute,
+    admin_list_mutes,
+    admin_warn,
+    admin_clear_warns,
 )
 from utilities.email_sender import send_email as _send_email, is_configured as _email_configured
 
@@ -228,82 +244,36 @@ _activity_counts: dict = {
 }
 _activity_lock = _RLock()
 
-# ── Admin system ───────────────────────────────────────────────────────────────
-_ADMINS_PATH = os.path.join(os.path.dirname(__file__), "admins.json")
-_admins_lock = _RLock()
-
-
-def _load_admins() -> dict:
-    try:
-        with open(_ADMINS_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {"owner": "ThePrimordialOne", "admins": [], "banned_users": {}, "muted_users": {}}
-
-
-def _save_admins(data: dict) -> None:
-    with open(_ADMINS_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-
+# ── Admin system (SQL-backed via Supabase) ─────────────────────────────────────
 
 def _is_owner(username: str) -> bool:
-    data = _load_admins()
-    return username.lower() == data.get("owner", "").lower()
+    return bool(username) and username.lower() == admin_get_owner()
 
 
 def _is_admin_user(username: str) -> bool:
-    """Returns True for the owner and any listed admin."""
-    data = _load_admins()
-    if username.lower() == data.get("owner", "").lower():
-        return True
-    return username.lower() in [a.lower() for a in data.get("admins", [])]
+    """Returns True for the owner and any listed moderator."""
+    if not username:
+        return False
+    uname = username.lower()
+    return uname == admin_get_owner() or uname in admin_get_mods()
 
 
 def _is_banned(username: str) -> bool:
-    data = _load_admins()
-    return username.lower() in {k.lower() for k in data.get("banned_users", {})}
+    return admin_is_banned(username)
 
 
 def _is_muted(username: str) -> bool:
-    import time as _tadmin
-    data = _load_admins()
-    muted = {k.lower(): v for k, v in data.get("muted_users", {}).items()}
-    entry = muted.get(username.lower())
-    if not entry:
-        return False
-    expires = entry.get("expires_at")
-    if expires and _tadmin.time() > expires:
-        # Auto-expire: clean up
-        with _admins_lock:
-            fresh = _load_admins()
-            to_del = [k for k in fresh.get("muted_users", {}) if k.lower() == username.lower()]
-            for k in to_del:
-                del fresh["muted_users"][k]
-            _save_admins(fresh)
-        return False
-    return True
+    return admin_is_muted(username)
 
 
 def _get_all_mods() -> list:
-    """Return owner + all admins as a list of canonical-case usernames."""
-    data = _load_admins()
-    owner = data.get("owner", "")
-    admins = data.get("admins", [])
-    return [m for m in ([owner] + admins) if m]
+    """Return owner + all mods as a list of lowercase usernames."""
+    return admin_get_all_mods()
 
 
 def _warn_user_in_admins(username: str, reason: str) -> int:
-    """Increment and persist the warn count for a user. Returns new count."""
-    with _admins_lock:
-        data = _load_admins()
-        warned = data.setdefault("warned_users", {})
-        lname = username.lower()
-        entry = warned.get(lname, {"count": 0, "reasons": []})
-        entry["count"] += 1
-        entry["reasons"].append(reason or "No reason given")
-        warned[lname] = entry
-        _save_admins(data)
-        return entry["count"]
+    """Record a warning for a user. Returns new total warning count."""
+    return admin_warn(username, reason)
 
 
 async def _broadcast_system(message: str, to_sid=None) -> None:
@@ -347,9 +317,9 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
 
     if cmd == "/mods":
         mods = _get_all_mods()
-        owner_name = _load_admins().get("owner", "")
+        owner_name = admin_get_owner()
         mods_str = ", ".join(
-            (f"{m} [Owner]" if m.lower() == owner_name.lower() else f"{m} [Mod]")
+            (f"{m} [Owner]" if m.lower() == owner_name else f"{m} [Mod]")
             for m in mods
         ) or "No moderators listed."
         await _broadcast_system(f"Moderators: {mods_str}", to_sid=sid)
@@ -411,14 +381,7 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
             if _is_owner(target) or (_is_admin_user(target) and not is_owner):
                 await sio.emit("chat_error", {"message": "You cannot ban a moderator."}, to=sid)
                 return True
-            with _admins_lock:
-                data = _load_admins()
-                data.setdefault("banned_users", {})[target] = {
-                    "reason": extra or "No reason given",
-                    "by": username,
-                    "at": _time_module.time(),
-                }
-                _save_admins(data)
+            admin_ban(target, extra or "No reason given", username)
             for s, u in list(_chat_online.items()):
                 if u.lower() == target.lower():
                     await sio.emit("chat_error", {"message": "You have been banned from chat."}, to=s)
@@ -430,16 +393,10 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
             return True
 
         if cmd == "/unban":
-            with _admins_lock:
-                data = _load_admins()
-                banned = data.get("banned_users", {})
-                key = next((k for k in banned if k.lower() == target.lower()), None)
-                if key:
-                    del banned[key]
-                    _save_admins(data)
-                    await _broadcast_system(f"{target} has been unbanned.", to_sid=sid)
-                else:
-                    await sio.emit("chat_error", {"message": f"{target} is not banned."}, to=sid)
+            if admin_unban(target):
+                await _broadcast_system(f"{target} has been unbanned.", to_sid=sid)
+            else:
+                await sio.emit("chat_error", {"message": f"{target} is not banned."}, to=sid)
             return True
 
         if cmd == "/mute":
@@ -450,14 +407,7 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
                 if tok[0].isdigit():
                     mins = max(1, int(tok[0]))
                     reason_text = tok[1] if len(tok) > 1 else ""
-            with _admins_lock:
-                data = _load_admins()
-                data.setdefault("muted_users", {})[target] = {
-                    "expires_at": _time_module.time() + mins * 60,
-                    "reason": reason_text or "No reason given",
-                    "by": username,
-                }
-                _save_admins(data)
+            admin_mute(target, _time_module.time() + mins * 60, reason_text or "No reason given", username)
             for s, u in list(_chat_online.items()):
                 if u.lower() == target.lower():
                     await sio.emit(
@@ -472,16 +422,10 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
             return True
 
         if cmd == "/unmute":
-            with _admins_lock:
-                data = _load_admins()
-                muted = data.get("muted_users", {})
-                key = next((k for k in muted if k.lower() == target.lower()), None)
-                if key:
-                    del muted[key]
-                    _save_admins(data)
-                    await _broadcast_system(f"{target} has been unmuted.", to_sid=sid)
-                else:
-                    await sio.emit("chat_error", {"message": f"{target} is not muted."}, to=sid)
+            if admin_unmute(target):
+                await _broadcast_system(f"{target} has been unmuted.", to_sid=sid)
+            else:
+                await sio.emit("chat_error", {"message": f"{target} is not muted."}, to=sid)
             return True
 
         if cmd == "/warn":
@@ -498,14 +442,7 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
                 to_sid=sid,
             )
             if count >= 3:
-                with _admins_lock:
-                    data = _load_admins()
-                    data.setdefault("muted_users", {})[target] = {
-                        "expires_at": _time_module.time() + 30 * 60,
-                        "reason": "3 warnings accumulated",
-                        "by": "SYSTEM",
-                    }
-                    _save_admins(data)
+                admin_mute(target, _time_module.time() + 30 * 60, "3 warnings accumulated", "SYSTEM")
                 for s, u in list(_chat_online.items()):
                     if u.lower() == target.lower():
                         await sio.emit(
@@ -520,16 +457,10 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
             return True
 
         if cmd == "/clearwarn":
-            with _admins_lock:
-                data = _load_admins()
-                warned = data.get("warned_users", {})
-                key = next((k for k in warned if k.lower() == target.lower()), None)
-                if key:
-                    del warned[key]
-                    _save_admins(data)
-                    await _broadcast_system(f"Warnings cleared for {target}.", to_sid=sid)
-                else:
-                    await sio.emit("chat_error", {"message": f"No warnings on record for {target}."}, to=sid)
+            if admin_clear_warns(target):
+                await _broadcast_system(f"Warnings cleared for {target}.", to_sid=sid)
+            else:
+                await sio.emit("chat_error", {"message": f"No warnings on record for {target}."}, to=sid)
             return True
 
         if cmd == "/kick":
@@ -551,17 +482,12 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
         if not target:
             await sio.emit("chat_error", {"message": "Usage: /addmod <username>"}, to=sid)
             return True
-        with _admins_lock:
-            data = _load_admins()
-            admins = data.setdefault("admins", [])
-            if target.lower() not in [a.lower() for a in admins]:
-                admins.append(target)
-                _save_admins(data)
-                mods = _get_all_mods()
-                await sio.emit("mod_list", [m.lower() for m in mods])
-                await _broadcast_system(f"{target} has been made a moderator.", to_sid=sid)
-            else:
-                await sio.emit("chat_error", {"message": f"{target} is already a moderator."}, to=sid)
+        if admin_add_mod(target):
+            mods = _get_all_mods()
+            await sio.emit("mod_list", [m.lower() for m in mods])
+            await _broadcast_system(f"{target} has been made a moderator.", to_sid=sid)
+        else:
+            await sio.emit("chat_error", {"message": f"{target} is already a moderator."}, to=sid)
         return True
 
     if cmd == "/removemod":
@@ -572,18 +498,12 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
         if not target:
             await sio.emit("chat_error", {"message": "Usage: /removemod <username>"}, to=sid)
             return True
-        with _admins_lock:
-            data = _load_admins()
-            admins = data.get("admins", [])
-            key = next((a for a in admins if a.lower() == target.lower()), None)
-            if key:
-                admins.remove(key)
-                _save_admins(data)
-                mods = _get_all_mods()
-                await sio.emit("mod_list", [m.lower() for m in mods])
-                await _broadcast_system(f"{target} is no longer a moderator.", to_sid=sid)
-            else:
-                await sio.emit("chat_error", {"message": f"{target} is not a moderator."}, to=sid)
+        if admin_remove_mod(target):
+            mods = _get_all_mods()
+            await sio.emit("mod_list", [m.lower() for m in mods])
+            await _broadcast_system(f"{target} is no longer a moderator.", to_sid=sid)
+        else:
+            await sio.emit("chat_error", {"message": f"{target} is not a moderator."}, to=sid)
         return True
 
     if cmd == "/setowner":
@@ -594,17 +514,12 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
         if not target:
             await sio.emit("chat_error", {"message": "Usage: /setowner <username>"}, to=sid)
             return True
-        with _admins_lock:
-            data = _load_admins()
-            old_owner = data.get("owner", "")
-            data["owner"] = target
-            admins = data.setdefault("admins", [])
-            if old_owner and old_owner.lower() not in [a.lower() for a in admins]:
-                admins.append(old_owner)
-            key = next((a for a in admins if a.lower() == target.lower()), None)
-            if key:
-                admins.remove(key)
-            _save_admins(data)
+        old_owner = admin_get_owner()
+        admin_set_owner(target)
+        # Demote new owner from mod list if present, promote old owner to mod
+        admin_remove_mod(target)
+        if old_owner:
+            admin_add_mod(old_owner)
         mods = _get_all_mods()
         await sio.emit("mod_list", [m.lower() for m in mods])
         await sio.emit("owner_name", target.lower())
@@ -627,32 +542,35 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
         if not is_owner:
             await sio.emit("chat_error", {"message": "Only the owner can list bans."}, to=sid)
             return True
-        data = _load_admins()
-        banned = data.get("banned_users", {})
+        banned = admin_list_bans()
         if not banned:
             await _broadcast_system("No users are currently banned.", to_sid=sid)
         else:
-            for name, info in banned.items():
-                reason = info.get("reason", "No reason")
-                by = info.get("by", "unknown")
-                await _broadcast_system(f"  Banned: {name} — {reason} (by {by})", to_sid=sid)
+            for row in banned:
+                reason = row.get("reason", "No reason")
+                by = row.get("banned_by", "unknown")
+                await _broadcast_system(f"  Banned: {row['username']} — {reason} (by {by})", to_sid=sid)
         return True
 
     if cmd == "/listmutes":
         if not is_owner:
             await sio.emit("chat_error", {"message": "Only the owner can list mutes."}, to=sid)
             return True
-        import time as _tlist
-        data = _load_admins()
-        muted = data.get("muted_users", {})
-        active = {k: v for k, v in muted.items() if v.get("expires_at", 0) > _tlist.time()}
+        active = admin_list_mutes()
         if not active:
             await _broadcast_system("No users are currently muted.", to_sid=sid)
         else:
-            for name, info in active.items():
-                reason = info.get("reason", "No reason")
-                mins_left = max(0, int((info.get("expires_at", 0) - _tlist.time()) / 60))
-                await _broadcast_system(f"  Muted: {name} — {reason} ({mins_left}m left)", to_sid=sid)
+            import datetime as _dtlist
+            now = _dtlist.datetime.now(_dtlist.timezone.utc)
+            for row in active:
+                reason = row.get("reason", "No reason")
+                exp = row.get("expires_at")
+                if exp:
+                    exp_dt = _dtlist.datetime.fromisoformat(exp.replace("Z", "+00:00"))
+                    mins_left = max(0, int((exp_dt - now).total_seconds() / 60))
+                    await _broadcast_system(f"  Muted: {row['username']} — {reason} ({mins_left}m left)", to_sid=sid)
+                else:
+                    await _broadcast_system(f"  Muted: {row['username']} — {reason} (permanent)", to_sid=sid)
         return True
 
     # Unknown command
@@ -786,8 +704,8 @@ async def _on_chat_connect(sid, environ, auth=None):
     await sio.emit("online_users", sorted(set(_chat_online.values())))
     mods = _get_all_mods()
     await sio.emit("mod_list", [m.lower() for m in mods], to=sid)
-    owner_name = _load_admins().get("owner", "")
-    await sio.emit("owner_name", owner_name.lower(), to=sid)
+    owner_name = admin_get_owner()
+    await sio.emit("owner_name", owner_name, to=sid)
     await sio.emit("user_flags", {
         "is_mod": _is_admin_user(username),
         "is_owner": _is_owner(username),
@@ -876,15 +794,7 @@ async def _on_chat_send(sid, data):
     recent = _chat_recent_msgs.get(username, [])
     recent = [t for t in recent if now - t < _SPAM_WINDOW_SECS]
     if len(recent) >= _SPAM_MAX_MSGS:
-        # Auto-mute for 5 minutes
-        with _admins_lock:
-            fresh = _load_admins()
-            fresh.setdefault("muted_users", {})[username] = {
-                "expires_at": now + 5 * 60,
-                "reason": "auto-muted for flooding",
-                "by": "SYSTEM",
-            }
-            _save_admins(fresh)
+        admin_mute(username, now + 5 * 60, "auto-muted for flooding", "SYSTEM")
         await sio.emit(
             "chat_error",
             {"message": "You have been auto-muted for 5 minutes for flooding."},
@@ -7781,14 +7691,13 @@ def api_admin_status():
     caller = session.get("online_username", "")
     if not _is_admin_user(caller):
         return jsonify({"ok": False, "message": "Forbidden."}), 403
-    data = _load_admins()
     return jsonify({
         "ok": True,
         "is_owner": _is_owner(caller),
-        "owner": data.get("owner"),
-        "admins": data.get("admins", []),
-        "banned_users": data.get("banned_users", {}),
-        "muted_users": data.get("muted_users", {}),
+        "owner": admin_get_owner(),
+        "admins": admin_get_mods(),
+        "banned_users": {r["username"]: r for r in admin_list_bans()},
+        "muted_users": {r["username"]: r for r in admin_list_mutes()},
     })
 
 
@@ -7806,16 +7715,7 @@ def api_admin_ban():
         return jsonify({"ok": False, "message": "You cannot ban yourself."}), 400
     if _is_owner(target) and not _is_owner(caller):
         return jsonify({"ok": False, "message": "Only the owner can ban the owner."}), 403
-    with _admins_lock:
-        data = _load_admins()
-        data.setdefault("banned_users", {})[target] = {
-            "reason": reason,
-            "banned_by": caller,
-            "banned_at": _time_module.time(),
-        }
-        _save_admins(data)
-    # The banned user will be blocked on their next login attempt.
-    # Their current session will expire naturally or when they next make a request.
+    admin_ban(target, reason, caller)
     return jsonify({"ok": True, "message": f"{target} has been banned."})
 
 
@@ -7828,13 +7728,8 @@ def api_admin_unban():
     target = body.get("username", "").strip()
     if not target:
         return jsonify({"ok": False, "message": "No username provided."}), 400
-    with _admins_lock:
-        data = _load_admins()
-        removed = {k: v for k, v in data.get("banned_users", {}).items() if k.lower() == target.lower()}
-        if not removed:
-            return jsonify({"ok": False, "message": f"{target} is not banned."}), 404
-        data["banned_users"] = {k: v for k, v in data["banned_users"].items() if k.lower() != target.lower()}
-        _save_admins(data)
+    if not admin_unban(target):
+        return jsonify({"ok": False, "message": f"{target} is not banned."}), 404
     return jsonify({"ok": True, "message": f"{target} has been unbanned."})
 
 
@@ -7859,15 +7754,7 @@ def api_admin_mute():
             expires_at = _time_module.time() + int(duration_minutes) * 60
         except (ValueError, TypeError):
             return jsonify({"ok": False, "message": "Invalid duration."}), 400
-    with _admins_lock:
-        data = _load_admins()
-        data.setdefault("muted_users", {})[target] = {
-            "reason": reason,
-            "muted_by": caller,
-            "muted_at": _time_module.time(),
-            "expires_at": expires_at,
-        }
-        _save_admins(data)
+    admin_mute(target, expires_at, reason, caller)
     msg = f"{target} has been muted"
     msg += f" for {duration_minutes} minute(s)." if duration_minutes else " permanently."
     return jsonify({"ok": True, "message": msg})
@@ -7882,19 +7769,14 @@ def api_admin_unmute():
     target = body.get("username", "").strip()
     if not target:
         return jsonify({"ok": False, "message": "No username provided."}), 400
-    with _admins_lock:
-        data = _load_admins()
-        removed = {k: v for k, v in data.get("muted_users", {}).items() if k.lower() == target.lower()}
-        if not removed:
-            return jsonify({"ok": False, "message": f"{target} is not muted."}), 404
-        data["muted_users"] = {k: v for k, v in data["muted_users"].items() if k.lower() != target.lower()}
-        _save_admins(data)
+    if not admin_unmute(target):
+        return jsonify({"ok": False, "message": f"{target} is not muted."}), 404
     return jsonify({"ok": True, "message": f"{target} has been unmuted."})
 
 
 @app.route("/api/admin/add_admin", methods=["POST"])
 def api_admin_add_admin():
-    """Owner-only: promote a player to admin."""
+    """Owner-only: promote a player to moderator."""
     caller = session.get("online_username", "")
     if not _is_owner(caller):
         return jsonify({"ok": False, "message": "Only the owner can promote admins."}), 403
@@ -7902,19 +7784,14 @@ def api_admin_add_admin():
     target = body.get("username", "").strip()
     if not target:
         return jsonify({"ok": False, "message": "No username provided."}), 400
-    with _admins_lock:
-        data = _load_admins()
-        admins = data.setdefault("admins", [])
-        if any(a.lower() == target.lower() for a in admins):
-            return jsonify({"ok": False, "message": f"{target} is already an admin."}), 409
-        admins.append(target)
-        _save_admins(data)
+    if not admin_add_mod(target):
+        return jsonify({"ok": False, "message": f"{target} is already an admin."}), 409
     return jsonify({"ok": True, "message": f"{target} is now an admin."})
 
 
 @app.route("/api/admin/remove_admin", methods=["POST"])
 def api_admin_remove_admin():
-    """Owner-only: demote an admin."""
+    """Owner-only: demote a moderator."""
     caller = session.get("online_username", "")
     if not _is_owner(caller):
         return jsonify({"ok": False, "message": "Only the owner can demote admins."}), 403
@@ -7922,13 +7799,8 @@ def api_admin_remove_admin():
     target = body.get("username", "").strip()
     if not target:
         return jsonify({"ok": False, "message": "No username provided."}), 400
-    with _admins_lock:
-        data = _load_admins()
-        before = len(data.get("admins", []))
-        data["admins"] = [a for a in data.get("admins", []) if a.lower() != target.lower()]
-        if len(data["admins"]) == before:
-            return jsonify({"ok": False, "message": f"{target} is not an admin."}), 404
-        _save_admins(data)
+    if not admin_remove_mod(target):
+        return jsonify({"ok": False, "message": f"{target} is not an admin."}), 404
     return jsonify({"ok": True, "message": f"{target} has been removed from admins."})
 
 
