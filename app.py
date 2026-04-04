@@ -4181,6 +4181,7 @@ def api_spend_attr_point():
     result = spend_attribute_point(player, attr)
     if result["ok"]:
         save_player(player)
+        _autosave()
     attr_summary = get_attribute_summary(player)
     return jsonify(
         {
@@ -4405,6 +4406,7 @@ def action_explore():
         add_message("The area is quiet. You keep your senses sharp.", "var(--text-dim)")
 
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 
@@ -4456,6 +4458,7 @@ def action_rest():
     area_name = area.get("name", area_key.replace("_", " ").title())
     _set_activity(player, f"resting in {area_name}")
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 
@@ -4735,6 +4738,7 @@ def action_hire_companion():
     )
     add_message(f"{comp_data.get('name')} joins your party!", "var(--gold)")
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 
@@ -4794,6 +4798,7 @@ def action_dismiss_companion():
     name = comp_data.get("name", comp_id)
     add_message(f"{name} has left your party.", "var(--text-dim)")
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 
@@ -5102,6 +5107,7 @@ def action_equip():
     ok, msg = equip_item(player, item_name)
     add_message(msg, "var(--green-bright)" if ok else "var(--red)")
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=inventory")
 
 
@@ -5114,6 +5120,7 @@ def action_unequip():
     ok, msg = unequip_item(player, slot)
     add_message(msg, "var(--text-dim)" if ok else "var(--red)")
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=inventory")
 
 
@@ -5126,6 +5133,7 @@ def action_auto_equip():
     for msg in msgs:
         add_message(msg, "var(--green-bright)")
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=inventory")
 
 
@@ -5317,6 +5325,7 @@ def land_place_housing():
         "var(--green-bright)",
     )
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=land")
 
 
@@ -5343,6 +5352,7 @@ def land_remove_housing():
         add_message("That slot is already empty.", "var(--text-dim)")
 
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=land")
 
 
@@ -5393,6 +5403,7 @@ def land_plant():
         "var(--green-bright)",
     )
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=land")
 
 
@@ -7262,6 +7273,7 @@ def api_trade_apply():
     player["gold"] = current_gold
     session["player"] = player
     session.modified = True
+    _autosave()
     trade[applied_key] = True
     if trade.get("applied_a") and trade.get("applied_b"):
         _active_trades.pop(trade_id, None)
