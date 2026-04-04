@@ -9,6 +9,10 @@
 <style>
     /* On game page, the Groups FAB is accessible as a tab — hide it to avoid duplication */
     #groups-widget-fab { display: none !important; }
+    {% if show_welcome %}
+    /* Hide chat widget on main menu */
+    #chat-widget { display: none !important; }
+    {% endif %}
 </style>
 {% endblock %}
 {% block content %}
@@ -28,88 +32,41 @@
 
 {% if show_welcome %}
 <div class="welcome-screen">
-    <div class="welcome-inner">
-        <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="title-banner">
-        <div
-            style="text-align:center;margin-top:-10px;margin-bottom:4px;font-size:12px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">
-            v2.6.0 &mdash; New Landscape soon &#10024;</div>
-
-        {% if splash_text %}
-        <div
-            style="text-align:center;margin-bottom:14px;font-size:13px;color:var(--gold);font-style:italic;padding:0 20px;line-height:1.4;">
-            {{ splash_text }}
-        </div>
-        {% endif %}
-
-        <div class="scroll-panel welcome-scroll">
-            <h2 class="welcome-heading">Welcome to Our Legacy 2, Adventurer!</h2>
-            <p class="welcome-lore">
-                The realm of Eldenmoor teeters on the edge of ruin. Ancient evils stir in the deep places of the world,
-                and the old kingdoms crumble beneath the weight of war and shadow.
-                You are but one soul in a sea of thousands &mdash; yet destiny has a way of finding those who seek it.
-            </p>
-            <p class="welcome-lore">
-                Forge your path. Choose your class. Carve your legacy.
-            </p>
-
-            <div class="welcome-actions">
-                {% if online_user %}
-                <a href="/create" class="btn btn-primary btn-large">Sign Up and Start Game</a>
-                {% else %}
-                <button class="btn btn-primary btn-large" onclick="openOnlineModal(); switchOnlineTab('register');">Sign Up and Start Game</button>
-                {% endif %}
-            </div>
-
-            <!-- Online Account Button -->
-            <div class="save-load-bar" style="margin-top:8px;">
-                {% if online_user %}
-                <button class="btn btn-secondary" onclick="openOnlineModal()"
-                    style="background:linear-gradient(135deg,rgba(80,60,120,0.6),rgba(50,30,90,0.6));border-color:var(--mana-bright);">
-                    &#10024; {{ online_user }}
-                </button>
-                {% else %}
-                <button class="btn btn-secondary" onclick="openOnlineModal()"
-                    style="background:linear-gradient(135deg,rgba(80,60,120,0.6),rgba(50,30,90,0.6));border-color:var(--mana-bright);">
-                    <img src="/game_assets/glyphs/chat.png" alt="chat"
-                        style="width:22px;height:22px;image-rendering:pixelated;vertical-align:middle;margin-right:6px;">
-                    Sign In
-                </button>
-                {% endif %}
-            </div>
-
-            <div class="save-load-bar" style="margin-top:8px;justify-content:center;gap:8px;">
-                <button class="btn btn-secondary" onclick="openSettings()"><img class="type-glyph"
-                        src="/game_assets/glyphs/settings.png" alt="settings"> Settings</button>
-            </div>
-            <div id="save-status" class="save-notice" style="display:none;"></div>
+    <div class="mainmenu-wrap">
+        <div class="mainmenu-logo-area">
+            <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="mainmenu-logo">
+            {% if splash_text %}
+            <div class="mainmenu-splash">{{ splash_text }}</div>
+            {% endif %}
         </div>
 
-        <div class="welcome-features">
-            <div class="feature-tile">
-                <div class="feature-title">8 Classes</div>
-                <div class="feature-desc">Warrior, Mage, Rogue, Hunter, Bard, Paladin, Druid, Priest</div>
-            </div>
-            <div class="feature-tile">
-                <div class="feature-title">Deep World</div>
-                <div class="feature-desc">Dozens of areas, dungeons, and hidden places to discover</div>
-            </div>
-            <div class="feature-tile">
-                <div class="feature-title">Your Land</div>
-                <div class="feature-desc">Build a home, farm crops, and adopt a companion pet</div>
-            </div>
-            <div class="feature-tile">
-                <div class="feature-title">Companions</div>
-                <div class="feature-desc">Hire allies to fight alongside you in battle</div>
-            </div>
-            <div class="feature-tile">
-                <div class="feature-title">Quests</div>
-                <div class="feature-desc">Over 50 unique quests to complete</div>
-            </div>
-            <div class="feature-tile">
-                <div class="feature-title">Crafting</div>
-                <div class="feature-desc">Discover and craft powerful gear</div>
-            </div>
-        </div>
+        <nav class="mainmenu-nav">
+            {% if online_user %}
+            <div class="mainmenu-account-badge">&#10022; {{ online_user }}</div>
+            <button class="mainmenu-btn mainmenu-btn-highlight" onclick="openOnlineModal()">
+                <span class="mainmenu-cursor">&#9654;</span> Continue Adventure
+            </button>
+            <a href="/create" class="mainmenu-btn">
+                <span class="mainmenu-cursor">&#9654;</span> New Game
+            </a>
+            {% else %}
+            <button class="mainmenu-btn mainmenu-btn-highlight" onclick="openOnlineModal(); switchOnlineTab('register');">
+                <span class="mainmenu-cursor">&#9654;</span> New Game
+            </button>
+            <button class="mainmenu-btn" onclick="openOnlineModal(); switchOnlineTab('login');">
+                <span class="mainmenu-cursor">&#9654;</span> Sign In
+            </button>
+            {% endif %}
+            <a href="/play" class="mainmenu-btn">
+                <span class="mainmenu-cursor">&#9654;</span> Select Server
+            </a>
+            <button class="mainmenu-btn" onclick="openSettings()">
+                <span class="mainmenu-cursor">&#9654;</span> Settings
+            </button>
+        </nav>
+
+        <div class="mainmenu-version">v2.7.0 &mdash; New Landscape &#10024;</div>
+        <div id="save-status" class="save-notice" style="display:none;text-align:center;margin-top:8px;"></div>
     </div>
 </div>
 
@@ -834,14 +791,17 @@
                         {% endif %}
                     </div>
 
-                    {% if area.map_image %}
                     <div class="area-map-wrap" id="area-map-wrap">
+                        {% if area.map_image %}
                         <img src="/game_assets/maps/{{ area.map_image }}"
                              alt="Map of {{ area_name }}"
                              class="area-map-img"
-                             onerror="document.getElementById('area-map-wrap').style.display='none'">
+                             onerror="this.style.display='none';document.getElementById('no-map-label').style.display='block'">
+                        <p id="no-map-label" style="display:none;text-align:center;color:var(--text-dim);font-size:13px;padding:14px 0;font-style:italic;">None</p>
+                        {% else %}
+                        <p style="text-align:center;color:var(--text-dim);font-size:13px;padding:14px 0;font-style:italic;">None</p>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
             </div>
 
@@ -2719,12 +2679,18 @@
 
         <div style="margin-bottom:16px;">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Music</div>
-            <div style="display:flex;align-items:center;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
                 <button id="settings-music-toggle" class="btn btn-secondary btn-small" onclick="settingsToggleMusic()" style="min-width:48px;">On</button>
                 <input id="settings-music-slider" type="range" min="0" max="100" value="30"
                     oninput="settingsSetVolume(this.value)"
                     style="flex:1;accent-color:var(--gold);">
                 <span id="settings-music-vol" style="font-size:12px;color:var(--text-dim);min-width:32px;text-align:right;">30%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:11px;color:var(--text-dim);min-width:44px;">BGM Track</span>
+                <button class="btn btn-secondary btn-small bgm-track-btn" data-track="1" onclick="settingsChangeBGM('1')" style="min-width:40px;">1</button>
+                <button class="btn btn-secondary btn-small bgm-track-btn" data-track="2" onclick="settingsChangeBGM('2')" style="min-width:40px;">2</button>
+                <button class="btn btn-secondary btn-small bgm-track-btn" data-track="3" onclick="settingsChangeBGM('3')" style="min-width:40px;">3</button>
             </div>
         </div>
 

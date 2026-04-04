@@ -378,6 +378,15 @@ function initMusic() {
     _musicAudio = document.getElementById('bg-music');
     if (!_musicAudio) return;
 
+    var savedTrack = localStorage.getItem('ol2_bgm_track') || '1';
+    var trackSrc = { '1': '/game_assets/music/main_theme_1.mp3', '2': '/game_assets/music/main_theme_2.mp3', '3': '/game_assets/music/main_theme_3.mp3' };
+    if (trackSrc[savedTrack]) {
+        var src = _musicAudio.querySelector('source');
+        if (src) src.src = trackSrc[savedTrack];
+        _musicAudio.load();
+    }
+    _updateBGMButtons(savedTrack);
+
     var savedVol = parseFloat(localStorage.getItem('ol2_music_volume'));
     if (!isNaN(savedVol)) {
         _musicAudio.volume = savedVol;
@@ -675,6 +684,35 @@ function settingsSetVolume(val) {
     var label = document.getElementById('settings-music-vol');
     if (btn)   btn.textContent = (parseInt(val, 10) === 0) ? 'Off' : 'On';
     if (label) label.textContent = val + '%';
+}
+
+function _updateBGMButtons(track) {
+    document.querySelectorAll('.bgm-track-btn').forEach(function(btn) {
+        var active = btn.dataset.track === String(track);
+        btn.style.borderColor = active ? 'var(--gold)' : '';
+        btn.style.color = active ? 'var(--gold)' : '';
+    });
+}
+
+function settingsChangeBGM(track) {
+    var audio = document.getElementById('bg-music');
+    if (!audio) return;
+    var tracks = { '1': '/game_assets/music/main_theme_1.mp3', '2': '/game_assets/music/main_theme_2.mp3', '3': '/game_assets/music/main_theme_3.mp3' };
+    var newSrc = tracks[String(track)];
+    if (!newSrc) return;
+    localStorage.setItem('ol2_bgm_track', String(track));
+    localStorage.removeItem('ol2_music_time');
+    var wasPlaying = !audio.paused && !_musicMuted;
+    audio.pause();
+    var src = audio.querySelector('source');
+    if (src) { src.src = newSrc; audio.load(); }
+    if (wasPlaying) {
+        audio.addEventListener('canplay', function resume() {
+            audio.removeEventListener('canplay', resume);
+            audio.play().catch(function() {});
+        });
+    }
+    _updateBGMButtons(track);
 }
 
 async function saveAndQuit() {

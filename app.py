@@ -1397,7 +1397,7 @@ GAME_DATA: dict[str, Any] = {
     "effects": load_json("effects.json"),
 }
 
-GAME_VERSION = "2.5.1"
+GAME_VERSION = "2.7.0"
 
 BUILDING_TYPES = {
     "house": {"label": "House", "slots": 3},
