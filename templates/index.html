@@ -10,8 +10,8 @@
     /* On game page, the Groups FAB is accessible as a tab — hide it to avoid duplication */
     #groups-widget-fab { display: none !important; }
     {% if show_welcome %}
-    /* Hide chat widget on main menu */
-    #chat-widget { display: none !important; }
+    /* Hide all chat UI on main menu */
+    #chat-widget, #chat-toggle-btn { display: none !important; }
     {% endif %}
 </style>
 {% endblock %}
@@ -35,6 +35,7 @@
     <div class="mainmenu-wrap">
         <div class="mainmenu-logo-area">
             <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="mainmenu-logo">
+            <div class="mainmenu-version">v2.7.0 &mdash; New Landscape &#10024;</div>
             {% if splash_text %}
             <div class="mainmenu-splash">{{ splash_text }}</div>
             {% endif %}
@@ -57,15 +58,10 @@
                 <span class="mainmenu-cursor">&#9654;</span> Sign In
             </button>
             {% endif %}
-            <a href="/play" class="mainmenu-btn">
-                <span class="mainmenu-cursor">&#9654;</span> Select Server
-            </a>
             <button class="mainmenu-btn" onclick="openSettings()">
                 <span class="mainmenu-cursor">&#9654;</span> Settings
             </button>
         </nav>
-
-        <div class="mainmenu-version">v2.7.0 &mdash; New Landscape &#10024;</div>
         <div id="save-status" class="save-notice" style="display:none;text-align:center;margin-top:8px;"></div>
     </div>
 </div>
