@@ -31,10 +31,12 @@ function checkAutosaved() {
     if (params.get('autosaved') !== '1') return;
     history.replaceState(null, '', window.location.pathname);
     var el = document.getElementById('autosave-indicator');
-    if (!el) return;
-    el.textContent = '\u2756 Progress saved';
-    el.style.display = 'block';
-    setTimeout(function () { el.style.display = 'none'; }, 2500);
+    if (el) {
+        el.textContent = '\u2756 Progress saved';
+        el.style.display = 'block';
+        setTimeout(function () { el.style.display = 'none'; }, 2500);
+    }
+    showToast('\u2756 Progress autosaved', 'var(--green-bright)', 2500);
 }
 
 function gameConfirm(message, onConfirm) {
