@@ -1274,7 +1274,8 @@ body.page-fade-out { animation: pageFadeOut 0.2s ease both; }
 .area-map-img {
     display: block;
     width: 100%;
-    height: auto;
+    max-height: 160px;
+    object-fit: contain;
     image-rendering: pixelated;
 }
 
