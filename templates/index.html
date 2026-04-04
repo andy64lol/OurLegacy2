@@ -47,9 +47,9 @@
             <button class="mainmenu-btn mainmenu-btn-highlight" onclick="openOnlineModal()">
                 <span class="mainmenu-cursor">&#9654;</span> Continue Adventure
             </button>
-            <a href="/create" class="mainmenu-btn">
-                <span class="mainmenu-cursor">&#9654;</span> New Game
-            </a>
+            <button class="mainmenu-btn" onclick="onlineLogout()">
+                <span class="mainmenu-cursor">&#9654;</span> Log Out
+            </button>
             {% else %}
             <button class="mainmenu-btn mainmenu-btn-highlight" onclick="openOnlineModal(); switchOnlineTab('register');">
                 <span class="mainmenu-cursor">&#9654;</span> New Game
