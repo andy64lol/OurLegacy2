@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner Console — Our Legacy 2</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg: #0a0c10;
+    --surface: #111418;
+    --border: #1e2530;
+    --border-bright: #2a3545;
+    --green: #22c55e;
+    --green-dim: #16a34a;
+    --red: #ef4444;
+    --gold: #f59e0b;
+    --blue: #60a5fa;
+    --muted: #4b5563;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --prompt: #f59e0b;
+    --info: #38bdf8;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ── */
+.adm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+.adm-logo {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+}
+.adm-logo span { color: var(--red); }
+.adm-meta { font-size: 11px; color: var(--text-dim); }
+.adm-meta b { color: var(--green); }
+.adm-back {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    border: 1px solid var(--border-bright);
+    padding: 4px 10px;
+    border-radius: 4px;
+    transition: color 0.15s;
+}
+.adm-back:hover { color: var(--text); }
+
+/* ── Layout ── */
+.adm-body {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 0;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 52px);
+}
+
+/* ── Terminal column ── */
+.adm-terminal {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.adm-output {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scroll-behavior: smooth;
+}
+
+.adm-line {
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.adm-line.ok   { color: var(--green); }
+.adm-line.err  { color: var(--red); }
+.adm-line.warn { color: var(--gold); }
+.adm-line.info { color: var(--info); }
+.adm-line.dim  { color: var(--text-dim); }
+.adm-line.cmd  { color: var(--prompt); }
+.adm-line.head { color: var(--blue); font-weight: 700; margin-top: 6px; }
+
+.adm-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px 14px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+}
+.adm-prompt { color: var(--prompt); user-select: none; font-weight: 700; flex-shrink: 0; }
+.adm-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    caret-color: var(--green);
+}
+.adm-run-btn {
+    background: rgba(34,197,94,0.12);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    flex-shrink: 0;
+}
+.adm-run-btn:hover { background: rgba(34,197,94,0.22); }
+
+/* ── Sidebar ── */
+.adm-sidebar {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 14px 14px 20px;
+    gap: 14px;
+}
+
+.adm-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.adm-card-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.adm-card-title b { color: var(--gold); }
+.adm-card-body { padding: 10px 12px; font-size: 12px; }
+
+.adm-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin: 1px 2px 1px 0;
+}
+.pill-red  { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.pill-gold { background: rgba(245,158,11,0.15); color: var(--gold); border: 1px solid rgba(245,158,11,0.3); }
+.pill-blue { background: rgba(96,165,250,0.15); color: var(--blue); border: 1px solid rgba(96,165,250,0.3); }
+.pill-green{ background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+
+.adm-empty { color: var(--muted); font-style: italic; font-size: 11px; }
+
+.adm-cmd-ref { display: grid; grid-template-columns: 1fr; gap: 3px; }
+.adm-cmd-item {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    cursor: pointer;
+    padding: 3px 0;
+    border-radius: 3px;
+}
+.adm-cmd-item:hover .adm-cmd-name { color: var(--gold); }
+.adm-cmd-name { color: var(--blue); flex-shrink: 0; min-width: 100px; font-size: 11px; }
+.adm-cmd-desc { color: var(--text-dim); font-size: 11px; line-height: 1.3; }
+
+.adm-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.adm-stat-row:last-child { border-bottom: none; }
+.adm-stat-label { color: var(--text-dim); font-size: 11px; }
+.adm-stat-val { color: var(--text); font-size: 12px; font-weight: 600; }
+
+@media (max-width: 700px) {
+    .adm-body { grid-template-columns: 1fr; }
+    .adm-sidebar { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="adm-header">
+    <div class="adm-logo">&#9760; OL2 <span>OWNER CONSOLE</span></div>
+    <div class="adm-meta">Signed in as <b>{{ online_user }}</b></div>
+    <a href="/" class="adm-back">&#8592; Main Menu</a>
+</div>
+
+<div class="adm-body">
+
+    <!-- Terminal -->
+    <div class="adm-terminal">
+        <div class="adm-output" id="output">
+            <div class="adm-line head">Our Legacy 2 — Owner Console</div>
+            <div class="adm-line dim">Type <span style="color:var(--blue)">help</span> for a list of commands. Use ↑↓ for history.</div>
+            <div class="adm-line dim">────────────────────────────────────────</div>
+        </div>
+        <div class="adm-input-row">
+            <span class="adm-prompt">owner@ol2 &gt;</span>
+            <input id="cmd-input" class="adm-input" type="text" placeholder="Enter command..." autocomplete="off" spellcheck="false">
+            <button class="adm-run-btn" onclick="runCommand()">Run</button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="adm-sidebar">
+
+        <!-- Stats card -->
+        <div class="adm-card">
+            <div class="adm-card-title">Server Stats <b id="online-count">—</b> online</div>
+            <div class="adm-card-body" id="stat-body">
+                <div class="adm-stat-row"><span class="adm-stat-label">Owner</span><span class="adm-stat-val" id="stat-owner">—</span></div>
+                <div class="adm-stat-row"><span class="adm-stat-label">Moderators</span><span class="adm-stat-val" id="stat-mods">—</span></div>
+                <div class="adm-stat-row"><span class="adm-stat-label">Banned</span><span class="adm-stat-val" id="stat-bans">—</span></div>
+                <div class="adm-stat-row"><span class="adm-stat-label">Muted</span><span class="adm-stat-val" id="stat-mutes">—</span></div>
+            </div>
+        </div>
+
+        <!-- Bans -->
+        <div class="adm-card">
+            <div class="adm-card-title">Banned Players</div>
+            <div class="adm-card-body" id="ban-list"><span class="adm-empty">Loading…</span></div>
+        </div>
+
+        <!-- Mutes -->
+        <div class="adm-card">
+            <div class="adm-card-title">Muted Players</div>
+            <div class="adm-card-body" id="mute-list"><span class="adm-empty">Loading…</span></div>
+        </div>
+
+        <!-- Mods -->
+        <div class="adm-card">
+            <div class="adm-card-title">Moderators</div>
+            <div class="adm-card-body" id="mod-list"><span class="adm-empty">Loading…</span></div>
+        </div>
+
+        <!-- Command reference -->
+        <div class="adm-card">
+            <div class="adm-card-title">Commands</div>
+            <div class="adm-card-body">
+                <div class="adm-cmd-ref" id="cmd-ref">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const COMMANDS = [
+    { name: "ban <user>",        desc: "Ban a player (optional reason after username)" },
+    { name: "unban <user>",      desc: "Lift a ban" },
+    { name: "kick <user>",       desc: "Force-logout a player immediately" },
+    { name: "mute <user>",       desc: "Mute permanently or: mute <user> <mins> [reason]" },
+    { name: "unmute <user>",     desc: "Lift a mute" },
+    { name: "warn <user>",       desc: "Warn a player (optional reason)" },
+    { name: "clearwarn <user>",  desc: "Clear all warnings for a player" },
+    { name: "addmod <user>",     desc: "Promote a player to moderator" },
+    { name: "removemod <user>",  desc: "Demote a moderator" },
+    { name: "listbans",          desc: "List all banned players" },
+    { name: "listmutes",         desc: "List all muted players" },
+    { name: "listmods",          desc: "List all moderators" },
+    { name: "online",            desc: "Show online players" },
+    { name: "setowner <user>",   desc: "Transfer ownership (IRREVERSIBLE)" },
+    { name: "refresh",           desc: "Refresh sidebar data" },
+    { name: "clear",             desc: "Clear the console output" },
+    { name: "help",              desc: "Show this command list" },
+];
+
+// Render command reference in sidebar
+const cmdRef = document.getElementById('cmd-ref');
+COMMANDS.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'adm-cmd-item';
+    el.innerHTML = `<span class="adm-cmd-name">${c.name}</span><span class="adm-cmd-desc">${c.desc}</span>`;
+    el.addEventListener('click', () => {
+        const base = c.name.split(' ')[0];
+        document.getElementById('cmd-input').value = base + ' ';
+        document.getElementById('cmd-input').focus();
+    });
+    cmdRef.appendChild(el);
+});
+
+// Output helpers
+const output = document.getElementById('output');
+function print(text, cls = '') {
+    const d = document.createElement('div');
+    d.className = 'adm-line' + (cls ? ' ' + cls : '');
+    d.textContent = text;
+    output.appendChild(d);
+    output.scrollTop = output.scrollHeight;
+}
+function printHTML(html, cls = '') {
+    const d = document.createElement('div');
+    d.className = 'adm-line' + (cls ? ' ' + cls : '');
+    d.innerHTML = html;
+    output.appendChild(d);
+    output.scrollTop = output.scrollHeight;
+}
+
+// Command history
+let history = [], histIdx = -1;
+document.getElementById('cmd-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { runCommand(); return; }
+    if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (histIdx < history.length - 1) { histIdx++; e.target.value = history[histIdx]; }
+    }
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (histIdx > 0) { histIdx--; e.target.value = history[histIdx]; }
+        else { histIdx = -1; e.target.value = ''; }
+    }
+});
+
+// API helper
+async function api(method, endpoint, body) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(endpoint, opts);
+    return r.json();
+}
+
+// Sidebar refresh
+async function refreshData() {
+    try {
+        const d = await api('GET', '/api/admin/data');
+        if (!d.ok) return;
+        document.getElementById('online-count').textContent = d.online_count;
+        document.getElementById('stat-owner').textContent = d.owner || '—';
+        document.getElementById('stat-mods').textContent = d.mods.length;
+        document.getElementById('stat-bans').textContent = d.bans.length;
+        document.getElementById('stat-mutes').textContent = d.mutes.length;
+
+        const banEl = document.getElementById('ban-list');
+        if (d.bans.length) {
+            banEl.innerHTML = d.bans.map(b =>
+                `<span class="adm-pill pill-red" title="Banned by ${b.banned_by||'?'}: ${b.reason||''}">${b.username}</span>`
+            ).join('');
+        } else banEl.innerHTML = '<span class="adm-empty">No bans</span>';
+
+        const muteEl = document.getElementById('mute-list');
+        if (d.mutes.length) {
+            muteEl.innerHTML = d.mutes.map(m =>
+                `<span class="adm-pill pill-gold" title="${m.reason||''}">${m.username}</span>`
+            ).join('');
+        } else muteEl.innerHTML = '<span class="adm-empty">No mutes</span>';
+
+        const modEl = document.getElementById('mod-list');
+        if (d.mods.length) {
+            modEl.innerHTML = d.mods.map(m =>
+                `<span class="adm-pill pill-blue">${m}</span>`
+            ).join('');
+        } else modEl.innerHTML = '<span class="adm-empty">No moderators</span>';
+    } catch (e) {}
+}
+refreshData();
+setInterval(refreshData, 15000);
+
+// Command runner
+async function runCommand() {
+    const input = document.getElementById('cmd-input');
+    const raw = input.value.trim();
+    if (!raw) return;
+    input.value = '';
+    history.unshift(raw);
+    histIdx = -1;
+    if (history.length > 80) history.pop();
+
+    print('> ' + raw, 'cmd');
+
+    const parts = raw.split(/\s+/);
+    const cmd = parts[0].toLowerCase();
+
+    try {
+        switch (cmd) {
+            case 'help': {
+                print('──── Available Commands ────', 'head');
+                COMMANDS.forEach(c => print(`  ${c.name.padEnd(22)} ${c.desc}`, 'dim'));
+                break;
+            }
+            case 'clear': {
+                output.innerHTML = '';
+                break;
+            }
+            case 'refresh': {
+                await refreshData();
+                print('Sidebar refreshed.', 'ok');
+                break;
+            }
+            case 'online': {
+                const d = await api('GET', '/api/admin/data');
+                if (!d.ok) { print(d.message, 'err'); break; }
+                print(`Online players (${d.online_count}):`, 'head');
+                if (d.online_users.length) d.online_users.forEach(u => print('  · ' + u, 'info'));
+                else print('  No players currently online.', 'dim');
+                break;
+            }
+            case 'listbans': {
+                const d = await api('GET', '/api/admin/data');
+                if (!d.ok) { print(d.message, 'err'); break; }
+                print(`Banned players (${d.bans.length}):`, 'head');
+                if (d.bans.length) d.bans.forEach(b => print(`  ${b.username.padEnd(20)} — ${b.reason||'No reason'} (by ${b.banned_by||'?'})`, 'dim'));
+                else print('  No banned players.', 'dim');
+                await refreshData();
+                break;
+            }
+            case 'listmutes': {
+                const d = await api('GET', '/api/admin/data');
+                if (!d.ok) { print(d.message, 'err'); break; }
+                print(`Muted players (${d.mutes.length}):`, 'head');
+                if (d.mutes.length) d.mutes.forEach(m => {
+                    const exp = m.expires_at ? new Date(m.expires_at * 1000).toLocaleString() : 'Permanent';
+                    print(`  ${m.username.padEnd(20)} — ${m.reason||'No reason'} (until: ${exp})`, 'dim');
+                });
+                else print('  No muted players.', 'dim');
+                await refreshData();
+                break;
+            }
+            case 'listmods': {
+                const d = await api('GET', '/api/admin/data');
+                if (!d.ok) { print(d.message, 'err'); break; }
+                print(`Moderators (${d.mods.length}):`, 'head');
+                if (d.mods.length) d.mods.forEach(m => print('  · ' + m, 'info'));
+                else print('  No moderators assigned.', 'dim');
+                break;
+            }
+            case 'ban': {
+                const user = parts[1];
+                if (!user) { print('Usage: ban <username> [reason]', 'warn'); break; }
+                const reason = parts.slice(2).join(' ') || 'No reason given.';
+                const r = await api('POST', '/api/admin/ban', { username: user, reason });
+                print(r.message, r.ok ? 'ok' : 'err');
+                if (r.ok) await refreshData();
+                break;
+            }
+            case 'unban': {
+                const user = parts[1];
+                if (!user) { print('Usage: unban <username>', 'warn'); break; }
+                const r = await api('POST', '/api/admin/unban', { username: user });
+                print(r.message, r.ok ? 'ok' : 'err');
+                if (r.ok) await refreshData();
+                break;
+            }
+            case 'kick': {
+                const user = parts[1];
+                if (!user) { print('Usage: kick <username>', 'warn'); break; }
+                const r = await api('POST', '/api/admin/kick', { username: user });
+                print(r.message, r.ok ? 'ok' : 'err');
+                break;
+            }
+            case 'mute': {
+                const user = parts[1];
+                if (!user) { print('Usage: mute <username> [minutes] [reason]', 'warn'); break; }
+                let duration_minutes = null;
+                let reasonStart = 2;
+                if (parts[2] && /^\d+$/.test(parts[2])) { duration_minutes = parseInt(parts[2]); reasonStart = 3; }
+                const reason = parts.slice(reasonStart).join(' ') || 'No reason given.';
+                const r = await api('POST', '/api/admin/mute', { username: user, reason, duration_minutes });
+                print(r.message, r.ok ? 'ok' : 'err');
+                if (r.ok) await refreshData();
+                break;
+            }
+            case 'unmute': {
+                const user = parts[1];
+                if (!user) { print('Usage: unmute <username>', 'warn'); break; }
+                const r = await api('POST', '/api/admin/unmute', { username: user });
+                print(r.message, r.ok ? 'ok' : 'err');
+                if (r.ok) await refreshData();
+                break;
+            }
+            case 'warn': {
+                const user = parts[1];
+                if (!user) { print('Usage: warn <username> [reason]', 'warn'); break; }
+                const reason = parts.slice(2).join(' ') || 'No reason given.';
+                const r = await api('POST', '/api/admin/warn', { username: user, reason });
+                print(r.message, r.ok ? 'ok' : 'err');
+                break;
+            }
+            case 'clearwarn': {
+                const user = parts[1];
+                if (!user) { print('Usage: clearwarn <username>', 'warn'); break; }
+                const r = await api('POST', '/api/admin/clearwarn', { username: user });
+                print(r.message, r.ok ? 'ok' : 'err');
+                break;
+            }
+            case 'addmod': {
+                const user = parts[1];
+                if (!user) { print('Usage: addmod <username>', 'warn'); break; }
+                const r = await api('POST', '/api/admin/add_admin', { username: user });
+                print(r.message, r.ok ? 'ok' : 'err');
+                if (r.ok) await refreshData();
+                break;
+            }
+            case 'removemod': {
+                const user = parts[1];
+                if (!user) { print('Usage: removemod <username>', 'warn'); break; }
+                const r = await api('POST', '/api/admin/remove_admin', { username: user });
+                print(r.message, r.ok ? 'ok' : 'err');
+                if (r.ok) await refreshData();
+                break;
+            }
+            case 'setowner': {
+                const user = parts[1];
+                if (!user) { print('Usage: setowner <username>', 'warn'); break; }
+                print(`⚠ WARNING: This will transfer ownership to "${user}" and you will lose owner access.`, 'warn');
+                print('Type  confirm setowner ' + user + '  to proceed.', 'warn');
+                break;
+            }
+            case 'confirm': {
+                if (parts[1] === 'setowner' && parts[2]) {
+                    const r = await api('POST', '/api/admin/setowner', { username: parts[2] });
+                    print(r.message, r.ok ? 'ok' : 'err');
+                    if (r.ok) {
+                        print('You are no longer the owner. Redirecting…', 'warn');
+                        setTimeout(() => window.location.href = '/', 2000);
+                    }
+                } else {
+                    print('Nothing to confirm.', 'dim');
+                }
+                break;
+            }
+            default:
+                print(`Unknown command: ${cmd}. Type help for a list.`, 'err');
+        }
+    } catch (e) {
+        print('Error: ' + e.message, 'err');
+    }
+}
+
+// Focus input on load
+document.getElementById('cmd-input').focus();
+</script>
+</body>
+</html>

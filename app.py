@@ -207,6 +207,10 @@ _SPAM_MAX_MSGS = 5            # max messages in window before auto-mute
 _active_sessions: dict = {}
 # Inactivity tracking: maps user_id -> last_activity_timestamp
 _session_last_activity: dict = {}
+# Admin: usernames force-kicked by owner (will be logged out on next request)
+_kicked_usernames: set = set()
+# Admin: username -> user_id mapping for kick support
+_username_to_userid: dict = {}
 CHAT_COOLDOWN_SECS = 10
 CHAT_MAX_LEN = 200
 
@@ -1574,6 +1578,12 @@ def _is_session_valid() -> bool:
         return True
     token = session.get("session_token")
     if not token:
+        return False
+    # Owner kick: force-logout by username
+    username = session.get("online_username", "")
+    if username and username.lower() in _kicked_usernames:
+        _kicked_usernames.discard(username.lower())
+        _active_sessions.pop(user_id, None)
         return False
     # If there IS an entry for this user but with a DIFFERENT token → legitimate kick
     # (another device logged in and took over the session).
@@ -6849,6 +6859,7 @@ def api_online_login():
         session_token = str(uuid.uuid4())
         _active_sessions[user_id] = session_token
         _session_last_activity[user_id] = _time_module.time()
+        _username_to_userid[actual_username.lower()] = user_id
         session["online_username"] = actual_username
         session["online_user_id"] = user_id
         session["session_token"] = session_token
@@ -7867,6 +7878,97 @@ def api_admin_remove_admin():
     if not admin_remove_mod(target):
         return jsonify({"ok": False, "message": f"{target} is not an admin."}), 404
     return jsonify({"ok": True, "message": f"{target} has been removed from admins."})
+
+
+@app.route("/admin")
+def admin_console():
+    """Owner-only admin console page."""
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return redirect(url_for("index"))
+    return render_template("admin.html", online_user=caller)
+
+
+@app.route("/api/admin/data", methods=["GET"])
+def api_admin_data():
+    """Extended admin data: bans, mutes, mods, online count."""
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    return jsonify({
+        "ok": True,
+        "is_owner": True,
+        "owner": admin_get_owner(),
+        "mods": admin_get_mods(),
+        "bans": admin_list_bans(),
+        "mutes": admin_list_mutes(),
+        "online_count": len(_active_sessions),
+        "online_users": list(_username_to_userid.keys()),
+    })
+
+
+@app.route("/api/admin/kick", methods=["POST"])
+def api_admin_kick():
+    """Owner-only: force-logout a user on their next request."""
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Only the owner can kick players."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("username", "").strip().lower()
+    if not target:
+        return jsonify({"ok": False, "message": "No username provided."}), 400
+    if target == caller.lower():
+        return jsonify({"ok": False, "message": "You cannot kick yourself."}), 400
+    # Also invalidate their active session token immediately if online
+    uid = _username_to_userid.get(target)
+    if uid:
+        _active_sessions.pop(uid, None)
+    _kicked_usernames.add(target)
+    return jsonify({"ok": True, "message": f"{target} has been kicked."})
+
+
+@app.route("/api/admin/warn", methods=["POST"])
+def api_admin_warn_user():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("username", "").strip()
+    reason = body.get("reason", "").strip() or "No reason given."
+    if not target:
+        return jsonify({"ok": False, "message": "No username provided."}), 400
+    count = admin_warn(target, reason)
+    return jsonify({"ok": True, "message": f"{target} warned. Total warnings: {count}."})
+
+
+@app.route("/api/admin/clearwarn", methods=["POST"])
+def api_admin_clearwarn():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("username", "").strip()
+    if not target:
+        return jsonify({"ok": False, "message": "No username provided."}), 400
+    if admin_clear_warns(target):
+        return jsonify({"ok": True, "message": f"Warnings cleared for {target}."})
+    return jsonify({"ok": False, "message": f"No warnings found for {target}."}), 404
+
+
+@app.route("/api/admin/setowner", methods=["POST"])
+def api_admin_setowner():
+    """Owner-only: transfer ownership to another username."""
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Only the owner can transfer ownership."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("username", "").strip()
+    if not target:
+        return jsonify({"ok": False, "message": "No username provided."}), 400
+    if target.lower() == caller.lower():
+        return jsonify({"ok": False, "message": "You are already the owner."}), 400
+    admin_set_owner(target)
+    return jsonify({"ok": True, "message": f"Ownership transferred to {target}."})
 
 
 from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi
