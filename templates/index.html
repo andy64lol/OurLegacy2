@@ -373,6 +373,22 @@
             </div>
         </div>
 
+        {% if battle_companions %}
+        <div class="battle-companions-row">
+            <div class="battle-companions-label">&#9876; Party</div>
+            {% for comp in battle_companions %}
+            {% set _chp_pct = [(comp.hp / comp.max_hp * 100)|int, 100]|min if comp.max_hp > 0 else 0 %}
+            <div class="battle-comp-card{% if comp.hp <= 0 %} battle-comp-fallen{% endif %}">
+                <div class="battle-comp-name">{{ comp.name }}</div>
+                <div class="battle-comp-bar-wrap">
+                    <div class="battle-comp-bar" style="width:{{ _chp_pct }}%;background:{% if comp.hp <= 0 %}var(--red){% elif _chp_pct > 60 %}var(--green-bright){% elif _chp_pct > 25 %}var(--gold){% else %}var(--red){% endif %};"></div>
+                </div>
+                <div class="battle-comp-hp">{% if comp.hp <= 0 %}Fallen{% else %}{{ comp.hp }}/{{ comp.max_hp }}{% endif %}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="panel battle-log-panel">
             <div class="panel-title">Battle Chronicle</div>
             <div class="panel-body message-log battle-log" id="battle-log">

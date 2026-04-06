@@ -2062,44 +2062,70 @@ def get_boss_phase(phases, hp_pct):
     return len(sorted_desc) - 1, sorted_desc[-1]
 
 
-def _enemy_take_turn(enemy, player, player_effects, log):
-    """Dispatch enemy turn — boss uses full mechanic, regular enemy does plain attack."""
+def _enemy_take_turn(enemy, player, player_effects, log, battle_companions=None):
+    """Dispatch enemy turn — boss uses full mechanic, regular enemy does plain attack.
+    If battle_companions is provided, the enemy may target a living companion instead."""
     if enemy.get("is_boss"):
         boss_take_turn(enemy, player, player_effects, log)
-    else:
-        # Evasion check: player armor evasion_bonus + attr_evasion
-        evasion_pct = player.get("attr_evasion", 0) / 100.0
-        dodge = player.get("dodge_chance", 0.0) + evasion_pct
-        if dodge > 0 and random.random() < dodge:
-            log.append(f"You evade the {enemy['name']}'s attack!")
+        return
+
+    # Build target pool: player + any living companions
+    living_companions = [c for c in (battle_companions or []) if c.get("hp", 0) > 0]
+    # Enemy picks a random target; companions each share equal weight with the player
+    targets = ["player"] + [c["id"] for c in living_companions]
+    chosen = random.choice(targets)
+
+    if chosen != "player" and living_companions:
+        # Enemy attacks a companion
+        comp = next((c for c in living_companions if c["id"] == chosen), None)
+        if comp:
+            c_dmg = max(1, enemy["attack"] - comp["defense"] + dice.between(-2, 4))
+            comp["hp"] = max(0, comp["hp"] - c_dmg)
+            if comp["hp"] == 0:
+                log.append(
+                    f"The {enemy['name']} strikes {comp['name']} for {c_dmg} damage — "
+                    f"{comp['name']} has fallen!"
+                )
+            else:
+                log.append(
+                    f"The {enemy['name']} attacks {comp['name']} for {c_dmg} damage! "
+                    f"({comp['hp']}/{comp['max_hp']} HP remaining)"
+                )
             return
-        # Apply physical resistance from armor
-        phys_res = player.get("physical_resistance", 0.0)
-        e_raw = max(1, enemy["attack"] - player["defense"] + dice.between(-2, 4))
-        e_dmg = max(1, int(e_raw * (1.0 - phys_res)))
-        if "shield" in player_effects:
-            shield_data = player_effects["shield"].get("data", player_effects["shield"])
-            absorb = shield_data.get("absorb_amount", 0)
-            reduction = min(absorb, e_dmg)
-            e_dmg = max(0, e_dmg - reduction)
-            if reduction > 0:
-                log.append(f"Your shield absorbs {reduction} damage!")
-        # Active buff absorb (parry etc.)
-        for buff in list(player.get("active_buffs", [])):
-            if e_dmg <= 0:
-                break
-            mods = buff.get("modifiers", {})
-            absorb = mods.get("absorb_amount", 0)
-            if absorb > 0:
-                use = min(absorb, e_dmg)
-                e_dmg -= use
-                mods["absorb_amount"] = absorb - use
-        player["hp"] = max(0, player["hp"] - e_dmg)
-        if e_dmg > 0:
-            res_note = f" (-{int(phys_res * 100)}% phys res)" if phys_res > 0 else ""
-            log.append(f"The {enemy['name']} strikes you for {e_dmg} damage{res_note}.")
-        else:
-            log.append(f"The {enemy['name']} attacks but your defences hold!")
+
+    # Enemy attacks the player
+    evasion_pct = player.get("attr_evasion", 0) / 100.0
+    dodge = player.get("dodge_chance", 0.0) + evasion_pct
+    if dodge > 0 and random.random() < dodge:
+        log.append(f"You evade the {enemy['name']}'s attack!")
+        return
+    # Apply physical resistance from armor
+    phys_res = player.get("physical_resistance", 0.0)
+    e_raw = max(1, enemy["attack"] - player["defense"] + dice.between(-2, 4))
+    e_dmg = max(1, int(e_raw * (1.0 - phys_res)))
+    if "shield" in player_effects:
+        shield_data = player_effects["shield"].get("data", player_effects["shield"])
+        absorb = shield_data.get("absorb_amount", 0)
+        reduction = min(absorb, e_dmg)
+        e_dmg = max(0, e_dmg - reduction)
+        if reduction > 0:
+            log.append(f"Your shield absorbs {reduction} damage!")
+    # Active buff absorb (parry etc.)
+    for buff in list(player.get("active_buffs", [])):
+        if e_dmg <= 0:
+            break
+        mods = buff.get("modifiers", {})
+        absorb = mods.get("absorb_amount", 0)
+        if absorb > 0:
+            use = min(absorb, e_dmg)
+            e_dmg -= use
+            mods["absorb_amount"] = absorb - use
+    player["hp"] = max(0, player["hp"] - e_dmg)
+    if e_dmg > 0:
+        res_note = f" (-{int(phys_res * 100)}% phys res)" if phys_res > 0 else ""
+        log.append(f"The {enemy['name']} strikes you for {e_dmg} damage{res_note}.")
+    else:
+        log.append(f"The {enemy['name']} attacks but your defences hold!")
 
 
 def boss_take_turn(enemy, player, player_effects, log):
@@ -5597,6 +5623,7 @@ def battle_spell():
     log = session.get("battle_log", [])
     player_effects: dict[str, Any] = session.get("battle_player_effects") or {}
     enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
+    battle_companions = session.get("battle_companions", [])
 
     # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
@@ -5636,11 +5663,36 @@ def battle_spell():
     session["battle_enemy"] = enemy
 
     if enemy.get("hp", 1) <= 0:
+        _sync_companion_hp_to_player(player, battle_companions)
+        _restore_companion_hp(player)
         return _handle_victory(player, enemy, log)
 
-    _enemy_take_turn(enemy, player, player_effects, log)
+    _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
+
+    # Companion action
+    if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
+        session["battle_companions"] = battle_companions
+        session["battle_player_effects"] = player_effects
+        session["battle_enemy_effects"] = enemy_effects
+        _sync_companion_hp_to_player(player, battle_companions)
+        _restore_companion_hp(player)
+        return _handle_victory(player, enemy, log)
+
+    session["battle_companions"] = battle_companions
 
     if player["hp"] <= 0:
+        won = _companion_last_stand(battle_companions, enemy, log)
+        session["battle_companions"] = battle_companions
+        _sync_companion_hp_to_player(player, battle_companions)
+        if won:
+            player["hp"] = 1
+            log.append("Your companions fought on and saved you! You survive, barely.")
+            _restore_companion_hp(player)
+            session["battle_player_effects"] = player_effects
+            session["battle_enemy_effects"] = enemy_effects
+            return _handle_victory(player, enemy, log)
+        session["battle_player_effects"] = player_effects
+        session["battle_enemy_effects"] = enemy_effects
         return _handle_defeat(player, enemy, log)
 
     session["battle_log"] = log
@@ -5740,7 +5792,7 @@ def battle_attack():
             _restore_companion_hp(player)
             return _handle_victory(player, enemy, log)
 
-    _enemy_take_turn(enemy, player, player_effects, log)
+    _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
 
     # Companion action
     if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
@@ -5806,7 +5858,7 @@ def battle_defend():
     log.append("You brace yourself, raising your guard.")
     real_defense = player["defense"]
     player["defense"] = real_defense * 2
-    _enemy_take_turn(enemy, player, player_effects, log)
+    _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
     player["defense"] = real_defense
 
     # Companion action
@@ -5925,7 +5977,7 @@ def battle_use_item():
         if used:
             player["inventory"].remove(item_name)
 
-        _enemy_take_turn(enemy, player, player_effects, log)
+        _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
 
     # Companion action
     if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
