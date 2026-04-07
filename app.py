@@ -7889,6 +7889,62 @@ def admin_console():
     return render_template("admin.html", online_user=caller)
 
 
+@app.route("/items")
+def items_debug():
+    """Debug page showing all items, stats, and textures."""
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return redirect(url_for("index"))
+
+    raw = ITEMS  # already loaded dict
+
+    items_list = []
+    for name, data in raw.items():
+        if not isinstance(data, dict):
+            continue
+        entry = {"name": name}
+        entry.update(data)
+        # Ensure None-safe fields for template
+        for field in ("texture", "type", "rarity", "weapon_type", "armor_type",
+                      "description", "effect", "tags", "requirements",
+                      "price", "attack_bonus", "defense_bonus", "magic_bonus",
+                      "crit_chance", "aim_accuracy", "parry_chance", "weight",
+                      "sharpness", "smiting", "value", "min_value", "max_value",
+                      "duration"):
+            entry.setdefault(field, None)
+        entry["tags"] = entry["tags"] or []
+        entry["requirements"] = entry["requirements"] or {}
+        items_list.append(entry)
+
+    # Sort by type then name
+    items_list.sort(key=lambda x: (x.get("type") or "", x["name"]))
+
+    total = len(items_list)
+    with_texture = sum(1 for i in items_list if i.get("texture"))
+    without_texture = total - with_texture
+
+    all_types = sorted({i.get("type") or "unknown" for i in items_list})
+    all_rarities = sorted({i.get("rarity") or "common" for i in items_list},
+                          key=lambda r: ["common","uncommon","rare","epic","legendary"].index(r)
+                          if r in ["common","uncommon","rare","epic","legendary"] else 99)
+
+    type_counts = {}
+    for i in items_list:
+        t = i.get("type") or "unknown"
+        type_counts[t] = type_counts.get(t, 0) + 1
+
+    return render_template(
+        "items.html",
+        items=items_list,
+        total=total,
+        with_texture=with_texture,
+        without_texture=without_texture,
+        type_list=all_types,
+        rarity_list=all_rarities,
+        type_counts=type_counts,
+    )
+
+
 @app.route("/api/admin/data", methods=["GET"])
 def api_admin_data():
     """Extended admin data: bans, mutes, mods, online count."""

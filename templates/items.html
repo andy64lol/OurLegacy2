@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Items Debug — Our Legacy 2</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg: #0a0c10;
+    --surface: #111418;
+    --surface2: #161b22;
+    --border: #1e2530;
+    --border-bright: #2a3545;
+    --gold: #f59e0b;
+    --blue: #60a5fa;
+    --green: #22c55e;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --orange: #fb923c;
+    --muted: #4b5563;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --rarity-common: #9ca3af;
+    --rarity-uncommon: #22c55e;
+    --rarity-rare: #60a5fa;
+    --rarity-epic: #a78bfa;
+    --rarity-legendary: #f59e0b;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-wrap: wrap;
+}
+.logo {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+.logo span { color: var(--red); }
+.stat-pill {
+    font-size: 11px;
+    color: var(--text-dim);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 2px 8px;
+}
+.stat-pill b { color: var(--blue); }
+
+/* ── Controls ── */
+.controls {
+    padding: 14px 24px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.search-box {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    width: 260px;
+    outline: none;
+}
+.search-box:focus { border-color: var(--blue); }
+.filter-select {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 5px 10px;
+    outline: none;
+    cursor: pointer;
+}
+.filter-select:focus { border-color: var(--blue); }
+.count-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: auto;
+}
+.count-label b { color: var(--green); }
+
+/* ── Grid ── */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    padding: 20px 24px;
+}
+
+/* ── Item Card ── */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.15s;
+}
+.card:hover { border-color: var(--border-bright); }
+.card.rarity-common    { border-left: 3px solid var(--rarity-common); }
+.card.rarity-uncommon  { border-left: 3px solid var(--rarity-uncommon); }
+.card.rarity-rare      { border-left: 3px solid var(--rarity-rare); }
+.card.rarity-epic      { border-left: 3px solid var(--rarity-epic); }
+.card.rarity-legendary { border-left: 3px solid var(--rarity-legendary); }
+
+.card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+}
+.item-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    flex-shrink: 0;
+    background: #0d1117;
+    border-radius: 6px;
+    border: 1px solid var(--border-bright);
+    padding: 3px;
+}
+.no-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    background: #0d1117;
+    border-radius: 6px;
+    border: 1px solid var(--border-bright);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    user-select: none;
+}
+.card-title-block { flex: 1; min-width: 0; }
+.item-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.item-badges {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+.badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    text-transform: capitalize;
+    letter-spacing: 0.03em;
+}
+.badge-type     { background: #1e2d45; color: var(--blue); }
+.badge-rarity-common    { background: #1f2937; color: var(--rarity-common); }
+.badge-rarity-uncommon  { background: #14291e; color: var(--rarity-uncommon); }
+.badge-rarity-rare      { background: #172035; color: var(--rarity-rare); }
+.badge-rarity-epic      { background: #201535; color: var(--rarity-epic); }
+.badge-rarity-legendary { background: #2a1f00; color: var(--rarity-legendary); }
+.badge-wtype    { background: #231a00; color: var(--orange); }
+
+.card-body { padding: 10px 14px; flex: 1; }
+.desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+/* Stats table */
+.stats { width: 100%; border-collapse: collapse; }
+.stats td {
+    font-size: 11px;
+    padding: 2px 0;
+    vertical-align: top;
+}
+.stat-key {
+    color: var(--text-dim);
+    width: 50%;
+    padding-right: 6px;
+}
+.stat-val { color: var(--text); font-weight: 600; }
+.stat-val.positive { color: var(--green); }
+.stat-val.price { color: var(--gold); }
+
+/* Tags row */
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.tag {
+    font-size: 10px;
+    background: #1c2433;
+    color: var(--muted);
+    padding: 1px 6px;
+    border-radius: 3px;
+}
+
+/* Texture filepath */
+.card-footer {
+    padding: 7px 14px;
+    background: #0d1117;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--text-dim);
+    word-break: break-all;
+    font-family: 'Courier New', monospace;
+}
+.card-footer .filepath { color: #4a6fa5; }
+.card-footer .no-tex { color: var(--muted); font-style: italic; }
+
+/* Hidden card */
+.card.hidden { display: none; }
+
+/* Rarity color helpers */
+.r-common    { color: var(--rarity-common); }
+.r-uncommon  { color: var(--rarity-uncommon); }
+.r-rare      { color: var(--rarity-rare); }
+.r-epic      { color: var(--rarity-epic); }
+.r-legendary { color: var(--rarity-legendary); }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">Our Legacy <span>2</span> &mdash; Items Debug</div>
+    <div class="stat-pill">Total: <b>{{ total }}</b></div>
+    <div class="stat-pill">With Texture: <b>{{ with_texture }}</b></div>
+    <div class="stat-pill">No Texture: <b>{{ without_texture }}</b></div>
+    <div class="stat-pill">Types: <b>{{ type_counts | length }}</b></div>
+    <a href="/admin" style="margin-left:auto;font-size:11px;color:var(--text-dim);text-decoration:none;border:1px solid var(--border-bright);padding:4px 10px;border-radius:4px;">&larr; Admin</a>
+</div>
+
+<div class="controls">
+    <input class="search-box" type="text" id="search" placeholder="Search by name, type, tag..." oninput="filterItems()">
+    <select class="filter-select" id="filter-type" onchange="filterItems()">
+        <option value="">All Types</option>
+        {% for t in type_list %}
+        <option value="{{ t }}">{{ t }}</option>
+        {% endfor %}
+    </select>
+    <select class="filter-select" id="filter-rarity" onchange="filterItems()">
+        <option value="">All Rarities</option>
+        {% for r in rarity_list %}
+        <option value="{{ r }}">{{ r }}</option>
+        {% endfor %}
+    </select>
+    <select class="filter-select" id="filter-tex" onchange="filterItems()">
+        <option value="">All (texture)</option>
+        <option value="yes">Has Texture</option>
+        <option value="no">No Texture</option>
+    </select>
+    <div class="count-label">Showing <b id="visible-count">{{ total }}</b> items</div>
+</div>
+
+<div class="grid" id="grid">
+{% for item in items %}
+<div class="card rarity-{{ item.rarity | default('common') }}"
+     data-name="{{ item.name | lower }}"
+     data-type="{{ item.type | default('') }}"
+     data-rarity="{{ item.rarity | default('common') }}"
+     data-tags="{{ (item.tags or []) | join(' ') | lower }}"
+     data-tex="{{ 'yes' if item.texture else 'no' }}">
+
+    <div class="card-top">
+        {% if item.texture %}
+        <img class="item-icon" src="/game_assets/{{ item.texture }}" alt="{{ item.name }}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="no-icon" style="display:none;">🗡️</div>
+        {% else %}
+        <div class="no-icon">
+            {% if item.type == 'consumable' %}🧪
+            {% elif item.type == 'armor' %}🛡️
+            {% elif item.type == 'material' %}⚙️
+            {% elif item.type == 'book' %}📖
+            {% elif item.type == 'offhand' %}🪃
+            {% elif item.type == 'accessory' %}💍
+            {% else %}❓{% endif %}
+        </div>
+        {% endif %}
+        <div class="card-title-block">
+            <div class="item-name" title="{{ item.name }}">{{ item.name }}</div>
+            <div class="item-badges">
+                <span class="badge badge-type">{{ item.type | default('unknown') }}</span>
+                {% if item.rarity %}
+                <span class="badge badge-rarity-{{ item.rarity }}">{{ item.rarity }}</span>
+                {% endif %}
+                {% if item.weapon_type %}
+                <span class="badge badge-wtype">{{ item.weapon_type }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        {% if item.description %}
+        <div class="desc">{{ item.description }}</div>
+        {% endif %}
+
+        <table class="stats">
+        {% if item.price is not none %}
+        <tr><td class="stat-key">price</td><td class="stat-val price">{{ item.price }}g</td></tr>
+        {% endif %}
+        {% if item.attack_bonus is not none %}
+        <tr><td class="stat-key">attack bonus</td><td class="stat-val positive">+{{ item.attack_bonus }}</td></tr>
+        {% endif %}
+        {% if item.defense_bonus is not none %}
+        <tr><td class="stat-key">defense bonus</td><td class="stat-val positive">+{{ item.defense_bonus }}</td></tr>
+        {% endif %}
+        {% if item.magic_bonus is not none %}
+        <tr><td class="stat-key">magic bonus</td><td class="stat-val positive">+{{ item.magic_bonus }}</td></tr>
+        {% endif %}
+        {% if item.crit_chance is not none %}
+        <tr><td class="stat-key">crit chance</td><td class="stat-val">{{ item.crit_chance }}%</td></tr>
+        {% endif %}
+        {% if item.aim_accuracy is not none %}
+        <tr><td class="stat-key">aim accuracy</td><td class="stat-val">{{ item.aim_accuracy }}%</td></tr>
+        {% endif %}
+        {% if item.parry_chance is not none %}
+        <tr><td class="stat-key">parry chance</td><td class="stat-val">{{ item.parry_chance }}%</td></tr>
+        {% endif %}
+        {% if item.weight is not none %}
+        <tr><td class="stat-key">weight</td><td class="stat-val">{{ item.weight }}</td></tr>
+        {% endif %}
+        {% if item.sharpness is not none %}
+        <tr><td class="stat-key">sharpness</td><td class="stat-val">{{ item.sharpness }}</td></tr>
+        {% endif %}
+        {% if item.smiting is not none %}
+        <tr><td class="stat-key">smiting</td><td class="stat-val">{{ item.smiting }}</td></tr>
+        {% endif %}
+        {% if item.value is not none and item.type == 'consumable' %}
+        <tr><td class="stat-key">effect value</td><td class="stat-val positive">{{ item.value }}</td></tr>
+        {% endif %}
+        {% if item.min_value is not none %}
+        <tr><td class="stat-key">value range</td><td class="stat-val">{{ item.min_value }}–{{ item.max_value }}</td></tr>
+        {% endif %}
+        {% if item.duration is not none %}
+        <tr><td class="stat-key">duration</td><td class="stat-val">{{ item.duration }} turns</td></tr>
+        {% endif %}
+        {% if item.effect %}
+        <tr><td class="stat-key">effect</td><td class="stat-val">{{ item.effect }}</td></tr>
+        {% endif %}
+        {% if item.armor_type %}
+        <tr><td class="stat-key">armor type</td><td class="stat-val">{{ item.armor_type }}</td></tr>
+        {% endif %}
+        {% if item.requirements %}
+        {% for rk, rv in item.requirements.items() %}
+        <tr><td class="stat-key">req {{ rk }}</td><td class="stat-val">{{ rv }}</td></tr>
+        {% endfor %}
+        {% endif %}
+        </table>
+
+        {% if item.tags %}
+        <div class="tags">
+            {% for tag in item.tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card-footer">
+        {% if item.texture %}
+        <span class="filepath">data/assets/{{ item.texture }}</span>
+        {% else %}
+        <span class="no-tex">no texture assigned</span>
+        {% endif %}
+    </div>
+
+</div>
+{% endfor %}
+</div>
+
+<script>
+const cards = Array.from(document.querySelectorAll('.card'));
+const countEl = document.getElementById('visible-count');
+
+function filterItems() {
+    const q = document.getElementById('search').value.toLowerCase().trim();
+    const typeF = document.getElementById('filter-type').value;
+    const rarityF = document.getElementById('filter-rarity').value;
+    const texF = document.getElementById('filter-tex').value;
+
+    let visible = 0;
+    cards.forEach(card => {
+        const name = card.dataset.name || '';
+        const type = card.dataset.type || '';
+        const rarity = card.dataset.rarity || '';
+        const tags = card.dataset.tags || '';
+        const tex = card.dataset.tex || '';
+
+        const matchQ = !q || name.includes(q) || type.includes(q) || tags.includes(q);
+        const matchType = !typeF || type === typeF;
+        const matchRarity = !rarityF || rarity === rarityF;
+        const matchTex = !texF || tex === texF;
+
+        if (matchQ && matchType && matchRarity && matchTex) {
+            card.classList.remove('hidden');
+            visible++;
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+    countEl.textContent = visible;
+}
+</script>
+</body>
+</html>

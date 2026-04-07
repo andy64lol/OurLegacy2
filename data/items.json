@@ -11,7 +11,8 @@
          "healing"
       ],
       "min_value": 40,
-      "max_value": 60
+      "max_value": 60,
+      "texture": "items/consumables/rpg_icons129.png"
    },
    "Mana Potion": {
       "type": "consumable",
@@ -25,7 +26,8 @@
          "mana"
       ],
       "min_value": 24,
-      "max_value": 36
+      "max_value": 36,
+      "texture": "items/consumables/rpg_icons130.png"
    },
    "Large Health Potion": {
       "type": "consumable",
@@ -38,7 +40,8 @@
       "tags": [
          "consumable",
          "heal"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons131.png"
    },
    "Frost Potion": {
       "type": "consumable",
@@ -53,7 +56,8 @@
          "healing",
          "defensive"
       ],
-      "on_use_buff": "defense_boost"
+      "on_use_buff": "defense_boost",
+      "texture": "items/consumables/rpg_icons132.png"
    },
    "Iron Sword": {
       "type": "weapon",
@@ -75,7 +79,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons25.png"
    },
    "Steel Dagger": {
       "type": "weapon",
@@ -101,7 +106,8 @@
          "finesse",
          "one-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons26.png"
    },
    "Magic Staff": {
       "type": "weapon",
@@ -127,7 +133,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons69.png"
    },
    "Greatsword": {
       "type": "weapon",
@@ -154,7 +161,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons27.png"
    },
    "Leather Armor": {
       "type": "armor",
@@ -242,7 +250,8 @@
          "magical",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons1.png"
    },
    "Boots of Speed": {
       "type": "accessory",
@@ -257,7 +266,8 @@
          "accessory",
          "boots",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons2.png"
    },
    "Goblin Ear": {
       "type": "material",
@@ -449,7 +459,8 @@
          "bludgeoning",
          "one-handed",
          "holy"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons117.png"
    },
    "Troll Hide": {
       "type": "material",
@@ -480,7 +491,8 @@
          "finesse",
          "one-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons28.png"
    },
    "Wooden Wand": {
       "type": "weapon",
@@ -506,7 +518,8 @@
          "magical",
          "arcane",
          "one-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons70.png"
    },
    "Crystalline Wand": {
       "type": "weapon",
@@ -534,7 +547,8 @@
          "arcane",
          "one-handed",
          "ice"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons71.png"
    },
    "Spellsword": {
       "type": "weapon",
@@ -559,7 +573,8 @@
          "slashing",
          "one-handed",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons29.png"
    },
    "Ethereal Staff": {
       "type": "weapon",
@@ -585,7 +600,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons72.png"
    },
    "Rogue's Dagger": {
       "type": "weapon",
@@ -612,7 +628,8 @@
          "finesse",
          "one-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons30.png"
    },
    "Ninja Kunai": {
       "type": "weapon",
@@ -638,7 +655,8 @@
          "ranged",
          "finesse",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons141.png"
    },
    "Shadow Blade": {
       "type": "weapon",
@@ -662,7 +680,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons31.png"
    },
    "Obsidian Edge": {
       "type": "weapon",
@@ -687,7 +706,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons32.png"
    },
    "Iron Axe": {
       "type": "weapon",
@@ -713,7 +733,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/axes/rpg_icons89.png"
    },
    "Chieftain's Axe": {
       "type": "weapon",
@@ -740,7 +761,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/axes/rpg_icons90.png"
    },
    "Warhammer": {
       "type": "weapon",
@@ -769,7 +791,8 @@
          "two-handed",
          "heavy",
          "holy"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons118.png"
    },
    "Dragonsoul Blade": {
       "type": "weapon",
@@ -796,7 +819,8 @@
          "slashing",
          "one-handed",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons33.png"
    },
    "Mourning Blade": {
       "type": "weapon",
@@ -819,7 +843,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons34.png"
    },
    "Plate Armor": {
       "type": "armor",
@@ -971,7 +996,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons35.png"
    },
    "Dragonbone Lute": {
       "type": "weapon",
@@ -998,7 +1024,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons36.png"
    },
    "Skyfall Lyre": {
       "type": "weapon",
@@ -1025,7 +1052,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons37.png"
    },
    "H\u00e4mmelson's Legendary Flute": {
       "type": "weapon",
@@ -1053,7 +1081,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons38.png"
    },
    "War Drum of The god of Thunder Z\u00e2esltral": {
       "type": "weapon",
@@ -1083,7 +1112,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons39.png"
    },
    "Wooden Flute": {
       "type": "weapon",
@@ -1110,7 +1140,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons40.png"
    },
    "Silver Lyre": {
       "type": "weapon",
@@ -1137,7 +1168,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons41.png"
    },
    "Oak Harp": {
       "type": "weapon",
@@ -1164,7 +1196,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons42.png"
    },
    "Rhythm Drum": {
       "type": "weapon",
@@ -1192,7 +1225,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons43.png"
    },
    "Celestial Harp": {
       "type": "weapon",
@@ -1219,7 +1253,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons44.png"
    },
    "Crystal Flute": {
       "type": "weapon",
@@ -1247,7 +1282,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons45.png"
    },
    "Golden Lyre": {
       "type": "weapon",
@@ -1274,7 +1310,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons46.png"
    },
    "Warfare Drum": {
       "type": "weapon",
@@ -1301,7 +1338,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons47.png"
    },
    "Songsmith's Lyre": {
       "type": "weapon",
@@ -1328,7 +1366,8 @@
          "bard",
          "instrument",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons48.png"
    },
    "Silken Robes": {
       "type": "armor",
@@ -1507,7 +1546,8 @@
          "slashing",
          "one-handed",
          "holy"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons49.png"
    },
    "Druidic Staff": {
       "type": "weapon",
@@ -1533,7 +1573,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons73.png"
    },
    "Crown of Wisdom": {
       "type": "accessory",
@@ -1551,7 +1592,8 @@
          "crown",
          "magical",
          "offensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons3.png"
    },
    "Cloak of Shadows": {
       "type": "accessory",
@@ -1569,7 +1611,8 @@
          "cloak",
          "defensive",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons4.png"
    },
    "Amulet of Valor": {
       "type": "accessory",
@@ -1587,7 +1630,8 @@
          "amulet",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons5.png"
    },
    "Ring of Mana": {
       "type": "accessory",
@@ -1603,7 +1647,8 @@
          "accessory",
          "ring",
          "magical"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons6.png"
    },
    "Ring of Precision": {
       "type": "accessory",
@@ -1621,7 +1666,8 @@
          "ring",
          "offensive",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons7.png"
    },
    "Nature's Embrace": {
       "type": "weapon",
@@ -1648,7 +1694,8 @@
          "slashing",
          "one-handed",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons50.png"
    },
    "Gaea's Wrath": {
       "type": "weapon",
@@ -1675,7 +1722,8 @@
          "slashing",
          "one-handed",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons51.png"
    },
    "Sun-Blessed Mace": {
       "type": "weapon",
@@ -1703,7 +1751,8 @@
          "one-handed",
          "fire",
          "holy"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons119.png"
    },
    "Aegis of the Eternal Light": {
       "type": "weapon",
@@ -1729,7 +1778,8 @@
          "slashing",
          "one-handed",
          "holy"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons52.png"
    },
    "Scepter of Divine Grace": {
       "type": "weapon",
@@ -1755,7 +1805,8 @@
          "magical",
          "holy",
          "one-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons74.png"
    },
    "Relic of the First Saint": {
       "type": "weapon",
@@ -1782,7 +1833,8 @@
          "slashing",
          "one-handed",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons53.png"
    },
    "Ironwood Barkskin": {
       "type": "armor",
@@ -1949,7 +2001,8 @@
          "gauntlet",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons8.png"
    },
    "Crown of the Dawn": {
       "type": "accessory",
@@ -1969,7 +2022,8 @@
          "magical",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons9.png"
    },
    "Solar Talisman": {
       "type": "accessory",
@@ -1986,7 +2040,8 @@
          "amulet",
          "magical",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons10.png"
    },
    "Pendant of Fortitude": {
       "type": "accessory",
@@ -2002,7 +2057,8 @@
          "accessory",
          "amulet",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons11.png"
    },
    "Boots of the Phoenix": {
       "type": "accessory",
@@ -2019,7 +2075,8 @@
          "boots",
          "defensive",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons12.png"
    },
    "Assassin's Blade": {
       "type": "weapon",
@@ -2044,7 +2101,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons54.png"
    },
    "Arcane Grimoire": {
       "type": "weapon",
@@ -2071,7 +2129,8 @@
          "slashing",
          "one-handed",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons55.png"
    },
    "Titan's Hammer": {
       "type": "weapon",
@@ -2098,7 +2157,8 @@
          "bludgeoning",
          "one-handed",
          "holy"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons120.png"
    },
    "Venomstrike Dagger": {
       "type": "weapon",
@@ -2128,7 +2188,8 @@
          "one-handed",
          "poison",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons56.png"
    },
    "Celestial Scepter": {
       "type": "weapon",
@@ -2155,7 +2216,8 @@
          "magical",
          "holy",
          "one-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons75.png"
    },
    "Berserker's Axe": {
       "type": "weapon",
@@ -2182,7 +2244,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/axes/rpg_icons91.png"
    },
    "Nightshade Armor": {
       "type": "armor",
@@ -2355,7 +2418,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons142.png"
    },
    "Longbow": {
       "type": "weapon",
@@ -2381,7 +2445,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons143.png"
    },
    "Composite Bow": {
       "type": "weapon",
@@ -2407,7 +2472,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons144.png"
    },
    "Elven Bow": {
       "type": "weapon",
@@ -2433,7 +2499,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons145.png"
    },
    "Light Crossbow": {
       "type": "weapon",
@@ -2459,7 +2526,8 @@
          "two-handed",
          "holy",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons146.png"
    },
    "Heavy Crossbow": {
       "type": "weapon",
@@ -2485,7 +2553,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons147.png"
    },
    "Repeating Crossbow": {
       "type": "weapon",
@@ -2511,7 +2580,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons148.png"
    },
    "Hunting Spear": {
       "type": "weapon",
@@ -2529,7 +2599,8 @@
       "smiting": 0,
       "tags": [
          "physical"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons121.png"
    },
    "Warrior Spear": {
       "type": "weapon",
@@ -2547,7 +2618,8 @@
       "smiting": 0,
       "tags": [
          "physical"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons122.png"
    },
    "Tri-point Spear": {
       "type": "weapon",
@@ -2565,7 +2637,8 @@
       "smiting": 0,
       "tags": [
          "physical"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons123.png"
    },
    "Dragon Spear": {
       "type": "weapon",
@@ -2583,7 +2656,8 @@
       "smiting": 0,
       "tags": [
          "physical"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons124.png"
    },
    "Hunting Knife": {
       "type": "weapon",
@@ -2609,7 +2683,8 @@
          "finesse",
          "one-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons57.png"
    },
    "Steel Hunting Knife": {
       "type": "weapon",
@@ -2635,7 +2710,8 @@
          "finesse",
          "one-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons58.png"
    },
    "Assassin Hunting Knife": {
       "type": "weapon",
@@ -2662,7 +2738,8 @@
          "finesse",
          "one-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons59.png"
    },
    "Master Hunter's Knife": {
       "type": "weapon",
@@ -2689,7 +2766,8 @@
          "finesse",
          "one-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons60.png"
    },
    "Luck Charm": {
       "type": "accessory",
@@ -2698,7 +2776,8 @@
       "rarity": "common",
       "tags": [
          "accessory"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons13.png"
    },
    "Fortune Charm": {
       "type": "accessory",
@@ -2707,7 +2786,8 @@
       "rarity": "uncommon",
       "tags": [
          "accessory"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons14.png"
    },
    "Blessing of the Wild": {
       "type": "accessory",
@@ -2720,7 +2800,8 @@
          "accessory",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons15.png"
    },
    "Hunter's Totem": {
       "type": "accessory",
@@ -2733,7 +2814,8 @@
          "accessory",
          "offensive",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons16.png"
    },
    "Predator's Eye": {
       "type": "accessory",
@@ -2746,7 +2828,8 @@
          "accessory",
          "offensive",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons17.png"
    },
    "Stalker's Badge": {
       "type": "accessory",
@@ -2758,7 +2841,8 @@
       "tags": [
          "accessory",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons18.png"
    },
    "Nature's Blessing": {
       "type": "accessory",
@@ -2771,7 +2855,8 @@
          "accessory",
          "magical",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons19.png"
    },
    "Sharpshooter's Ring": {
       "type": "accessory",
@@ -2784,7 +2869,8 @@
          "accessory",
          "ring",
          "offensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons20.png"
    },
    "Hydra Fang": {
       "type": "weapon",
@@ -2808,7 +2894,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons61.png"
    },
    "Venom Sac": {
       "type": "material",
@@ -2909,7 +2996,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons76.png"
    },
    "Soul Orb": {
       "type": "offhand",
@@ -2938,7 +3026,8 @@
          "crown",
          "magical",
          "offensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons21.png"
    },
    "Cursed Amulet": {
       "type": "accessory",
@@ -2956,7 +3045,8 @@
          "amulet",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons22.png"
    },
    "Stone Shield": {
       "type": "offhand",
@@ -2994,7 +3084,8 @@
          "one-handed",
          "lightning",
          "holy"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons125.png"
    },
    "Storm Giant's Belt": {
       "type": "accessory",
@@ -3011,7 +3102,8 @@
          "accessory",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons23.png"
    },
    "Lightning Crystal": {
       "type": "material",
@@ -3062,7 +3154,8 @@
          "gauntlet",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons24.png"
    },
    "Death Knight's Shield": {
       "type": "offhand",
@@ -3091,7 +3184,8 @@
          "magical",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons1.png"
    },
    "Necrotic Blade": {
       "type": "weapon",
@@ -3117,7 +3211,8 @@
          "slashing",
          "one-handed",
          "poison"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons62.png"
    },
    "Phylactery": {
       "type": "accessory",
@@ -3132,7 +3227,8 @@
       "tags": [
          "accessory",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons2.png"
    },
    "Soul Reaver": {
       "type": "weapon",
@@ -3157,7 +3253,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons63.png"
    },
    "Lich King's Robes": {
       "type": "armor",
@@ -3199,7 +3296,8 @@
          "accessory",
          "crown",
          "offensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons3.png"
    },
    "Infernal Blade": {
       "type": "weapon",
@@ -3225,7 +3323,8 @@
          "slashing",
          "one-handed",
          "fire"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons64.png"
    },
    "Hellfire Shield": {
       "type": "offhand",
@@ -3334,7 +3433,8 @@
          "slashing",
          "one-handed",
          "lightning"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons65.png"
    },
    "Sky Crown": {
       "type": "accessory",
@@ -3353,7 +3453,8 @@
          "offensive",
          "defensive",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons4.png"
    },
    "Dragon Soul Gem": {
       "type": "offhand",
@@ -3389,7 +3490,8 @@
       "tags": [
          "accessory",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons5.png"
    },
    "Cloudstrider Boots": {
       "type": "accessory",
@@ -3404,7 +3506,8 @@
          "accessory",
          "boots",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons6.png"
    },
    "Obsidian Waraxe": {
       "type": "weapon",
@@ -3430,7 +3533,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/axes/rpg_icons92.png"
    },
    "Sundered Earth Hammer": {
       "type": "weapon",
@@ -3457,7 +3561,8 @@
          "one-handed",
          "fire",
          "holy"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons126.png"
    },
    "Colossus Slayer": {
       "type": "weapon",
@@ -3481,7 +3586,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons66.png"
    },
    "Vahnir's Greatsword": {
       "type": "weapon",
@@ -3509,7 +3615,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons67.png"
    },
    "Mage New Weapons lvl 4-7": "MAGE_WEAPONS_PLACEHOLDER",
    "Ebonwood Staff": {
@@ -3537,7 +3644,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons77.png"
    },
    "Crystal Prism Staff": {
       "type": "weapon",
@@ -3565,7 +3673,8 @@
          "arcane",
          "two-handed",
          "ice"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons78.png"
    },
    "Phoenixfire Wand": {
       "type": "weapon",
@@ -3594,7 +3703,8 @@
          "arcane",
          "one-handed",
          "fire"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons79.png"
    },
    "Astral Beacon": {
       "type": "weapon",
@@ -3621,7 +3731,8 @@
          "slashing",
          "one-handed",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons68.png"
    },
    "Howertz's Staff": {
       "type": "weapon",
@@ -3648,7 +3759,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons80.png"
    },
    "Rogue New Weapons lvl 4-7": "ROGUE_WEAPONS_PLACEHOLDER",
    "Toxic Thorn": {
@@ -3675,7 +3787,8 @@
          "slashing",
          "one-handed",
          "poison"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons25.png"
    },
    "Whisperstep Daggers": {
       "type": "weapon",
@@ -3703,7 +3816,8 @@
          "finesse",
          "one-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons26.png"
    },
    "Midnight Cleaver": {
       "type": "weapon",
@@ -3729,7 +3843,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/axes/rpg_icons93.png"
    },
    "Phantom Strike": {
       "type": "weapon",
@@ -3753,7 +3868,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons27.png"
    },
    "Infiltration Shadow": {
       "type": "weapon",
@@ -3779,7 +3895,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons28.png"
    },
    "Hunter New Weapons lvl 4-7": "HUNTER_WEAPONS_PLACEHOLDER",
    "Thornshot Bow": {
@@ -3806,7 +3923,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons141.png"
    },
    "Ranger's Crossbow": {
       "type": "weapon",
@@ -3832,7 +3950,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons142.png"
    },
    "Venomspitter": {
       "type": "weapon",
@@ -3858,7 +3977,8 @@
          "slashing",
          "one-handed",
          "poison"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons29.png"
    },
    "Stormcaller": {
       "type": "weapon",
@@ -3884,7 +4004,8 @@
          "slashing",
          "one-handed",
          "lightning"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons30.png"
    },
    "Phyla's Root Longbow": {
       "type": "weapon",
@@ -3911,7 +4032,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons143.png"
    },
    "Demonforged Plate": {
       "type": "armor",
@@ -4123,7 +4245,8 @@
          "offensive",
          "divine"
       ],
-      "on_use_buff": "giant_strength"
+      "on_use_buff": "giant_strength",
+      "texture": "items/consumables/rpg_icons133.png"
    },
    "Shadowstep Elixir": {
       "type": "consumable",
@@ -4138,7 +4261,8 @@
          "mobility",
          "divine"
       ],
-      "on_use_buff": "shadow_step"
+      "on_use_buff": "shadow_step",
+      "texture": "items/consumables/rpg_icons134.png"
    },
    "Phoenix Tears": {
       "type": "consumable",
@@ -4153,7 +4277,8 @@
          "heal",
          "restore",
          "powerful"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons135.png"
    },
    "Dragon's Breath Potion": {
       "type": "consumable",
@@ -4166,7 +4291,8 @@
       "tags": [
          "consumable",
          "healing"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons136.png"
    },
    "New Materials": "MATERIALS_PLACEHOLDER",
    "Storm Elemental Core": {
@@ -4238,7 +4364,8 @@
          "accessory",
          "ring",
          "magical"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons7.png"
    },
    "Amulet of the Guardian": {
       "type": "accessory",
@@ -4254,7 +4381,8 @@
          "accessory",
          "amulet",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons8.png"
    },
    "Bracers of Fury": {
       "type": "accessory",
@@ -4269,7 +4397,8 @@
       "tags": [
          "accessory",
          "offensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons9.png"
    },
    "Charm of the Forest": {
       "type": "accessory",
@@ -4283,7 +4412,8 @@
       "tags": [
          "accessory",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons10.png"
    },
    "Seal of the Ancients": {
       "type": "accessory",
@@ -4301,7 +4431,8 @@
          "magical",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons11.png"
    },
    "Wooden Shield": {
       "type": "offhand",
@@ -4329,7 +4460,8 @@
          "crown",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons12.png"
    },
    "Soul Gem": {
       "type": "offhand",
@@ -4355,7 +4487,8 @@
          "accessory",
          "crown",
          "magical"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons13.png"
    },
    "Crystal of Eternal Winter": {
       "type": "offhand",
@@ -4381,7 +4514,8 @@
          "accessory",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons14.png"
    },
    "Bone Necklace": {
       "type": "accessory",
@@ -4397,7 +4531,8 @@
          "accessory",
          "magical",
          "offensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons15.png"
    },
    "Eternal Essence": {
       "type": "material",
@@ -4441,7 +4576,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons31.png"
    },
    "Dark Lord's Cloak": {
       "type": "armor",
@@ -4556,7 +4692,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons81.png"
    },
    "D\u00e4lokurg's Warhammer": {
       "type": "weapon",
@@ -4584,7 +4721,8 @@
          "two-handed",
          "heavy",
          "holy"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons127.png"
    },
    "Bandit Leader's Cloak": {
       "type": "armor",
@@ -4791,7 +4929,8 @@
          "ranged",
          "finesse",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons144.png"
    },
    "Ninjato": {
       "type": "weapon",
@@ -4815,7 +4954,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons32.png"
    },
    "Bandit's Chain": {
       "type": "accessory",
@@ -4829,7 +4969,8 @@
       "tags": [
          "accessory",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons16.png"
    },
    "Paladin's Sword": {
       "type": "weapon",
@@ -4853,7 +4994,8 @@
          "slashing",
          "one-handed",
          "holy"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons33.png"
    },
    "Holy Shield": {
       "type": "armor",
@@ -4924,7 +5066,8 @@
          "bludgeoning",
          "one-handed",
          "holy"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons128.png"
    },
    "Divine Essence": {
       "type": "material",
@@ -4979,7 +5122,8 @@
       "smiting": 0,
       "tags": [
          "physical"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons117.png"
    },
    "Beast Form Amulet": {
       "type": "accessory",
@@ -4997,7 +5141,8 @@
          "amulet",
          "defensive",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons17.png"
    },
    "Herb Bundle": {
       "type": "material",
@@ -5040,7 +5185,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons82.png"
    },
    "Devout's Robe": {
       "type": "armor",
@@ -5092,7 +5238,8 @@
          "arcane",
          "one-handed",
          "holy"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons83.png"
    },
    "Sacred Water": {
       "type": "material",
@@ -5117,7 +5264,8 @@
          "magical"
       ],
       "min_value": 79999999,
-      "max_value": 119999998
+      "max_value": 119999998,
+      "texture": "items/consumables/rpg_icons137.png"
    },
    "High Priest's Scepter": {
       "type": "weapon",
@@ -5143,7 +5291,8 @@
          "magical",
          "holy",
          "one-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons84.png"
    },
    "Saintly Robes": {
       "type": "armor",
@@ -5195,7 +5344,8 @@
          "bludgeoning",
          "one-handed",
          "holy"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons118.png"
    },
    "Elder Wood Armor": {
       "type": "armor",
@@ -5244,7 +5394,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons85.png"
    },
    "Holy Vestment": {
       "type": "armor",
@@ -5306,7 +5457,8 @@
          "finesse",
          "one-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons34.png"
    },
    "Stolen Gold Necklace": {
       "type": "accessory",
@@ -5323,7 +5475,8 @@
          "accessory",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons18.png"
    },
    "Divine Sword": {
       "type": "weapon",
@@ -5350,7 +5503,8 @@
          "one-handed",
          "magical",
          "holy"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons35.png"
    },
    "Supreme Artifact": {
       "type": "accessory",
@@ -5369,7 +5523,8 @@
          "magical",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons19.png"
    },
    "Legendary Crown": {
       "type": "accessory",
@@ -5391,7 +5546,8 @@
          "offensive",
          "defensive",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons20.png"
    },
    "Crown of Greed": {
       "type": "accessory",
@@ -5407,7 +5563,8 @@
          "accessory",
          "crown",
          "offensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons21.png"
    },
    "Ember Core": {
       "type": "material",
@@ -5432,7 +5589,8 @@
          "accessory",
          "crown",
          "offensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons22.png"
    },
    "Magma Stone": {
       "type": "material",
@@ -5477,7 +5635,8 @@
          "crown",
          "magical",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons23.png"
    },
    "Heart of Winter": {
       "type": "material",
@@ -5501,7 +5660,8 @@
       "tags": [
          "accessory",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons24.png"
    },
    "Celestial Halo": {
       "type": "accessory",
@@ -5518,7 +5678,8 @@
          "accessory",
          "magical",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons1.png"
    },
    "Holy Relic": {
       "type": "material",
@@ -5582,7 +5743,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons86.png"
    },
    "Bone Hatchet": {
       "type": "weapon",
@@ -5607,7 +5769,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/axes/rpg_icons94.png"
    },
    "Taiga Hunter's Bow": {
       "type": "weapon",
@@ -5632,7 +5795,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons145.png"
    },
    "Frost Blade": {
       "type": "weapon",
@@ -5657,7 +5821,8 @@
          "slashing",
          "one-handed",
          "ice"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons36.png"
    },
    "Shaman's Totem Staff": {
       "type": "weapon",
@@ -5682,7 +5847,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons87.png"
    },
    "Siberian War Axe": {
       "type": "weapon",
@@ -5707,7 +5873,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/axes/rpg_icons95.png"
    },
    "Permafrost Spear": {
       "type": "weapon",
@@ -5728,7 +5895,8 @@
       "tags": [
          "physical",
          "ice"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons119.png"
    },
    "Snowbinable Fang Sword": {
       "type": "weapon",
@@ -5754,7 +5922,8 @@
          "slashing",
          "one-handed",
          "ice"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons37.png"
    },
    "Siberian Wolf Fang": {
       "type": "material",
@@ -5814,7 +5983,8 @@
          "healing"
       ],
       "min_value": 28,
-      "max_value": 42
+      "max_value": 42,
+      "texture": "items/consumables/rpg_icons138.png"
    },
    "Shaman's Bone Totem": {
       "type": "material",
@@ -5893,7 +6063,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons38.png"
    },
    "Yatagan": {
       "type": "weapon",
@@ -5916,7 +6087,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons39.png"
    },
    "Ottoman Bow": {
       "type": "weapon",
@@ -5941,7 +6113,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons146.png"
    },
    "Ottoman Lance": {
       "type": "weapon",
@@ -5960,7 +6133,8 @@
       "smiting": 0,
       "tags": [
          "physical"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons120.png"
    },
    "Corsair Cutlass": {
       "type": "weapon",
@@ -5983,7 +6157,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons40.png"
    },
    "Desert Serpent Blade": {
       "type": "weapon",
@@ -6008,7 +6183,8 @@
          "slashing",
          "one-handed",
          "poison"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons41.png"
    },
    "Vizier Staff": {
       "type": "weapon",
@@ -6033,7 +6209,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons88.png"
    },
    "Janissary Carbine": {
       "type": "weapon",
@@ -6056,7 +6233,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons42.png"
    },
    "Sultan's Blade": {
       "type": "weapon",
@@ -6080,7 +6258,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons43.png"
    },
    "Blade of Yildirim": {
       "type": "weapon",
@@ -6104,7 +6283,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons44.png"
    },
    "Ottoman Chainmail": {
       "type": "armor",
@@ -6236,7 +6416,8 @@
          "ring",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons2.png"
    },
    "Corsair's Amulet": {
       "type": "accessory",
@@ -6253,7 +6434,8 @@
          "amulet",
          "defensive",
          "mobile"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons3.png"
    },
    "Janissary Medallion": {
       "type": "accessory",
@@ -6269,7 +6451,8 @@
          "accessory",
          "offensive",
          "defensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons4.png"
    },
    "Ottoman Turban of Wisdom": {
       "type": "accessory",
@@ -6285,7 +6468,8 @@
          "accessory",
          "magical",
          "offensive"
-      ]
+      ],
+      "texture": "items/rings_and_necklaces/rpg_icons5.png"
    },
    "Ottoman Gold Coin": {
       "type": "material",
@@ -6491,7 +6675,8 @@
          "slashing",
          "one-handed",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons45.png"
    },
    "The River Kingdoms of Yixuan": {
       "type": "book",
@@ -6671,7 +6856,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons46.png"
    },
    "Jade Spear": {
       "type": "weapon",
@@ -6690,7 +6876,8 @@
       "smiting": 0,
       "tags": [
          "physical"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons121.png"
    },
    "Bamboo Staff": {
       "type": "weapon",
@@ -6715,7 +6902,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons69.png"
    },
    "Serpent Fang Dagger": {
       "type": "weapon",
@@ -6743,7 +6931,8 @@
          "one-handed",
          "poison",
          "outlaw"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons47.png"
    },
    "Silk-Wrapped Yari": {
       "type": "weapon",
@@ -6766,7 +6955,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons48.png"
    },
    "Jade Dragon Sword": {
       "type": "weapon",
@@ -6792,7 +6982,8 @@
          "slashing",
          "one-handed",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons49.png"
    },
    "Clan Greataxe": {
       "type": "weapon",
@@ -6817,7 +7008,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/axes/rpg_icons96.png"
    },
    "Warbrand": {
       "type": "weapon",
@@ -6840,7 +7032,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons50.png"
    },
    "Skull-Crusher Maul": {
       "type": "weapon",
@@ -6868,7 +7061,8 @@
          "two-handed",
          "heavy",
          "holy"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons122.png"
    },
    "Iron Horde Axe": {
       "type": "weapon",
@@ -6894,7 +7088,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/axes/rpg_icons97.png"
    },
    "Bear-Claw Gauntlet": {
       "type": "weapon",
@@ -6914,7 +7109,8 @@
       "smiting": 0,
       "tags": [
          "physical"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons123.png"
    },
    "Yixuan Silk Robe": {
       "type": "armor",
@@ -7044,7 +7240,8 @@
          "mana"
       ],
       "min_value": 36,
-      "max_value": 54
+      "max_value": 54,
+      "texture": "items/consumables/rpg_icons139.png"
    },
    "Eastern Herb Medicine": {
       "type": "consumable",
@@ -7058,7 +7255,8 @@
          "healing"
       ],
       "min_value": 60,
-      "max_value": 90
+      "max_value": 90,
+      "texture": "items/consumables/rpg_icons140.png"
    },
    "Warrior's Brew": {
       "type": "consumable",
@@ -7073,7 +7271,8 @@
          "offensive",
          "alchemical"
       ],
-      "on_use_buff": "attack_boost"
+      "on_use_buff": "attack_boost",
+      "texture": "items/consumables/rpg_icons129.png"
    },
    "Jade Lotus Draught": {
       "type": "consumable",
@@ -7088,7 +7287,8 @@
          "alchemical"
       ],
       "min_value": 120,
-      "max_value": 180
+      "max_value": 180,
+      "texture": "items/consumables/rpg_icons130.png"
    },
    "Pepper Tonic": {
       "type": "consumable",
@@ -7103,7 +7303,8 @@
          "mobility",
          "alchemical"
       ],
-      "on_use_buff": "speed_boost"
+      "on_use_buff": "speed_boost",
+      "texture": "items/consumables/rpg_icons131.png"
    },
    "Kalovar Sabre": {
       "type": "weapon",
@@ -7126,7 +7327,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons51.png"
    },
    "Corsair's Cutlass": {
       "type": "weapon",
@@ -7149,7 +7351,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons52.png"
    },
    "Kalovar War Lance": {
       "type": "weapon",
@@ -7168,7 +7371,8 @@
       "smiting": 0,
       "tags": [
          "physical"
-      ]
+      ],
+      "texture": "items/tridents/rpg_icons124.png"
    },
    "Steppe Recurve Bow": {
       "type": "weapon",
@@ -7193,7 +7397,8 @@
          "ranged",
          "two-handed",
          "outlaw"
-      ]
+      ],
+      "texture": "items/slingshots/rpg_icons147.png"
    },
    "Bear Warrior Axe": {
       "type": "weapon",
@@ -7218,7 +7423,8 @@
          "slashing",
          "two-handed",
          "heavy"
-      ]
+      ],
+      "texture": "items/axes/rpg_icons98.png"
    },
    "Yixuan River Blade": {
       "type": "weapon",
@@ -7242,7 +7448,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons53.png"
    },
    "Jade Court Rapier": {
       "type": "weapon",
@@ -7265,7 +7472,8 @@
          "physical",
          "slashing",
          "one-handed"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons54.png"
    },
    "Constanplea Ghost Blade": {
       "type": "weapon",
@@ -7291,7 +7499,8 @@
          "slashing",
          "one-handed",
          "magical"
-      ]
+      ],
+      "texture": "items/swords/rpg_icons55.png"
    },
    "Kalovar Grand Vizier's Staff": {
       "type": "weapon",
@@ -7318,7 +7527,8 @@
          "magical",
          "arcane",
          "two-handed"
-      ]
+      ],
+      "texture": "items/staffs/rpg_icons70.png"
    },
    "Iron Horde Standard": {
       "type": "offhand",
@@ -7355,7 +7565,8 @@
       "event_item": true,
       "tags": [
          "consumable"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons132.png"
    },
    "Primordial Essence": {
       "type": "consumable",
@@ -7367,7 +7578,8 @@
       "event_item": true,
       "tags": [
          "consumable"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons133.png"
    },
    "Grand Feast Platter": {
       "type": "consumable",
@@ -7383,7 +7595,8 @@
       "event_item": true,
       "tags": [
          "consumable"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons134.png"
    },
    "Saintly Blessing": {
       "type": "consumable",
@@ -7395,7 +7608,8 @@
       "event_item": true,
       "tags": [
          "consumable"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons135.png"
    },
    "Venom Sacs": {
       "type": "material",
@@ -7419,7 +7633,8 @@
          "buff",
          "combat",
          "attack"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons136.png"
    },
    "Iron Skin Draught": {
       "type": "consumable",
@@ -7434,7 +7649,8 @@
          "buff",
          "defense",
          "armor"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons137.png"
    },
    "Swiftness Elixir": {
       "type": "consumable",
@@ -7449,7 +7665,8 @@
          "buff",
          "speed",
          "evasion"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons138.png"
    },
    "Empowerment Draught": {
       "type": "consumable",
@@ -7464,7 +7681,8 @@
          "buff",
          "magic",
          "powerful"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons139.png"
    },
    "Large Mana Potion": {
       "type": "consumable",
@@ -7477,6 +7695,7 @@
       "tags": [
          "consumable",
          "mana"
-      ]
+      ],
+      "texture": "items/consumables/rpg_icons140.png"
    }
 }
