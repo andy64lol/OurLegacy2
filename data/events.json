@@ -62,6 +62,16 @@
       "condition": {
         "type": "first_login_on_date"
       }
+    },
+    {
+      "id": "Renewed energy",
+      "name": "Renewed Energy",
+      "description":"Sorry for being away! Life has gotten busy and I had to step out sorry! I'm coming back to dev sure next month probably! /n - ThePrimordialOne",
+      "date":"2026-04-29",
+      "reward_type": "gold",
+      "reward_amount": 20260429,
+      "reward_message": "Have a good day!",
+      "condition":{"type":"none"}
     }
   ]
 }
