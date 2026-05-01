@@ -241,7 +241,7 @@
             Global Chat
         </div>
         <div style="display:flex;gap:6px;">
-            <a class="back-link" href="/friends">&#10024; Friends</a>
+            <a class="back-link" href="/friends">Friends</a>
             <a class="back-link" href="/game">&#8592; Game</a>
         </div>
     </div>
@@ -256,10 +256,10 @@
     </div>
 
     <div id="mod-hint-bar">
-        &#9876; Mod commands: /mute /unmute /ban /unban /warn /clearwarn /kick /announce &mdash; type /help for full list
+        Mod commands: /mute /unmute /ban /unban /warn /clearwarn /kick /announce &mdash; type /help for full list
     </div>
     <div id="owner-hint-bar">
-        &#9733; Owner commands: /addmod /removemod /setowner /clearall /listbans /listmutes &mdash; type /help for full list
+        Owner commands: /addmod /removemod /setowner /clearall /listbans /listmutes &mdash; type /help for full list
     </div>
 
     <div id="chat-input-bar" style="position:relative;">
@@ -268,7 +268,7 @@
             <div id="glyph-picker-grid" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
         </div>
         <div class="row">
-            <button onclick="toggleGlyphPicker()" title="Insert glyph" class="glyph-btn-page">&#10022;</button>
+            <button onclick="toggleGlyphPicker()" title="Insert glyph" class="glyph-btn-page">+</button>
             <input id="chat-input-page" type="text" maxlength="200"
                 placeholder="Message the realm... (/help for commands, :warrior: for glyphs)"
                 autocomplete="off"
@@ -367,8 +367,8 @@
             var isOwner = OWNER_NAME && u.toLowerCase() === OWNER_NAME;
             var isMod = !isOwner && MOD_LIST.indexOf(u.toLowerCase()) !== -1;
             var badge = isOwner
-                ? '<span style="font-size:9px;vertical-align:middle;margin-left:2px;">&#9733;</span>'
-                : (isMod ? '<span style="font-size:9px;vertical-align:middle;margin-left:2px;">&#9876;</span>' : '');
+                ? '<span style="font-size:9px;vertical-align:middle;margin-left:2px;">[O]</span>'
+                : (isMod ? '<span style="font-size:9px;vertical-align:middle;margin-left:2px;">[M]</span>' : '');
             var pillClass = 'user-pill' + (isOwner ? ' user-pill-owner' : (isMod ? ' user-pill-mod' : (isMe ? ' user-pill-me' : '')));
             if (isMe) {
                 return '<span class="' + pillClass + '">' + escHtml(u) + badge + ' (you)</span>';

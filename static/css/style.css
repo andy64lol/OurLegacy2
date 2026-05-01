@@ -137,39 +137,56 @@ strong {
 }
 
 .btn-primary {
+    background: var(--wood-dark);
+    color: var(--gold-bright);
+    border-color: var(--wood-bright);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--wood-mid);
+    color: var(--gold-bright);
+}
+
+/* Wooden button — applied selectively to main action buttons */
+.btn-wood {
     background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.png');
     background-size: 100% 100%;
     background-color: transparent;
-    color: var(--gold-bright);
+    color: #3a1a06;
     border-color: transparent;
     image-rendering: pixelated;
-    text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    text-shadow: none;
     aspect-ratio: 3 / 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding-top: 0;
-    padding-bottom: 0;
+    padding-bottom: 0.35em;
 }
 
-.btn-primary.btn-large,
-.btn-primary.btn-small,
-.btn-primary.btn-xsmall {
-    padding-top: 0;
-    padding-bottom: 0;
-}
-
-.btn-primary:hover:not(:disabled) {
+.btn-wood:hover:not(:disabled):not(.btn-disabled) {
     background-image: url('/game_assets/UI/button_normal/%5B3%5D%20Hover.png');
     background-size: 100% 100%;
     background-color: transparent;
-    color: var(--gold-bright);
+    color: #3a1a06;
 }
 
-.btn-primary:active:not(:disabled) {
+.btn-wood:active:not(:disabled):not(.btn-disabled) {
     background-image: url('/game_assets/UI/button_normal/%5B2%5D%20Clicked.png');
     background-size: 100% 100%;
     background-color: transparent;
+}
+
+/* Large buttons never get wooden texture */
+.btn-large.btn-wood {
+    background-image: none;
+    background: var(--wood-dark);
+    color: var(--gold-bright);
+    border-color: var(--wood-bright);
+    aspect-ratio: unset;
+    display: inline-block;
+    padding-top: 13px;
+    padding-bottom: 13px;
 }
 
 .btn-secondary {
@@ -244,31 +261,13 @@ strong {
 }
 
 .btn-item {
-    background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.png');
-    background-size: 100% 100%;
-    background-color: transparent;
+    background: var(--wood-dark);
     color: var(--gold);
-    border-color: transparent;
-    image-rendering: pixelated;
-    text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
-    aspect-ratio: 3 / 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 0;
-    padding-bottom: 0;
+    border-color: var(--wood-bright);
 }
 
 .btn-item:hover:not(.btn-disabled) {
-    background-image: url('/game_assets/UI/button_normal/%5B3%5D%20Hover.png');
-    background-size: 100% 100%;
-    background-color: transparent;
-}
-
-.btn-item:active:not(.btn-disabled) {
-    background-image: url('/game_assets/UI/button_normal/%5B2%5D%20Clicked.png');
-    background-size: 100% 100%;
-    background-color: transparent;
+    background: var(--wood-mid);
 }
 
 .btn-flee {

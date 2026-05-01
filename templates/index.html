@@ -35,7 +35,7 @@
     <div class="mainmenu-wrap">
         <div class="mainmenu-logo-area">
             <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="mainmenu-logo">
-            <div class="mainmenu-version">v2.7.0 &mdash; New Landscape &#10024;</div>
+            <div class="mainmenu-version">v2.7.0 &mdash; New Landscape</div>
             {% if splash_text %}
             <div class="mainmenu-splash">{{ splash_text }}</div>
             {% endif %}
@@ -43,23 +43,23 @@
 
         <nav class="mainmenu-nav">
             {% if online_user %}
-            <div class="mainmenu-account-badge">&#10022; {{ online_user }}</div>
+            <div class="mainmenu-account-badge">{{ online_user }}</div>
             <button class="mainmenu-btn mainmenu-btn-highlight" onclick="openOnlineModal()">
-                <span class="mainmenu-cursor">&#9654;</span> Continue Adventure
+                Continue Adventure
             </button>
             <button class="mainmenu-btn" onclick="onlineLogout()">
-                <span class="mainmenu-cursor">&#9654;</span> Log Out
+                Log Out
             </button>
             {% else %}
             <button class="mainmenu-btn mainmenu-btn-highlight" onclick="openOnlineModal(); switchOnlineTab('register');">
-                <span class="mainmenu-cursor">&#9654;</span> New Game
+                New Game
             </button>
             <button class="mainmenu-btn" onclick="openOnlineModal(); switchOnlineTab('login');">
-                <span class="mainmenu-cursor">&#9654;</span> Sign In
+                Sign In
             </button>
             {% endif %}
             <button class="mainmenu-btn" onclick="openSettings()">
-                <span class="mainmenu-cursor">&#9654;</span> Settings
+                Settings
             </button>
         </nav>
         <div id="save-status" class="save-notice" style="display:none;text-align:center;margin-top:8px;"></div>
@@ -83,7 +83,7 @@
         <!-- Logged In View -->
         <div id="online-logged-in">
             <div style="text-align:center;font-size:14px;color:var(--mana-bright);margin-bottom:14px;">
-                &#10024; Welcome back, <strong>{{ online_user }}</strong>
+                Welcome back, <strong>{{ online_user }}</strong>
             </div>
             {% if cloud_meta %}
             <div
@@ -97,15 +97,14 @@
                     cloud_meta.current_area|replace('_',' ')|title }}</span>
             </div>
             <button class="btn btn-primary" onclick="cloudLoad()"
-                style="width:100%;margin-bottom:8px;font-size:14px;">&#9654; Continue Adventure</button>
+                style="width:100%;margin-bottom:8px;font-size:14px;">Continue Adventure</button>
             {% else %}
             <div
                 style="text-align:center;font-size:12px;color:var(--text-dim);margin-bottom:14px;padding:12px;background:rgba(0,0,0,0.25);border-radius:8px;line-height:1.5;">
                 No cloud save yet.<br>Begin a new journey and your progress will be saved online.
             </div>
             <a href="/create" class="btn btn-primary"
-                style="display:block;width:100%;box-sizing:border-box;text-align:center;margin-bottom:8px;font-size:14px;">&#9728;
-                Start New Journey</a>
+                style="display:block;width:100%;box-sizing:border-box;text-align:center;margin-bottom:8px;font-size:14px;">Start New Journey</a>
             {% endif %}
             <button class="btn btn-secondary" onclick="onlineLogout()"
                 style="width:100%;font-size:12px;opacity:0.6;">Logout</button>
@@ -375,7 +374,7 @@
 
         {% if battle_companions %}
         <div class="battle-companions-row">
-            <div class="battle-companions-label">&#9876; Party</div>
+            <div class="battle-companions-label">Party</div>
             {% for comp in battle_companions %}
             {% set _chp_pct = [(comp.hp / comp.max_hp * 100)|int, 100]|min if comp.max_hp > 0 else 0 %}
             <div class="battle-comp-card{% if comp.hp <= 0 %} battle-comp-fallen{% endif %}">
@@ -766,8 +765,8 @@
                     {% endif %}
                 </button>
                 {% if online_username %}
-                <button class="tab-btn" data-tab="adventure-group">&#9876; Group</button>
-                <button class="tab-btn" data-tab="friends">&#10024; Friends</button>
+                <button class="tab-btn" data-tab="adventure-group">Group</button>
+                <button class="tab-btn" data-tab="friends">Friends</button>
                 {% endif %}
             </nav>
         </div><!-- end .tab-nav-wrap -->
@@ -787,7 +786,7 @@
 
                     <div class="action-row">
                         <form method="post" action="/action/explore">
-                            <button type="submit" class="btn btn-primary">Venture Forth</button>
+                            <button type="submit" class="btn btn-primary btn-wood">Venture Forth</button>
                         </form>
                         {% if area.can_rest %}
                         <form method="post" action="/action/rest">
@@ -820,8 +819,8 @@
             {% if online_user %}
             <div class="panel world-pulse-panel" style="margin-bottom:14px;">
                 <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
-                    <span>&#127758; World Pulse</span>
-                    <span class="world-online-badge">&#9679; {{ online_count }} online</span>
+                    <span>World Pulse</span>
+                    <span class="world-online-badge">{{ online_count }} online</span>
                 </div>
                 <div class="panel-body" style="padding:10px 16px;">
                     {% if world_events %}
@@ -841,7 +840,7 @@
             {% if online_username %}
             <div class="panel" id="nearby-panel" style="margin-bottom:14px;display:none;">
                 <div class="panel-title" style="display:flex;align-items:center;gap:8px;">
-                    <span>&#128065; Sightings</span>
+                    <span>Sightings</span>
                     <span style="font-size:11px;font-weight:400;color:var(--text-dim);font-style:italic;">Others have
                         been seen here recently</span>
                 </div>
@@ -1054,11 +1053,11 @@
                 <div style="display:flex;gap:8px;padding:8px 12px 0;flex-wrap:wrap;">
                     <form method="post" action="/action/quick_heal" style="margin:0;">
                         <button type="submit" class="btn btn-small btn-primary"
-                            title="Use your best available healing item">&#10084; Quick Heal</button>
+                            title="Use your best available healing item">Quick Heal</button>
                     </form>
                     <form method="post" action="/action/sort_inventory" style="margin:0;">
                         <button type="submit" class="btn btn-small btn-secondary"
-                            title="Sort inventory by item type then name">&#8645; Sort Items</button>
+                            title="Sort inventory by item type then name">Sort Items</button>
                     </form>
                 </div>
                 <div class="panel-body">
@@ -1087,15 +1086,15 @@
                             <div class="inv-card-desc">{{ (item.description or '')[:65] }}</div>
                             {% if item.equippable %}
                             {% if item.can_equip %}
-                            <div class="item-can-use">&#10003; Can equip ({{ item.type }})</div>
+                            <div class="item-can-use">Can equip ({{ item.type }})</div>
                             {% else %}
-                            <div class="item-req-block">&#10007; {{ item.equip_block_reason }}</div>
+                            <div class="item-req-block">{{ item.equip_block_reason }}</div>
                             {% endif %}
                             {% elif item.is_book %}
                             <div class="item-can-use" style="color:var(--gold);">Readable book{% if item.already_read %}
                                 &mdash; already read{% endif %}</div>
                             {% else %}
-                            <div class="item-can-use" style="color:var(--mana-bright,#7eb8f7);">&#10003; Usable ({{
+                            <div class="item-can-use" style="color:var(--mana-bright,#7eb8f7);">Usable ({{
                                 item.type }})</div>
                             {% endif %}
                             <div class="inv-card-actions">
@@ -1311,7 +1310,7 @@
                         Room {{ active_dungeon.room_index + 1 }} / {{ active_dungeon.rooms|length }}
                     </div>
                     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                        <a href="/dungeon/room" class="btn btn-primary">Continue</a>
+                        <a href="/dungeon/room" class="btn btn-primary btn-wood">Continue</a>
                         <form method="POST" action="/dungeon/abandon">
                             <button type="button" class="btn btn-danger btn-small"
                                 onclick="var b=this;gameConfirm('Abandon this dungeon run? All progress will be lost.',function(){b.closest('form').submit();})">Abandon</button>
@@ -1350,7 +1349,7 @@
                                 <div class="dungeon-name">
                                     {{ d.name }}
                                     {% if d.completed %}
-                                    <span class="dungeon-complete-badge">&#10003; Completed</span>
+                                    <span class="dungeon-complete-badge">Completed</span>
                                     {% elif not d.in_area %}
                                     <span class="dungeon-lock-badge">Wrong Area</span>
                                     {% elif not d.available %}
@@ -1860,7 +1859,7 @@
                                     {% if ch.ready and not ch.claimed %}
                                     <form method="post" action="/action/claim_challenge">
                                         <input type="hidden" name="challenge_id" value="{{ ch.id }}">
-                                        <button type="submit" class="btn btn-primary btn-small">Claim!</button>
+                                        <button type="submit" class="btn btn-primary btn-wood btn-small">Claim!</button>
                                     </form>
                                     {% elif ch.claimed %}
                                     <span style="font-size:12px;color:var(--text-dim);">Done</span>
@@ -2120,16 +2119,14 @@
         <div class="tab-content" id="tab-friends">
             <div class="panel">
                 <div class="panel-title">
-                    &#10024; Friends
+                    Friends
                     <a href="/friends"
                         style="font-size:11px;font-weight:normal;color:var(--mana-bright);text-decoration:none;margin-left:8px;opacity:0.8;">Full
                         view &amp; DMs</a>
                     <a href="/groups"
-                        style="font-size:11px;font-weight:normal;color:var(--gold);text-decoration:none;margin-left:8px;opacity:0.85;">⚔
-                        Group</a>
+                        style="font-size:11px;font-weight:normal;color:var(--gold);text-decoration:none;margin-left:8px;opacity:0.85;">Group</a>
                     <a href="/leaderboard"
-                        style="font-size:11px;font-weight:normal;color:var(--gold-bright);text-decoration:none;margin-left:6px;opacity:0.85;">🏆
-                        Ranks</a>
+                        style="font-size:11px;font-weight:normal;color:var(--gold-bright);text-decoration:none;margin-left:6px;opacity:0.85;">Ranks</a>
                 </div>
                 <div class="panel-body" style="padding:0;">
 
@@ -2180,10 +2177,10 @@
                     var html = '';
 
                     if (data.incoming && data.incoming.length) {
-                        html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);padding:8px 14px 3px;">&#128228; Requests (' + data.incoming.length + ')</div>';
+                        html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);padding:8px 14px 3px;">Requests (' + data.incoming.length + ')</div>';
                         data.incoming.forEach(function (req) {
                             html += '<div style="padding:8px 14px;border-bottom:1px solid rgba(180,130,255,0.07);">' +
-                                '<div style="font-size:13px;color:var(--gold);margin-bottom:5px;">&#10024; ' + efEsc(req.username) + '</div>' +
+                                '<div style="font-size:13px;color:var(--gold);margin-bottom:5px;">' + efEsc(req.username) + '</div>' +
                                 '<div style="display:flex;gap:5px;">' +
                                 '<button onclick="efRespond(\'' + efEsc(req.id) + '\',true)" style="padding:3px 10px;background:rgba(30,100,60,0.6);border:1px solid var(--green-bright);border-radius:4px;color:var(--green-bright);font-size:12px;cursor:pointer;">Accept</button>' +
                                 '<button onclick="efRespond(\'' + efEsc(req.id) + '\',false)" style="padding:3px 10px;background:rgba(100,30,30,0.4);border:1px solid rgba(200,80,80,0.4);border-radius:4px;color:var(--red);font-size:12px;cursor:pointer;">Decline</button>' +
@@ -2216,7 +2213,7 @@
                     }
 
                     if (blocked && blocked.length) {
-                        html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#f97316;opacity:.7;padding:8px 14px 3px;">&#128683; Blocked (' + blocked.length + ')</div>';
+                        html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#f97316;opacity:.7;padding:8px 14px 3px;">Blocked (' + blocked.length + ')</div>';
                         blocked.forEach(function (u) {
                             html += '<div style="display:flex;align-items:center;gap:7px;padding:6px 14px;">' +
                                 '<span style="flex:1;font-size:12px;color:var(--text-dim);text-decoration:line-through;">' + efEsc(u) + '</span>' +
@@ -2286,9 +2283,8 @@
                 .ag-form-input { width:100%;padding:7px 10px;background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--text-light);font-size:13px;font-family:'Tiny5',monospace;margin-bottom:6px;outline:none;box-sizing:border-box; }
                 .ag-form-input:focus { border-color:var(--wood-bright); }
                 .ag-btn { padding:6px 12px;border:2px solid;font-family:'Tiny5',monospace;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:0.05em; }
-                .ag-btn-primary { background-image:url('/game_assets/UI/button_normal/%5B1%5D%20Normal.png');background-size:100% 100%;background-color:transparent;border-color:transparent;color:var(--gold-bright);image-rendering:pixelated;text-shadow:1px 1px 0 rgba(0,0,0,0.7);aspect-ratio:3/1;display:inline-flex;align-items:center;justify-content:center;padding-top:0;padding-bottom:0; }
-                .ag-btn-primary:hover { background-image:url('/game_assets/UI/button_normal/%5B3%5D%20Hover.png');background-size:100% 100%;background-color:transparent; }
-                .ag-btn-primary:active { background-image:url('/game_assets/UI/button_normal/%5B2%5D%20Clicked.png');background-size:100% 100%;background-color:transparent; }
+                .ag-btn-primary { background:var(--wood-dark);border-color:var(--wood-bright);color:var(--gold-bright); }
+                .ag-btn-primary:hover { background:var(--wood-mid); }
                 .ag-btn-danger { background:var(--red-dark);border-color:var(--red);color:#f8c0a0; }
                 .ag-btn-danger:hover { background:var(--red); }
                 .ag-btn-sm { padding:3px 8px;font-size:11px; }
@@ -2296,7 +2292,7 @@
                 #ag-group-chat-input-row { display:flex;gap:6px;padding:10px 14px;border-top:2px solid var(--border);background:var(--bg-panel);flex-shrink:0; }
             </style>
             <div class="panel" style="margin-bottom:0;">
-                <div class="panel-title">&#9876; Adventure Group</div>
+                <div class="panel-title">Adventure Group</div>
             </div>
             <div id="ag-wrap">
                 <div id="ag-loading" style="padding:30px;text-align:center;color:var(--text-dim);font-size:13px;">Loading group data...</div>
@@ -2304,7 +2300,7 @@
                     <div id="ag-body">
                         <div id="ag-left">
                             <div class="ag-card">
-                                <div class="ag-card-title">&#9876; <span id="ag-name"></span></div>
+                                <div class="ag-card-title"><span id="ag-name"></span></div>
                                 <div class="ag-card-body">
                                     <div id="ag-desc" style="font-size:12px;color:var(--text-dim);margin-bottom:6px;"></div>
                                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -2328,7 +2324,7 @@
                                 </div>
                             </div>
                             <div class="ag-card" id="ag-invite-card" style="display:none;">
-                                <div class="ag-card-title">&#128273; Invite Code</div>
+                                <div class="ag-card-title">Invite Code</div>
                                 <div class="ag-card-body">
                                     <div style="display:flex;align-items:center;gap:8px;background:var(--bg-panel-dark);border:1px solid var(--gold-dim);padding:7px 10px;">
                                         <span id="ag-invite-code" style="font-size:18px;font-weight:700;color:var(--gold);letter-spacing:0.2em;flex:1;text-align:center;"></span>
@@ -2338,7 +2334,7 @@
                                 </div>
                             </div>
                             <div class="ag-card">
-                                <div class="ag-card-title">&#128100; Members (<span id="ag-member-count"></span>)</div>
+                                <div class="ag-card-title">Members (<span id="ag-member-count"></span>)</div>
                                 <div class="ag-card-body" id="ag-members"></div>
                             </div>
                             <button class="ag-btn ag-btn-danger" onclick="agLeave()" style="width:100%;" id="ag-leave-btn"></button>
@@ -2346,8 +2342,8 @@
                         </div>
                         <div id="ag-right">
                             <div id="ag-tab-bar">
-                                <button class="ag-tab-btn active" onclick="agShowTab('log',this)">&#128220; Activity Log</button>
-                                <button class="ag-tab-btn" onclick="agShowTab('gchat',this)">&#128172; Group Chat</button>
+                                <button class="ag-tab-btn active" onclick="agShowTab('log',this)">Activity Log</button>
+                                <button class="ag-tab-btn" onclick="agShowTab('gchat',this)">Group Chat</button>
                             </div>
                             <div class="ag-panel active" id="ag-panel-log"></div>
                             <div class="ag-panel" id="ag-panel-gchat" style="padding:0;overflow:hidden;flex-direction:column;">
@@ -2366,12 +2362,11 @@
                 <div id="ag-no-group" style="display:none;flex:1;align-items:center;justify-content:center;padding:30px;">
                     <div style="max-width:440px;width:100%;display:flex;flex-direction:column;gap:14px;">
                         <div style="text-align:center;margin-bottom:8px;">
-                            <div style="font-size:40px;margin-bottom:6px;">&#9876;</div>
                             <div style="font-size:16px;color:var(--gold);font-weight:700;margin-bottom:4px;letter-spacing:0.06em;text-transform:uppercase;">Adventure Groups</div>
                             <div style="font-size:13px;color:var(--text-dim);line-height:1.6;">Form a party of up to 6. Complete quests, dungeons, and battles together to earn group XP!</div>
                         </div>
                         <div class="ag-card">
-                            <div class="ag-card-title">&#9876; Create a Group</div>
+                            <div class="ag-card-title">Create a Group</div>
                             <div class="ag-card-body">
                                 <input class="ag-form-input" id="ag-create-name" type="text" maxlength="32" placeholder="Group name (2–32 chars)">
                                 <input class="ag-form-input" id="ag-create-desc" type="text" maxlength="200" placeholder="Description (optional)">
@@ -2380,7 +2375,7 @@
                             </div>
                         </div>
                         <div class="ag-card">
-                            <div class="ag-card-title">&#128273; Join a Group</div>
+                            <div class="ag-card-title">Join a Group</div>
                             <div class="ag-card-body">
                                 <input class="ag-form-input" id="ag-join-code" type="text" maxlength="16" placeholder="Enter invite code" style="text-transform:uppercase;letter-spacing:0.15em;">
                                 <button class="ag-btn ag-btn-primary" style="width:100%;" onclick="agJoinGroup()">Join Group</button>
@@ -2496,7 +2491,7 @@
                 _agSocket.on('group_level_up', function(data) {
                     var banner = document.createElement('div');
                     banner.style.cssText = 'position:fixed;top:30px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--wood-dark);border:2px solid var(--gold);padding:16px 28px;text-align:center;box-shadow:4px 4px 0 rgba(0,0,0,0.5);font-family:Tiny5,monospace;';
-                    banner.innerHTML = '<div style="font-size:20px;color:var(--gold);text-transform:uppercase;">&#9876; Group Level Up!</div><div style="color:var(--gold-bright);font-size:15px;">Level ' + data.level + '!</div><div style="font-size:13px;color:var(--green-bright);margin-top:6px;">+' + data.bonus_xp + ' XP  +' + data.bonus_gold + ' Gold!</div>';
+                    banner.innerHTML = '<div style="font-size:20px;color:var(--gold);text-transform:uppercase;">Group Level Up!</div><div style="color:var(--gold-bright);font-size:15px;">Level ' + data.level + '!</div><div style="font-size:13px;color:var(--green-bright);margin-top:6px;">+' + data.bonus_xp + ' XP  +' + data.bonus_gold + ' Gold!</div>';
                     document.body.appendChild(banner);
                     setTimeout(function(){ banner.remove(); }, 6000);
                 });
@@ -2677,7 +2672,7 @@
         {% if cs.title %}<div class="cutscene-title">{{ cs.title }}</div>{% endif %}
         {% if cs.image_url %}<img src="{{ cs.image_url }}" class="cutscene-img" alt="Cutscene">{% endif %}
         <div class="cutscene-text">{{ cs.text or '' }}</div>
-        <button class="btn btn-primary" onclick="dismissCutscene('{{ pending_cutscene.id }}')">Continue</button>
+        <button class="btn btn-primary btn-wood" onclick="dismissCutscene('{{ pending_cutscene.id }}')">Continue</button>
     </div>
 </div>
 {% endif %}
@@ -2771,7 +2766,7 @@
         {% else %}
         <div
             style="margin-bottom:12px;font-size:12px;color:var(--text-dim);padding:8px 10px;background:rgba(0,0,0,0.3);border-radius:6px;border:1px solid rgba(200,160,60,0.2);">
-            &#128274; Name cannot be changed on a cloud save account.</div>
+            Name cannot be changed on a cloud save account.</div>
         {% endif %}
         <div style="margin-bottom:12px;">
             <label
@@ -3360,15 +3355,15 @@
 
     /* ── Wizard Data ── */
     const WIZ_BACKGROUNDS = {
-        soldier: {label: 'Soldier', desc: '+5 ATK · +5 DEF', lore: 'You served in the king\'s army, your body honed by years of drill.', fomo: '&#128293; Most Popular', fomoClass: 'fomo-hot'},
-        scholar: {label: 'Scholar', desc: '+8 MP · +2 Spell Power', lore: 'Books were your weapons. Knowledge, your shield.', fomo: '&#9733; Top Pick', fomoClass: 'fomo-top'},
-        street_rat: {label: 'Street Rat', desc: '+3 SPD · +30 Gold', lore: 'You grew up in the alleys, quick fingers and quicker feet.', fomo: '&#128293; Trending', fomoClass: 'fomo-hot'},
+        soldier: {label: 'Soldier', desc: '+5 ATK · +5 DEF', lore: 'You served in the king\'s army, your body honed by years of drill.', fomo: 'Most Popular', fomoClass: 'fomo-hot'},
+        scholar: {label: 'Scholar', desc: '+8 MP · +2 Spell Power', lore: 'Books were your weapons. Knowledge, your shield.', fomo: 'Top Pick', fomoClass: 'fomo-top'},
+        street_rat: {label: 'Street Rat', desc: '+3 SPD · +30 Gold', lore: 'You grew up in the alleys, quick fingers and quicker feet.', fomo: 'Trending', fomoClass: 'fomo-hot'},
         farmer: {label: 'Farmer', desc: '+20 HP · +2 DEF', lore: 'Hard soil and harder days made your body sturdy.'},
-        noble: {label: 'Noble', desc: '+60 Gold · 5% Discount', lore: 'Silver spoons and silk curtains — and a will to prove yourself.', fomo: '&#9733; Fan Favourite', fomoClass: 'fomo-top'},
-        wanderer: {label: 'Wanderer', desc: '+2 SPD · +10% EXP', lore: 'The road is your home. Every mile a lesson.', fomo: '&#128293; Hot Right Now', fomoClass: 'fomo-hot'},
+        noble: {label: 'Noble', desc: '+60 Gold · 5% Discount', lore: 'Silver spoons and silk curtains — and a will to prove yourself.', fomo: 'Fan Favourite', fomoClass: 'fomo-top'},
+        wanderer: {label: 'Wanderer', desc: '+2 SPD · +10% EXP', lore: 'The road is your home. Every mile a lesson.', fomo: 'Hot Right Now', fomoClass: 'fomo-hot'},
         herbalist: {label: 'Herbalist', desc: '+12 HP · +5 MP', lore: 'You know which leaves heal and which ones kill.'},
         sailor: {label: 'Sailor', desc: '+3 ATK · +3 SPD', lore: 'Salt air and storm waves forged your reflexes.'},
-        mercenary: {label: 'Mercenary', desc: '+7 ATK', lore: 'You sold your sword to whoever paid most — and survived.', fomo: '&#9733; Rising Fast', fomoClass: 'fomo-top'},
+        mercenary: {label: 'Mercenary', desc: '+7 ATK', lore: 'You sold your sword to whoever paid most — and survived.', fomo: 'Rising Fast', fomoClass: 'fomo-top'},
         acolyte: {label: 'Acolyte', desc: '+10 MP · +1 Spell Power', lore: 'Temple bells and midnight prayers left their mark on your soul.'},
         blacksmith: {label: 'Blacksmith', desc: '+2 ATK · +4 DEF', lore: 'Hammer and anvil shaped both steel and your spirit.'},
     };
@@ -3573,13 +3568,13 @@
                     </div>`).join('');
                 const fomoCount = Math.floor(Math.random() * 300) + 600;
                 showArea(`
-                <div class="wiz-fomo-bar">&#128293; <strong>${fomoCount.toLocaleString()} adventurers</strong> are exploring Eldenmoor right now!</div>
+                <div class="wiz-fomo-bar"><strong>${fomoCount.toLocaleString()} adventurers</strong> are exploring Eldenmoor right now!</div>
                 <div class="wiz-we-section">
-                    <div class="wiz-we-label">&#127758; World Events</div>
+                    <div class="wiz-we-label">World Events</div>
                     <div class="wiz-we-feed">${evHtml}</div>
                 </div>
                 <div class="wiz-we-section" style="margin-top:10px;">
-                    <div class="wiz-we-label">&#128220; Quests Awaiting You</div>
+                    <div class="wiz-we-label">Quests Awaiting You</div>
                     <div class="wiz-qp-list">${qHtml}</div>
                 </div>
                 <button class="btn btn-primary wiz-continue-btn" onclick="wizSelectWorldEvents()">I'm Ready &rarr;</button>`);
@@ -3591,7 +3586,7 @@
                 const cards = Object.entries(WIZ_BACKGROUNDS).map(([k, v]) => makeWizCard('bg', k, v.label, v.desc, v.fomo, v.fomoClass)).join('');
                 const fomoCount = Math.floor(Math.random() * 400) + 800;
                 showArea(`
-                <div class="wiz-fomo-bar">&#128101; <strong>${fomoCount.toLocaleString()} adventurers</strong> began their journey in the last hour &mdash; don't miss out!</div>
+                <div class="wiz-fomo-bar"><strong>${fomoCount.toLocaleString()} adventurers</strong> began their journey in the last hour &mdash; don't miss out!</div>
                 <div class="wiz-grid-3">${cards}</div>
                 <div class="wiz-lore" id="wiz-lore-bg"></div>
                 <button class="btn btn-primary wiz-continue-btn" onclick="wizSelectBg()">Continue</button>`);

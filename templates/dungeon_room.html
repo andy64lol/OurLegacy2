@@ -105,7 +105,7 @@
                     <div style="display:flex;gap:10px;flex-wrap:wrap;">
                         <input type="text" name="answer" placeholder="Enter your answer..."
                                class="dungeon-text-input" autocomplete="off" autofocus>
-                        <button type="submit" class="btn btn-primary">Answer</button>
+                        <button type="submit" class="btn btn-primary btn-wood">Answer</button>
                     </div>
                 </form>
                 <form method="POST" action="/dungeon/answer" style="margin-top:8px;">
@@ -140,7 +140,7 @@
                     <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">You will be taken to the battle screen.</div>
                 </div>
                 <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary" style="margin-top:16px;">Engage!</button>
+                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">Engage!</button>
                 </form>
 
                 <!-- ── AMBUSH ROOM ── -->
@@ -151,7 +151,7 @@
                     <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">A powerful foe waits to strike — rewards are greater but so is the danger.</div>
                 </div>
                 <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary" style="margin-top:16px;border-color:var(--red);">Face the Ambush!</button>
+                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">Face the Ambush!</button>
                 </form>
 
                 <!-- ── SHRINE ROOM ── -->
@@ -162,7 +162,7 @@
                     <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">Approach and receive the blessing — HP and MP restored.</div>
                 </div>
                 <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary" style="margin-top:16px;border-color:var(--green-bright);color:var(--green-bright);">Approach the Shrine</button>
+                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">Approach the Shrine</button>
                 </form>
 
                 <!-- ── CHEST ROOM ── -->
@@ -172,7 +172,7 @@
                     <div style="color:var(--gold);font-weight:600;font-size:16px;">A treasure chest awaits!</div>
                 </div>
                 <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary" style="margin-top:16px;">Open Chest</button>
+                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">Open Chest</button>
                 </form>
 
                 <!-- ── TRAP CHEST ROOM ── -->
@@ -191,7 +191,7 @@
                     </div>
                 </div>
                 <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary" style="margin-top:16px;">Roll to Disarm & Open</button>
+                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">Roll to Disarm & Open</button>
                 </form>
 
                 <!-- ── EMPTY ROOM ── -->
@@ -201,7 +201,7 @@
                     <div style="color:var(--text-dim);font-size:15px;">The chamber is still and silent.</div>
                 </div>
                 <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary" style="margin-top:16px;">
+                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">
                         {% if room_num == total_rooms %}Complete Dungeon{% else %}Proceed{% endif %}
                     </button>
                 </form>
