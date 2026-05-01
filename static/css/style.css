@@ -144,6 +144,19 @@ strong {
     border-color: transparent;
     image-rendering: pixelated;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    aspect-ratio: 3 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.btn-primary.btn-large,
+.btn-primary.btn-small,
+.btn-primary.btn-xsmall {
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -238,6 +251,12 @@ strong {
     border-color: transparent;
     image-rendering: pixelated;
     text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+    aspect-ratio: 3 / 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .btn-item:hover:not(.btn-disabled) {
