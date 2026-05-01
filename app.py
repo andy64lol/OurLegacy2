@@ -2165,7 +2165,17 @@ def boss_take_turn(enemy, player, player_effects, log):
         result["new_phase_desc"] = desc
         log.append(f"{enemy['name']} enters a new phase! {desc}")
 
-    # Phase multipliers removed — mobs receive no stat buffs from phase transitions
+    # Apply phase multipliers — nerfed to 50% of original strength to keep bosses manageable
+    if "_base_attack" not in enemy:
+        enemy["_base_attack"] = enemy["attack"]
+        enemy["_base_defense"] = enemy["defense"]
+
+    raw_atk_mult = phase_data.get("attack_multiplier", 1.0)
+    raw_def_mult = phase_data.get("defense_multiplier", 1.0)
+    atk_mult = 1.0 + (raw_atk_mult - 1.0) * 0.5
+    def_mult = 1.0 + (raw_def_mult - 1.0) * 0.5
+    enemy["attack"] = max(1, int(enemy["_base_attack"] * atk_mult))
+    enemy["defense"] = max(0, int(enemy["_base_defense"] * def_mult))
 
     # Tick ability cooldowns
     cooldowns = enemy.get("_ability_cooldowns", {})
@@ -2203,8 +2213,8 @@ def boss_take_turn(enemy, player, player_effects, log):
         stun_chance = ability.get("stun_chance", 0.0)
 
         if dmg > 0:
-            # Ability damage ignores some defense
-            raw = max(1, dmg - player["defense"] // 2 + dice.between(-3, 5))
+            # Ability damage ignores some defense — reduced by 20% to make bosses more manageable
+            raw = max(1, int((dmg - player["defense"] // 2 + dice.between(-3, 5)) * 0.8))
             if "shield" in player_effects:
                 absorb = (
                     player_effects["shield"].get("data", {}).get("absorb_amount", 0)
@@ -2443,9 +2453,9 @@ def apply_status_effect(effects_dict, effect_key, turns=None):
     }
 
 
-def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False):
+def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False, player_level=1):
     """Process all active status effects for an entity. Returns True if stunned.
-    When is_enemy=True, buff effects (healing, stat boosts) are suppressed."""
+    When is_enemy=True, healing is scaled down relative to player_level."""
     to_remove = []
     stunned = False
     for eff_key, eff_info in list(effects_dict.items()):
@@ -2461,10 +2471,15 @@ def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False
                 f"{entity_label} takes {dmg} {eff_key} damage! ({max(0, eff_info['turns'] - 1)} turns left)"
             )
         elif eff_type == "healing_over_time":
-            if not is_enemy:
-                heal = data.get("heal_amount", 8)
-                entity["hp"] = min(entity.get("max_hp", entity["hp"]), entity["hp"] + heal)
-                log.append(f"{entity_label} regenerates {heal} HP!")
+            heal_base = data.get("heal_amount", 8)
+            if is_enemy:
+                # Scale enemy healing down relative to player level — higher level = less regen
+                scale = max(0.25, 1.0 - player_level * 0.03)
+                heal = max(1, int(heal_base * scale))
+            else:
+                heal = heal_base
+            entity["hp"] = min(entity.get("max_hp", entity["hp"]), entity["hp"] + heal)
+            log.append(f"{entity_label} regenerates {heal} HP!")
         elif eff_type == "action_block":
             stunned = True
             log.append(f"{entity_label} is stunned and cannot act!")
@@ -2505,8 +2520,8 @@ def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False
         eff_info["turns"] -= 1
         if eff_info["turns"] <= 0:
             to_remove.append(eff_key)
-            if eff_type == "stat_boost" and not is_enemy:
-                # Revert stat boosts from old format (enemies never receive stat boosts)
+            if eff_type == "stat_boost":
+                # Revert stat boosts from old format when they expire
                 for stat_key in ("defense_bonus", "attack_bonus", "speed_bonus"):
                     if stat_key in data:
                         stat = stat_key.replace("_bonus", "")
@@ -5633,7 +5648,7 @@ def battle_spell():
     enemy_name = enemy.get("name", "Enemy")
     stunned = process_turn_effects(player, player_effects, log, "You")
     session["battle_player_effects"] = player_effects
-    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True)
+    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True, player_level=player.get("level", 1))
     session["battle_enemy_effects"] = enemy_effects
 
     if player["hp"] <= 0:
@@ -5722,7 +5737,7 @@ def battle_attack():
     # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
     stunned = process_turn_effects(player, player_effects, log, "You")
-    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True)
+    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True, player_level=player.get("level", 1))
 
     if player["hp"] <= 0:
         session["battle_player_effects"] = player_effects
@@ -5848,7 +5863,7 @@ def battle_defend():
     # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
     process_turn_effects(player, player_effects, log, "You")
-    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True)
+    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True, player_level=player.get("level", 1))
 
     if player["hp"] <= 0:
         session["battle_player_effects"] = player_effects
