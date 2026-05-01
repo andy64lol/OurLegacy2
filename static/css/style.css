@@ -137,14 +137,26 @@ strong {
 }
 
 .btn-primary {
-    background: var(--wood-dark);
+    background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.png');
+    background-size: 100% 100%;
+    background-color: transparent;
     color: var(--gold-bright);
-    border-color: var(--wood-bright);
+    border-color: transparent;
+    image-rendering: pixelated;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: var(--wood-mid);
+    background-image: url('/game_assets/UI/button_normal/%5B3%5D%20Hover.png');
+    background-size: 100% 100%;
+    background-color: transparent;
     color: var(--gold-bright);
+}
+
+.btn-primary:active:not(:disabled) {
+    background-image: url('/game_assets/UI/button_normal/%5B2%5D%20Clicked.png');
+    background-size: 100% 100%;
+    background-color: transparent;
 }
 
 .btn-secondary {
@@ -219,13 +231,25 @@ strong {
 }
 
 .btn-item {
-    background: var(--wood-dark);
+    background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.png');
+    background-size: 100% 100%;
+    background-color: transparent;
     color: var(--gold);
-    border-color: var(--wood-bright);
+    border-color: transparent;
+    image-rendering: pixelated;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
 }
 
 .btn-item:hover:not(.btn-disabled) {
-    background: var(--wood-mid);
+    background-image: url('/game_assets/UI/button_normal/%5B3%5D%20Hover.png');
+    background-size: 100% 100%;
+    background-color: transparent;
+}
+
+.btn-item:active:not(.btn-disabled) {
+    background-image: url('/game_assets/UI/button_normal/%5B2%5D%20Clicked.png');
+    background-size: 100% 100%;
+    background-color: transparent;
 }
 
 .btn-flee {
