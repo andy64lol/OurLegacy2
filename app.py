@@ -2165,15 +2165,7 @@ def boss_take_turn(enemy, player, player_effects, log):
         result["new_phase_desc"] = desc
         log.append(f"{enemy['name']} enters a new phase! {desc}")
 
-    # Apply phase multipliers to current combat stats (snapshot every turn)
-    if "_base_attack" not in enemy:
-        enemy["_base_attack"] = enemy["attack"]
-        enemy["_base_defense"] = enemy["defense"]
-
-    atk_mult = phase_data.get("attack_multiplier", 1.0)
-    def_mult = phase_data.get("defense_multiplier", 1.0)
-    enemy["attack"] = max(1, int(enemy["_base_attack"] * atk_mult))
-    enemy["defense"] = max(0, int(enemy["_base_defense"] * def_mult))
+    # Phase multipliers removed — mobs receive no stat buffs from phase transitions
 
     # Tick ability cooldowns
     cooldowns = enemy.get("_ability_cooldowns", {})
@@ -2451,8 +2443,9 @@ def apply_status_effect(effects_dict, effect_key, turns=None):
     }
 
 
-def process_turn_effects(entity, effects_dict, log, entity_label):
-    """Process all active status effects for an entity. Returns True if stunned."""
+def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False):
+    """Process all active status effects for an entity. Returns True if stunned.
+    When is_enemy=True, buff effects (healing, stat boosts) are suppressed."""
     to_remove = []
     stunned = False
     for eff_key, eff_info in list(effects_dict.items()):
@@ -2468,9 +2461,10 @@ def process_turn_effects(entity, effects_dict, log, entity_label):
                 f"{entity_label} takes {dmg} {eff_key} damage! ({max(0, eff_info['turns'] - 1)} turns left)"
             )
         elif eff_type == "healing_over_time":
-            heal = data.get("heal_amount", 8)
-            entity["hp"] = min(entity.get("max_hp", entity["hp"]), entity["hp"] + heal)
-            log.append(f"{entity_label} regenerates {heal} HP!")
+            if not is_enemy:
+                heal = data.get("heal_amount", 8)
+                entity["hp"] = min(entity.get("max_hp", entity["hp"]), entity["hp"] + heal)
+                log.append(f"{entity_label} regenerates {heal} HP!")
         elif eff_type == "action_block":
             stunned = True
             log.append(f"{entity_label} is stunned and cannot act!")
@@ -2511,8 +2505,8 @@ def process_turn_effects(entity, effects_dict, log, entity_label):
         eff_info["turns"] -= 1
         if eff_info["turns"] <= 0:
             to_remove.append(eff_key)
-            if eff_type == "stat_boost":
-                # Revert stat boosts from old format
+            if eff_type == "stat_boost" and not is_enemy:
+                # Revert stat boosts from old format (enemies never receive stat boosts)
                 for stat_key in ("defense_bonus", "attack_bonus", "speed_bonus"):
                     if stat_key in data:
                         stat = stat_key.replace("_bonus", "")
@@ -5639,7 +5633,7 @@ def battle_spell():
     enemy_name = enemy.get("name", "Enemy")
     stunned = process_turn_effects(player, player_effects, log, "You")
     session["battle_player_effects"] = player_effects
-    process_turn_effects(enemy, enemy_effects, log, enemy_name)
+    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True)
     session["battle_enemy_effects"] = enemy_effects
 
     if player["hp"] <= 0:
@@ -5728,7 +5722,7 @@ def battle_attack():
     # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
     stunned = process_turn_effects(player, player_effects, log, "You")
-    process_turn_effects(enemy, enemy_effects, log, enemy_name)
+    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True)
 
     if player["hp"] <= 0:
         session["battle_player_effects"] = player_effects
@@ -5854,7 +5848,7 @@ def battle_defend():
     # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
     process_turn_effects(player, player_effects, log, "You")
-    process_turn_effects(enemy, enemy_effects, log, enemy_name)
+    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True)
 
     if player["hp"] <= 0:
         session["battle_player_effects"] = player_effects
