@@ -3701,12 +3701,12 @@ def game():
         xp_progress = mining_xp_total - cur_lvl_xp
         xp_pct = min(100, int(xp_progress / xp_span * 100)) if mining_lvl < 25 else 100
 
+        # Show ALL ores from global requirements table (random pool), not area-specific
         mine_items = []
-        for ore_name in mine_pool:
+        for ore_name, req in _ORE_REQUIREMENTS.items():
             ore_item = GAME_DATA["items"].get(ore_name, {})
             if not isinstance(ore_item, dict):
                 continue
-            req = _ORE_REQUIREMENTS.get(ore_name, {"pickaxe_tier": 1, "mining_level": 1})
             accessible = (
                 best_pickaxe_tier >= req["pickaxe_tier"]
                 and mining_lvl >= req["mining_level"]
@@ -4614,7 +4614,7 @@ def action_rest():
     if revived:
         names = ", ".join(revived)
         add_message(
-            f"&#9876; Your fallen companions have recovered: {names}!",
+            f"Your fallen companions have recovered: {names}!",
             "var(--gold)",
         )
 
@@ -4651,37 +4651,23 @@ def action_mine():
 
     if best_tier == 0:
         add_message(
-            "&#9935; You need a pickaxe to mine. Buy a Wooden Pickaxe from a shop (20g).",
+            "You need a pickaxe to mine. Buy a Wooden Pickaxe from a shop (20g).",
             "var(--red)",
         )
         return redirect(url_for("game"))
 
-    # ── Filter pool by pickaxe tier + mining level ──────────────────────────
+    # ── Build accessible pool from ALL ores (not area-specific) ─────────────
     mining_lvl = _get_mining_level(player)
     accessible: list[str] = []
-    for ore_name in mine_pool:
-        req = _ORE_REQUIREMENTS.get(ore_name, {"pickaxe_tier": 1, "mining_level": 1})
+    for ore_name, req in _ORE_REQUIREMENTS.items():
         if best_tier >= req["pickaxe_tier"] and mining_lvl >= req["mining_level"]:
             accessible.append(ore_name)
 
     if not accessible:
-        lowest_pickaxe = min(
-            _ORE_REQUIREMENTS.get(o, {}).get("pickaxe_tier", 1) for o in mine_pool
+        add_message(
+            "You need a better pickaxe or higher Mining Level to find ore here.",
+            "var(--text-dim)",
         )
-        lowest_lvl = min(
-            _ORE_REQUIREMENTS.get(o, {}).get("mining_level", 1) for o in mine_pool
-        )
-        if best_tier < lowest_pickaxe:
-            needed_pick = _PICKAXE_TIER_NAMES.get(lowest_pickaxe, "better pickaxe")
-            add_message(
-                f"&#9935; Your {best_pickaxe} can't crack these veins. You need a {needed_pick}.",
-                "var(--text-dim)",
-            )
-        else:
-            add_message(
-                f"&#9935; These ore veins require Mining Level {lowest_lvl}. Keep mining to level up!",
-                "var(--text-dim)",
-            )
         return redirect(url_for("game"))
 
     # ── STR-based success chance ─────────────────────────────────────────────
@@ -4692,14 +4678,14 @@ def action_mine():
 
     if _rand.random() > success_chance:
         add_message(
-            "&#9935; You swing your pickaxe but find nothing this time.",
+            "You swing your pickaxe but find nothing this time.",
             "var(--text-dim)",
         )
         save_player(player)
         _autosave()
         return redirect(url_for("game"))
 
-    # ── Weighted draw by rarity ──────────────────────────────────────────────
+    # ── Weighted draw by rarity from random global pool ──────────────────────
     _rw = {"junk": 80, "common": 60, "uncommon": 30, "rare": 8, "legendary": 2}
     pool_names: list[str] = []
     pool_weights: list[int] = []
@@ -4730,11 +4716,11 @@ def action_mine():
     }
     color = _rc.get(rarity, "var(--text-light)")
     qty_str = f" &times;{amount}" if amount > 1 else ""
-    add_message(f"&#9935; You mined {ore_name}{qty_str}! (+{xp_gain} Mining XP)", color)
+    add_message(f"You mined {ore_name}{qty_str}! (+{xp_gain} Mining XP)", color)
 
     if new_level > old_level:
         add_message(
-            f"&#9935; Mining Level Up! You are now Mining Level {new_level}!",
+            f"Mining Level Up! You are now Mining Level {new_level}!",
             "var(--gold)",
         )
 

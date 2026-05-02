@@ -465,7 +465,7 @@
         <div class="hdr-links">
             <a href="/groups">⚔ Group</a>
             <a href="/leaderboard">🏆 Leaderboard</a>
-            <a href="/chat">&#128172; Chat</a>
+            <a href="/chat">Chat</a>
             <a href="/game">&#8592; Game</a>
         </div>
     </div>
@@ -495,8 +495,8 @@
                 <div id="dm-header">
                     <div id="dm-with-name"></div>
                     <div id="dm-header-btns">
-                        <button id="dm-trade-btn" onclick="startTrade()" title="Trade items with this player">&#128181; Trade</button>
-                        <button id="dm-block-btn" onclick="blockUser()">&#128683; Block</button>
+                        <button id="dm-trade-btn" onclick="startTrade()" title="Trade items with this player">Trade</button>
+                        <button id="dm-block-btn" onclick="blockUser()">Block</button>
                         <button id="dm-remove-btn" onclick="removeFriend()">Remove</button>
                     </div>
                 </div>
@@ -526,7 +526,7 @@
 
             <!-- Invite (you're the recipient) -->
             <div id="trade-invite-panel" style="display:none;">
-                <div class="big">&#128181;</div>
+                <div class="big"></div>
                 <div class="msg"><strong id="trade-invite-from"></strong> wants to trade with you!</div>
                 <div class="trade-invite-btns">
                     <button id="trade-accept-btn" onclick="tradeAccept()">&#10003; Accept</button>
@@ -548,7 +548,7 @@
                         <div class="trade-col-header">Your Offer</div>
                         <div id="trade-my-items"><span class="trade-empty-hint">No items yet</span></div>
                         <div class="trade-gold-row">
-                            <span class="trade-gold-label">&#128081; Gold:</span>
+                            <span class="trade-gold-label">Gold:</span>
                             <input type="number" id="trade-gold-input" class="trade-gold-input" min="0" max="9999999" value="0" placeholder="0">
                             <button class="trade-gold-set-btn" onclick="tradeSetGold()">Set</button>
                         </div>
@@ -557,7 +557,7 @@
                         <div class="trade-col-header">Their Offer</div>
                         <div id="trade-their-items"><span class="trade-empty-hint">Nothing offered yet</span></div>
                         <div class="trade-gold-row">
-                            <span class="trade-gold-label">&#128081; Gold:</span>
+                            <span class="trade-gold-label">Gold:</span>
                             <span class="trade-gold-display" id="trade-their-gold">0</span>
                         </div>
                     </div>
@@ -577,7 +577,7 @@
 
             <!-- Approved / applying -->
             <div id="trade-approved-panel" style="display:none;">
-                <div class="big">&#127381;</div>
+                <div class="big"></div>
                 <div style="font-size:16px;font-weight:700;color:var(--green-bright);margin-bottom:12px;">Trade Agreed!</div>
                 <div class="summary" id="trade-approved-summary"></div>
                 <div id="trade-applying-msg" style="margin-top:16px;font-size:13px;color:var(--text-dim);">Applying trade...</div>
@@ -644,7 +644,7 @@ function friendsPageConfirm(msg, onOk) {
                 appendDmMsg(msg, true);
                 fetch('/api/dm/' + encodeURIComponent(msg.sender));
             } else {
-                showToast('&#128172; New message from <strong>' + esc(msg.sender) + '</strong>');
+                showToast('New message from <strong>' + esc(msg.sender) + '</strong>');
                 loadFriends();
             }
         });
@@ -661,7 +661,7 @@ function friendsPageConfirm(msg, onOk) {
             document.getElementById('trade-invite-from').textContent = data.from;
             document.getElementById('trade-title').textContent = 'Trade Request';
             document.getElementById('trade-status-badge').textContent = 'Incoming';
-            showToast('&#128181; <strong>' + esc(data.from) + '</strong> wants to trade!');
+            showToast('<strong>' + esc(data.from) + '</strong> wants to trade!');
         });
 
         socket.on('trade_invite_sent', function(data) {
@@ -707,7 +707,7 @@ function friendsPageConfirm(msg, onOk) {
                 if (d.ok) {
                     document.getElementById('trade-applying-msg').textContent = d.message || 'Trade complete!';
                     document.getElementById('trade-applying-msg').style.color = 'var(--green-bright)';
-                    showToast('&#127381; Trade complete! ' + (d.message || ''));
+                    showToast('Trade complete! ' + (d.message || ''));
                     setTimeout(closeTradeOverlay, 4000);
                 } else {
                     document.getElementById('trade-applying-msg').textContent = 'Error: ' + (d.message || 'Apply failed.');
@@ -977,7 +977,7 @@ function friendsPageConfirm(msg, onOk) {
         var html = '';
 
         if (data.incoming && data.incoming.length) {
-            html += '<div class="sidebar-section-label">&#128228; Requests (' + data.incoming.length + ')</div>';
+            html += '<div class="sidebar-section-label">Requests (' + data.incoming.length + ')</div>';
             data.incoming.forEach(function(req) {
                 html += '<div class="request-row">' +
                     '<div class="request-name">&#10024; ' + esc(req.username) + '</div>' +
@@ -1014,7 +1014,7 @@ function friendsPageConfirm(msg, onOk) {
         }
 
         if (blockedUsers && blockedUsers.length) {
-            html += '<div class="sidebar-section-label" style="color:#f97316;opacity:0.7;">&#128683; Blocked (' + blockedUsers.length + ')</div>';
+            html += '<div class="sidebar-section-label" style="color:#f97316;opacity:0.7;">Blocked (' + blockedUsers.length + ')</div>';
             blockedUsers.forEach(function(u) {
                 html += '<div class="blocked-row">' +
                     '<span class="blocked-name">' + esc(u) + '</span>' +
@@ -1084,7 +1084,7 @@ function friendsPageConfirm(msg, onOk) {
                 body: JSON.stringify({ target: target, action: 'block' })
             }).then(function(r) { return r.json(); }).then(function(d) {
                 if (d.ok) {
-                    showToast('&#128683; ' + d.message);
+                    showToast('' + d.message);
                     currentDmWith = null;
                     document.getElementById('dm-empty').style.display = '';
                     document.getElementById('dm-conversation').style.display = 'none';

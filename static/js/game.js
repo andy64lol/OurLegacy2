@@ -218,7 +218,6 @@ function loadMarketTab() {
 function renderMarket(data, container) {
     if (data.cooldown_msg) {
         container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-dim);">' +
-            '<div style="font-size:28px;margin-bottom:10px;">&#128274;</div>' +
             '<div>' + data.cooldown_msg + '</div>' +
             '<div style="margin-top:10px;font-size:12px;">The Elite Market refreshes every 10 minutes.</div></div>';
         return;
@@ -588,7 +587,7 @@ function loadSaveSlots() {
             row.style.cssText = 'display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);';
             if (s.empty) {
                 row.innerHTML = '<div style="flex:1;font-size:12px;color:var(--text-dim);">' +
-                    '<span style="color:var(--gold);font-size:11px;font-weight:700;margin-right:6px;">' + (isAuto ? '&#128260; AUTO' : 'Slot ' + s.slot) + '</span>' +
+                    '<span style="color:var(--gold);font-size:11px;font-weight:700;margin-right:6px;">' + (isAuto ? 'AUTO' : 'Slot ' + s.slot) + '</span>' +
                     '<em>Empty</em></div>' +
                     (isAuto ? '' : '<button class="btn btn-secondary btn-small" onclick="saveToSlot(' + s.slot + ')" style="font-size:11px;padding:3px 10px;">Save</button>');
             } else {
@@ -598,7 +597,7 @@ function loadSaveSlots() {
                 var label = _esc(s.label || (isAuto ? 'Auto Save' : 'Save ' + s.slot));
                 var date = _esc(s.saved_at || '');
                 row.innerHTML = '<div style="flex:1;min-width:0;">' +
-                    '<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:2px;">' + (isAuto ? '&#128260; AUTO' : 'Slot ' + s.slot) + ' &mdash; <span style="color:var(--text-light);">' + label + '</span></div>' +
+                    '<div style="font-size:11px;color:var(--gold);font-weight:700;margin-bottom:2px;">' + (isAuto ? 'AUTO' : 'Slot ' + s.slot) + ' &mdash; <span style="color:var(--text-light);">' + label + '</span></div>' +
                     '<div style="font-size:12px;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + name + ' &bull; Lv ' + s.level + ' ' + cls + '</div>' +
                     '<div style="font-size:11px;color:var(--text-dim);">' + area + (date ? ' &middot; ' + date : '') + '</div>' +
                     '</div>' +

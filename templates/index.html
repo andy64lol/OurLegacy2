@@ -737,7 +737,7 @@
                 <button class="tab-btn" data-tab="shop">{{ shop_name or 'Shop' }}</button>
                 {% endif %}
                 {% if mine_data %}
-                <button class="tab-btn" data-tab="mining">&#9935; Mines</button>
+                <button class="tab-btn" data-tab="mining">Mines</button>
                 {% endif %}
                 <button class="tab-btn" data-tab="crafting">Crafting</button>
                 <button class="tab-btn" data-tab="dungeons">
@@ -1291,7 +1291,7 @@
 
             <!-- Mining Level Card -->
             <div class="panel" style="margin-bottom:10px;">
-                <div class="panel-title">&#9935; Mining</div>
+                <div class="panel-title">Mining</div>
                 <div class="panel-body">
                     <div class="mine-level-row">
                         <div class="mine-level-badge">Lv.{{ mine_data.mining_level }}</div>
@@ -1308,7 +1308,7 @@
                         </div>
                         <div class="mine-pickaxe-col">
                             {% if mine_data.has_pickaxe %}
-                            <span class="mine-pickaxe-label">&#9935; {{ mine_data.best_pickaxe }}</span>
+                            <span class="mine-pickaxe-label">{{ mine_data.best_pickaxe }}</span>
                             {% else %}
                             <span class="mine-pickaxe-label mine-no-pickaxe">No pickaxe</span>
                             {% endif %}
@@ -1325,7 +1325,7 @@
                         <form method="post" action="/action/mine">
                             <button type="submit" class="btn btn-primary mine-btn"
                                 {% if not mine_data.has_pickaxe %}disabled title="Buy a pickaxe first"{% endif %}>
-                                &#9935; Mine
+                                Mine
                             </button>
                         </form>
                         <span class="mine-str-hint">STR {{ player.attributes.str or 0 }} &rarr; +{{ ((player.attributes.str or 0) * 0.5) | round(1) }}% success</span>
@@ -1340,7 +1340,6 @@
                     <div class="mine-ore-list">
                         {% for ore in mine_data.pool %}
                         <div class="mine-ore-entry {% if not ore.accessible %}mine-ore-locked{% endif %}">
-                            <span class="mine-ore-icon">{% if ore.accessible %}&#9652;{% else %}&#128274;{% endif %}</span>
                             <span class="mine-ore-name rarity-{{ ore.rarity }}">{{ ore.name }}</span>
                             <span class="mine-ore-badge rarity-badge-{{ ore.rarity }}">{{ ore.rarity }}</span>
                             <span class="mine-ore-value">{{ ore.price }}g</span>

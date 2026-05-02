@@ -339,7 +339,7 @@
     <div id="groups-header">
         <div class="title">&#9876; Adventure Group</div>
         <div class="hdr-links">
-            <a href="/leaderboard">&#127942; Leaderboard</a>
+            <a href="/leaderboard">Leaderboard</a>
             <a href="/friends">Friends</a>
         </div>
     </div>
@@ -383,7 +383,7 @@
             <!-- Invite Code (leader only) -->
             {% if group.leader == online_username %}
             <div class="panel-card">
-                <div class="panel-card-title">&#128273; Invite Code</div>
+                <div class="panel-card-title">Invite Code</div>
                 <div class="panel-card-body">
                     <div class="invite-code-box">
                         <span class="invite-code-val" id="invite-code-display">{{ group.invite_code }}</span>
@@ -396,7 +396,7 @@
 
             <!-- Members -->
             <div class="panel-card">
-                <div class="panel-card-title">&#128100; Members ({{ group.members|length }}/6)</div>
+                <div class="panel-card-title">Members ({{ group.members|length }}/6)</div>
                 <div class="panel-card-body">
                     <div class="member-list">
                         {% for m in group.members %}
@@ -426,8 +426,8 @@
         <!-- RIGHT: Activity log + Group chat -->
         <div id="groups-right">
             <div id="tab-bar">
-                <button class="grp-tab-btn active" onclick="showTab('log', this)">&#128220; Activity Log</button>
-                <button class="grp-tab-btn" onclick="showTab('chat', this)">&#128172; Group Chat</button>
+                <button class="grp-tab-btn active" onclick="showTab('log', this)">Activity Log</button>
+                <button class="grp-tab-btn" onclick="showTab('chat', this)">Group Chat</button>
             </div>
 
             <!-- Activity Log -->
@@ -495,7 +495,7 @@
                 </div>
 
                 <div class="panel-card">
-                    <div class="panel-card-title">&#128273; Join a Group</div>
+                    <div class="panel-card-title">Join a Group</div>
                     <div class="panel-card-body">
                         <input class="form-input" id="join-code" type="text" maxlength="16" placeholder="Enter invite code" style="text-transform:uppercase;letter-spacing:0.15em;">
                         <button class="btn-grp btn-grp-primary" style="width:100%;" onclick="joinGroup()">Join Group</button>
@@ -504,7 +504,7 @@
                 </div>
 
                 <div style="text-align:center;">
-                    <a href="/leaderboard" style="font-size:12px;color:var(--text-dim);">&#127942; View Leaderboard</a>
+                    <a href="/leaderboard" style="font-size:12px;color:var(--text-dim);">View Leaderboard</a>
                 </div>
             </div>
         </div>
