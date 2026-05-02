@@ -1055,9 +1055,9 @@
       ],
       "texture": "items/swords/rpg_icons37.png"
    },
-   "H\u00e4mmelson's Legendary Flute": {
+   "Hämmelson's Legendary Flute": {
       "type": "weapon",
-      "description": "The masterpiece of the legendary bard H\u00e4mmelson, each note carries the power to move mountains.",
+      "description": "The masterpiece of the legendary bard Hämmelson, each note carries the power to move mountains.",
       "attack_bonus": 219,
       "mp_bonus": 50,
       "speed_bonus": 3,
@@ -1084,9 +1084,9 @@
       ],
       "texture": "items/swords/rpg_icons38.png"
    },
-   "War Drum of The god of Thunder Z\u00e2esltral": {
+   "War Drum of The god of Thunder Zâesltral": {
       "type": "weapon",
-      "description": "The sacred war drum of the storm god Z\u00e2esltral, its beating shakes the very foundations of reality.",
+      "description": "The sacred war drum of the storm god Zâesltral, its beating shakes the very foundations of reality.",
       "attack_bonus": 244,
       "mp_bonus": 35,
       "magic_weapon": true,
@@ -1495,9 +1495,9 @@
          "enchanted"
       ]
    },
-   "The Poetry god \u00c4epleollo's Robe": {
+   "The Poetry god Äepleollo's Robe": {
       "type": "armor",
-      "description": "The divine robes of the Poetry god \u00c4epleollo, woven from verses of pure inspiration. Wearing it grants the power to turn words into reality.",
+      "description": "The divine robes of the Poetry god Äepleollo, woven from verses of pure inspiration. Wearing it grants the power to turn words into reality.",
       "defense_bonus": 15,
       "mp_bonus": 55,
       "attack_bonus": 8,
@@ -4695,9 +4695,9 @@
       ],
       "texture": "items/staffs/rpg_icons81.png"
    },
-   "D\u00e4lokurg's Warhammer": {
+   "Dälokurg's Warhammer": {
       "type": "weapon",
-      "description": "A huge warhammer that once belonged to the infamous bandit leader of Br\u00efgadrak Oblast.",
+      "description": "A huge warhammer that once belonged to the infamous bandit leader of Brïgadrak Oblast.",
       "attack_bonus": 240,
       "price": 320,
       "rarity": "legendary",
@@ -4726,7 +4726,7 @@
    },
    "Bandit Leader's Cloak": {
       "type": "armor",
-      "description": "A cloak worn by D\u00e4lokurg, providing stealth and agility.",
+      "description": "A cloak worn by Dälokurg, providing stealth and agility.",
       "defense_bonus": 120,
       "speed_bonus": 140,
       "price": 280,
@@ -4754,7 +4754,8 @@
       "price": 5,
       "rarity": "common",
       "tags": [
-         "material"
+         "material",
+         "ore"
       ]
    },
    "Coal": {
@@ -4763,7 +4764,8 @@
       "price": 3,
       "rarity": "common",
       "tags": [
-         "material"
+         "material",
+         "ore"
       ]
    },
    "Steel Ingot": {
@@ -6402,7 +6404,7 @@
    },
    "Sultan's Signet Ring": {
       "type": "accessory",
-      "description": "A heavy gold ring bearing the seal of the Ottoman Sultan. Commands respect \u2014 and fear.",
+      "description": "A heavy gold ring bearing the seal of the Ottoman Sultan. Commands respect — and fear.",
       "attack_bonus": 5,
       "defense_bonus": 5,
       "gold_bonus": 0,
@@ -6492,7 +6494,7 @@
    },
    "Janissary Badge": {
       "type": "material",
-      "description": "The insignia badge of a Janissary soldier \u2014 proof of a hard-won fight.",
+      "description": "The insignia badge of a Janissary soldier — proof of a hard-won fight.",
       "price": 30,
       "rarity": "common",
       "tags": [
@@ -6590,7 +6592,7 @@
    "The New Order: Life in Kostantora": {
       "type": "book",
       "book_key": "new_order_of_kostantora",
-      "description": "A personal account of Kostantora fifteen years after the conquest \u2014 the slave markets, faith, and survival. By Miriam of the Lower City.",
+      "description": "A personal account of Kostantora fifteen years after the conquest — the slave markets, faith, and survival. By Miriam of the Lower City.",
       "price": 70,
       "rarity": "rare"
    },
@@ -6618,7 +6620,7 @@
    "The Origin of Eldenmoor": {
       "type": "book",
       "book_key": "origin_of_eldermoor",
-      "description": "A scholarly transcription of the Primordial Scriptures \u2014 texts said to record how Andrew, the Primordial One, created the world using sacred commands no mortal has ever understood. Cheap because everyone assumes it's fiction.",
+      "description": "A scholarly transcription of the Primordial Scriptures — texts said to record how Andrew, the Primordial One, created the world using sacred commands no mortal has ever understood. Cheap because everyone assumes it's fiction.",
       "price": 5,
       "rarity": "common"
    },
@@ -6652,7 +6654,7 @@
    },
    "Talisman of Andy": {
       "type": "weapon",
-      "description": "A sacred talisman forged in the heart of the Eternal Flame, blessed by ancient spirits. Wielded only by those chosen by destiny itself. Gifted freely on the day of its creator\u2019s birth.",
+      "description": "A sacred talisman forged in the heart of the Eternal Flame, blessed by ancient spirits. Wielded only by those chosen by destiny itself. Gifted freely on the day of its creator’s birth.",
       "attack_bonus": 124,
       "magic_weapon": true,
       "mp_bonus": 50,
@@ -6716,7 +6718,7 @@
    "Origia: A History of the First Settlement": {
       "type": "book",
       "book_key": "origia_first_settlement",
-      "description": "A Bureau of Historical Records account of the village most call Starting Village \u2014 its true name, its founding, and why the world keeps forgetting what it is actually called.",
+      "description": "A Bureau of Historical Records account of the village most call Starting Village — its true name, its founding, and why the world keeps forgetting what it is actually called.",
       "price": 35,
       "rarity": "uncommon"
    },
@@ -6727,10 +6729,10 @@
       "price": 25,
       "rarity": "common"
    },
-   "A History of the Kingdom of \u00c6nglia": {
+   "A History of the Kingdom of Ænglia": {
       "type": "book",
       "book_key": "history_of_aenglia",
-      "description": "High Archivist Pellan's definitive account of \u00c6nglia \u2014 from the first settlements and the founding of the Nevrolian dynasty to the Byzantra incursion and the rise of Eldenmoor as the royal capital.",
+      "description": "High Archivist Pellan's definitive account of Ænglia — from the first settlements and the founding of the Nevrolian dynasty to the Byzantra incursion and the rise of Eldenmoor as the royal capital.",
       "price": 60,
       "rarity": "uncommon"
    },
@@ -6773,7 +6775,7 @@
    },
    "Barbarian Iron Chunk": {
       "type": "material",
-      "description": "Crudely smelted iron from the northern clans \u2014 impure, but their smiths know tricks with it",
+      "description": "Crudely smelted iron from the northern clans — impure, but their smiths know tricks with it",
       "price": 18,
       "rarity": "common",
       "tags": [
@@ -6881,7 +6883,7 @@
    },
    "Bamboo Staff": {
       "type": "weapon",
-      "description": "A seasoned bamboo staff reinforced with iron bands \u2014 light, fast, and deceptively powerful",
+      "description": "A seasoned bamboo staff reinforced with iron bands — light, fast, and deceptively powerful",
       "attack_bonus": 18,
       "speed_bonus": 5,
       "mp_bonus": 10,
@@ -6987,7 +6989,7 @@
    },
    "Clan Greataxe": {
       "type": "weapon",
-      "description": "A massive double-headed axe from the northern clans \u2014 brutal, heavy, and extraordinarily effective",
+      "description": "A massive double-headed axe from the northern clans — brutal, heavy, and extraordinarily effective",
       "attack_bonus": 38,
       "speed_bonus": -2,
       "price": 180,
@@ -7013,7 +7015,7 @@
    },
    "Warbrand": {
       "type": "weapon",
-      "description": "A long, heavy two-handed sword used by Varak clan champions \u2014 massive reach, devastating power",
+      "description": "A long, heavy two-handed sword used by Varak clan champions — massive reach, devastating power",
       "attack_bonus": 48,
       "speed_bonus": -1,
       "price": 250,
@@ -7230,7 +7232,7 @@
    },
    "Jade Tea": {
       "type": "consumable",
-      "description": "A calming eastern tea brewed from chrysanthemum and wolfberry \u2014 restores MP and steadies the mind",
+      "description": "A calming eastern tea brewed from chrysanthemum and wolfberry — restores MP and steadies the mind",
       "effect": "mp_restore",
       "value": 45,
       "price": 55,
@@ -7292,7 +7294,7 @@
    },
    "Pepper Tonic": {
       "type": "consumable",
-      "description": "A concentrated dose of eastern black pepper in tonic water \u2014 improves circulation and speed",
+      "description": "A concentrated dose of eastern black pepper in tonic water — improves circulation and speed",
       "effect": "speed_boost",
       "value": 5,
       "duration": 6,
@@ -7308,7 +7310,7 @@
    },
    "Kalovar Sabre": {
       "type": "weapon",
-      "description": "A curved cavalry sabre favoured by Kalovar mounted soldiers \u2014 fast, single-edged, and lethal at range",
+      "description": "A curved cavalry sabre favoured by Kalovar mounted soldiers — fast, single-edged, and lethal at range",
       "attack_bonus": 25,
       "speed_bonus": 4,
       "price": 140,
@@ -7356,7 +7358,7 @@
    },
    "Kalovar War Lance": {
       "type": "weapon",
-      "description": "A long cavalry lance used by Kalovar heavy horse \u2014 devastating on the charge, unwieldy on foot",
+      "description": "A long cavalry lance used by Kalovar heavy horse — devastating on the charge, unwieldy on foot",
       "attack_bonus": 44,
       "defense_bonus": 3,
       "price": 280,
@@ -7376,7 +7378,7 @@
    },
    "Steppe Recurve Bow": {
       "type": "weapon",
-      "description": "A short but powerful recurve bow made from layered bone and sinew \u2014 the Varak steppe archer's weapon of choice",
+      "description": "A short but powerful recurve bow made from layered bone and sinew — the Varak steppe archer's weapon of choice",
       "attack_bonus": 22,
       "speed_bonus": 5,
       "price": 160,
@@ -7532,7 +7534,7 @@
    },
    "Iron Horde Standard": {
       "type": "offhand",
-      "description": "A clan battle standard of the Iron Horde. Inspires Varak warriors to near-supernatural ferocity \u2014 and terrifies everyone else.",
+      "description": "A clan battle standard of the Iron Horde. Inspires Varak warriors to near-supernatural ferocity — and terrifies everyone else.",
       "defense_bonus": 8,
       "attack_bonus": 10,
       "fear_factor": 0.12,
@@ -7555,7 +7557,7 @@
    },
    "Primordial Birthday Cake": {
       "type": "consumable",
-      "description": "A towering, multi-layered cake baked by the cosmos itself in honour of Andrew \u2014 The Primordial One's birthday. The frosting shimmers with stardust, the candles burn with the light of newborn stars, and each slice tastes of every good thing ever created. It fully restores your health and mana, fills you with a profound sense of celebratory joy, and grants a generous helping of experience \u2014 because on Andrew's birthday, everyone levels up a little.",
+      "description": "A towering, multi-layered cake baked by the cosmos itself in honour of Andrew — The Primordial One's birthday. The frosting shimmers with stardust, the candles burn with the light of newborn stars, and each slice tastes of every good thing ever created. It fully restores your health and mana, fills you with a profound sense of celebratory joy, and grants a generous helping of experience — because on Andrew's birthday, everyone levels up a little.",
       "effect": "birthday_cake",
       "heal_pct": 100,
       "mp_restore_pct": 100,
@@ -7570,7 +7572,7 @@
    },
    "Primordial Essence": {
       "type": "consumable",
-      "description": "A crystallized fragment of the cosmos itself, bestowed by a being older than time. Its inner light pulses with the weight of countless ages. Consuming it floods your very soul with an incomprehensible surge of experience \u2014 the lifetime of a god compressed into a single breath. Extremely rare and impossibly expensive.",
+      "description": "A crystallized fragment of the cosmos itself, bestowed by a being older than time. Its inner light pulses with the weight of countless ages. Consuming it floods your very soul with an incomprehensible surge of experience — the lifetime of a god compressed into a single breath. Extremely rare and impossibly expensive.",
       "effect": "grant_exp",
       "value": 100000000000,
       "price": 9999999999,
@@ -7697,5 +7699,89 @@
          "mana"
       ],
       "texture": "items/consumables/rpg_icons140.png"
+   },
+   "Copper Ore": {
+      "type": "material",
+      "description": "Reddish ore extracted from shallow veins. The most accessible metal for beginners.",
+      "price": 8,
+      "rarity": "common",
+      "tags": [
+         "material",
+         "ore"
+      ]
+   },
+   "Silver Ore": {
+      "type": "material",
+      "description": "A gleaming metallic ore prized for its conductivity and use in fine jewellery.",
+      "price": 25,
+      "rarity": "uncommon",
+      "tags": [
+         "material",
+         "ore"
+      ]
+   },
+   "Gold Ore": {
+      "type": "material",
+      "description": "A heavy, lustrous ore. Even a small nugget is worth a small fortune.",
+      "price": 55,
+      "rarity": "uncommon",
+      "tags": [
+         "material",
+         "ore"
+      ]
+   },
+   "Darkstone": {
+      "type": "material",
+      "description": "A jet-black mineral that absorbs light. Favoured by shadow-smiths for dark enchantments.",
+      "price": 45,
+      "rarity": "uncommon",
+      "tags": [
+         "material",
+         "ore",
+         "dark"
+      ]
+   },
+   "Mithril Ore": {
+      "type": "material",
+      "description": "Impossibly light yet harder than steel. Only master smiths can work this rare ore.",
+      "price": 110,
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "ore"
+      ]
+   },
+   "Sunstone Crystal": {
+      "type": "material",
+      "description": "A warm amber crystal that pulses with solar energy. Shatters if kept in darkness too long.",
+      "price": 140,
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "ore",
+         "crystal"
+      ]
+   },
+   "Adamantine Ore": {
+      "type": "material",
+      "description": "The hardest substance known. Legends say weapons forged from it never lose their edge.",
+      "price": 280,
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "ore"
+      ]
+   },
+   "Shadowite Crystal": {
+      "type": "material",
+      "description": "A pitch-black crystal born in the deepest voids. Its surface seems to move as if alive.",
+      "price": 480,
+      "rarity": "legendary",
+      "tags": [
+         "material",
+         "ore",
+         "crystal",
+         "dark"
+      ]
    }
 }

@@ -4846,3 +4846,98 @@ body.page-fade-out {
         height: 20px;
     }
 }
+/* ═══════════════════════════════════════════════════════════════════════════
+   Mining
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mine-action-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.mine-btn {
+    min-width: 130px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+}
+
+.mine-str-hint {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+.mine-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+}
+
+.mine-ore-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mine-ore-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.mine-ore-name {
+    font-weight: 600;
+    min-width: 130px;
+}
+
+.mine-ore-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    min-width: 72px;
+    text-align: center;
+}
+
+.rarity-badge-junk     { background: rgba(120,120,120,0.18); color: var(--text-dim); }
+.rarity-badge-common   { background: rgba(200,200,200,0.12); color: var(--text-light); }
+.rarity-badge-uncommon { background: rgba(80,200,100,0.18);  color: var(--green-bright); }
+.rarity-badge-rare     { background: rgba(80,130,220,0.20);  color: var(--mana-bright); }
+.rarity-badge-legendary{ background: rgba(200,160,50,0.22);  color: var(--gold); }
+
+.mine-ore-value {
+    font-size: 12px;
+    color: var(--gold-dim);
+    min-width: 36px;
+    text-align: right;
+}
+
+.mine-ore-desc {
+    color: var(--text-dim);
+    font-style: italic;
+    font-size: 12px;
+    flex: 1;
+}
+
+@media (max-width: 600px) {
+    .mine-ore-entry {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    .mine-ore-desc {
+        width: 100%;
+        min-width: 0;
+    }
+}

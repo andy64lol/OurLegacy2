@@ -736,6 +736,9 @@
                 {% if shop_items %}
                 <button class="tab-btn" data-tab="shop">{{ shop_name or 'Shop' }}</button>
                 {% endif %}
+                {% if mine_data %}
+                <button class="tab-btn" data-tab="mining">&#9935; Mines</button>
+                {% endif %}
                 <button class="tab-btn" data-tab="crafting">Crafting</button>
                 <button class="tab-btn" data-tab="dungeons">
                     Dungeons
@@ -1276,6 +1279,37 @@
                             </form>
                         </div>
                         {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ── Mines ── -->
+        {% if mine_data %}
+        <div class="tab-content" id="tab-mining">
+            <div class="panel" style="margin-bottom:14px;">
+                <div class="panel-title">&#9935; Mine</div>
+                <div class="panel-body">
+                    <p class="panel-note">Strike the earth for ores and minerals. Each attempt advances time. Higher STR improves your success rate.</p>
+                    <div class="mine-action-row">
+                        <form method="post" action="/action/mine">
+                            <button type="submit" class="btn btn-primary mine-btn">&#9935; Mine</button>
+                        </form>
+                        <span class="mine-str-hint">STR bonus: +{{ (player.attributes.str or 0) * 0.5 | round(1) }}%</span>
+                    </div>
+                    <div style="margin-top:18px;">
+                        <div class="mine-section-label">Known Ore Deposits</div>
+                        <div class="mine-ore-list">
+                            {% for ore in mine_data.pool %}
+                            <div class="mine-ore-entry">
+                                <span class="mine-ore-name rarity-{{ ore.rarity }}">{{ ore.name }}</span>
+                                <span class="mine-ore-badge rarity-badge-{{ ore.rarity }}">{{ ore.rarity }}</span>
+                                <span class="mine-ore-value">{{ ore.price }}g</span>
+                                <span class="mine-ore-desc">{{ ore.description }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>

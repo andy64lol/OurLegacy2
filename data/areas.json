@@ -93,7 +93,12 @@
         "quest_unlock": "goblin_cache"
       }
     ],
-    "map_image": "forest_path.png"
+    "map_image": "forest_path.png",
+    "mine_pool": [
+      "Coal",
+      "Copper Ore",
+      "Iron Ore"
+    ]
   },
   "deep_woods": {
     "name": "Deep Woods",
@@ -167,7 +172,12 @@
         "quest_unlock": "shadow_seal"
       }
     ],
-    "map_image": "ancient_ruins.png"
+    "map_image": "ancient_ruins.png",
+    "mine_pool": [
+      "Iron Ore",
+      "Silver Ore",
+      "Coal"
+    ]
   },
   "underground_tombs": {
     "name": "Underground Tombs",
@@ -188,7 +198,12 @@
     ],
     "difficulty": 3,
     "can_rest": false,
-    "map_image": "underground_tombs.png"
+    "map_image": "underground_tombs.png",
+    "mine_pool": [
+      "Iron Ore",
+      "Silver Ore",
+      "Darkstone"
+    ]
   },
   "crystal_caves": {
     "name": "Crystal Caves",
@@ -221,7 +236,12 @@
         "quest_unlock": "crystal_bounty"
       }
     ],
-    "map_image": "crystal_caves.png"
+    "map_image": "crystal_caves.png",
+    "mine_pool": [
+      "Silver Ore",
+      "Gold Ore",
+      "Darkstone"
+    ]
   },
   "dragon_lair": {
     "name": "Dragon's Lair",
@@ -240,7 +260,12 @@
     "difficulty": 5,
     "boss_area": true,
     "can_rest": false,
-    "map_image": "dragon_lair.png"
+    "map_image": "dragon_lair.png",
+    "mine_pool": [
+      "Adamantine Ore",
+      "Sunstone Crystal",
+      "Mithril Ore"
+    ]
   },
   "moonlit_glade": {
     "name": "Moonlit Glade",
@@ -329,7 +354,12 @@
     ],
     "difficulty": 4,
     "can_rest": false,
-    "map_image": "void_cavern.png"
+    "map_image": "void_cavern.png",
+    "mine_pool": [
+      "Mithril Ore",
+      "Darkstone",
+      "Gold Ore"
+    ]
   },
   "abyss_gate": {
     "name": "Abyss Gate",
@@ -509,7 +539,12 @@
     ],
     "difficulty": 4,
     "can_rest": false,
-    "map_image": "thunder_peak.png"
+    "map_image": "thunder_peak.png",
+    "mine_pool": [
+      "Gold Ore",
+      "Mithril Ore",
+      "Sunstone Crystal"
+    ]
   },
   "crypt_of_eternity": {
     "name": "Crypt of Eternity",
@@ -597,7 +632,13 @@
     "difficulty": 2,
     "rest_cost": 12,
     "can_rest": true,
-    "map_image": "mountain_base.png"
+    "map_image": "mountain_base.png",
+    "mine_pool": [
+      "Coal",
+      "Copper Ore",
+      "Iron Ore",
+      "Silver Ore"
+    ]
   },
   "port_lesben": {
     "name": "Port Lesbèn",
@@ -1523,7 +1564,12 @@
         ]
       }
     ],
-    "map_image": "deep_taiga.png"
+    "map_image": "deep_taiga.png",
+    "mine_pool": [
+      "Mithril Ore",
+      "Adamantine Ore",
+      "Darkstone"
+    ]
   },
   "permafrost_cavern": {
     "name": "Permafrost Cavern",
@@ -1545,7 +1591,12 @@
     "weather_probabilities": {
       "null": 100
     },
-    "map_image": "permafrost_cavern.png"
+    "map_image": "permafrost_cavern.png",
+    "mine_pool": [
+      "Adamantine Ore",
+      "Shadowite Crystal",
+      "Mithril Ore"
+    ]
   },
   "snowbinable_lair": {
     "name": "Snowbinable's Lair",
@@ -1883,7 +1934,11 @@
       "stormy": 25,
       "snowy": 10
     },
-    "map_image": "kapali_mountains.png"
+    "map_image": "kapali_mountains.png",
+    "mine_pool": [
+      "Adamantine Ore",
+      "Shadowite Crystal"
+    ]
   },
   "desert_of_ankhara": {
     "name": "The Desert of Ankhara",

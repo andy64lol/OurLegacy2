@@ -3645,6 +3645,25 @@ def game():
             }
         )
 
+    # Mine data for current area
+    mine_data = None
+    mine_pool = area.get("mine_pool", [])
+    if mine_pool:
+        mine_items = []
+        for ore_name in mine_pool:
+            ore_item = GAME_DATA["items"].get(ore_name, {})
+            if isinstance(ore_item, dict):
+                mine_items.append(
+                    {
+                        "name": ore_name,
+                        "rarity": ore_item.get("rarity", "common"),
+                        "description": ore_item.get("description", ""),
+                        "price": ore_item.get("price", 5),
+                    }
+                )
+        if mine_items:
+            mine_data = {"pool": mine_items}
+
     # Pending cutscene
     pending_cutscene_id = session.get("pending_cutscene")
     pending_cutscene = None
@@ -3774,6 +3793,7 @@ def game():
         dungeon_list=dungeon_list,
         active_dungeon=active_dungeon,
         attr_summary=attr_summary,
+        mine_data=mine_data,
         read_books=player.get("read_books", []),
         online_user=session.get("online_username"),
         events_data=events_data,
@@ -4523,6 +4543,81 @@ def action_rest():
 
     area_name = area.get("name", area_key.replace("_", " ").title())
     _set_activity(player, f"resting in {area_name}")
+    save_player(player)
+    _autosave()
+    return redirect(url_for("game"))
+
+
+@app.route("/action/mine", methods=["POST"])
+def action_mine():
+    import random as _rand
+
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+
+    area_key = session.get("current_area", "starting_village")
+    area = GAME_DATA["areas"].get(area_key, {})
+    mine_pool = area.get("mine_pool", [])
+
+    if not mine_pool:
+        add_message("There are no mines in this area.", "var(--red)")
+        return redirect(url_for("game"))
+
+    # STR-based success chance: 65% base + 0.5% per point of STR
+    attrs = player.get("attributes", {})
+    str_val = int(attrs.get("str", 0))
+    success_chance = min(0.95, 0.65 + str_val * 0.005)
+
+    advance_game_time(player)
+
+    if _rand.random() > success_chance:
+        add_message(
+            "&#9935; You swing your pickaxe but find nothing this time.",
+            "var(--text-dim)",
+        )
+        save_player(player)
+        _autosave()
+        return redirect(url_for("game"))
+
+    # Weighted draw by rarity
+    _rarity_weights = {"junk": 80, "common": 60, "uncommon": 30, "rare": 8, "legendary": 2}
+    pool_names: list[str] = []
+    pool_weights: list[int] = []
+    for ore_name in mine_pool:
+        ore_data = GAME_DATA["items"].get(ore_name, {})
+        if isinstance(ore_data, dict):
+            rarity = ore_data.get("rarity", "common")
+            pool_names.append(ore_name)
+            pool_weights.append(_rarity_weights.get(rarity, 30))
+
+    if not pool_names:
+        add_message("The mine appears exhausted.", "var(--text-dim)")
+        save_player(player)
+        _autosave()
+        return redirect(url_for("game"))
+
+    ore_name = _rand.choices(pool_names, weights=pool_weights, k=1)[0]
+    amount = _rand.choices([1, 2, 3], weights=[60, 30, 10], k=1)[0]
+
+    for _ in range(amount):
+        player["inventory"].append(ore_name)
+
+    ore_data = GAME_DATA["items"].get(ore_name, {})
+    rarity = ore_data.get("rarity", "common") if isinstance(ore_data, dict) else "common"
+    _rarity_colors = {
+        "junk": "var(--text-dim)",
+        "common": "var(--text-light)",
+        "uncommon": "var(--green-bright)",
+        "rare": "var(--mana-bright)",
+        "legendary": "var(--gold)",
+    }
+    color = _rarity_colors.get(rarity, "var(--text-light)")
+    qty_str = f" &times;{amount}" if amount > 1 else ""
+    add_message(f"&#9935; You mined {ore_name}{qty_str}!", color)
+
+    area_name = area.get("name", area_key.replace("_", " ").title())
+    _set_activity(player, f"mining in {area_name}")
     save_player(player)
     _autosave()
     return redirect(url_for("game"))
