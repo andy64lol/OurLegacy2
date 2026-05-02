@@ -798,7 +798,7 @@
             function setTickerContent(items) {
                 var inner = document.getElementById('news-ticker-inner');
                 if (!inner) return;
-                var combined = items.map(function(a){ return '★ ' + a.text + '  (' + a.ts + ')'; }).join('     ·     ');
+                var combined = items.map(function(a){ return a.text + '  (' + a.ts + ')'; }).join('     ·     ');
                 inner.textContent = combined + '     ·     ' + combined;
                 inner.style.animation = 'none';
                 inner.offsetHeight;
@@ -1503,7 +1503,7 @@
                                 </div>
                                 {% if not d.in_area %}
                                 <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">
-                                    &#x1F4CD; Located in <strong>{{ d.hint_area_name }}</strong>
+                                    Located in <strong>{{ d.hint_area_name }}</strong>
                                 </div>
                                 {% endif %}
                             </div>
@@ -3712,7 +3712,7 @@
             showWizStep(6);
             typeText('Before you venture forth... take a look at what awaits you in the realm.', () => {
                 const evHtml = WIZ_WORLD_EVENTS.length
-                    ? WIZ_WORLD_EVENTS.map(ev => `<div class="wiz-we-entry">&#9675; ${ev.msg}</div>`).join('')
+                    ? WIZ_WORLD_EVENTS.map(ev => `<div class="wiz-we-entry">${ev.msg}</div>`).join('')
                     : '<div class="wiz-we-entry" style="font-style:italic;opacity:0.6;">The realm stirs with new activity every hour...</div>';
                 const quests = WIZ_QUEST_PREVIEWS.slice(0, 3);
                 const qHtml = quests.map(q => `
@@ -3925,7 +3925,7 @@
 <div id="session-expired-overlay"
     style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.88);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
     <div style="background:linear-gradient(160deg,rgba(22,10,40,0.99),rgba(10,4,20,0.99));border:2px solid rgba(255,80,80,0.55);border-radius:14px;padding:36px 28px;width:100%;max-width:360px;box-shadow:0 0 60px rgba(200,40,40,0.4);text-align:center;">
-        <div style="font-size:36px;margin-bottom:12px;">&#9200;</div>
+        <div style="margin-bottom:12px;"><img src="/game_assets/glyphs/settings.png" alt="" style="width:32px;height:32px;image-rendering:pixelated;opacity:0.7;"></div>
         <div style="font-size:16px;font-weight:bold;color:#ff6060;margin-bottom:10px;letter-spacing:0.03em;">Session Expired</div>
         <p style="font-size:13px;color:var(--text-dim);line-height:1.6;margin:0 0 20px 0;">
             You have been inactive for 30 minutes. Returning to the main page&hellip;
