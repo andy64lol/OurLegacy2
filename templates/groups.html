@@ -337,7 +337,7 @@
 <div id="groups-page">
 
     <div id="groups-header">
-        <div class="title">&#9876; Adventure Group</div>
+        <div class="title">Adventure Group</div>
         <div class="hdr-links">
             <a href="/leaderboard">Leaderboard</a>
             <a href="/friends">Friends</a>
@@ -351,7 +351,7 @@
 
             <!-- Group Info -->
             <div class="panel-card">
-                <div class="panel-card-title">&#9876; {{ group.name }}</div>
+                <div class="panel-card-title">{{ group.name }}</div>
                 <div class="panel-card-body">
                     {% if group.description %}
                     <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">{{ group.description }}</div>
@@ -479,13 +479,13 @@
             <div style="max-width:440px;width:100%;display:flex;flex-direction:column;gap:14px;">
 
                 <div style="text-align:center;margin-bottom:8px;">
-                    <div style="font-size:40px;margin-bottom:6px;">&#9876;</div>
+                    <div style="margin-bottom:6px;"><img src="/game_assets/glyphs/fight.png" alt="" style="width:36px;height:36px;image-rendering:pixelated;opacity:0.7;"></div>
                     <div style="font-size:16px;color:var(--gold);font-weight:700;margin-bottom:4px;letter-spacing:0.06em;text-transform:uppercase;">Adventure Groups</div>
                     <div style="font-size:13px;color:var(--text-dim);line-height:1.6;">Form a party with up to 6 adventurers. Complete quests, dungeons, and battles together to earn group XP and level your team!</div>
                 </div>
 
                 <div class="panel-card">
-                    <div class="panel-card-title">&#9876; Create a Group</div>
+                    <div class="panel-card-title">Create a Group</div>
                     <div class="panel-card-body">
                         <input class="form-input" id="create-name" type="text" maxlength="32" placeholder="Group name (2–32 chars)">
                         <input class="form-input" id="create-desc" type="text" maxlength="200" placeholder="Description (optional)">
@@ -536,7 +536,7 @@ socket.on('group_chat_error', (data) => {
 socket.on('group_level_up', (data) => {
     const banner = document.createElement('div');
     banner.style.cssText = 'position:fixed;top:30px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--wood-dark);border:2px solid var(--gold);padding:16px 28px;text-align:center;box-shadow:4px 4px 0 rgba(0,0,0,0.5);font-family:Tiny5,monospace;';
-    banner.innerHTML = `<div style="font-size:20px;color:var(--gold);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em;">&#9876; Group Level Up!</div><div style="color:var(--gold-bright);font-size:15px;">Your group reached <strong>Level ${data.level}</strong>!</div><div style="font-size:13px;color:var(--green-bright);margin-top:6px;">+${data.bonus_xp} XP &nbsp;+${data.bonus_gold} Gold for all members!</div>`;
+    banner.innerHTML = `<div style="font-size:20px;color:var(--gold);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em;">Group Level Up!</div><div style="color:var(--gold-bright);font-size:15px;">Your group reached <strong>Level ${data.level}</strong>!</div><div style="font-size:13px;color:var(--green-bright);margin-top:6px;">+${data.bonus_xp} XP &nbsp;+${data.bonus_gold} Gold for all members!</div>`;
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), 6000);
 });

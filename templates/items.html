@@ -298,16 +298,14 @@ body {
     <div class="card-top">
         {% if item.texture %}
         <img class="item-icon" src="/game_assets/{{ item.texture }}" alt="{{ item.name }}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-        <div class="no-icon" style="display:none;">🗡️</div>
+        <div class="no-icon" style="display:none;"></div>
         {% else %}
         <div class="no-icon">
-            {% if item.type == 'consumable' %}🧪
-            {% elif item.type == 'armor' %}🛡️
-            {% elif item.type == 'material' %}⚙️
-            {% elif item.type == 'book' %}📖
-            {% elif item.type == 'offhand' %}🪃
-            {% elif item.type == 'accessory' %}💍
-            {% else %}❓{% endif %}
+            {% if item.type == 'consumable' %}<img src="/game_assets/glyphs/food.png" alt="" style="width:24px;height:24px;image-rendering:pixelated;">
+            {% elif item.type == 'book' %}<img src="/game_assets/glyphs/book.png" alt="" style="width:24px;height:24px;image-rendering:pixelated;">
+            {% elif item.type == 'offhand' %}<img src="/game_assets/glyphs/offhand.png" alt="" style="width:24px;height:24px;image-rendering:pixelated;">
+            {% elif item.type == 'accessory' %}<img src="/game_assets/glyphs/accessories.png" alt="" style="width:24px;height:24px;image-rendering:pixelated;">
+            {% else %}<img src="/game_assets/glyphs/materials.png" alt="" style="width:24px;height:24px;image-rendering:pixelated;">{% endif %}
         </div>
         {% endif %}
         <div class="card-title-block">

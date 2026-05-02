@@ -461,10 +461,10 @@
 <div id="friends-page">
 
     <div id="friends-header">
-        <div class="title">&#10024; Friends</div>
+        <div class="title">Friends</div>
         <div class="hdr-links">
-            <a href="/groups">⚔ Group</a>
-            <a href="/leaderboard">🏆 Leaderboard</a>
+            <a href="/groups">Group</a>
+            <a href="/leaderboard">Leaderboard</a>
             <a href="/chat">Chat</a>
             <a href="/game">&#8592; Game</a>
         </div>
@@ -487,7 +487,7 @@
 
         <div id="dm-panel">
             <div id="dm-empty">
-                <div class="big-icon">&#10024;</div>
+                <div class="big-icon"><img src="/game_assets/glyphs/chat.png" alt="" style="width:32px;height:32px;image-rendering:pixelated;opacity:0.5;"></div>
                 <div>Select a friend to chat privately</div>
             </div>
 
@@ -529,14 +529,14 @@
                 <div class="big"></div>
                 <div class="msg"><strong id="trade-invite-from"></strong> wants to trade with you!</div>
                 <div class="trade-invite-btns">
-                    <button id="trade-accept-btn" onclick="tradeAccept()">&#10003; Accept</button>
-                    <button id="trade-decline-btn" onclick="tradeDecline()">&#10005; Decline</button>
+                    <button id="trade-accept-btn" onclick="tradeAccept()">Accept</button>
+                    <button id="trade-decline-btn" onclick="tradeDecline()">Decline</button>
                 </div>
             </div>
 
             <!-- Waiting (you sent the invite) -->
             <div id="trade-waiting-panel" style="display:none;">
-                <span class="spin">&#9881;</span>
+                <span class="spin">...</span>
                 Waiting for <strong id="trade-waiting-for"></strong> to accept your trade request...
                 <div style="margin-top:14px;font-size:12px;color:var(--text-dim);">They will see a notification. You can cancel at any time.</div>
             </div>
@@ -565,8 +565,8 @@
 
                 <div id="trade-confirm-bar">
                     <span id="trade-confirm-status">Waiting for both players to confirm...</span>
-                    <button id="trade-confirm-btn" onclick="tradeConfirm(true)">&#10003; Confirm Offer</button>
-                    <button id="trade-unconfirm-btn" style="display:none;" onclick="tradeConfirm(false)">&#8635; Edit Offer</button>
+                    <button id="trade-confirm-btn" onclick="tradeConfirm(true)">Confirm Offer</button>
+                    <button id="trade-unconfirm-btn" style="display:none;" onclick="tradeConfirm(false)">Edit Offer</button>
                 </div>
 
                 <div id="trade-inventory-section">
@@ -590,7 +590,6 @@
 <!-- Confirm dialog -->
 <div id="fc-overlay" style="position:fixed;inset:0;width:100%;height:100%;background:rgba(0,0,0,0.82);z-index:14000;display:none;align-items:center;justify-content:center;">
     <div id="fc-box" style="background:linear-gradient(160deg,rgba(20,12,40,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.45);border-radius:12px;padding:28px 28px 22px;max-width:380px;width:90%;box-shadow:0 8px 40px rgba(60,20,120,0.55);text-align:center;">
-        <div style="font-size:28px;margin-bottom:12px;">&#9888;&#65039;</div>
         <div id="fc-msg" style="font-size:14px;color:#e0d8f0;margin-bottom:22px;line-height:1.6;"></div>
         <div style="display:flex;gap:10px;justify-content:center;">
             <button id="fc-ok" style="min-width:100px;padding:8px 16px;background:rgba(160,30,30,0.7);border:1px solid #f87171;border-radius:6px;color:#f87171;cursor:pointer;">Confirm</button>
@@ -630,12 +629,12 @@ function friendsPageConfirm(msg, onOk) {
         socket = io({ transports: ['polling', 'websocket'] });
 
         socket.on('friend_request', function(data) {
-            showToast('&#10024; Friend request from <strong>' + esc(data.from) + '</strong>');
+            showToast('Friend request from <strong>' + esc(data.from) + '</strong>');
             loadFriends();
         });
 
         socket.on('friend_accepted', function(data) {
-            showToast('&#10024; <strong>' + esc(data.from) + '</strong> accepted your friend request!');
+            showToast('<strong>' + esc(data.from) + '</strong> accepted your friend request!');
             loadFriends();
         });
 
@@ -721,14 +720,14 @@ function friendsPageConfirm(msg, onOk) {
 
         socket.on('trade_cancelled', function(data) {
             var msg = (data && data.message) ? data.message : 'Trade cancelled.';
-            showToast('&#10060; ' + esc(msg));
+            showToast(esc(msg));
             tradeState = null;
             tradeInvite = null;
             closeTradeOverlay();
         });
 
         socket.on('trade_error', function(data) {
-            showToast('&#9888; ' + esc((data && data.message) ? data.message : 'Trade error.'));
+            showToast(esc((data && data.message) ? data.message : 'Trade error.'));
         });
     }
 
@@ -767,7 +766,7 @@ function friendsPageConfirm(msg, onOk) {
         if (data.my_offer && data.my_offer.items && data.my_offer.items.length) {
             myItemsEl.innerHTML = data.my_offer.items.map(function(item) {
                 return '<span class="trade-item-chip mine" onclick="tradeRemoveItem(' + JSON.stringify(item) + ')" title="Click to remove">' +
-                    esc(item) + ' <span class="remove-x">&#10005;</span></span>';
+                    esc(item) + ' <span class="remove-x">x</span></span>';
             }).join('');
         } else {
             myItemsEl.innerHTML = '<span class="trade-empty-hint">No items yet — pick from inventory below</span>';
@@ -897,11 +896,11 @@ function friendsPageConfirm(msg, onOk) {
     window.startTrade = function() {
         if (!currentDmWith) return;
         if (!currentDmIsOnline) {
-            showToast('&#9888; ' + esc(currentDmWith) + ' is offline. You can only trade with online players.');
+            showToast(esc(currentDmWith) + ' is offline. You can only trade with online players.');
             return;
         }
         if (tradeState) {
-            showToast('&#9888; You already have an active trade.');
+            showToast('You already have an active trade.');
             return;
         }
         if (!socket) return;
@@ -980,7 +979,7 @@ function friendsPageConfirm(msg, onOk) {
             html += '<div class="sidebar-section-label">Requests (' + data.incoming.length + ')</div>';
             data.incoming.forEach(function(req) {
                 html += '<div class="request-row">' +
-                    '<div class="request-name">&#10024; ' + esc(req.username) + '</div>' +
+                    '<div class="request-name">' + esc(req.username) + '</div>' +
                     '<div class="request-btns">' +
                     '<button class="btn-accept" onclick="respondRequest(\'' + req.id + '\',true)">Accept</button>' +
                     '<button class="btn-decline" onclick="respondRequest(\'' + req.id + '\',false)">Decline</button>' +
@@ -1102,7 +1101,7 @@ function friendsPageConfirm(msg, onOk) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ target: username, action: 'unblock' })
         }).then(function(r) { return r.json(); }).then(function(d) {
-            if (d.ok) { showToast('&#9989; ' + d.message); loadFriends(); }
+            if (d.ok) { showToast(d.message); loadFriends(); }
         });
     };
 

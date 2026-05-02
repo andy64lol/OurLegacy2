@@ -212,7 +212,7 @@ body {
 <body>
 
 <div class="adm-header">
-    <div class="adm-logo">&#9760; OL2 <span>OWNER CONSOLE</span></div>
+    <div class="adm-logo">OL2 <span>OWNER CONSOLE</span></div>
     <div class="adm-meta">Signed in as <b>{{ online_user }}</b></div>
     <a href="/" class="adm-back">&#8592; Main Menu</a>
 </div>
@@ -553,7 +553,7 @@ async function runCommand() {
             case 'setowner': {
                 const user = parts[1];
                 if (!user) { print('Usage: setowner <username>', 'warn'); break; }
-                print(`⚠ WARNING: This will transfer ownership to "${user}" and you will lose owner access.`, 'warn');
+                print(`WARNING: This will transfer ownership to "${user}" and you will lose owner access.`, 'warn');
                 print('Type  confirm setowner ' + user + '  to proceed.', 'warn');
                 break;
             }

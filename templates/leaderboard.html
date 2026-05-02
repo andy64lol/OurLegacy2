@@ -153,9 +153,9 @@
 <div id="lb-page">
 
     <div id="lb-header">
-        <div class="title">🏆 Leaderboard</div>
+        <div class="title">Leaderboard</div>
         <div class="hdr-links">
-            <a href="/groups">⚔ My Group</a>
+            <a href="/groups">My Group</a>
             <a href="/game">← Game</a>
         </div>
     </div>
@@ -198,7 +198,7 @@ async function loadLeaderboard() {
         const players = data.players || [];
 
         let groupsHtml = `<div class="lb-section">
-            <div class="lb-section-title">⚔ Top Adventure Groups</div>`;
+            <div class="lb-section-title">Top Adventure Groups</div>`;
 
         if (groups.length === 0) {
             groupsHtml += '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:20px 0;">No groups yet. Be the first!</div>';
@@ -224,7 +224,7 @@ async function loadLeaderboard() {
         groupsHtml += '</div>';
 
         let playersHtml = `<div class="lb-section">
-            <div class="lb-section-title">⚡ Top Adventurers</div>`;
+            <div class="lb-section-title">Top Adventurers</div>`;
 
         if (players.length === 0) {
             playersHtml += '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:20px 0;">No players found yet.</div>';

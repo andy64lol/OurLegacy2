@@ -20,10 +20,9 @@
     <script src="/static/js/game.js"></script>
     {% block extra_scripts %}{% endblock %}
 
-    <!-- Custom Confirm Modal -->
+    <!-- confirm modal -->
     <div id="game-confirm-overlay" style="display:none;position:fixed;inset:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,0.82);z-index:10000;align-items:center;justify-content:center;overflow:hidden;" onclick="event.stopPropagation()">
         <div style="background:linear-gradient(160deg,rgba(20,12,40,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.45);border-radius:12px;padding:28px 28px 22px;max-width:380px;width:90%;box-shadow:0 8px 40px rgba(60,20,120,0.55);text-align:center;">
-            <div style="font-size:28px;margin-bottom:12px;">&#9888;&#65039;</div>
             <div id="game-confirm-msg" style="font-size:14px;color:var(--text-light);margin-bottom:22px;line-height:1.6;"></div>
             <div style="display:flex;gap:10px;justify-content:center;">
                 <button id="game-confirm-ok" class="btn btn-danger" style="min-width:100px;">Confirm</button>
@@ -151,7 +150,7 @@
     <div id="groups-overlay" onclick="if(event.target===this)closeGroupsOverlay()">
         <div id="groups-overlay-panel">
             <div id="groups-overlay-header">
-                <span style="font-size:13px;font-weight:700;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">&#9876; Adventure Group</span>
+                <span style="font-size:13px;font-weight:700;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;">Adventure Group</span>
                 <button onclick="closeGroupsOverlay()" style="background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;" title="Close">&times;</button>
             </div>
             <iframe id="groups-overlay-frame" src="" title="Adventure Group"></iframe>
@@ -174,7 +173,8 @@
         </div>
 
         <!-- Groups FAB -->
-        <button class="widget-fab" id="groups-widget-fab" onclick="openGroupsOverlay()" title="Adventure Group">&#9876;
+        <button class="widget-fab" id="groups-widget-fab" onclick="openGroupsOverlay()" title="Adventure Group">
+            <img src="/game_assets/glyphs/fight.png" alt="group" style="width:22px;height:22px;image-rendering:pixelated;">
             <span id="groups-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--bg-main);width:14px;height:14px;font-size:9px;line-height:14px;text-align:center;font-weight:700;"></span>
         </button>
     </div>
@@ -183,7 +183,7 @@
     <div id="trade-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;">
         <div id="trade-panel" style="background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.6);width:min(700px,96vw);max-height:90vh;overflow-y:auto;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:2px solid var(--border);background:var(--wood-dark);">
-                <span id="trade-title" style="font-size:14px;font-weight:700;color:var(--gold);letter-spacing:0.07em;text-transform:uppercase;">&#8644; Trade</span>
+                <span id="trade-title" style="font-size:14px;font-weight:700;color:var(--gold);letter-spacing:0.07em;text-transform:uppercase;">Trade</span>
                 <div style="display:flex;gap:8px;align-items:center;">
                     <span id="trade-status-label" style="font-size:11px;color:var(--text-dim);"></span>
                     <button id="trade-cancel-btn" onclick="tradeCancel()" style="padding:4px 10px;background:var(--red-dark);border:1px solid var(--red);color:#f8c0a0;font-size:12px;cursor:pointer;font-family:'Tiny5',monospace;">Cancel</button>
@@ -392,7 +392,7 @@
             var bar = document.createElement('div');
             bar.id = 'trade-invite-bar';
             bar.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9600;background:var(--bg-panel);border:2px solid var(--gold-dim);padding:10px 18px;display:flex;align-items:center;gap:14px;box-shadow:3px 3px 0 rgba(0,0,0,0.5);min-width:260px;max-width:90vw;font-family:Tiny5,monospace;';
-            bar.innerHTML = '<span style="font-size:13px;color:var(--gold);">&#8644; <b>' + escHtml(fromUser) + '</b> wants to trade with you!</span>' +
+            bar.innerHTML = '<span style="font-size:13px;color:var(--gold);"><b>' + escHtml(fromUser) + '</b> wants to trade with you!</span>' +
                 '<button onclick="tradeAcceptInvite(\'' + tradeId + '\')" style="padding:5px 12px;background:var(--green);border:1px solid var(--green-bright);color:var(--gold-bright);font-size:12px;cursor:pointer;white-space:nowrap;font-family:Tiny5,monospace;">Accept</button>' +
                 '<button onclick="tradeDeclineInvite(\'' + tradeId + '\')" style="padding:5px 12px;background:var(--red-dark);border:1px solid var(--red);color:#f8c0a0;font-size:12px;cursor:pointer;white-space:nowrap;font-family:Tiny5,monospace;">Decline</button>';
             document.body.appendChild(bar);
@@ -611,7 +611,7 @@
     </script>
     {% endif %}
 
-    <!-- Chat FAB — always visible, works for all users -->
+    <!-- chat + terminal FABs -->
     <style>
         #chat-toggle-btn {
             position: fixed;
@@ -640,12 +640,288 @@
             background: var(--wood-bright, #c8843c);
             box-shadow: 0 0 0 3px rgba(200,150,60,0.35), 0 4px 16px rgba(0,0,0,0.55);
         }
+        /* terminal fab — above chat button, owner only */
+        #terminal-fab {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 8100;
+            width: 50px;
+            height: 50px;
+            background: #0c1018;
+            border: 2px solid #1e3a5f;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.55);
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+        }
+        #terminal-fab:hover { background: #131c2b; transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.65); }
+        #terminal-fab.term-open { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.25), 0 4px 16px rgba(0,0,0,0.55); }
+        /* terminal overlay */
+        #terminal-overlay {
+            display: none;
+            position: fixed;
+            bottom: 142px;
+            right: 20px;
+            z-index: 8050;
+            width: min(520px, 96vw);
+            height: 340px;
+            background: #060709;
+            border: 2px solid #1a2535;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.7);
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #terminal-overlay.visible { display: flex; }
+        #term-hdr {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #0c1018;
+            border-bottom: 1px solid #1a2535;
+            flex-shrink: 0;
+        }
+        #term-hdr img { width: 14px; height: 14px; image-rendering: pixelated; }
+        #term-hdr-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #3b82f6; flex: 1; font-family: 'Courier New', monospace; }
+        #term-hdr-close { background: none; border: none; color: #4b5563; font-size: 16px; cursor: pointer; line-height: 1; padding: 0 2px; }
+        #term-out {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .t-pl { line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+        .t-pl.ok   { color: #22c55e; }
+        .t-pl.err  { color: #ef4444; }
+        .t-pl.warn { color: #f59e0b; }
+        .t-pl.info { color: #60a5fa; }
+        .t-pl.dim  { color: #4b5563; }
+        .t-pl.cmd  { color: #f59e0b; }
+        .t-pl.head { color: #3b82f6; font-weight: 700; }
+        #term-input-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px 6px;
+            border-top: 1px solid #1a2535;
+            background: #0c1018;
+            flex-shrink: 0;
+        }
+        .t-prompt { color: #f59e0b; font-size: 11px; font-family: 'Courier New', monospace; user-select: none; }
+        #term-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            caret-color: #22c55e;
+        }
+        .t-run-btn {
+            background: rgba(34,197,94,0.1);
+            border: 1px solid #16a34a;
+            color: #22c55e;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-family: 'Courier New', monospace;
+            cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+        }
+        .t-run-btn:hover { background: rgba(34,197,94,0.2); }
     </style>
+
+    <!-- terminal overlay (owner only) -->
+    <div id="terminal-overlay">
+        <div id="term-hdr">
+            <img src="/game_assets/glyphs/terminal.png" alt="terminal">
+            <span id="term-hdr-label">owner terminal</span>
+            <button id="term-hdr-close" onclick="toggleTerminal()" title="close">&times;</button>
+        </div>
+        <div id="term-out"></div>
+        <div id="term-input-row">
+            <span class="t-prompt">root@ol2 &gt;</span>
+            <input id="term-input" type="text" placeholder="Command..." autocomplete="off" spellcheck="false">
+            <button class="t-run-btn" onclick="runTermCmd()">Run</button>
+        </div>
+    </div>
+
+    <button id="terminal-fab" onclick="toggleTerminal()" title="Owner Terminal">
+        <img src="/game_assets/glyphs/terminal.png" alt="terminal" style="width:22px;height:22px;image-rendering:pixelated;">
+    </button>
+
     <button id="chat-toggle-btn"
             onclick="if(typeof toggleChat==='function'){toggleChat();}else{window.location.href='/chat';}"
             title="Global Chat">
         <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
         <span id="chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red,#c0392b);color:#fff;width:15px;height:15px;font-size:9px;line-height:15px;text-align:center;font-weight:700;border-radius:50%;"></span>
     </button>
+
+    <script>
+    (function() {
+        var termOpen = false;
+
+        // check owner status then show fab
+        fetch('/api/admin/data', { method: 'GET', cache: 'no-store' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(d) {
+                if (d && d.ok && d.is_owner) {
+                    var fab = document.getElementById('terminal-fab');
+                    if (fab) fab.style.display = 'flex';
+                }
+            })
+            .catch(function() {});
+
+        window.toggleTerminal = function() {
+            termOpen = !termOpen;
+            var ov = document.getElementById('terminal-overlay');
+            var fab = document.getElementById('terminal-fab');
+            if (ov) ov.classList.toggle('visible', termOpen);
+            if (fab) fab.classList.toggle('term-open', termOpen);
+            if (termOpen) {
+                var inp = document.getElementById('term-input');
+                if (inp) inp.focus();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var inp = document.getElementById('term-input');
+            if (inp) inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') runTermCmd(); });
+        });
+
+        function tPrint(text, cls) {
+            var out = document.getElementById('term-out');
+            if (!out) return;
+            var d = document.createElement('div');
+            d.className = 't-pl' + (cls ? ' ' + cls : '');
+            d.textContent = text;
+            out.appendChild(d);
+            out.scrollTop = out.scrollHeight;
+        }
+
+        async function tApi(method, endpoint, body) {
+            var opts = { method: method, headers: { 'Content-Type': 'application/json' } };
+            if (body) opts.body = JSON.stringify(body);
+            var r = await fetch(endpoint, opts);
+            return r.json();
+        }
+
+        window.runTermCmd = async function() {
+            var inp = document.getElementById('term-input');
+            if (!inp) return;
+            var raw = inp.value.trim();
+            if (!raw) return;
+            inp.value = '';
+            tPrint('> ' + raw, 'cmd');
+            var parts = raw.split(/\s+/);
+            var cmd = parts[0].toLowerCase();
+            try {
+                switch (cmd) {
+                    case 'help':
+                        tPrint('server: ban unban kick mute unmute warn addmod removemod online', 'info');
+                        tPrint('char:   stats inventory heal  give gold/xp/item/mxp  set level/stat/mining  remove item', 'info');
+                        break;
+                    case 'clear':
+                        document.getElementById('term-out').innerHTML = '';
+                        break;
+                    case 'stats': {
+                        var d = await tApi('GET', '/api/admin/game/stats');
+                        if (!d.ok) { tPrint(d.message, 'err'); break; }
+                        tPrint(d.name + ' (' + d.class + ')  Lv' + d.level + ' [' + d.rank + ']  ' + d.hp + '/' + d.max_hp + 'HP  ' + d.gold + 'g  Mining:' + d.mining_level, 'info');
+                        tPrint('ATK:' + d.attack + '  DEF:' + d.defense + '  SPD:' + d.speed + '  EXP:' + d.experience + '/' + d.experience_to_next + '  Inv:' + d.inventory_count, 'dim');
+                        break;
+                    }
+                    case 'inventory': {
+                        var d = await tApi('GET', '/api/admin/game/inventory');
+                        if (!d.ok) { tPrint(d.message, 'err'); break; }
+                        var entries = Object.entries(d.inventory);
+                        if (!entries.length) { tPrint('(empty)  Gold: ' + d.gold + 'g', 'dim'); break; }
+                        tPrint('Inventory (' + entries.length + ' types, ' + d.gold + 'g):', 'head');
+                        entries.sort(function(a,b){return a[0].localeCompare(b[0]);}).forEach(function(e){
+                            tPrint('  ' + (e[1] > 1 ? e[1] + 'x ' : '   ') + e[0], 'dim');
+                        });
+                        break;
+                    }
+                    case 'heal': {
+                        var r = await tApi('POST', '/api/admin/game/heal');
+                        tPrint(r.message, r.ok ? 'ok' : 'err');
+                        break;
+                    }
+                    case 'give': {
+                        var sub = (parts[1] || '').toLowerCase();
+                        if (sub === 'gold' || sub === 'xp' || sub === 'mxp') {
+                            var kind = sub === 'mxp' ? 'mining_xp' : sub;
+                            var n = parseInt(parts[2]);
+                            if (!n || n <= 0) { tPrint('usage: give ' + sub + ' <amount>', 'warn'); break; }
+                            var r = await tApi('POST', '/api/admin/game/give', { kind: kind, amount: n });
+                            tPrint(r.message, r.ok ? 'ok' : 'err');
+                        } else if (sub === 'item') {
+                            var lastP = parts[parts.length - 1];
+                            var hasQty = /^\d+$/.test(lastP) && parts.length > 3;
+                            var qty = hasQty ? parseInt(lastP) : 1;
+                            var itemName = (hasQty ? parts.slice(2, -1) : parts.slice(2)).join(' ');
+                            if (!itemName) { tPrint('usage: give item <name> [qty]', 'warn'); break; }
+                            var r = await tApi('POST', '/api/admin/game/give', { kind: 'item', item: itemName, qty: qty });
+                            tPrint(r.message, r.ok ? 'ok' : 'err');
+                        } else { tPrint('usage: give gold|xp|mxp|item <value>', 'warn'); }
+                        break;
+                    }
+                    case 'set': {
+                        var sub = (parts[1] || '').toLowerCase();
+                        if (sub === 'level') {
+                            var r = await tApi('POST', '/api/admin/game/set', { kind: 'level', value: parseInt(parts[2]) });
+                            tPrint(r.message, r.ok ? 'ok' : 'err');
+                        } else if (sub === 'stat') {
+                            var r = await tApi('POST', '/api/admin/game/set', { kind: 'stat', stat: parts[2], value: parseInt(parts[3]) });
+                            tPrint(r.message, r.ok ? 'ok' : 'err');
+                        } else if (sub === 'mining') {
+                            var r = await tApi('POST', '/api/admin/game/set', { kind: 'mining_level', value: parseInt(parts[2]) });
+                            tPrint(r.message, r.ok ? 'ok' : 'err');
+                        } else { tPrint('usage: set level|stat|mining <value>', 'warn'); }
+                        break;
+                    }
+                    case 'remove': {
+                        if ((parts[1]||'').toLowerCase() === 'item') {
+                            var lastP = parts[parts.length - 1];
+                            var hasQty = /^\d+$/.test(lastP) && parts.length > 3;
+                            var qty = hasQty ? parseInt(lastP) : 1;
+                            var itemName = (hasQty ? parts.slice(2, -1) : parts.slice(2)).join(' ');
+                            var r = await tApi('POST', '/api/admin/game/remove', { item: itemName, qty: qty });
+                            tPrint(r.message, r.ok ? 'ok' : 'err');
+                        } else { tPrint('usage: remove item <name> [qty]', 'warn'); }
+                        break;
+                    }
+                    case 'ban': { var r = await tApi('POST', '/api/admin/ban', { username: parts[1], reason: parts.slice(2).join(' ') || 'No reason.' }); tPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                    case 'unban': { var r = await tApi('POST', '/api/admin/unban', { username: parts[1] }); tPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                    case 'kick': { var r = await tApi('POST', '/api/admin/kick', { username: parts[1] }); tPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                    case 'mute': {
+                        var hasMin = parts[2] && /^\d+$/.test(parts[2]);
+                        var r = await tApi('POST', '/api/admin/mute', { username: parts[1], duration_minutes: hasMin ? parseInt(parts[2]) : null, reason: parts.slice(hasMin ? 3 : 2).join(' ') || 'No reason.' });
+                        tPrint(r.message, r.ok ? 'ok' : 'err'); break;
+                    }
+                    case 'unmute': { var r = await tApi('POST', '/api/admin/unmute', { username: parts[1] }); tPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                    case 'warn': { var r = await tApi('POST', '/api/admin/warn', { username: parts[1], reason: parts.slice(2).join(' ') || 'No reason.' }); tPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                    case 'addmod': { var r = await tApi('POST', '/api/admin/add_admin', { username: parts[1] }); tPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                    case 'removemod': { var r = await tApi('POST', '/api/admin/remove_admin', { username: parts[1] }); tPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                    case 'online': {
+                        var d = await tApi('GET', '/api/admin/data');
+                        if (!d.ok) { tPrint(d.message, 'err'); break; }
+                        tPrint('online (' + d.online_count + '): ' + (d.online_users.join(', ') || 'none'), 'info');
+                        break;
+                    }
+                    default:
+                        tPrint('unknown: ' + cmd + '  (type help)', 'err');
+                }
+            } catch(e) { tPrint('error: ' + e.message, 'err'); }
+        };
+    })();
+    </script>
 </body>
 </html>

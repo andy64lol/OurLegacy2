@@ -65,7 +65,7 @@
             </button>
         </nav>
         {% if online_count is defined and online_count %}
-        <div class="mainmenu-online-count">&#9679; {{ online_count }} adventurer{{ 's' if online_count != 1 else '' }} online</div>
+        <div class="mainmenu-online-count">{{ online_count }} adventurer{{ 's' if online_count != 1 else '' }} online</div>
         {% endif %}
         <div id="save-status" class="save-notice" style="display:none;text-align:center;margin-top:8px;"></div>
     </div>
@@ -218,7 +218,7 @@
             {% if enemy.is_boss %}
             <div
                 style="font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:0.18em;margin-bottom:6px;font-weight:700;opacity:0.85;">
-                <img class="type-glyph" src="/game_assets/glyphs/fight.png" alt="boss battle"> ⚔ Boss Encounter ⚔
+                <img class="type-glyph" src="/game_assets/glyphs/fight.png" alt="boss battle"> Boss Encounter
             </div>
             <div
                 style="font-size:22px;font-weight:700;color:var(--gold);letter-spacing:0.04em;text-shadow:0 0 20px rgba(255,180,60,0.5);">
@@ -234,7 +234,7 @@
 
         {% if boss_dialogue and enemy.is_boss %}
         <div class="boss-dialogue-banner">
-            <div class="boss-dialogue-icon">💀</div>
+            <div class="boss-dialogue-icon"><img src="/game_assets/glyphs/fight.png" alt="boss" style="width:28px;height:28px;image-rendering:pixelated;"></div>
             <div class="boss-dialogue-body">
                 <div class="boss-dialogue-label">{{ enemy.name }} declares</div>
                 <div class="boss-dialogue-text">"{{ boss_dialogue }}"</div>
@@ -686,7 +686,7 @@
                     style="text-align:center;">Elite Market</button>
                 <button onclick="openCustomizeModal()" class="btn btn-secondary btn-small"
                     style="text-align:center;border-color:var(--gold-dim);color:var(--gold-dim);"
-                    title="10,000 gold">&#9997; Change Character</button>
+                    title="10,000 gold">Change Character</button>
             </div>
         </div>
 
@@ -702,7 +702,7 @@
             {% if user_has_email is defined and not user_has_email %}
             <button onclick="openEmailSetupModal()" title="{% if user_email_pending %}Verify your email address{% else %}Add an email address for password recovery{% endif %}"
                 style="width:100%;background:rgba(180,100,20,0.25);border:1px solid rgba(220,150,40,0.6);border-radius:6px;color:#e8a020;font-size:11px;padding:4px 8px;cursor:pointer;margin-top:3px;display:flex;align-items:center;justify-content:center;gap:4px;">
-                {% if user_email_pending %}&#9993; Verify email{% else %}&#9888; Add email address{% endif %}
+                {% if user_email_pending %}Verify email{% else %}Add email address{% endif %}
             </button>
             {% endif %}
             {% endif %}
@@ -782,7 +782,7 @@
         <!-- ── News Ticker ── -->
         <div id="news-ticker" class="news-ticker" style="display:none;">
             <div class="news-ticker-label">
-                <span class="news-ticker-icon">&#9733;</span>
+                <span class="news-ticker-icon"><img src="/game_assets/glyphs/sparkles.png" alt="" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle;"></span>
                 <span>News</span>
             </div>
             <div class="news-ticker-track">
@@ -1799,7 +1799,7 @@
                             <div class="comp-class-label">{{ comp.class }}</div>
                             {% if comp.fallen %}
                             <div style="margin:6px 0;padding:5px 8px;background:rgba(180,30,30,0.25);border:1px solid var(--red);font-size:0.75rem;color:var(--red);text-align:center;letter-spacing:0.06em;text-transform:uppercase;">
-                                &#9760; Fallen — Rest at an inn to revive
+                                Fallen — Rest at an inn to revive
                             </div>
                             {% else %}
                             {% if comp.description %}
@@ -2841,7 +2841,7 @@
     <div style="background:linear-gradient(160deg,rgba(18,12,38,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.35);border-radius:14px;padding:26px 24px;width:100%;max-width:380px;position:relative;box-shadow:0 0 40px rgba(140,90,255,0.2);">
         <button onclick="closeSettings()"
             style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;">&times;</button>
-        <div style="text-align:center;margin-bottom:18px;font-size:18px;font-weight:700;color:var(--gold);">&#9881; Settings</div>
+        <div style="text-align:center;margin-bottom:18px;font-size:18px;font-weight:700;color:var(--gold);">Settings</div>
 
         <div style="margin-bottom:16px;">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Music</div>
@@ -2909,8 +2909,7 @@
         style="background:linear-gradient(160deg,rgba(20,14,40,0.99),rgba(10,6,24,0.99));border:1px solid rgba(200,160,60,0.5);border-radius:14px;padding:28px 24px;width:100%;max-width:380px;position:relative;box-shadow:0 0 40px rgba(200,150,50,0.2);">
         <button onclick="closeCustomizeModal()"
             style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;">&times;</button>
-        <div style="text-align:center;margin-bottom:6px;font-size:18px;font-weight:700;color:var(--gold);">&#9997;
-            Change Character</div>
+        <div style="text-align:center;margin-bottom:6px;font-size:18px;font-weight:700;color:var(--gold);">Change Character</div>
         <div style="text-align:center;font-size:12px;color:var(--text-dim);margin-bottom:18px;">Costs <span
                 style="color:var(--gold);font-weight:700;">10,000 gold</span> &mdash; only changed fields apply</div>
         {% if not online_user %}
@@ -3969,6 +3968,17 @@
     }
 
     setInterval(checkSession, SESSION_CHECK_INTERVAL);
+
+    // autosave every 5 minutes
+    setInterval(async function() {
+        try {
+            var r = await fetch('/api/online/autosave', { method: 'POST' });
+            var d = await r.json();
+            if (d && d.ok && typeof showToast === 'function') {
+                showToast('Progress autosaved', 'var(--green-bright)', 2500);
+            }
+        } catch(e) {}
+    }, 300000);
 })();
 </script>
 {% endif %}
@@ -3982,7 +3992,6 @@
         {% if user_email_pending %}
         <!-- ── Pending verification state ── -->
         <div style="text-align:center;margin-bottom:18px;">
-            <div style="font-size:30px;margin-bottom:8px;">&#9993;</div>
             <div style="font-size:15px;font-weight:bold;color:#e8a020;letter-spacing:0.03em;">Check Your Email</div>
         </div>
         <p style="font-size:13px;color:var(--text-dim);margin:0 0 16px 0;text-align:center;line-height:1.6;">
@@ -4003,7 +4012,6 @@
         {% else %}
         <!-- ── No email set state ── -->
         <div style="text-align:center;margin-bottom:18px;">
-            <div style="font-size:30px;margin-bottom:8px;">&#9888;</div>
             <div style="font-size:15px;font-weight:bold;color:#e8a020;letter-spacing:0.03em;">Add an Email Address</div>
         </div>
         <p style="font-size:13px;color:var(--text-dim);margin:0 0 16px 0;text-align:center;line-height:1.6;">

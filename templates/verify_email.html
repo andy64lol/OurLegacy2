@@ -12,24 +12,23 @@
 
         {% if not token %}
         <div style="text-align:center;padding:18px;background:rgba(180,40,40,0.15);border:1px solid rgba(255,80,80,0.3);border-radius:8px;font-size:13px;color:var(--red);">
-            &#9888; No verification token provided.<br>
+            No verification token provided.<br>
             Check your email for the correct link.
         </div>
 
         {% elif result and result.ok %}
         <div style="text-align:center;padding:22px 16px;background:rgba(20,80,40,0.25);border:1px solid rgba(60,180,100,0.4);border-radius:10px;">
-            <div style="font-size:36px;margin-bottom:10px;">&#9989;</div>
             <div style="font-size:16px;font-weight:bold;color:var(--green-bright);margin-bottom:10px;">Email Verified!</div>
             <div style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:18px;">
                 Your email address has been confirmed and your account is now fully secured.
                 Your progress has been saved automatically.
             </div>
-            <a href="/" class="btn btn-primary" style="display:inline-block;text-decoration:none;">&#9654; Return to Game</a>
+            <a href="/" class="btn btn-primary" style="display:inline-block;text-decoration:none;">Return to Game</a>
         </div>
 
         {% else %}
         <div style="text-align:center;padding:18px;background:rgba(180,40,40,0.15);border:1px solid rgba(255,80,80,0.3);border-radius:8px;font-size:13px;color:var(--red);margin-bottom:16px;">
-            &#9888; {{ result.message if result else "Verification failed. The link may be invalid or expired." }}
+            {{ result.message if result else "Verification failed. The link may be invalid or expired." }}
         </div>
         <p style="font-size:12px;color:var(--text-dim);text-align:center;margin:0 0 16px 0;">
             Return to the game and request a new verification email from your account.
