@@ -589,51 +589,58 @@ body.ol2-bg-4 .welcome-screen {
 }
 
 /* ─── Announcement Bar ───────────────────────────────────── */
-.announce-bar {
-    display: flex;
+/* ─── News Ticker ────────────────────────────────────────── */
+.news-ticker {
     align-items: center;
-    gap: 10px;
-    padding: 7px 16px;
-    background: linear-gradient(90deg, rgba(70,36,10,0.95), rgba(46,24,6,0.95));
-    border-bottom: 2px solid var(--wood-mid);
-    border-top: 1px solid var(--wood-dark);
-    font-size: 13px;
-    color: var(--gold-bright);
-    letter-spacing: 0.04em;
-    animation: announcePulse 4s ease-in-out infinite alternate;
+    overflow: hidden;
+    height: 26px;
+    background: linear-gradient(90deg, #0e0a04, #1a0e02);
+    border-bottom: 2px solid var(--wood-dark);
+    border-top: 1px solid #2a1500;
     position: relative;
     z-index: 10;
-}
-
-@keyframes announcePulse {
-    from { border-color: var(--wood-mid); }
-    to   { border-color: var(--wood-bright); }
-}
-
-.announce-bar-icon {
-    font-size: 14px;
     flex-shrink: 0;
+}
+
+.news-ticker-label {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 10px;
+    height: 100%;
+    background: var(--wood-darkest);
+    border-right: 1px solid var(--wood-dark);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
     color: var(--gold);
+    white-space: nowrap;
 }
 
-.announce-bar-text {
+.news-ticker-icon { font-size: 12px; }
+
+.news-ticker-track {
     flex: 1;
+    overflow: hidden;
+    height: 100%;
+    position: relative;
 }
 
-.announce-bar-close {
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
-    font-size: 16px;
-    padding: 0 2px;
-    line-height: 1;
-    flex-shrink: 0;
-    transition: color 0.12s;
+.news-ticker-inner {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    font-size: 11px;
+    color: var(--gold-bright);
+    letter-spacing: 0.04em;
+    animation: tickerScroll 30s linear infinite;
 }
 
-.announce-bar-close:hover {
-    color: var(--text-bright);
+@keyframes tickerScroll {
+    from { left: 100%; }
+    to   { left: -200%; }
 }
 
 /* ─── Main menu online badge ─────────────────────────────── */

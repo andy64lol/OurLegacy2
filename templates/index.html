@@ -779,28 +779,40 @@
             </nav>
         </div><!-- end .tab-nav-wrap -->
 
-        <!-- ── Announcement Bar ── -->
-        <div id="announce-bar" class="announce-bar" style="display:none;">
-            <span class="announce-bar-icon">&#9733;</span>
-            <span class="announce-bar-text" id="announce-bar-text"></span>
-            <span id="announce-bar-ts" style="font-size:11px;color:var(--text-dim);flex-shrink:0;"></span>
-            <button class="announce-bar-close" onclick="document.getElementById('announce-bar').style.display='none';">&times;</button>
+        <!-- ── News Ticker ── -->
+        <div id="news-ticker" class="news-ticker" style="display:none;">
+            <div class="news-ticker-label">
+                <span class="news-ticker-icon">&#9733;</span>
+                <span>News</span>
+            </div>
+            <div class="news-ticker-track">
+                <div class="news-ticker-inner" id="news-ticker-inner"></div>
+            </div>
         </div>
         <script>
         (function(){
-            var _lastAnnounceTs = null;
+            var _tickerItems = [];
+            var _tickerIdx = 0;
+            var _tickerAnim = null;
+
+            function setTickerContent(items) {
+                var inner = document.getElementById('news-ticker-inner');
+                if (!inner) return;
+                var combined = items.map(function(a){ return '★ ' + a.text + '  (' + a.ts + ')'; }).join('     ·     ');
+                inner.textContent = combined + '     ·     ' + combined;
+                inner.style.animation = 'none';
+                inner.offsetHeight;
+                var duration = Math.max(18, combined.length * 0.18);
+                inner.style.animation = 'tickerScroll ' + duration + 's linear infinite';
+            }
+
             function loadAnnouncements() {
                 fetch('/api/announcements').then(function(r){ return r.json(); }).then(function(data){
-                    var bar = document.getElementById('announce-bar');
-                    var txt = document.getElementById('announce-bar-text');
-                    var ts = document.getElementById('announce-bar-ts');
-                    if (!bar || !data.announcements || !data.announcements.length) return;
-                    var latest = data.announcements[data.announcements.length - 1];
-                    if (latest.ts === _lastAnnounceTs) return;
-                    _lastAnnounceTs = latest.ts;
-                    txt.textContent = latest.text;
-                    ts.textContent = latest.ts;
-                    bar.style.display = 'flex';
+                    var ticker = document.getElementById('news-ticker');
+                    if (!ticker || !data.announcements || !data.announcements.length) return;
+                    _tickerItems = data.announcements;
+                    ticker.style.display = 'flex';
+                    setTickerContent(_tickerItems);
                 }).catch(function(){});
             }
             loadAnnouncements();
@@ -2851,10 +2863,10 @@
         <div style="margin-bottom:16px;">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Background</div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="1" onclick="applyBackground('1')">Forest</button>
-                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="2" onclick="applyBackground('2')">Ruins</button>
-                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="3" onclick="applyBackground('3')">Dungeon</button>
-                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="4" onclick="applyBackground('4')">Tavern</button>
+                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="1" onclick="applyBackground('1')">1</button>
+                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="2" onclick="applyBackground('2')">2</button>
+                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="3" onclick="applyBackground('3')">3</button>
+                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="4" onclick="applyBackground('4')">4</button>
                 <button class="btn btn-secondary btn-small bg-option-btn" data-bg="none" onclick="applyBackground('none')">None</button>
             </div>
         </div>

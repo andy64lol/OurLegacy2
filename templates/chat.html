@@ -209,18 +209,100 @@
             letter-spacing: 0.04em;
         }
 
-        .owner-badge {
-            display: inline-block;
-            font-size: 9px;
-            background: rgba(60,40,0,0.6);
-            border: 1px solid var(--gold);
-            color: var(--gold-bright);
-            padding: 0 4px;
-            margin-left: 4px;
+        .owner-badge, .mod-badge {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 5px;
             vertical-align: middle;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
         }
+        .owner-badge img, .mod-badge img {
+            width: 14px;
+            height: 14px;
+            image-rendering: pixelated;
+        }
+
+        /* ── Admin Terminal Panel ── */
+        #admin-terminal-panel {
+            display: none;
+            flex-direction: column;
+            background: #060709;
+            border-bottom: 2px solid #1a2535;
+            flex-shrink: 0;
+            max-height: 220px;
+        }
+        #admin-terminal-panel.visible { display: flex; }
+        .adm-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            background: #0c1018;
+            border-bottom: 1px solid #1a2535;
+            cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .adm-panel-header img { width: 14px; height: 14px; image-rendering: pixelated; }
+        .adm-panel-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #3b82f6;
+            flex: 1;
+        }
+        .adm-panel-toggle {
+            font-size: 10px;
+            color: #4b5563;
+        }
+        #admin-terminal-out {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            min-height: 60px;
+        }
+        .adm-pl { line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+        .adm-pl.ok   { color: #22c55e; }
+        .adm-pl.err  { color: #ef4444; }
+        .adm-pl.warn { color: #f59e0b; }
+        .adm-pl.info { color: #60a5fa; }
+        .adm-pl.dim  { color: #4b5563; }
+        .adm-pl.cmd  { color: #f59e0b; }
+        .adm-pl.head { color: #3b82f6; font-weight: 700; }
+        #admin-terminal-input-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px 6px;
+            border-top: 1px solid #1a2535;
+            background: #0c1018;
+            flex-shrink: 0;
+        }
+        .adm-prompt-lbl { color: #f59e0b; font-size: 11px; font-family: 'Courier New', monospace; user-select: none; }
+        #admin-terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            caret-color: #22c55e;
+        }
+        .adm-run-btn-sm {
+            background: rgba(34,197,94,0.1);
+            border: 1px solid #16a34a;
+            color: #22c55e;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-family: 'Courier New', monospace;
+            cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+        }
+        .adm-run-btn-sm:hover { background: rgba(34,197,94,0.2); }
 
         .user-pill-owner {
             background: rgba(80,55,0,0.5);
@@ -249,6 +331,23 @@
     <div id="online-bar">
         <span class="label">Online:</span>
         <div id="chat-users-inner-page"></div>
+    </div>
+
+    <!-- Admin Terminal Panel (owner/mod only) -->
+    <div id="admin-terminal-panel">
+        <div class="adm-panel-header" onclick="toggleAdminTerminal()">
+            <img src="/game_assets/glyphs/terminal.png" alt="terminal">
+            <span class="adm-panel-label">Admin Terminal</span>
+            <span class="adm-panel-toggle" id="adm-toggle-icon">▾</span>
+        </div>
+        <div id="admin-terminal-body" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+            <div id="admin-terminal-out"></div>
+            <div id="admin-terminal-input-row">
+                <span class="adm-prompt-lbl">root@ol2 &gt;</span>
+                <input id="admin-terminal-input" type="text" placeholder="Command..." autocomplete="off" spellcheck="false">
+                <button class="adm-run-btn-sm" onclick="runAdminCmd()">Run</button>
+            </div>
+        </div>
     </div>
 
     <div id="chat-messages-page">
@@ -305,6 +404,8 @@
             IS_OWNER = !!flags.is_owner;
             var ownerBar = document.getElementById('owner-hint-bar');
             if (ownerBar) ownerBar.style.display = IS_OWNER ? 'block' : 'none';
+            var panel = document.getElementById('admin-terminal-panel');
+            if (panel && (IS_OWNER || IS_MOD)) panel.classList.add('visible');
         });
 
         socket.on('owner_name', function(name) {
@@ -367,8 +468,8 @@
             var isOwner = OWNER_NAME && u.toLowerCase() === OWNER_NAME;
             var isMod = !isOwner && MOD_LIST.indexOf(u.toLowerCase()) !== -1;
             var badge = isOwner
-                ? '<span style="font-size:9px;vertical-align:middle;margin-left:2px;">[O]</span>'
-                : (isMod ? '<span style="font-size:9px;vertical-align:middle;margin-left:2px;">[M]</span>' : '');
+                ? '<img src="/game_assets/glyphs/owner.png" style="width:11px;height:11px;vertical-align:middle;margin-left:3px;image-rendering:pixelated;" alt="owner" title="Owner">'
+                : (isMod ? '<img src="/game_assets/glyphs/admin.png" style="width:11px;height:11px;vertical-align:middle;margin-left:3px;image-rendering:pixelated;" alt="mod" title="Moderator">' : '');
             var pillClass = 'user-pill' + (isOwner ? ' user-pill-owner' : (isMod ? ' user-pill-mod' : (isMe ? ' user-pill-me' : '')));
             if (isMe) {
                 return '<span class="' + pillClass + '">' + escHtml(u) + badge + ' (you)</span>';
@@ -418,8 +519,8 @@
             var bubbleBorder = isMe ? 'var(--wood-bright)' : (isOwnerMsg ? 'var(--gold)' : (isMod ? 'var(--gold-dim)' : 'var(--border)'));
             var nameColor = isMe ? 'var(--gold-bright)' : 'var(--gold)';
             var roleBadgeHtml = isOwnerMsg
-                ? '<span class="owner-badge">&#9733; OWNER</span>'
-                : (isMod ? '<span class="mod-badge">&#9876; MOD</span>' : '');
+                ? '<span class="owner-badge"><img src="/game_assets/glyphs/owner.png" alt="owner" title="Owner"></span>'
+                : (isMod ? '<span class="mod-badge"><img src="/game_assets/glyphs/admin.png" alt="mod" title="Moderator"></span>' : '');
             div.innerHTML =
                 '<div style="max-width:560px;padding:6px 12px;background:' + bubbleBg +
                 ';border:1px solid ' + bubbleBorder + ';word-break:break-word;">' +
@@ -554,7 +655,152 @@
         initChat();
         var inp = document.getElementById('chat-input-page');
         if (inp) inp.focus();
+
+        var ti = document.getElementById('admin-terminal-input');
+        if (ti) ti.addEventListener('keydown', function(e) { if (e.key === 'Enter') runAdminCmd(); });
     });
+
+    // ── Admin Terminal ──────────────────────────────────────────────
+    var _admTermOpen = true;
+    var _admHistory = [], _admHistIdx = -1;
+
+    window.toggleAdminTerminal = function() {
+        var body = document.getElementById('admin-terminal-body');
+        var icon = document.getElementById('adm-toggle-icon');
+        _admTermOpen = !_admTermOpen;
+        if (body) body.style.display = _admTermOpen ? 'flex' : 'none';
+        if (icon) icon.textContent = _admTermOpen ? '▾' : '▸';
+    };
+
+    function admPrint(text, cls) {
+        var out = document.getElementById('admin-terminal-out');
+        if (!out) return;
+        var d = document.createElement('div');
+        d.className = 'adm-pl' + (cls ? ' ' + cls : '');
+        d.textContent = text;
+        out.appendChild(d);
+        out.scrollTop = out.scrollHeight;
+    }
+
+    async function admApi(method, endpoint, body) {
+        var opts = { method: method, headers: { 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+        var r = await fetch(endpoint, opts);
+        return r.json();
+    }
+
+    window.runAdminCmd = async function() {
+        var inp = document.getElementById('admin-terminal-input');
+        if (!inp) return;
+        var raw = inp.value.trim();
+        if (!raw) return;
+        inp.value = '';
+        _admHistory.unshift(raw);
+        _admHistIdx = -1;
+        if (_admHistory.length > 40) _admHistory.pop();
+        admPrint('> ' + raw, 'cmd');
+        var parts = raw.split(/\s+/);
+        var cmd = parts[0].toLowerCase();
+        try {
+            switch (cmd) {
+                case 'help':
+                    admPrint('Server: ban unban kick mute unmute warn addmod removemod online', 'info');
+                    admPrint('Char:   stats inventory heal  give gold/xp/item/mxp  set level/stat/mining  remove item', 'info');
+                    break;
+                case 'clear':
+                    document.getElementById('admin-terminal-out').innerHTML = '';
+                    break;
+                case 'stats': {
+                    var d = await admApi('GET', '/api/admin/game/stats');
+                    if (!d.ok) { admPrint(d.message, 'err'); break; }
+                    admPrint(d.name + ' (' + d.class + ')  Lv' + d.level + ' [' + d.rank + ']  ' + d.hp + '/' + d.max_hp + 'HP  ' + d.gold + 'g  Mining:' + d.mining_level, 'info');
+                    admPrint('ATK:' + d.attack + '  DEF:' + d.defense + '  SPD:' + d.speed + '  EXP:' + d.experience + '/' + d.experience_to_next + '  Inv:' + d.inventory_count, 'dim');
+                    break;
+                }
+                case 'inventory': {
+                    var d = await admApi('GET', '/api/admin/game/inventory');
+                    if (!d.ok) { admPrint(d.message, 'err'); break; }
+                    var entries = Object.entries(d.inventory);
+                    if (!entries.length) { admPrint('(empty)  Gold: ' + d.gold + 'g', 'dim'); break; }
+                    admPrint('Inventory (' + entries.length + ' types, ' + d.gold + 'g):', 'head');
+                    entries.sort(function(a,b){return a[0].localeCompare(b[0]);}).forEach(function(e){
+                        admPrint('  ' + (e[1] > 1 ? e[1] + 'x ' : '   ') + e[0], 'dim');
+                    });
+                    break;
+                }
+                case 'heal': {
+                    var r = await admApi('POST', '/api/admin/game/heal');
+                    admPrint(r.message, r.ok ? 'ok' : 'err');
+                    break;
+                }
+                case 'give': {
+                    var sub = (parts[1] || '').toLowerCase();
+                    if (sub === 'gold' || sub === 'xp' || sub === 'mxp') {
+                        var kind = sub === 'mxp' ? 'mining_xp' : sub;
+                        var n = parseInt(parts[2]);
+                        if (!n || n <= 0) { admPrint('Usage: give ' + sub + ' <amount>', 'warn'); break; }
+                        var r = await admApi('POST', '/api/admin/game/give', { kind: kind, amount: n });
+                        admPrint(r.message, r.ok ? 'ok' : 'err');
+                    } else if (sub === 'item') {
+                        var lastP = parts[parts.length - 1];
+                        var hasQty = /^\d+$/.test(lastP) && parts.length > 3;
+                        var qty = hasQty ? parseInt(lastP) : 1;
+                        var itemName = (hasQty ? parts.slice(2, -1) : parts.slice(2)).join(' ');
+                        if (!itemName) { admPrint('Usage: give item <name> [qty]', 'warn'); break; }
+                        var r = await admApi('POST', '/api/admin/game/give', { kind: 'item', item: itemName, qty: qty });
+                        admPrint(r.message, r.ok ? 'ok' : 'err');
+                    } else { admPrint('Usage: give gold|xp|mxp|item <value>', 'warn'); }
+                    break;
+                }
+                case 'set': {
+                    var sub = (parts[1] || '').toLowerCase();
+                    if (sub === 'level') {
+                        var n = parseInt(parts[2]);
+                        var r = await admApi('POST', '/api/admin/game/set', { kind: 'level', value: n });
+                        admPrint(r.message, r.ok ? 'ok' : 'err');
+                    } else if (sub === 'stat') {
+                        var r = await admApi('POST', '/api/admin/game/set', { kind: 'stat', stat: parts[2], value: parseInt(parts[3]) });
+                        admPrint(r.message, r.ok ? 'ok' : 'err');
+                    } else if (sub === 'mining') {
+                        var r = await admApi('POST', '/api/admin/game/set', { kind: 'mining_level', value: parseInt(parts[2]) });
+                        admPrint(r.message, r.ok ? 'ok' : 'err');
+                    } else { admPrint('Usage: set level|stat|mining <value>', 'warn'); }
+                    break;
+                }
+                case 'remove': {
+                    if ((parts[1]||'').toLowerCase() === 'item') {
+                        var lastP = parts[parts.length - 1];
+                        var hasQty = /^\d+$/.test(lastP) && parts.length > 3;
+                        var qty = hasQty ? parseInt(lastP) : 1;
+                        var itemName = (hasQty ? parts.slice(2, -1) : parts.slice(2)).join(' ');
+                        var r = await admApi('POST', '/api/admin/game/remove', { item: itemName, qty: qty });
+                        admPrint(r.message, r.ok ? 'ok' : 'err');
+                    } else { admPrint('Usage: remove item <name> [qty]', 'warn'); }
+                    break;
+                }
+                case 'ban': { var r = await admApi('POST', '/api/admin/ban', { username: parts[1], reason: parts.slice(2).join(' ') || 'No reason.' }); admPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                case 'unban': { var r = await admApi('POST', '/api/admin/unban', { username: parts[1] }); admPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                case 'kick': { var r = await admApi('POST', '/api/admin/kick', { username: parts[1] }); admPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                case 'mute': {
+                    var hasMin = parts[2] && /^\d+$/.test(parts[2]);
+                    var r = await admApi('POST', '/api/admin/mute', { username: parts[1], duration_minutes: hasMin ? parseInt(parts[2]) : null, reason: parts.slice(hasMin ? 3 : 2).join(' ') || 'No reason.' });
+                    admPrint(r.message, r.ok ? 'ok' : 'err'); break;
+                }
+                case 'unmute': { var r = await admApi('POST', '/api/admin/unmute', { username: parts[1] }); admPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                case 'warn': { var r = await admApi('POST', '/api/admin/warn', { username: parts[1], reason: parts.slice(2).join(' ') || 'No reason.' }); admPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                case 'addmod': { var r = await admApi('POST', '/api/admin/add_admin', { username: parts[1] }); admPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                case 'removemod': { var r = await admApi('POST', '/api/admin/remove_admin', { username: parts[1] }); admPrint(r.message, r.ok ? 'ok' : 'err'); break; }
+                case 'online': {
+                    var d = await admApi('GET', '/api/admin/data');
+                    if (!d.ok) { admPrint(d.message, 'err'); break; }
+                    admPrint('Online (' + d.online_count + '): ' + (d.online_users.join(', ') || 'none'), 'info');
+                    break;
+                }
+                default:
+                    admPrint('Unknown: ' + cmd + '  (type help)', 'err');
+            }
+        } catch(e) { admPrint('Error: ' + e.message, 'err'); }
+    };
 })();
 </script>
 </body>

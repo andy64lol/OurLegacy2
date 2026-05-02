@@ -243,7 +243,7 @@
             }
             var bgColor = isMe ? 'var(--wood-dark)' : (isMod ? 'rgba(80,55,10,0.4)' : 'var(--bg-panel)');
             var borderColor = isMe ? 'var(--wood-bright)' : (isMod ? 'var(--gold-dim)' : 'var(--border)');
-            var modBadge = isMod ? '<span style="font-size:8px;background:rgba(120,90,20,0.5);border:1px solid var(--gold-dim);color:var(--gold);padding:0 3px;margin-left:3px;vertical-align:middle;">MOD</span>' : '';
+            var modBadge = isMod ? '<img src="/game_assets/glyphs/admin.png" style="width:11px;height:11px;vertical-align:middle;margin-left:3px;image-rendering:pixelated;" alt="mod" title="Moderator">' : '';
             div.innerHTML =
                 '<div style="max-width:230px;padding:4px 9px;background:' + bgColor +
                 ';border:1px solid ' + borderColor + ';word-break:break-word;">' +
@@ -375,7 +375,7 @@
                 innerEl.innerHTML = users.map(function(u) {
                     var isMe = (u === CURRENT_USER);
                     var isMod = MOD_LIST.indexOf(u.toLowerCase()) !== -1;
-                    var badge = isMod ? ' &#9876;' : '';
+                    var badge = isMod ? '<img src="/game_assets/glyphs/admin.png" style="width:10px;height:10px;vertical-align:middle;margin-left:2px;image-rendering:pixelated;" alt="mod">' : '';
                     if (isMe) return '<span class="user-pill user-pill-me">' + escHtml(u) + badge + ' (you)</span>';
                     return '<a href="/friends?dm=' + encodeURIComponent(u) + '" target="_parent" class="user-pill">' + escHtml(u) + badge + '</a>';
                 }).join('');

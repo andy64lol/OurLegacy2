@@ -8452,6 +8452,8 @@ from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi
 async def _on_startup():
     global _asyncio_loop, _bg_started
     _asyncio_loop = _asyncio.get_running_loop()
+    from concurrent.futures import ThreadPoolExecutor
+    _asyncio_loop.set_default_executor(ThreadPoolExecutor(max_workers=20))
     if not _bg_started:
         _bg_started = True
         _asyncio.create_task(_world_tick())
