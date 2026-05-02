@@ -7785,7 +7785,7 @@
       ]
    },
    "Wooden Pickaxe": {
-      "type": "tool",
+      "type": "pickaxe",
       "description": "A basic pickaxe carved from hardwood. Can break common ore veins.",
       "price": 20,
       "rarity": "common",
@@ -7796,7 +7796,7 @@
       "pickaxe_tier": 1
    },
    "Iron Pickaxe": {
-      "type": "tool",
+      "type": "pickaxe",
       "description": "A sturdy pickaxe forged from iron bars. Reaches uncommon ore veins.",
       "price": 100,
       "rarity": "uncommon",
@@ -7807,7 +7807,7 @@
       "pickaxe_tier": 2
    },
    "Steel Pickaxe": {
-      "type": "tool",
+      "type": "pickaxe",
       "description": "A darkstone-reinforced pickaxe that bites through rare ore with ease.",
       "price": 280,
       "rarity": "rare",
@@ -7818,7 +7818,7 @@
       "pickaxe_tier": 3
    },
    "Mithril Pickaxe": {
-      "type": "tool",
+      "type": "pickaxe",
       "description": "A masterwork pick imbued with sunstone energy. Can harvest legendary deposits.",
       "price": 700,
       "rarity": "legendary",
