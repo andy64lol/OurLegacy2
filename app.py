@@ -691,7 +691,7 @@ def _inject_chat_globals():
 # ─── SocketIO Chat Events ────────────────────────────────────────────────────
 
 
-@sio.on("connect")
+@sio.on("connect")  # type: ignore[misc]
 async def _on_chat_connect(sid, environ, auth=None):
     global _asyncio_loop, _bg_started
     sess = await _asyncio.get_event_loop().run_in_executor(
@@ -724,7 +724,7 @@ async def _on_chat_connect(sid, environ, auth=None):
     await sio.emit("chat_history", history, to=sid)
 
 
-@sio.on("disconnect")
+@sio.on("disconnect")  # type: ignore[misc]
 async def _on_chat_disconnect(sid):
     username = _chat_online.pop(sid, None)
     await sio.emit("online_users", sorted(set(_chat_online.values())))
@@ -750,7 +750,7 @@ async def _on_chat_disconnect(sid):
                 _active_trades.pop(tid, None)
 
 
-@sio.on("chat_send")
+@sio.on("chat_send")  # type: ignore[misc]
 async def _on_chat_send(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -894,7 +894,7 @@ async def _emit_trade_update(trade: dict):
         await sio.emit("trade_update", _trade_payload(trade, trade["player_b"]), to=s)
 
 
-@sio.on("trade_request")
+@sio.on("trade_request")  # type: ignore[misc]
 async def _on_trade_request(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -946,7 +946,7 @@ async def _on_trade_request(sid, data):
     await sio.emit("trade_invite_sent", {"trade_id": trade_id, "to": target}, to=sid)
 
 
-@sio.on("trade_accept")
+@sio.on("trade_accept")  # type: ignore[misc]
 async def _on_trade_accept(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -970,7 +970,7 @@ async def _on_trade_accept(sid, data):
     await _emit_trade_update(trade)
 
 
-@sio.on("trade_decline")
+@sio.on("trade_decline")  # type: ignore[misc]
 async def _on_trade_decline(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -989,7 +989,7 @@ async def _on_trade_decline(sid, data):
     _active_trades.pop(trade_id, None)
 
 
-@sio.on("trade_add_item")
+@sio.on("trade_add_item")  # type: ignore[misc]
 async def _on_trade_add_item(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -1035,7 +1035,7 @@ async def _on_trade_add_item(sid, data):
     await _emit_trade_update(trade)
 
 
-@sio.on("trade_remove_item")
+@sio.on("trade_remove_item")  # type: ignore[misc]
 async def _on_trade_remove_item(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -1061,7 +1061,7 @@ async def _on_trade_remove_item(sid, data):
     await _emit_trade_update(trade)
 
 
-@sio.on("trade_set_gold")
+@sio.on("trade_set_gold")  # type: ignore[misc]
 async def _on_trade_set_gold(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -1093,7 +1093,7 @@ async def _on_trade_set_gold(sid, data):
     await _emit_trade_update(trade)
 
 
-@sio.on("trade_confirm")
+@sio.on("trade_confirm")  # type: ignore[misc]
 async def _on_trade_confirm(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -1138,7 +1138,7 @@ async def _on_trade_confirm(sid, data):
         await _emit_trade_update(trade)
 
 
-@sio.on("trade_cancel")
+@sio.on("trade_cancel")  # type: ignore[misc]
 async def _on_trade_cancel(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -1407,7 +1407,7 @@ GAME_DATA: dict[str, Any] = {
     "effects": load_json("effects.json"),
 }
 
-GAME_VERSION = "2.7.0"
+GAME_VERSION = "2.7.1"
 
 BUILDING_TYPES = {
     "house": {"label": "House", "slots": 3},
@@ -1609,7 +1609,7 @@ def _update_save_slot(slot: int, label: str, state: dict) -> None:
     slots = session.get("_save_slots") or [None] * 5
     if not isinstance(slots, list):
         slots = [None] * 5
-    slots = (list(slots) + [None] * 5)[:5]
+    slots: list[Any] = (list(slots) + [None] * 5)[:5]
     player = state.get("player", {})
     # Strip _save_slots from the snapshot to avoid recursion
     snapshot = {k: v for k, v in state.items() if k != "_save_slots"}
@@ -6956,7 +6956,7 @@ def api_saves_list():
     slots = session.get("_save_slots") or [None] * 5
     if not isinstance(slots, list):
         slots = [None] * 5
-    slots = (list(slots) + [None] * 5)[:5]
+    slots: list[Any] = (list(slots) + [None] * 5)[:5]
     result = []
     for i, s in enumerate(slots):
         if s is None or not isinstance(s, dict):
@@ -7456,7 +7456,7 @@ GROUP_CHAT_COOLDOWN = 5
 _group_chat_cooldowns: dict = {}
 
 
-@sio.on("group_chat_send")
+@sio.on("group_chat_send")  # type: ignore[misc]
 async def on_group_chat_send(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -7926,7 +7926,7 @@ def items_debug():
     if not _is_owner(caller):
         return redirect(url_for("index"))
 
-    raw = ITEMS  # already loaded dict
+    raw: dict = GAME_DATA.get("items", {})
 
     items_list = []
     for name, data in raw.items():

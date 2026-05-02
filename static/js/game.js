@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function checkAutosaved() {
-    var params = new URLSearchParams(window.location.search);
+    var params = new window.URLSearchParams(window.location.search);
     if (params.get('autosaved') !== '1') return;
     history.replaceState(null, '', window.location.pathname);
     var el = document.getElementById('autosave-indicator');
@@ -150,7 +150,7 @@ function switchTab(tabName, instant) {
     }
     var mainContent = document.querySelector('.main-content');
     if (mainContent) mainContent.scrollTo({ top: 0, behavior: 'smooth' });
-    document.dispatchEvent(new CustomEvent('tabChanged', { detail: tabName }));
+    document.dispatchEvent(new window.CustomEvent('tabChanged', { detail: tabName }));
 }
 
 function initTabs() {
@@ -171,7 +171,7 @@ function scrollLogsToBottom() {
 }
 
 function checkUrlTab() {
-    var params = new URLSearchParams(window.location.search);
+    var params = new window.URLSearchParams(window.location.search);
     var tabName = params.get('tab') || window.location.hash.replace('#', '');
     if (tabName) {
         switchTab(tabName, true);
@@ -403,7 +403,7 @@ function initMusic() {
     var savedTime = parseFloat(localStorage.getItem('ol2_music_time'));
     function startPlayback() {
         if (!isNaN(savedTime) && savedTime > 0 && savedTime < _musicAudio.duration) {
-            try { _musicAudio.currentTime = savedTime; } catch (e) {}
+            try { _musicAudio.currentTime = savedTime; } catch {}
         }
         if (_musicMuted) return;
         var playPromise = _musicAudio.play();
@@ -615,7 +615,7 @@ function loadSaveSlots() {
 }
 
 function saveToSlot(slot) {
-    var label = prompt('Name this save (optional):', 'Save ' + slot);
+    var label = window.prompt('Name this save (optional):', 'Save ' + slot);
     if (label === null) return;
     label = label.trim() || ('Save ' + slot);
     fetch('/api/saves/write', {
@@ -822,6 +822,25 @@ async function settingsDownloadCloud() {
     }
 }
 
+// Expose functions called from HTML onclick/oninput attributes
+window.gameConfirm           = gameConfirm;
+window.showPendingToasts     = showPendingToasts;
+window.saveGame              = saveGame;
+window.triggerLoadFile       = triggerLoadFile;
+window.applyBackground       = applyBackground;
+window.openSettings          = openSettings;
+window.settingsOverlayClick  = settingsOverlayClick;
+window.saveToSlot            = saveToSlot;
+window.restoreFromSlot       = restoreFromSlot;
+window.settingsToggleFullscreen = settingsToggleFullscreen;
+window.settingsToggleMusic   = settingsToggleMusic;
+window.settingsSetVolume     = settingsSetVolume;
+window.settingsChangeBGM     = settingsChangeBGM;
+window.saveAndQuit           = saveAndQuit;
+window.dismissCutscene       = dismissCutscene;
+window.logoutAndSave         = logoutAndSave;
+window.settingsDownloadCloud = settingsDownloadCloud;
+
 /* ── Tab Overflow (three-dot menu) ─────────────────────────────────────────── */
 function initTabOverflow() {
     var nav = document.getElementById('main-tabs');
@@ -922,7 +941,7 @@ function initTabOverflow() {
     updateOverflow();
 
     var resizeObs = window.ResizeObserver
-        ? new ResizeObserver(function() { updateOverflow(); })
+        ? new window.ResizeObserver(function() { updateOverflow(); })
         : null;
     if (resizeObs) resizeObs.observe(nav);
     else window.addEventListener('resize', updateOverflow);
@@ -956,12 +975,12 @@ function initSidebarToggle() {
             btn.innerHTML = '&#9664;'; // ◀
             btn.style.left = '250px';
         }
-        try { localStorage.setItem('ol2-sidebar-collapsed', collapsed ? '1' : '0'); } catch(e) {}
+        try { localStorage.setItem('ol2-sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
     }
 
     // Read saved preference; default collapsed on narrow screens
     var saved;
-    try { saved = localStorage.getItem('ol2-sidebar-collapsed'); } catch(e) {}
+    try { saved = localStorage.getItem('ol2-sidebar-collapsed'); } catch {}
     var startCollapsed = saved !== null ? saved === '1' : window.innerWidth < 900;
     setCollapsed(startCollapsed);
 
@@ -981,10 +1000,10 @@ function initAmbientParticles() {
     var count = 28;
 
     for (var i = 0; i < count; i++) {
-        (function(idx) {
+        (function() {
             var delay = Math.random() * 18;
             setTimeout(function() { spawnAmbient(layer, COLORS); }, delay * 1000);
-        })(i);
+        })();
     }
 
     setInterval(function() {
