@@ -4941,3 +4941,97 @@ body.page-fade-out {
         min-width: 0;
     }
 }
+
+/* ── Mining level card ───────────────────────────────────────────────────── */
+.mine-level-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.mine-level-badge {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gold);
+    min-width: 52px;
+    text-align: center;
+    line-height: 1;
+    padding: 6px 4px;
+    background: rgba(200,160,50,0.12);
+    border: 1px solid rgba(200,160,50,0.3);
+    border-radius: 8px;
+}
+.mine-level-info {
+    flex: 1;
+    min-width: 0;
+}
+.mine-level-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+}
+.mine-xp-bar-wrap {
+    height: 7px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+.mine-xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+    min-width: 3px;
+}
+.mine-xp-text {
+    font-size: 11px;
+    color: var(--text-dim);
+}
+.mine-pickaxe-col {
+    text-align: right;
+}
+.mine-pickaxe-label {
+    font-size: 12px;
+    color: var(--green-bright);
+    font-weight: 600;
+}
+.mine-no-pickaxe {
+    color: var(--red) !important;
+    opacity: 0.8;
+}
+.mine-no-pick-notice {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(200,60,60,0.12);
+    border: 1px solid rgba(200,60,60,0.3);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-light);
+}
+/* ── Mining ore list ─────────────────────────────────────────────────────── */
+.mine-ore-locked {
+    opacity: 0.5;
+}
+.mine-ore-icon {
+    font-size: 13px;
+    min-width: 16px;
+    text-align: center;
+}
+.mine-ore-locked-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    background: rgba(120,120,120,0.15);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    white-space: nowrap;
+}
+@media (max-width: 600px) {
+    .mine-level-row { flex-wrap: wrap; }
+    .mine-pickaxe-col { text-align: left; }
+}

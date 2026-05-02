@@ -7783,5 +7783,104 @@
          "crystal",
          "dark"
       ]
+   },
+   "Wooden Pickaxe": {
+      "type": "tool",
+      "description": "A basic pickaxe carved from hardwood. Can break common ore veins.",
+      "price": 20,
+      "rarity": "common",
+      "tags": [
+         "tool",
+         "pickaxe"
+      ],
+      "pickaxe_tier": 1
+   },
+   "Iron Pickaxe": {
+      "type": "tool",
+      "description": "A sturdy pickaxe forged from iron bars. Reaches uncommon ore veins.",
+      "price": 100,
+      "rarity": "uncommon",
+      "tags": [
+         "tool",
+         "pickaxe"
+      ],
+      "pickaxe_tier": 2
+   },
+   "Steel Pickaxe": {
+      "type": "tool",
+      "description": "A darkstone-reinforced pickaxe that bites through rare ore with ease.",
+      "price": 280,
+      "rarity": "rare",
+      "tags": [
+         "tool",
+         "pickaxe"
+      ],
+      "pickaxe_tier": 3
+   },
+   "Mithril Pickaxe": {
+      "type": "tool",
+      "description": "A masterwork pick imbued with sunstone energy. Can harvest legendary deposits.",
+      "price": 700,
+      "rarity": "legendary",
+      "tags": [
+         "tool",
+         "pickaxe"
+      ],
+      "pickaxe_tier": 4
+   },
+   "Copper Bar": {
+      "type": "material",
+      "description": "A refined copper ingot, smooth and reddish. Ready for smithing.",
+      "price": 20,
+      "rarity": "common",
+      "tags": [
+         "material",
+         "bar",
+         "metal"
+      ]
+   },
+   "Iron Bar": {
+      "type": "material",
+      "description": "A solid iron ingot smelted from raw ore. The backbone of basic smithing.",
+      "price": 25,
+      "rarity": "common",
+      "tags": [
+         "material",
+         "bar",
+         "metal"
+      ]
+   },
+   "Silver Bar": {
+      "type": "material",
+      "description": "A gleaming silver ingot, prized for jewellery and magical conductors.",
+      "price": 70,
+      "rarity": "uncommon",
+      "tags": [
+         "material",
+         "bar",
+         "metal"
+      ]
+   },
+   "Gold Bar": {
+      "type": "material",
+      "description": "A heavy gold ingot. Worth a small fortune even in raw form.",
+      "price": 140,
+      "rarity": "uncommon",
+      "tags": [
+         "material",
+         "bar",
+         "metal"
+      ]
+   },
+   "Mithril Bar": {
+      "type": "material",
+      "description": "A featherlight yet unbreakable bar of refined mithril. Extremely rare.",
+      "price": 310,
+      "rarity": "rare",
+      "tags": [
+         "material",
+         "bar",
+         "metal"
+      ]
    }
 }

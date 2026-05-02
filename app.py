@@ -1407,7 +1407,43 @@ GAME_DATA: dict[str, Any] = {
     "effects": load_json("effects.json"),
 }
 
-GAME_VERSION = "2.7.1"
+GAME_VERSION = "2.7.2"
+
+# ─── Mining constants ─────────────────────────────────────────────────────────
+_PICKAXE_TIERS: dict[str, int] = {
+    "Wooden Pickaxe":  1,
+    "Iron Pickaxe":    2,
+    "Steel Pickaxe":   3,
+    "Mithril Pickaxe": 4,
+}
+_PICKAXE_TIER_NAMES: dict[int, str] = {v: k for k, v in _PICKAXE_TIERS.items()}
+_ORE_REQUIREMENTS: dict[str, dict[str, int]] = {
+    "Coal":              {"pickaxe_tier": 1, "mining_level": 1},
+    "Copper Ore":        {"pickaxe_tier": 1, "mining_level": 1},
+    "Iron Ore":          {"pickaxe_tier": 1, "mining_level": 1},
+    "Silver Ore":        {"pickaxe_tier": 2, "mining_level": 5},
+    "Gold Ore":          {"pickaxe_tier": 2, "mining_level": 8},
+    "Darkstone":         {"pickaxe_tier": 2, "mining_level": 8},
+    "Mithril Ore":       {"pickaxe_tier": 3, "mining_level": 12},
+    "Sunstone Crystal":  {"pickaxe_tier": 3, "mining_level": 12},
+    "Adamantine Ore":    {"pickaxe_tier": 4, "mining_level": 16},
+    "Shadowite Crystal": {"pickaxe_tier": 4, "mining_level": 20},
+}
+_MINING_XP_PER_RARITY: dict[str, int] = {
+    "junk": 5, "common": 10, "uncommon": 30, "rare": 75, "legendary": 200,
+}
+
+
+def _get_mining_level(player: dict) -> int:
+    """Mining level 1-25 computed from total mining XP. XP for level N = (N-1)^2 * 50."""
+    import math as _m
+    xp = max(0, player.get("mining_xp", 0))
+    return min(25, int(_m.sqrt(xp / 50)) + 1)
+
+
+def _mining_xp_for_level(level: int) -> int:
+    """Total XP needed to reach a given mining level."""
+    return max(0, (level - 1) ** 2 * 50)
 
 BUILDING_TYPES = {
     "house": {"label": "House", "slots": 3},
@@ -3649,20 +3685,61 @@ def game():
     mine_data = None
     mine_pool = area.get("mine_pool", [])
     if mine_pool:
+        player_inv = player.get("inventory", [])
+        best_pickaxe_tier = max(
+            (_PICKAXE_TIERS.get(i, 0) for i in player_inv), default=0
+        )
+        best_pickaxe_name = next(
+            (i for i in reversed(player_inv) if _PICKAXE_TIERS.get(i, 0) == best_pickaxe_tier),
+            None,
+        )
+        mining_lvl = _get_mining_level(player)
+        mining_xp_total = player.get("mining_xp", 0)
+        cur_lvl_xp = _mining_xp_for_level(mining_lvl)
+        next_lvl_xp = _mining_xp_for_level(mining_lvl + 1)
+        xp_span = max(1, next_lvl_xp - cur_lvl_xp)
+        xp_progress = mining_xp_total - cur_lvl_xp
+        xp_pct = min(100, int(xp_progress / xp_span * 100)) if mining_lvl < 25 else 100
+
         mine_items = []
         for ore_name in mine_pool:
             ore_item = GAME_DATA["items"].get(ore_name, {})
-            if isinstance(ore_item, dict):
-                mine_items.append(
-                    {
-                        "name": ore_name,
-                        "rarity": ore_item.get("rarity", "common"),
-                        "description": ore_item.get("description", ""),
-                        "price": ore_item.get("price", 5),
-                    }
-                )
+            if not isinstance(ore_item, dict):
+                continue
+            req = _ORE_REQUIREMENTS.get(ore_name, {"pickaxe_tier": 1, "mining_level": 1})
+            accessible = (
+                best_pickaxe_tier >= req["pickaxe_tier"]
+                and mining_lvl >= req["mining_level"]
+            )
+            if not accessible:
+                if best_pickaxe_tier < req["pickaxe_tier"]:
+                    blocked_by = f"Needs {_PICKAXE_TIER_NAMES.get(req['pickaxe_tier'], 'better pickaxe')}"
+                else:
+                    blocked_by = f"Mining Lv.{req['mining_level']}"
+            else:
+                blocked_by = None
+            mine_items.append(
+                {
+                    "name": ore_name,
+                    "rarity": ore_item.get("rarity", "common"),
+                    "description": ore_item.get("description", ""),
+                    "price": ore_item.get("price", 5),
+                    "accessible": accessible,
+                    "blocked_by": blocked_by,
+                }
+            )
         if mine_items:
-            mine_data = {"pool": mine_items}
+            mine_data = {
+                "pool": mine_items,
+                "mining_level": mining_lvl,
+                "mining_xp": mining_xp_total,
+                "xp_progress": xp_progress,
+                "xp_needed": xp_span,
+                "xp_pct": xp_pct,
+                "has_pickaxe": best_pickaxe_tier > 0,
+                "best_pickaxe": best_pickaxe_name,
+                "best_tier": best_pickaxe_tier,
+            }
 
     # Pending cutscene
     pending_cutscene_id = session.get("pending_cutscene")
@@ -4564,9 +4641,51 @@ def action_mine():
         add_message("There are no mines in this area.", "var(--red)")
         return redirect(url_for("game"))
 
-    # STR-based success chance: 65% base + 0.5% per point of STR
-    attrs = player.get("attributes", {})
-    str_val = int(attrs.get("str", 0))
+    # ── Pickaxe check ───────────────────────────────────────────────────────
+    inventory = player.get("inventory", [])
+    best_tier = max((_PICKAXE_TIERS.get(i, 0) for i in inventory), default=0)
+    best_pickaxe = next(
+        (i for i in reversed(inventory) if _PICKAXE_TIERS.get(i, 0) == best_tier),
+        None,
+    )
+
+    if best_tier == 0:
+        add_message(
+            "&#9935; You need a pickaxe to mine. Buy a Wooden Pickaxe from a shop (20g).",
+            "var(--red)",
+        )
+        return redirect(url_for("game"))
+
+    # ── Filter pool by pickaxe tier + mining level ──────────────────────────
+    mining_lvl = _get_mining_level(player)
+    accessible: list[str] = []
+    for ore_name in mine_pool:
+        req = _ORE_REQUIREMENTS.get(ore_name, {"pickaxe_tier": 1, "mining_level": 1})
+        if best_tier >= req["pickaxe_tier"] and mining_lvl >= req["mining_level"]:
+            accessible.append(ore_name)
+
+    if not accessible:
+        lowest_pickaxe = min(
+            _ORE_REQUIREMENTS.get(o, {}).get("pickaxe_tier", 1) for o in mine_pool
+        )
+        lowest_lvl = min(
+            _ORE_REQUIREMENTS.get(o, {}).get("mining_level", 1) for o in mine_pool
+        )
+        if best_tier < lowest_pickaxe:
+            needed_pick = _PICKAXE_TIER_NAMES.get(lowest_pickaxe, "better pickaxe")
+            add_message(
+                f"&#9935; Your {best_pickaxe} can't crack these veins. You need a {needed_pick}.",
+                "var(--text-dim)",
+            )
+        else:
+            add_message(
+                f"&#9935; These ore veins require Mining Level {lowest_lvl}. Keep mining to level up!",
+                "var(--text-dim)",
+            )
+        return redirect(url_for("game"))
+
+    # ── STR-based success chance ─────────────────────────────────────────────
+    str_val = int(player.get("attributes", {}).get("str", 0))
     success_chance = min(0.95, 0.65 + str_val * 0.005)
 
     advance_game_time(player)
@@ -4580,41 +4699,44 @@ def action_mine():
         _autosave()
         return redirect(url_for("game"))
 
-    # Weighted draw by rarity
-    _rarity_weights = {"junk": 80, "common": 60, "uncommon": 30, "rare": 8, "legendary": 2}
+    # ── Weighted draw by rarity ──────────────────────────────────────────────
+    _rw = {"junk": 80, "common": 60, "uncommon": 30, "rare": 8, "legendary": 2}
     pool_names: list[str] = []
     pool_weights: list[int] = []
-    for ore_name in mine_pool:
-        ore_data = GAME_DATA["items"].get(ore_name, {})
-        if isinstance(ore_data, dict):
-            rarity = ore_data.get("rarity", "common")
+    for ore_name in accessible:
+        od = GAME_DATA["items"].get(ore_name, {})
+        if isinstance(od, dict):
             pool_names.append(ore_name)
-            pool_weights.append(_rarity_weights.get(rarity, 30))
-
-    if not pool_names:
-        add_message("The mine appears exhausted.", "var(--text-dim)")
-        save_player(player)
-        _autosave()
-        return redirect(url_for("game"))
+            pool_weights.append(_rw.get(od.get("rarity", "common"), 30))
 
     ore_name = _rand.choices(pool_names, weights=pool_weights, k=1)[0]
     amount = _rand.choices([1, 2, 3], weights=[60, 30, 10], k=1)[0]
-
     for _ in range(amount):
         player["inventory"].append(ore_name)
 
     ore_data = GAME_DATA["items"].get(ore_name, {})
     rarity = ore_data.get("rarity", "common") if isinstance(ore_data, dict) else "common"
-    _rarity_colors = {
-        "junk": "var(--text-dim)",
-        "common": "var(--text-light)",
-        "uncommon": "var(--green-bright)",
-        "rare": "var(--mana-bright)",
+
+    # ── Mining XP & level-up ─────────────────────────────────────────────────
+    xp_gain = _MINING_XP_PER_RARITY.get(rarity, 10) * amount
+    old_level = _get_mining_level(player)
+    player["mining_xp"] = player.get("mining_xp", 0) + xp_gain
+    new_level = _get_mining_level(player)
+
+    _rc = {
+        "junk": "var(--text-dim)", "common": "var(--text-light)",
+        "uncommon": "var(--green-bright)", "rare": "var(--mana-bright)",
         "legendary": "var(--gold)",
     }
-    color = _rarity_colors.get(rarity, "var(--text-light)")
+    color = _rc.get(rarity, "var(--text-light)")
     qty_str = f" &times;{amount}" if amount > 1 else ""
-    add_message(f"&#9935; You mined {ore_name}{qty_str}!", color)
+    add_message(f"&#9935; You mined {ore_name}{qty_str}! (+{xp_gain} Mining XP)", color)
+
+    if new_level > old_level:
+        add_message(
+            f"&#9935; Mining Level Up! You are now Mining Level {new_level}!",
+            "var(--gold)",
+        )
 
     area_name = area.get("name", area_key.replace("_", " ").title())
     _set_activity(player, f"mining in {area_name}")

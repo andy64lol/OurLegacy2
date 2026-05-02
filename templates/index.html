@@ -40,7 +40,7 @@
                 <div class="mainmenu-splash">{{ splash_text }}</div>
                 {% endif %}
             </div>
-            <div class="mainmenu-version">v2.7.1 &mdash; Hai World</div>
+            <div class="mainmenu-version">v2.7.2 &mdash; Mines and Ores</div>
         </div>
 
         <nav class="mainmenu-nav">
@@ -1288,31 +1288,76 @@
         <!-- ── Mines ── -->
         {% if mine_data %}
         <div class="tab-content" id="tab-mining">
-            <div class="panel" style="margin-bottom:14px;">
-                <div class="panel-title">&#9935; Mine</div>
+
+            <!-- Mining Level Card -->
+            <div class="panel" style="margin-bottom:10px;">
+                <div class="panel-title">&#9935; Mining</div>
                 <div class="panel-body">
-                    <p class="panel-note">Strike the earth for ores and minerals. Each attempt advances time. Higher STR improves your success rate.</p>
-                    <div class="mine-action-row">
-                        <form method="post" action="/action/mine">
-                            <button type="submit" class="btn btn-primary mine-btn">&#9935; Mine</button>
-                        </form>
-                        <span class="mine-str-hint">STR bonus: +{{ (player.attributes.str or 0) * 0.5 | round(1) }}%</span>
-                    </div>
-                    <div style="margin-top:18px;">
-                        <div class="mine-section-label">Known Ore Deposits</div>
-                        <div class="mine-ore-list">
-                            {% for ore in mine_data.pool %}
-                            <div class="mine-ore-entry">
-                                <span class="mine-ore-name rarity-{{ ore.rarity }}">{{ ore.name }}</span>
-                                <span class="mine-ore-badge rarity-badge-{{ ore.rarity }}">{{ ore.rarity }}</span>
-                                <span class="mine-ore-value">{{ ore.price }}g</span>
-                                <span class="mine-ore-desc">{{ ore.description }}</span>
+                    <div class="mine-level-row">
+                        <div class="mine-level-badge">Lv.{{ mine_data.mining_level }}</div>
+                        <div class="mine-level-info">
+                            <div class="mine-level-label">Mining Level</div>
+                            {% if mine_data.mining_level < 25 %}
+                            <div class="mine-xp-bar-wrap">
+                                <div class="mine-xp-bar-fill" style="width:{{ mine_data.xp_pct }}%;"></div>
                             </div>
-                            {% endfor %}
+                            <div class="mine-xp-text">{{ mine_data.xp_progress }} / {{ mine_data.xp_needed }} XP to next level</div>
+                            {% else %}
+                            <div class="mine-xp-text" style="color:var(--gold);">Max Level</div>
+                            {% endif %}
                         </div>
+                        <div class="mine-pickaxe-col">
+                            {% if mine_data.has_pickaxe %}
+                            <span class="mine-pickaxe-label">&#9935; {{ mine_data.best_pickaxe }}</span>
+                            {% else %}
+                            <span class="mine-pickaxe-label mine-no-pickaxe">No pickaxe</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if not mine_data.has_pickaxe %}
+                    <div class="mine-no-pick-notice">
+                        You need a pickaxe to mine. Buy a <strong>Wooden Pickaxe</strong> from any General Store for <strong>20g</strong>.
+                    </div>
+                    {% endif %}
+
+                    <div class="mine-action-row" style="margin-top:12px;">
+                        <form method="post" action="/action/mine">
+                            <button type="submit" class="btn btn-primary mine-btn"
+                                {% if not mine_data.has_pickaxe %}disabled title="Buy a pickaxe first"{% endif %}>
+                                &#9935; Mine
+                            </button>
+                        </form>
+                        <span class="mine-str-hint">STR {{ player.attributes.str or 0 }} &rarr; +{{ ((player.attributes.str or 0) * 0.5) | round(1) }}% success</span>
                     </div>
                 </div>
             </div>
+
+            <!-- Ore Deposits -->
+            <div class="panel">
+                <div class="panel-title">Ore Deposits</div>
+                <div class="panel-body" style="padding-bottom:10px;">
+                    <div class="mine-ore-list">
+                        {% for ore in mine_data.pool %}
+                        <div class="mine-ore-entry {% if not ore.accessible %}mine-ore-locked{% endif %}">
+                            <span class="mine-ore-icon">{% if ore.accessible %}&#9652;{% else %}&#128274;{% endif %}</span>
+                            <span class="mine-ore-name rarity-{{ ore.rarity }}">{{ ore.name }}</span>
+                            <span class="mine-ore-badge rarity-badge-{{ ore.rarity }}">{{ ore.rarity }}</span>
+                            <span class="mine-ore-value">{{ ore.price }}g</span>
+                            {% if ore.blocked_by %}
+                            <span class="mine-ore-locked-tag">{{ ore.blocked_by }}</span>
+                            {% else %}
+                            <span class="mine-ore-desc">{{ (ore.description or '')[:55] }}{% if (ore.description or '')|length > 55 %}…{% endif %}</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div style="margin-top:10px;font-size:11px;color:var(--text-dim);">
+                        Pickaxes &amp; smelting recipes available in the <strong>Crafting</strong> tab.
+                    </div>
+                </div>
+            </div>
+
         </div>
         {% endif %}
 

@@ -6,7 +6,9 @@
     "Elixirs",
     "Enchantments",
     "Utility",
-    "Consumables"
+    "Consumables",
+    "Smelting",
+    "Smithing"
   ],
   "recipes": {
     "health_potion_basic": {
@@ -805,6 +807,128 @@
       "skill_requirement": 7,
       "craft_time": 4,
       "rarity": "rare"
+    },
+    "smelt_copper_bar": {
+      "name": "Smelt Copper Bar",
+      "description": "Refine copper ore into a workable ingot. Requires coal as fuel.",
+      "category": "Smelting",
+      "output": {
+        "Copper Bar": 1
+      },
+      "materials": {
+        "Copper Ore": 3,
+        "Coal": 1
+      },
+      "skill_requirement": 1,
+      "craft_time": 1,
+      "rarity": "common"
+    },
+    "smelt_iron_bar": {
+      "name": "Smelt Iron Bar",
+      "description": "Forge raw iron ore into a solid ingot using coal as fuel.",
+      "category": "Smelting",
+      "output": {
+        "Iron Bar": 1
+      },
+      "materials": {
+        "Iron Ore": 3,
+        "Coal": 1
+      },
+      "skill_requirement": 1,
+      "craft_time": 1,
+      "rarity": "common"
+    },
+    "smelt_silver_bar": {
+      "name": "Smelt Silver Bar",
+      "description": "Melt down silver ore into a refined ingot.",
+      "category": "Smelting",
+      "output": {
+        "Silver Bar": 1
+      },
+      "materials": {
+        "Silver Ore": 3,
+        "Coal": 1
+      },
+      "skill_requirement": 3,
+      "craft_time": 1,
+      "rarity": "uncommon"
+    },
+    "smelt_gold_bar": {
+      "name": "Smelt Gold Bar",
+      "description": "Gold demands intense heat — two coals to yield one bar.",
+      "category": "Smelting",
+      "output": {
+        "Gold Bar": 1
+      },
+      "materials": {
+        "Gold Ore": 2,
+        "Coal": 2
+      },
+      "skill_requirement": 5,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "smelt_mithril_bar": {
+      "name": "Smelt Mithril Bar",
+      "description": "Mithril resists ordinary heat. Heavy coal use required.",
+      "category": "Smelting",
+      "output": {
+        "Mithril Bar": 1
+      },
+      "materials": {
+        "Mithril Ore": 2,
+        "Coal": 3
+      },
+      "skill_requirement": 10,
+      "craft_time": 3,
+      "rarity": "rare"
+    },
+    "craft_iron_pickaxe": {
+      "name": "Forge Iron Pickaxe",
+      "description": "Hammer iron bars into a sturdy mining pick. Unlocks uncommon ore veins.",
+      "category": "Smithing",
+      "output": {
+        "Iron Pickaxe": 1
+      },
+      "materials": {
+        "Iron Bar": 3
+      },
+      "skill_requirement": 5,
+      "mining_level_requirement": 3,
+      "craft_time": 2,
+      "rarity": "uncommon"
+    },
+    "craft_steel_pickaxe": {
+      "name": "Forge Steel Pickaxe",
+      "description": "Iron reinforced with darkstone. Breaks through rare ore deposits.",
+      "category": "Smithing",
+      "output": {
+        "Steel Pickaxe": 1
+      },
+      "materials": {
+        "Iron Bar": 4,
+        "Darkstone": 2
+      },
+      "skill_requirement": 10,
+      "mining_level_requirement": 7,
+      "craft_time": 3,
+      "rarity": "rare"
+    },
+    "craft_mithril_pickaxe": {
+      "name": "Forge Mithril Pickaxe",
+      "description": "A masterwork mithril pick imbued with sunstone energy. Can mine legendary veins.",
+      "category": "Smithing",
+      "output": {
+        "Mithril Pickaxe": 1
+      },
+      "materials": {
+        "Mithril Bar": 3,
+        "Sunstone Crystal": 1
+      },
+      "skill_requirement": 15,
+      "mining_level_requirement": 12,
+      "craft_time": 5,
+      "rarity": "legendary"
     }
   },
   "material_categories": {
@@ -812,7 +936,20 @@
       "Iron Ore",
       "Coal",
       "Steel Ingot",
-      "Gold Nugget"
+      "Gold Nugget",
+      "Copper Ore",
+      "Silver Ore",
+      "Gold Ore",
+      "Darkstone",
+      "Mithril Ore",
+      "Sunstone Crystal",
+      "Adamantine Ore",
+      "Shadowite Crystal",
+      "Copper Bar",
+      "Iron Bar",
+      "Silver Bar",
+      "Gold Bar",
+      "Mithril Bar"
     ],
     "herbs": [
       "Herb",

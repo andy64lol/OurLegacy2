@@ -44,6 +44,7 @@ def get_recipes(crafting_data: Dict[str, Any],
 def check_recipe_craftable(player: Dict[str, Any],
                            recipe: Dict[str, Any]) -> Dict[str, Any]:
     """Check if player can craft a recipe. Returns {'ok': bool, 'missing': list}."""
+    import math as _math
     level = player.get('level', 1)
     req = recipe.get('skill_requirement', 1)
     if level < req:
@@ -52,6 +53,17 @@ def check_recipe_craftable(player: Dict[str, Any],
             'missing': [],
             'reason': f'Level {req} required (you are level {level}).'
         }
+
+    mining_req = recipe.get('mining_level_requirement', 0)
+    if mining_req > 0:
+        mining_xp = max(0, player.get('mining_xp', 0))
+        mining_level = min(25, int(_math.sqrt(mining_xp / 50)) + 1)
+        if mining_level < mining_req:
+            return {
+                'ok': False,
+                'missing': [],
+                'reason': f'Mining Level {mining_req} required (you are Mining Level {mining_level}).'
+            }
 
     inventory = player.get('inventory', [])
     missing = []
