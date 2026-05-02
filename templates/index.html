@@ -64,6 +64,9 @@
                 Settings
             </button>
         </nav>
+        {% if online_count is defined and online_count %}
+        <div class="mainmenu-online-count">&#9679; {{ online_count }} adventurer{{ 's' if online_count != 1 else '' }} online</div>
+        {% endif %}
         <div id="save-status" class="save-notice" style="display:none;text-align:center;margin-top:8px;"></div>
     </div>
 </div>
@@ -773,6 +776,35 @@
             </nav>
         </div><!-- end .tab-nav-wrap -->
 
+        <!-- ── Announcement Bar ── -->
+        <div id="announce-bar" class="announce-bar" style="display:none;">
+            <span class="announce-bar-icon">&#9733;</span>
+            <span class="announce-bar-text" id="announce-bar-text"></span>
+            <span id="announce-bar-ts" style="font-size:11px;color:var(--text-dim);flex-shrink:0;"></span>
+            <button class="announce-bar-close" onclick="document.getElementById('announce-bar').style.display='none';">&times;</button>
+        </div>
+        <script>
+        (function(){
+            var _lastAnnounceTs = null;
+            function loadAnnouncements() {
+                fetch('/api/announcements').then(function(r){ return r.json(); }).then(function(data){
+                    var bar = document.getElementById('announce-bar');
+                    var txt = document.getElementById('announce-bar-text');
+                    var ts = document.getElementById('announce-bar-ts');
+                    if (!bar || !data.announcements || !data.announcements.length) return;
+                    var latest = data.announcements[data.announcements.length - 1];
+                    if (latest.ts === _lastAnnounceTs) return;
+                    _lastAnnounceTs = latest.ts;
+                    txt.textContent = latest.text;
+                    ts.textContent = latest.ts;
+                    bar.style.display = 'flex';
+                }).catch(function(){});
+            }
+            loadAnnouncements();
+            setInterval(loadAnnouncements, 30000);
+        })();
+        </script>
+
         <!-- ── Explore ── -->
         <div class="tab-content active" id="tab-explore">
             <div class="panel" style="margin-bottom:14px;">
@@ -918,8 +950,10 @@
                         }
                         panel.style.display = '';
                         var html = '';
-                        data.players.forEach(function (p, i) {
-                            var border = i < data.players.length - 1
+                        var shown = data.players.slice(0, 5);
+                        var extra = data.players.length - shown.length;
+                        shown.forEach(function (p, i) {
+                            var border = (i < shown.length - 1 || extra > 0)
                                 ? 'border-bottom:1px solid rgba(255,255,255,0.05);'
                                 : '';
                             html += '<div style="padding:8px 0;' + border + 'line-height:1.55;">'
@@ -929,6 +963,9 @@
                                 + '<span style="color:var(--text-dim);font-size:11px;"> &mdash; ' + _esc(p.when) + '</span>'
                                 + '</div>';
                         });
+                        if (extra > 0) {
+                            html += '<div style="padding:6px 0;font-size:12px;color:var(--text-dim);font-style:italic;">...and ' + extra + ' more adventurer' + (extra > 1 ? 's' : '') + ' nearby</div>';
+                        }
                         body.innerHTML = html;
                     }).catch(function () { });
                 }

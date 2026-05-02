@@ -565,18 +565,73 @@ body.ol2-bg-4 .welcome-screen {
     position: absolute;
     bottom: 14px;
     right: -4px;
-    transform: rotate(10deg);
+    transform: rotate(-10deg);
     font-size: 11px;
     color: var(--gold-bright);
     font-style: italic;
-    opacity: 0.92;
+    opacity: 0.88;
     letter-spacing: 0.03em;
-    background: rgba(0, 0, 0, 0.55);
-    padding: 2px 9px;
-    border: 1px solid var(--gold-dim);
     white-space: nowrap;
     pointer-events: none;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 12px rgba(200,160,40,0.4);
+}
+
+/* ─── Announcement Bar ───────────────────────────────────── */
+.announce-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 16px;
+    background: linear-gradient(90deg, rgba(70,36,10,0.95), rgba(46,24,6,0.95));
+    border-bottom: 2px solid var(--wood-mid);
+    border-top: 1px solid var(--wood-dark);
+    font-size: 13px;
+    color: var(--gold-bright);
+    letter-spacing: 0.04em;
+    animation: announcePulse 4s ease-in-out infinite alternate;
+    position: relative;
+    z-index: 10;
+}
+
+@keyframes announcePulse {
+    from { border-color: var(--wood-mid); }
+    to   { border-color: var(--wood-bright); }
+}
+
+.announce-bar-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    color: var(--gold);
+}
+
+.announce-bar-text {
+    flex: 1;
+}
+
+.announce-bar-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 2px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.12s;
+}
+
+.announce-bar-close:hover {
+    color: var(--text-bright);
+}
+
+/* ─── Main menu online badge ─────────────────────────────── */
+.mainmenu-online-count {
+    font-size: 11px;
+    color: var(--green-bright);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 6px;
+    opacity: 0.85;
 }
 
 .mainmenu-nav {

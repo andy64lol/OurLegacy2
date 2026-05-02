@@ -196,6 +196,7 @@ def _load_session_for_socket(environ: dict) -> dict:
 
 # Online users: {sid: username}  (in-memory, single worker)
 _chat_online: dict = {}
+_server_announcements: list = []  # [(timestamp_str, text), ...]  max 5
 _chat_cooldowns: dict = {}   # {username: last_sent_timestamp}
 _chat_recent_msgs: dict = {} # {username: [timestamps...]} spam window
 _chat_last_content: dict = {} # {username: last_message_text} repeat guard
@@ -366,6 +367,11 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
         if not text:
             await sio.emit("chat_error", {"message": "Usage: /announce <text>"}, to=sid)
             return True
+        import datetime as _dt
+        ts = _dt.datetime.utcnow().strftime("%H:%M UTC")
+        _server_announcements.append((ts, text))
+        if len(_server_announcements) > 5:
+            _server_announcements.pop(0)
         await _broadcast_system(f"\u2605 ANNOUNCEMENT: {text}")
         return True
 
@@ -2266,27 +2272,27 @@ def boss_take_turn(enemy, player, player_effects, log):
 # ─── Companion combat helpers ─────────────────────────────────────────────────
 
 _COMPANION_RANK_HP = {
-    "common": 1200,
-    "uncommon": 2200,
-    "rare": 3500,
-    "epic": 5500,
-    "legendary": 9000,
+    "common": 4000,
+    "uncommon": 7500,
+    "rare": 13000,
+    "epic": 20000,
+    "legendary": 32000,
 }
 
 _COMPANION_RANK_ATK_CAP = {
-    "common": 320,
-    "uncommon": 520,
-    "rare": 780,
-    "epic": 1100,
-    "legendary": 1600,
+    "common": 800,
+    "uncommon": 1400,
+    "rare": 2200,
+    "epic": 3200,
+    "legendary": 5000,
 }
 
 _COMPANION_RANK_DEF_CAP = {
-    "common": 120,
-    "uncommon": 200,
-    "rare": 300,
-    "epic": 440,
-    "legendary": 620,
+    "common": 280,
+    "uncommon": 480,
+    "rare": 720,
+    "epic": 1050,
+    "legendary": 1600,
 }
 
 
@@ -2301,8 +2307,8 @@ def _get_companion_combat_stats(comp_entry):
     atk_bonus = comp_data.get("attack_bonus", 0)
     def_bonus = comp_data.get("defense_bonus", 0)
     crit_bonus = comp_data.get("crit_damage_bonus", 0)
-    base_atk = atk_bonus * 18 + 120 + crit_bonus // 3
-    base_def = def_bonus * 14 + 45
+    base_atk = atk_bonus * 40 + 500 + crit_bonus // 2
+    base_def = def_bonus * 28 + 180
     return {
         "id": comp_id,
         "name": comp_entry.get("name", comp_data.get("name", "Companion")),
@@ -2310,8 +2316,8 @@ def _get_companion_combat_stats(comp_entry):
         "max_hp": comp_entry.get("max_hp", max_hp),
         "attack": min(atk_cap, base_atk),
         "defense": min(def_cap, base_def),
-        "action_chance": comp_data.get("action_chance", 0.65),
-        "crit_chance": min(0.50, comp_data.get("crit_chance", 0) / 100.0),
+        "action_chance": min(0.95, comp_data.get("action_chance", 0.82)),
+        "crit_chance": min(0.60, comp_data.get("crit_chance", 0) / 100.0 + 0.12),
         "fallen": comp_entry.get("fallen", False),
     }
 
@@ -2336,9 +2342,9 @@ def _companion_take_action(battle_companions, enemy, log):
         if random.random() > comp.get("action_chance", 0.40):
             continue
         dmg = max(1, comp["attack"] - enemy["defense"] + dice.between(-3, 6))
-        comp_crit_rate = 0.15 + comp.get("crit_chance", 0.0)
+        comp_crit_rate = 0.20 + comp.get("crit_chance", 0.0)
         if random.random() < comp_crit_rate:
-            dmg = int(dmg * 2.5)
+            dmg = int(dmg * 3.5)
             log.append(
                 f"[{comp['name']} lands a critical blow on {enemy['name']} for {dmg}!]"
             )
@@ -2961,6 +2967,13 @@ def health_ping():
     return _jsonify({"status": "ok"}), 200
 
 
+@app.route("/api/announcements")
+def api_announcements():
+    """Return the latest server announcements for the in-game banner."""
+    from flask import jsonify as _jsonify
+    return _jsonify({"announcements": [{"ts": ts, "text": t} for ts, t in _server_announcements]}), 200
+
+
 @app.route("/chat")
 def chat_page():
     username = session.get("online_username")
@@ -2992,6 +3005,7 @@ def index():
         splash_text=splash,
         online_user=online_user,
         cloud_meta=cloud_meta,
+        online_count=len(_active_sessions),
     )
 
 
