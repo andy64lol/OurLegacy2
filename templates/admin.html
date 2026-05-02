@@ -279,36 +279,55 @@ body {
 
 <script>
 const COMMANDS = [
-    { name: "ban <user>",        desc: "Ban a player (optional reason after username)" },
-    { name: "unban <user>",      desc: "Lift a ban" },
-    { name: "kick <user>",       desc: "Force-logout a player immediately" },
-    { name: "mute <user>",       desc: "Mute permanently or: mute <user> <mins> [reason]" },
-    { name: "unmute <user>",     desc: "Lift a mute" },
-    { name: "warn <user>",       desc: "Warn a player (optional reason)" },
-    { name: "clearwarn <user>",  desc: "Clear all warnings for a player" },
-    { name: "addmod <user>",     desc: "Promote a player to moderator" },
-    { name: "removemod <user>",  desc: "Demote a moderator" },
-    { name: "listbans",          desc: "List all banned players" },
-    { name: "listmutes",         desc: "List all muted players" },
-    { name: "listmods",          desc: "List all moderators" },
-    { name: "online",            desc: "Show online players" },
-    { name: "setowner <user>",   desc: "Transfer ownership (IRREVERSIBLE)" },
-    { name: "refresh",           desc: "Refresh sidebar data" },
-    { name: "clear",             desc: "Clear the console output" },
-    { name: "help",              desc: "Show this command list" },
+    { name: "── SERVER ──",           desc: "", header: true },
+    { name: "ban <user>",             desc: "Ban a player (optional reason after username)" },
+    { name: "unban <user>",           desc: "Lift a ban" },
+    { name: "kick <user>",            desc: "Force-logout a player immediately" },
+    { name: "mute <user>",            desc: "Mute permanently or: mute <user> <mins> [reason]" },
+    { name: "unmute <user>",          desc: "Lift a mute" },
+    { name: "warn <user>",            desc: "Warn a player (optional reason)" },
+    { name: "clearwarn <user>",       desc: "Clear all warnings for a player" },
+    { name: "addmod <user>",          desc: "Promote a player to moderator" },
+    { name: "removemod <user>",       desc: "Demote a moderator" },
+    { name: "listbans",               desc: "List all banned players" },
+    { name: "listmutes",              desc: "List all muted players" },
+    { name: "listmods",               desc: "List all moderators" },
+    { name: "online",                 desc: "Show online players" },
+    { name: "setowner <user>",        desc: "Transfer ownership (IRREVERSIBLE)" },
+    { name: "── CHARACTER ──",        desc: "", header: true },
+    { name: "stats",                  desc: "Show your current character stats" },
+    { name: "inventory",              desc: "List your inventory" },
+    { name: "heal",                   desc: "Fully restore your HP and MP" },
+    { name: "give gold <n>",          desc: "Add gold to your character" },
+    { name: "give xp <n>",            desc: "Add XP (triggers level-ups)" },
+    { name: "give item <name> [qty]", desc: "Add an item to your inventory" },
+    { name: "give mxp <n>",          desc: "Add mining XP to your character" },
+    { name: "set level <n>",          desc: "Set your character level (1–999)" },
+    { name: "set stat <name> <n>",    desc: "Set a stat: hp max_hp mp max_mp attack defense speed gold" },
+    { name: "set mining <n>",         desc: "Set your mining level (1–25)" },
+    { name: "remove item <name> [n]", desc: "Remove item(s) from inventory" },
+    { name: "── CONSOLE ──",          desc: "", header: true },
+    { name: "refresh",                desc: "Refresh sidebar data" },
+    { name: "clear",                  desc: "Clear the console output" },
+    { name: "help",                   desc: "Show this command list" },
 ];
 
 // Render command reference in sidebar
 const cmdRef = document.getElementById('cmd-ref');
 COMMANDS.forEach(c => {
     const el = document.createElement('div');
-    el.className = 'adm-cmd-item';
-    el.innerHTML = `<span class="adm-cmd-name">${c.name}</span><span class="adm-cmd-desc">${c.desc}</span>`;
-    el.addEventListener('click', () => {
-        const base = c.name.split(' ')[0];
-        document.getElementById('cmd-input').value = base + ' ';
-        document.getElementById('cmd-input').focus();
-    });
+    if (c.header) {
+        el.style.cssText = 'font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);padding:6px 0 2px;border-top:1px solid var(--border);margin-top:4px;';
+        el.textContent = c.name;
+    } else {
+        el.className = 'adm-cmd-item';
+        el.innerHTML = `<span class="adm-cmd-name">${c.name}</span><span class="adm-cmd-desc">${c.desc}</span>`;
+        el.addEventListener('click', () => {
+            const base = c.name.split(' ')[0];
+            document.getElementById('cmd-input').value = base + ' ';
+            document.getElementById('cmd-input').focus();
+        });
+    }
     cmdRef.appendChild(el);
 });
 
@@ -548,6 +567,107 @@ async function runCommand() {
                     }
                 } else {
                     print('Nothing to confirm.', 'dim');
+                }
+                break;
+            }
+            // ── Character commands ──────────────────────────────────────
+            case 'stats': {
+                const d = await api('GET', '/api/admin/game/stats');
+                if (!d.ok) { print(d.message, 'err'); break; }
+                print('──── Character Stats ────', 'head');
+                print(`  Name     : ${d.name}  (${d.class})`, 'info');
+                print(`  Level    : ${d.level}  Rank: ${d.rank}`, 'info');
+                print(`  EXP      : ${d.experience} / ${d.experience_to_next}`, 'dim');
+                print(`  HP       : ${d.hp} / ${d.max_hp}`, 'info');
+                print(`  MP       : ${d.mp} / ${d.max_mp}`, 'info');
+                print(`  Attack   : ${d.attack}    Defense: ${d.defense}    Speed: ${d.speed}`, 'dim');
+                print(`  Gold     : ${d.gold}g`, 'warn');
+                print(`  Mining   : Lv ${d.mining_level}  (${d.mining_xp} XP)`, 'dim');
+                print(`  Inventory: ${d.inventory_count} items`, 'dim');
+                break;
+            }
+            case 'inventory': {
+                const d = await api('GET', '/api/admin/game/inventory');
+                if (!d.ok) { print(d.message, 'err'); break; }
+                print(`──── Inventory (Gold: ${d.gold}g) ────`, 'head');
+                const entries = Object.entries(d.inventory);
+                if (!entries.length) { print('  (empty)', 'dim'); break; }
+                entries.sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name, qty]) => {
+                    print(`  ${qty > 1 ? qty + 'x ' : '   '}${name}`, 'dim');
+                });
+                break;
+            }
+            case 'heal': {
+                const r = await api('POST', '/api/admin/game/heal');
+                print(r.message, r.ok ? 'ok' : 'err');
+                break;
+            }
+            case 'give': {
+                const sub = (parts[1] || '').toLowerCase();
+                if (sub === 'gold') {
+                    const n = parseInt(parts[2]);
+                    if (!n || n <= 0) { print('Usage: give gold <amount>', 'warn'); break; }
+                    const r = await api('POST', '/api/admin/game/give', { kind: 'gold', amount: n });
+                    print(r.message, r.ok ? 'ok' : 'err');
+                } else if (sub === 'xp') {
+                    const n = parseInt(parts[2]);
+                    if (!n || n <= 0) { print('Usage: give xp <amount>', 'warn'); break; }
+                    const r = await api('POST', '/api/admin/game/give', { kind: 'xp', amount: n });
+                    print(r.message, r.ok ? 'ok' : 'err');
+                } else if (sub === 'mxp') {
+                    const n = parseInt(parts[2]);
+                    if (!n || n <= 0) { print('Usage: give mxp <amount>', 'warn'); break; }
+                    const r = await api('POST', '/api/admin/game/give', { kind: 'mining_xp', amount: n });
+                    print(r.message, r.ok ? 'ok' : 'err');
+                } else if (sub === 'item') {
+                    const lastPart = parts[parts.length - 1];
+                    const hasQty = /^\d+$/.test(lastPart) && parts.length > 3;
+                    const qty = hasQty ? parseInt(lastPart) : 1;
+                    const nameParts = hasQty ? parts.slice(2, -1) : parts.slice(2);
+                    const itemName = nameParts.join(' ');
+                    if (!itemName) { print('Usage: give item <item name> [qty]', 'warn'); break; }
+                    const r = await api('POST', '/api/admin/game/give', { kind: 'item', item: itemName, qty });
+                    print(r.message, r.ok ? 'ok' : 'err');
+                } else {
+                    print('Usage: give gold|xp|mxp|item <value>', 'warn');
+                }
+                break;
+            }
+            case 'set': {
+                const sub = (parts[1] || '').toLowerCase();
+                if (sub === 'level') {
+                    const n = parseInt(parts[2]);
+                    if (!n || n < 1) { print('Usage: set level <1-999>', 'warn'); break; }
+                    const r = await api('POST', '/api/admin/game/set', { kind: 'level', value: n });
+                    print(r.message, r.ok ? 'ok' : 'err');
+                } else if (sub === 'stat') {
+                    const stat = parts[2]; const val = parseInt(parts[3]);
+                    if (!stat || isNaN(val)) { print('Usage: set stat <name> <value>', 'warn'); break; }
+                    const r = await api('POST', '/api/admin/game/set', { kind: 'stat', stat, value: val });
+                    print(r.message, r.ok ? 'ok' : 'err');
+                } else if (sub === 'mining') {
+                    const n = parseInt(parts[2]);
+                    if (!n || n < 1 || n > 25) { print('Usage: set mining <1-25>', 'warn'); break; }
+                    const r = await api('POST', '/api/admin/game/set', { kind: 'mining_level', value: n });
+                    print(r.message, r.ok ? 'ok' : 'err');
+                } else {
+                    print('Usage: set level|stat|mining <value>', 'warn');
+                }
+                break;
+            }
+            case 'remove': {
+                const sub = (parts[1] || '').toLowerCase();
+                if (sub === 'item') {
+                    const lastPart = parts[parts.length - 1];
+                    const hasQty = /^\d+$/.test(lastPart) && parts.length > 3;
+                    const qty = hasQty ? parseInt(lastPart) : 1;
+                    const nameParts = hasQty ? parts.slice(2, -1) : parts.slice(2);
+                    const itemName = nameParts.join(' ');
+                    if (!itemName) { print('Usage: remove item <name> [qty]', 'warn'); break; }
+                    const r = await api('POST', '/api/admin/game/remove', { item: itemName, qty });
+                    print(r.message, r.ok ? 'ok' : 'err');
+                } else {
+                    print('Usage: remove item <name> [qty]', 'warn');
                 }
                 break;
             }

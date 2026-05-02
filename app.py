@@ -8260,6 +8260,192 @@ def api_admin_setowner():
     return jsonify({"ok": True, "message": f"Ownership transferred to {target}."})
 
 
+# ─── Game Terminal API (owner-only: operate on owner's own session) ───────────
+
+@app.route("/api/admin/game/stats", methods=["GET"])
+def api_game_stats():
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    player = session.get("player")
+    if not player:
+        return jsonify({"ok": False, "message": "No active character in session. Load a save first."})
+    return jsonify({
+        "ok": True,
+        "name": player.get("name", "?"),
+        "class": player.get("class", "?"),
+        "level": player.get("level", 1),
+        "rank": player.get("rank", "F"),
+        "experience": player.get("experience", 0),
+        "experience_to_next": player.get("experience_to_next", 100),
+        "hp": player.get("hp", 0),
+        "max_hp": player.get("max_hp", 0),
+        "mp": player.get("mp", 0),
+        "max_mp": player.get("max_mp", 0),
+        "attack": player.get("attack", 0),
+        "defense": player.get("defense", 0),
+        "speed": player.get("speed", 0),
+        "gold": player.get("gold", 0),
+        "mining_xp": player.get("mining_xp", 0),
+        "mining_level": _get_mining_level(player),
+        "inventory_count": len(player.get("inventory", [])),
+    })
+
+
+@app.route("/api/admin/game/give", methods=["POST"])
+def api_game_give():
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    player = session.get("player")
+    if not player:
+        return jsonify({"ok": False, "message": "No active character in session. Load a save first."})
+    body = request.get_json(force=True, silent=True) or {}
+    kind = body.get("kind", "").lower()
+    if kind == "gold":
+        amount = int(body.get("amount", 0))
+        if amount <= 0:
+            return jsonify({"ok": False, "message": "Amount must be positive."})
+        player["gold"] = player.get("gold", 0) + amount
+        session.modified = True
+        return jsonify({"ok": True, "message": f"Gave {amount} gold. Total: {player['gold']}g."})
+    elif kind == "xp":
+        amount = int(body.get("amount", 0))
+        if amount <= 0:
+            return jsonify({"ok": False, "message": "Amount must be positive."})
+        leveled = gain_experience(player, amount)
+        session.modified = True
+        msg = f"Gave {amount} XP."
+        if leveled:
+            msg += f" Level up! Now level {player['level']}."
+        return jsonify({"ok": True, "message": msg})
+    elif kind == "item":
+        item_name = body.get("item", "").strip()
+        qty = max(1, int(body.get("qty", 1)))
+        all_items = GAME_DATA.get("items", {})
+        matched = next((k for k in all_items if k.lower() == item_name.lower()), None)
+        if not matched:
+            close = [k for k in all_items if item_name.lower() in k.lower()]
+            if close:
+                return jsonify({"ok": False, "message": f"Item not found. Did you mean: {', '.join(close[:5])}?"})
+            return jsonify({"ok": False, "message": f"Item '{item_name}' not found."})
+        inv = player.setdefault("inventory", [])
+        for _ in range(qty):
+            inv.append(matched)
+        session.modified = True
+        return jsonify({"ok": True, "message": f"Added {qty}x {matched} to inventory."})
+    elif kind == "mining_xp":
+        amount = int(body.get("amount", 0))
+        if amount <= 0:
+            return jsonify({"ok": False, "message": "Amount must be positive."})
+        player["mining_xp"] = player.get("mining_xp", 0) + amount
+        session.modified = True
+        return jsonify({"ok": True, "message": f"Gave {amount} mining XP. Mining level: {_get_mining_level(player)}."})
+    else:
+        return jsonify({"ok": False, "message": "kind must be: gold, xp, item, or mining_xp."})
+
+
+@app.route("/api/admin/game/set", methods=["POST"])
+def api_game_set():
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    player = session.get("player")
+    if not player:
+        return jsonify({"ok": False, "message": "No active character in session. Load a save first."})
+    body = request.get_json(force=True, silent=True) or {}
+    kind = body.get("kind", "").lower()
+    if kind == "level":
+        lvl = int(body.get("value", 1))
+        if lvl < 1 or lvl > 999:
+            return jsonify({"ok": False, "message": "Level must be 1–999."})
+        player["level"] = lvl
+        player["rank"] = get_rank(lvl)
+        player["experience"] = 0
+        player["experience_to_next"] = int(100 * (1.5 ** (lvl - 1)))
+        session.modified = True
+        return jsonify({"ok": True, "message": f"Level set to {lvl} (rank {player['rank']})."})
+    elif kind == "stat":
+        stat = body.get("stat", "").lower()
+        value = int(body.get("value", 0))
+        valid_stats = {"hp", "max_hp", "mp", "max_mp", "attack", "defense", "speed", "gold"}
+        if stat not in valid_stats:
+            return jsonify({"ok": False, "message": f"Stat must be one of: {', '.join(sorted(valid_stats))}."})
+        if value < 0:
+            return jsonify({"ok": False, "message": "Value cannot be negative."})
+        player[stat] = value
+        if stat == "max_hp":
+            player["hp"] = min(player["hp"], value)
+        if stat == "max_mp":
+            player["mp"] = min(player["mp"], value)
+        session.modified = True
+        return jsonify({"ok": True, "message": f"{stat} set to {value}."})
+    elif kind == "mining_level":
+        lvl = int(body.get("value", 1))
+        if lvl < 1 or lvl > 25:
+            return jsonify({"ok": False, "message": "Mining level must be 1–25."})
+        player["mining_xp"] = _mining_xp_for_level(lvl)
+        session.modified = True
+        return jsonify({"ok": True, "message": f"Mining level set to {lvl}."})
+    else:
+        return jsonify({"ok": False, "message": "kind must be: level, stat, or mining_level."})
+
+
+@app.route("/api/admin/game/heal", methods=["POST"])
+def api_game_heal():
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    player = session.get("player")
+    if not player:
+        return jsonify({"ok": False, "message": "No active character in session. Load a save first."})
+    player["hp"] = player.get("max_hp", 100)
+    player["mp"] = player.get("max_mp", 50)
+    session.modified = True
+    return jsonify({"ok": True, "message": f"Fully restored. HP: {player['hp']}/{player['max_hp']}  MP: {player['mp']}/{player['max_mp']}."})
+
+
+@app.route("/api/admin/game/remove", methods=["POST"])
+def api_game_remove():
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    player = session.get("player")
+    if not player:
+        return jsonify({"ok": False, "message": "No active character in session. Load a save first."})
+    body = request.get_json(force=True, silent=True) or {}
+    item_name = body.get("item", "").strip()
+    qty = max(1, int(body.get("qty", 1)))
+    inv = player.get("inventory", [])
+    matched = next((k for k in set(inv) if k.lower() == item_name.lower()), None)
+    if not matched:
+        return jsonify({"ok": False, "message": f"'{item_name}' not found in inventory."})
+    removed = 0
+    for _ in range(qty):
+        if matched in inv:
+            inv.remove(matched)
+            removed += 1
+        else:
+            break
+    session.modified = True
+    return jsonify({"ok": True, "message": f"Removed {removed}x {matched} from inventory."})
+
+
+@app.route("/api/admin/game/inventory", methods=["GET"])
+def api_game_inventory():
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    player = session.get("player")
+    if not player:
+        return jsonify({"ok": False, "message": "No active character in session. Load a save first."})
+    inv = player.get("inventory", [])
+    counts = {}
+    for item in inv:
+        counts[item] = counts.get(item, 0) + 1
+    return jsonify({"ok": True, "inventory": counts, "gold": player.get("gold", 0)})
+
+
 from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi
 
 
