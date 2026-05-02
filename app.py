@@ -2954,6 +2954,13 @@ def serve_game_asset(filename):
     return send_from_directory("data/assets", filename)
 
 
+@app.route("/ping")
+def health_ping():
+    """Lightweight health-check endpoint for Uptime Robot."""
+    from flask import jsonify as _jsonify
+    return _jsonify({"status": "ok"}), 200
+
+
 @app.route("/chat")
 def chat_page():
     username = session.get("online_username")

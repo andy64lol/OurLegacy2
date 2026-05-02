@@ -7,56 +7,56 @@
 
 /* ─── CSS Variables ──────────────────────────────────────── */
 :root {
-    /* Slate Gray */
-    --slate-darkest: #22222c;
-    --slate-dark: #32323e;
-    --slate-mid: #505062;
-    --slate-light: #727288;
-    --slate-bright: #9898b0;
+    /* Slate Gray — consolidated */
+    --slate-darkest: #1e1e26;
+    --slate-dark: #2e2e38;
+    --slate-mid: #484858;
+    --slate-light: #686878;
+    --slate-bright: #8888a0;
 
-    /* Wood Brown */
-    --wood-darkest: #28160a;
-    --wood-dark: #4c2810;
-    --wood-mid: #7c4c20;
-    --wood-light: #b06c30;
-    --wood-bright: #d88c48;
+    /* Wood Brown — consolidated */
+    --wood-darkest: #241408;
+    --wood-dark: #46240e;
+    --wood-mid: #70421c;
+    --wood-light: #a06030;
+    --wood-bright: #c47c40;
 
-    /* Gold accent */
-    --gold: #e8c460;
-    --gold-bright: #ffd870;
-    --gold-dim: #a88030;
+    /* Gold accent — slightly muted */
+    --gold: #d4b050;
+    --gold-bright: #e8c860;
+    --gold-dim: #907020;
 
-    /* Text */
-    --text-light: #ecd8b0;
-    --text-bright: #fff8e8;
-    --text-dim: #908878;
-    --text-dark: #2c2010;
+    /* Text — slightly warmer */
+    --text-light: #ddc89e;
+    --text-bright: #f0e8d8;
+    --text-dim: #847868;
+    --text-dark: #281c0e;
 
-    /* Status */
-    --red: #e05858;
-    --red-dark: #903030;
-    --green: #608858;
-    --green-bright: #90d068;
-    --mana-blue: #4888cc;
-    --mana-bright: #68a8f0;
-    --exp-purple: #9868c8;
+    /* Status — muted slightly */
+    --red: #cc4e4e;
+    --red-dark: #7a2828;
+    --green: #547848;
+    --green-bright: #7abc58;
+    --mana-blue: #3c78b8;
+    --mana-bright: #5898dc;
+    --exp-purple: #8858b4;
 
     /* UI */
-    --border: #584838;
-    --border-bright: #785848;
-    --bg-main: #1c1810;
-    --bg-panel: #282420;
-    --bg-panel-dark: #201c18;
+    --border: #4e3e2e;
+    --border-bright: #6e4e38;
+    --bg-main: #18140c;
+    --bg-panel: #24201a;
+    --bg-panel-dark: #1c1814;
 
     /* Aliases for legacy usage */
-    --panel-bg: #282420;
+    --panel-bg: #24201a;
 
-    /* Rarity */
-    --rarity-common: #a0a0a0;
-    --rarity-uncommon: #60c060;
-    --rarity-rare: #4898d8;
-    --rarity-epic: #c050e0;
-    --rarity-legendary: #f0d040;
+    /* Rarity — kept distinct but slightly muted */
+    --rarity-common: #909090;
+    --rarity-uncommon: #50a850;
+    --rarity-rare: #3888c8;
+    --rarity-epic: #a840cc;
+    --rarity-legendary: #d8bc30;
 }
 
 /* ─── Reset ──────────────────────────────────────────────── */
@@ -534,12 +534,12 @@ body.ol2-bg-4 .welcome-screen {
 }
 
 .mainmenu-logo-area {
-    margin-bottom: 48px;
+    margin-bottom: 32px;
 }
 
 .mainmenu-logo {
-    max-width: 400px;
-    width: 90%;
+    max-width: 580px;
+    width: 92%;
     image-rendering: pixelated;
     animation: mainmenu-glow 3s ease-in-out infinite alternate;
 }
@@ -568,9 +568,9 @@ body.ol2-bg-4 .welcome-screen {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
+    gap: 5px;
     width: 100%;
-    max-width: 310px;
+    max-width: 180px;
 }
 
 .mainmenu-account-badge {
@@ -587,19 +587,19 @@ body.ol2-bg-4 .welcome-screen {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 6px;
     width: 100%;
     aspect-ratio: 3 / 1;
-    padding: 0 28px 0.25em;
+    padding: 0 14px 0.2em;
     background-image: url('/game_assets/UI/button_silver/%5B1%5D%20Normal.png');
     background-size: 100% 100%;
     background-color: transparent;
     background-repeat: no-repeat;
     border: none;
     color: #2a1a0a;
-    font-size: 15px;
+    font-size: 11px;
     font-family: 'Tiny5', monospace;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     text-align: center;
     text-decoration: none;
@@ -824,7 +824,7 @@ body.ol2-bg-4 .welcome-screen {
     padding: 7px 10px;
     border: 2px solid var(--border);
     background: var(--slate-dark);
-    border-radius: 4px;
+    border-radius: 8px;
     transition: background 0.1s, border-color 0.1s;
     display: flex;
     flex-direction: column;
@@ -876,7 +876,7 @@ body.ol2-bg-4 .welcome-screen {
     padding: 10px 14px;
     border: 2px solid var(--border);
     background: var(--slate-dark);
-    border-radius: 4px;
+    border-radius: 8px;
     text-align: center;
     transition: background 0.1s, border-color 0.1s;
 }
@@ -931,7 +931,7 @@ body.ol2-bg-4 .welcome-screen {
     padding: 8px 10px;
     border: 2px solid var(--border);
     background: var(--slate-dark);
-    border-radius: 4px;
+    border-radius: 8px;
     text-align: center;
     transition: background 0.1s, border-color 0.1s;
 }
@@ -990,7 +990,7 @@ body.ol2-bg-4 .welcome-screen {
     height: 80px;
     border: 3px solid var(--wood-bright);
     background: linear-gradient(160deg, var(--slate-dark) 0%, var(--wood-darkest) 100%);
-    border-radius: 6px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1002,14 +1002,14 @@ body.ol2-bg-4 .welcome-screen {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 8px;
     display: block;
 }
 
 .wizard-bubble {
     background: var(--slate-dark);
     border: 2px solid var(--wood-mid);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 18px 22px;
     flex: 1;
     font-size: 18px;
@@ -1141,7 +1141,7 @@ body.ol2-bg-4 .welcome-screen {
     padding: 10px 12px;
     border: 2px solid var(--border);
     background: var(--slate-dark);
-    border-radius: 5px;
+    border-radius: 8px;
     text-align: center;
     transition: border-color 0.12s, background 0.12s;
     cursor: pointer;
@@ -1217,7 +1217,7 @@ body.ol2-bg-4 .welcome-screen {
     color: var(--gold);
     background: rgba(255, 180, 0, 0.1);
     border: 1px solid rgba(255, 180, 0, 0.3);
-    border-radius: 6px;
+    border-radius: 10px;
     padding: 7px 12px;
     margin-bottom: 10px;
     text-align: center;
@@ -1229,7 +1229,7 @@ body.ol2-bg-4 .welcome-screen {
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 2px 5px;
     margin-bottom: 4px;
     display: inline-block;
@@ -1263,7 +1263,7 @@ body.ol2-bg-4 .welcome-screen {
 .wiz-we-section {
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--border);
-    border-radius: 7px;
+    border-radius: 10px;
     padding: 10px 12px;
 }
 
@@ -1309,7 +1309,7 @@ body.ol2-bg-4 .welcome-screen {
     font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 2px 5px;
     flex-shrink: 0;
     margin-top: 2px;
@@ -1353,7 +1353,7 @@ body.ol2-bg-4 .welcome-screen {
 .wiz-summary {
     background: var(--slate-dark);
     border: 2px solid var(--gold-dim);
-    border-radius: 6px;
+    border-radius: 10px;
     padding: 14px 20px;
 }
 
@@ -1846,7 +1846,7 @@ body.ol2-bg-4 .main-content {
 .toast {
     background: rgba(28, 24, 16, 0.97);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 14px;
     padding: 13px 20px;
     font-size: 14px;
     color: var(--text-light);
@@ -2127,7 +2127,7 @@ body.page-fade-out {
     display: inline-block;
     font-size: 10px;
     padding: 1px 5px;
-    border-radius: 3px;
+    border-radius: 6px;
     border: 1px solid var(--gold-dim, #8a7030);
     color: var(--gold, #c9a84c);
     margin-left: 4px;
@@ -2214,7 +2214,7 @@ body.page-fade-out {
 
 .area-map-wrap {
     margin-bottom: 14px;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--border);
     background: rgba(0, 0, 0, 0.3);
@@ -2514,7 +2514,7 @@ body.page-fade-out {
 
 /* Spell sidebar uses single-column layout */
 .battle-spell-sidebar .btn-spell {
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 /* Pagination controls */
@@ -2593,7 +2593,7 @@ body.page-fade-out {
     background: linear-gradient(135deg, rgba(110, 0, 0, 0.55) 0%, rgba(30, 0, 0, 0.85) 100%);
     border: 1px solid rgba(255, 80, 80, 0.55);
     border-left: 4px solid var(--red);
-    border-radius: 10px;
+    border-radius: 14px;
     padding: 16px 20px;
     margin: 0 0 18px 0;
     box-shadow: 0 0 24px rgba(200, 40, 40, 0.25), inset 0 0 40px rgba(0, 0, 0, 0.4);
@@ -2681,7 +2681,7 @@ body.page-fade-out {
     height: 22px;
     background: linear-gradient(90deg, rgba(50, 0, 0, 0.9) 0%, rgba(20, 0, 0, 0.95) 100%);
     border: 2px solid rgba(200, 50, 50, 0.7);
-    border-radius: 5px;
+    border-radius: 8px;
     overflow: hidden;
     position: relative;
     animation: bossBarGlow 2s ease-in-out infinite;
@@ -2787,7 +2787,7 @@ body.page-fade-out {
     flex-wrap: wrap;
     background: rgba(0,0,0,0.25);
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 8px 12px;
     margin-bottom: 12px;
 }
@@ -2807,7 +2807,7 @@ body.page-fade-out {
     gap: 7px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 6px;
+    border-radius: 10px;
     padding: 5px 9px;
     min-width: 130px;
 }
@@ -2829,14 +2829,14 @@ body.page-fade-out {
     flex: 1;
     height: 6px;
     background: rgba(255,255,255,0.1);
-    border-radius: 3px;
+    border-radius: 6px;
     overflow: hidden;
     min-width: 40px;
 }
 
 .battle-comp-bar {
     height: 100%;
-    border-radius: 3px;
+    border-radius: 6px;
     transition: width 0.3s;
 }
 
@@ -4236,7 +4236,7 @@ body.page-fade-out {
     background: var(--slate-darkest);
     border: 1px dashed var(--border);
     padding: 16px;
-    border-radius: 6px;
+    border-radius: 10px;
 }
 
 .land-locked-icon {
@@ -4269,7 +4269,7 @@ body.page-fade-out {
 .training-card {
     background: var(--slate-dark);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 10px;
     padding: 12px;
     display: flex;
     flex-direction: column;
@@ -4300,7 +4300,7 @@ body.page-fade-out {
     padding: 2px 8px;
     background: var(--gold);
     color: #111;
-    border-radius: 4px;
+    border-radius: 8px;
     font-weight: 700;
     margin-left: 8px;
     vertical-align: middle;
@@ -4329,7 +4329,7 @@ body.page-fade-out {
 .attr-card {
     background: var(--slate-dark);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 10px;
     padding: 12px;
     display: flex;
     flex-direction: column;
@@ -4384,7 +4384,7 @@ body.page-fade-out {
     background: var(--slate-dark);
     color: var(--text-bright);
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 5px 8px;
     font-size: 13px;
     font-family: inherit;
@@ -4715,12 +4715,12 @@ body.page-fade-out {
 
     #trade-panel {
         width: 100% !important;
-        border-radius: 14px 14px 0 0 !important;
+        border-radius: 18px 14px 0 0 !important;
         max-height: 92vh !important;
     }
 
     #trade-panel>div:first-child {
-        border-radius: 14px 14px 0 0 !important;
+        border-radius: 18px 14px 0 0 !important;
     }
 
     #trade-panel>div:nth-child(2) {
