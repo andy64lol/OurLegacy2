@@ -535,6 +535,12 @@ body.ol2-bg-4 .welcome-screen {
 
 .mainmenu-logo-area {
     margin-bottom: 32px;
+    text-align: center;
+}
+
+.mainmenu-logo-wrap {
+    position: relative;
+    display: inline-block;
 }
 
 .mainmenu-logo {
@@ -542,6 +548,7 @@ body.ol2-bg-4 .welcome-screen {
     width: 92%;
     image-rendering: pixelated;
     animation: mainmenu-glow 3s ease-in-out infinite alternate;
+    display: block;
 }
 
 @keyframes mainmenu-glow {
@@ -555,13 +562,21 @@ body.ol2-bg-4 .welcome-screen {
 }
 
 .mainmenu-splash {
-    margin-top: 10px;
-    font-size: 13px;
-    color: var(--gold);
+    position: absolute;
+    bottom: 14px;
+    right: -4px;
+    transform: rotate(10deg);
+    font-size: 11px;
+    color: var(--gold-bright);
     font-style: italic;
-    opacity: 0.8;
-    letter-spacing: 0.04em;
-    max-width: 380px;
+    opacity: 0.92;
+    letter-spacing: 0.03em;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 2px 9px;
+    border: 1px solid var(--gold-dim);
+    white-space: nowrap;
+    pointer-events: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
 
 .mainmenu-nav {
@@ -1950,19 +1965,22 @@ body.ol2-bg-4 .main-content {
 
 .tab-nav {
     display: flex;
-    gap: 0;
+    gap: 3px;
     border-bottom: 2px solid var(--border);
     flex-wrap: nowrap;
     overflow: hidden;
+    align-items: flex-end;
+    padding: 0 2px;
 }
 
 .tab-btn {
     flex: 0 0 auto;
     text-align: center;
-    padding: 9px 11px;
-    background: var(--slate-dark);
-    border: none;
-    border-right: 1px solid var(--border);
+    padding: 7px 11px 9px;
+    background: var(--slate-darkest);
+    border: 2px solid transparent;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
     color: var(--text-dim);
     font-family: 'Tiny5', monospace;
     font-size: 13px;
@@ -1970,19 +1988,24 @@ body.ol2-bg-4 .main-content {
     text-transform: uppercase;
     letter-spacing: 0.03em;
     cursor: pointer;
-    transition: background 0.1s, color 0.1s;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
     white-space: nowrap;
+    position: relative;
+    margin-bottom: -2px;
 }
 
 .tab-btn:hover {
     background: var(--slate-mid);
     color: var(--text-light);
+    border-color: var(--border);
 }
 
 .tab-btn.active {
     background: var(--wood-dark);
     color: var(--gold);
-    border-bottom: 2px solid var(--wood-bright);
+    border-color: var(--border-bright);
+    border-bottom: 2px solid var(--wood-dark);
+    z-index: 2;
 }
 
 /* Three-dot overflow button */
@@ -4096,36 +4119,41 @@ body.page-fade-out {
 }
 
 .pager-btn {
-    padding: 5px 16px;
+    padding: 5px 18px;
     background: var(--slate-dark);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-light);
     font-family: 'Tiny5', monospace;
     font-size: 13px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     cursor: pointer;
-    transition: background 0.1s, color 0.1s;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
 
 .pager-btn:hover:not(:disabled) {
-    background: var(--slate-mid);
-    color: var(--text-bright);
-    border-color: var(--slate-bright);
+    background: var(--wood-dark);
+    color: var(--gold);
+    border-color: var(--wood-mid);
 }
 
 .pager-btn:disabled {
-    opacity: 0.3;
+    opacity: 0.25;
     cursor: not-allowed;
 }
 
 .pager-info {
     font-size: 13px;
-    color: var(--text-dim);
-    min-width: 90px;
+    color: var(--gold-dim);
+    min-width: 80px;
     text-align: center;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+    background: var(--slate-darkest);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
 }
 
 /* ─── Weather / Time label badges ───────────────────────────────────────── */

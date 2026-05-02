@@ -878,8 +878,9 @@ def collect_group_gold(username: str) -> Dict[str, Any]:
         share = g["gold_pool"] // count
         if share < 1:
             return {"ok": False, "message": "Not enough gold to distribute yet."}
-        client.table("ol2_groups").update({"gold_pool": 0}).eq("id", group_id).execute()
-        client.table("ol2_group_log").insert({"group_id": group_id, "username": username, "action": f"triggered a treasury distribution ({share} gold per member).", "xp_awarded": 0, "gold_awarded": share}).execute()
+        remaining = g["gold_pool"] - share
+        client.table("ol2_groups").update({"gold_pool": max(0, remaining)}).eq("id", group_id).execute()
+        client.table("ol2_group_log").insert({"group_id": group_id, "username": username, "action": f"collected their treasury share ({share} gold).", "xp_awarded": 0, "gold_awarded": share}).execute()
         return {"ok": True, "message": f"You collected {share} gold from the group treasury!", "gold": share, "group_id": group_id}
 
     try:

@@ -34,11 +34,13 @@
 <div class="welcome-screen">
     <div class="mainmenu-wrap">
         <div class="mainmenu-logo-area">
-            <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="mainmenu-logo">
+            <div class="mainmenu-logo-wrap">
+                <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="mainmenu-logo">
+                {% if splash_text %}
+                <div class="mainmenu-splash">{{ splash_text }}</div>
+                {% endif %}
+            </div>
             <div class="mainmenu-version">v2.7.0 &mdash; New Landscape</div>
-            {% if splash_text %}
-            <div class="mainmenu-splash">{{ splash_text }}</div>
-            {% endif %}
         </div>
 
         <nav class="mainmenu-nav">
@@ -2272,8 +2274,9 @@
                 #ag-left { width:280px;flex-shrink:0;border-right:2px solid var(--border);display:flex;flex-direction:column;gap:10px;padding:12px;background:var(--bg-panel-dark);overflow-y:auto; }
                 #ag-right { flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-main); }
                 #ag-tab-bar { display:flex;border-bottom:2px solid var(--border);flex-shrink:0;background:var(--bg-panel-dark); }
-                .ag-tab-btn { padding:8px 14px;font-size:12px;font-family:'Tiny5',monospace;color:var(--text-dim);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;text-transform:uppercase;letter-spacing:0.05em; }
-                .ag-tab-btn.active { color:var(--gold);border-bottom-color:var(--gold); }
+                .ag-tab-btn { padding:6px 14px 8px;font-size:12px;font-family:'Tiny5',monospace;color:var(--text-dim);background:var(--slate-darkest);border:2px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;margin-bottom:-2px;cursor:pointer;text-transform:uppercase;letter-spacing:0.05em;transition:background 0.12s,border-color 0.12s,color 0.12s;position:relative;z-index:1; }
+                .ag-tab-btn:hover { background:var(--slate-mid);border-color:var(--border);color:var(--text-light); }
+                .ag-tab-btn.active { color:var(--gold);background:var(--wood-dark);border-color:var(--border-bright);border-bottom:2px solid var(--wood-dark);z-index:2; }
                 .ag-panel { display:none;flex:1;overflow-y:auto;padding:12px 14px;flex-direction:column;gap:6px; }
                 .ag-panel.active { display:flex; }
                 .ag-card { background:var(--bg-panel);border:2px solid var(--border);box-shadow:2px 2px 0 rgba(0,0,0,0.3); }
@@ -2346,6 +2349,11 @@
                                 <button class="ag-tab-btn" onclick="agShowTab('gchat',this)">Group Chat</button>
                             </div>
                             <div class="ag-panel active" id="ag-panel-log"></div>
+                            <div id="ag-log-pager" style="display:none;align-items:center;justify-content:center;gap:8px;padding:8px 14px;border-top:1px solid var(--border);flex-shrink:0;">
+                                <button id="ag-log-prev" class="pager-btn" onclick="_agLogPrev()">&#8592; Prev</button>
+                                <span id="ag-log-page-info" class="pager-info">1 / 1</span>
+                                <button id="ag-log-next" class="pager-btn" onclick="_agLogNext()">Next &#8594;</button>
+                            </div>
                             <div class="ag-panel" id="ag-panel-gchat" style="padding:0;overflow:hidden;flex-direction:column;">
                                 <div id="ag-group-chat-msgs"></div>
                                 <div id="ag-gchat-error" style="font-size:11px;color:var(--red);padding:0 14px 3px;min-height:13px;"></div>
@@ -2451,23 +2459,46 @@
                 });
                 var leaveBtn = document.getElementById('ag-leave-btn');
                 leaveBtn.textContent = isLeader ? 'Disband / Leave' : 'Leave Group';
-                var logEl = document.getElementById('ag-panel-log');
-                logEl.innerHTML = '';
-                if (g.log && g.log.length) {
-                    g.log.forEach(function(entry) {
-                        var div = document.createElement('div');
-                        div.style.cssText = 'display:flex;flex-direction:column;gap:2px;padding:7px 10px;background:var(--bg-panel);border:1px solid var(--border);border-left:3px solid var(--wood-mid);margin-bottom:4px;';
-                        var ts = entry.created_at ? entry.created_at.slice(0,16).replace('T',' ') : '';
-                        div.innerHTML = '<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;font-weight:700;color:var(--gold);">' + agEsc(entry.username) + '</span><span style="font-size:12px;color:var(--text-light);">' + agEsc(entry.action||'') + '</span></div>' +
-                            '<div style="display:flex;gap:10px;align-items:center;">' +
-                            (entry.xp_awarded ? '<span style="color:var(--exp-purple);font-size:11px;">+' + entry.xp_awarded + ' group XP</span>' : '') +
-                            (entry.gold_awarded ? '<span style="color:var(--gold);font-size:11px;">+' + entry.gold_awarded + ' gold</span>' : '') +
-                            (ts ? '<span style="font-size:10px;color:var(--text-dim);">' + agEsc(ts) + '</span>' : '') + '</div>';
-                        logEl.appendChild(div);
-                    });
-                } else {
-                    logEl.innerHTML = '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:30px 0;">No activity yet.</div>';
+                var _agLogEntries = g.log || [];
+                var _agLogPage = 0;
+                var _agLogPerPage = 8;
+                function agRenderLog() {
+                    var logEl = document.getElementById('ag-panel-log');
+                    var pagEl = document.getElementById('ag-log-pager');
+                    logEl.innerHTML = '';
+                    var total = _agLogEntries.length;
+                    var totalPages = Math.max(1, Math.ceil(total / _agLogPerPage));
+                    _agLogPage = Math.min(_agLogPage, totalPages - 1);
+                    var start = _agLogPage * _agLogPerPage;
+                    var slice = _agLogEntries.slice(start, start + _agLogPerPage);
+                    if (slice.length) {
+                        slice.forEach(function(entry) {
+                            var div = document.createElement('div');
+                            div.style.cssText = 'display:flex;flex-direction:column;gap:2px;padding:7px 10px;background:var(--bg-panel);border:1px solid var(--border);border-left:3px solid var(--wood-mid);margin-bottom:4px;border-radius:8px;';
+                            var ts = entry.created_at ? entry.created_at.slice(0,16).replace('T',' ') : '';
+                            div.innerHTML = '<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;font-weight:700;color:var(--gold);">' + agEsc(entry.username) + '</span><span style="font-size:12px;color:var(--text-light);">' + agEsc(entry.action||'') + '</span></div>' +
+                                '<div style="display:flex;gap:10px;align-items:center;">' +
+                                (entry.xp_awarded ? '<span style="color:var(--exp-purple);font-size:11px;">+' + entry.xp_awarded + ' group XP</span>' : '') +
+                                (entry.gold_awarded ? '<span style="color:var(--gold);font-size:11px;">+' + entry.gold_awarded + ' gold</span>' : '') +
+                                (ts ? '<span style="font-size:10px;color:var(--text-dim);">' + agEsc(ts) + '</span>' : '') + '</div>';
+                            logEl.appendChild(div);
+                        });
+                    } else {
+                        logEl.innerHTML = '<div style="color:var(--text-dim);font-size:13px;text-align:center;padding:30px 0;">No activity yet.</div>';
+                    }
+                    if (pagEl) {
+                        pagEl.style.display = totalPages <= 1 ? 'none' : 'flex';
+                        var prevBtn = document.getElementById('ag-log-prev');
+                        var nextBtn = document.getElementById('ag-log-next');
+                        var info = document.getElementById('ag-log-page-info');
+                        if (prevBtn) prevBtn.disabled = _agLogPage <= 0;
+                        if (nextBtn) nextBtn.disabled = _agLogPage >= totalPages - 1;
+                        if (info) info.textContent = (_agLogPage + 1) + ' / ' + totalPages;
+                    }
                 }
+                window._agLogPrev = function() { if (_agLogPage > 0) { _agLogPage--; agRenderLog(); } };
+                window._agLogNext = function() { var tp = Math.ceil(_agLogEntries.length / _agLogPerPage); if (_agLogPage < tp - 1) { _agLogPage++; agRenderLog(); } };
+                agRenderLog();
             }
 
             function agInitSocket() {
