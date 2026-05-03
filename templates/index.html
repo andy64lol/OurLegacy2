@@ -2966,56 +2966,62 @@
 
 <!-- Settings Modal -->
 <div id="settings-modal" onclick="settingsOverlayClick(event)"
-    style="display:none;position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,0.78);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
-    <div style="background:linear-gradient(160deg,rgba(18,12,38,0.99),rgba(10,6,24,0.99));border:1px solid rgba(180,130,255,0.35);border-radius:14px;padding:26px 24px;width:100%;max-width:380px;position:relative;box-shadow:0 0 40px rgba(140,90,255,0.2);">
+    style="display:none;position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,0.75);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+    <div style="border-radius:14px;padding:22px 22px 18px;width:100%;max-width:520px;position:relative;">
         <button onclick="closeSettings()"
             style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;">&times;</button>
-        <div style="text-align:center;margin-bottom:18px;font-size:18px;font-weight:700;color:var(--gold);">Settings</div>
+        <div style="text-align:center;margin-bottom:14px;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:0.06em;text-transform:uppercase;">Settings</div>
 
-        <div style="margin-bottom:16px;">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Music</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                <button id="settings-music-toggle" class="btn btn-secondary btn-small" onclick="settingsToggleMusic()" style="min-width:48px;">On</button>
+        <!-- Music row — full width -->
+        <div style="margin-bottom:10px;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Music</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <button id="settings-music-toggle" class="btn btn-secondary btn-small" onclick="settingsToggleMusic()" style="min-width:44px;flex-shrink:0;">On</button>
                 <input id="settings-music-slider" type="range" min="0" max="100" value="30"
                     oninput="settingsSetVolume(this.value)"
                     style="flex:1;accent-color:var(--gold);">
-                <span id="settings-music-vol" style="font-size:12px;color:var(--text-dim);min-width:32px;text-align:right;">30%</span>
+                <span id="settings-music-vol" style="font-size:11px;color:var(--text-dim);min-width:30px;text-align:right;">30%</span>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-                <span style="font-size:11px;color:var(--text-dim);min-width:44px;">BGM Track</span>
-                <button class="btn btn-secondary btn-small bgm-track-btn" data-track="1" onclick="settingsChangeBGM('1')" style="min-width:40px;">1</button>
-                <button class="btn btn-secondary btn-small bgm-track-btn" data-track="2" onclick="settingsChangeBGM('2')" style="min-width:40px;">2</button>
-                <button class="btn btn-secondary btn-small bgm-track-btn" data-track="3" onclick="settingsChangeBGM('3')" style="min-width:40px;">3</button>
-            </div>
-        </div>
-
-        <div style="margin-bottom:16px;">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Background</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="1" onclick="applyBackground('1')">1</button>
-                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="2" onclick="applyBackground('2')">2</button>
-                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="3" onclick="applyBackground('3')">3</button>
-                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="4" onclick="applyBackground('4')">4</button>
-                <button class="btn btn-secondary btn-small bg-option-btn" data-bg="none" onclick="applyBackground('none')">None</button>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:10px;color:var(--text-dim);flex-shrink:0;">Track</span>
+                <button class="btn btn-secondary btn-small bgm-track-btn" data-track="1" onclick="settingsChangeBGM('1')" style="min-width:36px;">1</button>
+                <button class="btn btn-secondary btn-small bgm-track-btn" data-track="2" onclick="settingsChangeBGM('2')" style="min-width:36px;">2</button>
+                <button class="btn btn-secondary btn-small bgm-track-btn" data-track="3" onclick="settingsChangeBGM('3')" style="min-width:36px;">3</button>
             </div>
         </div>
 
-        <div style="margin-bottom:16px;">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Display</div>
-            <button id="settings-fs-btn" class="btn btn-secondary btn-small" onclick="settingsToggleFullscreen()" style="width:100%;">Go Fullscreen</button>
-        </div>
+        <!-- 2-column grid for smaller sections -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
 
-        <div style="margin-bottom:16px;">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Interface</div>
-            <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:11px;color:var(--text-dim);min-width:52px;">Buttons</span>
-                <button id="settings-btn-style" class="btn btn-secondary btn-small" onclick="settingsToggleButtonStyle()">Classic</button>
+            <!-- Background -->
+            <div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;">
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Background</div>
+                <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary btn-small bg-option-btn" data-bg="1" onclick="applyBackground('1')">1</button>
+                    <button class="btn btn-secondary btn-small bg-option-btn" data-bg="2" onclick="applyBackground('2')">2</button>
+                    <button class="btn btn-secondary btn-small bg-option-btn" data-bg="3" onclick="applyBackground('3')">3</button>
+                    <button class="btn btn-secondary btn-small bg-option-btn" data-bg="4" onclick="applyBackground('4')">4</button>
+                    <button class="btn btn-secondary btn-small bg-option-btn" data-bg="none" onclick="applyBackground('none')">Off</button>
+                </div>
+            </div>
+
+            <!-- Display + Interface stacked in the right column -->
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;">
+                    <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Display</div>
+                    <button id="settings-fs-btn" class="btn btn-secondary btn-small" onclick="settingsToggleFullscreen()" style="width:100%;">Fullscreen</button>
+                </div>
+                <div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;">
+                    <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Buttons</div>
+                    <button id="settings-btn-style" class="btn btn-secondary btn-small" onclick="settingsToggleButtonStyle()" style="width:100%;">Classic</button>
+                </div>
             </div>
         </div>
 
-        <div style="margin-bottom:16px;">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Theme &amp; Colours</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <!-- Theme row — full width -->
+        <div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;margin-bottom:10px;">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Theme &amp; Colours</div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
                 <button class="theme-option-btn btn btn-secondary btn-small active" data-theme="default" onclick="applyTheme('default')">Default</button>
                 <button class="theme-option-btn btn btn-secondary btn-small" data-theme="forest" onclick="applyTheme('forest')">Forest</button>
                 <button class="theme-option-btn btn btn-secondary btn-small" data-theme="crimson" onclick="applyTheme('crimson')">Crimson</button>
