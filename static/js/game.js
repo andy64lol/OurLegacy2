@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initMusic();
     initPageTransitions();
     initBackground();
+    initButtonStyle();
     initLowHpWarning();
     initBattleKeys();
     checkMobile();
@@ -507,6 +508,31 @@ function initPagination() {
     });
 }
 
+function initButtonStyle() {
+    var style = localStorage.getItem('ol2_btn_style') || 'png';
+    _applyButtonStyle(style);
+}
+
+function _applyButtonStyle(style) {
+    if (style === 'classic') {
+        document.body.classList.add('ol2-btn-classic');
+    } else {
+        document.body.classList.remove('ol2-btn-classic');
+    }
+    var btn = document.getElementById('settings-btn-style');
+    if (btn) btn.textContent = style === 'classic' ? 'Classic' : 'PNG';
+}
+
+function applyButtonStyle(style) {
+    _applyButtonStyle(style);
+    localStorage.setItem('ol2_btn_style', style);
+}
+
+function settingsToggleButtonStyle() {
+    var current = localStorage.getItem('ol2_btn_style') || 'png';
+    applyButtonStyle(current === 'png' ? 'classic' : 'png');
+}
+
 function initBackground() {
     var bg = localStorage.getItem('ol2_bg');
     if (!bg) {
@@ -555,6 +581,12 @@ function openSettings() {
 
     var fsBtn = document.getElementById('settings-fs-btn');
     if (fsBtn) fsBtn.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Go Fullscreen';
+
+    var btnStyleLabel = document.getElementById('settings-btn-style');
+    if (btnStyleLabel) {
+        var curStyle = localStorage.getItem('ol2_btn_style') || 'png';
+        btnStyleLabel.textContent = curStyle === 'classic' ? 'Classic' : 'PNG';
+    }
 
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -839,6 +871,8 @@ window.saveAndQuit           = saveAndQuit;
 window.dismissCutscene       = dismissCutscene;
 window.logoutAndSave         = logoutAndSave;
 window.settingsDownloadCloud = settingsDownloadCloud;
+window.settingsToggleButtonStyle = settingsToggleButtonStyle;
+window.applyButtonStyle          = applyButtonStyle;
 
 /* ── Tab Overflow (three-dot menu) ─────────────────────────────────────────── */
 function initTabOverflow() {

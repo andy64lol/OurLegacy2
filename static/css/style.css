@@ -159,6 +159,26 @@ strong {
     color: var(--gold-bright);
 }
 
+/* Classic mode: strip PNG texture from wooden buttons */
+body.ol2-btn-classic .btn-wood {
+    background-image: none !important;
+    background: var(--wood-dark) !important;
+    color: var(--gold-bright) !important;
+    border-color: var(--wood-bright) !important;
+    aspect-ratio: unset !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+}
+body.ol2-btn-classic .btn-wood:hover:not(:disabled):not(.btn-disabled) {
+    background-image: none !important;
+    background: var(--wood-mid) !important;
+    color: var(--gold-bright) !important;
+}
+body.ol2-btn-classic .btn-wood:active:not(:disabled):not(.btn-disabled) {
+    background-image: none !important;
+    background: var(--wood-dark) !important;
+}
+
 /* Wooden button — applied selectively to main action buttons */
 .btn-wood {
     background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.png');
@@ -2036,11 +2056,13 @@ body.ol2-bg-4 .main-content {
     position: relative;
     z-index: 200;
     margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
 }
 
 .tab-nav {
     display: flex;
-    gap: 3px;
+    gap: 0;
     border-bottom: 2px solid var(--border);
     flex-wrap: nowrap;
     overflow: hidden;

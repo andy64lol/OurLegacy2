@@ -902,10 +902,8 @@
                 <button class="tab-btn" data-tab="friends">Friends</button>
                 {% endif %}
             </nav>
-        </div><!-- end .tab-nav-wrap -->
-
-        <!-- news ticker -->
-        <div id="news-ticker" class="news-ticker">
+            <!-- news ticker — glued directly under the tabs -->
+            <div id="news-ticker" class="news-ticker">
             <div class="news-ticker-label">
                 <span class="news-ticker-icon"><img src="/game_assets/glyphs/sparkles.png" alt="" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle;"></span>
                 <span>News</span>
@@ -914,6 +912,7 @@
                 <div class="news-ticker-inner" id="news-ticker-inner">No announcements at this time.</div>
             </div>
         </div>
+        </div><!-- end .tab-nav-wrap -->
         <script>
         (function(){
             function setTickerContent(items) {
