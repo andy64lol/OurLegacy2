@@ -214,9 +214,9 @@
 
 <!-- Online Account Modal -->
 <div id="online-modal-overlay" onclick="closeOnlineModal(event)"
-    style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.75);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+    style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.75);backdrop-filter:blur(3px);align-items:center;justify-content:center;overflow:hidden;">
     <div id="online-modal-box"
-        style="background:linear-gradient(160deg,rgba(18,12,38,0.98),rgba(10,6,28,0.98));border:1px solid rgba(180,130,255,0.45);border-radius:14px;padding:28px 24px;width:100%;max-width:360px;position:relative;box-shadow:0 0 40px rgba(140,90,255,0.25);">
+        style="background:linear-gradient(160deg,rgba(18,12,38,0.98),rgba(10,6,28,0.98));border:1px solid rgba(180,130,255,0.45);border-radius:14px;padding:28px 24px;width:100%;max-width:360px;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 0 40px rgba(140,90,255,0.25);" onclick="event.stopPropagation()">
         <button onclick="closeOnlineModal()"
             style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;">&times;</button>
         <div style="text-align:center;margin-bottom:18px;">
@@ -697,6 +697,7 @@
             style="display:none;position:absolute;top:8px;right:8px;z-index:10;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;color:var(--text-dim);font-size:16px;cursor:pointer;line-height:1;align-items:center;justify-content:center;"
             aria-label="Close menu">&times;</button>
 
+        <div class="sidebar-scroll">
         <div class="sidebar-top">
             <img src="/game_assets/game_title_our_legacy_2_720px_300px.png" alt="Our Legacy 2" class="sidebar-banner">
         </div>
@@ -814,6 +815,7 @@
                     title="10,000 gold">Change Character</button>
             </div>
         </div>
+        </div><!-- /.sidebar-scroll -->
 
         <div class="sidebar-save-section">
             {% if not online_user %}
@@ -848,6 +850,9 @@
                     class="type-glyph" src="/game_assets/glyphs/settings.png" alt="settings"> Settings</button>
         </div>
     </aside>
+
+    <!-- Sidebar resize handle -->
+    <div id="sidebar-resize-handle" title="Drag to resize sidebar"></div>
 
     <!-- Main content -->
     <main class="main-content">
@@ -1188,43 +1193,6 @@
                                 int }}%</strong></div>
                         {% endif %}
                     </div>
-                </div>
-            </div>
-
-            <!-- Attributes Panel -->
-            <div class="panel" style="margin-bottom:14px;" id="attr-panel">
-                <div class="panel-title">
-                    Attributes
-                    {% if attr_summary.unspent_points > 0 %}
-                    <span class="attr-points-badge" id="attr-points-badge">{{ attr_summary.unspent_points }} point{{ 's'
-                        if attr_summary.unspent_points != 1 }} available</span>
-                    {% endif %}
-                </div>
-                <div class="panel-body">
-                    {% if attr_summary.unspent_points > 0 %}
-                    <p class="panel-note" style="color:var(--gold);">You have unspent attribute points! Spend them to
-                        grow stronger.</p>
-                    {% else %}
-                    <p class="panel-note">Gain attribute points by leveling up (3 per level). Each attribute permanently
-                        boosts your stats.</p>
-                    {% endif %}
-                    <div class="attr-grid" id="attr-grid">
-                        {% for attr_key, attr_info in attr_summary.attributes.items() %}
-                        <div class="attr-card" id="attr-{{ attr_key }}">
-                            <div class="attr-top">
-                                <div class="attr-name">{{ attr_info.name }}</div>
-                                <div class="attr-value" id="attr-val-{{ attr_key }}">{{ attr_info.value }}</div>
-                            </div>
-                            <div class="attr-desc">{{ attr_info.description }}</div>
-                            {% if attr_summary.unspent_points > 0 %}
-                            <button class="btn btn-xsmall btn-primary attr-spend-btn" data-attr="{{ attr_key }}"
-                                style="margin-top:6px;">+ Spend Point</button>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div id="attr-message"
-                        style="margin-top:10px;font-size:13px;color:var(--green-bright);display:none;"></div>
                 </div>
             </div>
 
@@ -2156,6 +2124,44 @@
 
         <!-- ── Character Sheet ── -->
         <div class="tab-content" id="tab-character">
+
+            <!-- Attributes Panel (spend points here) -->
+            <div class="panel" style="margin-bottom:14px;" id="attr-panel">
+                <div class="panel-title">
+                    Attributes
+                    {% if attr_summary.unspent_points > 0 %}
+                    <span class="attr-points-badge" id="attr-points-badge">{{ attr_summary.unspent_points }} point{{ 's'
+                        if attr_summary.unspent_points != 1 }} available</span>
+                    {% endif %}
+                </div>
+                <div class="panel-body">
+                    {% if attr_summary.unspent_points > 0 %}
+                    <p class="panel-note" style="color:var(--gold);">You have unspent attribute points! Spend them to
+                        grow stronger.</p>
+                    {% else %}
+                    <p class="panel-note">Gain attribute points by leveling up (3 per level). Each attribute permanently
+                        boosts your stats.</p>
+                    {% endif %}
+                    <div class="attr-grid" id="attr-grid">
+                        {% for attr_key, attr_info in attr_summary.attributes.items() %}
+                        <div class="attr-card" id="attr-{{ attr_key }}">
+                            <div class="attr-top">
+                                <div class="attr-name">{{ attr_info.name }}</div>
+                                <div class="attr-value" id="attr-val-{{ attr_key }}">{{ attr_info.value }}</div>
+                            </div>
+                            <div class="attr-desc">{{ attr_info.description }}</div>
+                            {% if attr_summary.unspent_points > 0 %}
+                            <button class="btn btn-xsmall btn-primary attr-spend-btn" data-attr="{{ attr_key }}"
+                                style="margin-top:6px;">+ Spend Point</button>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div id="attr-message"
+                        style="margin-top:10px;font-size:13px;color:var(--green-bright);display:none;"></div>
+                </div>
+            </div>
+
             <div class="panel" style="margin-bottom:14px;">
                 <div class="panel-title">Character Sheet</div>
                 <div class="panel-body">
@@ -2966,8 +2972,8 @@
 
 <!-- Settings Modal -->
 <div id="settings-modal" onclick="settingsOverlayClick(event)"
-    style="display:none;position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,0.75);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
-    <div style="border-radius:14px;padding:22px 22px 18px;width:100%;max-width:520px;position:relative;">
+    style="display:none;position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,0.75);backdrop-filter:blur(3px);align-items:center;justify-content:center;overflow:hidden;">
+    <div style="background:linear-gradient(160deg,rgba(18,12,38,0.99),rgba(10,6,24,0.99));border:1px solid rgba(var(--modal-border-rgb,140,90,255),0.35);border-radius:14px;padding:22px 22px 18px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 0 40px rgba(var(--modal-glow-rgb,100,60,200),0.2);" onclick="event.stopPropagation()">
         <button onclick="closeSettings()"
             style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;">&times;</button>
         <div style="text-align:center;margin-bottom:14px;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:0.06em;text-transform:uppercase;">Settings</div>
@@ -3051,6 +3057,7 @@
                 <div>Game created by <span style="color:var(--gold);">andy64lol</span> &amp; <span style="color:var(--gold);">Jerry (Jeroyix)</span></div>
                 <div>Tileset textures by <a href="https://limezu.itch.io/" target="_blank" rel="noopener"
                     style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(200,160,60,0.4);">LimeZu</a></div>
+                <div>
             </div>
         </div>
     </div>
@@ -4235,4 +4242,71 @@
     });
 </script>
 {% endif %}
+
+<!-- Sidebar Resize Handle JS -->
+<script>
+(function () {
+    var handle = document.getElementById('sidebar-resize-handle');
+    var layout = document.querySelector('.game-layout');
+    var sidebar = document.getElementById('main-sidebar');
+    if (!handle || !layout || !sidebar) return;
+
+    var MIN_W = 160, MAX_W = 440;
+
+    function applyWidth(w) {
+        w = Math.max(MIN_W, Math.min(MAX_W, w));
+        layout.style.gridTemplateColumns = w + 'px 5px 1fr';
+    }
+
+    /* restore saved width */
+    var saved = parseInt(localStorage.getItem('ol2_sidebar_width'), 10);
+    if (saved && saved >= MIN_W && saved <= MAX_W) applyWidth(saved);
+
+    var dragging = false, startX = 0, startW = 0;
+
+    handle.addEventListener('mousedown', function (e) {
+        dragging = true;
+        startX = e.clientX;
+        startW = sidebar.offsetWidth;
+        handle.classList.add('dragging');
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'col-resize';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        applyWidth(startW + (e.clientX - startX));
+    });
+
+    document.addEventListener('mouseup', function () {
+        if (!dragging) return;
+        dragging = false;
+        handle.classList.remove('dragging');
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        var w = sidebar.offsetWidth;
+        localStorage.setItem('ol2_sidebar_width', w);
+    });
+
+    /* touch support */
+    handle.addEventListener('touchstart', function (e) {
+        dragging = true;
+        startX = e.touches[0].clientX;
+        startW = sidebar.offsetWidth;
+        e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchmove', function (e) {
+        if (!dragging) return;
+        applyWidth(startW + (e.touches[0].clientX - startX));
+    }, { passive: true });
+
+    document.addEventListener('touchend', function () {
+        if (!dragging) return;
+        dragging = false;
+        localStorage.setItem('ol2_sidebar_width', sidebar.offsetWidth);
+    });
+})();
+</script>
 {% endblock %}
