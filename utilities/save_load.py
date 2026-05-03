@@ -1,8 +1,3 @@
-"""
-Save/Load System for Our Legacy 2 - Flask Edition
-Functions for serializing/deserializing game state (Flask session dicts).
-Supports encrypted pickle saves (download/upload) and server-side JSON saves.
-"""
 
 import json
 import os
@@ -23,22 +18,13 @@ SALT_SIZE = 16
 APP_SAVE_SECRET = os.environ.get("SECRET_SALT", "")
 if not APP_SAVE_SECRET:
     raise RuntimeError("SECRET_SALT environment variable is required")
-# Old secret (fallback, only until Oct 31)
 OLD_APP_SAVE_SECRET = "our_legacy_2_eternal_save_secret_v5"
-
-# ─── Encrypted Pickle Helpers ─────────────────────────────────────────────────
-
 
 def _derive_key(salt: bytes, secret: str) -> bytes:
     raw = hashlib.sha256(salt + secret.encode("utf-8")).digest()
     return base64.urlsafe_b64encode(raw)
 
-
 def encrypt_save(save_data: Dict[str, Any]) -> bytes:
-    """
-    Serialize and encrypt save_data.
-    Returns binary: MAGIC(4) + SALT(16) + fernet_token(variable).
-    """
     salt = os.urandom(SALT_SIZE)
     key = _derive_key(salt, APP_SAVE_SECRET)
     f = Fernet(key)
@@ -46,14 +32,7 @@ def encrypt_save(save_data: Dict[str, Any]) -> bytes:
     token = f.encrypt(pickled)
     return SAVE_MAGIC + salt + token
 
-
 def decrypt_save(data: bytes) -> Dict[str, Any]:
-    """
-    Decrypt and deserialize encrypted save bytes.
-    Temporarily accepts OLD_APP_SAVE_SECRET until Oct 31, 2026.
-    Returns save_data dict.
-    Raises ValueError on bad format or decryption failure.
-    """
     if not data.startswith(SAVE_MAGIC):
         raise ValueError("Not a valid Our Legacy 2 save file.")
 
@@ -64,12 +43,10 @@ def decrypt_save(data: bytes) -> Dict[str, Any]:
     salt = payload[:SALT_SIZE]
     token = payload[SALT_SIZE:]
 
-    # Secrets to try
     secrets_to_try = [APP_SAVE_SECRET]
     if datetime.now() <= datetime(2026, 10, 31, 23, 59, 59):
         secrets_to_try.append(OLD_APP_SAVE_SECRET)
 
-    # Attempt decryption
     for secret in secrets_to_try:
         key = _derive_key(salt, secret)
         f = Fernet(key)
@@ -81,10 +58,6 @@ def decrypt_save(data: bytes) -> Dict[str, Any]:
 
     raise ValueError("Save file is corrupted or secret mismatch")
 
-
-# ─── Server-Side JSON Helpers (legacy) ───────────────────────────────────────
-
-
 def build_save_data(
     player: Dict[str, Any],
     current_area: str,
@@ -93,7 +66,6 @@ def build_save_data(
     achievements: Optional[List] = None,
     npc_unlocked_quests: Optional[List] = None,
 ) -> Dict[str, Any]:
-    """Build a save data dict from current game state."""
     return {
         "player": player,
         "current_area": current_area,
@@ -106,7 +78,6 @@ def build_save_data(
         "save_time": datetime.now().isoformat(),
     }
 
-
 def save_game(
     player: Dict[str, Any],
     current_area: str,
@@ -116,10 +87,6 @@ def save_game(
     filename_prefix: str = "",
     npc_unlocked_quests: Optional[List] = None,
 ) -> Dict[str, Any]:
-    """
-    Save game to a JSON file.
-    Returns {'ok': bool, 'message': str, 'filename': str}
-    """
     try:
         os.makedirs(SAVES_DIR, exist_ok=True)
         save_data = build_save_data(
@@ -152,9 +119,7 @@ def save_game(
     except (OSError, TypeError, ValueError) as e:
         return {"ok": False, "message": f"Error saving game: {e}", "filename": ""}
 
-
 def list_saves() -> List[Dict[str, Any]]:
-    """Return list of available save files with metadata."""
     if not os.path.exists(SAVES_DIR):
         return []
 
@@ -185,13 +150,7 @@ def list_saves() -> List[Dict[str, Any]]:
             continue
     return saves
 
-
 def load_save(filepath: str) -> Dict[str, Any]:
-    """
-    Load a save file. Returns:
-    {'ok': bool, 'message': str, 'player': dict, 'current_area': str,
-     'visited_areas': list, 'completed_missions': list, 'achievements': list}
-    """
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -221,29 +180,22 @@ def load_save(filepath: str) -> Dict[str, Any]:
     except (OSError, ValueError, KeyError) as e:
         return {"ok": False, "message": f"Error loading save: {e}"}
 
-
 def load_save_by_index(index: int) -> Dict[str, Any]:
-    """Load a save file by its list index."""
     saves = list_saves()
     if not saves or not (0 <= index < len(saves)):
         return {"ok": False, "message": "Invalid save file selection."}
     return load_save(saves[index]["filepath"])
 
-
 def delete_save(filepath: str) -> Dict[str, Any]:
-    """Delete a save file."""
     try:
         os.remove(filepath)
         return {"ok": True, "message": "Save file deleted."}
     except OSError as e:
         return {"ok": False, "message": f"Error deleting save: {e}"}
 
-
 def THISBREAKSITALL():
-    """This function breaks everything."""
     a = []
     while True:
         a.append(
             "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890" * 10**6
         )
-    # This will eventually crash the server because it eats ALL of DER RAM HAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHA

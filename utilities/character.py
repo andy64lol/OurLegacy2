@@ -1,13 +1,8 @@
-"""
-Character and Stats Management for Our Legacy 2 - Flask Edition
-"""
 import json
 import uuid
 from typing import Dict, List, Any, Optional
 
-
 class Character:
-    """Player character class - used for building/loading character state."""
 
     def __init__(self,
                  name: str,
@@ -136,7 +131,6 @@ class Character:
         self.hp = min(self.max_hp, self.hp + amount)
 
     def gain_experience(self, exp: int) -> bool:
-        """Gain experience and level up. Returns True if leveled up."""
         self.experience += exp
         leveled = False
         while self.experience >= self.experience_to_next:
@@ -263,7 +257,6 @@ class Character:
         return True
 
     def get_stats_dict(self) -> Dict[str, Any]:
-        """Return character stats as a JSON-serializable dict."""
         from utilities.stats import get_default_attributes
         return {
             "name": self.name,
@@ -305,11 +298,9 @@ class Character:
             "dodge_chance": 0.0,
         }
 
-
 def build_new_character(name: str, character_class: str,
                         classes_data: Dict[str, Any],
                         items_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Build a new character dict ready for Flask session storage."""
     char = Character(name, character_class, classes_data)
     cls_data = classes_data.get(character_class, {})
     starting_items = list(cls_data.get("starting_items", ["Health Potion"]))
@@ -329,10 +320,8 @@ def build_new_character(name: str, character_class: str,
     char.update_stats_from_equipment(items_data)
     return char.get_stats_dict()
 
-
 def get_available_classes(
         classes_data: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Return list of available classes with their info."""
     result = []
     for class_name, class_data in classes_data.items():
         result.append({

@@ -1,13 +1,3 @@
-"""
-Apply gevent monkey-patching only when running the app directly.
-
-Do NOT call monkey.patch_all() at module import time: when Gunicorn
-imports this module in the master process, patching there converts
-internal Gunicorn Timer threads into greenlets which later attempt to
-remove themselves from `threading._active` and can raise KeyError
-because gevent has already cleaned them up. The gevent worker class
-performs the necessary patching inside each worker process.
-"""
 
 import sys
 
@@ -140,7 +130,7 @@ from utilities.supabase_db import (
 from utilities.email_sender import send_email as _send_email, is_configured as _email_configured
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)  # type: ignore
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 app.secret_key = os.environ.get("SECRET_KEY") or os.environ.get("SESSION_SECRET", "ol2-default-dev-key-change-in-prod")
 
 limiter = Limiter(
@@ -160,17 +150,14 @@ Session(app)
 
 sio = _socketio_module.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
 
-# ── asyncio helpers ─────────────────────────────────────────────────────────
 _asyncio_loop: _asyncio.AbstractEventLoop | None = None
-_username_player: dict = {}  # {username: player_dict} kept fresh by _autosave
+_username_player: dict = {}
 
 def _emit_sync(event: str, data, **kwargs) -> None:
-    """Schedule a socket.io emit from a synchronous Flask-route context."""
     if _asyncio_loop is not None and not _asyncio_loop.is_closed():
         _asyncio.run_coroutine_threadsafe(sio.emit(event, data, **kwargs), _asyncio_loop)
 
 def _load_session_for_socket(environ: dict) -> dict:
-    """Read the Flask filesystem session for a socket.io connection."""
     from http.cookies import SimpleCookie
     import cachelib.file as _clf
     cookie_str = environ.get("HTTP_COOKIE", "")
@@ -194,49 +181,37 @@ def _load_session_for_socket(environ: dict) -> dict:
     except Exception:
         return {}
 
-# Online users: {sid: username}  (in-memory, single worker)
 _chat_online: dict = {}
-_server_announcements: list = []  # [(timestamp_str, text), ...]  max 5
-_chat_cooldowns: dict = {}   # {username: last_sent_timestamp}
-_chat_recent_msgs: dict = {} # {username: [timestamps...]} spam window
-_chat_last_content: dict = {} # {username: last_message_text} repeat guard
-_SPAM_WINDOW_SECS = 12       # rolling window for rate limiting
-_SPAM_MAX_MSGS = 5            # max messages in window before auto-mute
+_server_announcements: list = []
+_chat_cooldowns: dict = {}
+_chat_recent_msgs: dict = {}
+_chat_last_content: dict = {}
+_SPAM_WINDOW_SECS = 12
+_SPAM_MAX_MSGS = 5
 
-# Single-session enforcement: maps user_id -> session_token
-# Tracks the active session token per user_id for multi-login detection.
 _active_sessions: dict = {}
-# Inactivity tracking: maps user_id -> last_activity_timestamp
 _session_last_activity: dict = {}
-# Admin: usernames force-kicked by owner (will be logged out on next request)
 _kicked_usernames: set = set()
-# Admin: username -> user_id mapping for kick support
 _username_to_userid: dict = {}
 CHAT_COOLDOWN_SECS = 10
 CHAT_MAX_LEN = 200
 
-_dm_cooldowns: dict = {}  # {username: last_dm_timestamp}
-_fr_cooldowns: dict = {}  # {username: [timestamps]} — friend request rate limiting
+_dm_cooldowns: dict = {}
+_fr_cooldowns: dict = {}
 DM_COOLDOWN_SECS = 2
 DM_MAX_LEN = 500
 FR_MAX_PER_MINUTE = 5
 
-# ─── World events feed (online only) ─────────────────────────────────────────
-# A rolling log of recent world events visible to online players.
 _world_events: list = []
 _WORLD_EVENTS_MAX = 40
 
-
 def push_world_event(text: str) -> None:
-    """Append a timestamped event to the global world feed, trimming old ones."""
     import time as _time
 
     _world_events.append({"t": int(_time.time()), "msg": text})
     if len(_world_events) > _WORLD_EVENTS_MAX:
         del _world_events[: len(_world_events) - _WORLD_EVENTS_MAX]
 
-
-# ─── Activity tracker (feeds _world_tick dynamic world events) ────────────────
 from threading import RLock as _RLock
 
 _activity_counts: dict = {
@@ -249,40 +224,28 @@ _activity_counts: dict = {
 }
 _activity_lock = _RLock()
 
-# ── Admin system (SQL-backed via Supabase) ─────────────────────────────────────
-
 def _is_owner(username: str) -> bool:
     return bool(username) and username.lower() == admin_get_owner()
 
-
 def _is_admin_user(username: str) -> bool:
-    """Returns True for the owner and any listed moderator."""
     if not username:
         return False
     uname = username.lower()
     return uname == admin_get_owner() or uname in admin_get_mods()
 
-
 def _is_banned(username: str) -> bool:
     return admin_is_banned(username)
-
 
 def _is_muted(username: str) -> bool:
     return admin_is_muted(username)
 
-
 def _get_all_mods() -> list:
-    """Return owner + all mods as a list of lowercase usernames."""
     return admin_get_all_mods()
 
-
 def _warn_user_in_admins(username: str, reason: str) -> int:
-    """Record a warning for a user. Returns new total warning count."""
     return admin_warn(username, reason)
 
-
 async def _broadcast_system(message: str, to_sid=None) -> None:
-    """Emit a SYSTEM chat message to everyone or a single SID."""
     payload = {
         "username": "SYSTEM",
         "message": message,
@@ -294,18 +257,15 @@ async def _broadcast_system(message: str, to_sid=None) -> None:
     else:
         await sio.emit("chat_message", payload)
 
-
 async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
-    """Parse and execute a slash command.  Returns True if handled."""
     if not raw.startswith("/"):
         return False
 
-    parts = raw.split(None, 2)  # [cmd, target?, rest?]
+    parts = raw.split(None, 2)
     cmd = parts[0].lower()
     is_admin = _is_admin_user(username)
     is_owner = _is_owner(username)
 
-    # ── Commands available to everyone ────────────────────────────
     if cmd == "/help":
         lines = ["Available commands: /me <action>  /mods  /help"]
         if is_admin:
@@ -350,7 +310,6 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
             })
         return True
 
-    # ── Mod-only commands ─────────────────────────────────────────
     if cmd in ("/mute", "/unmute", "/ban", "/unban", "/warn", "/clearwarn",
                "/kick", "/announce", "/addmod", "/removemod",
                "/setowner", "/clearall", "/listbans", "/listmutes"):
@@ -375,7 +334,6 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
         await _broadcast_system(f"\u2605 ANNOUNCEMENT: {text}")
         return True
 
-    # All remaining commands need a target username
     if cmd in ("/mute", "/unmute", "/ban", "/unban", "/warn", "/clearwarn", "/kick"):
         target = parts[1].strip() if len(parts) > 1 else ""
         if not target:
@@ -526,7 +484,6 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
             return True
         old_owner = admin_get_owner()
         admin_set_owner(target)
-        # Demote new owner from mod list if present, promote old owner to mod
         admin_remove_mod(target)
         if old_owner:
             admin_add_mod(old_owner)
@@ -583,7 +540,6 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
                     await _broadcast_system(f"  Muted: {row['username']} — {reason} (permanent)", to_sid=sid)
         return True
 
-    # Unknown command
     await sio.emit(
         "chat_error",
         {"message": f"Unknown command: {cmd}. Type /help for a list."},
@@ -591,28 +547,19 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
     )
     return True
 
-
 def _record_activity(category: str, amount: int = 1) -> None:
-    """Thread-safe increment of an activity counter consumed by _world_tick."""
     with _activity_lock:
         if category in _activity_counts:
             _activity_counts[category] += amount
 
-
-# ─── Per-area presence tracker ────────────────────────────────────────────────
-# Maps username → {area, text, t} so the explore tab can show who else is here.
 _area_presence: dict = {}
 
-
 def _update_area_presence(username: str, area: str, text: str) -> None:
-    """Record that *username* is in *area* doing *text* right now."""
     import time as _time2
 
     if username:
         _area_presence[username] = {"area": area, "text": text, "t": _time2.time()}
 
-
-# ─── Narrative helpers for area presence ─────────────────────────────────────
 import re as _re
 
 _NARRATIVE_PATTERNS = [
@@ -638,18 +585,14 @@ _NARRATIVE_PATTERNS = [
     (r"^claiming an event reward$", lambda m: "claiming a rare event reward"),
 ]
 
-
 def _narrativize(status: str) -> str:
-    """Convert a raw activity_status into an evocative present-tense description."""
     for pattern, fmt in _NARRATIVE_PATTERNS:
         m = _re.match(pattern, status.strip(), _re.IGNORECASE)
         if m:
             return fmt(m)
     return status.strip()
 
-
 def _narrative_when(ago_secs: int) -> str:
-    """Return a prose time-ago string."""
     if ago_secs < 30:
         return "moments ago"
     elif ago_secs < 90:
@@ -663,35 +606,23 @@ def _narrative_when(ago_secs: int) -> str:
     else:
         return f"{ago_secs // 3600} hours past"
 
-
 def _clear_area_presence(username: str) -> None:
-    """Remove a player from the presence tracker (called on disconnect / logout)."""
     _area_presence.pop(username, None)
 
-
-# ─── In-memory trade state ────────────────────────────────────────────────────
-# trade_id → {id, player_a, player_b, offer_a, offer_b, confirmed_a, confirmed_b,
-#              status, applied_a, applied_b}
 _active_trades: dict = {}
 TRADE_MAX_ITEMS = 10
 TRADE_MAX_GOLD = 9_999_999
-TRADE_TIMEOUT_SECS = 300  # 5 min inactivity → auto-cancel
+TRADE_TIMEOUT_SECS = 300
 _bg_started = False
 
-# Unique identifier for this worker process — used by the distributed tick lock.
 import uuid as _uuid_mod
 _WORLD_TICK_WORKER_ID: str = _uuid_mod.uuid4().hex
-
 
 @app.context_processor
 def _inject_chat_globals():
     return {"online_username": session.get("online_username")}
 
-
-# ─── SocketIO Chat Events ────────────────────────────────────────────────────
-
-
-@sio.on("connect")  # type: ignore[misc]
+@sio.on("connect")
 async def _on_chat_connect(sid, environ, auth=None):
     global _asyncio_loop, _bg_started
     sess = await _asyncio.get_event_loop().run_in_executor(
@@ -701,7 +632,6 @@ async def _on_chat_connect(sid, environ, auth=None):
     if not username:
         await sio.disconnect(sid)
         return
-    # Refuse connection for banned users
     if _is_banned(username):
         await sio.emit("chat_error", {"message": "You are banned from chat."}, to=sid)
         await sio.disconnect(sid)
@@ -723,8 +653,7 @@ async def _on_chat_connect(sid, environ, auth=None):
     history = await _asyncio.get_event_loop().run_in_executor(None, get_chat_history, 60)
     await sio.emit("chat_history", history, to=sid)
 
-
-@sio.on("disconnect")  # type: ignore[misc]
+@sio.on("disconnect")
 async def _on_chat_disconnect(sid):
     username = _chat_online.pop(sid, None)
     await sio.emit("online_users", sorted(set(_chat_online.values())))
@@ -749,15 +678,13 @@ async def _on_chat_disconnect(sid):
                     )
                 _active_trades.pop(tid, None)
 
-
-@sio.on("chat_send")  # type: ignore[misc]
+@sio.on("chat_send")
 async def _on_chat_send(sid, data):
     username = _chat_online.get(sid)
     if not username:
         await sio.emit("chat_error", {"message": "You must be logged in to chat."}, to=sid)
         return
 
-    # Banned check (belt-and-suspenders: connection already refused banned users)
     if _is_banned(username):
         await sio.emit("chat_error", {"message": "You are banned from chat."}, to=sid)
         await sio.disconnect(sid)
@@ -767,13 +694,11 @@ async def _on_chat_send(sid, data):
     if not raw:
         return
 
-    # Slash commands bypass mute/cooldown so mods can still act
     if raw.startswith("/"):
         handled = await _handle_mod_command(sid, username, raw)
         if handled:
             return
 
-    # Mute check (after command handling)
     if _is_muted(username):
         await sio.emit(
             "chat_error", {"message": "You are muted and cannot send messages."}, to=sid
@@ -790,7 +715,6 @@ async def _on_chat_send(sid, data):
 
     now = _time_module.time()
 
-    # ── Repeat-message guard ───────────────────────────────────────
     last_content = _chat_last_content.get(username, "")
     if raw.lower() == last_content.lower():
         await sio.emit(
@@ -800,7 +724,6 @@ async def _on_chat_send(sid, data):
         )
         return
 
-    # ── Spam / flood detection ─────────────────────────────────────
     recent = _chat_recent_msgs.get(username, [])
     recent = [t for t in recent if now - t < _SPAM_WINDOW_SECS]
     if len(recent) >= _SPAM_MAX_MSGS:
@@ -814,7 +737,6 @@ async def _on_chat_send(sid, data):
     recent.append(now)
     _chat_recent_msgs[username] = recent
 
-    # ── Cooldown ───────────────────────────────────────────────────
     last_ts = _chat_cooldowns.get(username, 0)
     remaining = int(CHAT_COOLDOWN_SECS - (now - last_ts))
     if remaining > 0:
@@ -848,12 +770,7 @@ async def _on_chat_send(sid, data):
             "chat_error", {"message": "Failed to send message. Try again."}, to=sid
         )
 
-
-# ─── SocketIO Trade Events ─────────────────────────────────────────────────────
-
-
 def _get_trade_for_user(trade_id: str, username: str):
-    """Return trade dict if trade_id exists and username is a participant."""
     trade = _active_trades.get(trade_id)
     if not trade:
         return None
@@ -861,9 +778,7 @@ def _get_trade_for_user(trade_id: str, username: str):
         return None
     return trade
 
-
 def _trade_payload(trade: dict, viewer: str) -> dict:
-    """Build the trade_update payload for a viewer."""
     other = trade["player_b"] if viewer == trade["player_a"] else trade["player_a"]
     my_offer = trade["offer_a"] if viewer == trade["player_a"] else trade["offer_b"]
     their_offer = trade["offer_b"] if viewer == trade["player_a"] else trade["offer_a"]
@@ -883,9 +798,7 @@ def _trade_payload(trade: dict, viewer: str) -> dict:
         "status": trade["status"],
     }
 
-
 async def _emit_trade_update(trade: dict):
-    """Emit trade_update to both participants."""
     a_sids = [s for s, u in _chat_online.items() if u == trade["player_a"]]
     b_sids = [s for s, u in _chat_online.items() if u == trade["player_b"]]
     for s in a_sids:
@@ -893,8 +806,7 @@ async def _emit_trade_update(trade: dict):
     for s in b_sids:
         await sio.emit("trade_update", _trade_payload(trade, trade["player_b"]), to=s)
 
-
-@sio.on("trade_request")  # type: ignore[misc]
+@sio.on("trade_request")
 async def _on_trade_request(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -945,8 +857,7 @@ async def _on_trade_request(sid, data):
         await sio.emit("trade_invite", {"trade_id": trade_id, "from": username}, to=s)
     await sio.emit("trade_invite_sent", {"trade_id": trade_id, "to": target}, to=sid)
 
-
-@sio.on("trade_accept")  # type: ignore[misc]
+@sio.on("trade_accept")
 async def _on_trade_accept(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -969,8 +880,7 @@ async def _on_trade_accept(sid, data):
     trade["last_activity"] = _time_module.time()
     await _emit_trade_update(trade)
 
-
-@sio.on("trade_decline")  # type: ignore[misc]
+@sio.on("trade_decline")
 async def _on_trade_decline(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -988,8 +898,7 @@ async def _on_trade_decline(sid, data):
     await sio.emit("trade_cancelled", {"message": "You declined the trade."}, to=sid)
     _active_trades.pop(trade_id, None)
 
-
-@sio.on("trade_add_item")  # type: ignore[misc]
+@sio.on("trade_add_item")
 async def _on_trade_add_item(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -1034,8 +943,7 @@ async def _on_trade_add_item(sid, data):
     trade["last_activity"] = _time_module.time()
     await _emit_trade_update(trade)
 
-
-@sio.on("trade_remove_item")  # type: ignore[misc]
+@sio.on("trade_remove_item")
 async def _on_trade_remove_item(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -1060,8 +968,7 @@ async def _on_trade_remove_item(sid, data):
     trade["last_activity"] = _time_module.time()
     await _emit_trade_update(trade)
 
-
-@sio.on("trade_set_gold")  # type: ignore[misc]
+@sio.on("trade_set_gold")
 async def _on_trade_set_gold(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -1092,8 +999,7 @@ async def _on_trade_set_gold(sid, data):
     trade["last_activity"] = _time_module.time()
     await _emit_trade_update(trade)
 
-
-@sio.on("trade_confirm")  # type: ignore[misc]
+@sio.on("trade_confirm")
 async def _on_trade_confirm(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -1137,8 +1043,7 @@ async def _on_trade_confirm(sid, data):
     else:
         await _emit_trade_update(trade)
 
-
-@sio.on("trade_cancel")  # type: ignore[misc]
+@sio.on("trade_cancel")
 async def _on_trade_cancel(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -1156,12 +1061,7 @@ async def _on_trade_cancel(sid, data):
     await sio.emit("trade_cancelled", {"message": "You cancelled the trade."}, to=sid)
     _active_trades.pop(trade_id, None)
 
-
-# ─── Background World Tick ─────────────────────────────────────────────────────
-
-
 async def _expire_stale_trades():
-    """Cancel trades that have been inactive beyond TRADE_TIMEOUT_SECS."""
     now = _time_module.time()
     for tid, trade in list(_active_trades.items()):
         if trade["status"] not in ("pending", "active"):
@@ -1180,9 +1080,7 @@ async def _expire_stale_trades():
                         )
             _active_trades.pop(tid, None)
 
-
 def _tick_world_events() -> None:
-    """Drain activity counters and push thematic world-event messages."""
     with _activity_lock:
         counts = dict(_activity_counts)
         for k in _activity_counts:
@@ -1196,11 +1094,10 @@ def _tick_world_events() -> None:
     challenges = counts["challenges"]
 
     if sum(counts.values()) == 0:
-        return  # quiet interval — nothing to announce
+        return
 
     messages: list[str] = []
 
-    # Boss kills — always announce
     if boss_kills:
         messages.append(
             random.choice(
@@ -1213,7 +1110,6 @@ def _tick_world_events() -> None:
             )
         )
 
-    # Heavy casualties
     if deaths >= 3:
         messages.append(
             random.choice(
@@ -1236,7 +1132,6 @@ def _tick_world_events() -> None:
             )
         )
 
-    # Heroic deeds
     deeds = quests + dungeons + challenges
     if deeds >= 3:
         messages.append(
@@ -1278,7 +1173,6 @@ def _tick_world_events() -> None:
             )
         )
 
-    # Pure combat surge (no boss, no deeds)
     if not messages and battles >= 5:
         messages.append(
             random.choice(
@@ -1291,13 +1185,10 @@ def _tick_world_events() -> None:
             )
         )
 
-    # Push at most 2 messages to avoid flooding
     for msg in messages[:2]:
         push_world_event(msg)
 
-
 def _prune_area_presence() -> None:
-    """Remove presence entries older than 15 min or for players no longer online."""
     import time as _tp
 
     cutoff = _tp.time() - 900
@@ -1308,19 +1199,10 @@ def _prune_area_presence() -> None:
     for u in stale:
         _area_presence.pop(u, None)
 
-
 async def _world_tick():
-    """Background asyncio task: fires every 30 s for housekeeping.
-
-    Uses a Supabase-backed distributed lock so that only one worker runs the
-    tick when uvicorn is scaled beyond a single worker.  The lock TTL is 90 s
-    (3× the tick interval), so a crashed worker's lease expires automatically
-    and another worker takes over within one tick period.
-    """
     while True:
         await _asyncio.sleep(30)
 
-        # Distributed lock — skip this tick if another worker holds the lease.
         try:
             acquired = await _asyncio.get_event_loop().run_in_executor(
                 None,
@@ -1331,7 +1213,7 @@ async def _world_tick():
             if not acquired:
                 continue
         except Exception:
-            pass  # Lock system unavailable — proceed anyway (safe degradation).
+            pass
 
         try:
             await _expire_stale_trades()
@@ -1346,7 +1228,6 @@ async def _world_tick():
         except Exception:
             pass
 
-
 @app.errorhandler(429)
 def ratelimit_handler(e):
     return jsonify(
@@ -1356,11 +1237,9 @@ def ratelimit_handler(e):
         }
     ), 429
 
-
 dice = Dice()
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
-
 
 def load_json(filename) -> dict[str, Any]:
     try:
@@ -1370,7 +1249,6 @@ def load_json(filename) -> dict[str, Any]:
     except (OSError, ValueError, KeyError):
         return {}
 
-
 def load_json_list(filename) -> list:
     try:
         with open(os.path.join(DATA_DIR, filename), "r", encoding="utf-8") as f:
@@ -1378,7 +1256,6 @@ def load_json_list(filename) -> list:
             return data if isinstance(data, list) else []
     except (OSError, ValueError, KeyError):
         return []
-
 
 GAME_DATA: dict[str, Any] = {
     "classes": load_json("classes.json"),
@@ -1409,7 +1286,6 @@ GAME_DATA: dict[str, Any] = {
 
 GAME_VERSION = "2.7.2"
 
-# ─── Mining constants ─────────────────────────────────────────────────────────
 _PICKAXE_TIERS: dict[str, int] = {
     "Wooden Pickaxe":  1,
     "Iron Pickaxe":    2,
@@ -1433,16 +1309,12 @@ _MINING_XP_PER_RARITY: dict[str, int] = {
     "junk": 5, "common": 10, "uncommon": 30, "rare": 75, "legendary": 200,
 }
 
-
 def _get_mining_level(player: dict) -> int:
-    """Mining level 1-25 computed from total mining XP. XP for level N = (N-1)^2 * 50."""
     import math as _m
     xp = max(0, player.get("mining_xp", 0))
     return min(25, int(_m.sqrt(xp / 50)) + 1)
 
-
 def _mining_xp_for_level(level: int) -> int:
-    """Total XP needed to reach a given mining level."""
     return max(0, (level - 1) ** 2 * 50)
 
 BUILDING_TYPES = {
@@ -1456,7 +1328,6 @@ BUILDING_TYPES = {
 
 EQUIPPABLE_TYPES = {"weapon", "armor", "offhand", "accessory"}
 
-# Crafting materials grouped by area difficulty tier
 MATERIALS_BY_TIER = {
     1: ["Iron Ore", "Herbs", "Goblin Ears", "Wolf Fangs"],
     2: ["Coal", "Mana Herbs", "Orc Teeth", "Crystal Shards"],
@@ -1486,7 +1357,6 @@ TIME_ICONS = {
     "Midnight": "",
 }
 
-# Training options at Your Land
 TRAINING_OPTIONS = {
     "attack": {"label": "Attack Training", "stat": "attack", "cost": 80, "gain": 1},
     "defense": {"label": "Defense Training", "stat": "defense", "cost": 80, "gain": 1},
@@ -1505,31 +1375,19 @@ TRAINING_OPTIONS = {
     },
 }
 
-# Boss challenge cooldown in seconds (8 hours)
 BOSS_CHALLENGE_COOLDOWN = 8 * 3600
-
-
-# ─── Helpers ────────────────────────────────────────────────────────────────
-
 
 def get_player() -> dict[str, Any] | None:
     return session.get("player")
 
-
 def save_player(player: dict[str, Any]) -> None:
-    # Keep visited_areas in sync inside the player dict so it persists with the character
     player["visited_areas"] = list(
         set(player.get("visited_areas", []) + session.get("visited_areas", []))
     )
     session["player"] = player
     session.modified = True
 
-
-# ─── Persistent character helpers (Phase 1 MMO) ──────────────────────────────
-
-
 def _build_game_state() -> dict[str, Any]:
-    """Bundle all persistent session data into a dict for Supabase storage."""
     player = session.get("player")
     if not player:
         return {}
@@ -1551,9 +1409,7 @@ def _build_game_state() -> dict[str, Any]:
         "save_version": "7.1",
     }
 
-
 def _apply_game_state(data: dict[str, Any]) -> None:
-    """Apply a loaded game state dict to the current session."""
     player = data.get("player")
     if not player:
         return
@@ -1578,15 +1434,12 @@ def _apply_game_state(data: dict[str, Any]) -> None:
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
-    # Restore save slots if present
     raw_slots = data.get("_save_slots")
     if isinstance(raw_slots, list):
         session["_save_slots"] = raw_slots
     session.modified = True
 
-
 def _diary_append(text: str, color: str = "var(--text-light)") -> None:
-    """Append an entry to the diary (activity log) without showing it in the message feed."""
     diary = session.get("diary", [])
     diary.append({"text": text, "color": color})
     if len(diary) > 500:
@@ -1594,60 +1447,38 @@ def _diary_append(text: str, color: str = "var(--text-light)") -> None:
     session["diary"] = diary
     session.modified = True
 
-
-_AUTOSAVE_DIARY_INTERVAL = 300  # seconds between autosave diary entries
-
+_AUTOSAVE_DIARY_INTERVAL = 300
 
 def _effective_mob_level(player_level: int) -> int:
-    """
-    Return the effective level used to scale mob stats.
-    When the player is level 10+, mobs are nerfed to player_level // 10 (min 1).
-    Below level 10 normal level is used so early combat is still meaningful.
-    """
     if player_level >= 10:
         return max(1, player_level // 10)
     return player_level
 
-
 def _is_session_valid() -> bool:
-    """
-    Return True if the current Flask session's token matches the active session for this user
-    AND the session has not been inactive for more than ONLINE_SESSION_TIMEOUT seconds.
-    Returns True (passes) when the user is not logged in online (offline play is fine).
-    """
     user_id = session.get("online_user_id")
     if not user_id:
         return True
     token = session.get("session_token")
     if not token:
         return False
-    # Owner kick: force-logout by username
     username = session.get("online_username", "")
     if username and username.lower() in _kicked_usernames:
         _kicked_usernames.discard(username.lower())
         _active_sessions.pop(user_id, None)
         return False
-    # If there IS an entry for this user but with a DIFFERENT token → legitimate kick
-    # (another device logged in and took over the session).
     if user_id in _active_sessions and _active_sessions[user_id] != token:
         return False
-    # If there is NO entry at all → server was restarted and the in-memory dict was wiped.
-    # Auto-restore the session from the signed cookie so the user is not kicked.
     if user_id not in _active_sessions:
         _active_sessions[user_id] = token
-    # Refresh activity timestamp
     _session_last_activity[user_id] = _time_module.time()
     return True
 
-
 def _update_save_slot(slot: int, label: str, state: dict) -> None:
-    """Write a clean game state snapshot to save slot 1-5 in the session."""
     slots = session.get("_save_slots") or [None] * 5
     if not isinstance(slots, list):
         slots = [None] * 5
     slots: list[Any] = (list(slots) + [None] * 5)[:5]
     player = state.get("player", {})
-    # Strip _save_slots from the snapshot to avoid recursion
     snapshot = {k: v for k, v in state.items() if k != "_save_slots"}
     slots[slot - 1] = {
         "slot": slot,
@@ -1662,21 +1493,13 @@ def _update_save_slot(slot: int, label: str, state: dict) -> None:
     session["_save_slots"] = slots
     session.modified = True
 
-
 def _autosave() -> None:
-    """
-    Autosave: always updates the in-session slot 1 ("Auto Save") for all users.
-    Also persists to Supabase for logged-in users.
-    Logs a diary entry at most once every 5 minutes to avoid flooding.
-    """
     state = _build_game_state()
     if not state:
         return
 
-    # Always update slot 1 (auto-save) in session, even for offline users
     _update_save_slot(1, "Auto Save", state)
 
-    # Supabase persistence — online users only
     user_id = session.get("online_user_id")
     if user_id:
         username = session.get("online_username")
@@ -1688,7 +1511,6 @@ def _autosave() -> None:
         except Exception:
             pass
 
-    # Log to activities (diary) with throttling so it doesn't flood
     now = _time_module.time()
     last_log = session.get("_last_autosave_diary_log", 0)
     if now - last_log >= _AUTOSAVE_DIARY_INTERVAL:
@@ -1696,22 +1518,14 @@ def _autosave() -> None:
         session["_last_autosave_diary_log"] = now
         session.modified = True
 
-
 def _set_activity(player: dict, status: str) -> None:
-    """Store a short activity string on the player dict (persisted in autosave)."""
     player["activity_status"] = status
     username = session.get("online_username")
     area = session.get("current_area", "")
     if username and area:
         _update_area_presence(username, area, status)
 
-
 def _group_contribute(xp_gained: int, gold_gained: int, action: str) -> None:
-    """
-    Contribute a share of XP/gold to the player's group (if they're in one).
-    Silently skips for offline or non-grouped players.
-    Broadcasts group_level_up to all online group members on level-up.
-    """
     username = session.get("online_username")
     if not username:
         return
@@ -1737,10 +1551,8 @@ def _group_contribute(xp_gained: int, gold_gained: int, action: str) -> None:
     except Exception:
         pass
 
-
 def get_messages():
     return session.get("messages", [])
-
 
 def add_message(text, color="var(--text-light)"):
     msgs = session.get("messages", [])
@@ -1756,7 +1568,6 @@ def add_message(text, color="var(--text-light)"):
     session["diary"] = diary
 
     session.modified = True
-
 
 def get_rank(level):
     if level < 5:
@@ -1775,7 +1586,6 @@ def get_rank(level):
         return "S-Tier Adventurer"
     else:
         return "Legendary Hero"
-
 
 def gain_experience(player, amount):
     player["experience"] += amount
@@ -1798,17 +1608,9 @@ def gain_experience(player, amount):
         update_level_challenges(player)
     return leveled
 
-
-# ─── Timed Events ─────────────────────────────────────────────────────────────
-
 import datetime as _dt
 
-
 def check_and_award_events(player):
-    """Check all active events and award unclaimed rewards to the player.
-
-    Returns True if at least one event reward was awarded this call.
-    """
     events = GAME_DATA.get("events", [])
     if not events:
         return False
@@ -1822,7 +1624,6 @@ def check_and_award_events(player):
         if not event_id or event_id in claimed:
             continue
 
-        # ── Date window check ──────────────────────────────────────────────
         if "date" in event:
             if today_str != event["date"]:
                 continue
@@ -1832,7 +1633,6 @@ def check_and_award_events(player):
         else:
             continue
 
-        # ── Condition check ────────────────────────────────────────────────
         condition = event.get("condition", {})
         ctype = condition.get("type", "none")
 
@@ -1841,10 +1641,8 @@ def check_and_award_events(player):
             if player.get("total_bosses_defeated", 0) < required:
                 continue
         elif ctype == "first_login_on_date":
-            pass  # date already matched above; just being present counts
-        # ctype == "none" always passes
+            pass
 
-        # ── Award reward ───────────────────────────────────────────────────
         rtype = event.get("reward_type", "")
         msg = event.get(
             "reward_message",
@@ -1865,7 +1663,6 @@ def check_and_award_events(player):
 
     return awarded_any
 
-
 def advance_crops(player):
     crops = player.get("crops", {})
     for _slot_id, crop_info in crops.items():
@@ -1875,12 +1672,7 @@ def advance_crops(player):
             if crop_info["turns"] >= growth_time:
                 crop_info["ready"] = True
 
-
-# ─── Time of Day ──────────────────────────────────────────────────────────────
-
-
 def get_game_time(player=None):
-    """Return current time period name based on real London local time."""
     import datetime as _dt2
     import zoneinfo
 
@@ -1905,14 +1697,10 @@ def get_game_time(player=None):
     else:
         return "Midnight"
 
-
 def advance_game_time(player):
-    """Increment game ticks by 1."""
     player["game_ticks"] = player.get("game_ticks", 0) + 1
 
-
 def apply_regen_effects(player):
-    """Tick down any active regen effects (e.g. from Grand Feast Platter)."""
     effects = player.get("regen_effects", [])
     if not effects:
         return
@@ -1936,10 +1724,6 @@ def apply_regen_effects(player):
             )
     player["regen_effects"] = remaining
 
-
-# ─── Weather ──────────────────────────────────────────────────────────────────
-
-# WMO weather interpretation codes → game weather types
 _WMO_TO_GAME_WEATHER = {
     0: "sunny",
     1: "sunny",
@@ -1972,12 +1756,9 @@ _WMO_TO_GAME_WEATHER = {
 }
 
 _real_weather_cache: dict = {"weather": "sunny", "fetched_at": 0.0}
-_WEATHER_CACHE_TTL = 2 * 3600  # 2 IRL hours = 1 game day
-
+_WEATHER_CACHE_TTL = 2 * 3600
 
 def get_real_weather(area_name: str = "") -> str:
-    """Return real London weather from Open-Meteo, cached for 2 hours.
-    Underground/subterranean areas always return 'null'."""
     name_lower = area_name.lower()
     if "tomb" in name_lower or "cavern" in name_lower or "underground" in name_lower:
         return "null"
@@ -1998,23 +1779,16 @@ def get_real_weather(area_name: str = "") -> str:
             _real_weather_cache["weather"] = mapped
             _real_weather_cache["fetched_at"] = now
         except Exception:
-            pass  # Keep cached value on failure
+            pass
 
     return _real_weather_cache["weather"]
 
-
 def get_weather_bonuses(weather_key):
-    """Return exp and gold bonus multipliers for given weather."""
     weather_def = GAME_DATA["weather"].get(weather_key, {})
     bonuses = weather_def.get("bonuses", {})
     return bonuses.get("exp_bonus", 0.0), bonuses.get("gold_bonus", 0.0)
 
-
-# ─── Weekly Challenges ────────────────────────────────────────────────────────
-
-
 def update_weekly_challenge(player, event_type, amount=1):
-    """Track weekly challenge progress for the given event type."""
     ch_prog = player.setdefault("weekly_challenges_progress", {})
     for ch in GAME_DATA["weekly_challenges"]:
         ch_id = ch.get("id", "")
@@ -2027,9 +1801,7 @@ def update_weekly_challenge(player, event_type, amount=1):
             entry = ch_prog.setdefault(ch_id, {})
             entry["count"] = entry.get("count", 0) + amount
 
-
 def update_level_challenges(player):
-    """Update level_reach challenges to match current level."""
     ch_prog = player.setdefault("weekly_challenges_progress", {})
     for ch in GAME_DATA["weekly_challenges"]:
         if ch.get("type") == "level_reach":
@@ -2042,9 +1814,7 @@ def update_level_challenges(player):
             entry = ch_prog.setdefault(ch_id, {})
             entry["count"] = max(entry.get("count", 0), player.get("level", 1))
 
-
 def update_gold_challenges(player):
-    """Update gold_reach challenges to match current gold."""
     ch_prog = player.setdefault("weekly_challenges_progress", {})
     for ch in GAME_DATA["weekly_challenges"]:
         if ch.get("type") == "gold_reach":
@@ -2057,9 +1827,7 @@ def update_gold_challenges(player):
             entry = ch_prog.setdefault(ch_id, {})
             entry["count"] = max(entry.get("count", 0), player.get("gold", 0))
 
-
 def build_challenges_display(player):
-    """Build challenge display list for template."""
     update_gold_challenges(player)
     ch_prog = player.get("weekly_challenges_progress", {})
     result = []
@@ -2087,24 +1855,10 @@ def build_challenges_display(player):
         )
     return result
 
-
-# ─── Boss Dialogue ────────────────────────────────────────────────────────────
-
-
 def get_boss_dialogue(boss_key, timing):
-    """Return boss dialogue text for 'start' or 'defeat'."""
     return GAME_DATA["dialogues"].get(f"{boss_key}.boss.{timing}", "")
 
-
-# ─── Boss Battle Mechanics ────────────────────────────────────────────────────
-
-
 def get_boss_phase(phases, hp_pct):
-    """
-    Return (phase_index, phase_dict) for the given HP percentage.
-    Phases are ordered so that the highest threshold applies first (full health),
-    and later phases kick in as HP drops.
-    """
     if not phases:
         return 0, {}
     sorted_desc = sorted(phases, key=lambda p: -p.get("hp_threshold", 1.0))
@@ -2113,22 +1867,16 @@ def get_boss_phase(phases, hp_pct):
             return i, phase
     return len(sorted_desc) - 1, sorted_desc[-1]
 
-
 def _enemy_take_turn(enemy, player, player_effects, log, battle_companions=None):
-    """Dispatch enemy turn — boss uses full mechanic, regular enemy does plain attack.
-    If battle_companions is provided, the enemy may target a living companion instead."""
     if enemy.get("is_boss"):
         boss_take_turn(enemy, player, player_effects, log)
         return
 
-    # Build target pool: player + any living companions
     living_companions = [c for c in (battle_companions or []) if c.get("hp", 0) > 0]
-    # Enemy picks a random target; companions each share equal weight with the player
     targets = ["player"] + [c["id"] for c in living_companions]
     chosen = random.choice(targets)
 
     if chosen != "player" and living_companions:
-        # Enemy attacks a companion
         comp = next((c for c in living_companions if c["id"] == chosen), None)
         if comp:
             c_dmg = max(1, enemy["attack"] - comp["defense"] + dice.between(-2, 4))
@@ -2145,13 +1893,11 @@ def _enemy_take_turn(enemy, player, player_effects, log, battle_companions=None)
                 )
             return
 
-    # Enemy attacks the player
     evasion_pct = player.get("attr_evasion", 0) / 100.0
     dodge = player.get("dodge_chance", 0.0) + evasion_pct
     if dodge > 0 and random.random() < dodge:
         log.append(f"You evade the {enemy['name']}'s attack!")
         return
-    # Apply physical resistance from armor
     phys_res = player.get("physical_resistance", 0.0)
     e_raw = max(1, enemy["attack"] - player["defense"] + dice.between(-2, 4))
     e_dmg = max(1, int(e_raw * (1.0 - phys_res)))
@@ -2162,7 +1908,6 @@ def _enemy_take_turn(enemy, player, player_effects, log, battle_companions=None)
         e_dmg = max(0, e_dmg - reduction)
         if reduction > 0:
             log.append(f"Your shield absorbs {reduction} damage!")
-    # Active buff absorb (parry etc.)
     for buff in list(player.get("active_buffs", [])):
         if e_dmg <= 0:
             break
@@ -2179,15 +1924,7 @@ def _enemy_take_turn(enemy, player, player_effects, log, battle_companions=None)
     else:
         log.append(f"The {enemy['name']} attacks but your defences hold!")
 
-
 def boss_take_turn(enemy, player, player_effects, log):
-    """
-    Resolve the boss's turn: may use a special ability or do a regular attack.
-    Handles phase transitions, ability cooldowns, and effect application.
-    Modifies enemy/player dicts and log in place.
-    Returns dict with keys: used_ability (name or None), phase_changed (bool),
-    new_phase_desc (str or None).
-    """
     result = {"used_ability": None, "phase_changed": False, "new_phase_desc": None}
 
     boss_key = enemy.get("key", "")
@@ -2198,7 +1935,6 @@ def boss_take_turn(enemy, player, player_effects, log):
     hp_pct = enemy["hp"] / max(1, enemy["max_hp"])
     phase_idx, phase_data = get_boss_phase(phases, hp_pct)
 
-    # Detect phase transition
     prev_phase_idx = enemy.get("_phase_idx", 0)
     if phase_idx != prev_phase_idx and phases:
         enemy["_phase_idx"] = phase_idx
@@ -2207,7 +1943,6 @@ def boss_take_turn(enemy, player, player_effects, log):
         result["new_phase_desc"] = desc
         log.append(f"{enemy['name']} enters a new phase! {desc}")
 
-    # Apply phase multipliers — nerfed to 50% of original strength to keep bosses manageable
     if "_base_attack" not in enemy:
         enemy["_base_attack"] = enemy["attack"]
         enemy["_base_defense"] = enemy["defense"]
@@ -2219,21 +1954,18 @@ def boss_take_turn(enemy, player, player_effects, log):
     enemy["attack"] = max(1, int(enemy["_base_attack"] * atk_mult))
     enemy["defense"] = max(0, int(enemy["_base_defense"] * def_mult))
 
-    # Tick ability cooldowns
     cooldowns = enemy.get("_ability_cooldowns", {})
     for ab_name in list(cooldowns.keys()):
         if cooldowns[ab_name] > 0:
             cooldowns[ab_name] -= 1
     enemy["_ability_cooldowns"] = cooldowns
 
-    # Determine which abilities are unlocked for this phase
     unlocked = set()
     if phases and phase_data.get("special_abilities_unlocked"):
         unlocked = set(phase_data["special_abilities_unlocked"])
     if not unlocked and abilities:
         unlocked = {ab["name"] for ab in abilities}
 
-    # Filter eligible abilities (off cooldown and unlocked)
     eligible = [
         ab
         for ab in abilities
@@ -2255,7 +1987,6 @@ def boss_take_turn(enemy, player, player_effects, log):
         stun_chance = ability.get("stun_chance", 0.0)
 
         if dmg > 0:
-            # Ability damage ignores some defense — reduced by 20% to make bosses more manageable
             raw = max(1, int((dmg - player["defense"] // 2 + dice.between(-3, 5)) * 0.8))
             if "shield" in player_effects:
                 absorb = (
@@ -2288,7 +2019,6 @@ def boss_take_turn(enemy, player, player_effects, log):
             log.append(f"  ({ability.get('description', '')})")
 
     if not used_ability:
-        # Regular attack
         e_dmg = max(1, enemy["attack"] - player["defense"] + dice.between(-2, 4))
         if "shield" in player_effects:
             absorb = player_effects["shield"].get("data", {}).get("absorb_amount", 0)
@@ -2303,9 +2033,6 @@ def boss_take_turn(enemy, player, player_effects, log):
             log.append(f"The {enemy['name']} attacks but your shield holds!")
 
     return result
-
-
-# ─── Companion combat helpers ─────────────────────────────────────────────────
 
 _COMPANION_RANK_HP = {
     "common": 4000,
@@ -2331,9 +2058,7 @@ _COMPANION_RANK_DEF_CAP = {
     "legendary": 1600,
 }
 
-
 def _get_companion_combat_stats(comp_entry):
-    """Derive in-battle combat stats for a companion from game data + stored HP."""
     comp_id = comp_entry.get("id", "")
     comp_data = GAME_DATA["companions"].get(comp_id, {})
     rank = comp_data.get("rank", "common")
@@ -2357,21 +2082,14 @@ def _get_companion_combat_stats(comp_entry):
         "fallen": comp_entry.get("fallen", False),
     }
 
-
 def _build_battle_companions(player):
-    """Build session battle_companions list from player's hired companions (excludes fallen)."""
     return [
         _get_companion_combat_stats(c)
         for c in player.get("companions", [])
         if isinstance(c, dict) and not c.get("fallen", False)
     ]
 
-
 def _companion_take_action(battle_companions, enemy, log):
-    """
-    Each living companion rolls against their action_chance (40% baseline).
-    Returns True if the enemy was killed by a companion this turn.
-    """
     for comp in battle_companions:
         if comp["hp"] <= 0:
             continue
@@ -2391,12 +2109,7 @@ def _companion_take_action(battle_companions, enemy, log):
             return True
     return False
 
-
 def _companion_last_stand(battle_companions, enemy, log):
-    """
-    Simulate companions fighting solo after the player goes down.
-    Returns True if they defeat the enemy before all perishing.
-    """
     alive = [c for c in battle_companions if c["hp"] > 0]
     if not alive:
         return False
@@ -2420,10 +2133,7 @@ def _companion_last_stand(battle_companions, enemy, log):
         alive = [c for c in alive if c["hp"] > 0]
     return False
 
-
 def _sync_companion_hp_to_player(player, battle_companions):
-    """Write battle HP from session companions back into the player's companion list.
-    Marks companions as fallen if they reach 0 HP."""
     hp_map = {c["id"]: c["hp"] for c in battle_companions}
     for comp in player.get("companions", []):
         if isinstance(comp, dict) and comp.get("id") in hp_map:
@@ -2432,16 +2142,12 @@ def _sync_companion_hp_to_player(player, battle_companions):
             if new_hp <= 0:
                 comp["fallen"] = True
 
-
 def _restore_companion_hp(player):
-    """Restore living (non-fallen) companions to full HP after any battle outcome."""
     for comp in player.get("companions", []):
         if isinstance(comp, dict) and "max_hp" in comp and not comp.get("fallen", False):
             comp["hp"] = comp["max_hp"]
 
-
 def _revive_companions(player):
-    """Revive all fallen companions to full HP (called on inn rest)."""
     revived = []
     for comp in player.get("companions", []):
         if isinstance(comp, dict) and comp.get("fallen", False):
@@ -2452,9 +2158,7 @@ def _revive_companions(player):
             revived.append(comp.get("name", "Companion"))
     return revived
 
-
 def _ensure_companion_hp(player):
-    """Migration: assign/refresh HP/max_hp to companions with updated buffed values."""
     for comp in player.get("companions", []):
         if not isinstance(comp, dict):
             continue
@@ -2464,16 +2168,10 @@ def _ensure_companion_hp(player):
             comp["hp"] = new_max
             comp["max_hp"] = new_max
         elif comp.get("max_hp", 0) < new_max and not comp.get("fallen", False):
-            # Refresh to the new buffed max_hp
             comp["max_hp"] = new_max
             comp["hp"] = new_max
 
-
-# ─── Cutscenes ────────────────────────────────────────────────────────────────
-
-
 def trigger_cutscene(cutscene_id):
-    """Queue a cutscene to display on next game page load, if not already seen."""
     seen = session.get("seen_cutscenes", [])
     cutscene_def = GAME_DATA["cutscenes"].get(cutscene_id)
     if cutscene_def and not cutscene_def.get("iterable", True) and cutscene_id in seen:
@@ -2481,12 +2179,7 @@ def trigger_cutscene(cutscene_id):
     session["pending_cutscene"] = cutscene_id
     session.modified = True
 
-
-# ─── Status Effects ────────────────────────────────────────────────────────────
-
-
 def apply_status_effect(effects_dict, effect_key, turns=None):
-    """Add or refresh a status effect. Uses duration from effects.json if turns not specified."""
     effect_def = load_json("effects.json").get(effect_key, {})
     duration = turns or effect_def.get("duration", 3)
     effects_dict[effect_key] = {
@@ -2494,18 +2187,13 @@ def apply_status_effect(effects_dict, effect_key, turns=None):
         "data": effect_def,
     }
 
-
 def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False, player_level=1):
-    """Process all active status effects for an entity. Returns True if stunned.
-    When is_enemy=True, healing is scaled down relative to player_level."""
     to_remove = []
     stunned = False
     for eff_key, eff_info in list(effects_dict.items()):
-        # Support both old nested-data format and new flat format
         data = eff_info.get("data", eff_info)
         eff_type = data.get("type", "")
 
-        # ── Old nested-format effects ──────────────────────────────────────────
         if eff_type == "damage_over_time":
             dmg = data.get("damage", 5)
             entity["hp"] = max(0, entity["hp"] - dmg)
@@ -2515,7 +2203,6 @@ def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False
         elif eff_type == "healing_over_time":
             heal_base = data.get("heal_amount", 8)
             if is_enemy:
-                # Scale enemy healing down relative to player level — higher level = less regen
                 scale = max(0.25, 1.0 - player_level * 0.03)
                 heal = max(1, int(heal_base * scale))
             else:
@@ -2526,7 +2213,6 @@ def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False
             stunned = True
             log.append(f"{entity_label} is stunned and cannot act!")
 
-        # ── New flat-format proc effects ───────────────────────────────────────
         elif eff_key == "bleed":
             dmg = eff_info.get("damage", 6)
             entity["hp"] = max(0, entity["hp"] - dmg)
@@ -2540,7 +2226,6 @@ def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False
             log.append(f"{entity_label} is dazed and cannot act this turn!")
 
         elif eff_key == "weaken":
-            # Weaken reduces effective defense — tracked in effect, applied in damage calc
             turns_left = max(0, eff_info["turns"] - 1)
             if turns_left > 0:
                 log.append(
@@ -2563,7 +2248,6 @@ def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False
         if eff_info["turns"] <= 0:
             to_remove.append(eff_key)
             if eff_type == "stat_boost":
-                # Revert stat boosts from old format when they expire
                 for stat_key in ("defense_bonus", "attack_bonus", "speed_bonus"):
                     if stat_key in data:
                         stat = stat_key.replace("_bonus", "")
@@ -2574,9 +2258,6 @@ def process_turn_effects(entity, effects_dict, log, entity_label, is_enemy=False
 
     return stunned
 
-
-# ─── Equipment Helpers ───────────────────────────────────────────────────────
-
 STAT_BONUSES = [
     ("attack_bonus", "attack", 1),
     ("defense_bonus", "defense", 1),
@@ -2586,15 +2267,12 @@ STAT_BONUSES = [
     ("defense_penalty", "defense", -1),
     ("speed_penalty", "speed", -1),
     ("spell_power_bonus", "attr_spell_power", 1),
-    # New equipment stats
     ("evasion_bonus", "attr_evasion", 1),
     ("spell_power", "attr_spell_power", 1),
     ("crit_chance", "attr_crit_chance", 1),
 ]
 
-
 def apply_item_bonuses(player, item_data, direction=1):
-    """Apply (direction=1) or remove (direction=-1) item stat bonuses."""
     for bonus_key, stat_key, sign in STAT_BONUSES:
         val = item_data.get(bonus_key, 0)
         if val:
@@ -2608,7 +2286,6 @@ def apply_item_bonuses(player, item_data, direction=1):
     if mp_bonus and direction == 1:
         player["mp"] = min(player["mp"] + mp_bonus, player["max_mp"])
 
-    # Elemental resistances (armor only) — clamp to [0, 0.9]
     res_keys = (
         "physical_resistance",
         "fire_resistance",
@@ -2623,7 +2300,6 @@ def apply_item_bonuses(player, item_data, direction=1):
             current = player.get(rk, 0.0)
             player[rk] = max(0.0, min(0.9, current + val * direction))
 
-    # Outlaw tag on bows/daggers: grant dodge_chance bonus
     if item_data.get("type") == "weapon":
         tags = item_data.get("tags", [])
         if "outlaw" in tags:
@@ -2632,9 +2308,7 @@ def apply_item_bonuses(player, item_data, direction=1):
                 max(0.0, player.get("dodge_chance", 0.0) + dodge_bonus * direction), 4
             )
 
-
 def _ensure_equipment_slots(player):
-    """Ensure player has all equipment slots including 3 accessory slots."""
     if "equipment" not in player:
         player["equipment"] = {}
     for slot in (
@@ -2646,15 +2320,12 @@ def _ensure_equipment_slots(player):
         "accessory_3",
     ):
         player["equipment"].setdefault(slot, None)
-    # Migrate old single 'accessory' slot
     if "accessory" in player["equipment"]:
         old_val = player["equipment"].pop("accessory")
         if old_val and not player["equipment"].get("accessory_1"):
             player["equipment"]["accessory_1"] = old_val
 
-
 def equip_item(player, item_name):
-    """Equip item from inventory. Returns (success, message)."""
     if item_name not in player.get("inventory", []):
         return False, f"You don't have {item_name}."
 
@@ -2675,7 +2346,6 @@ def equip_item(player, item_name):
     _ensure_equipment_slots(player)
     equipment = player["equipment"]
 
-    # Determine slot
     if item_type == "accessory":
         slot = None
         for i in range(1, 4):
@@ -2684,11 +2354,10 @@ def equip_item(player, item_name):
                 slot = s
                 break
         if not slot:
-            slot = "accessory_1"  # Replace slot 1 if all full
+            slot = "accessory_1"
     else:
         slot = item_type
 
-    # Unequip current item in slot
     current = equipment.get(slot)
     if current:
         cur_data = GAME_DATA["items"].get(current, {})
@@ -2696,7 +2365,6 @@ def equip_item(player, item_name):
             apply_item_bonuses(player, cur_data, direction=-1)
         player["inventory"].append(current)
 
-    # Equip new item
     equipment[slot] = item_name
     player["inventory"].remove(item_name)
     apply_item_bonuses(player, item_data, direction=1)
@@ -2713,9 +2381,7 @@ def equip_item(player, item_name):
         msg += f" ({bonus_str})"
     return True, msg
 
-
 def unequip_item(player, slot):
-    """Unequip item from slot. Returns (success, message)."""
     equipment = player.get("equipment", {})
     item_name = equipment.get(slot)
     if not item_name:
@@ -2729,9 +2395,7 @@ def unequip_item(player, slot):
     player["inventory"].append(item_name)
     return True, f"You unequip {item_name}."
 
-
 def _item_score(item_data):
-    """Score an item by total stat contribution (higher = better)."""
     if not isinstance(item_data, dict):
         return 0
     score = 0
@@ -2752,20 +2416,13 @@ def _item_score(item_data):
     score += (item_data.get("aim_accuracy", 85) - 85) * 0.3
     return score
 
-
 def auto_equip_best(player):
-    """
-    Auto-equip the best items from inventory for each slot.
-    Only swaps if the inventory item is better than what is equipped.
-    Returns list of messages about what was equipped.
-    """
     items_data: dict[str, Any] = GAME_DATA["items"]
     player_level = player.get("level", 1)
     player_class = player.get("class", "")
     _ensure_equipment_slots(player)
     equipment = player["equipment"]
 
-    # Put all currently equipped items back in inventory for fair comparison
     for slot in list(equipment.keys()):
         current = equipment.get(slot)
         if current:
@@ -2775,7 +2432,6 @@ def auto_equip_best(player):
             if isinstance(item_d, dict):
                 apply_item_bonuses(player, item_d, direction=-1)
 
-    # Group inventory items by their equip slot
     slot_candidates: dict[str, list[str]] = {
         "weapon": [],
         "armor": [],
@@ -2800,7 +2456,6 @@ def auto_equip_best(player):
 
     messages = []
 
-    # Equip best weapon, armor, offhand
     for slot in ("weapon", "armor", "offhand"):
         candidates = slot_candidates.get(slot, [])
         if not candidates:
@@ -2810,7 +2465,6 @@ def auto_equip_best(player):
         if ok:
             messages.append(msg)
 
-    # Equip best accessories (up to 3)
     acc_candidates = sorted(
         slot_candidates.get("accessory", []),
         key=lambda n: _item_score(items_data.get(n, {})),
@@ -2825,18 +2479,10 @@ def auto_equip_best(player):
         messages.append("No better items found to equip.")
     return messages
 
-
-# Bro comments are unnecessary here
-
-# NO THEY'RE NECESSARY FOR THE TEAM
-
-
 def get_quest_progress(mission_id):
     return session.get("quest_progress", {}).get(mission_id, {})
 
-
 def update_quest_kills(enemy_key, enemy_name):
-    """Update kill counts for all active kill quests matching this enemy."""
     completed = set(session.get("completed_missions", []))
     missions: dict[str, Any] = GAME_DATA["missions"]
     quest_progress: dict[str, Any] = session.get("quest_progress") or {}
@@ -2880,9 +2526,7 @@ def update_quest_kills(enemy_key, enemy_name):
         session["quest_progress"] = quest_progress
         session.modified = True
 
-
 def check_mission_completable(mission_id, player):
-    """Check if a mission can be completed right now."""
     mission = GAME_DATA["missions"].get(mission_id, {})
     if not mission:
         return False, "Mission not found."
@@ -2946,9 +2590,7 @@ def check_mission_completable(mission_id, player):
 
     return True, "Ready"
 
-
 def get_mission_progress_display(mission_id, player):
-    """Return display info about mission progress."""
     mission = GAME_DATA["missions"].get(mission_id, {})
     if not mission:
         return []
@@ -2990,25 +2632,19 @@ def get_mission_progress_display(mission_id, player):
 
     return items_display
 
-
 @app.route("/game_assets/<path:filename>")
 def serve_game_asset(filename):
     return send_from_directory("data/assets", filename)
 
-
 @app.route("/ping")
 def health_ping():
-    """Lightweight health-check endpoint for Uptime Robot."""
     from flask import jsonify as _jsonify
     return _jsonify({"status": "ok"}), 200
 
-
 @app.route("/api/announcements")
 def api_announcements():
-    """Return the latest server announcements for the in-game banner."""
     from flask import jsonify as _jsonify
     return _jsonify({"announcements": [{"ts": ts, "text": t} for ts, t in _server_announcements]}), 200
-
 
 @app.route("/chat")
 def chat_page():
@@ -3017,14 +2653,12 @@ def chat_page():
         return redirect(url_for("index"))
     return render_template("chat.html", online_username=username)
 
-
 @app.route("/chat_widget")
 def chat_widget_page():
     username = session.get("online_username")
     if not username:
         return ("Unauthorized", 401)
     return render_template("chat_widget.html", online_username=username)
-
 
 @app.route("/")
 def index():
@@ -3044,11 +2678,9 @@ def index():
         online_count=len(_active_sessions),
     )
 
-
 @app.route("/play")
 def play():
     return render_template("play.html")
-
 
 @app.route("/create", methods=["GET", "POST"])
 def create():
@@ -3210,7 +2842,6 @@ def create():
         _autosave()
         return redirect(url_for("game"))
 
-
 @app.route("/game")
 def game():
     player = get_player()
@@ -3229,7 +2860,6 @@ def game():
             world_events=list(reversed(_world_events[-8:])),
         )
 
-    # ── Email check (online users must have a verified email) ────────────────
     _game_user_id = session.get("online_user_id")
     _user_has_email = True
     _user_email_pending = None
@@ -3238,14 +2868,12 @@ def game():
         if not _user_has_email:
             _user_email_pending = get_pending_email_verification(_game_user_id)
 
-    # ── Timed events ──────────────────────────────────────────────────────────
     events_awarded = check_and_award_events(player)
     save_player(player)
     if events_awarded:
         _set_activity(player, "claiming an event reward")
         _autosave()
 
-    # ── Battle state: show battle view inline ──────────────.g�───────────────
     _ensure_companion_hp(player)
 
     enemy: dict[str, Any] = session.get("battle_enemy") or {}
@@ -3333,7 +2961,6 @@ def game():
         connections.append(
             {
                 "key": conn_key,
-                # FOW: reveal name and details only for visited areas
                 "name": conn_area.get("name", conn_key.replace("_", " ").title())
                 if is_visited
                 else "???",
@@ -3345,7 +2972,6 @@ def game():
             }
         )
 
-    # Shop items
     shop_discount = min(0.50, player.get("attr_gold_discount", 0.0))
     shop_items = []
     shop_name = ""
@@ -3374,7 +3000,6 @@ def game():
                 }
             )
 
-    # Inventory
     inventory_items = []
     counts: dict[str, int] = {}
     for item_name in player.get("inventory", []):
@@ -3430,7 +3055,6 @@ def game():
             }
         )
 
-    # Equipment info — includes 3 accessory slots
     equipped_details = {}
     for slot, item_name in player.get("equipment", {}).items():
         if item_name:
@@ -3446,7 +3070,6 @@ def game():
                     else "",
                 }
 
-    # Missions
     completed = session.get("completed_missions", [])
     completed_set = set(completed)
     npc_unlocked_quests = set(session.get("npc_unlocked_quests", []))
@@ -3491,7 +3114,6 @@ def game():
 
     available_missions.sort(key=lambda m: (not m["eligible"], m["unlock_level"]))
 
-    # Your Land data
     land_data = None
     if area_key == "your_land":
         housing_data: dict[str, Any] = GAME_DATA["housing"]
@@ -3598,7 +3220,6 @@ def game():
             "has_garden": has_garden,
         }
 
-    # Companion system
     active_companions = []
     for comp in player.get("companions", []):
         if isinstance(comp, dict):
@@ -3643,7 +3264,6 @@ def game():
                 }
             )
 
-    # Time and weather
     game_time = get_game_time()
     game_time_icon = TIME_ICONS.get(game_time, "")
     area_name_for_weather = (
@@ -3656,10 +3276,8 @@ def game():
     weather_bonus_exp = int(weather_def.get("bonuses", {}).get("exp_bonus", 0) * 100)
     weather_bonus_gold = int(weather_def.get("bonuses", {}).get("gold_bonus", 0) * 100)
 
-    # Weekly challenges
     challenges_display = build_challenges_display(player)
 
-    # Boss challenges for current area
     available_bosses = []
     now_ts = _time_module.time()
     boss_cooldowns = player.get("boss_cooldowns", {})
@@ -3681,7 +3299,6 @@ def game():
             }
         )
 
-    # Mine data for current area
     mine_data = None
     mine_pool = area.get("mine_pool", [])
     if mine_pool:
@@ -3701,7 +3318,6 @@ def game():
         xp_progress = mining_xp_total - cur_lvl_xp
         xp_pct = min(100, int(xp_progress / xp_span * 100)) if mining_lvl < 25 else 100
 
-        # Show ALL ores from global requirements table (random pool), not area-specific
         mine_items = []
         for ore_name, req in _ORE_REQUIREMENTS.items():
             ore_item = GAME_DATA["items"].get(ore_name, {})
@@ -3741,7 +3357,6 @@ def game():
                 "best_tier": best_pickaxe_tier,
             }
 
-    # Pending cutscene
     pending_cutscene_id = session.get("pending_cutscene")
     pending_cutscene = None
     if pending_cutscene_id:
@@ -3752,7 +3367,6 @@ def game():
                 "content": cs.get("content", {}),
             }
 
-    # Crafting data for inline tab
     crafting_data: dict[str, Any] = GAME_DATA.get("crafting", {})
     raw_recipes = get_recipes(crafting_data)
     crafting_recipes = []
@@ -3762,7 +3376,6 @@ def game():
             {**recipe, "can_craft": check["ok"], "missing": check.get("missing", [])}
         )
 
-    # Events data for inline tab
     def _get_events_display(p):
         today = _dt.date.today()
         today_str = today.isoformat()
@@ -3818,7 +3431,6 @@ def game():
 
     events_data = _get_events_display(player)
 
-    # Dungeon data for inline tab
     dungeons_data: dict[str, Any] = GAME_DATA.get("dungeons", {})
     completed_dungeons_set = set(player.get("completed_dungeons", []))
     visited_areas_list = session.get("visited_areas", [area_key])
@@ -3884,14 +3496,12 @@ def game():
         user_email_pending=_user_email_pending,
     )
 
-
 def _item_stat_summary(item_data):
     if not isinstance(item_data, dict):
         return ""
     parts = []
     itype = item_data.get("type", "")
 
-    # Core stat bonuses/penalties (all equippable types)
     for bonus_key, label in [
         ("attack_bonus", "ATK"),
         ("defense_bonus", "DEF"),
@@ -3908,7 +3518,6 @@ def _item_stat_summary(item_data):
             sign = "+" if "penalty" not in bonus_key else "-"
             parts.append(f"{sign}{abs(int(val))} {label}")
 
-    # Weapon-specific stats
     if itype == "weapon":
         for bonus_key, label in [
             ("sharpness", "Sharp"),
@@ -3922,7 +3531,6 @@ def _item_stat_summary(item_data):
             if val:
                 parts.append(f"+{int(val)} {label}")
 
-        # Weapon-type proc attributes
         wtype = item_data.get("weapon_type", "")
         for proc_key, label in [
             ("crit_chance", "Crit"),
@@ -3950,7 +3558,6 @@ def _item_stat_summary(item_data):
                     else f"+{val} {label}"
                 )
 
-    # Armor-specific stats
     elif itype == "armor":
         armor_type = item_data.get("armor_type", "")
         if armor_type:
@@ -3970,7 +3577,6 @@ def _item_stat_summary(item_data):
             if val:
                 parts.append(f"+{int(val * 100)}% {label}")
 
-    # Consumable effects
     elif itype == "consumable":
         effect = item_data.get("effect")
         min_v = item_data.get("min_value", item_data.get("value", 0))
@@ -4009,13 +3615,7 @@ def _item_stat_summary(item_data):
 
     return ", ".join(parts)
 
-
 def _get_weapon_combat_effects(player, enemy):
-    """
-    Calculate bonus elemental/special damage from the player's equipped weapon
-    against the current enemy, taking enemy tags into account.
-    Returns a list of (bonus_dmg, message) tuples.
-    """
     equipment = player.get("equipment", {})
     weapon_name = equipment.get("weapon")
     if not weapon_name:
@@ -4027,7 +3627,6 @@ def _get_weapon_combat_effects(player, enemy):
     enemy_tags = set(enemy.get("tags", []))
     effects = []
 
-    # ── Sharpness: bonus vs humanoid/beast, reduced vs armored/construct ─────
     sharpness = weapon.get("sharpness", 0)
     if sharpness:
         if "humanoid" in enemy_tags or "beast" in enemy_tags:
@@ -4044,7 +3643,6 @@ def _get_weapon_combat_effects(player, enemy):
             bonus = sharpness
             effects.append((bonus, f"Your weapon's edge adds {bonus} cutting damage."))
 
-    # ── Smiting: bonus vs undead/demon ───────────────────────────────────────
     smiting = weapon.get("smiting", 0)
     if smiting:
         if "undead" in enemy_tags or "demon" in enemy_tags:
@@ -4062,7 +3660,6 @@ def _get_weapon_combat_effects(player, enemy):
             bonus = smiting
             effects.append((bonus, f"+{bonus} blessed damage."))
 
-    # ── Fire attack ──────────────────────────────────────────────────────────
     fire_atk = weapon.get("fire_attack", 0)
     if fire_atk:
         if "ice" in enemy_tags or "cold" in enemy_tags:
@@ -4078,7 +3675,6 @@ def _get_weapon_combat_effects(player, enemy):
             bonus = fire_atk
             effects.append((bonus, f"Your weapon blazes! +{bonus} fire damage."))
 
-    # ── Ice attack ───────────────────────────────────────────────────────────
     ice_atk = weapon.get("ice_attack", 0)
     if ice_atk:
         if "fire" in enemy_tags or "demon" in enemy_tags:
@@ -4092,7 +3688,6 @@ def _get_weapon_combat_effects(player, enemy):
             bonus = ice_atk
             effects.append((bonus, f"Your weapon freezes! +{bonus} ice damage."))
 
-    # ── Lightning attack ─────────────────────────────────────────────────────
     lightning_atk = weapon.get("lightning_attack", 0)
     if lightning_atk:
         if "armored" in enemy_tags or "construct" in enemy_tags:
@@ -4113,7 +3708,6 @@ def _get_weapon_combat_effects(player, enemy):
             bonus = lightning_atk
             effects.append((bonus, f"A bolt of lightning! +{bonus} lightning damage."))
 
-    # ── Poison attack ───────────────────────────────────────────────── [�──────
     poison_atk = weapon.get("poison_attack", 0)
     if poison_atk:
         if "construct" in enemy_tags or "undead" in enemy_tags:
@@ -4131,13 +3725,7 @@ def _get_weapon_combat_effects(player, enemy):
 
     return effects
 
-
 def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
-    """
-    Roll weapon-type proc chances and apply status effects to the enemy.
-    Returns a list of message strings for the battle log.
-    Modifies enemy_effects dict in place.
-    """
     equipment = player.get("equipment", {})
     weapon_name = equipment.get("weapon")
     if not weapon_name:
@@ -4154,7 +3742,6 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
     def _roll(chance_pct):
         return random.random() * 100 < chance_pct
 
-    # ── Bleed (daggers, throwing, sharp weapons) ──────────────────────────────
     bleed_chance = weapon.get("bleed_chance", 0)
     if bleed_chance and _roll(bleed_chance):
         if "construct" not in enemy_tags and "undead" not in enemy_tags:
@@ -4168,7 +3755,6 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
                 f"Your blade opens a deep wound! [{enemy.get('name', 'Enemy')} is bleeding]"
             )
 
-    # ── Stun / Daze (maces, warhammers) ──────────────────────────────────────
     stun_chance = weapon.get("stun_chance", 0)
     if stun_chance and _roll(stun_chance):
         if "construct" not in enemy_tags:
@@ -4178,7 +3764,6 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
                 f"Your crushing blow dazes {enemy.get('name', 'the enemy')}! [Dazed — loses next action]"
             )
 
-    # ── Weaken (axes — armor penetration leaves target exposed) ──────────────
     cleave_chance = weapon.get("cleave_chance", 0)
     if cleave_chance and _roll(cleave_chance):
         pen = weapon.get("armor_penetration", 10)
@@ -4193,7 +3778,6 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
             f"Your cleaving strike weakens {enemy.get('name', 'the enemy')}'s defences! [-{int(pen * 0.6)} DEF for 4 turns]"
         )
 
-    # ── Knockback / Shaken (greatswords, warhammers) ──────────────────────────
     knockback_chance = weapon.get("knockback_chance", 0)
     if knockback_chance and _roll(knockback_chance):
         enemy_effects["shaken"] = {"turns": 3, "acc_penalty": 20}
@@ -4201,7 +3785,6 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
             f"{enemy.get('name', 'The enemy')} is knocked back and shaken! [-20% accuracy for 3 turns]"
         )
 
-    # ── Sweep damage (greatswords, warhammers — bonus hit) ────────────────────
     sweep_chance = weapon.get("sweep_chance", 0)
     if sweep_chance and _roll(sweep_chance):
         sweep_dmg = max(1, int(player.get("attack", 10) * 0.35))
@@ -4210,14 +3793,12 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
             f"Your sweeping blow strikes again for {sweep_dmg} bonus damage!"
         )
 
-    # ── Multi-hit (throwing weapons) ──────────────────────────────────────────
     multi_hit_chance = weapon.get("multi_hit_chance", 0)
     if multi_hit_chance and _roll(multi_hit_chance):
         hit_dmg = max(1, int(player.get("attack", 10) * 0.25))
         enemy["hp"] = max(0, enemy.get("hp", 1) - hit_dmg)
         messages.append(f"Your second projectile strikes for {hit_dmg} extra damage!")
 
-    # ── Parry (swords — temporary defense buff for player) ────────────────────
     parry_chance = weapon.get("parry_chance", 0)
     if parry_chance and _roll(parry_chance):
         existing_buffs = player.get("active_buffs", [])
@@ -4233,7 +3814,6 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
             "You deflect the next blow with expert swordsmanship! [Parry: +10 DEF, absorbs 15 dmg for 2 turns]"
         )
 
-    # ── Inspire (bard instruments) ────────────────────────────────────────────
     inspire_chance = weapon.get("inspire_chance", 0)
     if inspire_chance and _roll(inspire_chance):
         inspire_bonus = weapon.get("harmony_bonus", 8)
@@ -4253,7 +3833,6 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
             f"Your melody inspires courage! [+{inspire_bonus} ATK, +{int(inspire_bonus * 0.5)} SPD for 6 turns]"
         )
 
-    # ── Armor Crush (maces — reduces enemy effective defense) ─────────────────
     armor_crush = weapon.get("armor_crush", 0)
     if armor_crush and _roll(20):
         existing = enemy_effects.get("armor_crushed", {}).get("def_reduction", 0)
@@ -4265,7 +3844,6 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
             f"You crush through the armour! [{enemy.get('name', 'Enemy')} defence -{armor_crush} for 5 turns]"
         )
 
-    # ── Backstab (daggers — only if enemy is not yet in combat or is shaken) ──
     backstab_bonus = weapon.get("backstab_bonus", 0)
     if backstab_bonus and ("shaken" in enemy_effects or "daze" in enemy_effects):
         enemy["hp"] = max(0, enemy.get("hp", 1) - backstab_bonus)
@@ -4275,12 +3853,7 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
 
     return messages
 
-
 def _check_weapon_accuracy(player, enemy):
-    """
-    Returns True if the attack hits, False if it misses.
-    Uses weapon aim_accuracy vs enemy speed.
-    """
     equipment = player.get("equipment", {})
     weapon_name = equipment.get("weapon")
     if not weapon_name:
@@ -4294,7 +3867,6 @@ def _check_weapon_accuracy(player, enemy):
     dodge_factor = max(0.0, min(0.25, (enemy_speed - player_speed) * 0.015))
     hit_chance = max(0.55, base_acc - dodge_factor)
     return random.random() < hit_chance
-
 
 def _companion_stat_summary(comp_data):
     if not isinstance(comp_data, dict):
@@ -4317,10 +3889,6 @@ def _companion_stat_summary(comp_data):
             parts.append(f"+{int(val)} {label}")
     return ", ".join(parts)
 
-
-# ─── Cutscene API ─────────────────────────────────────────────────────────────
-
-
 @app.route("/api/dismiss_cutscene", methods=["POST"])
 def dismiss_cutscene():
     cutscene_id = session.pop("pending_cutscene", None)
@@ -4331,7 +3899,6 @@ def dismiss_cutscene():
         session["seen_cutscenes"] = seen
         session.modified = True
     return jsonify({"ok": True})
-
 
 @app.route("/api/spend_attr_point", methods=["POST"])
 def api_spend_attr_point():
@@ -4361,10 +3928,6 @@ def api_spend_attr_point():
         }
     )
 
-
-# ─── Exploration ─────────────────────────────────────────────────────────────
-
-
 @app.route("/action/explore", methods=["POST"])
 def action_explore():
     player = get_player()
@@ -4383,7 +3946,6 @@ def action_explore():
 
     current_weather = get_real_weather(area.get("name", ""))
 
-    # Boss encounter: 8% chance if area has bosses
     if possible_bosses and random.random() < 0.08:
         boss_key = random.choice(possible_bosses)
         boss_data = GAME_DATA.get("bosses", {}).get(boss_key, {})
@@ -4454,7 +4016,6 @@ def action_explore():
         save_player(player)
         return redirect(url_for("game"))
 
-    # ── NPC Encounter (20% chance in areas with NPCs, no battle)
     area_npcs = area.get("npcs", [])
     npc_talked = False
     if area_npcs and random.random() < 0.20:
@@ -4464,7 +4025,6 @@ def action_explore():
         add_message(f"You encounter {npc_name}.", "var(--gold)")
         add_message(f'"{dialogue}"', "var(--text-light)")
 
-        # Quest unlock via NPC dialogue
         quest_unlock = npc.get("quest_unlock")
         if quest_unlock:
             completed_missions = session.get("completed_missions", [])
@@ -4483,18 +4043,15 @@ def action_explore():
                 )
         npc_talked = True
 
-    # ── Random Explore Events (one event per explore)
     if not npc_talked:
         explore_event_roll = random.random()
         if explore_event_roll < 0.08:
-            # Trap!
             dmg = dice.between(5, max(6, player.get("level", 1) * 3))
             player["hp"] = max(1, player["hp"] - dmg)
             add_message(
                 f"You trigger a hidden trap! You take {dmg} damage.", "var(--red)"
             )
         elif explore_event_roll < 0.14:
-            # Ancient shrine — restore MP
             mp_restore = dice.between(10, 30)
             player["mp"] = min(player["max_mp"], player["mp"] + mp_restore)
             add_message(
@@ -4502,7 +4059,6 @@ def action_explore():
                 "var(--mana-bright,#7eb8f7)",
             )
         elif explore_event_roll < 0.19:
-            # Mysterious tome — bonus EXP
             exp_bonus = dice.between(15, 40)
             player["exp"] = player.get("exp", 0) + exp_bonus
             add_message(
@@ -4510,7 +4066,6 @@ def action_explore():
                 "var(--gold)",
             )
         elif explore_event_roll < 0.23:
-            # Abandoned camp — find multiple items
             finds = random.choice(
                 [
                     ["Health Potion"],
@@ -4526,8 +4081,6 @@ def action_explore():
                 "var(--text-light)",
             )
 
-    # ── Non-combat exploration outcomes
-    # 30% chance to find gold (5-20)
     if random.random() < 0.30:
         gold_found = dice.between(5, 20)
         player["gold"] += gold_found
@@ -4535,7 +4088,6 @@ def action_explore():
             f"You spot {gold_found} gold coins glinting on the ground.", "var(--gold)"
         )
 
-    # 40% chance to gather crafting materials
     if random.random() < 0.40:
         difficulty = area.get("difficulty", 1)
         tier = max(1, min(difficulty, 5))
@@ -4547,7 +4099,6 @@ def action_explore():
         mat_str = ", ".join(gathered)
         add_message(f"You gather materials: {mat_str}.", "var(--green-bright)")
 
-    # Other exploration outcomes — WIS boosts item find thresholds
     discovery_bonus = player.get("attr_discovery", 0.0)
     roll2 = random.random()
     if roll2 < 0.20:
@@ -4571,7 +4122,6 @@ def action_explore():
     save_player(player)
     _autosave()
     return redirect(url_for("game"))
-
 
 @app.route("/action/rest", methods=["POST"])
 def action_rest():
@@ -4624,7 +4174,6 @@ def action_rest():
     _autosave()
     return redirect(url_for("game"))
 
-
 @app.route("/action/mine", methods=["POST"])
 def action_mine():
     import random as _rand
@@ -4641,7 +4190,6 @@ def action_mine():
         add_message("There are no mines in this area.", "var(--red)")
         return redirect(url_for("game"))
 
-    # ── Pickaxe check ───────────────────────────────────────────────────────
     inventory = player.get("inventory", [])
     best_tier = max((_PICKAXE_TIERS.get(i, 0) for i in inventory), default=0)
     best_pickaxe = next(
@@ -4656,7 +4204,6 @@ def action_mine():
         )
         return redirect(url_for("game"))
 
-    # ── Build accessible pool from ALL ores (not area-specific) ─────────────
     mining_lvl = _get_mining_level(player)
     accessible: list[str] = []
     for ore_name, req in _ORE_REQUIREMENTS.items():
@@ -4670,7 +4217,6 @@ def action_mine():
         )
         return redirect(url_for("game"))
 
-    # ── STR-based success chance ─────────────────────────────────────────────
     str_val = int(player.get("attributes", {}).get("str", 0))
     success_chance = min(0.95, 0.65 + str_val * 0.005)
 
@@ -4685,7 +4231,6 @@ def action_mine():
         _autosave()
         return redirect(url_for("game"))
 
-    # ── Weighted draw by rarity from random global pool ──────────────────────
     _rw = {"junk": 80, "common": 60, "uncommon": 30, "rare": 8, "legendary": 2}
     pool_names: list[str] = []
     pool_weights: list[int] = []
@@ -4703,7 +4248,6 @@ def action_mine():
     ore_data = GAME_DATA["items"].get(ore_name, {})
     rarity = ore_data.get("rarity", "common") if isinstance(ore_data, dict) else "common"
 
-    # ── Mining XP & level-up ─────────────────────────────────────────────────
     xp_gain = _MINING_XP_PER_RARITY.get(rarity, 10) * amount
     old_level = _get_mining_level(player)
     player["mining_xp"] = player.get("mining_xp", 0) + xp_gain
@@ -4730,7 +4274,6 @@ def action_mine():
     _autosave()
     return redirect(url_for("game"))
 
-
 @app.route("/action/travel", methods=["POST"])
 def action_travel():
     player = get_player()
@@ -4750,14 +4293,12 @@ def action_travel():
         if first_visit:
             visited.append(dest_key)
             session["visited_areas"] = visited
-            # Trigger cutscene if area has one
             cs_id = dest_area.get("first_time_enter_cutscene")
             if cs_id:
                 trigger_cutscene(cs_id)
         add_message(f"You travel to {dest_name}.", "var(--wood-light)")
         _set_activity(player, f"wandering {dest_name}")
 
-        # Show players already in the destination area
         my_username = session.get("online_username")
         online_set = set(_chat_online.values()) - {my_username}
         import time as _tv
@@ -4783,10 +4324,6 @@ def action_travel():
     _autosave()
     return redirect(url_for("game") + "?autosaved=1")
 
-
-# ─── Manual Boss Challenge ─────────────em�t��──────────────────────────────────────
-
-
 @app.route("/action/challenge_boss", methods=["POST"])
 def action_challenge_boss():
     player = get_player()
@@ -4806,7 +4343,6 @@ def action_challenge_boss():
         add_message("Unknown boss.", "var(--red)")
         return redirect(url_for("game"))
 
-    # Check cooldown
     now_ts = _time_module.time()
     boss_cooldowns = player.get("boss_cooldowns", {})
     cooldown_until = boss_cooldowns.get(boss_key, 0)
@@ -4820,7 +4356,6 @@ def action_challenge_boss():
         )
         return redirect(url_for("game"))
 
-    # Set cooldown
     boss_cooldowns[boss_key] = now_ts + BOSS_CHALLENGE_COOLDOWN
     player["boss_cooldowns"] = boss_cooldowns
 
@@ -4853,7 +4388,6 @@ def action_challenge_boss():
     session.modified = True
     save_player(player)
     return redirect(url_for("game"))
-
 
 @app.route("/action/buy", methods=["POST"])
 def action_buy():
@@ -4892,7 +4426,6 @@ def action_buy():
     _autosave()
     return redirect(url_for("game"))
 
-
 @app.route("/action/sell", methods=["POST"])
 def action_sell():
     player = get_player()
@@ -4917,10 +4450,6 @@ def action_sell():
     save_player(player)
     _autosave()
     return redirect(url_for("game") + "?tab=inventory")
-
-
-# ─── Companion System ────────────────────────────────────────────────────────
-
 
 @app.route("/action/hire_companion", methods=["POST"])
 def action_hire_companion():
@@ -5010,7 +4539,6 @@ def action_hire_companion():
     _autosave()
     return redirect(url_for("game"))
 
-
 @app.route("/action/dismiss_companion", methods=["POST"])
 def action_dismiss_companion():
     player = get_player()
@@ -5069,7 +4597,6 @@ def action_dismiss_companion():
     save_player(player)
     _autosave()
     return redirect(url_for("game"))
-
 
 @app.route("/action/use_item", methods=["POST"])
 def action_use_item():
@@ -5176,7 +4703,6 @@ def action_use_item():
     elif item_type == "book":
         return redirect(url_for("action_read_book") + f"?item={item_name}")
     elif item_type == "consumable":
-        # Generic effect-driven consumable handling
         effect = item_data.get("effect", "")
         value = item_data.get("value", 0)
         min_v = item_data.get("min_value", value)
@@ -5243,7 +4769,6 @@ def action_use_item():
     _autosave()
     return redirect(url_for("game"))
 
-
 @app.route("/action/quick_heal", methods=["POST"])
 def action_quick_heal():
     player = get_player()
@@ -5288,7 +4813,6 @@ def action_quick_heal():
     _autosave()
     return redirect(url_for("game"))
 
-
 @app.route("/action/sort_inventory", methods=["POST"])
 def action_sort_inventory():
     player = get_player()
@@ -5317,7 +4841,6 @@ def action_sort_inventory():
     add_message("Inventory sorted by type.", "var(--text-dim)")
     save_player(player)
     return redirect(url_for("game") + "?tab=character")
-
 
 @app.route("/action/read_book", methods=["GET", "POST"])
 def action_read_book():
@@ -5366,7 +4889,6 @@ def action_read_book():
         item_name=item_name,
     )
 
-
 @app.route("/action/equip", methods=["POST"])
 def action_equip():
     player = get_player()
@@ -5378,7 +4900,6 @@ def action_equip():
     save_player(player)
     _autosave()
     return redirect(url_for("game") + "?tab=inventory")
-
 
 @app.route("/action/unequip", methods=["POST"])
 def action_unequip():
@@ -5392,7 +4913,6 @@ def action_unequip():
     _autosave()
     return redirect(url_for("game") + "?tab=inventory")
 
-
 @app.route("/action/auto_equip", methods=["POST"])
 def action_auto_equip():
     player = get_player()
@@ -5404,10 +4924,6 @@ def action_auto_equip():
     save_player(player)
     _autosave()
     return redirect(url_for("game") + "?tab=inventory")
-
-
-# ─── Missions ─────────────────────────────────────────────────────────────────
-
 
 @app.route("/action/complete_mission", methods=["POST"])
 def action_complete_mission():
@@ -5429,7 +4945,6 @@ def action_complete_mission():
 
     mission = GAME_DATA["missions"].get(mission_id, {})
 
-    # Trigger mission accept cutscene on first ever mission completion
     if not completed:
         trigger_cutscene("mission_accept_tutorial")
 
@@ -5459,7 +4974,6 @@ def action_complete_mission():
             "var(--gold)",
         )
 
-    # Update weekly challenge
     update_weekly_challenge(player, "mission_count", 1)
 
     quest_progress: dict[str, Any] = session.get("quest_progress") or {}
@@ -5470,10 +4984,6 @@ def action_complete_mission():
     save_player(player)
     _autosave()
     return redirect(url_for("game"))
-
-
-# ─── Weekly Challenges ────────────────────────────────────────────────────────
-
 
 @app.route("/action/claim_challenge", methods=["POST"])
 def action_claim_challenge():
@@ -5523,10 +5033,6 @@ def action_claim_challenge():
     _autosave()
     return redirect(url_for("game") + "#challenges")
 
-
-# ─── Your Land Routes ────────────────────────────────────────────────────────
-
-
 @app.route("/action/land/buy_housing", methods=["POST"])
 def land_buy_housing():
     player = get_player()
@@ -5562,7 +5068,6 @@ def land_buy_housing():
     _autosave()
     return redirect(url_for("game") + "?tab=land")
 
-
 @app.route("/action/land/place_housing", methods=["POST"])
 def land_place_housing():
     player = get_player()
@@ -5597,7 +5102,6 @@ def land_place_housing():
     _autosave()
     return redirect(url_for("game") + "?tab=land")
 
-
 @app.route("/action/land/remove_housing", methods=["POST"])
 def land_remove_housing():
     player = get_player()
@@ -5624,14 +5128,12 @@ def land_remove_housing():
     _autosave()
     return redirect(url_for("game") + "?tab=land")
 
-
 @app.route("/action/land/plant", methods=["POST"])
 def land_plant():
     player = get_player()
     if not player:
         return redirect(url_for("index"))
 
-    # Require a garden to be built
     building_slots = player.get("building_slots", {})
     has_garden = any(k.startswith("garden") and v for k, v in building_slots.items())
     if not has_garden:
@@ -5675,7 +5177,6 @@ def land_plant():
     _autosave()
     return redirect(url_for("game") + "?tab=land")
 
-
 @app.route("/action/land/harvest", methods=["POST"])
 def land_harvest():
     player = get_player()
@@ -5716,7 +5217,6 @@ def land_harvest():
     save_player(player)
     _autosave()
     return redirect(url_for("game") + "?tab=land")
-
 
 @app.route("/action/land/buy_pet", methods=["POST"])
 def land_buy_pet():
@@ -5785,10 +5285,6 @@ def land_buy_pet():
     _autosave()
     return redirect(url_for("game") + "?tab=land")
 
-
-# ─── Training (Your Land) ─────────────────────────────────────────────────────
-
-
 @app.route("/action/land/train", methods=["POST"])
 def land_train():
     player = get_player()
@@ -5799,7 +5295,6 @@ def land_train():
         add_message("You can only train at Your Land.", "var(--red)")
         return redirect(url_for("game"))
 
-    # Require a training place to be built
     building_slots = player.get("building_slots", {})
     has_training_place = any(
         k.startswith("training_place") and v for k, v in building_slots.items()
@@ -5827,7 +5322,6 @@ def land_train():
     stat = str(option["stat"])
     gain = option["gain"]
     player[stat] = player.get(stat, 0) + gain
-    # If training max_hp, also restore current hp a bit
     if stat == "max_hp":
         player["hp"] = min(player["hp"] + gain, player["max_hp"])
     elif stat == "max_mp":
@@ -5841,14 +5335,9 @@ def land_train():
     _autosave()
     return redirect(url_for("game") + "?tab=land")
 
-
-# ─── Battle Routes ────────────────────────────────────────────────────────────
-
-
 @app.route("/battle")
 def battle():
     return redirect(url_for("game"))
-
 
 @app.route("/battle/spell", methods=["POST"])
 def battle_spell():
@@ -5868,7 +5357,6 @@ def battle_spell():
     enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
     battle_companions = session.get("battle_companions", [])
 
-    # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
     stunned = process_turn_effects(player, player_effects, log, "You")
     session["battle_player_effects"] = player_effects
@@ -5912,7 +5400,6 @@ def battle_spell():
 
     _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
 
-    # Companion action
     if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
         session["battle_companions"] = battle_companions
         session["battle_player_effects"] = player_effects
@@ -5945,7 +5432,6 @@ def battle_spell():
     save_player(player)
     return redirect(url_for("game"))
 
-
 @app.route("/battle/attack", methods=["POST"])
 def battle_attack():
     player = get_player()
@@ -5958,7 +5444,6 @@ def battle_attack():
     enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
     battle_companions = session.get("battle_companions", [])
 
-    # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
     stunned = process_turn_effects(player, player_effects, log, "You")
     process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True, player_level=player.get("level", 1))
@@ -5973,11 +5458,9 @@ def battle_attack():
         return _handle_victory(player, enemy, log)
 
     if not stunned:
-        # ── Accuracy check ───────────────────────────────────────────────────
         if not _check_weapon_accuracy(player, enemy):
             log.append(f"You swing at the {enemy_name} but miss!")
         else:
-            # Factor in weaken / armor_crushed debuffs on enemy defense
             eff_enemy_def = enemy["defense"]
             weaken_eff = enemy_effects.get("weaken", {})
             if weaken_eff.get("turns", 0) > 0:
@@ -5990,7 +5473,6 @@ def battle_attack():
                     0, eff_enemy_def - armor_crush_eff.get("def_reduction", 0)
                 )
 
-            # Armor penetration ignores a % of remaining defense
             armor_pen_pct = 0
             eq_weapon = GAME_DATA["items"].get(
                 player.get("equipment", {}).get("weapon", ""), {}
@@ -6013,7 +5495,6 @@ def battle_attack():
                 log.append(f"You attack the {enemy_name} for {p_dmg} damage.")
             enemy["hp"] = max(0, enemy["hp"] - p_dmg)
 
-            # ── Weapon elemental/special effects ─────────────────────────────
             weapon_effects = _get_weapon_combat_effects(player, enemy)
             total_bonus = 0
             for bonus_dmg, bonus_msg in weapon_effects:
@@ -6023,7 +5504,6 @@ def battle_attack():
             if total_bonus > 0:
                 enemy["hp"] = max(0, enemy["hp"] - total_bonus)
 
-            # ── On-hit proc effects (bleed, stun, weaken, inspire, etc.) ─────
             proc_msgs = _get_weapon_on_hit_procs(player, enemy, enemy_effects)
             for msg in proc_msgs:
                 log.append(msg)
@@ -6037,7 +5517,6 @@ def battle_attack():
 
     _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
 
-    # Companion action
     if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
         session["battle_companions"] = battle_companions
         session["battle_player_effects"] = player_effects
@@ -6071,7 +5550,6 @@ def battle_attack():
     save_player(player)
     return redirect(url_for("game"))
 
-
 @app.route("/battle/defend", methods=["POST"])
 def battle_defend():
     player = get_player()
@@ -6084,7 +5562,6 @@ def battle_defend():
     enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
     battle_companions = session.get("battle_companions", [])
 
-    # Process effects at start of turn
     enemy_name = enemy.get("name", "Enemy")
     process_turn_effects(player, player_effects, log, "You")
     process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True, player_level=player.get("level", 1))
@@ -6104,7 +5581,6 @@ def battle_defend():
     _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
     player["defense"] = real_defense
 
-    # Companion action
     if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
         session["battle_companions"] = battle_companions
         session["battle_player_effects"] = player_effects
@@ -6137,7 +5613,6 @@ def battle_defend():
     session["battle_enemy_effects"] = enemy_effects
     save_player(player)
     return redirect(url_for("game"))
-
 
 @app.route("/battle/use_item", methods=["POST"])
 def battle_use_item():
@@ -6203,7 +5678,6 @@ def battle_use_item():
                 f"You use the {item_name}. {buff_def.get('description', 'A buff is applied!')} ({dur} turns)"
             )
         elif item_data.get("type") == "consumable":
-            # Fallback: name-based healing
             lower = item_name.lower()
             if "mana" in lower or "mp" in lower:
                 restore = dice.between(25, 50)
@@ -6222,7 +5696,6 @@ def battle_use_item():
 
         _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
 
-    # Companion action
     if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
         session["battle_companions"] = battle_companions
         session["battle_player_effects"] = player_effects
@@ -6255,7 +5728,6 @@ def battle_use_item():
     session["battle_enemy_effects"] = enemy_effects
     save_player(player)
     return redirect(url_for("game"))
-
 
 @app.route("/battle/flee", methods=["POST"])
 def battle_flee():
@@ -6291,13 +5763,11 @@ def battle_flee():
     save_player(player)
     return redirect(url_for("game"))
 
-
 def _handle_victory(player, enemy, log):
     log.append(f"The {enemy['name']} falls! Victory!")
     exp = enemy.get("exp_reward", enemy.get("experience_reward", 30))
     gold = enemy.get("gold_reward", 10)
 
-    # Apply weather bonuses
     _area_name_bw = (
         GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "")
     )
@@ -6348,7 +5818,6 @@ def _handle_victory(player, enemy, log):
     if loot_item:
         add_message(f"Found: {loot_item}", "var(--gold)")
 
-    # Post-battle companion healing aura
     post_heal = player.get("attr_post_battle_heal", 0)
     if post_heal and post_heal > 0:
         actual = min(post_heal, player["max_hp"] - player["hp"])
@@ -6356,24 +5825,20 @@ def _handle_victory(player, enemy, log):
             player["hp"] += actual
             log.append(f"Your companion's aura restores {actual} HP after battle.")
 
-    # Update quest kill progress
     enemy_key = enemy.get("key", enemy.get("name", "").lower().replace(" ", "_"))
     enemy_name = enemy.get("name", "")
     update_quest_kills(enemy_key, enemy_name)
 
-    # Update weekly challenges
     update_weekly_challenge(player, "kill_count", 1)
     _record_activity("boss_kills" if enemy.get("is_boss") else "battles")
     if enemy.get("is_boss"):
         update_weekly_challenge(player, "boss_kill", 1)
         player["total_bosses_defeated"] = player.get("total_bosses_defeated", 0) + 1
-        # Boss defeat dialogue
         boss_key = enemy.get("key", "")
         defeat_dialogue = get_boss_dialogue(boss_key, "defeat")
         if defeat_dialogue:
             log.append(f'"{defeat_dialogue}"')
 
-    # Clear status effects
     session.pop("battle_player_effects", None)
     session.pop("battle_enemy_effects", None)
     session.pop("battle_companions", None)
@@ -6382,7 +5847,6 @@ def _handle_victory(player, enemy, log):
     save_player(player)
     _autosave()
 
-    # World events feed (online players only)
     if session.get("online_username"):
         _pname = player.get("name", session.get("online_username", "Someone"))
         _aname = (
@@ -6395,7 +5859,6 @@ def _handle_victory(player, enemy, log):
         else:
             push_world_event(f"{_pname} slew a {enemy['name']} in {_aname}.")
 
-    # If inside a dungeon, return there instead of showing victory screen
     active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}
     if active_dungeon:
         rooms = active_dungeon.get("rooms", [])
@@ -6415,11 +5878,9 @@ def _handle_victory(player, enemy, log):
         leveled=leveled,
     )
 
-
 def _handle_defeat(player, enemy, log):
     log.append("You fall in battle...")
 
-    # If inside a dungeon, restart the dungeon from the beginning
     active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}
     if active_dungeon:
         player["hp"] = max(1, int(player["max_hp"] * 0.40))
@@ -6434,7 +5895,6 @@ def _handle_defeat(player, enemy, log):
         session.pop("battle_companions", None)
         session["battle_log"] = log
         session["battle_enemy"] = None
-        # Restart dungeon from room 1
         active_dungeon["room_index"] = 0
         active_dungeon["current_challenge"] = None
         active_dungeon["challenge_answered"] = False
@@ -6457,10 +5917,6 @@ def _handle_defeat(player, enemy, log):
     _autosave()
 
     return render_template("defeat.html", player=player, enemy=enemy, log=log)
-
-
-# ─── Save / Load ───────────────────────────────────────────────────────────────
-
 
 @app.route("/api/save", methods=["POST"])
 def api_save():
@@ -6491,7 +5947,6 @@ def api_save():
     response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
-
 @app.route("/api/load", methods=["POST"])
 def api_load():
     data = None
@@ -6518,7 +5973,6 @@ def api_load():
         return jsonify({"error": "Invalid save file: missing player data."}), 400
 
     _ensure_equipment_slots(player)
-    # Initialize new fields if missing (backward compatibility)
     player.setdefault("game_ticks", 0)
     player.setdefault("weekly_challenges_progress", {})
     player.setdefault("boss_cooldowns", {})
@@ -6541,14 +5995,9 @@ def api_load():
     session.modified = True
     return jsonify({"ok": True, "player_name": player.get("name")})
 
-
-# ─── Crafting Routes ──────────────────────────────────────────────────────────
-
-
 @app.route("/crafting")
 def crafting():
     return redirect(url_for("game") + "?tab=crafting")
-
 
 @app.route("/action/craft", methods=["POST"])
 def action_craft():
@@ -6565,14 +6014,9 @@ def action_craft():
     _autosave()
     return redirect(url_for("game") + "?tab=crafting")
 
-
-# ─── Dungeon Routes ────────────────────────────────────────────────────────────
-
-
 @app.route("/dungeons")
 def dungeons():
     return redirect(url_for("game") + "?tab=dungeons")
-
 
 @app.route("/action/dungeon/enter", methods=["POST"])
 def dungeon_enter():
@@ -6628,7 +6072,6 @@ def dungeon_enter():
     save_player(player)
     return redirect(url_for("dungeon_room"))
 
-
 @app.route("/dungeon/room")
 def dungeon_room():
     player = get_player()
@@ -6669,7 +6112,6 @@ def dungeon_room():
         current_challenge=current_challenge,
         messages=list(reversed(get_messages()))[:10],
     )
-
 
 @app.route("/action/dungeon/proceed", methods=["POST"])
 def dungeon_proceed():
@@ -6828,7 +6270,6 @@ def dungeon_proceed():
         return redirect(url_for("dungeon_complete"))
     return redirect(url_for("dungeon_room"))
 
-
 @app.route("/dungeon/answer", methods=["POST"])
 def dungeon_answer():
     player = get_player()
@@ -6851,7 +6292,6 @@ def dungeon_answer():
     if active["room_index"] >= len(active["rooms"]):
         return redirect(url_for("dungeon_complete"))
     return redirect(url_for("dungeon_room"))
-
 
 @app.route("/dungeon/choose", methods=["POST"])
 def dungeon_choose():
@@ -6876,7 +6316,6 @@ def dungeon_choose():
         return redirect(url_for("dungeon_complete"))
     return redirect(url_for("dungeon_room"))
 
-
 @app.route("/dungeon/complete")
 def dungeon_complete():
     player = get_player()
@@ -6895,20 +6334,17 @@ def dungeon_complete():
             f"cleared dungeon: {dungeon.get('name', 'a dungeon')}",
         )
         _record_activity("dungeons")
-        # Mark dungeon as completed in player data
         dungeon_id = dungeon.get("id", "")
         if dungeon_id:
             completed_dungeons = player.setdefault("completed_dungeons", [])
             if dungeon_id not in completed_dungeons:
                 completed_dungeons.append(dungeon_id)
         session.pop("active_dungeon", None)
-        # Update weekly challenge
         update_weekly_challenge(player, "dungeon_complete", 1)
         save_player(player)
         _autosave()
 
     return redirect(url_for("game") + "?tab=dungeons")
-
 
 @app.route("/dungeon/abandon", methods=["POST"])
 def dungeon_abandon():
@@ -6916,11 +6352,9 @@ def dungeon_abandon():
     add_message("You retreat from the dungeon.", "var(--text-dim)")
     return redirect(url_for("game") + "?tab=dungeons")
 
-
 @app.route("/market")
 def market():
     return redirect(url_for("game") + "?tab=market")
-
 
 @app.route("/api/market_data")
 def api_market_data():
@@ -6950,7 +6384,6 @@ def api_market_data():
         }
     )
 
-
 @app.route("/action/market/reset", methods=["POST"])
 def market_reset():
     player = get_player()
@@ -6966,7 +6399,6 @@ def market_reset():
         save_player(player)
         add_message("The Elite Market stock has been rerolled!", "var(--gold)")
     return redirect(url_for("game") + "?tab=market")
-
 
 @app.route("/action/market/buy", methods=["POST"])
 def market_buy():
@@ -6991,10 +6423,6 @@ def market_buy():
     _autosave()
     return redirect(url_for("game") + "?tab=market")
 
-
-# ─── Server-side Save / Load ──────────────────────────────────────────────────
-
-
 @app.route("/api/server_save", methods=["POST"])
 def api_server_save():
     player = get_player()
@@ -7010,12 +6438,10 @@ def api_server_save():
     )
     return jsonify(result)
 
-
 @app.route("/api/server_saves", methods=["GET"])
 def api_server_saves():
     saves = list_saves()
     return jsonify({"saves": saves})
-
 
 @app.route("/api/server_load", methods=["POST"])
 def api_server_load():
@@ -7036,7 +6462,6 @@ def api_server_load():
 
     return jsonify({"ok": result.get("ok"), "message": result.get("message", "")})
 
-
 @app.route("/api/player_stats")
 def api_player_stats():
     player = get_player()
@@ -7044,15 +6469,10 @@ def api_player_stats():
         return jsonify({"ok": False})
     return jsonify({"ok": True, "player": player})
 
-
 @app.route("/new_game")
 def new_game():
     session.clear()
     return redirect(url_for("index"))
-
-
-# ─── Online Account Routes ────────────────────────────────────────────────────
-
 
 @app.route("/api/online/register", methods=["POST"])
 @limiter.limit("5 per hour")
@@ -7066,7 +6486,6 @@ def api_online_register():
         return jsonify(result), 200
     return jsonify(result), 400
 
-
 @app.route("/api/online/login", methods=["POST"])
 @limiter.limit("10 per minute")
 def api_online_login():
@@ -7076,12 +6495,9 @@ def api_online_login():
     result = login_user(username, password)
     if result["ok"]:
         user_id = result["user_id"]
-        # Use the actual stored username (the user may have logged in via email)
         actual_username = result.get("username") or username.lower()
-        # Ban check — do not allow banned accounts to log in.
         if _is_banned(actual_username):
             return jsonify({"ok": False, "message": "Your account has been banned."}), 403
-        # Server cap: reject if 100 other players are already online.
         other_active = [uid for uid in _active_sessions if uid != user_id]
         if len(other_active) >= 100:
             return jsonify({
@@ -7101,7 +6517,6 @@ def api_online_login():
             {"ok": True, "message": result["message"], "username": actual_username}
         )
     return jsonify({"ok": False, "message": result["message"]}), 401
-
 
 @app.route("/api/online/logout", methods=["POST"])
 def api_online_logout():
@@ -7135,27 +6550,21 @@ def api_online_logout():
     session.modified = True
     return jsonify({"ok": True, "message": "Logged out."})
 
-
 @app.route("/api/session/check", methods=["GET"])
 def api_session_check():
-    """Check if this browser's session is still the active session for this user."""
     if not _is_session_valid():
         return jsonify({"valid": False}), 200
     return jsonify({"valid": True}), 200
 
-
 @app.route("/api/online/autosave", methods=["POST"])
 def api_online_autosave():
-    """Frontend-triggered autosave — saves character state for logged-in users."""
     if not _is_session_valid():
         return jsonify({"ok": False}), 401
     _autosave()
     return jsonify({"ok": True})
 
-
 @app.route("/api/saves/list", methods=["GET"])
 def api_saves_list():
-    """Return metadata for all 5 save slots (no snapshot data sent to client)."""
     slots = session.get("_save_slots") or [None] * 5
     if not isinstance(slots, list):
         slots = [None] * 5
@@ -7177,10 +6586,8 @@ def api_saves_list():
             })
     return jsonify({"ok": True, "slots": result})
 
-
 @app.route("/api/saves/write", methods=["POST"])
 def api_saves_write():
-    """Write current game state to a manual save slot (2-5)."""
     if not _is_session_valid():
         return jsonify({"ok": False, "message": "Not logged in."}), 401
     data = request.get_json(force=True, silent=True) or {}
@@ -7195,7 +6602,6 @@ def api_saves_write():
     if not state:
         return jsonify({"ok": False, "message": "No active character."}), 400
     _update_save_slot(slot, label, state)
-    # Persist to Supabase so slots survive server restarts
     state["_save_slots"] = session.get("_save_slots", [None] * 5)
     try:
         user_id = session.get("online_user_id")
@@ -7205,10 +6611,8 @@ def api_saves_write():
         pass
     return jsonify({"ok": True, "message": f"Saved to slot {slot}!"})
 
-
 @app.route("/api/saves/restore", methods=["POST"])
 def api_saves_restore():
-    """Restore game state from a save slot."""
     if not _is_session_valid():
         return jsonify({"ok": False, "message": "Not logged in."}), 401
     data = request.get_json(force=True, silent=True) or {}
@@ -7225,13 +6629,11 @@ def api_saves_restore():
     if not slot_data or not isinstance(slot_data, dict) or not slot_data.get("snapshot"):
         return jsonify({"ok": False, "message": "That slot is empty."}), 404
     snapshot = slot_data["snapshot"]
-    # Apply snapshot — keeps current save slots intact (don't overwrite with old ones)
     current_slots = slots
     _apply_game_state(snapshot)
     session["_save_slots"] = current_slots
     session.modified = True
     return jsonify({"ok": True, "message": f"Restored from slot {slot}!", "reload": True})
-
 
 @app.route("/api/online/cloud_save", methods=["POST"])
 def api_cloud_save():
@@ -7259,7 +6661,6 @@ def api_cloud_save():
     if result.get("ok"):
         add_message("Game saved to cloud.", color="var(--accent)")
     return jsonify(result), 200 if result["ok"] else 500
-
 
 @app.route("/api/online/cloud_load", methods=["POST"])
 def api_cloud_load():
@@ -7300,7 +6701,6 @@ def api_cloud_load():
         {"ok": True, "message": result["message"], "player_name": player.get("name")}
     )
 
-
 @app.route("/api/online/cloud_meta")
 def api_cloud_meta():
     user_id = session.get("online_user_id")
@@ -7308,7 +6708,6 @@ def api_cloud_meta():
         return jsonify({"ok": False, "meta": None})
     meta = get_cloud_save_meta(user_id)
     return jsonify({"ok": True, "meta": meta})
-
 
 @app.route("/api/online/cloud_download")
 def api_cloud_download():
@@ -7329,17 +6728,12 @@ def api_cloud_download():
     response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
-
-# ─── Friends & DM Routes ──────────────────────────────────────────────────────
-
-
 @app.route("/friends")
 def friends_page():
     username = session.get("online_username")
     if not username:
         return redirect("/")
     return render_template("friends.html", online_username=username)
-
 
 @app.route("/api/friends", methods=["GET"])
 def api_friends():
@@ -7354,7 +6748,6 @@ def api_friends():
     for f in result.get("friends", []):
         f["unread"] = unread.get(f["username"], 0)
     return jsonify(result)
-
 
 @app.route("/api/friends/request", methods=["POST"])
 def api_friend_request():
@@ -7385,7 +6778,6 @@ def api_friend_request():
                 _emit_sync("friend_request", {"from": username}, to=sid)
     return jsonify(result)
 
-
 @app.route("/api/friends/respond", methods=["POST"])
 def api_friend_respond():
     username = session.get("online_username")
@@ -7402,7 +6794,6 @@ def api_friend_respond():
             _emit_sync("friend_accepted", {"from": username}, to=sid)
     return jsonify(result)
 
-
 @app.route("/api/friends/remove", methods=["POST"])
 def api_friend_remove():
     username = session.get("online_username")
@@ -7410,7 +6801,6 @@ def api_friend_remove():
         return jsonify({"ok": False, "message": "Not logged in."})
     target = (request.json or {}).get("target", "").strip().lower()
     return jsonify(remove_friend(username, target))
-
 
 @app.route("/api/dm/<other>", methods=["GET"])
 def api_dm_get(other):
@@ -7421,7 +6811,6 @@ def api_dm_get(other):
     mark_dms_read(username, other)
     messages = get_dm_conversation(username, other)
     return jsonify({"ok": True, "messages": messages})
-
 
 @app.route("/api/dm/send", methods=["POST"])
 def api_dm_send():
@@ -7465,7 +6854,6 @@ def api_dm_send():
             _emit_sync("dm_message", payload, to=sid)
     return jsonify(result)
 
-
 @app.route("/api/block", methods=["POST"])
 def api_block_user():
     username = session.get("online_username")
@@ -7480,17 +6868,12 @@ def api_block_user():
         return jsonify(unblock_user(username, target))
     return jsonify(block_user(username, target))
 
-
 @app.route("/api/block/list", methods=["GET"])
 def api_block_list():
     username = session.get("online_username")
     if not username:
         return jsonify({"blocked": []})
     return jsonify({"ok": True, "blocked": get_blocked_by_me(username)})
-
-
-# ─── Trade REST Routes ────────────────────────────────────────────────────────
-
 
 @app.route("/api/player/inventory")
 def api_player_inventory():
@@ -7522,7 +6905,6 @@ def api_player_inventory():
             "active_trade_id": active_trade_id,
         }
     )
-
 
 @app.route("/api/trade/apply", methods=["POST"])
 def api_trade_apply():
@@ -7582,14 +6964,12 @@ def api_trade_apply():
         }
     )
 
-
 @app.route("/api/dm/unread", methods=["GET"])
 def api_dm_unread():
     username = session.get("online_username")
     if not username:
         return jsonify({})
     return jsonify(get_unread_dm_counts(username))
-
 
 @app.route("/action/customize_character", methods=["POST"])
 def action_customize_character():
@@ -7652,14 +7032,10 @@ def action_customize_character():
     )
     return jsonify({"ok": True, "message": f"Character updated: {', '.join(changes)}."})
 
-
-# ─── Adventure Groups ────────────────────────────────────────────────────────
-
 GROUP_CHAT_COOLDOWN = 5
 _group_chat_cooldowns: dict = {}
 
-
-@sio.on("group_chat_send")  # type: ignore[misc]
+@sio.on("group_chat_send")
 async def on_group_chat_send(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -7698,7 +7074,6 @@ async def on_group_chat_send(sid, data):
         for s in [s for s, u in _chat_online.items() if u == member]:
             await sio.emit("group_chat_message", payload, to=s)
 
-
 @app.route("/groups")
 def groups_page():
     online_username = session.get("online_username")
@@ -7715,7 +7090,6 @@ def groups_page():
         "groups.html", online_username=online_username, group=group_data
     )
 
-
 @app.route("/api/groups/my")
 def api_groups_my():
     username = session.get("online_username")
@@ -7726,7 +7100,6 @@ def api_groups_my():
         return jsonify(res)
     except Exception as e:
         return jsonify({"ok": False, "message": str(e)})
-
 
 @app.route("/api/groups/create", methods=["POST"])
 @limiter.limit("5 per hour")
@@ -7740,7 +7113,6 @@ def api_groups_create():
     result = create_group(username, name, description)
     return jsonify(result), 200 if result["ok"] else 400
 
-
 @app.route("/api/groups/join", methods=["POST"])
 @limiter.limit("10 per hour")
 def api_groups_join():
@@ -7752,7 +7124,6 @@ def api_groups_join():
     result = join_group(username, invite_code)
     return jsonify(result), 200 if result["ok"] else 400
 
-
 @app.route("/api/groups/leave", methods=["POST"])
 def api_groups_leave():
     username = session.get("online_username")
@@ -7760,7 +7131,6 @@ def api_groups_leave():
         return jsonify({"ok": False, "message": "Not logged in."})
     result = leave_group(username)
     return jsonify(result), 200 if result["ok"] else 400
-
 
 @app.route("/api/groups/kick", methods=["POST"])
 def api_groups_kick():
@@ -7771,7 +7141,6 @@ def api_groups_kick():
     target = (data.get("target") or "").strip().lower()
     result = kick_group_member(username, target)
     return jsonify(result), 200 if result["ok"] else 400
-
 
 @app.route("/api/groups/collect_gold", methods=["POST"])
 def api_groups_collect_gold():
@@ -7791,13 +7160,8 @@ def api_groups_collect_gold():
             )
     return jsonify(result), 200 if result["ok"] else 400
 
-
-# ─── Area activity feed ───────────────────────────────────────────────────────
-
-
 @app.route("/api/area_activity")
 def api_area_activity():
-    """Return other online players in the same area with their last activity."""
     import time as _ta
 
     username = session.get("online_username")
@@ -7806,7 +7170,7 @@ def api_area_activity():
         return jsonify({"ok": False, "players": []})
 
     now = _ta.time()
-    cutoff = now - 900  # 15 minutes
+    cutoff = now - 900
     online_set = set(_chat_online.values())
 
     results = []
@@ -7831,25 +7195,16 @@ def api_area_activity():
     results.sort(key=lambda x: x["when"])
     return jsonify({"ok": True, "area": area, "players": results})
 
-
-# ─── Leaderboard ─────────────────────────────────────────────────────────────
-
-
 @app.route("/leaderboard")
 def leaderboard_page():
     online_username = session.get("online_username")
     return render_template("leaderboard.html", online_username=online_username)
-
 
 @app.route("/api/leaderboard")
 def api_leaderboard():
     groups = get_group_leaderboard()
     players = get_player_leaderboard()
     return jsonify({"ok": True, "groups": groups, "players": players})
-
-
-# ─── Password Reset ───────────────────────────────────────────────────────────
-
 
 @app.route("/api/online/set_email", methods=["POST"])
 @limiter.limit("5 per hour")
@@ -7863,7 +7218,6 @@ def api_online_set_email():
     if not result["ok"]:
         return jsonify(result), 400
 
-    # Send verification email if token was created and email is configured
     if result["token"] and result["email"]:
         base_url = request.host_url.rstrip("/")
         verify_url = f"{base_url}/verify-email?token={result['token']}"
@@ -7895,21 +7249,17 @@ def api_online_set_email():
 
     return jsonify({"ok": True, "message": f"Verification email sent to {result['email']}. Check your inbox and click the link to confirm."})
 
-
 @app.route("/verify-email")
 def verify_email_page():
     token = request.args.get("token", "").strip()
     if not token:
         return render_template("verify_email.html", token=None, result=None)
     result = verify_email_token(token)
-    # If verification succeeded and the user is currently logged in as the verified user,
-    # trigger an autosave so their progress is secured.
     if result["ok"] and result.get("user_id"):
         verified_user_id = result["user_id"]
         if session.get("online_user_id") == verified_user_id:
             _autosave()
     return render_template("verify_email.html", token=token, result=result)
-
 
 @app.route("/api/online/forgot-password", methods=["POST"])
 @limiter.limit("3 per hour")
@@ -7961,12 +7311,10 @@ def api_forgot_password():
 
     return jsonify({"ok": True, "message": "If that email is registered, you'll receive a reset link shortly."})
 
-
 @app.route("/reset-password")
 def reset_password_page():
     token = request.args.get("token", "").strip()
     return render_template("reset_password.html", token=token)
-
 
 @app.route("/api/online/reset-password", methods=["POST"])
 @limiter.limit("10 per hour")
@@ -7986,17 +7334,11 @@ def api_reset_password():
         return jsonify(result), 200
     return jsonify(result), 400
 
-
-# ── Admin API ─────────────────────────────────────────────────────────────────
-
 def _require_admin():
-    """Return the calling username if they are an admin/owner, else None."""
     return session.get("online_username") if _is_admin_user(session.get("online_username", "")) else None
-
 
 @app.route("/api/admin/status", methods=["GET"])
 def api_admin_status():
-    """Return the caller's admin role and the current ban/mute lists (admins only)."""
     caller = session.get("online_username", "")
     if not _is_admin_user(caller):
         return jsonify({"ok": False, "message": "Forbidden."}), 403
@@ -8008,7 +7350,6 @@ def api_admin_status():
         "banned_users": {r["username"]: r for r in admin_list_bans()},
         "muted_users": {r["username"]: r for r in admin_list_mutes()},
     })
-
 
 @app.route("/api/admin/ban", methods=["POST"])
 def api_admin_ban():
@@ -8027,7 +7368,6 @@ def api_admin_ban():
     admin_ban(target, reason, caller)
     return jsonify({"ok": True, "message": f"{target} has been banned."})
 
-
 @app.route("/api/admin/unban", methods=["POST"])
 def api_admin_unban():
     caller = session.get("online_username", "")
@@ -8041,7 +7381,6 @@ def api_admin_unban():
         return jsonify({"ok": False, "message": f"{target} is not banned."}), 404
     return jsonify({"ok": True, "message": f"{target} has been unbanned."})
 
-
 @app.route("/api/admin/mute", methods=["POST"])
 def api_admin_mute():
     caller = session.get("online_username", "")
@@ -8050,7 +7389,7 @@ def api_admin_mute():
     body = request.get_json(force=True, silent=True) or {}
     target = body.get("username", "").strip()
     reason = body.get("reason", "").strip() or "No reason given."
-    duration_minutes = body.get("duration_minutes")  # None = permanent
+    duration_minutes = body.get("duration_minutes")
     if not target:
         return jsonify({"ok": False, "message": "No username provided."}), 400
     if target.lower() == caller.lower():
@@ -8068,7 +7407,6 @@ def api_admin_mute():
     msg += f" for {duration_minutes} minute(s)." if duration_minutes else " permanently."
     return jsonify({"ok": True, "message": msg})
 
-
 @app.route("/api/admin/unmute", methods=["POST"])
 def api_admin_unmute():
     caller = session.get("online_username", "")
@@ -8082,10 +7420,8 @@ def api_admin_unmute():
         return jsonify({"ok": False, "message": f"{target} is not muted."}), 404
     return jsonify({"ok": True, "message": f"{target} has been unmuted."})
 
-
 @app.route("/api/admin/add_admin", methods=["POST"])
 def api_admin_add_admin():
-    """Owner-only: promote a player to moderator."""
     caller = session.get("online_username", "")
     if not _is_owner(caller):
         return jsonify({"ok": False, "message": "Only the owner can promote admins."}), 403
@@ -8097,10 +7433,8 @@ def api_admin_add_admin():
         return jsonify({"ok": False, "message": f"{target} is already an admin."}), 409
     return jsonify({"ok": True, "message": f"{target} is now an admin."})
 
-
 @app.route("/api/admin/remove_admin", methods=["POST"])
 def api_admin_remove_admin():
-    """Owner-only: demote a moderator."""
     caller = session.get("online_username", "")
     if not _is_owner(caller):
         return jsonify({"ok": False, "message": "Only the owner can demote admins."}), 403
@@ -8112,19 +7446,15 @@ def api_admin_remove_admin():
         return jsonify({"ok": False, "message": f"{target} is not an admin."}), 404
     return jsonify({"ok": True, "message": f"{target} has been removed from admins."})
 
-
 @app.route("/admin")
 def admin_console():
-    """Owner-only admin console page."""
     caller = session.get("online_username", "")
     if not _is_owner(caller):
         return redirect(url_for("index"))
     return render_template("admin.html", online_user=caller)
 
-
 @app.route("/items")
 def items_debug():
-    """Debug page showing all items, stats, and textures."""
     caller = session.get("online_username", "")
     if not _is_owner(caller):
         return redirect(url_for("index"))
@@ -8137,7 +7467,6 @@ def items_debug():
             continue
         entry = {"name": name}
         entry.update(data)
-        # Ensure None-safe fields for template
         for field in ("texture", "type", "rarity", "weapon_type", "armor_type",
                       "description", "effect", "tags", "requirements",
                       "price", "attack_bonus", "defense_bonus", "magic_bonus",
@@ -8149,7 +7478,6 @@ def items_debug():
         entry["requirements"] = entry["requirements"] or {}
         items_list.append(entry)
 
-    # Sort by type then name
     items_list.sort(key=lambda x: (x.get("type") or "", x["name"]))
 
     total = len(items_list)
@@ -8177,10 +7505,8 @@ def items_debug():
         type_counts=type_counts,
     )
 
-
 @app.route("/api/admin/data", methods=["GET"])
 def api_admin_data():
-    """Extended admin data: bans, mutes, mods, online count."""
     caller = session.get("online_username", "")
     if not _is_owner(caller):
         return jsonify({"ok": False, "message": "Forbidden."}), 403
@@ -8195,10 +7521,8 @@ def api_admin_data():
         "online_users": list(_username_to_userid.keys()),
     })
 
-
 @app.route("/api/admin/kick", methods=["POST"])
 def api_admin_kick():
-    """Owner-only: force-logout a user on their next request."""
     caller = session.get("online_username", "")
     if not _is_owner(caller):
         return jsonify({"ok": False, "message": "Only the owner can kick players."}), 403
@@ -8208,13 +7532,11 @@ def api_admin_kick():
         return jsonify({"ok": False, "message": "No username provided."}), 400
     if target == caller.lower():
         return jsonify({"ok": False, "message": "You cannot kick yourself."}), 400
-    # Also invalidate their active session token immediately if online
     uid = _username_to_userid.get(target)
     if uid:
         _active_sessions.pop(uid, None)
     _kicked_usernames.add(target)
     return jsonify({"ok": True, "message": f"{target} has been kicked."})
-
 
 @app.route("/api/admin/warn", methods=["POST"])
 def api_admin_warn_user():
@@ -8229,7 +7551,6 @@ def api_admin_warn_user():
     count = admin_warn(target, reason)
     return jsonify({"ok": True, "message": f"{target} warned. Total warnings: {count}."})
 
-
 @app.route("/api/admin/clearwarn", methods=["POST"])
 def api_admin_clearwarn():
     caller = session.get("online_username", "")
@@ -8243,10 +7564,8 @@ def api_admin_clearwarn():
         return jsonify({"ok": True, "message": f"Warnings cleared for {target}."})
     return jsonify({"ok": False, "message": f"No warnings found for {target}."}), 404
 
-
 @app.route("/api/admin/setowner", methods=["POST"])
 def api_admin_setowner():
-    """Owner-only: transfer ownership to another username."""
     caller = session.get("online_username", "")
     if not _is_owner(caller):
         return jsonify({"ok": False, "message": "Only the owner can transfer ownership."}), 403
@@ -8258,9 +7577,6 @@ def api_admin_setowner():
         return jsonify({"ok": False, "message": "You are already the owner."}), 400
     admin_set_owner(target)
     return jsonify({"ok": True, "message": f"Ownership transferred to {target}."})
-
-
-# ─── Game Terminal API (owner-only: operate on owner's own session) ───────────
 
 @app.route("/api/admin/game/stats", methods=["GET"])
 def api_game_stats():
@@ -8290,7 +7606,6 @@ def api_game_stats():
         "mining_level": _get_mining_level(player),
         "inventory_count": len(player.get("inventory", [])),
     })
-
 
 @app.route("/api/admin/game/give", methods=["POST"])
 def api_game_give():
@@ -8344,7 +7659,6 @@ def api_game_give():
     else:
         return jsonify({"ok": False, "message": "kind must be: gold, xp, item, or mining_xp."})
 
-
 @app.route("/api/admin/game/set", methods=["POST"])
 def api_game_set():
     caller = session.get("online_username", "")
@@ -8390,7 +7704,6 @@ def api_game_set():
     else:
         return jsonify({"ok": False, "message": "kind must be: level, stat, or mining_level."})
 
-
 @app.route("/api/admin/game/heal", methods=["POST"])
 def api_game_heal():
     caller = session.get("online_username", "")
@@ -8403,7 +7716,6 @@ def api_game_heal():
     player["mp"] = player.get("max_mp", 50)
     session.modified = True
     return jsonify({"ok": True, "message": f"Fully restored. HP: {player['hp']}/{player['max_hp']}  MP: {player['mp']}/{player['max_mp']}."})
-
 
 @app.route("/api/admin/game/remove", methods=["POST"])
 def api_game_remove():
@@ -8430,7 +7742,6 @@ def api_game_remove():
     session.modified = True
     return jsonify({"ok": True, "message": f"Removed {removed}x {matched} from inventory."})
 
-
 @app.route("/api/admin/game/inventory", methods=["GET"])
 def api_game_inventory():
     caller = session.get("online_username", "")
@@ -8445,9 +7756,7 @@ def api_game_inventory():
         counts[item] = counts.get(item, 0) + 1
     return jsonify({"ok": True, "inventory": counts, "gold": player.get("gold", 0)})
 
-
 from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi
-
 
 async def _on_startup():
     global _asyncio_loop, _bg_started
@@ -8457,7 +7766,6 @@ async def _on_startup():
     if not _bg_started:
         _bg_started = True
         _asyncio.create_task(_world_tick())
-
 
 asgi_app = _socketio_module.ASGIApp(
     sio,

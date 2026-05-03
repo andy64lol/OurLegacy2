@@ -1,11 +1,3 @@
-"""
-debug_accounts.py — Debug script for Our Legacy 2 account system.
-
-Tests: registration, login, logout, cloud meta/save/load, edge cases,
-       username length limits, and rate limiting.
-Run with: python debug/debug_accounts.py
-The app must be running on localhost:5000.
-"""
 
 import requests
 import json
@@ -23,7 +15,6 @@ WARN = "\033[93m[WARN]\033[0m"
 
 results = []
 
-
 def log(status, label, detail=""):
     tag = {"PASS": PASS, "FAIL": FAIL, "INFO": INFO, "WARN": WARN}[status]
     line = f"  {tag} {label}"
@@ -33,21 +24,16 @@ def log(status, label, detail=""):
     if status in ("PASS", "FAIL"):
         results.append((status, label))
 
-
 def check(label, condition, ok_detail="", fail_detail=""):
     if condition:
         log("PASS", label, ok_detail)
     else:
         log("FAIL", label, fail_detail)
 
-
 def section(title):
     print(f"\n{'─'*60}")
     print(f"  {title}")
     print(f"{'─'*60}")
-
-
-# ─── 1. Server Connectivity ───────────────────────────────────────────────────
 
 section("1. SERVER CONNECTIVITY")
 
@@ -60,14 +46,10 @@ except requests.exceptions.ConnectionError:
     print("\n  Cannot continue without a running server. Exiting.")
     sys.exit(1)
 
-
-# ─── 2. Registration ──────────────────────────────────────────────────────────
-
 section("2. REGISTRATION")
 
 reg_session = requests.Session()
 
-# Happy path
 r = reg_session.post(f"{BASE_URL}/api/online/register",
                      json={"username": TEST_USER, "password": TEST_PASS})
 try:
@@ -79,7 +61,6 @@ try:
 except Exception as e:
     log("FAIL", "Register new user", f"Could not parse response: {e}")
 
-# Duplicate username
 r2 = reg_session.post(f"{BASE_URL}/api/online/register",
                       json={"username": TEST_USER, "password": TEST_PASS})
 try:
@@ -91,7 +72,6 @@ try:
 except Exception as e:
     log("FAIL", "Reject duplicate username", f"Could not parse response: {e}")
 
-# Username too short
 r3 = reg_session.post(f"{BASE_URL}/api/online/register",
                       json={"username": "ab", "password": TEST_PASS})
 try:
@@ -103,7 +83,6 @@ try:
 except Exception as e:
     log("FAIL", "Reject username < 3 chars", f"Could not parse response: {e}")
 
-# Username exactly 20 chars — should succeed
 user_20 = f"u{'x' * 17}{int(time.time()) % 100:02d}"[:20]
 r_20 = reg_session.post(f"{BASE_URL}/api/online/register",
                         json={"username": user_20, "password": TEST_PASS})
@@ -118,7 +97,6 @@ try:
 except Exception as e:
     log("FAIL", "Accept username of exactly 20 chars", f"Could not parse response: {e}")
 
-# Username 21 chars — should be rejected
 r_21 = reg_session.post(f"{BASE_URL}/api/online/register",
                         json={"username": "a" * 21, "password": TEST_PASS})
 try:
@@ -130,7 +108,6 @@ try:
 except Exception as e:
     log("FAIL", "Reject username > 20 chars", f"Could not parse response: {e}")
 
-# Password too short — use a fresh session so rate limit doesn't interfere
 r4 = requests.post(f"{BASE_URL}/api/online/register",
                    json={"username": TEST_USER + "x", "password": "abc"})
 if r4.status_code == 429:
@@ -146,7 +123,6 @@ else:
     except Exception as e:
         log("FAIL", "Reject password < 6 chars", f"Could not parse response: {e}")
 
-# Empty fields
 r5 = requests.post(f"{BASE_URL}/api/online/register",
                    json={"username": "", "password": ""})
 if r5.status_code == 429:
@@ -162,14 +138,10 @@ else:
     except Exception as e:
         log("FAIL", "Reject empty fields on register", f"Could not parse response: {e}")
 
-
-# ─── 3. Login ─────────────────────────────────────────────────────────────────
-
 section("3. LOGIN")
 
 login_session = requests.Session()
 
-# Wrong password
 r = login_session.post(f"{BASE_URL}/api/online/login",
                        json={"username": TEST_USER, "password": "wrongpassword"})
 try:
@@ -181,7 +153,6 @@ try:
 except Exception as e:
     log("FAIL", "Reject wrong password", f"Could not parse response: {e}")
 
-# Non-existent user
 r2 = login_session.post(f"{BASE_URL}/api/online/login",
                         json={"username": "thisuserdoesnotexist999", "password": TEST_PASS})
 try:
@@ -193,7 +164,6 @@ try:
 except Exception as e:
     log("FAIL", "Reject non-existent user", f"Could not parse response: {e}")
 
-# Case-insensitive username
 r3 = login_session.post(f"{BASE_URL}/api/online/login",
                         json={"username": TEST_USER.upper(), "password": TEST_PASS})
 try:
@@ -206,7 +176,6 @@ try:
 except Exception as e:
     log("FAIL", "Accept username case-insensitively", f"Could not parse response: {e}")
 
-# Happy path login (keep this session for later tests)
 auth_session = requests.Session()
 r4 = auth_session.post(f"{BASE_URL}/api/online/login",
                        json={"username": TEST_USER, "password": TEST_PASS})
@@ -226,9 +195,6 @@ if login_ok:
           body4.get("username", "") == TEST_USER.lower(),
           f"username='{body4.get('username', '')}'",
           f"Expected '{TEST_USER.lower()}', got '{body4.get('username', '')}'")
-
-
-# ─── 4. Cloud Meta (requires login) ──────────────────────────────────────────
 
 section("4. CLOUD META (requires login)")
 
@@ -257,9 +223,6 @@ if login_ok:
         log("FAIL", "Cloud meta (not logged in)", f"Could not parse response: {e}")
 else:
     log("WARN", "Cloud meta tests skipped — login failed")
-
-
-# ─── 5. Cloud Save (requires login + active game session) ────────────────────
 
 section("5. CLOUD SAVE (requires login + active game session)")
 
@@ -292,9 +255,6 @@ if login_ok:
 else:
     log("WARN", "Cloud save tests skipped — login failed")
 
-
-# ─── 6. Cloud Load (requires login) ──────────────────────────────────────────
-
 section("6. CLOUD LOAD (requires login)")
 
 if login_ok:
@@ -324,9 +284,6 @@ if login_ok:
         log("FAIL", "Cloud load auth guard", f"Could not parse response: {e}")
 else:
     log("WARN", "Cloud load tests skipped — login failed")
-
-
-# ─── 7. Logout ────────────────────────────────────────────────────────────────
 
 section("7. LOGOUT")
 
@@ -363,9 +320,6 @@ if login_ok:
 else:
     log("WARN", "Logout tests skipped — login failed")
 
-
-# ─── 8. Security / Edge Cases ─────────────────────────────────────────────────
-
 section("8. SECURITY & EDGE CASES")
 
 inj_session = requests.Session()
@@ -388,9 +342,6 @@ check("Login handles non-JSON body gracefully",
       r2.status_code in (400, 401),
       f"HTTP {r2.status_code}",
       f"Got HTTP {r2.status_code} — may cause 500 error")
-
-
-# ─── 9. Rate Limiting ─────────────────────────────────────────────────────────
 
 section("9. RATE LIMITING")
 
@@ -436,9 +387,6 @@ for i in range(8):
 if not hit_reg_429:
     log("WARN", "Register rate limit not triggered in 8 attempts",
         "This may be because the hour window reset, or flask-limiter is not active")
-
-
-# ─── 10. Summary ──────────────────────────────────────────────────────────────
 
 section("10. SUMMARY")
 

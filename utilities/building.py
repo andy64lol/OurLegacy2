@@ -1,7 +1,3 @@
-"""
-Building / Housing System for Our Legacy 2 - Flask Edition
-Pure functions that operate on player dicts.
-"""
 from typing import Dict, List, Any
 
 BUILDING_TYPES = {
@@ -35,10 +31,8 @@ BUILDING_TYPES = {
     },
 }
 
-
 def get_building_status(player: Dict[str, Any],
                         housing_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Return current building slot status for the player."""
     building_slots = player.get('building_slots', {})
     slots_info = {}
 
@@ -69,10 +63,8 @@ def get_building_status(player: Dict[str, Any],
         'housing_owned': player.get('housing_owned', []),
     }
 
-
 def get_available_slots_for_type(player: Dict[str, Any],
                                  item_type: str) -> List[str]:
-    """Return list of empty slot IDs for the given item type."""
     info = BUILDING_TYPES.get(item_type, {})
     if not info:
         return []
@@ -84,13 +76,8 @@ def get_available_slots_for_type(player: Dict[str, Any],
             empty.append(slot_id)
     return empty
 
-
 def place_housing_item(player: Dict[str, Any], item_id: str, slot_id: str,
                        housing_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Place a housing item in a slot. Modifies player dict in place.
-    Returns {'ok': bool, 'message': str}
-    """
     if item_id not in player.get('housing_owned', []):
         return {'ok': False, 'message': 'You do not own that structure.'}
 
@@ -121,13 +108,8 @@ def place_housing_item(player: Dict[str, Any], item_id: str, slot_id: str,
         f'Placed {name} in slot {slot_id}. Comfort: +{comfort}. Total: {player["comfort_points"]}'
     }
 
-
 def remove_housing_item_slot(player: Dict[str, Any], slot_id: str,
                              housing_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Remove a housing item from a slot. Modifies player dict in place.
-    Returns {'ok': bool, 'message': str}
-    """
     building_slots = player.get('building_slots', {})
     item_id = building_slots.get(slot_id)
     if not item_id:
@@ -143,10 +125,8 @@ def remove_housing_item_slot(player: Dict[str, Any], slot_id: str,
     name = h_data.get('name', item_id)
     return {'ok': True, 'message': f'Removed {name} from slot {slot_id}.'}
 
-
 def get_home_status(player: Dict[str, Any],
                     housing_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Return detailed home status and statistics."""
     building_slots = player.get('building_slots', {})
     placed = [item_id for item_id in building_slots.values() if item_id]
     item_comforts: Dict[str, Dict[str, Any]] = {}
@@ -174,10 +154,8 @@ def get_home_status(player: Dict[str, Any],
         } for n, info in sorted_items[:10]],
     }
 
-
 def plant_crop(player: Dict[str, Any], farm_slot_id: str, crop_key: str,
                farming_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Plant a crop in a farm slot. Returns result dict."""
     building_slots = player.get('building_slots', {})
     if not building_slots.get(farm_slot_id):
         return {
@@ -225,9 +203,7 @@ def plant_crop(player: Dict[str, Any], farm_slot_id: str, crop_key: str,
         f'Planted {crop_data.get("name", crop_key)} in {farm_slot_id}.'
     }
 
-
 def harvest_crop(player: Dict[str, Any], farm_slot_id: str) -> Dict[str, Any]:
-    """Harvest a ready crop. Returns result dict."""
     crops = player.get('crops', {})
     crop_info = crops.get(farm_slot_id)
     if not crop_info:

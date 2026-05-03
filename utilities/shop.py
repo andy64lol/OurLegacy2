@@ -1,13 +1,7 @@
-"""
-Shop System for Our Legacy 2 - Flask Edition
-Pure functions that operate on player dicts and return result dicts.
-"""
 from typing import Dict, List, Any
-
 
 def get_shop_items(shop_data: Dict[str, Any], items_data: Dict[str, Any],
                    player: Dict[str, Any]) -> Dict[str, Any]:
-    """Return shop inventory with player-relevant info."""
     items = shop_data.get('items', [])
     max_buy = shop_data.get('max_buy', 99)
     item_details = []
@@ -39,13 +33,8 @@ def get_shop_items(shop_data: Dict[str, Any], items_data: Dict[str, Any],
         'player_gold': player.get('gold', 0),
     }
 
-
 def buy_item(player: Dict[str, Any], item_id: str, items_data: Dict[str, Any],
              shop_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Purchase an item for the player.
-    Returns {'ok': bool, 'message': str, 'color': str}
-    """
     if item_id not in items_data:
         return {
             'ok': False,
@@ -81,13 +70,8 @@ def buy_item(player: Dict[str, Any], item_id: str, items_data: Dict[str, Any],
         'color': 'var(--green-bright)'
     }
 
-
 def sell_item(player: Dict[str, Any], item_id: str,
               items_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Sell an item from the player's inventory.
-    Returns {'ok': bool, 'message': str, 'color': str}
-    """
     inventory = player.get('inventory', [])
     if item_id not in inventory:
         return {
@@ -118,10 +102,8 @@ def sell_item(player: Dict[str, Any], item_id: str,
         'color': 'var(--gold)'
     }
 
-
 def get_sellable_inventory(player: Dict[str, Any],
                            items_data: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Return list of items the player can sell."""
     equipment_items = set(v for v in player.get('equipment', {}).values() if v)
     sellable = []
     for item_id in player.get('inventory', []):
@@ -137,11 +119,9 @@ def get_sellable_inventory(player: Dict[str, Any],
         })
     return sellable
 
-
 def get_housing_shop_items(shop_data: Dict[str, Any], housing_data: Dict[str,
                                                                          Any],
                            player: Dict[str, Any]) -> Dict[str, Any]:
-    """Return housing shop inventory."""
     items = shop_data.get('items', [])
     owned_set = set(player.get('housing_owned', []))
     item_details = []

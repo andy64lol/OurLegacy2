@@ -1,13 +1,7 @@
-"""
-Crafting System for Our Legacy 2 - Flask Edition
-Pure functions that operate on player dicts.
-"""
 from typing import Dict, List, Any, Optional
-
 
 def get_crafting_materials(player: Dict[str, Any],
                            crafting_data: Dict[str, Any]) -> Dict[str, int]:
-    """Return dict of material_id -> count in player inventory."""
     material_categories = crafting_data.get('material_categories', {})
     all_materials: set = set()
     for materials in material_categories.values():
@@ -19,10 +13,8 @@ def get_crafting_materials(player: Dict[str, Any],
             counts[item] = counts.get(item, 0) + 1
     return counts
 
-
 def get_recipes(crafting_data: Dict[str, Any],
                 category: Optional[str] = None) -> List[Dict[str, Any]]:
-    """Return list of recipe dicts, optionally filtered by category."""
     recipes = crafting_data.get('recipes', {})
     result = []
     for rid, rdata in recipes.items():
@@ -40,10 +32,8 @@ def get_recipes(crafting_data: Dict[str, Any],
         })
     return result
 
-
 def check_recipe_craftable(player: Dict[str, Any],
                            recipe: Dict[str, Any]) -> Dict[str, Any]:
-    """Check if player can craft a recipe. Returns {'ok': bool, 'missing': list}."""
     import math as _math
     level = player.get('level', 1)
     req = recipe.get('skill_requirement', 1)
@@ -74,13 +64,8 @@ def check_recipe_craftable(player: Dict[str, Any],
 
     return {'ok': len(missing) == 0, 'missing': missing, 'reason': None}
 
-
 def craft_item(player: Dict[str, Any], recipe_id: str,
                crafting_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Craft an item from a recipe. Modifies player dict in place.
-    Returns {'ok': bool, 'message': str, 'items_crafted': list}
-    """
     recipes = crafting_data.get('recipes', {})
     recipe = recipes.get(recipe_id)
     if not recipe:
@@ -128,9 +113,7 @@ def craft_item(player: Dict[str, Any], recipe_id: str,
         'recipe_name': name,
     }
 
-
 def get_recipe_categories(crafting_data: Dict[str, Any]) -> List[str]:
-    """Return list of unique recipe categories."""
     recipes = crafting_data.get('recipes', {})
     cats = set()
     for rdata in recipes.values():

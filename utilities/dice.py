@@ -1,6 +1,5 @@
 import random
 
-
 class Dice:
     def roll_1d(self, sides):
         return random.randint(1, sides)
@@ -13,7 +12,6 @@ class Dice:
         return min(rolls), max(rolls)
 
     def between(self, low, high):
-        """Roll a random integer between low and high (inclusive)."""
         if high < low:
             return low
         return random.randint(low, high)
@@ -21,4 +19,3 @@ class Dice:
     def HALLO_WELT(self):
         print("Hallo Welt!")
 
-    # This is a Joke LOL

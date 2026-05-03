@@ -1,21 +1,11 @@
-"""
-Dungeon System for Our Legacy 2 - Flask Edition
-Stateless dungeon functions that return result dicts.
-"""
 import random
 from typing import Dict, List, Any, Optional
-
 
 def get_available_dungeons(dungeons_data: Dict[str, Any], current_area: str,
                            player_level: int,
                            visited_areas: Optional[List[str]] = None,
                            areas_data: Optional[Dict[str, Any]] = None
                            ) -> List[Dict[str, Any]]:
-    """Return all dungeons with discovery and area-access flags.
-
-    A dungeon is *discovered* only if the player has visited at least one of
-    its allowed_areas.  It can only be *entered* from one of those areas.
-    """
     all_dungeons = dungeons_data.get('dungeons', [])
     visited_set = set(visited_areas or [])
     areas_data = areas_data or {}
@@ -29,7 +19,6 @@ def get_available_dungeons(dungeons_data: Dict[str, Any], current_area: str,
         in_area = current_area in allowed
         level_ok = player_level >= min_level
 
-        # Build a human-readable hint name from the first allowed area
         hint_area_id = allowed[0] if allowed else ""
         area_info = areas_data.get(hint_area_id, {})
         hint_area_name = (area_info.get("name") or
@@ -54,7 +43,6 @@ def get_available_dungeons(dungeons_data: Dict[str, Any], current_area: str,
     result.sort(key=lambda d: d['min_level'])
     return result
 
-
 def _pick_riddle(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
     templates = dungeons_data.get('challenge_templates', {})
     q_types = templates.get('question', {}).get('types', [])
@@ -71,7 +59,6 @@ def _pick_riddle(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
             'experience': 100
         },
     }
-
 
 def _pick_multi_choice(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
     templates = dungeons_data.get('challenge_templates', {})
@@ -101,7 +88,6 @@ def _pick_multi_choice(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
         },
     }
 
-
 def _pick_trap(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
     templates = dungeons_data.get('challenge_templates', {})
     trap_types = templates.get('trap', {}).get('types', [])
@@ -129,12 +115,10 @@ def _pick_trap(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
         },
     }
 
-
 def generate_dungeon_rooms(
         dungeon: Dict[str, Any],
         dungeons_data: Optional[Dict[str,
                                      Any]] = None) -> List[Dict[str, Any]]:
-    """Generate dungeon rooms with embedded challenge data."""
     room_weights = dungeon.get('room_weights', {})
     total_rooms = dungeon.get('rooms', 5)
     if dungeons_data is None:
@@ -183,7 +167,6 @@ def generate_dungeon_rooms(
 
         rooms.append(room)
     return rooms
-
 
 def process_chest_room(player: Dict[str, Any], room: Dict[str, Any],
                        dungeons_data: Dict[str, Any],
@@ -258,13 +241,11 @@ def process_chest_room(player: Dict[str, Any], room: Dict[str, Any],
         'items': items_found
     }
 
-
 def process_trap_chest_room(player: Dict[str, Any], room: Dict[str, Any],
                             dungeons_data: Dict[str,
                                                 Any], items_data: Dict[str,
                                                                        Any],
                             roll: int) -> Dict[str, Any]:
-    """Process a trapped chest — roll to disarm, then open it."""
     trap = room.get('challenge', {})
     messages = []
     threshold = trap.get('threshold', 10)
@@ -294,7 +275,6 @@ def process_trap_chest_room(player: Dict[str, Any], room: Dict[str, Any],
 
     return {'type': 'trap_chest', 'messages': messages}
 
-
 def process_empty_room(_room: Dict[str, Any]) -> Dict[str, Any]:
     msgs = [
         'The chamber is silent. You breathe and press on.',
@@ -323,7 +303,6 @@ def process_empty_room(_room: Dict[str, Any]) -> Dict[str, Any]:
         elif 'heal' in event:
             messages.append({'text': str(event['text']), 'color': str(event['color'])})
     return {'type': 'empty', 'messages': messages}
-
 
 def process_battle_room(_player: Dict[str, Any], room: Dict[str, Any],
                         enemies_data: Dict[str, Any], areas_data: Dict[str,
@@ -396,9 +375,7 @@ def process_battle_room(_player: Dict[str, Any], room: Dict[str, Any],
         }],
     }
 
-
 def process_shrine_room(player: Dict[str, Any]) -> Dict[str, Any]:
-    """A shrine that restores some HP and/or MP."""
     max_hp = player.get('max_hp', 100)
     max_mp = player.get('max_mp', 50)
     current_hp = player.get('hp', max_hp)
@@ -436,12 +413,10 @@ def process_shrine_room(player: Dict[str, Any]) -> Dict[str, Any]:
         })
     return {'type': 'shrine', 'messages': messages, 'heal': heal_amount, 'mp': mp_amount}
 
-
 def process_ambush_room(_player: Dict[str, Any], room: Dict[str, Any],
                         enemies_data: Dict[str, Any], areas_data: Dict[str, Any],
                         current_area: str,
                         dungeon: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """An ambush — a stronger enemy with a bonus reward on victory."""
     possible: List[str] = []
     if dungeon:
         possible = dungeon.get('possible_enemies', [])
@@ -494,7 +469,6 @@ def process_ambush_room(_player: Dict[str, Any], room: Dict[str, Any],
         }],
     }
 
-
 def process_question_room(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
     riddle = _pick_riddle(dungeons_data)
     return {
@@ -515,7 +489,6 @@ def process_question_room(dungeons_data: Dict[str, Any]) -> Dict[str, Any]:
             'color': 'var(--gold)'
         }],
     }
-
 
 def answer_question(player: Dict[str, Any], question_data: Dict[str, Any],
                     answer: str) -> Dict[str, Any]:
@@ -558,7 +531,6 @@ def answer_question(player: Dict[str, Any], question_data: Dict[str, Any],
             'player_alive':
             player['hp'] > 0,
         }
-
 
 def answer_multi_choice(player: Dict[str, Any], choice_data: Dict[str, Any],
                         choice_index: int) -> Dict[str, Any]:
@@ -610,7 +582,6 @@ def answer_multi_choice(player: Dict[str, Any], choice_data: Dict[str, Any],
                 },
             ],
         }
-
 
 def complete_dungeon(player: Dict[str, Any],
                      dungeon: Dict[str, Any]) -> Dict[str, Any]:

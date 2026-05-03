@@ -1,6 +1,5 @@
 from typing import Dict, Any, Optional
 
-
 class Enemy:
 
     def __init__(self, enemy_data: Dict[str, Any]):
@@ -44,7 +43,6 @@ class Enemy:
         e = cls(data)
         e.hp = data.get("hp", e.max_hp)
         return e
-
 
 class Boss(Enemy):
 

@@ -1,7 +1,3 @@
-"""
-Email sending via Resend.
-Uses RESEND_API_KEY and SENDER_EMAIL environment variables.
-"""
 import os
 import logging
 from typing import Optional
@@ -13,17 +9,12 @@ SENDER_EMAIL = os.environ.get("RESEND_EMAIL", "")
 
 logger = logging.getLogger(__name__)
 
-
 def send_email(
     to: str,
     subject: str,
     body_html: str,
     body_text: Optional[str] = None,
 ) -> dict:
-    """
-    Send an email via Resend.
-    Returns {'ok': bool, 'message': str}
-    """
     if not RESEND_API_KEY:
         return {"ok": False, "message": "Email service not configured (missing RESEND_API_KEY)."}
     if not SENDER_EMAIL:
@@ -49,7 +40,5 @@ def send_email(
         logger.error("Resend error: %s", e)
         return {"ok": False, "message": f"Email send failed: {e}"}
 
-
 def is_configured() -> bool:
-    """Return True if email sending is configured."""
     return bool(RESEND_API_KEY and SENDER_EMAIL)

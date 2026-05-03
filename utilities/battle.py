@@ -1,12 +1,7 @@
-"""
-Battle System for Our Legacy 2 - Flask Edition
-Stateless battle functions that return result dicts.
-"""
 import random
 from typing import Dict, List, Any, Optional, Tuple
 from utilities.dice import Dice
 from utilities.entities import Enemy
-
 
 def create_hp_mp_bar(current: int,
                      maximum: int,
@@ -19,7 +14,6 @@ def create_hp_mp_bar(current: int,
     empty = "░" * (width - filled_width)
     return f"[{filled}{empty}] {current}/{maximum}"
 
-
 def create_boss_hp_bar(current: int, maximum: int, width: int = 40) -> str:
     if maximum <= 0:
         return "[" + " " * width + "]"
@@ -29,14 +23,12 @@ def create_boss_hp_bar(current: int, maximum: int, width: int = 40) -> str:
     percentage = (current / maximum) * 100
     return f"BOSS HP [{filled}{empty}] {percentage:.1f}% ({current}/{maximum})"
 
-
 def get_effective_attack(player: Dict[str, Any]) -> int:
     base = player.get('attack', 10)
     buff_bonus = sum(
         b.get('modifiers', {}).get('attack_bonus', 0)
         for b in player.get('active_buffs', []))
     return base + buff_bonus
-
 
 def get_effective_defense(player: Dict[str, Any]) -> int:
     base = player.get('defense', 8)
@@ -48,7 +40,6 @@ def get_effective_defense(player: Dict[str, Any]) -> int:
         total = int(total * 1.5)
     return total
 
-
 def get_effective_speed(player: Dict[str, Any]) -> int:
     base = player.get('speed', 10)
     buff_bonus = sum(
@@ -56,9 +47,7 @@ def get_effective_speed(player: Dict[str, Any]) -> int:
         for b in player.get('active_buffs', []))
     return base + buff_bonus
 
-
 def player_take_damage(player: Dict[str, Any], raw_damage: int) -> int:
-    """Apply damage to player dict. Returns actual damage taken."""
     defense = get_effective_defense(player)
     damage = max(1, raw_damage - defense)
     remaining = damage
@@ -75,9 +64,7 @@ def player_take_damage(player: Dict[str, Any], raw_damage: int) -> int:
     player['hp'] = max(0, player.get('hp', 0) - taken)
     return taken
 
-
 def tick_buffs(player: Dict[str, Any]) -> bool:
-    """Tick player buffs. Returns True if any expired."""
     changed = False
     buffs = player.get('active_buffs', [])
     remaining = []
@@ -90,14 +77,9 @@ def tick_buffs(player: Dict[str, Any]) -> bool:
     player['active_buffs'] = remaining
     return changed
 
-
 def battle_round_player_attack(player: Dict[str, Any], enemy_dict: Dict[str,
                                                                         Any],
                                _items_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Execute the player's attack portion of a battle round.
-    Returns a result dict with messages, damage dealt, etc.
-    """
     dice = Dice()
     messages = []
     result = {
@@ -143,9 +125,7 @@ def battle_round_player_attack(player: Dict[str, Any], enemy_dict: Dict[str,
 
     return result
 
-
 def battle_round_player_defend(player: Dict[str, Any]) -> Dict[str, Any]:
-    """Player chooses to defend."""
     player['defending'] = True
     return {
         "action":
@@ -160,10 +140,8 @@ def battle_round_player_defend(player: Dict[str, Any]) -> Dict[str, Any]:
         True,
     }
 
-
 def battle_round_player_flee(player: Dict[str, Any],
                              enemy_dict: Dict[str, Any]) -> Dict[str, Any]:
-    """Player attempts to flee."""
     p_speed = get_effective_speed(player)
     e_speed = enemy_dict.get('speed', 5)
     flee_chance = 0.7 if p_speed > e_speed else 0.4
@@ -181,10 +159,8 @@ def battle_round_player_flee(player: Dict[str, Any],
         "player_alive": True,
     }
 
-
 def battle_round_enemy_attack(player: Dict[str, Any],
                               enemy_dict: Dict[str, Any]) -> Dict[str, Any]:
-    """Enemy attacks the player. Modifies player dict in place."""
     dice = Dice()
     messages = []
 
@@ -225,10 +201,8 @@ def battle_round_enemy_attack(player: Dict[str, Any],
         "player_alive": player_alive,
     }
 
-
 def collect_battle_rewards(player: Dict[str, Any], enemy_dict: Dict[str, Any],
                            _items_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Collect rewards after defeating an enemy. Modifies player dict in place."""
     messages = []
     e_name = enemy_dict.get('name', 'the enemy')
     exp_reward = enemy_dict.get('experience_reward',
@@ -300,9 +274,7 @@ def collect_battle_rewards(player: Dict[str, Any], enemy_dict: Dict[str, Any],
         "loot": loot_gained,
     }
 
-
 def handle_player_defeat(player: Dict[str, Any]) -> Dict[str, Any]:
-    """Handle player being defeated. Modifies player dict and returns to starting village."""
     player['hp'] = player.get('max_hp', 100) // 2
     player['mp'] = player.get('max_mp', 50) // 2
     return {
@@ -321,11 +293,9 @@ def handle_player_defeat(player: Dict[str, Any]) -> Dict[str, Any]:
         "starting_village",
     }
 
-
 def build_enemy_from_area(
         area_key: str, enemies_data: Dict[str, Any],
         areas_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Pick a random enemy from the current area."""
     area = areas_data.get(area_key, {})
     possible = area.get('possible_enemies', [])
     if not possible:
@@ -338,11 +308,9 @@ def build_enemy_from_area(
         return None
     return dict(enemy_data)
 
-
 def get_spells_for_weapon(
         weapon_name: Optional[str], items_data: Dict[str, Any],
         spells_data: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
-    """Return list of (spell_name, spell_data) available for the given weapon."""
     if not weapon_name:
         return []
     weapon = items_data.get(weapon_name, {})

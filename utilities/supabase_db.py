@@ -1,11 +1,3 @@
-"""
-Supabase integration for Our Legacy 2.
-Handles user accounts (username + hashed password), cloud saves, and global chat.
-
-All Supabase calls are executed inside gevent's native thread pool (tpool) to
-avoid the httpx/asyncio vs gevent event-loop conflict that causes silent hangs
-on gunicorn+gevent deployments (e.g. Render).
-"""
 import os
 import hashlib
 import base64
@@ -13,7 +5,6 @@ import secrets
 from typing import Optional, Dict, Any, List
 
 def _run(fn, *args, **kwargs):
-    """Run a blocking function directly (no gevent tpool needed with asyncio)."""
     return fn(*args, **kwargs)
 
 from supabase import create_client, Client
@@ -26,24 +17,20 @@ try:
 except Exception:
     _PROFANITY_AVAILABLE = False
 
-
 def contains_profanity(text: str) -> bool:
     if not _PROFANITY_AVAILABLE:
         return False
     return _profanity.contains_profanity(text)
-
 
 def censor_text(text: str) -> str:
     if not _PROFANITY_AVAILABLE:
         return text
     return _profanity.censor(text)
 
-
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "").strip()
 
 _client: Optional[Client] = None
-
 
 def _get_client() -> Client:
     global _client
@@ -53,29 +40,17 @@ def _get_client() -> Client:
         _client = create_client(SUPABASE_URL, SUPABASE_KEY)
     return _client
 
-
 def _hash_password(password: str, salt: Optional[str] = None) -> tuple[str, str]:
-    """Hash a password with SHA-256 + salt. Returns (hash_hex, salt_hex)."""
     if salt is None:
         salt = secrets.token_hex(16)
     h = hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
     return h, salt
 
-
-# ─── Account Management ───────────────────────────────────────────────────────
-
 def _is_valid_email(email: str) -> bool:
-    """Basic email format check."""
     import re
     return bool(re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email))
 
-
 def register_user(username: str, password: str, email: Optional[str] = None) -> Dict[str, Any]:
-    """
-    Register a new user account.
-    Email is optional but must be unique and valid if provided.
-    Returns {'ok': bool, 'message': str}
-    """
     username = username.strip().lower()
     if not username or len(username) < 3:
         return {"ok": False, "message": "Username must be at least 3 characters."}
@@ -125,12 +100,7 @@ def register_user(username: str, password: str, email: Optional[str] = None) -> 
     except Exception as e:
         return {"ok": False, "message": f"Registration failed: {e}"}
 
-
 def login_user(username_or_email: str, password: str) -> Dict[str, Any]:
-    """
-    Authenticate a user by username or email.
-    Returns {'ok': bool, 'message': str, 'user_id': str|None, 'username': str|None}
-    """
     identifier = username_or_email.strip().lower()
     by_email = "@" in identifier
 
@@ -164,15 +134,7 @@ def login_user(username_or_email: str, password: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Login failed: {e}", "user_id": None, "username": None}
 
-
-# ─── Cloud Save / Load ────────────────────────────────────────────────────────
-
 def cloud_save(user_id: str, save_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Save game state to Supabase as an encrypted blob.
-    Each user has one cloud save slot (upsert by user_id).
-    Returns {'ok': bool, 'message': str}
-    """
     encrypted_bytes = encrypt_save(save_data)
     encoded = base64.b64encode(encrypted_bytes).decode("utf-8")
     player = save_data.get("player", {})
@@ -195,12 +157,7 @@ def cloud_save(user_id: str, save_data: Dict[str, Any]) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Cloud save failed: {e}"}
 
-
 def cloud_load(user_id: str) -> Dict[str, Any]:
-    """
-    Load game state from Supabase for the given user.
-    Returns {'ok': bool, 'message': str, 'data': dict|None}
-    """
     def _do():
         client = _get_client()
         result = (
@@ -231,9 +188,7 @@ def cloud_load(user_id: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Cloud load failed: {e}", "data": None}
 
-
 def get_cloud_save_meta(user_id: str) -> Optional[Dict[str, Any]]:
-    """Return metadata about the user's cloud save, or None if none exists."""
     def _do():
         client = _get_client()
         result = (
@@ -250,11 +205,7 @@ def get_cloud_save_meta(user_id: str) -> Optional[Dict[str, Any]]:
     except Exception:
         return None
 
-
-# ─── Friends ──────────────────────────────────────────────────────────────────
-
 def send_friend_request(requester: str, target: str) -> Dict[str, Any]:
-    """Send a friend request. Returns {'ok': bool, 'message': str}."""
     if requester == target:
         return {"ok": False, "message": "You can't add yourself."}
 
@@ -287,9 +238,7 @@ def send_friend_request(requester: str, target: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Failed: {e}"}
 
-
 def respond_friend_request(request_id: str, accept: bool, current_user: str) -> Dict[str, Any]:
-    """Accept or reject a pending friend request."""
     def _do():
         client = _get_client()
         row = client.table("ol2_friends").select("id, requester, target, status").eq("id", request_id).execute()
@@ -312,9 +261,7 @@ def respond_friend_request(request_id: str, accept: bool, current_user: str) -> 
     except Exception as e:
         return {"ok": False, "message": f"Failed: {e}"}
 
-
 def remove_friend(user_a: str, user_b: str) -> Dict[str, Any]:
-    """Remove a friendship between two users."""
     def _do():
         client = _get_client()
         client.table("ol2_friends").delete().or_(
@@ -327,9 +274,7 @@ def remove_friend(user_a: str, user_b: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Failed: {e}"}
 
-
 def get_friends(username: str) -> Dict[str, Any]:
-    """Get all friends and pending requests for a user."""
     def _do():
         client = _get_client()
         result = (
@@ -357,11 +302,7 @@ def get_friends(username: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "friends": [], "incoming": [], "outgoing": [], "error": str(e)}
 
-
-# ─── Private Messages ─────────────────────────────────────────────────────────
-
 def send_dm(sender: str, recipient: str, message: str) -> Dict[str, Any]:
-    """Send a private message between two users."""
     message = censor_text(message.strip())
     if not message:
         return {"ok": False, "message": "Message is empty."}
@@ -383,9 +324,7 @@ def send_dm(sender: str, recipient: str, message: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": str(e)}
 
-
 def get_dm_conversation(user_a: str, user_b: str, limit: int = 80) -> List[Dict[str, Any]]:
-    """Get DM conversation history between two users, oldest first."""
     def _do():
         client = _get_client()
         result = (
@@ -403,9 +342,7 @@ def get_dm_conversation(user_a: str, user_b: str, limit: int = 80) -> List[Dict[
     except Exception:
         return []
 
-
 def mark_dms_read(recipient: str, sender: str) -> None:
-    """Mark all DMs from sender to recipient as read."""
     def _do():
         client = _get_client()
         client.table("ol2_dms").update({"read": True}).eq("recipient", recipient).eq("sender", sender).eq("read", False).execute()
@@ -415,9 +352,7 @@ def mark_dms_read(recipient: str, sender: str) -> None:
     except Exception:
         pass
 
-
 def get_unread_dm_counts(username: str) -> Dict[str, int]:
-    """Return dict of {sender: unread_count} for all unread DMs for username."""
     def _do():
         client = _get_client()
         result = (
@@ -437,11 +372,7 @@ def get_unread_dm_counts(username: str) -> Dict[str, int]:
     except Exception:
         return {}
 
-
-# ─── Global Chat ──────────────────────────────────────────────────────────────
-
 def send_chat_message(username: str, message: str) -> Dict[str, Any]:
-    """Store a chat message in Supabase. Returns {'ok': bool, 'row': dict}."""
     def _do():
         client = _get_client()
         result = (
@@ -459,11 +390,7 @@ def send_chat_message(username: str, message: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "row": None, "error": str(e)}
 
-
-# ─── Blocks / Blacklist ───────────────────────────────────────────────────────
-
 def block_user(blocker: str, blocked: str) -> Dict[str, Any]:
-    """Block a user. Also removes any existing friendship."""
     if blocker == blocked:
         return {"ok": False, "message": "You can't block yourself."}
 
@@ -491,9 +418,7 @@ def block_user(blocker: str, blocked: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Failed: {e}"}
 
-
 def unblock_user(blocker: str, blocked: str) -> Dict[str, Any]:
-    """Remove a block."""
     def _do():
         client = _get_client()
         client.table("ol2_blocks").delete().eq("blocker", blocker).eq("blocked", blocked).execute()
@@ -504,9 +429,7 @@ def unblock_user(blocker: str, blocked: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Failed: {e}"}
 
-
 def is_blocked(sender: str, recipient: str) -> bool:
-    """Return True if recipient has blocked sender."""
     def _do():
         client = _get_client()
         result = (
@@ -523,9 +446,7 @@ def is_blocked(sender: str, recipient: str) -> bool:
     except Exception:
         return False
 
-
 def get_blocked_by_me(username: str) -> List[str]:
-    """Return list of usernames blocked by username."""
     def _do():
         client = _get_client()
         result = (
@@ -541,9 +462,7 @@ def get_blocked_by_me(username: str) -> List[str]:
     except Exception:
         return []
 
-
 def get_chat_history(limit: int = 60) -> List[Dict[str, Any]]:
-    """Return the most recent chat messages, oldest first."""
     def _do():
         client = _get_client()
         result = (
@@ -560,9 +479,7 @@ def get_chat_history(limit: int = 60) -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-
 def clear_chat_history() -> Dict[str, Any]:
-    """Delete all messages from the global chat. Owner-only action."""
     def _do():
         client = _get_client()
         client.table("ol2_chat").delete().gte("created_at", "1970-01-01T00:00:00").execute()
@@ -573,15 +490,7 @@ def clear_chat_history() -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "error": str(e)}
 
-
-# ─── Persistent Character (Phase 1 MMO) ───────────────────────────────────────
-
 def character_autosave(user_id: str, game_state: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Persist the full structured game state for a logged-in character.
-    Uses an upsert on user_id so each account has exactly one live character row.
-    Returns {'ok': bool, 'message': str}
-    """
     import json as _json
 
     player = game_state.get("player") or {}
@@ -604,12 +513,7 @@ def character_autosave(user_id: str, game_state: Dict[str, Any]) -> Dict[str, An
     except Exception as e:
         return {"ok": False, "message": f"Character autosave failed: {e}"}
 
-
 def character_autoload(user_id: str) -> Dict[str, Any]:
-    """
-    Load the persistent game state for a logged-in user.
-    Returns {'ok': bool, 'message': str, 'data': dict|None}
-    """
     import json as _json
 
     def _do():
@@ -645,9 +549,7 @@ def character_autoload(user_id: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Character load failed: {e}", "data": None}
 
-
 def character_delete(user_id: str) -> Dict[str, Any]:
-    """Delete the persistent character for a user (e.g. when starting a new character)."""
     def _do():
         client = _get_client()
         client.table("ol2_characters").delete().eq("user_id", user_id).execute()
@@ -658,20 +560,13 @@ def character_delete(user_id: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Delete failed: {e}"}
 
-
-# ─── Adventure Groups ─────────────────────────────────────────────────────────
-
 _GROUP_MAX_MEMBERS = 6
 _GROUP_XP_CURVE_FACTOR = 1.4
 
-
 def _group_xp_to_next(level: int) -> int:
-    """XP needed to reach the next group level."""
     return int(100 * (_GROUP_XP_CURVE_FACTOR ** (level - 1)))
 
-
 def create_group(leader: str, name: str, description: str = "") -> Dict[str, Any]:
-    """Create a new adventure group. Returns invite_code on success."""
     name = name.strip()
     if not name or len(name) < 2 or len(name) > 32:
         return {"ok": False, "message": "Group name must be 2–32 characters."}
@@ -680,11 +575,9 @@ def create_group(leader: str, name: str, description: str = "") -> Dict[str, Any
 
     def _do():
         client = _get_client()
-        # Check player is not already in a group
         existing = client.table("ol2_group_members").select("group_id").eq("username", leader).execute()
         if existing.data:
             return {"ok": False, "message": "You are already in a group. Leave it first."}
-        # Check group name not taken
         taken = client.table("ol2_groups").select("id").eq("name", name).execute()
         if taken.data:
             return {"ok": False, "message": "A group with that name already exists."}
@@ -709,9 +602,7 @@ def create_group(leader: str, name: str, description: str = "") -> Dict[str, Any
     except Exception as e:
         return {"ok": False, "message": f"Failed to create group: {e}"}
 
-
 def join_group(username: str, invite_code: str) -> Dict[str, Any]:
-    """Join a group by its invite code."""
     invite_code = invite_code.strip().upper()
 
     def _do():
@@ -736,9 +627,7 @@ def join_group(username: str, invite_code: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Failed to join group: {e}"}
 
-
 def leave_group(username: str) -> Dict[str, Any]:
-    """Leave current group. If leader and other members remain, promotes the next member."""
     def _do():
         client = _get_client()
         mem_res = client.table("ol2_group_members").select("group_id").eq("username", username).execute()
@@ -765,9 +654,7 @@ def leave_group(username: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Failed to leave group: {e}"}
 
-
 def kick_group_member(leader: str, target: str) -> Dict[str, Any]:
-    """Leader kicks a member from the group."""
     if leader == target:
         return {"ok": False, "message": "You cannot kick yourself."}
 
@@ -792,9 +679,7 @@ def kick_group_member(leader: str, target: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Failed: {e}"}
 
-
 def get_user_group(username: str) -> Dict[str, Any]:
-    """Return full group info for the user's current group, or None."""
     def _do():
         client = _get_client()
         mem_res = client.table("ol2_group_members").select("group_id, contribution_xp, joined_at").eq("username", username).execute()
@@ -814,12 +699,7 @@ def get_user_group(username: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "group": None}
 
-
 def contribute_to_group(username: str, xp: int, gold: int, action: str) -> Dict[str, Any]:
-    """
-    Add XP and gold to the user's group. Handles group leveling.
-    Returns {ok, leveled_up, new_level, bonus_xp, bonus_gold}.
-    """
     if xp <= 0 and gold <= 0:
         return {"ok": False}
 
@@ -860,9 +740,7 @@ def contribute_to_group(username: str, xp: int, gold: int, action: str) -> Dict[
     except Exception as e:
         return {"ok": False}
 
-
 def collect_group_gold(username: str) -> Dict[str, Any]:
-    """Distribute an equal share of the group gold pool to all members (capped per call)."""
     def _do():
         client = _get_client()
         mem_res = client.table("ol2_group_members").select("group_id").eq("username", username).execute()
@@ -888,9 +766,7 @@ def collect_group_gold(username: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Failed: {e}"}
 
-
 def get_group_leaderboard() -> List[Dict[str, Any]]:
-    """Return top 10 groups by level, then XP."""
     def _do():
         client = _get_client()
         res = client.table("ol2_groups").select("name, leader, level, xp, xp_to_next, gold_pool").order("level", desc=True).order("xp", desc=True).limit(10).execute()
@@ -916,9 +792,7 @@ def get_group_leaderboard() -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-
 def get_player_leaderboard() -> List[Dict[str, Any]]:
-    """Return top 10 players by level from the ol2_characters table."""
     def _do():
         client = _get_client()
         import json as _json
@@ -959,13 +833,7 @@ def get_player_leaderboard() -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-
 def get_all_activities(exclude_user_id: str = None) -> List[Dict[str, Any]]:
-    """
-    Return a list of {player_name, activity_status, current_area} for all
-    characters saved within the last 60 minutes.  Used to show online players'
-    current activity in the travel feed.
-    """
     import json as _json
     from datetime import datetime, timezone, timedelta
 
@@ -1005,15 +873,9 @@ def get_all_activities(exclude_user_id: str = None) -> List[Dict[str, Any]]:
         })
     return out
 
-
-# ─── Email Management ────────────────────────────────────────────────────────
-
-
-EMAIL_VERIFICATION_EXPIRY = 86400  # 24 hours
-
+EMAIL_VERIFICATION_EXPIRY = 86400
 
 def get_user_email(user_id: str) -> Optional[str]:
-    """Return the verified email address for the given user_id, or None."""
     def _do():
         client = _get_client()
         result = (
@@ -1033,9 +895,7 @@ def get_user_email(user_id: str) -> Optional[str]:
     except Exception:
         return None
 
-
 def get_pending_email_verification(user_id: str) -> Optional[str]:
-    """Return the pending (unverified) email if there is an active verification request."""
     import datetime
 
     def _do():
@@ -1066,12 +926,7 @@ def get_pending_email_verification(user_id: str) -> Optional[str]:
     except Exception:
         return None
 
-
 def request_email_verification(user_id: str, email: str) -> Dict[str, Any]:
-    """
-    Create a pending email verification token. Does NOT save the email yet.
-    Returns {'ok': bool, 'message': str, 'token': str|None, 'email': str|None}
-    """
     email_clean = email.strip().lower()
     if not email_clean:
         return {"ok": False, "message": "Please enter an email address.", "token": None, "email": None}
@@ -1105,12 +960,7 @@ def request_email_verification(user_id: str, email: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Could not create verification: {e}", "token": None, "email": None}
 
-
 def verify_email_token(token: str) -> Dict[str, Any]:
-    """
-    Validate an email verification token and save the email as verified on the user's account.
-    Returns {'ok': bool, 'message': str, 'user_id': str|None}
-    """
     import datetime
 
     token = token.strip()
@@ -1167,18 +1017,9 @@ def verify_email_token(token: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Verification failed: {e}", "user_id": None}
 
-
-# ─── Password Reset ───────────────────────────────────────────────────────────
-
-RESET_TOKEN_EXPIRY_SECONDS = 3600  # 1 hour
-
+RESET_TOKEN_EXPIRY_SECONDS = 3600
 
 def create_password_reset_token(email: str) -> Dict[str, Any]:
-    """
-    Look up a user by email, generate a secure reset token, store it, and
-    return {'ok': bool, 'message': str, 'token': str|None, 'email': str|None}.
-    Always returns ok=True with a generic message to avoid user-enumeration.
-    """
     email_clean = email.strip().lower()
     if not email_clean:
         return {"ok": False, "message": "Please enter your email address.", "token": None, "email": None}
@@ -1208,12 +1049,7 @@ def create_password_reset_token(email: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Reset request failed: {e}", "token": None, "email": None}
 
-
 def reset_password_with_token(token: str, new_password: str) -> Dict[str, Any]:
-    """
-    Validate a reset token and update the user's password.
-    Returns {'ok': bool, 'message': str}
-    """
     import datetime
 
     token = token.strip()
@@ -1265,31 +1101,9 @@ def reset_password_with_token(token: str, new_password: str) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "message": f"Password reset failed: {e}"}
 
-
-# ─── Distributed World-Tick Lock ──────────────────────────────────────────────
-# Prevents multiple Gunicorn workers from each running their own world tick when
-# the worker count is scaled above 1.  Uses a single row in `ol2_tick_lock` as
-# a lease: the holder renews its TTL every tick; if a worker crashes the lease
-# expires and another worker acquires it automatically.
-#
-# Required Supabase table (run once):
-#   CREATE TABLE IF NOT EXISTS ol2_tick_lock (
-#       lock_name  TEXT PRIMARY KEY,
-#       worker_id  TEXT NOT NULL,
-#       expires_at TIMESTAMPTZ NOT NULL
-#   );
-
 _TICK_LOCK_NAME = "world_tick"
 
-
 def try_acquire_or_renew_world_tick_lock(worker_id: str, ttl_seconds: int = 90) -> bool:
-    """
-    Try to acquire or renew the world-tick distributed lock.
-
-    Returns True  if this worker now holds the lock (newly acquired or renewed).
-    Returns False if a different worker currently holds a valid lease.
-    Falls back to True when Supabase is not configured (single-worker mode).
-    """
     try:
         client = _get_client()
         now = datetime.datetime.now(datetime.timezone.utc)
@@ -1297,7 +1111,6 @@ def try_acquire_or_renew_world_tick_lock(worker_id: str, ttl_seconds: int = 90) 
         now_str = now.isoformat()
 
         def _do():
-            # 1. Renew if we already hold the lock — returns the updated row.
             renew_res = (
                 client.table("ol2_tick_lock")
                 .update({"expires_at": expires_at})
@@ -1308,13 +1121,10 @@ def try_acquire_or_renew_world_tick_lock(worker_id: str, ttl_seconds: int = 90) 
             if renew_res.data:
                 return True
 
-            # 2. Evict any expired lease so we can compete for it.
             client.table("ol2_tick_lock").delete().eq(
                 "lock_name", _TICK_LOCK_NAME
             ).lt("expires_at", now_str).execute()
 
-            # 3. Try to insert our lease; if another worker already holds a
-            #    valid one this INSERT is silently ignored (no upsert).
             try:
                 ins_res = (
                     client.table("ol2_tick_lock")
@@ -1334,15 +1144,11 @@ def try_acquire_or_renew_world_tick_lock(worker_id: str, ttl_seconds: int = 90) 
         return _run(_do)
 
     except RuntimeError:
-        # Supabase not configured — single-worker mode, always allow.
         return True
     except Exception:
-        # Network / transient error — allow the tick rather than starve it.
         return True
 
-
 def release_world_tick_lock(worker_id: str) -> None:
-    """Release the world-tick lock if this worker currently holds it."""
     try:
         client = _get_client()
         _run(
@@ -1355,15 +1161,10 @@ def release_world_tick_lock(worker_id: str) -> None:
     except Exception:
         pass
 
-
-# ─── Admin System ─────────────────────────────────────────────────────────────
-
 _ADMIN_OWNER_KEY = "owner"
 _ADMIN_OWNER_DEFAULT = "ThePrimordialOne"
 
-
 def admin_get_owner() -> str:
-    """Return the current owner username (lowercase)."""
     def _do():
         client = _get_client()
         result = (
@@ -1380,9 +1181,7 @@ def admin_get_owner() -> str:
     except Exception:
         return _ADMIN_OWNER_DEFAULT.lower()
 
-
 def admin_set_owner(new_owner: str) -> None:
-    """Set the server owner (upsert by key)."""
     def _do():
         client = _get_client()
         client.table("ol2_admin_config").upsert(
@@ -1393,9 +1192,7 @@ def admin_set_owner(new_owner: str) -> None:
     except Exception:
         pass
 
-
 def admin_get_mods() -> List[str]:
-    """Return list of moderator usernames (lowercase, excludes owner)."""
     def _do():
         client = _get_client()
         result = client.table("ol2_admin_mods").select("username").execute()
@@ -1405,9 +1202,7 @@ def admin_get_mods() -> List[str]:
     except Exception:
         return []
 
-
 def admin_add_mod(username: str) -> bool:
-    """Add a moderator. Returns True if added, False if already listed."""
     uname = username.lower()
     def _do():
         client = _get_client()
@@ -1426,9 +1221,7 @@ def admin_add_mod(username: str) -> bool:
     except Exception:
         return False
 
-
 def admin_remove_mod(username: str) -> bool:
-    """Remove a moderator. Returns True if the user was in the list."""
     uname = username.lower()
     def _do():
         client = _get_client()
@@ -1444,9 +1237,7 @@ def admin_remove_mod(username: str) -> bool:
     except Exception:
         return False
 
-
 def admin_get_all_mods() -> List[str]:
-    """Return owner + all moderators as a deduplicated list of lowercase usernames."""
     owner = admin_get_owner()
     mods = admin_get_mods()
     seen: set = set()
@@ -1457,9 +1248,7 @@ def admin_get_all_mods() -> List[str]:
             seen.add(m)
     return result
 
-
 def admin_is_banned(username: str) -> bool:
-    """Return True if the username is in the ban list."""
     uname = username.lower()
     def _do():
         client = _get_client()
@@ -1475,9 +1264,7 @@ def admin_is_banned(username: str) -> bool:
     except Exception:
         return False
 
-
 def admin_ban(username: str, reason: str, banned_by: str) -> None:
-    """Ban a user (upsert — re-banning updates the reason)."""
     uname = username.lower()
     def _do():
         client = _get_client()
@@ -1491,9 +1278,7 @@ def admin_ban(username: str, reason: str, banned_by: str) -> None:
     except Exception:
         pass
 
-
 def admin_unban(username: str) -> bool:
-    """Remove a ban. Returns True if the user was banned."""
     uname = username.lower()
     def _do():
         client = _get_client()
@@ -1509,9 +1294,7 @@ def admin_unban(username: str) -> bool:
     except Exception:
         return False
 
-
 def admin_list_bans() -> List[Dict[str, Any]]:
-    """Return all banned users with reason and metadata."""
     def _do():
         client = _get_client()
         result = (
@@ -1525,9 +1308,7 @@ def admin_list_bans() -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-
 def admin_is_muted(username: str) -> bool:
-    """Return True if the username is currently muted (handles auto-expiry)."""
     import datetime as _dt
     uname = username.lower()
     def _do():
@@ -1542,7 +1323,7 @@ def admin_is_muted(username: str) -> bool:
             return False
         expires_at = result.data[0].get("expires_at")
         if expires_at is None:
-            return True  # permanent mute
+            return True
         exp = _dt.datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
         if _dt.datetime.now(_dt.timezone.utc) > exp:
             client.table("ol2_admin_mutes").delete().eq("username", uname).execute()
@@ -1553,9 +1334,7 @@ def admin_is_muted(username: str) -> bool:
     except Exception:
         return False
 
-
 def admin_mute(username: str, expires_at: Optional[float], reason: str, muted_by: str) -> None:
-    """Mute a user. expires_at is a Unix timestamp, or None for a permanent mute."""
     import datetime as _dt
     uname = username.lower()
     exp_iso: Optional[str] = None
@@ -1574,9 +1353,7 @@ def admin_mute(username: str, expires_at: Optional[float], reason: str, muted_by
     except Exception:
         pass
 
-
 def admin_unmute(username: str) -> bool:
-    """Remove a mute. Returns True if the user was muted."""
     uname = username.lower()
     def _do():
         client = _get_client()
@@ -1592,9 +1369,7 @@ def admin_unmute(username: str) -> bool:
     except Exception:
         return False
 
-
 def admin_list_mutes() -> List[Dict[str, Any]]:
-    """Return all currently active mutes (expired ones are excluded)."""
     import datetime as _dt
     def _do():
         client = _get_client()
@@ -1619,9 +1394,7 @@ def admin_list_mutes() -> List[Dict[str, Any]]:
     except Exception:
         return []
 
-
 def admin_warn(username: str, reason: str) -> int:
-    """Record a warning for a user. Returns the new total warning count."""
     uname = username.lower()
     def _do():
         client = _get_client()
@@ -1641,9 +1414,7 @@ def admin_warn(username: str, reason: str) -> int:
     except Exception:
         return 1
 
-
 def admin_clear_warns(username: str) -> bool:
-    """Delete all warnings for a user. Returns True if any existed."""
     uname = username.lower()
     def _do():
         client = _get_client()

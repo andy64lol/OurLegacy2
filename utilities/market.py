@@ -17,14 +17,12 @@ ELITE_RARITIES = {"rare", "legendary"}
 ELITE_TYPES = {"weapon", "armor", "accessory", "consumable"}
 MARKET_PRICE_MULTIPLIER = 2.0
 
-
 def _load_items() -> Dict[str, Any]:
     try:
         with open(_ITEMS_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except (OSError, json.JSONDecodeError):
         return {}
-
 
 def _build_elite_pool(items: Dict[str, Any]) -> List[Dict[str, Any]]:
     pool = []
@@ -44,25 +42,21 @@ def _build_elite_pool(items: Dict[str, Any]) -> List[Dict[str, Any]]:
         pool.append(entry)
     return pool
 
-
 def _get_time_window_seed() -> int:
     now = datetime.now()
     total_minutes = int(now.timestamp()) // 60
     window = total_minutes // MARKET_COOLDOWN_MINUTES
     return window
 
-
 def _is_birthday() -> bool:
     now = datetime.now()
     return now.month == BIRTHDAY_MONTH and now.day == BIRTHDAY_DAY
-
 
 def _select_market_items(pool: List[Dict[str, Any]], extra_seed: int = 0) -> List[Dict[str, Any]]:
     seed = _get_time_window_seed() + extra_seed * 999983
     rng = random.Random(seed)
     count = min(MARKET_ITEM_COUNT, len(pool))
     return rng.sample(pool, count)
-
 
 def _get_birthday_item(items: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     data = items.get(BIRTHDAY_ITEM_NAME)
@@ -74,9 +68,7 @@ def _get_birthday_item(items: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     entry["birthday_special"] = True
     return entry
 
-
 class MarketAPI:
-    """Elite Market backed by local items data with a time-window rotation."""
 
     def __init__(self):
         self.cache: Optional[Dict[str, Any]] = None
@@ -100,7 +92,6 @@ class MarketAPI:
         return None
 
     def fetch_market_data(self, force_refresh: bool = False, extra_seed: int = 0) -> Dict[str, Any]:
-        """Fetch market data from local items.json. Returns result dict with ok, data, message."""
         current_window = _get_time_window_seed()
 
         if not force_refresh and self._is_cache_valid() and extra_seed == self._last_extra_seed:
@@ -163,9 +154,7 @@ class MarketAPI:
             by_type.setdefault(t, []).append(item)
         return by_type
 
-
 _market_api = MarketAPI()
-
 
 def get_market_api() -> MarketAPI:
     return _market_api

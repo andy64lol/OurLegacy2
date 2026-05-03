@@ -1,17 +1,11 @@
-"""
-Spell Casting System for Our Legacy 2 - Flask Edition
-Stateless functions that operate on player dicts.
-"""
 
 import random
 from typing import Dict, List, Any, Optional
 from utilities.dice import Dice
 
-
 def get_available_spells(
     weapon_name: Optional[str], items_data: Dict[str, Any], spells_data: Dict[str, Any]
 ) -> List[Dict[str, Any]]:
-    """Return list of spells available for the given weapon."""
     if not weapon_name:
         return []
     weapon = items_data.get(weapon_name, {})
@@ -32,11 +26,9 @@ def get_available_spells(
             )
     return spells
 
-
 def can_cast_spell(
     player: Dict[str, Any], spell_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """Check if the player can cast a spell."""
     cost = spell_data.get("mp_cost", 0)
     if player.get("mp", 0) < cost:
         return {
@@ -45,7 +37,6 @@ def can_cast_spell(
         }
     return {"ok": True}
 
-
 def cast_spell(
     player: Dict[str, Any],
     enemy_dict: Dict[str, Any],
@@ -53,10 +44,6 @@ def cast_spell(
     spell_data: Dict[str, Any],
     effects_data: Dict[str, Any],
 ) -> Dict[str, Any]:
-    """
-    Cast a spell. Modifies player dict in place (MP cost).
-    Returns a result dict with messages and outcome data.
-    """
     messages: List[Dict[str, Any]] = []
     cost = spell_data.get("mp_cost", 0)
     check = can_cast_spell(player, spell_data)

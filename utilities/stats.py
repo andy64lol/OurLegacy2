@@ -1,18 +1,3 @@
-"""
-Attribute System for Our Legacy 2
-
-STR, DEX, INT, CHA, WIS, CON — the six core attributes.
-Players start with 5 in each attribute.
-Each level grants 3 points to spend.
-
-Attribute effects:
-  STR (Strength)      — +2 ATK per point above base
-  DEX (Dexterity)     — +1 SPD, +1% dodge per point above base
-  INT (Intelligence)  — +3 max MP, +2 spell power per point above base
-  CHA (Charisma)      — +1% shop discount per point above base
-  WIS (Wisdom)        — +2 max MP, +2% item discovery per point above base
-  CON (Constitution)  — +5 max HP, +1 DEF per point above base
-"""
 from typing import Dict, Any
 
 ATTRIBUTE_NAMES: Dict[str, str] = {
@@ -36,10 +21,8 @@ ATTRIBUTE_DESCRIPTIONS: Dict[str, str] = {
 BASE_ATTRIBUTE: int = 5
 POINTS_PER_LEVEL: int = 3
 
-
 def get_default_attributes() -> Dict[str, int]:
     return {attr: BASE_ATTRIBUTE for attr in ATTRIBUTE_NAMES}
-
 
 def ensure_attributes(player: Dict[str, Any]) -> None:
     if 'attributes' not in player:
@@ -57,7 +40,6 @@ def ensure_attributes(player: Dict[str, Any]) -> None:
         if field not in player:
             player[field] = default
 
-
 def get_unspent_points(player: Dict[str, Any]) -> int:
     ensure_attributes(player)
     level = player.get('level', 1)
@@ -68,7 +50,6 @@ def get_unspent_points(player: Dict[str, Any]) -> int:
     )
     total_available = (level - 1) * POINTS_PER_LEVEL
     return max(0, total_available - total_spent)
-
 
 def spend_attribute_point(player: Dict[str, Any], attr: str) -> Dict[str, Any]:
     if attr not in ATTRIBUTE_NAMES:
@@ -108,7 +89,6 @@ def spend_attribute_point(player: Dict[str, Any], attr: str) -> Dict[str, Any]:
         'ok': True,
         'message': f'{ATTRIBUTE_NAMES[attr]} increased to {new_val}!'
     }
-
 
 def get_attribute_summary(player: Dict[str, Any]) -> Dict[str, Any]:
     ensure_attributes(player)
