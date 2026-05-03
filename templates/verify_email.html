@@ -1,43 +1,152 @@
 {% extends "base.html" %}
+{% block extra_head %}
+<style>
+    body { margin: 0; }
+    .ve-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 20px;
+        background:
+            linear-gradient(to bottom, rgba(10,6,20,0.72) 0%, rgba(6,3,14,0.92) 100%),
+            url('/game_assets/backgrounds/1.png') center/cover no-repeat fixed;
+    }
+    .ve-logo {
+        width: 240px;
+        max-width: 70vw;
+        image-rendering: pixelated;
+        margin-bottom: 32px;
+        filter: drop-shadow(0 4px 24px rgba(120,70,255,0.35));
+    }
+    .ve-card {
+        background: linear-gradient(160deg, rgba(14,8,30,0.98), rgba(8,4,20,0.98));
+        border: 1px solid rgba(160,110,255,0.3);
+        border-radius: 16px;
+        padding: 36px 32px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 0 60px rgba(100,60,200,0.2), inset 0 0 0 1px rgba(255,255,255,0.03);
+        text-align: center;
+    }
+    .ve-eyebrow {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--mana-bright);
+        opacity: 0.75;
+        margin-bottom: 22px;
+    }
+    .ve-state-box {
+        border-radius: 12px;
+        padding: 24px 18px;
+        margin-bottom: 8px;
+    }
+    .ve-state-ok {
+        background: rgba(20,80,40,0.3);
+        border: 1px solid rgba(60,190,110,0.35);
+    }
+    .ve-state-err {
+        background: rgba(120,30,30,0.25);
+        border: 1px solid rgba(255,80,80,0.3);
+    }
+    .ve-state-icon {
+        width: 40px;
+        height: 40px;
+        image-rendering: pixelated;
+        margin-bottom: 14px;
+        opacity: 0.9;
+    }
+    .ve-state-title {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: 0.03em;
+    }
+    .ve-state-body {
+        font-size: 12px;
+        color: var(--text-dim);
+        line-height: 1.7;
+        margin-bottom: 20px;
+    }
+    .ve-btn {
+        display: inline-block;
+        padding: 10px 28px;
+        background: linear-gradient(135deg, #6d3fd4, #4a2aa8);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        box-shadow: 0 2px 16px rgba(100,60,200,0.4);
+        transition: opacity 0.18s, box-shadow 0.18s;
+        font-family: inherit;
+    }
+    .ve-btn:hover { opacity: 0.88; box-shadow: 0 4px 24px rgba(100,60,200,0.55); }
+    .ve-back {
+        display: inline-block;
+        margin-top: 22px;
+        font-size: 11px;
+        color: var(--text-dim);
+        text-decoration: none;
+        opacity: 0.55;
+        letter-spacing: 0.05em;
+        transition: opacity 0.15s;
+    }
+    .ve-back:hover { opacity: 0.9; color: var(--mana-bright); }
+    .ve-divider {
+        height: 1px;
+        background: rgba(160,110,255,0.12);
+        margin: 20px 0;
+    }
+</style>
+{% endblock %}
 {% block content %}
-<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
-    <div style="background:linear-gradient(160deg,rgba(18,12,38,0.98),rgba(10,6,28,0.98));border:1px solid rgba(180,130,255,0.45);border-radius:14px;padding:36px 28px;width:100%;max-width:400px;box-shadow:0 0 48px rgba(140,90,255,0.25);">
+<div class="ve-page">
+    <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="ve-logo">
 
-        <div style="text-align:center;margin-bottom:22px;">
-            <img src="/game_assets/game_title_our_legacy_2.png" alt="Our Legacy 2" style="max-width:220px;margin-bottom:12px;">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:var(--mana-bright);opacity:0.8;">
-                Email Verification
-            </div>
-        </div>
+    <div class="ve-card">
+        <div class="ve-eyebrow">Email Verification</div>
 
         {% if not token %}
-        <div style="text-align:center;padding:18px;background:rgba(180,40,40,0.15);border:1px solid rgba(255,80,80,0.3);border-radius:8px;font-size:13px;color:var(--red);">
-            No verification token provided.<br>
-            Check your email for the correct link.
+        <div class="ve-state-box ve-state-err">
+            <img src="/game_assets/glyphs/settings.png" alt="" class="ve-state-icon" style="opacity:0.5;">
+            <div class="ve-state-title" style="color:var(--red);">No Token Found</div>
+            <div class="ve-state-body">
+                No verification token was provided.<br>
+                Check your inbox for the correct link.
+            </div>
         </div>
 
         {% elif result and result.ok %}
-        <div style="text-align:center;padding:22px 16px;background:rgba(20,80,40,0.25);border:1px solid rgba(60,180,100,0.4);border-radius:10px;">
-            <div style="font-size:16px;font-weight:bold;color:var(--green-bright);margin-bottom:10px;">Email Verified!</div>
-            <div style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:18px;">
-                Your email address has been confirmed and your account is now fully secured.
+        <div class="ve-state-box ve-state-ok">
+            <img src="/game_assets/glyphs/sparkles.png" alt="" class="ve-state-icon">
+            <div class="ve-state-title" style="color:var(--green-bright);">Email Verified!</div>
+            <div class="ve-state-body">
+                Your address has been confirmed and your account is now fully secured.
                 Your progress has been saved automatically.
             </div>
-            <a href="/" class="btn btn-primary" style="display:inline-block;text-decoration:none;">Return to Game</a>
+            <a href="/" class="ve-btn">Return to Game</a>
         </div>
 
         {% else %}
-        <div style="text-align:center;padding:18px;background:rgba(180,40,40,0.15);border:1px solid rgba(255,80,80,0.3);border-radius:8px;font-size:13px;color:var(--red);margin-bottom:16px;">
-            {{ result.message if result else "Verification failed. The link may be invalid or expired." }}
+        <div class="ve-state-box ve-state-err">
+            <img src="/game_assets/glyphs/fight.png" alt="" class="ve-state-icon" style="opacity:0.55;">
+            <div class="ve-state-title" style="color:var(--red);">Verification Failed</div>
+            <div class="ve-state-body">
+                {{ result.message if result else "The link may be invalid or expired." }}<br><br>
+                Return to the game and request a new verification email from your account settings.
+            </div>
         </div>
-        <p style="font-size:12px;color:var(--text-dim);text-align:center;margin:0 0 16px 0;">
-            Return to the game and request a new verification email from your account.
-        </p>
         {% endif %}
 
-        <div style="margin-top:20px;text-align:center;">
-            <a href="/" style="font-size:12px;color:var(--text-dim);text-decoration:none;opacity:0.7;">&#8592; Return to game</a>
-        </div>
+        <div class="ve-divider"></div>
+        <a href="/" class="ve-back">&#8592; Return to game</a>
     </div>
 </div>
 {% endblock %}
