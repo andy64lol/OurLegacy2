@@ -537,8 +537,8 @@ function settingsToggleButtonStyle() {
 }
 
 /* ── Themes ──────────────────────────────────────────────────────────────── */
-var OL2_THEMES = ['default', 'forest', 'crimson', 'midnight', 'dusk'];
-var OL2_THEME_LABELS = { default: 'Default', forest: 'Forest', crimson: 'Crimson', midnight: 'Midnight', dusk: 'Dusk' };
+var OL2_THEMES = ['default', 'forest', 'crimson', 'midnight', 'amethyst'];
+var OL2_THEME_LABELS = { default: 'Default', forest: 'Forest', crimson: 'Crimson', midnight: 'Midnight', amethyst: 'Amethyst' };
 
 function initTheme() {
     var theme = localStorage.getItem('ol2_theme') || 'default';
@@ -549,6 +549,7 @@ function _applyTheme(theme) {
     OL2_THEMES.forEach(function(t) {
         document.body.classList.remove('ol2-theme-' + t);
     });
+    document.body.classList.remove('ol2-theme-dusk');
     if (theme && theme !== 'default') document.body.classList.add('ol2-theme-' + theme);
     document.querySelectorAll('.theme-option-btn').forEach(function(btn) {
         btn.classList.toggle('active', btn.dataset.theme === theme);
