@@ -59,6 +59,111 @@
     --rarity-legendary: #d8bc30;
 }
 
+/* ─── Colour Themes ──────────────────────────────────────── */
+body.ol2-theme-forest {
+    --slate-darkest: #0e1a0e;
+    --slate-dark: #1a2e1a;
+    --slate-mid: #2e4a2e;
+    --slate-light: #486048;
+    --slate-bright: #6a886a;
+    --wood-darkest: #0c1408;
+    --wood-dark: #1e3410;
+    --wood-mid: #345a1c;
+    --wood-light: #508430;
+    --wood-bright: #78b048;
+    --gold: #a8c840;
+    --gold-bright: #c8e860;
+    --gold-dim: #607020;
+    --text-light: #c8e0b0;
+    --text-bright: #e8f8d8;
+    --text-dim: #6a8858;
+    --text-dark: #101c08;
+    --border: #2e4a1e;
+    --border-bright: #487030;
+    --bg-main: #0a120a;
+    --bg-panel: #141e12;
+    --bg-panel-dark: #0e180c;
+    --panel-bg: #141e12;
+}
+
+body.ol2-theme-crimson {
+    --slate-darkest: #1a0808;
+    --slate-dark: #2e1010;
+    --slate-mid: #4a1c1c;
+    --slate-light: #6e2828;
+    --slate-bright: #983a3a;
+    --wood-darkest: #200808;
+    --wood-dark: #5a1010;
+    --wood-mid: #8a1e1e;
+    --wood-light: #b83030;
+    --wood-bright: #d85050;
+    --gold: #e08060;
+    --gold-bright: #f0a080;
+    --gold-dim: #904030;
+    --text-light: #f0c8b8;
+    --text-bright: #fce8e0;
+    --text-dim: #906858;
+    --text-dark: #200c08;
+    --border: #5a2020;
+    --border-bright: #882e2e;
+    --bg-main: #120606;
+    --bg-panel: #1e0c0c;
+    --bg-panel-dark: #160808;
+    --panel-bg: #1e0c0c;
+}
+
+body.ol2-theme-midnight {
+    --slate-darkest: #08101e;
+    --slate-dark: #101828;
+    --slate-mid: #1e2e48;
+    --slate-light: #2e4868;
+    --slate-bright: #406090;
+    --wood-darkest: #080c18;
+    --wood-dark: #102050;
+    --wood-mid: #1c3878;
+    --wood-light: #2c54a8;
+    --wood-bright: #4070c8;
+    --gold: #60a0e0;
+    --gold-bright: #80c0f8;
+    --gold-dim: #305888;
+    --text-light: #b8d4f0;
+    --text-bright: #e0f0ff;
+    --text-dim: #587898;
+    --text-dark: #080e1e;
+    --border: #1c3060;
+    --border-bright: #2c4888;
+    --bg-main: #060c18;
+    --bg-panel: #0e1830;
+    --bg-panel-dark: #0a1224;
+    --panel-bg: #0e1830;
+}
+
+body.ol2-theme-dusk {
+    --slate-darkest: #140e20;
+    --slate-dark: #201830;
+    --slate-mid: #382a50;
+    --slate-light: #543e70;
+    --slate-bright: #785898;
+    --wood-darkest: #180c28;
+    --wood-dark: #3a1860;
+    --wood-mid: #5e2e90;
+    --wood-light: #8844b8;
+    --wood-bright: #b060d8;
+    --gold: #c880e8;
+    --gold-bright: #e0a0ff;
+    --gold-dim: #704090;
+    --text-light: #d8c0f0;
+    --text-bright: #f0e0ff;
+    --text-dim: #806898;
+    --text-dark: #180c28;
+    --border: #4a2070;
+    --border-bright: #6e30a0;
+    --bg-main: #0e0818;
+    --bg-panel: #18102a;
+    --bg-panel-dark: #120c20;
+    --panel-bg: #18102a;
+}
+
 /* ─── Reset ──────────────────────────────────────────────── */
 *,
 *::before,
@@ -211,6 +316,66 @@ body.ol2-btn-classic .mainmenu-btn-highlight {
 }
 body.ol2-btn-classic .mainmenu-btn-highlight:hover,
 body.ol2-btn-classic .mainmenu-btn-highlight:focus {
+    background-image: none !important;
+    background: var(--wood-mid) !important;
+    color: var(--gold-bright) !important;
+    filter: none !important;
+}
+
+/* Classic Slight-Rounded mode: strip PNG, gently rounded corners */
+body.ol2-btn-slight-rounded .btn,
+body.ol2-btn-slight-rounded .btn-wood {
+    border-radius: 7px !important;
+}
+body.ol2-btn-slight-rounded .btn-wood {
+    background-image: none !important;
+    background: var(--wood-dark) !important;
+    color: var(--gold-bright) !important;
+    border-color: var(--wood-bright) !important;
+    aspect-ratio: unset !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+    border-radius: 7px !important;
+}
+body.ol2-btn-slight-rounded .btn-wood:hover:not(:disabled):not(.btn-disabled) {
+    background-image: none !important;
+    background: var(--wood-mid) !important;
+    color: var(--gold-bright) !important;
+}
+body.ol2-btn-slight-rounded .btn-wood:active:not(:disabled):not(.btn-disabled) {
+    background-image: none !important;
+    background: var(--wood-dark) !important;
+}
+body.ol2-btn-slight-rounded .mainmenu-btn {
+    background-image: none !important;
+    background: var(--slate-dark) !important;
+    border: 2px solid var(--slate-light) !important;
+    color: var(--text-light) !important;
+    aspect-ratio: unset !important;
+    border-radius: 7px !important;
+    padding: 10px 20px !important;
+}
+body.ol2-btn-slight-rounded .mainmenu-btn:hover,
+body.ol2-btn-slight-rounded .mainmenu-btn:focus {
+    background-image: none !important;
+    background: var(--slate-mid) !important;
+    color: var(--text-bright) !important;
+    filter: none !important;
+}
+body.ol2-btn-slight-rounded .mainmenu-btn:active {
+    background-image: none !important;
+    background: var(--slate-dark) !important;
+    filter: none !important;
+}
+body.ol2-btn-slight-rounded .mainmenu-btn-highlight {
+    background-image: none !important;
+    background: var(--wood-dark) !important;
+    border-color: var(--wood-bright) !important;
+    color: var(--gold-bright) !important;
+    border-radius: 7px !important;
+}
+body.ol2-btn-slight-rounded .mainmenu-btn-highlight:hover,
+body.ol2-btn-slight-rounded .mainmenu-btn-highlight:focus {
     background-image: none !important;
     background: var(--wood-mid) !important;
     color: var(--gold-bright) !important;

@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initPageTransitions();
     initBackground();
     initButtonStyle();
+    initTheme();
     initLowHpWarning();
     initBattleKeys();
     checkMobile();
@@ -509,17 +510,18 @@ function initPagination() {
 }
 
 function initButtonStyle() {
-    var style = localStorage.getItem('ol2_btn_style') || 'png';
+    var style = localStorage.getItem('ol2_btn_style') || 'classic';
     _applyButtonStyle(style);
 }
 
 function _applyButtonStyle(style) {
-    document.body.classList.remove('ol2-btn-classic', 'ol2-btn-rounded');
+    document.body.classList.remove('ol2-btn-classic', 'ol2-btn-slight-rounded', 'ol2-btn-rounded');
     if (style === 'classic') document.body.classList.add('ol2-btn-classic');
+    else if (style === 'classic-slight') document.body.classList.add('ol2-btn-slight-rounded');
     else if (style === 'classic-rounded') document.body.classList.add('ol2-btn-rounded');
     var btn = document.getElementById('settings-btn-style');
     if (btn) {
-        btn.textContent = style === 'classic' ? 'Classic' : style === 'classic-rounded' ? 'Rounded' : 'PNG';
+        btn.textContent = style === 'classic' ? 'Classic' : style === 'classic-slight' ? 'Slight Rounded' : style === 'classic-rounded' ? 'Rounded' : 'PNG';
     }
 }
 
@@ -529,9 +531,33 @@ function applyButtonStyle(style) {
 }
 
 function settingsToggleButtonStyle() {
-    var current = localStorage.getItem('ol2_btn_style') || 'png';
-    var next = current === 'png' ? 'classic' : current === 'classic' ? 'classic-rounded' : 'png';
+    var current = localStorage.getItem('ol2_btn_style') || 'classic';
+    var next = current === 'png' ? 'classic' : current === 'classic' ? 'classic-slight' : current === 'classic-slight' ? 'classic-rounded' : 'png';
     applyButtonStyle(next);
+}
+
+/* ── Themes ──────────────────────────────────────────────────────────────── */
+var OL2_THEMES = ['default', 'forest', 'crimson', 'midnight', 'dusk'];
+var OL2_THEME_LABELS = { default: 'Default', forest: 'Forest', crimson: 'Crimson', midnight: 'Midnight', dusk: 'Dusk' };
+
+function initTheme() {
+    var theme = localStorage.getItem('ol2_theme') || 'default';
+    _applyTheme(theme);
+}
+
+function _applyTheme(theme) {
+    OL2_THEMES.forEach(function(t) {
+        document.body.classList.remove('ol2-theme-' + t);
+    });
+    if (theme && theme !== 'default') document.body.classList.add('ol2-theme-' + theme);
+    document.querySelectorAll('.theme-option-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.theme === theme);
+    });
+}
+
+function applyTheme(theme) {
+    _applyTheme(theme);
+    localStorage.setItem('ol2_theme', theme);
 }
 
 function initBackground() {
@@ -585,9 +611,14 @@ function openSettings() {
 
     var btnStyleLabel = document.getElementById('settings-btn-style');
     if (btnStyleLabel) {
-        var curStyle = localStorage.getItem('ol2_btn_style') || 'png';
-        btnStyleLabel.textContent = curStyle === 'classic' ? 'Classic' : 'PNG';
+        var curStyle = localStorage.getItem('ol2_btn_style') || 'classic';
+        btnStyleLabel.textContent = curStyle === 'classic' ? 'Classic' : curStyle === 'classic-slight' ? 'Slight Rounded' : curStyle === 'classic-rounded' ? 'Rounded' : 'PNG';
     }
+
+    var curTheme = localStorage.getItem('ol2_theme') || 'default';
+    document.querySelectorAll('.theme-option-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.theme === curTheme);
+    });
 
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';

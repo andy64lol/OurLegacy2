@@ -324,7 +324,15 @@
                 <div class="settings-section-label" style="margin-top:8px;">Interface</div>
                 <div class="settings-row">
                     <span class="settings-label">Buttons</span>
-                    <button id="settings-btn-style" class="btn btn-secondary btn-xsmall" onclick="settingsToggleButtonStyle()">PNG</button>
+                    <button id="settings-btn-style" class="btn btn-secondary btn-xsmall" onclick="settingsToggleButtonStyle()">Classic</button>
+                </div>
+                <div class="settings-section-label" style="margin-top:8px;">Theme &amp; Colours</div>
+                <div class="settings-row settings-bg-row" style="flex-wrap:wrap;gap:5px;">
+                    <button class="theme-option-btn btn btn-secondary btn-xsmall active" data-theme="default" onclick="applyTheme('default')">Default</button>
+                    <button class="theme-option-btn btn btn-secondary btn-xsmall" data-theme="forest" onclick="applyTheme('forest')">Forest</button>
+                    <button class="theme-option-btn btn btn-secondary btn-xsmall" data-theme="crimson" onclick="applyTheme('crimson')">Crimson</button>
+                    <button class="theme-option-btn btn btn-secondary btn-xsmall" data-theme="midnight" onclick="applyTheme('midnight')">Midnight</button>
+                    <button class="theme-option-btn btn btn-secondary btn-xsmall" data-theme="dusk" onclick="applyTheme('dusk')">Dusk</button>
                 </div>
             </div>
             <div class="settings-footer">
