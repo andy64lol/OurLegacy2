@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAI DO U DO DIS!?!?</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            color: #ff2222;
+            font-family: 'Comic Sans MS', 'Chiller', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 5vw;
+            animation: shake 0.3s infinite;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+        }
+
+        p {
+            font-size: 2.5vw;
+            color: #ffaa00;
+            animation: flicker 0.8s infinite alternate;
+            text-shadow: 0 0 10px #ffaa00;
+        }
+
+        .skull {
+            font-size: 10vw;
+            animation: spin 2s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes shake {
+            0%   { transform: translate(2px, -2px) rotate(-1deg); }
+            25%  { transform: translate(-2px, 2px) rotate(1deg); }
+            50%  { transform: translate(2px, 2px) rotate(-1deg); }
+            75%  { transform: translate(-2px, -2px) rotate(1deg); }
+            100% { transform: translate(2px, -2px) rotate(-1deg); }
+        }
+
+        @keyframes flicker {
+            0%   { opacity: 1; }
+            80%  { opacity: 1; }
+            85%  { opacity: 0.2; }
+            90%  { opacity: 1; }
+            95%  { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="skull">&#128128;</div>
+    <h1>WAI DO U DO DIS!?!?</h1>
+    <p>NOU DE SACRED TEXT IS GON!!!</p>
+    <div class="skull">&#128128;</div>
+</body>
+</html>

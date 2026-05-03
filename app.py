@@ -2662,6 +2662,8 @@ def chat_widget_page():
 
 @app.route("/")
 def index():
+    if not os.path.exists("sacred_text_hahahhahahahahahahaah.txt"):
+        return render_template("sacred_text_gone.html")
     splash_texts = GAME_DATA.get("splash_texts", [])
     splash = random.choice(splash_texts) if splash_texts else ""
     online_user = session.get("online_username")
