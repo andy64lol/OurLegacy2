@@ -591,6 +591,7 @@ body.ol2-bg-4 .welcome-screen {
 /* ─── Announcement Bar ───────────────────────────────────── */
 /* ─── News Ticker ────────────────────────────────────────── */
 .news-ticker {
+    display: flex;
     align-items: center;
     overflow: hidden;
     height: 26px;

@@ -906,40 +906,45 @@
             </nav>
         </div><!-- end .tab-nav-wrap -->
 
-        <!-- ── News Ticker ── -->
-        <div id="news-ticker" class="news-ticker" style="display:none;">
+        <!-- news ticker -->
+        <div id="news-ticker" class="news-ticker">
             <div class="news-ticker-label">
                 <span class="news-ticker-icon"><img src="/game_assets/glyphs/sparkles.png" alt="" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle;"></span>
                 <span>News</span>
             </div>
             <div class="news-ticker-track">
-                <div class="news-ticker-inner" id="news-ticker-inner"></div>
+                <div class="news-ticker-inner" id="news-ticker-inner">No announcements at this time.</div>
             </div>
         </div>
         <script>
         (function(){
-            var _tickerItems = [];
-            var _tickerIdx = 0;
-            var _tickerAnim = null;
-
             function setTickerContent(items) {
                 var inner = document.getElementById('news-ticker-inner');
                 if (!inner) return;
-                var combined = items.map(function(a){ return a.text + '  (' + a.ts + ')'; }).join('     ·     ');
-                inner.textContent = combined + '     ·     ' + combined;
+                if (!items || !items.length) {
+                    inner.textContent = 'No announcements at this time.';
+                    inner.style.animation = 'none';
+                    inner.style.left = '0';
+                    inner.style.position = 'relative';
+                    inner.style.transform = 'translateY(-50%)';
+                    inner.style.textAlign = 'center';
+                    inner.style.width = '100%';
+                    return;
+                }
+                inner.style.position = 'absolute';
+                inner.style.textAlign = '';
+                inner.style.width = '';
+                var combined = items.map(function(a){ return a.text + '  \u00b7  ' + a.ts; }).join('          \u2015\u2015          ');
+                inner.textContent = combined + '          \u2015\u2015          ' + combined;
                 inner.style.animation = 'none';
                 inner.offsetHeight;
-                var duration = Math.max(18, combined.length * 0.18);
+                var duration = Math.max(20, combined.length * 0.15);
                 inner.style.animation = 'tickerScroll ' + duration + 's linear infinite';
             }
 
             function loadAnnouncements() {
                 fetch('/api/announcements').then(function(r){ return r.json(); }).then(function(data){
-                    var ticker = document.getElementById('news-ticker');
-                    if (!ticker || !data.announcements || !data.announcements.length) return;
-                    _tickerItems = data.announcements;
-                    ticker.style.display = 'flex';
-                    setTickerContent(_tickerItems);
+                    setTickerContent(data.announcements || []);
                 }).catch(function(){});
             }
             loadAnnouncements();
