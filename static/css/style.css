@@ -159,7 +159,11 @@ strong {
     color: var(--gold-bright);
 }
 
-/* Classic mode: strip PNG texture from wooden buttons */
+/* Classic (sharp) mode: strip PNG, full square corners */
+body.ol2-btn-classic .btn,
+body.ol2-btn-classic .btn-wood {
+    border-radius: 0 !important;
+}
 body.ol2-btn-classic .btn-wood {
     background-image: none !important;
     background: var(--wood-dark) !important;
@@ -175,6 +179,30 @@ body.ol2-btn-classic .btn-wood:hover:not(:disabled):not(.btn-disabled) {
     color: var(--gold-bright) !important;
 }
 body.ol2-btn-classic .btn-wood:active:not(:disabled):not(.btn-disabled) {
+    background-image: none !important;
+    background: var(--wood-dark) !important;
+}
+
+/* Classic Rounded mode: strip PNG, fully rounded corners */
+body.ol2-btn-rounded .btn {
+    border-radius: 999px !important;
+}
+body.ol2-btn-rounded .btn-wood {
+    background-image: none !important;
+    background: var(--wood-dark) !important;
+    color: var(--gold-bright) !important;
+    border-color: var(--wood-bright) !important;
+    aspect-ratio: unset !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+    border-radius: 999px !important;
+}
+body.ol2-btn-rounded .btn-wood:hover:not(:disabled):not(.btn-disabled) {
+    background-image: none !important;
+    background: var(--wood-mid) !important;
+    color: var(--gold-bright) !important;
+}
+body.ol2-btn-rounded .btn-wood:active:not(:disabled):not(.btn-disabled) {
     background-image: none !important;
     background: var(--wood-dark) !important;
 }

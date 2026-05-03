@@ -514,13 +514,13 @@ function initButtonStyle() {
 }
 
 function _applyButtonStyle(style) {
-    if (style === 'classic') {
-        document.body.classList.add('ol2-btn-classic');
-    } else {
-        document.body.classList.remove('ol2-btn-classic');
-    }
+    document.body.classList.remove('ol2-btn-classic', 'ol2-btn-rounded');
+    if (style === 'classic') document.body.classList.add('ol2-btn-classic');
+    else if (style === 'classic-rounded') document.body.classList.add('ol2-btn-rounded');
     var btn = document.getElementById('settings-btn-style');
-    if (btn) btn.textContent = style === 'classic' ? 'Classic' : 'PNG';
+    if (btn) {
+        btn.textContent = style === 'classic' ? 'Classic' : style === 'classic-rounded' ? 'Rounded' : 'PNG';
+    }
 }
 
 function applyButtonStyle(style) {
@@ -530,7 +530,8 @@ function applyButtonStyle(style) {
 
 function settingsToggleButtonStyle() {
     var current = localStorage.getItem('ol2_btn_style') || 'png';
-    applyButtonStyle(current === 'png' ? 'classic' : 'png');
+    var next = current === 'png' ? 'classic' : current === 'classic' ? 'classic-rounded' : 'png';
+    applyButtonStyle(next);
 }
 
 function initBackground() {
