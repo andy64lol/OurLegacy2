@@ -212,7 +212,7 @@
     </div>
 </div>
 
-<!-- Online Account Modal -->
+
 <div id="online-modal-overlay" onclick="closeOnlineModal(event)"
     style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.75);backdrop-filter:blur(3px);align-items:center;justify-content:center;overflow:hidden;">
     <div id="online-modal-box"
@@ -226,7 +226,7 @@
                     style="width:22px;height:22px;image-rendering:pixelated;"> Online Account</div>
         </div>
         {% if online_user %}
-        <!-- logged in view -->
+        
         <div id="online-logged-in">
             <div style="text-align:center;font-size:14px;color:var(--mana-bright);margin-bottom:14px;">
                 Welcome back, <strong>{{ online_user }}</strong>
@@ -256,7 +256,7 @@
                 style="width:100%;font-size:12px;opacity:0.6;">Logout</button>
         </div>
         {% else %}
-        <!-- login / register tabs -->
+        
         <div id="online-tab-bar" style="display:flex;">
             <button class="btn tab-active" id="tab-login" onclick="switchOnlineTab('login')" style="flex:1;">Sign In</button>
             <button class="btn" id="tab-register" onclick="switchOnlineTab('register')" style="flex:1;">Register</button>
@@ -284,7 +284,7 @@
             <button type="submit" class="ol-submit ol-submit-reg" id="register-btn">Create Account &amp; Play</button>
             <p class="ol-footnote">Already have one? <a href="#" onclick="switchOnlineTab('login');return false;">Sign in</a></p>
         </form>
-        <!-- forgot password panel -->
+        
         <div id="online-forgot-form" style="display:none;">
             <button type="button" class="ol-link-btn" onclick="switchOnlineTab('login')"
                 style="margin-bottom:14px;display:block;">&#8592; Back to Sign In</button>
@@ -336,7 +336,7 @@
 {% elif in_battle %}
 <div class="battle-outer">
 
-    <!-- ── Main battle column ── -->
+    
     <div class="battle-main">
 
         <div class="battle-header">
@@ -603,16 +603,16 @@
         </div>
         {% endif %}
 
-    </div><!-- end .battle-main -->
+    </div>
 
-    <!-- ── Spellbook sidebar ── -->
+    
     <div class="battle-spell-sidebar">
         <div class="panel battle-spellbook-panel">
             <div class="panel-title" style="color:var(--mana-bright);"><img class="class-glyph"
                     src="/game_assets/glyphs/sparkles.png" alt="spells">Spellbook</div>
             <div class="panel-body">
 
-                <!-- MP bar -->
+                
                 <div style="margin-bottom:12px;">
                     <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">
                         MP: <strong style="color:var(--mana-bright);">{{ player.mp }} / {{ player.max_mp }}</strong>
@@ -624,7 +624,7 @@
                 </div>
 
                 {% if available_spells %}
-                <!-- Spell list with JS pagination -->
+                
                 <div id="spell-pages-container">
                     {% for spell in available_spells %}
                     {% set can_cast = player.mp >= spell.mp_cost %}
@@ -659,7 +659,7 @@
                     {% endfor %}
                 </div>
 
-                <!-- Pagination controls -->
+                
                 <div class="spell-pagination" id="spell-pagination">
                     <button class="spell-page-btn" id="spell-prev" onclick="spellPagePrev()" disabled>&#8249;</button>
                     <span id="spell-page-info"
@@ -679,20 +679,20 @@
 
             </div>
         </div>
-    </div><!-- end .battle-spell-sidebar -->
+    </div>
 
-</div><!-- end .battle-outer -->
+</div>
 
 
 {% else %}
 <div class="game-layout">
 
-    <!-- Mobile sidebar backdrop -->
+    
     <div id="mobile-sidebar-backdrop" onclick="mobileCloseSidebar()"></div>
 
-    <!-- Sidebar -->
+    
     <aside class="sidebar" id="main-sidebar">
-        <!-- Mobile close button (only visible on mobile) -->
+        
         <button onclick="mobileCloseSidebar()" id="mobile-sidebar-close"
             style="display:none;position:absolute;top:8px;right:8px;z-index:10;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;color:var(--text-dim);font-size:16px;cursor:pointer;line-height:1;align-items:center;justify-content:center;"
             aria-label="Close menu">&times;</button>
@@ -815,7 +815,7 @@
                     title="10,000 gold">Change Character</button>
             </div>
         </div>
-        </div><!-- /.sidebar-scroll -->
+        </div>
 
         <div class="sidebar-save-section">
             {% if not online_user %}
@@ -851,10 +851,10 @@
         </div>
     </aside>
 
-    <!-- Sidebar resize handle -->
+    
     <div id="sidebar-resize-handle" title="Drag to resize sidebar"></div>
 
-    <!-- Main content -->
+    
     <main class="main-content">
 
         <div class="tab-nav-wrap">
@@ -907,7 +907,7 @@
                 <button class="tab-btn" data-tab="friends">Friends</button>
                 {% endif %}
             </nav>
-            <!-- news ticker — glued directly under the tabs -->
+            
             <div id="news-ticker" class="news-ticker">
             <div class="news-ticker-label">
                 <span class="news-ticker-icon"><img src="/game_assets/glyphs/sparkles.png" alt="" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle;"></span>
@@ -917,7 +917,7 @@
                 <div class="news-ticker-inner" id="news-ticker-inner">No announcements at this time.</div>
             </div>
         </div>
-        </div><!-- end .tab-nav-wrap -->
+        </div>
         <script>
         (function(){
             function setTickerContent(items) {
@@ -954,7 +954,7 @@
         })();
         </script>
 
-        <!-- ── Explore ── -->
+        
         <div class="tab-content active" id="tab-explore">
             <div class="panel" style="margin-bottom:14px;">
                 <div class="panel-title">{{ area_name }}</div>
@@ -1059,7 +1059,7 @@
             </div>
             {% endif %}
 
-            <!-- ── Recent Events (mini-diary) ── -->
+            
             {% if messages %}
             <div class="panel" style="margin-bottom:14px;">
                 <div class="panel-title">Recent Events</div>
@@ -1124,7 +1124,7 @@
         </script>
         {% endif %}
 
-        <!-- ── Equipment & Inventory ── -->
+        
         <div class="tab-content" id="tab-inventory">
 
             <div class="panel" style="margin-bottom:14px;">
@@ -1283,7 +1283,7 @@
             </div>
         </div>
 
-        <!-- ── Travel ── -->
+        
         <div class="tab-content" id="tab-travel">
             <div class="panel">
                 <div class="panel-title">Travel</div>
@@ -1341,7 +1341,7 @@
             </div>
         </div>
 
-        <!-- ── Map ── -->
+        
         <div class="tab-content" id="tab-map">
             <div class="panel">
                 <div class="panel-title">World Map</div>
@@ -1354,7 +1354,7 @@
             </div>
         </div>
 
-        <!-- ── Shop ── -->
+        
         {% if shop_items %}
         <div class="tab-content" id="tab-shop">
             <div class="panel">
@@ -1394,11 +1394,11 @@
         </div>
         {% endif %}
 
-        <!-- ── Mines ── -->
+        
         {% if mine_data %}
         <div class="tab-content" id="tab-mining">
 
-            <!-- Mining Level Card -->
+            
             <div class="panel" style="margin-bottom:10px;">
                 <div class="panel-title">Mining</div>
                 <div class="panel-body">
@@ -1442,7 +1442,7 @@
                 </div>
             </div>
 
-            <!-- Ore Deposits -->
+            
             <div class="panel">
                 <div class="panel-title">Ore Deposits</div>
                 <div class="panel-body" style="padding-bottom:10px;">
@@ -1469,7 +1469,7 @@
         </div>
         {% endif %}
 
-        <!-- ── Crafting ── -->
+        
         <div class="tab-content" id="tab-crafting">
             <div class="panel">
                 <div class="panel-title">Crafting Workshop</div>
@@ -1522,7 +1522,7 @@
             </div>
         </div>
 
-        <!-- ── Dungeons ── -->
+        
         <div class="tab-content" id="tab-dungeons">
 
             {% if active_dungeon %}
@@ -1632,7 +1632,7 @@
             </div>
         </div>
 
-        <!-- ── Elite Market ── -->
+        
         <div class="tab-content" id="tab-market">
             <div class="panel">
                 <div class="panel-title">
@@ -1649,7 +1649,7 @@
             </div>
         </div>
 
-        <!-- ── Your Land ── -->
+        
         {% if land_data %}
         <div class="tab-content" id="tab-land">
 
@@ -1876,7 +1876,7 @@
         </div>
         {% endif %}
 
-        <!-- ── Companions ── -->
+        
         <div class="tab-content" id="tab-companions">
 
             <div class="panel" style="margin-bottom:14px;">
@@ -1980,7 +1980,7 @@
 
         </div>
 
-        <!-- ── Missions ── -->
+        
         <div class="tab-content" id="tab-missions">
             <div class="panel">
                 <div class="panel-title">
@@ -2043,7 +2043,7 @@
             </div>
         </div>
 
-        <!-- ── Weekly Challenges ── -->
+        
         <div class="tab-content" id="tab-challenges">
             <div class="panel">
                 <div class="panel-title">Weekly Challenges</div>
@@ -2102,7 +2102,7 @@
             </div>
         </div>
 
-        <!-- ── Diary ── -->
+        
         <div class="tab-content" id="tab-diary">
             <div class="panel">
                 <div class="panel-title">Diary</div>
@@ -2122,10 +2122,10 @@
             </div>
         </div>
 
-        <!-- ── Character Sheet ── -->
+        
         <div class="tab-content" id="tab-character">
 
-            <!-- Attributes Panel (spend points here) -->
+            
             <div class="panel" style="margin-bottom:14px;" id="attr-panel">
                 <div class="panel-title">
                     Attributes
@@ -2166,7 +2166,7 @@
                 <div class="panel-title">Character Sheet</div>
                 <div class="panel-body">
 
-                    <!-- Identity -->
+                    
                     <div class="stat-label" style="margin-bottom:8px;">Identity</div>
                     <div class="cs-identity-grid"
                         style="display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-bottom:18px;">
@@ -2191,7 +2191,7 @@
                                 }}</span></div>
                     </div>
 
-                    <!-- Combat Stats -->
+                    
                     <div class="stat-label" style="margin-bottom:8px;">Combat Stats</div>
                     <div class="stats-grid" style="margin-bottom:18px;">
                         <div class="stat-row"><span class="stat-name">Max HP</span><span class="stat-val">{{
@@ -2214,7 +2214,7 @@
                                 player.experience }} / {{ player.experience_to_next }}</span></div>
                     </div>
 
-                    <!-- Attributes & Modifiers -->
+                    
                     <div class="stat-label" style="margin-bottom:8px;">Attributes &amp; Modifiers</div>
                     {% if attr_summary %}
                     <div class="stats-grid" style="margin-bottom:18px;">
@@ -2235,7 +2235,7 @@
                     </div>
                     {% endif %}
 
-                    <!-- Bonus Modifiers -->
+                    
                     <div class="stat-label" style="margin-bottom:8px;">Bonus Modifiers</div>
                     <div class="stats-grid">
                         {% if player.attr_spell_power %}
@@ -2271,7 +2271,7 @@
             </div>
         </div>
 
-        <!-- ── Events ── -->
+        
         <div class="tab-content" id="tab-events">
             <div class="panel">
                 <div class="panel-title">
@@ -2378,7 +2378,7 @@
             </div>
         </div>
 
-        <!-- ── Friends (online only) ── -->
+        
         {% if online_username %}
         <div class="tab-content" id="tab-friends">
             <div class="panel">
@@ -2528,7 +2528,7 @@
         {% endif %}
 
         {% if online_username %}
-        <!-- ── Adventure Group (inline tab, online only) ── -->
+        
         <div class="tab-content" id="tab-adventure-group" style="padding:0;">
             <style>
                 #ag-wrap { display:flex;flex-direction:column;min-height:500px; }
@@ -2885,7 +2885,7 @@
 
     </main>
 
-    <!-- Mobile bottom navigation bar (only visible on mobile screens) -->
+    
     <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
         <button class="mobile-nav-btn" onclick="mobileToggleSidebar()" id="mob-nav-char" aria-label="Character panel">
             <img src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png" alt="Character">
@@ -2970,7 +2970,7 @@
 </div>
 {% endif %}
 
-<!-- Settings Modal -->
+
 <div id="settings-modal" onclick="settingsOverlayClick(event)"
     style="display:none;position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,0.75);backdrop-filter:blur(3px);align-items:center;justify-content:center;overflow:hidden;">
     <div style="background:linear-gradient(160deg,rgba(18,12,38,0.99),rgba(10,6,24,0.99));border:1px solid rgba(var(--modal-border-rgb,140,90,255),0.35);border-radius:14px;padding:22px 22px 18px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 0 40px rgba(var(--modal-glow-rgb,100,60,200),0.2);" onclick="event.stopPropagation()">
@@ -2978,7 +2978,7 @@
             style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;">&times;</button>
         <div style="text-align:center;margin-bottom:14px;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:0.06em;text-transform:uppercase;">Settings</div>
 
-        <!-- Music row — full width -->
+        
         <div style="margin-bottom:10px;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Music</div>
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -2996,10 +2996,10 @@
             </div>
         </div>
 
-        <!-- 2-column grid for smaller sections -->
+        
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
 
-            <!-- Background -->
+            
             <div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;">
                 <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Background</div>
                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
@@ -3011,7 +3011,7 @@
                 </div>
             </div>
 
-            <!-- Display + Interface stacked in the right column -->
+            
             <div style="display:flex;flex-direction:column;gap:8px;">
                 <div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;">
                     <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Display</div>
@@ -3024,7 +3024,7 @@
             </div>
         </div>
 
-        <!-- Theme row — full width -->
+        
         <div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;margin-bottom:10px;">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">Theme &amp; Colours</div>
             <div style="display:flex;gap:5px;flex-wrap:wrap;">
@@ -3054,16 +3054,26 @@
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.07);text-align:center;">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:6px;">Credits</div>
             <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">
-                <div>Game created by <span style="color:var(--gold);">andy64lol</span> &amp; <span style="color:var(--gold);">Jerry (Jeroyix)</span></div>
-                <div>Tileset textures by <a href="https://limezu.itch.io/" target="_blank" rel="noopener"
-                    style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(200,160,60,0.4);">LimeZu</a></div>
                 <div>
+                  Game created by
+                  <span class="creator">andy64lol</span>,
+                  <span class="creator">Jerry (Jeroyix)</span>,
+                  <span class="creator">Yui (YuiDesu)</span>
+                  &amp;
+                  <span class="creator">DigABow</span>
+                </div>
+                <div>Main tileset textures by <a href="https://limezu.itch.io/" target="_blank" rel="noopener"
+                    style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(200,160,60,0.4);">LimeZu</a></div>
+                <div>Also winter and desert tiles by <a href="https://gherwit.itch.io/" target="_blank" rel="noopener"
+                    style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(200,160,60,0.4);">
+                    Gherwit</a>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Character Customization Modal -->
+
 <div id="customize-modal-overlay" onclick="closeCustomizeModal(event)"
     style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.78);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
     <div id="customize-modal-box"
@@ -3456,7 +3466,7 @@
     };
 </script>
 
-<!-- World Map Script -->
+
 <script>
 (function() {
     var AREAS_DATA    = {{ areas_data | tojson }};
@@ -4082,7 +4092,7 @@
 {% endif %}
 
 {% if online_user is defined and online_user %}
-<!-- Session Timeout Warning Overlay -->
+
 <div id="session-expired-overlay"
     style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.88);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
     <div style="background:linear-gradient(160deg,rgba(22,10,40,0.99),rgba(10,4,20,0.99));border:2px solid rgba(255,80,80,0.55);border-radius:14px;padding:36px 28px;width:100%;max-width:360px;box-shadow:0 0 60px rgba(200,40,40,0.4);text-align:center;">
@@ -4145,13 +4155,13 @@
 {% endif %}
 
 {% if online_user is defined and online_user and user_has_email is defined and not user_has_email %}
-<!-- Email Setup / Verification Modal -->
+
 <div id="email-setup-overlay"
     style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
     <div style="background:linear-gradient(160deg,rgba(22,14,44,0.99),rgba(10,6,24,0.99));border:1px solid rgba(220,150,40,0.55);border-radius:14px;padding:32px 26px;width:100%;max-width:400px;box-shadow:0 0 50px rgba(180,100,0,0.3);position:relative;">
 
         {% if user_email_pending %}
-        <!-- ── Pending verification state ── -->
+        
         <div style="text-align:center;margin-bottom:18px;">
             <div style="font-size:15px;font-weight:bold;color:#e8a020;letter-spacing:0.03em;">Check Your Email</div>
         </div>
@@ -4171,7 +4181,7 @@
             Resend Verification Email
         </button>
         {% else %}
-        <!-- ── No email set state ── -->
+        
         <div style="text-align:center;margin-bottom:18px;">
             <div style="font-size:15px;font-weight:bold;color:#e8a020;letter-spacing:0.03em;">Add an Email Address</div>
         </div>
@@ -4243,7 +4253,7 @@
 </script>
 {% endif %}
 
-<!-- Sidebar Resize Handle JS -->
+
 <script>
 (function () {
     var handle = document.getElementById('sidebar-resize-handle');

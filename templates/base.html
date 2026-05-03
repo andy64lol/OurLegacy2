@@ -12,7 +12,7 @@
 </head>
 <body>
 
-    <!-- Page loading screen -->
+    
     <div id="page-loader">
         <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" id="page-loader-logo">
         <div class="loader">
@@ -264,7 +264,7 @@
         });
     </script>
 
-    <!-- Background music (loops; volume controlled by user) -->
+    
     <audio id="bg-music" loop preload="auto" style="display:none;">
         <source src="/game_assets/music/main_theme_1.mp3" type="audio/mpeg">
     </audio>
@@ -273,7 +273,7 @@
     <script src="/static/js/game.js"></script>
     {% block extra_scripts %}{% endblock %}
 
-    <!-- confirm modal -->
+    
     <div id="game-confirm-overlay" style="display:none;position:fixed;inset:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,0.82);z-index:10000;align-items:center;justify-content:center;overflow:hidden;" onclick="event.stopPropagation()">
         <div style="background:linear-gradient(160deg,rgba(24,14,6,0.99),rgba(14,8,2,0.99));border:1px solid rgba(200,165,90,0.42);border-radius:12px;padding:28px 28px 22px;max-width:380px;width:90%;box-shadow:0 8px 40px rgba(60,30,8,0.5);text-align:center;">
             <div id="game-confirm-msg" style="font-size:14px;color:var(--text-light);margin-bottom:22px;line-height:1.6;"></div>
@@ -284,7 +284,7 @@
         </div>
     </div>
 
-    <!-- Settings Modal (available on all pages) -->
+    
     <div id="settings-modal" class="settings-overlay" style="display:none;" onclick="settingsOverlayClick(event)">
         <div class="settings-panel panel">
             <div class="panel-title">Settings</div>
@@ -341,7 +341,7 @@
         </div>
     </div>
 
-    <!-- ── Global Chat Widget + Groups Widget (online users only) ─── -->
+    
     {% if online_username %}
     <style>
         /* Groups FAB hidden — Adventure Group is accessed via the in-game tab */
@@ -412,7 +412,7 @@
         }
     </style>
 
-    <!-- Groups Overlay Modal -->
+    
     <div id="groups-overlay" onclick="if(event.target===this)closeGroupsOverlay()">
         <div id="groups-overlay-panel">
             <div id="groups-overlay-header">
@@ -425,7 +425,7 @@
 
     <div id="chat-widget" style="position:fixed;bottom:20px;right:20px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
 
-        <!-- Chat Overlay Panel (full-screen modal, loads chat.html) -->
+        
         <div id="chat-panel" style="display:none;position:fixed;inset:0;z-index:8900;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;">
             <div style="width:min(860px,98vw);height:min(700px,96vh);background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.6);display:flex;flex-direction:column;overflow:hidden;">
                 <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--wood-dark);border-bottom:2px solid var(--border);flex-shrink:0;">
@@ -438,14 +438,14 @@
             </div>
         </div>
 
-        <!-- Groups FAB -->
+        
         <button class="widget-fab" id="groups-widget-fab" onclick="openGroupsOverlay()" title="Adventure Group">
             <img src="/game_assets/glyphs/fight.png" alt="group" style="width:22px;height:22px;image-rendering:pixelated;">
             <span id="groups-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--bg-main);width:14px;height:14px;font-size:9px;line-height:14px;text-align:center;font-weight:700;"></span>
         </button>
     </div>
 
-    <!-- Trade Panel Modal -->
+    
     <div id="trade-overlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;">
         <div id="trade-panel" style="background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.6);width:min(700px,96vw);max-height:90vh;overflow-y:auto;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:2px solid var(--border);background:var(--wood-dark);">
@@ -456,7 +456,7 @@
                 </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:320px;">
-                <!-- My offer -->
+                
                 <div style="padding:14px 16px;border-right:1px solid var(--border);">
                     <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:10px;">Your Offer</div>
                     <div id="trade-my-items" style="min-height:80px;display:flex;flex-direction:column;gap:4px;margin-bottom:10px;"></div>
@@ -469,14 +469,14 @@
                     </div>
                     <div id="trade-my-gold-label" style="font-size:10px;color:var(--text-dim);margin-top:4px;"></div>
                 </div>
-                <!-- Their offer -->
+                
                 <div style="padding:14px 16px;">
                     <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:10px;">Their Offer</div>
                     <div id="trade-their-items" style="min-height:80px;display:flex;flex-direction:column;gap:4px;margin-bottom:10px;"></div>
                     <div id="trade-their-gold" style="font-size:12px;color:var(--gold);margin-top:4px;"></div>
                 </div>
             </div>
-            <!-- Confirm bar -->
+            
             <div style="padding:10px 16px;border-top:2px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg-panel-dark);">
                 <div id="trade-error-label" style="font-size:11px;color:var(--red);flex:1;"></div>
                 <div style="display:flex;gap:8px;align-items:center;">
@@ -487,7 +487,7 @@
         </div>
     </div>
 
-    <!-- Item Picker Modal -->
+    
     <div id="trade-item-picker" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
         <div style="background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.5);width:min(440px,94vw);max-height:80vh;overflow-y:auto;padding:16px;">
             <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;text-transform:uppercase;letter-spacing:0.06em;">Choose Item to Offer <button onclick="document.getElementById('trade-item-picker').style.display='none'" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;">&times;</button></div>
@@ -496,10 +496,10 @@
         </div>
     </div>
 
-    <!-- Auto-save indicator -->
+    
     <div id="autosave-indicator" style="display:none;position:fixed;bottom:82px;right:20px;z-index:7500;font-size:11px;color:var(--green-bright);background:var(--bg-panel);border:1px solid var(--green);padding:3px 9px;pointer-events:none;font-family:'Tiny5',monospace;"></div>
 
-    <!-- SocketIO client -->
+    
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
     (function() {
@@ -877,7 +877,7 @@
     </script>
     {% endif %}
 
-    <!-- chat + terminal FABs -->
+    
     <style>
         #chat-toggle-btn {
             position: fixed;
@@ -1004,7 +1004,7 @@
         .t-run-btn:hover { background: rgba(34,197,94,0.2); }
     </style>
 
-    <!-- terminal overlay (owner only) -->
+    
     <div id="terminal-overlay">
         <div id="term-hdr">
             <img src="/game_assets/glyphs/terminal.png" alt="terminal">

@@ -1,38 +1,35 @@
-/* ============================================================
-   Our Legacy 2 — Medieval Pixel RPG Stylesheet
-   Tiny5 + Slate Gray & Wood Brown palette
-   ============================================================ */
+
 
 @import url('https://fonts.googleapis.com/css2?family=Tiny5&display=swap');
 
-/* ─── CSS Variables ──────────────────────────────────────── */
+
 :root {
-    /* Slate Gray — consolidated */
+    
     --slate-darkest: #1e1e26;
     --slate-dark: #2e2e38;
     --slate-mid: #484858;
     --slate-light: #686878;
     --slate-bright: #8888a0;
 
-    /* Wood Brown — consolidated */
+    
     --wood-darkest: #241408;
     --wood-dark: #46240e;
     --wood-mid: #70421c;
     --wood-light: #a06030;
     --wood-bright: #c47c40;
 
-    /* Gold accent — slightly muted */
+    
     --gold: #d4b050;
     --gold-bright: #e8c860;
     --gold-dim: #907020;
 
-    /* Text — slightly warmer */
+    
     --text-light: #ddc89e;
     --text-bright: #f0e8d8;
     --text-dim: #847868;
     --text-dark: #281c0e;
 
-    /* Status — muted slightly */
+    
     --red: #cc4e4e;
     --red-dark: #7a2828;
     --green: #547848;
@@ -41,29 +38,38 @@
     --mana-bright: #5898dc;
     --exp-purple: #8858b4;
 
-    /* UI */
+    
     --border: #4e3e2e;
     --border-bright: #6e4e38;
     --bg-main: #18140c;
     --bg-panel: #24201a;
     --bg-panel-dark: #1c1814;
 
-    /* Aliases for legacy usage */
+    
     --panel-bg: #24201a;
 
-    /* RGB tint channels for rgba() gradient usage — overridden per theme */
-    --bg-tint-rgb: 28, 24, 16;          /* warm panel tint */
-    --bg-tint-deep-rgb: 40, 22, 10;     /* deeper panel tint */
-    --bg-radial-rgb: 78, 44, 20;        /* radial accent glow */
-    --modal-border-rgb: 200, 165, 90;   /* modal border colour */
-    --modal-glow-rgb: 160, 100, 20;     /* modal outer glow */
-    --fow-bg-rgb: 8, 6, 18;             /* fog-of-war bg tint */
-    --fow-border-rgb: 120, 100, 160;    /* fog-of-war border */
-    --news-bg-a: #0e0a04;               /* news ticker bg start */
-    --news-bg-b: #1a0e02;               /* news ticker bg end */
-    --news-border-top: #2a1500;         /* news ticker top border */
+    
+    --bg-tint-rgb: 28, 24, 16;
+    
+    --bg-tint-deep-rgb: 40, 22, 10;
+    
+    --bg-radial-rgb: 78, 44, 20;
+    
+    --modal-border-rgb: 200, 165, 90;
+    
+    --modal-glow-rgb: 160, 100, 20;
+    
+    --fow-bg-rgb: 8, 6, 18;
+    
+    --fow-border-rgb: 120, 100, 160;
+    
+    --news-bg-a: #0e0a04;
+    
+    --news-bg-b: #1a0e02;
+    
+    --news-border-top: #2a1500;
+    
 
-    /* Rarity — kept distinct but slightly muted */
     --rarity-common: #909090;
     --rarity-uncommon: #50a850;
     --rarity-rare: #3888c8;
@@ -71,9 +77,7 @@
     --rarity-legendary: #d8bc30;
 }
 
-/* ─── Colour Themes ──────────────────────────────────────── */
 
-/* Forest — mossy greens, earthy bark (muted) */
 body.ol2-theme-forest {
     --bg-tint-rgb: 10, 18, 8;
     --bg-tint-deep-rgb: 6, 12, 4;
@@ -117,7 +121,7 @@ body.ol2-theme-forest {
     --panel-bg: #0e1c10;
 }
 
-/* Crimson — deep reds, charcoal embers (muted) */
+
 body.ol2-theme-crimson {
     --bg-tint-rgb: 24, 8, 8;
     --bg-tint-deep-rgb: 16, 4, 4;
@@ -161,7 +165,7 @@ body.ol2-theme-crimson {
     --panel-bg: #1c0c0c;
 }
 
-/* Midnight — steel navy, cool slate (muted) */
+
 body.ol2-theme-midnight {
     --bg-tint-rgb: 8, 10, 24;
     --bg-tint-deep-rgb: 4, 6, 16;
@@ -206,7 +210,7 @@ body.ol2-theme-midnight {
     --panel-bg: #080e20;
 }
 
-/* Amethyst — dusty violet, cool gems (muted) */
+
 body.ol2-theme-amethyst {
     --bg-tint-rgb: 16, 8, 26;
     --bg-tint-deep-rgb: 10, 4, 18;
@@ -250,7 +254,7 @@ body.ol2-theme-amethyst {
     --panel-bg: #120a22;
 }
 
-/* ─── Reset ──────────────────────────────────────────────── */
+
 *,
 *::before,
 *::after {
@@ -270,16 +274,22 @@ body {
     line-height: 1.55;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    cursor: url('/game_assets/UI/cursor/1.%20Pointer.png') 0 0, default;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
 }
 
-/* ─── Custom Pixel Cursors ───────────────────────────────── */
-button:hover, a:hover, .btn:hover, select:hover,
+
+button:hover,
+a:hover,
+.btn:hover,
+select:hover,
 [role="button"]:hover {
     cursor: url('/game_assets/UI/cursor/3.%20Hand%20Hover.png') 0 0, pointer;
 }
 
-button:active, a:active, .btn:active, select:active,
+button:active,
+a:active,
+.btn:active,
+select:active,
 [role="button"]:active {
     cursor: url('/game_assets/UI/cursor/4.%20Hand%20Grab.png') 0 0, pointer;
 }
@@ -302,7 +312,7 @@ strong {
     font-weight: 600;
 }
 
-/* ─── Scrollbar ──────────────────────────────────────────── */
+
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -321,7 +331,7 @@ strong {
     background: var(--wood-light);
 }
 
-/* ─── Buttons ────────────────────────────────────────────── */
+
 .btn {
     display: inline-block;
     padding: 9px 20px;
@@ -350,11 +360,12 @@ strong {
     color: var(--gold-bright);
 }
 
-/* Classic (sharp) mode: strip PNG, full square corners */
+
 body.ol2-btn-classic .btn,
 body.ol2-btn-classic .btn-wood {
     border-radius: 0 !important;
 }
+
 body.ol2-btn-classic .btn-wood {
     background-image: none !important;
     background: var(--wood-dark) !important;
@@ -364,15 +375,18 @@ body.ol2-btn-classic .btn-wood {
     padding-top: 9px !important;
     padding-bottom: 9px !important;
 }
+
 body.ol2-btn-classic .btn-wood:hover:not(:disabled):not(.btn-disabled) {
     background-image: none !important;
     background: var(--wood-mid) !important;
     color: var(--gold-bright) !important;
 }
+
 body.ol2-btn-classic .btn-wood:active:not(:disabled):not(.btn-disabled) {
     background-image: none !important;
     background: var(--wood-dark) !important;
 }
+
 body.ol2-btn-classic .mainmenu-btn {
     background-image: none !important;
     background: var(--slate-dark) !important;
@@ -382,6 +396,7 @@ body.ol2-btn-classic .mainmenu-btn {
     border-radius: 0 !important;
     padding: 10px 20px !important;
 }
+
 body.ol2-btn-classic .mainmenu-btn:hover,
 body.ol2-btn-classic .mainmenu-btn:focus {
     background-image: none !important;
@@ -389,17 +404,20 @@ body.ol2-btn-classic .mainmenu-btn:focus {
     color: var(--text-bright) !important;
     filter: none !important;
 }
+
 body.ol2-btn-classic .mainmenu-btn:active {
     background-image: none !important;
     background: var(--slate-dark) !important;
     filter: none !important;
 }
+
 body.ol2-btn-classic .mainmenu-btn-highlight {
     background-image: none !important;
     background: var(--wood-dark) !important;
     border-color: var(--wood-bright) !important;
     color: var(--gold-bright) !important;
 }
+
 body.ol2-btn-classic .mainmenu-btn-highlight:hover,
 body.ol2-btn-classic .mainmenu-btn-highlight:focus {
     background-image: none !important;
@@ -408,11 +426,12 @@ body.ol2-btn-classic .mainmenu-btn-highlight:focus {
     filter: none !important;
 }
 
-/* Classic Slight-Rounded mode: strip PNG, gently rounded corners */
+
 body.ol2-btn-slight-rounded .btn,
 body.ol2-btn-slight-rounded .btn-wood {
     border-radius: 7px !important;
 }
+
 body.ol2-btn-slight-rounded .btn-wood {
     background-image: none !important;
     background: var(--wood-dark) !important;
@@ -423,15 +442,18 @@ body.ol2-btn-slight-rounded .btn-wood {
     padding-bottom: 9px !important;
     border-radius: 7px !important;
 }
+
 body.ol2-btn-slight-rounded .btn-wood:hover:not(:disabled):not(.btn-disabled) {
     background-image: none !important;
     background: var(--wood-mid) !important;
     color: var(--gold-bright) !important;
 }
+
 body.ol2-btn-slight-rounded .btn-wood:active:not(:disabled):not(.btn-disabled) {
     background-image: none !important;
     background: var(--wood-dark) !important;
 }
+
 body.ol2-btn-slight-rounded .mainmenu-btn {
     background-image: none !important;
     background: var(--slate-dark) !important;
@@ -441,6 +463,7 @@ body.ol2-btn-slight-rounded .mainmenu-btn {
     border-radius: 7px !important;
     padding: 10px 20px !important;
 }
+
 body.ol2-btn-slight-rounded .mainmenu-btn:hover,
 body.ol2-btn-slight-rounded .mainmenu-btn:focus {
     background-image: none !important;
@@ -448,11 +471,13 @@ body.ol2-btn-slight-rounded .mainmenu-btn:focus {
     color: var(--text-bright) !important;
     filter: none !important;
 }
+
 body.ol2-btn-slight-rounded .mainmenu-btn:active {
     background-image: none !important;
     background: var(--slate-dark) !important;
     filter: none !important;
 }
+
 body.ol2-btn-slight-rounded .mainmenu-btn-highlight {
     background-image: none !important;
     background: var(--wood-dark) !important;
@@ -460,6 +485,7 @@ body.ol2-btn-slight-rounded .mainmenu-btn-highlight {
     color: var(--gold-bright) !important;
     border-radius: 7px !important;
 }
+
 body.ol2-btn-slight-rounded .mainmenu-btn-highlight:hover,
 body.ol2-btn-slight-rounded .mainmenu-btn-highlight:focus {
     background-image: none !important;
@@ -468,10 +494,11 @@ body.ol2-btn-slight-rounded .mainmenu-btn-highlight:focus {
     filter: none !important;
 }
 
-/* Classic Rounded mode: strip PNG, fully rounded corners */
+
 body.ol2-btn-rounded .btn {
     border-radius: 999px !important;
 }
+
 body.ol2-btn-rounded .btn-wood {
     background-image: none !important;
     background: var(--wood-dark) !important;
@@ -482,15 +509,18 @@ body.ol2-btn-rounded .btn-wood {
     padding-bottom: 9px !important;
     border-radius: 999px !important;
 }
+
 body.ol2-btn-rounded .btn-wood:hover:not(:disabled):not(.btn-disabled) {
     background-image: none !important;
     background: var(--wood-mid) !important;
     color: var(--gold-bright) !important;
 }
+
 body.ol2-btn-rounded .btn-wood:active:not(:disabled):not(.btn-disabled) {
     background-image: none !important;
     background: var(--wood-dark) !important;
 }
+
 body.ol2-btn-rounded .mainmenu-btn {
     background-image: none !important;
     background: var(--slate-dark) !important;
@@ -500,6 +530,7 @@ body.ol2-btn-rounded .mainmenu-btn {
     border-radius: 999px !important;
     padding: 10px 20px !important;
 }
+
 body.ol2-btn-rounded .mainmenu-btn:hover,
 body.ol2-btn-rounded .mainmenu-btn:focus {
     background-image: none !important;
@@ -507,11 +538,13 @@ body.ol2-btn-rounded .mainmenu-btn:focus {
     color: var(--text-bright) !important;
     filter: none !important;
 }
+
 body.ol2-btn-rounded .mainmenu-btn:active {
     background-image: none !important;
     background: var(--slate-dark) !important;
     filter: none !important;
 }
+
 body.ol2-btn-rounded .mainmenu-btn-highlight {
     background-image: none !important;
     background: var(--wood-dark) !important;
@@ -519,6 +552,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight {
     color: var(--gold-bright) !important;
     border-radius: 999px !important;
 }
+
 body.ol2-btn-rounded .mainmenu-btn-highlight:hover,
 body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     background-image: none !important;
@@ -527,7 +561,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     filter: none !important;
 }
 
-/* Wooden button — applied selectively to main action buttons */
+
 .btn-wood {
     background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.png');
     background-size: 100% 100%;
@@ -557,7 +591,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     background-color: transparent;
 }
 
-/* Large buttons never get wooden texture */
+
 .btn-large.btn-wood {
     background-image: none;
     background: var(--wood-dark);
@@ -611,7 +645,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     cursor: not-allowed;
 }
 
-/* Battle buttons */
+
 .btn-battle {
     width: 100%;
     padding: 15px 12px;
@@ -661,7 +695,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     color: var(--text-light);
 }
 
-/* Keyboard shortcut badge on battle buttons */
+
 .battle-btn-wrap {
     position: relative;
     display: block;
@@ -679,7 +713,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     line-height: 1;
 }
 
-/* ─── Panels ─────────────────────────────────────────────── */
+
 .panel {
     background: var(--bg-panel);
     border: 2px solid var(--border);
@@ -731,7 +765,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     margin-bottom: 12px;
 }
 
-/* ─── Banners ────────────────────────────────────────────── */
+
 .title-banner {
     display: block;
     width: 100%;
@@ -755,7 +789,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     border-bottom: 2px solid var(--border);
 }
 
-/* ─── Progress Bars ──────────────────────────────────────── */
+
 .bar-group {
     margin-bottom: 9px;
 }
@@ -800,7 +834,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     background: var(--green-bright);
 }
 
-/* ─── Stat Displays ──────────────────────────────────────── */
+
 .stat-mini-grid {
     display: flex;
     gap: 6px;
@@ -841,7 +875,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     color: var(--gold);
 }
 
-/* ─── Welcome Screen ─────────────────────────────────────── */
+
 .welcome-screen {
     min-height: 100vh;
     display: flex;
@@ -902,7 +936,7 @@ body.ol2-bg-4 .welcome-screen {
     bottom: 0;
 }
 
-/* ─── Main Menu (game-style) ──────────────────────────────── */
+
 .mainmenu-wrap {
     display: flex;
     flex-direction: column;
@@ -953,11 +987,10 @@ body.ol2-bg-4 .welcome-screen {
     letter-spacing: 0.03em;
     white-space: nowrap;
     pointer-events: none;
-    text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 12px rgba(200,160,40,0.4);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9), 0 0 12px rgba(200, 160, 40, 0.4);
 }
 
-/* ─── Announcement Bar ───────────────────────────────────── */
-/* ─── News Ticker ────────────────────────────────────────── */
+
 .news-ticker {
     display: flex;
     align-items: center;
@@ -987,7 +1020,9 @@ body.ol2-bg-4 .welcome-screen {
     white-space: nowrap;
 }
 
-.news-ticker-icon { font-size: 12px; }
+.news-ticker-icon {
+    font-size: 12px;
+}
 
 .news-ticker-track {
     flex: 1;
@@ -1008,11 +1043,16 @@ body.ol2-bg-4 .welcome-screen {
 }
 
 @keyframes tickerScroll {
-    from { left: 100%; }
-    to   { left: -200%; }
+    from {
+        left: 100%;
+    }
+
+    to {
+        left: -200%;
+    }
 }
 
-/* ─── Main menu online badge ─────────────────────────────── */
+
 .mainmenu-online-count {
     font-size: 11px;
     color: var(--green-bright);
@@ -1087,7 +1127,7 @@ body.ol2-bg-4 .welcome-screen {
 .mainmenu-btn-highlight {
     background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.png');
     color: var(--gold-bright);
-    text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
 }
 
 .mainmenu-btn-highlight:hover,
@@ -1122,7 +1162,7 @@ body.ol2-bg-4 .welcome-screen {
     opacity: 0.65;
 }
 
-/* Save/load controls on welcome */
+
 .save-load-bar {
     display: flex;
     gap: 10px;
@@ -1138,7 +1178,7 @@ body.ol2-bg-4 .welcome-screen {
     text-align: center;
 }
 
-/* ─── Page Wrap ──────────────────────────────────────────── */
+
 .page-wrap {
     max-width: 1120px;
     margin: 0 auto;
@@ -1159,7 +1199,7 @@ body.ol2-bg-4 .welcome-screen {
     margin-top: 10px;
 }
 
-/* ─── Character Creation ─────────────────────────────────── */
+
 .create-form {
     width: 100%;
 }
@@ -1415,7 +1455,7 @@ body.ol2-bg-4 .welcome-screen {
     margin-top: 2px;
 }
 
-/* ─── Character Creation Wizard ─────────────────────────── */
+
 .wizard-outer {
     min-height: 100vh;
     display: flex;
@@ -1840,7 +1880,7 @@ body.ol2-bg-4 .welcome-screen {
     font-weight: 600;
 }
 
-/* ─── Portal Cutscene ──────────────────────────────────── */
+
 .wizard-cutscene {
     display: none;
     position: fixed;
@@ -1955,7 +1995,7 @@ body.ol2-bg-4 .welcome-screen {
     }
 }
 
-/* Ambient floating particles */
+
 #ambient-particle-layer {
     position: fixed;
     inset: 0;
@@ -1995,7 +2035,7 @@ body.ol2-bg-4 .welcome-screen {
     }
 }
 
-/* Burst particles */
+
 .burst-particle {
     position: fixed;
     border-radius: 50%;
@@ -2095,7 +2135,7 @@ body.ol2-bg-4 .welcome-screen {
     font-size: 15px;
 }
 
-/* ─── Game Layout ────────────────────────────────────────── */
+
 .game-layout {
     display: grid;
     grid-template-columns: 250px 5px 1fr;
@@ -2135,7 +2175,7 @@ body.ol2-bg-4 .welcome-screen {
     transition: border-right-width 0.22s;
 }
 
-/* Scrollable middle section of sidebar */
+
 .sidebar-scroll {
     flex: 1;
     overflow-y: auto;
@@ -2143,7 +2183,7 @@ body.ol2-bg-4 .welcome-screen {
     min-height: 0;
 }
 
-/* Sidebar resize handle */
+
 #sidebar-resize-handle {
     width: 5px;
     cursor: col-resize;
@@ -2153,6 +2193,7 @@ body.ol2-bg-4 .welcome-screen {
     flex-shrink: 0;
     position: relative;
 }
+
 #sidebar-resize-handle:hover,
 #sidebar-resize-handle.dragging {
     background: var(--border-bright);
@@ -2169,7 +2210,7 @@ body.ol2-bg-4 .welcome-screen {
     border-radius: 0;
 }
 
-/* ─── Sidebar Toggle Button ──────────────────────────────── */
+
 .sidebar-toggle-btn {
     position: fixed;
     top: 50%;
@@ -2317,7 +2358,7 @@ body.ol2-bg-4 .main-content {
     z-index: 1;
 }
 
-/* ─── Toast Notifications ────────────────────────────────── */
+
 #toast-container {
     position: fixed;
     bottom: 32px;
@@ -2384,7 +2425,7 @@ body.ol2-bg-4 .main-content {
     color: var(--green-bright);
 }
 
-/* ─── Low HP Pulse ───────────────────────────────────────── */
+
 @keyframes hpPulse {
 
     0%,
@@ -2401,7 +2442,7 @@ body.ol2-bg-4 .main-content {
     animation: hpPulse 1.1s ease-in-out infinite;
 }
 
-/* ─── Music Controls ─────────────────────────────────────── */
+
 .music-control-row {
     display: flex;
     align-items: center;
@@ -2431,7 +2472,7 @@ body.ol2-bg-4 .main-content {
     flex-shrink: 0;
 }
 
-/* ─── Tabs ───────────────────────────────────────────────── */
+
 .tab-nav-wrap {
     position: relative;
     z-index: 200;
@@ -2485,7 +2526,7 @@ body.ol2-bg-4 .main-content {
     z-index: 2;
 }
 
-/* Three-dot overflow button */
+
 .tab-more-btn {
     flex-shrink: 0 !important;
     flex-grow: 1;
@@ -2503,7 +2544,7 @@ body.ol2-bg-4 .main-content {
     color: var(--text-bright);
 }
 
-/* Overflow dropdown */
+
 .tab-overflow-dropdown {
     display: none;
     position: absolute;
@@ -2654,7 +2695,7 @@ body.page-fade-out {
     cursor: not-allowed;
 }
 
-/* ─── Message Log ────────────────────────────────────────── */
+
 .message-log {
     background: var(--slate-darkest);
     border: 1px solid var(--border);
@@ -2704,7 +2745,7 @@ body.page-fade-out {
     font-weight: 500;
 }
 
-/* ─── Area & Actions ─────────────────────────────────────── */
+
 .area-description {
     font-size: 15px;
     color: var(--text-light);
@@ -2728,7 +2769,7 @@ body.page-fade-out {
     image-rendering: pixelated;
 }
 
-/* ─── World Pulse Panel ──────────────────────────────────── */
+
 .world-online-badge {
     font-size: 12px;
     color: var(--green-bright);
@@ -2792,7 +2833,7 @@ body.page-fade-out {
     text-align: center;
 }
 
-/* ─── Item Table ─────────────────────────────────────────── */
+
 .item-table {
     width: 100%;
     border-collapse: collapse;
@@ -2846,7 +2887,7 @@ body.page-fade-out {
     font-weight: 500;
 }
 
-/* Rarity */
+
 .rarity-common {
     color: var(--rarity-common);
 }
@@ -2867,7 +2908,7 @@ body.page-fade-out {
     color: var(--rarity-legendary);
 }
 
-/* ─── Travel ─────────────────────────────────────────────── */
+
 .connection-list {
     display: flex;
     flex-direction: column;
@@ -2930,7 +2971,7 @@ body.page-fade-out {
     margin-left: 8px;
 }
 
-/* ─── Missions ───────────────────────────────────────────── */
+
 .mission-list {
     display: flex;
     flex-direction: column;
@@ -2974,9 +3015,7 @@ body.page-fade-out {
     font-style: italic;
 }
 
-/* ─── Battle ─────────────────────────────────────────────── */
 
-/* Outer two-column wrapper */
 .battle-outer {
     display: grid;
     grid-template-columns: 1fr 280px;
@@ -2987,12 +3026,12 @@ body.page-fade-out {
     align-items: start;
 }
 
-/* Main battle column */
+
 .battle-main {
     min-width: 0;
 }
 
-/* Spellbook sidebar */
+
 .battle-spell-sidebar {
     position: sticky;
     top: 18px;
@@ -3003,7 +3042,7 @@ body.page-fade-out {
     margin-bottom: 0;
 }
 
-/* Spell sidebar items stack vertically */
+
 .spell-sidebar-item {
     margin-bottom: 8px;
 }
@@ -3012,12 +3051,12 @@ body.page-fade-out {
     margin-bottom: 0;
 }
 
-/* Spell sidebar uses single-column layout */
+
 .battle-spell-sidebar .btn-spell {
     border-radius: 8px;
 }
 
-/* Pagination controls */
+
 .spell-pagination {
     display: flex;
     align-items: center;
@@ -3049,7 +3088,7 @@ body.page-fade-out {
     cursor: not-allowed;
 }
 
-/* ─── Boss Dialogue Banner ────────────────────────────────── */
+
 @keyframes bossDialogueAppear {
     0% {
         opacity: 0;
@@ -3142,7 +3181,7 @@ body.page-fade-out {
     text-shadow: 0 0 18px rgba(255, 100, 100, 0.3);
 }
 
-/* ─── Epic Boss HP Bar ────────────────────────────────────── */
+
 @keyframes bossBarShimmer {
     0% {
         left: -60%;
@@ -3251,7 +3290,7 @@ body.page-fade-out {
     margin-bottom: 3px;
 }
 
-/* Existing battle layout pieces */
+
 .battle-layout {
     max-width: 920px;
     margin: 0 auto;
@@ -3285,8 +3324,8 @@ body.page-fade-out {
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
-    background: rgba(0,0,0,0.25);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     padding: 8px 12px;
     margin-bottom: 12px;
@@ -3305,8 +3344,8 @@ body.page-fade-out {
     display: flex;
     align-items: center;
     gap: 7px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 10px;
     padding: 5px 9px;
     min-width: 130px;
@@ -3314,7 +3353,7 @@ body.page-fade-out {
 
 .battle-comp-card.battle-comp-fallen {
     opacity: 0.45;
-    border-color: rgba(200,60,60,0.35);
+    border-color: rgba(200, 60, 60, 0.35);
 }
 
 .battle-comp-name {
@@ -3328,7 +3367,7 @@ body.page-fade-out {
 .battle-comp-bar-wrap {
     flex: 1;
     height: 6px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 6px;
     overflow: hidden;
     min-width: 40px;
@@ -3401,7 +3440,7 @@ body.page-fade-out {
     width: 100%;
 }
 
-/* ─── Result Screens ─────────────────────────────────────── */
+
 .result-screen {
     min-height: 100vh;
     display: flex;
@@ -3476,7 +3515,7 @@ body.page-fade-out {
     line-height: 1.65;
 }
 
-/* ─── Your Land ──────────────────────────────────────────── */
+
 .land-section {
     margin-bottom: 18px;
 }
@@ -3762,7 +3801,6 @@ body.page-fade-out {
     margin-top: 4px;
 }
 
-/* ── Spellbook / Battle Spells ─────────────────────────────────────────── */
 
 .spell-grid {
     display: grid;
@@ -3799,7 +3837,7 @@ body.page-fade-out {
     cursor: not-allowed;
 }
 
-/* Spell type border colors */
+
 .spell-damage {
     border-left-color: var(--red);
 }
@@ -3904,7 +3942,7 @@ body.page-fade-out {
     font-style: italic;
 }
 
-/* Spellbook section header */
+
 .spell-section-head {
     font-size: 12px;
     color: var(--text-dim);
@@ -3915,7 +3953,6 @@ body.page-fade-out {
     margin-bottom: 8px;
 }
 
-/* ── Store filter buttons ──────────────────────────────────────────────── */
 
 .store-filter.active {
     background: var(--slate-dark);
@@ -3923,7 +3960,7 @@ body.page-fade-out {
     color: var(--gold);
 }
 
-/* ─── Equipment Slots ────────────────────────────────────────────────────── */
+
 .equip-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -3975,7 +4012,7 @@ body.page-fade-out {
     text-align: center;
 }
 
-/* ─── Inventory Cards ────────────────────────────────────────────────────── */
+
 .inv-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -4042,7 +4079,7 @@ body.page-fade-out {
     flex-wrap: wrap;
 }
 
-/* ─── Shop Grid ──────────────────────────────────────────────────────────── */
+
 .shop-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -4094,7 +4131,7 @@ body.page-fade-out {
     margin-bottom: 8px;
 }
 
-/* ─── Quest Cards ────────────────────────────────────────────────────────── */
+
 .quest-card {
     background: var(--slate-dark);
     border: 1px solid var(--border);
@@ -4230,7 +4267,7 @@ body.page-fade-out {
     letter-spacing: 0.04em;
 }
 
-/* ─── Dungeon List ───────────────────────────────────────────────────────── */
+
 .dungeon-list {
     display: flex;
     flex-direction: column;
@@ -4331,7 +4368,7 @@ body.page-fade-out {
     padding-top: 4px;
 }
 
-/* ─── Dungeon Room UI ────────────────────────────────────────────────────── */
+
 .dungeon-room-map {
     display: flex;
     gap: 5px;
@@ -4455,14 +4492,14 @@ body.page-fade-out {
     font-size: 17px;
 }
 
-/* ─── Main Area (used by dungeon room, etc) ──────────────────────────────── */
+
 .main-area {
     padding: 18px;
     overflow-y: auto;
     flex: 1;
 }
 
-/* ─── Companion System ───────────────────────────────────────────────────── */
+
 .companion-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -4584,7 +4621,7 @@ body.page-fade-out {
     vertical-align: middle;
 }
 
-/* ─── Pagination Controls ────────────────────────────────────────────────── */
+
 .pager {
     display: flex;
     align-items: center;
@@ -4633,7 +4670,7 @@ body.page-fade-out {
     padding: 4px 10px;
 }
 
-/* ─── Weather / Time label badges ───────────────────────────────────────── */
+
 .status-badge {
     display: inline-block;
     font-size: 12px;
@@ -4680,7 +4717,7 @@ body.page-fade-out {
     color: var(--text-bright);
 }
 
-/* ─── Section Labels (no-emoji replacements) ─────────────────────────────── */
+
 .section-label-icon {
     display: inline-block;
     width: 18px;
@@ -4696,7 +4733,7 @@ body.page-fade-out {
     font-weight: 700;
 }
 
-/* ─── Quest Card Additions ────────────────────────────────────────────────── */
+
 .quest-lock-reason {
     font-size: 12px;
     color: var(--red);
@@ -4733,7 +4770,7 @@ body.page-fade-out {
     color: var(--green-bright);
 }
 
-/* ─── Land Section: Locked Notice ─────────────────────────────────────────── */
+
 .land-locked-notice {
     display: flex;
     align-items: flex-start;
@@ -4763,7 +4800,7 @@ body.page-fade-out {
     margin: 0;
 }
 
-/* ─── Training Grounds ─────────────────────────────────────────────────────── */
+
 .training-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -4798,7 +4835,7 @@ body.page-fade-out {
     margin-bottom: 4px;
 }
 
-/* ─── Attribute Panel ──────────────────────────────────────────────────────── */
+
 .attr-points-badge {
     display: inline-block;
     font-size: 12px;
@@ -4869,7 +4906,7 @@ body.page-fade-out {
     margin-bottom: 8px;
 }
 
-/* ─── Language Settings (Sidebar) ────────────────────────────────────────── */
+
 .sidebar-lang-section {
     padding: 8px 12px 10px;
     border-top: 1px solid var(--border);
@@ -4917,7 +4954,7 @@ body.page-fade-out {
     color: var(--text-bright);
 }
 
-/* ─── Class & Type Glyphs ────────────────────────────────────── */
+
 .class-glyph {
     width: 32px;
     height: 32px;
@@ -4937,7 +4974,7 @@ body.page-fade-out {
     image-rendering: crisp-edges;
 }
 
-/* ─── Settings Modal ─────────────────────────────────────────── */
+
 .settings-overlay {
     position: fixed;
     top: 0;
@@ -5009,11 +5046,7 @@ body.page-fade-out {
     justify-content: flex-end;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   MOBILE UI IMPROVEMENTS
-   ───────────────────────────────────────────────────────────── */
 
-/* ── Sidebar backdrop (shown when mobile drawer is open) ── */
 #mobile-sidebar-backdrop {
     display: none;
     position: fixed;
@@ -5028,25 +5061,25 @@ body.page-fade-out {
     display: block;
 }
 
-/* ── Mobile bottom navigation bar (hidden on desktop) ── */
+
 .mobile-bottom-nav {
     display: none;
 }
 
-/* tab-btn: ensure it won't shrink on any viewport */
+
 .tab-btn {
     flex-shrink: 0;
 }
 
 @media (max-width: 700px) {
 
-    /* ── Game layout: single column + bottom padding for nav bar ── */
+    
     .game-layout {
         grid-template-columns: 1fr !important;
         padding-bottom: 58px;
     }
 
-    /* ── Sidebar: slide-in drawer from the left ── */
+    
     .sidebar {
         position: fixed !important;
         top: 0;
@@ -5067,12 +5100,12 @@ body.page-fade-out {
         transform: translateX(0) !important;
     }
 
-    /* Keep collapsed state working when explicitly set */
+    
     .game-layout.sidebar-collapsed .sidebar {
         transform: translateX(-100%) !important;
     }
 
-    /* ── Mobile bottom nav bar ── */
+    
     .mobile-bottom-nav {
         display: flex;
         position: fixed;
@@ -5129,7 +5162,7 @@ body.page-fade-out {
         image-rendering: crisp-edges;
     }
 
-    /* ── Tab bar: horizontally scrollable (hides overflow dropdown on mobile) ── */
+    
     .tab-nav {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch;
@@ -5145,22 +5178,22 @@ body.page-fade-out {
         display: none !important;
     }
 
-    /* ── Main content: tighter padding ── */
+    
     .main-content {
         padding: 10px 10px 12px;
     }
 
-    /* ── Hide desktop sidebar toggle ── */
+    
     .sidebar-toggle-btn {
         display: none !important;
     }
 
-    /* ── Hide keyboard shortcut hints (no physical keyboard) ── */
+    
     .kb-hint {
         display: none !important;
     }
 
-    /* ── Battle: larger touch targets ── */
+    
     .btn-battle {
         min-height: 54px !important;
     }
@@ -5169,7 +5202,7 @@ body.page-fade-out {
         gap: 8px !important;
     }
 
-    /* ── Chat: full-width, above bottom nav ── */
+    
     #chat-widget {
         right: 10px !important;
         left: 10px !important;
@@ -5180,24 +5213,24 @@ body.page-fade-out {
         width: 100% !important;
     }
 
-    /* ── Toast: above bottom nav ── */
+    
     #toast-container {
         bottom: 68px !important;
     }
 
-    /* ── Autosave indicator: above bottom nav ── */
+    
     #autosave-indicator {
         bottom: 68px !important;
     }
 
-    /* ── Travel cards: stack on mobile ── */
+    
     .connection-card {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
 
-    /* ── Dungeon entries: stack on mobile ── */
+    
     .dungeon-entry {
         flex-direction: column;
         gap: 8px;
@@ -5207,13 +5240,13 @@ body.page-fade-out {
         padding-top: 0;
     }
 
-    /* ── Quest cards: stack on mobile ── */
+    
     .mission-card {
         flex-direction: column;
         gap: 8px;
     }
 
-    /* ── Trade overlay: full-width sheet on mobile ── */
+    
     #trade-overlay {
         align-items: flex-end !important;
     }
@@ -5232,18 +5265,18 @@ body.page-fade-out {
         grid-template-columns: 1fr !important;
     }
 
-    /* ── Scroll panel (welcome): tighter padding ── */
+    
     .scroll-panel {
         padding: 18px 16px;
     }
 
-    /* ── Wizard bubble: slightly smaller font ── */
+    
     .wizard-bubble {
         font-size: 15px;
         padding: 14px 16px;
     }
 
-    /* ── Page wrap: tighter padding ── */
+    
     .page-wrap {
         padding: 18px 12px;
     }
@@ -5268,9 +5301,7 @@ body.page-fade-out {
         height: 20px;
     }
 }
-/* ═══════════════════════════════════════════════════════════════════════════
-   Mining
-   ═══════════════════════════════════════════════════════════════════════════ */
+
 
 .mine-action-row {
     display: flex;
@@ -5333,11 +5364,30 @@ body.page-fade-out {
     text-align: center;
 }
 
-.rarity-badge-junk     { background: rgba(120,120,120,0.18); color: var(--text-dim); }
-.rarity-badge-common   { background: rgba(200,200,200,0.12); color: var(--text-light); }
-.rarity-badge-uncommon { background: rgba(80,200,100,0.18);  color: var(--green-bright); }
-.rarity-badge-rare     { background: rgba(80,130,220,0.20);  color: var(--mana-bright); }
-.rarity-badge-legendary{ background: rgba(200,160,50,0.22);  color: var(--gold); }
+.rarity-badge-junk {
+    background: rgba(120, 120, 120, 0.18);
+    color: var(--text-dim);
+}
+
+.rarity-badge-common {
+    background: rgba(200, 200, 200, 0.12);
+    color: var(--text-light);
+}
+
+.rarity-badge-uncommon {
+    background: rgba(80, 200, 100, 0.18);
+    color: var(--green-bright);
+}
+
+.rarity-badge-rare {
+    background: rgba(80, 130, 220, 0.20);
+    color: var(--mana-bright);
+}
+
+.rarity-badge-legendary {
+    background: rgba(200, 160, 50, 0.22);
+    color: var(--gold);
+}
 
 .mine-ore-value {
     font-size: 12px;
@@ -5358,18 +5408,20 @@ body.page-fade-out {
         flex-wrap: wrap;
         gap: 5px;
     }
+
     .mine-ore-desc {
         width: 100%;
         min-width: 0;
     }
 }
 
-/* ── Mining level card ───────────────────────────────────────────────────── */
+
 .mine-level-row {
     display: flex;
     align-items: center;
     gap: 14px;
 }
+
 .mine-level-badge {
     font-size: 22px;
     font-weight: 800;
@@ -5378,14 +5430,16 @@ body.page-fade-out {
     text-align: center;
     line-height: 1;
     padding: 6px 4px;
-    background: rgba(200,160,50,0.12);
-    border: 1px solid rgba(200,160,50,0.3);
+    background: rgba(200, 160, 50, 0.12);
+    border: 1px solid rgba(200, 160, 50, 0.3);
     border-radius: 8px;
 }
+
 .mine-level-info {
     flex: 1;
     min-width: 0;
 }
+
 .mine-level-label {
     font-size: 11px;
     font-weight: 700;
@@ -5394,6 +5448,7 @@ body.page-fade-out {
     color: var(--text-dim);
     margin-bottom: 4px;
 }
+
 .mine-xp-bar-wrap {
     height: 7px;
     background: var(--panel-bg);
@@ -5402,6 +5457,7 @@ body.page-fade-out {
     overflow: hidden;
     margin-bottom: 4px;
 }
+
 .mine-xp-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--gold-dim), var(--gold));
@@ -5409,117 +5465,133 @@ body.page-fade-out {
     transition: width 0.4s ease;
     min-width: 3px;
 }
+
 .mine-xp-text {
     font-size: 11px;
     color: var(--text-dim);
 }
+
 .mine-pickaxe-col {
     text-align: right;
 }
+
 .mine-pickaxe-label {
     font-size: 12px;
     color: var(--green-bright);
     font-weight: 600;
 }
+
 .mine-no-pickaxe {
     color: var(--red) !important;
     opacity: 0.8;
 }
+
 .mine-no-pick-notice {
     margin-top: 10px;
     padding: 8px 12px;
-    background: rgba(200,60,60,0.12);
-    border: 1px solid rgba(200,60,60,0.3);
+    background: rgba(200, 60, 60, 0.12);
+    border: 1px solid rgba(200, 60, 60, 0.3);
     border-radius: 6px;
     font-size: 13px;
     color: var(--text-light);
 }
-/* ── Mining ore list ─────────────────────────────────────────────────────── */
+
+
 .mine-ore-locked {
     opacity: 0.5;
 }
+
 .mine-ore-icon {
     font-size: 13px;
     min-width: 16px;
     text-align: center;
 }
+
 .mine-ore-locked-tag {
     font-size: 11px;
     font-weight: 700;
     color: var(--text-dim);
-    background: rgba(120,120,120,0.15);
+    background: rgba(120, 120, 120, 0.15);
     border: 1px solid var(--border);
     border-radius: 4px;
     padding: 2px 6px;
     white-space: nowrap;
 }
+
 @media (max-width: 600px) {
-    .mine-level-row { flex-wrap: wrap; }
-    .mine-pickaxe-col { text-align: left; }
+    .mine-level-row {
+        flex-wrap: wrap;
+    }
+
+    .mine-pickaxe-col {
+        text-align: left;
+    }
 }
 
-/* ─── Theme-aware overrides for inline-styled elements ───────
-   These use !important to override hardcoded inline styles so
-   that every panel responds correctly to colour themes.        */
 
-/* Settings modal panel (index.html) */
-#settings-modal > div {
+#settings-modal>div {
     background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-panel-dark) 100%) !important;
     border-color: rgba(var(--modal-border-rgb), 0.35) !important;
     box-shadow: 0 0 40px rgba(var(--modal-glow-rgb), 0.25) !important;
 }
 
-/* Online login/register modal */
+
 #online-modal-box {
     background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-panel-dark) 100%) !important;
     border-color: rgba(var(--modal-border-rgb), 0.32) !important;
     box-shadow: 0 0 50px rgba(var(--modal-glow-rgb), 0.22) !important;
 }
 
-/* Online tab bar active tab */
+
 #online-tab-bar .btn.tab-active {
     background: rgba(var(--modal-border-rgb), 0.22) !important;
 }
 
-/* Online form inputs */
+
 .ol-input {
     background: rgba(var(--modal-border-rgb), 0.05) !important;
     border-color: rgba(var(--modal-border-rgb), 0.28) !important;
 }
+
 .ol-input:focus {
     border-color: rgba(var(--modal-border-rgb), 0.75) !important;
     background: rgba(var(--modal-border-rgb), 0.09) !important;
 }
 
-/* Online form divider line */
+
 .ol-divider {
     background: rgba(var(--modal-border-rgb), 0.14) !important;
 }
 
-/* GitHub FAB button */
+
 #gh-fab {
     background: rgba(var(--bg-tint-rgb), 0.72) !important;
     border-color: rgba(var(--modal-border-rgb), 0.28) !important;
     color: rgba(var(--modal-border-rgb), 0.55) !important;
 }
+
 #gh-fab:hover {
     background: rgba(var(--modal-border-rgb), 0.12) !important;
     border-color: rgba(var(--modal-border-rgb), 0.65) !important;
     color: var(--text-bright) !important;
 }
 
-/* Customize / character creation modal */
+
 #customize-modal-box,
-#char-creation-modal > div {
+#char-creation-modal>div {
     background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-panel-dark) 100%) !important;
     border-color: rgba(var(--modal-border-rgb), 0.5) !important;
     box-shadow: 0 0 40px rgba(var(--modal-glow-rgb), 0.2) !important;
 }
 
-/* Friends / social overlays that use hardcoded arcane gradient */
-#ef-modal > div,
-#trade-modal > div {
+
+#ef-modal>div,
+#trade-modal>div {
     background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-panel-dark) 100%) !important;
     border-color: rgba(var(--modal-border-rgb), 0.35) !important;
     box-shadow: 0 0 40px rgba(var(--modal-glow-rgb), 0.2) !important;
+}
+
+.creator {
+    color: var(--gold);
 }

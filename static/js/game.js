@@ -536,7 +536,6 @@ function settingsToggleButtonStyle() {
     applyButtonStyle(next);
 }
 
-/* ── Themes ──────────────────────────────────────────────────────────────── */
 var OL2_THEMES = ['default', 'forest', 'crimson', 'midnight', 'amethyst'];
 var OL2_THEME_LABELS = { default: 'Default', forest: 'Forest', crimson: 'Crimson', midnight: 'Midnight', amethyst: 'Amethyst' };
 
@@ -623,7 +622,6 @@ function openSettings() {
 
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    // Load save slots if the list element exists (online mode only)
     if (document.getElementById('saves-slot-list')) loadSaveSlots();
 }
 
@@ -636,8 +634,6 @@ function closeSettings() {
 function settingsOverlayClick(e) {
     if (e.target === document.getElementById('settings-modal')) closeSettings();
 }
-
-// ── Save Slots ──────────────────────────────────────────────────────────────
 
 function loadSaveSlots() {
     var list = document.getElementById('saves-slot-list');
@@ -886,7 +882,6 @@ async function settingsDownloadCloud() {
     }
 }
 
-// Expose functions called from HTML onclick/oninput attributes
 window.gameConfirm           = gameConfirm;
 window.showPendingToasts     = showPendingToasts;
 window.saveGame              = saveGame;
@@ -907,20 +902,17 @@ window.settingsDownloadCloud = settingsDownloadCloud;
 window.settingsToggleButtonStyle = settingsToggleButtonStyle;
 window.applyButtonStyle          = applyButtonStyle;
 
-/* ── Tab Overflow (three-dot menu) ─────────────────────────────────────────── */
 function initTabOverflow() {
     var nav = document.getElementById('main-tabs');
     var wrap = nav && nav.closest('.tab-nav-wrap');
     if (!nav || !wrap) return;
 
-    // Create the ••• button inside the nav
     var moreBtn = document.createElement('button');
     moreBtn.className = 'tab-btn tab-more-btn';
     moreBtn.innerHTML = '&bull;&bull;&bull;';
     moreBtn.setAttribute('aria-label', 'More tabs');
     nav.appendChild(moreBtn);
 
-    // Create the dropdown container inside the wrap
     var dropdown = document.createElement('div');
     dropdown.className = 'tab-overflow-dropdown';
     wrap.appendChild(dropdown);
@@ -936,7 +928,6 @@ function initTabOverflow() {
     function updateOverflow() {
         var allBtns = Array.from(nav.querySelectorAll('.tab-btn:not(.tab-more-btn)'));
 
-        // Temporarily show all to measure natural widths
         allBtns.forEach(function(b) { b.style.display = ''; });
         moreBtn.style.display = 'none';
 
@@ -945,20 +936,17 @@ function initTabOverflow() {
         allBtns.forEach(function(b) { totalW += b.offsetWidth; });
 
         if (totalW <= navW) {
-            // Everything fits — no overflow needed
             dropdown.innerHTML = '';
             dropdown.classList.remove('open');
             return;
         }
 
-        // Need the ••• button — reserve its space
         moreBtn.style.flexGrow = '0';
         moreBtn.style.display = 'block';
         var moreBtnW = moreBtn.offsetWidth || 52;
         moreBtn.style.flexGrow = '1';
         var available = navW - moreBtnW;
 
-        // Walk from left; first button that would exceed available goes to overflow
         var used = 0;
         var overflowBtns = [];
         allBtns.forEach(function(b) {
@@ -968,7 +956,6 @@ function initTabOverflow() {
             }
         });
 
-        // If the active button is in overflow, swap it with the last visible one
         var activeBtn = null;
         allBtns.forEach(function(b) {
             if (b.classList.contains('active')) activeBtn = b;
@@ -984,12 +971,10 @@ function initTabOverflow() {
             }
         }
 
-        // Apply visibility
         allBtns.forEach(function(b) {
             b.style.display = overflowBtns.indexOf(b) !== -1 ? 'none' : '';
         });
 
-        // Build dropdown items
         dropdown.innerHTML = '';
         overflowBtns.forEach(function(btn) {
             var item = document.createElement('button');
@@ -1012,13 +997,11 @@ function initTabOverflow() {
     if (resizeObs) resizeObs.observe(nav);
     else window.addEventListener('resize', updateOverflow);
 
-    // Re-run after tab switches so the active indicator in dropdown stays right
     document.addEventListener('tabChanged', function() {
         updateOverflow();
     });
 }
 
-/* ── Sidebar Toggle ─────────────────────────────────────────────────────────── */
 function initSidebarToggle() {
     var layout = document.querySelector('.game-layout');
     if (!layout) return;
@@ -1044,7 +1027,6 @@ function initSidebarToggle() {
         try { localStorage.setItem('ol2-sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
     }
 
-    // Read saved preference; default collapsed on narrow screens
     var saved;
     try { saved = localStorage.getItem('ol2-sidebar-collapsed'); } catch {}
     var startCollapsed = saved !== null ? saved === '1' : window.innerWidth < 900;
@@ -1054,8 +1036,6 @@ function initSidebarToggle() {
         setCollapsed(!layout.classList.contains('sidebar-collapsed'));
     });
 }
-
-/* ── Ambient Particle System ── */
 
 function initAmbientParticles() {
     var layer = document.createElement('div');
@@ -1143,7 +1123,6 @@ function hookParticleEvents() {
     });
 }
 
-// ── Tilemap Renderer ─────────────────────────────────────────────────────────
 (function () {
     var canvas = document.getElementById('area-tilemap-canvas');
     if (!canvas) return;
@@ -1166,7 +1145,6 @@ function hookParticleEvents() {
             canvas.height = H;
             var ctx = canvas.getContext('2d');
 
-            // Load all tileset images
             var tsImages = {};
             var loadPromises = tilesets.map(function (ts) {
                 return new Promise(function (resolve) {
@@ -1191,9 +1169,6 @@ function hookParticleEvents() {
                         var destX = (idx % COLS) * tileW;
                         var destY = Math.floor(idx / COLS) * tileH;
 
-                        // Tile encoding: integer part = column in tileset,
-                        // first decimal digit * 10 = row in tileset.
-                        // e.g. 8.2 → col 8, row 2
                         var tileCol = Math.trunc(val);
                         var tileRow = Math.round((val - tileCol) * 10);
                         var srcX    = tileCol * tileW;
