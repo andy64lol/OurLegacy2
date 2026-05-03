@@ -53,7 +53,7 @@
         }
         /* loader component */
         .loader {
-            --duration: 3s;
+            --duration: 0.6s;
             --primary: rgb(110, 60, 200);
             --primary-light: #9b6edf;
             --primary-rgba: rgba(110, 60, 200, 0);
@@ -253,10 +253,11 @@
     </style>
     <script>
         window.addEventListener('load', function() {
+            fetch('/api/online/cloud_save', { method: 'POST' }).catch(function(){});
             var loader = document.getElementById('page-loader');
             if (loader) {
                 loader.classList.add('hidden');
-                setTimeout(function() { loader.remove(); }, 600);
+                setTimeout(function() { loader.remove(); }, 400);
             }
         });
     </script>
