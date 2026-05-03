@@ -182,6 +182,40 @@ body.ol2-btn-classic .btn-wood:active:not(:disabled):not(.btn-disabled) {
     background-image: none !important;
     background: var(--wood-dark) !important;
 }
+body.ol2-btn-classic .mainmenu-btn {
+    background-image: none !important;
+    background: var(--slate-dark) !important;
+    border: 2px solid var(--slate-light) !important;
+    color: var(--text-light) !important;
+    aspect-ratio: unset !important;
+    border-radius: 0 !important;
+    padding: 10px 20px !important;
+}
+body.ol2-btn-classic .mainmenu-btn:hover,
+body.ol2-btn-classic .mainmenu-btn:focus {
+    background-image: none !important;
+    background: var(--slate-mid) !important;
+    color: var(--text-bright) !important;
+    filter: none !important;
+}
+body.ol2-btn-classic .mainmenu-btn:active {
+    background-image: none !important;
+    background: var(--slate-dark) !important;
+    filter: none !important;
+}
+body.ol2-btn-classic .mainmenu-btn-highlight {
+    background-image: none !important;
+    background: var(--wood-dark) !important;
+    border-color: var(--wood-bright) !important;
+    color: var(--gold-bright) !important;
+}
+body.ol2-btn-classic .mainmenu-btn-highlight:hover,
+body.ol2-btn-classic .mainmenu-btn-highlight:focus {
+    background-image: none !important;
+    background: var(--wood-mid) !important;
+    color: var(--gold-bright) !important;
+    filter: none !important;
+}
 
 /* Classic Rounded mode: strip PNG, fully rounded corners */
 body.ol2-btn-rounded .btn {
@@ -205,6 +239,41 @@ body.ol2-btn-rounded .btn-wood:hover:not(:disabled):not(.btn-disabled) {
 body.ol2-btn-rounded .btn-wood:active:not(:disabled):not(.btn-disabled) {
     background-image: none !important;
     background: var(--wood-dark) !important;
+}
+body.ol2-btn-rounded .mainmenu-btn {
+    background-image: none !important;
+    background: var(--slate-dark) !important;
+    border: 2px solid var(--slate-light) !important;
+    color: var(--text-light) !important;
+    aspect-ratio: unset !important;
+    border-radius: 999px !important;
+    padding: 10px 20px !important;
+}
+body.ol2-btn-rounded .mainmenu-btn:hover,
+body.ol2-btn-rounded .mainmenu-btn:focus {
+    background-image: none !important;
+    background: var(--slate-mid) !important;
+    color: var(--text-bright) !important;
+    filter: none !important;
+}
+body.ol2-btn-rounded .mainmenu-btn:active {
+    background-image: none !important;
+    background: var(--slate-dark) !important;
+    filter: none !important;
+}
+body.ol2-btn-rounded .mainmenu-btn-highlight {
+    background-image: none !important;
+    background: var(--wood-dark) !important;
+    border-color: var(--wood-bright) !important;
+    color: var(--gold-bright) !important;
+    border-radius: 999px !important;
+}
+body.ol2-btn-rounded .mainmenu-btn-highlight:hover,
+body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
+    background-image: none !important;
+    background: var(--wood-mid) !important;
+    color: var(--gold-bright) !important;
+    filter: none !important;
 }
 
 /* Wooden button — applied selectively to main action buttons */

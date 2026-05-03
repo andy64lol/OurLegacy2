@@ -53,7 +53,7 @@
         }
         /* loader component */
         .loader {
-            --duration: 0.6s;
+            --duration: 1.4s;
             --primary: rgb(160, 110, 30);
             --primary-light: #c8a050;
             --primary-rgba: rgba(160, 110, 30, 0);
@@ -252,13 +252,15 @@
         }
     </style>
     <script>
-        window.addEventListener('load', function() {
-            fetch('/api/online/cloud_save', { method: 'POST' }).catch(function(){});
+        document.addEventListener('DOMContentLoaded', function() {
             var loader = document.getElementById('page-loader');
             if (loader) {
                 loader.classList.add('hidden');
                 setTimeout(function() { loader.remove(); }, 400);
             }
+        });
+        window.addEventListener('load', function() {
+            fetch('/api/online/cloud_save', { method: 'POST' }).catch(function(){});
         });
     </script>
 
