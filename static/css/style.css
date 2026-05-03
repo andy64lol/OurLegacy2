@@ -51,6 +51,18 @@
     /* Aliases for legacy usage */
     --panel-bg: #24201a;
 
+    /* RGB tint channels for rgba() gradient usage — overridden per theme */
+    --bg-tint-rgb: 28, 24, 16;          /* warm panel tint */
+    --bg-tint-deep-rgb: 40, 22, 10;     /* deeper panel tint */
+    --bg-radial-rgb: 78, 44, 20;        /* radial accent glow */
+    --modal-border-rgb: 200, 165, 90;   /* modal border colour */
+    --modal-glow-rgb: 160, 100, 20;     /* modal outer glow */
+    --fow-bg-rgb: 8, 6, 18;             /* fog-of-war bg tint */
+    --fow-border-rgb: 120, 100, 160;    /* fog-of-war border */
+    --news-bg-a: #0e0a04;               /* news ticker bg start */
+    --news-bg-b: #1a0e02;               /* news ticker bg end */
+    --news-border-top: #2a1500;         /* news ticker top border */
+
     /* Rarity — kept distinct but slightly muted */
     --rarity-common: #909090;
     --rarity-uncommon: #50a850;
@@ -63,6 +75,16 @@
 
 /* Forest — deep jungle greens, moss & bark */
 body.ol2-theme-forest {
+    --bg-tint-rgb: 10, 22, 8;
+    --bg-tint-deep-rgb: 6, 14, 4;
+    --bg-radial-rgb: 20, 65, 12;
+    --modal-border-rgb: 60, 180, 30;
+    --modal-glow-rgb: 40, 150, 20;
+    --fow-bg-rgb: 6, 12, 6;
+    --fow-border-rgb: 60, 140, 40;
+    --news-bg-a: #030a03;
+    --news-bg-b: #071405;
+    --news-border-top: #0f2a08;
     --slate-darkest: #071209;
     --slate-dark: #0f2212;
     --slate-mid: #1e4022;
@@ -97,6 +119,16 @@ body.ol2-theme-forest {
 
 /* Crimson — blood & fire, deep reds & embers */
 body.ol2-theme-crimson {
+    --bg-tint-rgb: 30, 6, 6;
+    --bg-tint-deep-rgb: 22, 3, 3;
+    --bg-radial-rgb: 90, 10, 10;
+    --modal-border-rgb: 220, 40, 40;
+    --modal-glow-rgb: 170, 20, 20;
+    --fow-bg-rgb: 18, 4, 4;
+    --fow-border-rgb: 170, 40, 40;
+    --news-bg-a: #0e0202;
+    --news-bg-b: #1c0404;
+    --news-border-top: #3a0808;
     --slate-darkest: #150404;
     --slate-dark: #280808;
     --slate-mid: #501010;
@@ -131,6 +163,16 @@ body.ol2-theme-crimson {
 
 /* Midnight — deep navy, steel blue, ice */
 body.ol2-theme-midnight {
+    --bg-tint-rgb: 8, 12, 32;
+    --bg-tint-deep-rgb: 4, 8, 22;
+    --bg-radial-rgb: 10, 22, 80;
+    --modal-border-rgb: 40, 90, 220;
+    --modal-glow-rgb: 20, 65, 190;
+    --fow-bg-rgb: 4, 6, 22;
+    --fow-border-rgb: 40, 90, 190;
+    --news-bg-a: #02040e;
+    --news-bg-b: #04081c;
+    --news-border-top: #0a1840;
     --slate-darkest: #04081a;
     --slate-dark: #080f2e;
     --slate-mid: #0e1e58;
@@ -165,6 +207,16 @@ body.ol2-theme-midnight {
 
 /* Amethyst — rich purple, violet gems, arcane glow */
 body.ol2-theme-amethyst {
+    --bg-tint-rgb: 20, 6, 34;
+    --bg-tint-deep-rgb: 12, 4, 24;
+    --bg-radial-rgb: 70, 10, 115;
+    --modal-border-rgb: 190, 60, 255;
+    --modal-glow-rgb: 150, 40, 210;
+    --fow-bg-rgb: 12, 4, 22;
+    --fow-border-rgb: 150, 60, 210;
+    --news-bg-a: #08030e;
+    --news-bg-b: #10051c;
+    --news-border-top: #280c40;
     --slate-darkest: #0e0618;
     --slate-dark: #1c0c32;
     --slate-mid: #381858;
@@ -796,24 +848,24 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
     justify-content: center;
     padding: 40px 20px;
     background:
-        linear-gradient(to bottom, rgba(28, 24, 16, 0.8) 0%, rgba(40, 22, 10, 0.95) 100%),
+        linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.8) 0%, rgba(var(--bg-tint-deep-rgb), 0.95) 100%),
         repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.12) 2px, rgba(0, 0, 0, 0.12) 4px);
 }
 
 body.ol2-bg-1 .welcome-screen {
-    background: linear-gradient(to bottom, rgba(28, 24, 16, 0.75) 0%, rgba(40, 22, 10, 0.88) 100%), url('/game_assets/backgrounds/1.png') center/cover no-repeat;
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/1.png') center/cover no-repeat;
 }
 
 body.ol2-bg-2 .welcome-screen {
-    background: linear-gradient(to bottom, rgba(28, 24, 16, 0.75) 0%, rgba(40, 22, 10, 0.88) 100%), url('/game_assets/backgrounds/2.png') center/cover no-repeat;
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/2.png') center/cover no-repeat;
 }
 
 body.ol2-bg-3 .welcome-screen {
-    background: linear-gradient(to bottom, rgba(28, 24, 16, 0.75) 0%, rgba(40, 22, 10, 0.88) 100%), url('/game_assets/backgrounds/3.png') center/cover no-repeat;
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/3.png') center/cover no-repeat;
 }
 
 body.ol2-bg-4 .welcome-screen {
-    background: linear-gradient(to bottom, rgba(28, 24, 16, 0.75) 0%, rgba(40, 22, 10, 0.88) 100%), url('/game_assets/backgrounds/4.png') center/cover no-repeat;
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/4.png') center/cover no-repeat;
 }
 
 .welcome-inner {
@@ -910,9 +962,9 @@ body.ol2-bg-4 .welcome-screen {
     align-items: center;
     overflow: hidden;
     height: 26px;
-    background: linear-gradient(90deg, #0e0a04, #1a0e02);
+    background: linear-gradient(90deg, var(--news-bg-a), var(--news-bg-b));
     border-bottom: 2px solid var(--wood-dark);
-    border-top: 1px solid #2a1500;
+    border-top: 1px solid var(--news-border-top);
     position: relative;
     z-index: 10;
     flex-shrink: 0;
@@ -1370,7 +1422,7 @@ body.ol2-bg-4 .welcome-screen {
     align-items: center;
     justify-content: flex-start;
     padding: 40px 20px 60px;
-    background: radial-gradient(ellipse at 50% 30%, rgba(78, 44, 20, 0.35) 0%, transparent 70%), var(--bg-main);
+    background: radial-gradient(ellipse at 50% 30%, rgba(var(--bg-radial-rgb), 0.35) 0%, transparent 70%), var(--bg-main);
     position: relative;
     overflow: hidden;
 }
@@ -2249,7 +2301,7 @@ body.ol2-bg-4 .main-content {
 }
 
 .toast {
-    background: rgba(28, 24, 16, 0.97);
+    background: rgba(var(--bg-tint-rgb), 0.97);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 13px 20px;
@@ -2804,8 +2856,8 @@ body.page-fade-out {
 }
 
 .connection-card.fow-unknown {
-    border-color: rgba(120, 100, 160, 0.25);
-    background: rgba(10, 6, 24, 0.6);
+    border-color: rgba(var(--fow-border-rgb), 0.25);
+    background: rgba(var(--fow-bg-rgb), 0.6);
     opacity: 0.8;
     filter: brightness(0.85);
 }
@@ -5371,4 +5423,70 @@ body.page-fade-out {
 @media (max-width: 600px) {
     .mine-level-row { flex-wrap: wrap; }
     .mine-pickaxe-col { text-align: left; }
+}
+
+/* ─── Theme-aware overrides for inline-styled elements ───────
+   These use !important to override hardcoded inline styles so
+   that every panel responds correctly to colour themes.        */
+
+/* Settings modal panel (index.html) */
+#settings-modal > div {
+    background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-panel-dark) 100%) !important;
+    border-color: rgba(var(--modal-border-rgb), 0.35) !important;
+    box-shadow: 0 0 40px rgba(var(--modal-glow-rgb), 0.25) !important;
+}
+
+/* Online login/register modal */
+#online-modal-box {
+    background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-panel-dark) 100%) !important;
+    border-color: rgba(var(--modal-border-rgb), 0.32) !important;
+    box-shadow: 0 0 50px rgba(var(--modal-glow-rgb), 0.22) !important;
+}
+
+/* Online tab bar active tab */
+#online-tab-bar .btn.tab-active {
+    background: rgba(var(--modal-border-rgb), 0.22) !important;
+}
+
+/* Online form inputs */
+.ol-input {
+    background: rgba(var(--modal-border-rgb), 0.05) !important;
+    border-color: rgba(var(--modal-border-rgb), 0.28) !important;
+}
+.ol-input:focus {
+    border-color: rgba(var(--modal-border-rgb), 0.75) !important;
+    background: rgba(var(--modal-border-rgb), 0.09) !important;
+}
+
+/* Online form divider line */
+.ol-divider {
+    background: rgba(var(--modal-border-rgb), 0.14) !important;
+}
+
+/* GitHub FAB button */
+#gh-fab {
+    background: rgba(var(--bg-tint-rgb), 0.72) !important;
+    border-color: rgba(var(--modal-border-rgb), 0.28) !important;
+    color: rgba(var(--modal-border-rgb), 0.55) !important;
+}
+#gh-fab:hover {
+    background: rgba(var(--modal-border-rgb), 0.12) !important;
+    border-color: rgba(var(--modal-border-rgb), 0.65) !important;
+    color: var(--text-bright) !important;
+}
+
+/* Customize / character creation modal */
+#customize-modal-box,
+#char-creation-modal > div {
+    background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-panel-dark) 100%) !important;
+    border-color: rgba(var(--modal-border-rgb), 0.5) !important;
+    box-shadow: 0 0 40px rgba(var(--modal-glow-rgb), 0.2) !important;
+}
+
+/* Friends / social overlays that use hardcoded arcane gradient */
+#ef-modal > div,
+#trade-modal > div {
+    background: linear-gradient(160deg, var(--bg-panel) 0%, var(--bg-panel-dark) 100%) !important;
+    border-color: rgba(var(--modal-border-rgb), 0.35) !important;
+    box-shadow: 0 0 40px rgba(var(--modal-glow-rgb), 0.2) !important;
 }
