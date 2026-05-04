@@ -59,7 +59,7 @@
     ],
     "rest_cost": 0,
     "can_rest": true,
-    "map_image": "your_land.png"
+    "map_image": "your_land.webp"
   },
   "forest_path": {
     "name": "Dark Forest",
@@ -275,7 +275,7 @@
         ]
       }
     ],
-    "map_image": "tavern.png"
+    "map_image": "tavern.webp"
   },
   "forgotten_oasis": {
     "name": "Forgotten Oasis",

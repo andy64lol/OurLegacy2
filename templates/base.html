@@ -410,6 +410,35 @@
             border: none;
             background: var(--bg-main);
         }
+
+        /* Chat panel visibility and interaction fixes */
+        #chat-panel {
+            pointer-events: none !important;
+        }
+        #chat-panel[style*="display: flex"],
+        #chat-panel[style*="display:flex"] {
+            pointer-events: auto !important;
+        }
+
+        /* Ensure chat panel children can be clicked */
+        #chat-panel button,
+        #chat-panel iframe,
+        #chat-panel * {
+            pointer-events: auto !important;
+        }
+
+        /* Groups overlay visibility fixes */
+        #groups-overlay[style*="display: flex"],
+        #groups-overlay[style*="display:flex"] {
+            display: flex !important;
+            pointer-events: auto !important;
+        }
+        
+        #groups-overlay button,
+        #groups-overlay iframe,
+        #groups-overlay * {
+            pointer-events: auto !important;
+        }
     </style>
 
     
@@ -597,7 +626,13 @@
         window.toggleChat = function() {
             chatOpen = !chatOpen;
             var panel = document.getElementById('chat-panel');
-            panel.style.display = chatOpen ? 'flex' : 'none';
+            if (chatOpen) {
+                panel.style.display = 'flex';
+                panel.style.pointerEvents = 'auto';
+            } else {
+                panel.style.display = 'none';
+                panel.style.pointerEvents = 'none';
+            }
             var fab = document.getElementById('chat-toggle-btn');
             if (fab) fab.classList.toggle('chat-open', chatOpen);
             if (chatOpen) {
@@ -615,7 +650,14 @@
         };
 
         document.getElementById('chat-panel').addEventListener('click', function(e) {
-            if (e.target === this) { chatOpen = false; this.style.display = 'none'; document.body.style.overflow = ''; var fab = document.getElementById('chat-toggle-btn'); if (fab) fab.classList.remove('chat-open'); }
+            if (e.target === this) { 
+                chatOpen = false; 
+                this.style.display = 'none'; 
+                this.style.pointerEvents = 'none';
+                document.body.style.overflow = ''; 
+                var fab = document.getElementById('chat-toggle-btn'); 
+                if (fab) fab.classList.remove('chat-open'); 
+            }
         });
 
         window.addEventListener('message', function(e) {

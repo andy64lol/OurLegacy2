@@ -2169,13 +2169,19 @@ body.ol2-bg-4 .welcome-screen {
 
 .game-layout {
     display: grid;
-    grid-template-columns: 250px 5px 1fr;
+    grid-template-columns: 280px 5px 1fr;
     min-height: 100vh;
     transition: grid-template-columns 0.22s ease;
 }
 
 .game-layout.sidebar-collapsed {
     grid-template-columns: 0px 0px 1fr;
+}
+
+@media (max-width: 900px) {
+    .game-layout {
+        grid-template-columns: 220px 5px 1fr;
+    }
 }
 
 @media (max-width: 700px) {
@@ -4523,6 +4529,13 @@ body.page-fade-out {
     padding: 18px;
     overflow-y: auto;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.main-area .panel {
+    min-width: 0;
 }
 
 
