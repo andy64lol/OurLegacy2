@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="game-layout">
-    <aside class="sidebar">
+
+    <div id="mobile-sidebar-backdrop" onclick="mobileCloseSidebar()"></div>
+
+    <aside class="sidebar" id="main-sidebar">
+        <button onclick="mobileCloseSidebar()" id="mobile-sidebar-close"
+            style="display:none;position:absolute;top:8px;right:8px;z-index:10;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;color:var(--text-dim);font-size:16px;cursor:pointer;line-height:1;align-items:center;justify-content:center;"
+            aria-label="Close menu">&times;</button>
+
+        <div class="sidebar-scroll">
         <div class="sidebar-top">
             <img src="/static/banner.webp" alt="Our Legacy 2" class="sidebar-banner">
         </div>
@@ -48,7 +56,14 @@
                 </form>
             </div>
         </div>
+        </div>
+
+        <div class="sidebar-nav">
+            <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;">Settings</button>
+        </div>
     </aside>
+
+    <div id="sidebar-resize-handle" title="Drag to resize sidebar"></div>
 
     <main class="main-area">
 
