@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
     checkMobile();
     initAmbientParticles();
     hookParticleEvents();
+    applyNumFmt();
+    initFabScrollBehavior();
 });
 
 function checkAutosaved() {
@@ -1201,3 +1203,69 @@ function hookParticleEvents() {
             if (wrap) wrap.style.display = 'none';
         });
 }());
+
+/* ── Big Number Formatter ───────────────────────────────────────── */
+function fmtNum(n) {
+    if (typeof n !== 'number') n = parseFloat(n);
+    if (isNaN(n)) return String(n);
+    var neg = n < 0;
+    var abs = Math.abs(n);
+    var result;
+    if (abs < 10000)       result = Math.round(abs).toLocaleString();
+    else if (abs < 1e6)    result = (abs / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+    else if (abs < 1e9)    result = (abs / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
+    else if (abs < 1e12)   result = (abs / 1e9).toFixed(2).replace(/\.?0+$/, '') + 'B';
+    else                   result = abs.toExponential(2).replace('e+', 'e');
+    return neg ? '-' + result : result;
+}
+
+function applyNumFmt() {
+    document.querySelectorAll('.gold-amount').forEach(function(el) {
+        var v = parseFloat(el.textContent.replace(/[^0-9.-]/g, ''));
+        if (!isNaN(v) && v >= 10000) el.textContent = fmtNum(v);
+    });
+    document.querySelectorAll('.bar-nums').forEach(function(el) {
+        el.textContent = el.textContent.split('/').map(function(part) {
+            var trimmed = part.trim();
+            var v = parseFloat(trimmed.replace(/[^0-9.-]/g, ''));
+            return (!isNaN(v) && v >= 10000) ? fmtNum(v) : trimmed;
+        }).join(' / ');
+    });
+    document.querySelectorAll('.stat-mini strong').forEach(function(el) {
+        var v = parseFloat(el.textContent.replace(/[^0-9.-]/g, ''));
+        if (!isNaN(v) && v >= 10000) el.textContent = fmtNum(v);
+    });
+    document.querySelectorAll('[data-fmt-num]').forEach(function(el) {
+        var v = parseFloat(el.textContent.replace(/[^0-9.-]/g, ''));
+        if (!isNaN(v) && v >= 10000) el.textContent = fmtNum(v);
+    });
+}
+
+/* ── FAB Scroll Behavior ────────────────────────────────────────── */
+function initFabScrollBehavior() {
+    var chat = document.getElementById('chat-toggle-btn');
+    var term = document.getElementById('terminal-fab');
+    if (!chat && !term) return;
+
+    var scrollTimer = null;
+    var isScrolling = false;
+
+    function onScrollStart() {
+        if (!isScrolling) {
+            isScrolling = true;
+            if (chat) chat.style.opacity = '0.15';
+            if (term) term.style.opacity = '0.15';
+        }
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(function() {
+            isScrolling = false;
+            if (chat && !chat.matches(':hover')) chat.style.opacity = '';
+            if (term && !term.matches(':hover')) term.style.opacity = '';
+        }, 600);
+    }
+
+    var scrollTargets = [window, document.querySelector('.main-area'), document.querySelector('.main-content')];
+    scrollTargets.forEach(function(el) {
+        if (el) el.addEventListener('scroll', onScrollStart, { passive: true });
+    });
+}

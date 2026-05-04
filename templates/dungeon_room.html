@@ -234,5 +234,22 @@
 </div>
 {% endblock %}
 {% block extra_scripts %}
-<script></script>
+<script>
+function mobileCloseSidebar() {
+    var sidebar = document.getElementById('main-sidebar');
+    var backdrop = document.getElementById('mobile-sidebar-backdrop');
+    var closeBtn = document.getElementById('mobile-sidebar-close');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    if (backdrop) backdrop.classList.remove('active');
+    if (closeBtn) closeBtn.style.display = 'none';
+}
+function mobileOpenSidebar() {
+    var sidebar = document.getElementById('main-sidebar');
+    var backdrop = document.getElementById('mobile-sidebar-backdrop');
+    var closeBtn = document.getElementById('mobile-sidebar-close');
+    if (sidebar) sidebar.classList.add('mobile-open');
+    if (backdrop) backdrop.classList.add('active');
+    if (closeBtn) closeBtn.style.display = 'flex';
+}
+</script>
 {% endblock %}

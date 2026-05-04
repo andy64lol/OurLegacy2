@@ -252,16 +252,23 @@
         }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        (function() {
             var loader = document.getElementById('page-loader');
-            if (loader) {
+            var loaderHidden = false;
+            function hideLoader() {
+                if (loaderHidden || !loader) return;
+                loaderHidden = true;
                 loader.classList.add('hidden');
-                setTimeout(function() { loader.remove(); }, 400);
+                setTimeout(function() { if (loader.parentNode) loader.remove(); }, 550);
             }
-        });
-        window.addEventListener('load', function() {
-            fetch('/api/online/cloud_save', { method: 'POST' }).catch(function(){});
-        });
+            // Fallback: hide after 6 seconds no matter what
+            setTimeout(hideLoader, 6000);
+            window.addEventListener('load', function() {
+                fetch('/api/online/cloud_save', { method: 'POST' })
+                    .then(hideLoader)
+                    .catch(hideLoader);
+            });
+        })();
     </script>
 
     
@@ -926,50 +933,56 @@
             bottom: 20px;
             right: 20px;
             z-index: 8100;
-            width: 50px;
-            height: 50px;
-            background: var(--wood-dark, #3a2510);
-            border: 2px solid var(--wood-bright, #c8843c);
+            width: 44px;
+            height: 44px;
+            background: rgba(58, 37, 16, 0.55);
+            border: 1px solid rgba(200, 132, 60, 0.45);
             color: var(--gold, #d4a843);
             cursor: pointer;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.55);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
-            margin-left: auto;
+            transition: background 0.2s, opacity 0.2s, transform 0.18s, box-shadow 0.18s;
+            opacity: 0.42;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
         #chat-toggle-btn:hover {
-            background: var(--wood-mid, #5a3a18);
+            background: rgba(90, 58, 24, 0.9);
+            opacity: 1;
             transform: scale(1.08);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.65);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.6);
         }
         #chat-toggle-btn.chat-open {
-            background: var(--wood-bright, #c8843c);
-            box-shadow: 0 0 0 3px rgba(200,150,60,0.35), 0 4px 16px rgba(0,0,0,0.55);
+            background: rgba(200, 132, 60, 0.75);
+            opacity: 0.92;
+            box-shadow: 0 0 0 2px rgba(200,150,60,0.4), 0 4px 16px rgba(0,0,0,0.55);
         }
         /* terminal fab — above chat button, owner only */
         #terminal-fab {
             display: none;
             position: fixed;
-            bottom: 80px;
+            bottom: 74px;
             right: 20px;
             z-index: 8100;
-            margin-left: auto;
-            width: 50px;
-            height: 50px;
-            background: #0c1018;
-            border: 2px solid #1e3a5f;
+            width: 44px;
+            height: 44px;
+            background: rgba(12, 16, 24, 0.5);
+            border: 1px solid rgba(30, 58, 95, 0.6);
             cursor: pointer;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.55);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+            transition: background 0.2s, opacity 0.2s, transform 0.18s, box-shadow 0.18s;
+            opacity: 0.42;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
-        #terminal-fab:hover { background: #131c2b; transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.65); }
-        #terminal-fab.term-open { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.25), 0 4px 16px rgba(0,0,0,0.55); }
+        #terminal-fab:hover { background: rgba(19, 28, 43, 0.95); opacity: 1; transform: scale(1.08); box-shadow: 0 4px 18px rgba(0,0,0,0.6); }
+        #terminal-fab.term-open { border-color: rgba(59,130,246,0.8); opacity: 0.92; box-shadow: 0 0 0 2px rgba(59,130,246,0.3), 0 4px 16px rgba(0,0,0,0.55); }
         /* terminal overlay */
         #terminal-overlay {
             display: none;
