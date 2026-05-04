@@ -852,8 +852,8 @@
       "void"
     ]
   },
-  "siberian_wolf": {
-    "name": "Siberian Wolf",
+  "vaelthari_wolf": {
+    "name": "Vaelthari Wolf",
     "hp": 270,
     "attack": 90,
     "defense": 24,
@@ -861,7 +861,7 @@
     "experience_reward": 30,
     "gold_reward": 12,
     "loot_table": [
-      "Siberian Wolf Fang",
+      "Vaelthari Wolf Fang",
       "Health Potion",
       "Taiga Hunter's Bow"
     ],
@@ -938,7 +938,7 @@
     "loot_table": [
       "Bone Hatchet",
       "Health Potion",
-      "Siberian War Axe"
+      "Vaelthari War Axe"
     ],
     "tags": [
       "humanoid",
@@ -1044,7 +1044,7 @@
     "experience_reward": 28,
     "gold_reward": 22,
     "loot_table": [
-      "Ottoman Gold Coin",
+      "Kalidran Gold Coin",
       "Spice Bundle",
       "Steel Dagger"
     ],
@@ -1064,7 +1064,7 @@
     "loot_table": [
       "Sultan's Blade",
       "Janissary Plate Armor",
-      "Ottoman Gold Coin",
+      "Kalidran Gold Coin",
       "Origins of the Osman People"
     ],
     "tags": [
@@ -1100,7 +1100,7 @@
     "gold_reward": 28,
     "loot_table": [
       "Corsair Cutlass",
-      "Ottoman Gold Coin",
+      "Kalidran Gold Coin",
       "Corsair Flag"
     ],
     "tags": [
@@ -1118,8 +1118,8 @@
     "gold_reward": 38,
     "loot_table": [
       "Janissary Badge",
-      "Ottoman Chainmail",
-      "Ottoman Scimitar"
+      "Kalidran Chainmail",
+      "Kalidran Scimitar"
     ],
     "tags": [
       "humanoid"
@@ -1172,7 +1172,7 @@
     "loot_table": [
       "Janissary Plate Armor",
       "Janissary Badge",
-      "Ottoman Scimitar"
+      "Kalidran Scimitar"
     ],
     "tags": [
       "humanoid",
@@ -1189,7 +1189,7 @@
     "gold_reward": 90,
     "loot_table": [
       "Elephant Tusk",
-      "Ottoman Gold Coin",
+      "Kalidran Gold Coin",
       "Large Health Potion"
     ],
     "tags": [
@@ -1206,7 +1206,7 @@
     "gold_reward": 35,
     "loot_table": [
       "Slave Chain",
-      "Ottoman Gold Coin",
+      "Kalidran Gold Coin",
       "Health Potion",
       "The New Order: Life in Kostantora"
     ],
@@ -1225,7 +1225,7 @@
     "loot_table": [
       "Corsair Cutlass",
       "Corsair Coat",
-      "Ottoman Gold Coin"
+      "Kalidran Gold Coin"
     ],
     "tags": [
       "humanoid"
@@ -1241,7 +1241,7 @@
     "gold_reward": 30,
     "loot_table": [
       "Desert Jewel",
-      "Ottoman Bow",
+      "Kalidran Bow",
       "Spice Bundle"
     ],
     "tags": [

@@ -3274,7 +3274,7 @@ def game():
         active_dungeon=active_dungeon,
         attr_summary=attr_summary,
         mine_data=mine_data,
-        read_books=player.get("read_books", []),
+
         online_user=session.get("online_username"),
         events_data=events_data,
         game_classes=list(GAME_DATA.get("classes", {}).keys()),
@@ -3699,7 +3699,8 @@ def api_spend_attr_point():
     ensure_attributes(player)
     data = request.get_json(force=True, silent=True) or {}
     attr = data.get("attr", "")
-    result = spend_attribute_point(player, attr)
+    count = int(data.get("count", 1))
+    result = spend_attribute_point(player, attr, count)
     if result["ok"]:
         save_player(player)
         _autosave()
@@ -4620,7 +4621,7 @@ def action_sort_inventory():
             "offhand": 2,
             "accessory": 3,
             "consumable": 4,
-            "book": 5,
+
             "material": 6,
         }
         t = data.get("type", "misc")

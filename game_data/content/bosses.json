@@ -1681,13 +1681,13 @@
       "large"
     ]
   },
-  "ottoman_pirate_lord": {
+  "kalidran_pirate_lord": {
     "name": "Pirate Lord Barbaros",
     "hp": 2800,
     "attack": 300,
     "defense": 140,
     "speed": 15,
-    "description": "The legendary commander of the Ottoman corsair fleet, Barbaros has plundered a hundred ports. His scarred face and booming laugh are the last things most men ever see.",
+    "description": "The legendary commander of the Kalidran corsair fleet, Barbaros has plundered a hundred ports. His scarred face and booming laugh are the last things most men ever see.",
     "special_abilities": [
       {
         "name": "Boarding Strike",
@@ -1760,7 +1760,7 @@
     "special_abilities": [
       {
         "name": "Court Sorcery",
-        "description": "Channels dark Ottoman court magic into a devastating blast",
+        "description": "Channels dark Kalidran court magic into a devastating blast",
         "damage": 50,
         "cooldown": 3
       },

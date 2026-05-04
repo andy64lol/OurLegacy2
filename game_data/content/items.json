@@ -5724,7 +5724,7 @@
   },
   "Birch Staff": {
     "type": "weapon",
-    "description": "A staff carved from ancient Siberian birch. Channels cold forest magic.",
+    "description": "A staff carved from ancient Vaelthari birch. Channels cold forest magic.",
     "attack_bonus": 15,
     "magic_weapon": true,
     "mp_bonus": 10,
@@ -5776,7 +5776,7 @@
   },
   "Taiga Hunter's Bow": {
     "type": "weapon",
-    "description": "A composite bow crafted from layered horn and sinew by Siberian hunters.",
+    "description": "A composite bow crafted from layered horn and sinew by Vaelthari hunters.",
     "attack_bonus": 22,
     "speed_bonus": 4,
     "price": 130,
@@ -5852,7 +5852,7 @@
     ],
     "texture": "items/staffs/rpg_icons87.png"
   },
-  "Siberian War Axe": {
+  "Vaelthari War Axe": {
     "type": "weapon",
     "description": "A heavy double-headed axe wielded by the warrior clans of the taiga.",
     "attack_bonus": 35,
@@ -5927,9 +5927,9 @@
     ],
     "texture": "items/swords/rpg_icons37.png"
   },
-  "Siberian Wolf Fang": {
+  "Vaelthari Wolf Fang": {
     "type": "material",
-    "description": "A large fang from a Siberian wolf, valued for its sharpness.",
+    "description": "A large fang from a Vaelthari wolf, valued for its sharpness.",
     "price": 15,
     "rarity": "common",
     "tags": [
@@ -6044,9 +6044,9 @@
       "material"
     ]
   },
-  "Ottoman Scimitar": {
+  "Kalidran Scimitar": {
     "type": "weapon",
-    "description": "A elegantly curved blade forged in the Ottoman tradition. Light and brutally sharp.",
+    "description": "A elegantly curved blade forged in the Kalidran tradition. Light and brutally sharp.",
     "attack_bonus": 20,
     "speed_bonus": 3,
     "price": 120,
@@ -6070,7 +6070,7 @@
   },
   "Yatagan": {
     "type": "weapon",
-    "description": "A short Ottoman sword with an inward-curved blade, favoured by the Janissaries.",
+    "description": "A short Kalidran sword with an inward-curved blade, favoured by the Janissaries.",
     "attack_bonus": 18,
     "speed_bonus": 5,
     "price": 105,
@@ -6092,9 +6092,9 @@
     ],
     "texture": "items/swords/rpg_icons39.png"
   },
-  "Ottoman Bow": {
+  "Kalidran Bow": {
     "type": "weapon",
-    "description": "A powerful recurve bow used by Ottoman cavalry and desert raiders alike.",
+    "description": "A powerful recurve bow used by Kalidran cavalry and desert raiders alike.",
     "attack_bonus": 24,
     "speed_bonus": 3,
     "price": 140,
@@ -6118,9 +6118,9 @@
     ],
     "texture": "items/slingshots/rpg_icons146.png"
   },
-  "Ottoman Lance": {
+  "Kalidran Lance": {
     "type": "weapon",
-    "description": "A long cavalry lance used in Ottoman charges. Devastating on the first strike.",
+    "description": "A long cavalry lance used in Kalidran charges. Devastating on the first strike.",
     "attack_bonus": 32,
     "speed_bonus": 1,
     "price": 190,
@@ -6140,7 +6140,7 @@
   },
   "Corsair Cutlass": {
     "type": "weapon",
-    "description": "A curved sabre used by Ottoman corsairs. The blade is notched from countless sea battles.",
+    "description": "A curved sabre used by Kalidran corsairs. The blade is notched from countless sea battles.",
     "attack_bonus": 22,
     "speed_bonus": 4,
     "price": 130,
@@ -6190,7 +6190,7 @@
   },
   "Vizier Staff": {
     "type": "weapon",
-    "description": "The ornate staff of an Ottoman court mage, set with sapphires and gilded in gold leaf.",
+    "description": "The ornate staff of an Kalidran court mage, set with sapphires and gilded in gold leaf.",
     "attack_bonus": 28,
     "magic_weapon": true,
     "mp_bonus": 30,
@@ -6288,9 +6288,9 @@
     ],
     "texture": "items/swords/rpg_icons44.png"
   },
-  "Ottoman Chainmail": {
+  "Kalidran Chainmail": {
     "type": "armor",
-    "description": "Finely-linked chainmail forged by Ottoman armorers. Flexible yet strong.",
+    "description": "Finely-linked chainmail forged by Kalidran armorers. Flexible yet strong.",
     "defense_bonus": 10,
     "speed_penalty": 1,
     "price": 130,
@@ -6312,7 +6312,7 @@
   },
   "Corsair Coat": {
     "type": "armor",
-    "description": "A thick leather coat worn by Ottoman sea pirates. Reinforced at the shoulders and chest.",
+    "description": "A thick leather coat worn by Kalidran sea pirates. Reinforced at the shoulders and chest.",
     "defense_bonus": 7,
     "speed_bonus": 2,
     "price": 95,
@@ -6334,7 +6334,7 @@
   },
   "Janissary Plate Armor": {
     "type": "armor",
-    "description": "Heavy plate armor worn by the Ottoman Empire's elite Janissary corps. Imposing and near-impenetrable.",
+    "description": "Heavy plate armor worn by the Kalidran Empire's elite Janissary corps. Imposing and near-impenetrable.",
     "defense_bonus": 18,
     "speed_penalty": 3,
     "price": 320,
@@ -6404,7 +6404,7 @@
   },
   "Sultan's Signet Ring": {
     "type": "accessory",
-    "description": "A heavy gold ring bearing the seal of the Ottoman Sultan. Commands respect — and fear.",
+    "description": "A heavy gold ring bearing the seal of the Kalidran Sultan. Commands respect — and fear.",
     "attack_bonus": 5,
     "defense_bonus": 5,
     "gold_bonus": 0,
@@ -6423,7 +6423,7 @@
   },
   "Corsair's Amulet": {
     "type": "accessory",
-    "description": "A sea-stone amulet worn by Ottoman pirates for luck on dangerous waters.",
+    "description": "A sea-stone amulet worn by Kalidran pirates for luck on dangerous waters.",
     "defense_bonus": 3,
     "speed_bonus": 4,
     "price": 120,
@@ -6456,9 +6456,9 @@
     ],
     "texture": "items/rings_and_necklaces/rpg_icons4.png"
   },
-  "Ottoman Turban of Wisdom": {
+  "Kalidran Turban of Wisdom": {
     "type": "accessory",
-    "description": "An elaborately wrapped turban imbued with the wisdom of Ottoman scholars.",
+    "description": "An elaborately wrapped turban imbued with the wisdom of Kalidran scholars.",
     "mp_bonus": 40,
     "attack_bonus": 3,
     "price": 260,
@@ -6473,7 +6473,7 @@
     ],
     "texture": "items/rings_and_necklaces/rpg_icons5.png"
   },
-  "Ottoman Gold Coin": {
+  "Kalidran Gold Coin": {
     "type": "material",
     "description": "A gold coin bearing the Sultan's tughra. Valuable anywhere in the world.",
     "price": 25,
@@ -6512,7 +6512,7 @@
   },
   "Corsair Flag": {
     "type": "material",
-    "description": "The battle flag of an Ottoman corsair ship. Collectors pay well for these.",
+    "description": "The battle flag of an Kalidran corsair ship. Collectors pay well for these.",
     "price": 35,
     "rarity": "common",
     "tags": [
@@ -6548,7 +6548,7 @@
   },
   "Elephant Tusk": {
     "type": "material",
-    "description": "An ivory tusk from an Ottoman war elephant. Immensely valuable.",
+    "description": "An ivory tusk from an Kalidran war elephant. Immensely valuable.",
     "price": 150,
     "rarity": "rare",
     "tags": [
@@ -6566,16 +6566,16 @@
   },
   "Grand Vizier's Grimoire": {
     "type": "material",
-    "description": "The spell-tome of Grand Vizier Karamanli, filled with forbidden Ottoman court magic.",
+    "description": "The spell-tome of Grand Vizier Karamanli, filled with forbidden Kalidran court magic.",
     "price": 400,
     "rarity": "legendary",
     "tags": [
       "material"
     ]
   },
-  "Ottoman Silk": {
+  "Kalidran Silk": {
     "type": "material",
-    "description": "Exquisite silk from Ottoman looms. Merchants will pay a fortune.",
+    "description": "Exquisite silk from Kalidran looms. Merchants will pay a fortune.",
     "price": 55,
     "rarity": "uncommon",
     "tags": [

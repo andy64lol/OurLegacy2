@@ -158,7 +158,7 @@
 {'Warrior':'warrior','Mage':'mage','Rogue':'rouge','Hunter':'hunter','Bard':'bard','Paladin':'paladin','Druid':'druid','Priest':'priest'}
 %}
 {% set _tglyph =
-{'weapon':'weapon','armor':'armor','offhand':'offhand','accessory':'accessories','book':'book','consumable':'food','material':'materials','pickaxe':'pickaxe'}
+{'weapon':'weapon','armor':'armor','offhand':'offhand','accessory':'accessories','consumable':'food','material':'materials','pickaxe':'pickaxe'}
 %}
 {% set _sglyph =
 {'weapon':'weapon','armor':'armor','offhand':'offhand','accessory_1':'accessories','accessory_2':'accessories','accessory_3':'accessories'}
@@ -2138,8 +2138,18 @@
                             </div>
                             <div class="attr-desc">{{ attr_info.description }}</div>
                             {% if attr_summary.unspent_points > 0 %}
-                            <button class="btn btn-xsmall btn-primary attr-spend-btn" data-attr="{{ attr_key }}"
-                                style="margin-top:6px;">+ Spend Point</button>
+                            <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;">
+                                <button class="btn btn-xsmall btn-primary attr-spend-btn" data-attr="{{ attr_key }}" data-count="1">+1</button>
+                                {% if attr_summary.unspent_points >= 5 %}
+                                <button class="btn btn-xsmall btn-primary attr-spend-btn" data-attr="{{ attr_key }}" data-count="5">+5</button>
+                                {% endif %}
+                                {% if attr_summary.unspent_points >= 10 %}
+                                <button class="btn btn-xsmall btn-primary attr-spend-btn" data-attr="{{ attr_key }}" data-count="10">+10</button>
+                                {% endif %}
+                                {% if attr_summary.unspent_points > 1 %}
+                                <button class="btn btn-xsmall btn-secondary attr-spend-btn" data-attr="{{ attr_key }}" data-count="{{ attr_summary.unspent_points }}" title="Spend all {{ attr_summary.unspent_points }} points here">+All</button>
+                                {% endif %}
+                            </div>
                             {% endif %}
                         </div>
                         {% endfor %}
@@ -3352,11 +3362,12 @@
         document.querySelectorAll('.attr-spend-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var attr = btn.dataset.attr;
-                btn.disabled = true;
+                var count = parseInt(btn.dataset.count || '1', 10);
+                document.querySelectorAll('.attr-spend-btn').forEach(function (b) { b.disabled = true; });
                 fetch('/api/spend_attr_point', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({attr: attr})
+                    body: JSON.stringify({attr: attr, count: count})
                 })
                     .then(function (r) {return r.json();})
                     .then(function (data) {
@@ -3385,13 +3396,17 @@
                                     b.style.display = 'none';
                                 });
                             } else {
-                                setTimeout(function () {btn.disabled = false;}, 1500);
+                                setTimeout(function () {
+                                    document.querySelectorAll('.attr-spend-btn').forEach(function (b) { b.disabled = false; });
+                                }, 800);
                             }
                         } else {
-                            btn.disabled = false;
+                            document.querySelectorAll('.attr-spend-btn').forEach(function (b) { b.disabled = false; });
                         }
                     })
-                    .catch(function () {btn.disabled = false;});
+                    .catch(function () {
+                        document.querySelectorAll('.attr-spend-btn').forEach(function (b) { b.disabled = false; });
+                    });
             });
         });
     });

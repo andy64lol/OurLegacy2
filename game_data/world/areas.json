@@ -1461,9 +1461,9 @@
   },
   "taiga_outskirts": {
     "name": "Taiga Outskirts",
-    "description": "The frigid outer edge of the Siberian taiga. Frost-covered pines stretch endlessly into the grey horizon. Siberian wolves howl in the distance and the ground crunches underfoot with permafrost. The air smells of pine resin and ice.",
+    "description": "The frigid outer edge of the Vaelthari taiga. Frost-covered pines stretch endlessly into the grey horizon. Vaelthari wolves howl in the distance and the ground crunches underfoot with permafrost. The air smells of pine resin and ice.",
     "possible_enemies": [
-      "siberian_wolf",
+      "vaelthari_wolf",
       "taiga_lynx",
       "taiga_bandit"
     ],
@@ -1511,7 +1511,7 @@
     "name": "Frozen River",
     "description": "A vast river locked beneath thick, ancient ice. The banks are stalked by bears and wolverines. Strange runes are carved into the ice — warnings left by the taiga shamans of old. The ice groans beneath your feet.",
     "possible_enemies": [
-      "siberian_wolf",
+      "vaelthari_wolf",
       "brown_bear",
       "wolverine_beast"
     ],
@@ -1546,7 +1546,7 @@
   },
   "deep_taiga": {
     "name": "Deep Taiga",
-    "description": "The ancient heart of the Siberian forest. Twisted pines block out the sky and silence reigns except for the distant chanting of frost shamans. Snow leopards stalk the shadows between trees that have stood since before the first kingdoms.",
+    "description": "The ancient heart of the Vaelthari forest. Twisted pines block out the sky and silence reigns except for the distant chanting of frost shamans. Snow leopards stalk the shadows between trees that have stood since before the first kingdoms.",
     "possible_enemies": [
       "frost_shaman",
       "snow_leopard",
