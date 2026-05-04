@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global Chat — Our Legacy 2</title>
-    <link rel="icon" href="/game_assets/game_title_our_legacy_2.png" type="image/png">
+    <link rel="icon" href="/game_assets/game_title_our_legacy_2.webp" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="/static/css/style.css">
@@ -236,7 +236,7 @@
 
     <div id="chat-header">
         <div class="title">
-            <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:24px;height:24px;image-rendering:pixelated;">
+            <img src="/game_assets/glyphs/chat.webp" alt="chat" style="width:24px;height:24px;image-rendering:pixelated;">
             Global Chat
         </div>
         <div style="display:flex;gap:6px;">
@@ -366,8 +366,8 @@
             var isOwner = OWNER_NAME && u.toLowerCase() === OWNER_NAME;
             var isMod = !isOwner && MOD_LIST.indexOf(u.toLowerCase()) !== -1;
             var badge = isOwner
-                ? '<img src="/game_assets/glyphs/owner.png" style="width:11px;height:11px;vertical-align:middle;margin-left:3px;image-rendering:pixelated;" alt="owner" title="Owner">'
-                : (isMod ? '<img src="/game_assets/glyphs/admin.png" style="width:11px;height:11px;vertical-align:middle;margin-left:3px;image-rendering:pixelated;" alt="mod" title="Moderator">' : '');
+                ? '<img src="/game_assets/glyphs/owner.webp" style="width:11px;height:11px;vertical-align:middle;margin-left:3px;image-rendering:pixelated;" alt="owner" title="Owner">'
+                : (isMod ? '<img src="/game_assets/glyphs/admin.webp" style="width:11px;height:11px;vertical-align:middle;margin-left:3px;image-rendering:pixelated;" alt="mod" title="Moderator">' : '');
             var pillClass = 'user-pill' + (isOwner ? ' user-pill-owner' : (isMod ? ' user-pill-mod' : (isMe ? ' user-pill-me' : '')));
             if (isMe) {
                 return '<span class="' + pillClass + '">' + escHtml(u) + badge + ' (you)</span>';
@@ -417,8 +417,8 @@
             var bubbleBorder = isMe ? 'var(--wood-bright)' : (isOwnerMsg ? 'var(--gold)' : (isMod ? 'var(--gold-dim)' : 'var(--border)'));
             var nameColor = isMe ? 'var(--gold-bright)' : 'var(--gold)';
             var roleBadgeHtml = isOwnerMsg
-                ? '<span class="owner-badge"><img src="/game_assets/glyphs/owner.png" alt="owner" title="Owner"></span>'
-                : (isMod ? '<span class="mod-badge"><img src="/game_assets/glyphs/admin.png" alt="mod" title="Moderator"></span>' : '');
+                ? '<span class="owner-badge"><img src="/game_assets/glyphs/owner.webp" alt="owner" title="Owner"></span>'
+                : (isMod ? '<span class="mod-badge"><img src="/game_assets/glyphs/admin.webp" alt="mod" title="Moderator"></span>' : '');
             div.innerHTML =
                 '<div style="max-width:560px;padding:6px 12px;background:' + bubbleBg +
                 ';border:1px solid ' + bubbleBorder + ';word-break:break-word;">' +
@@ -463,18 +463,18 @@
     }
 
     var GLYPHS = {
-        'warrior':'warrior.png','mage':'mage.png','rogue':'rouge.png','rouge':'rouge.png',
-        'hunter':'hunter.png','bard':'bard.png','paladin':'paladin.png','druid':'druid.png',
-        'priest':'priest.png','hp':'hp.png','mana':'mana.png','gold':'gold.png',
-        'exp':'exp.png','level':'level.gif','weapon':'weapon.png','armor':'armor.png',
-        'offhand':'offhand.png','accessories':'accessories.png','book':'book.png',
-        'food':'food.png','materials':'materials.png','spell':'spell.png',
-        'chat':'chat.png','settings':'settings.png','sparkles':'sparkles.png',
-        'fight':'fight.png','day':'time_day.png','night':'time_night.png',
-        'male':'male.png','female':'female.png','non_binary':'non_binary.png',
-        'pickaxe':'pickaxe.png',
-        'owner':'owner.png','admin':'admin.png',
-        'terminal':'terminal.png','online':'online.png'
+        'warrior':'warrior.webp','mage':'mage.webp','rogue':'rouge.webp','rouge':'rouge.webp',
+        'hunter':'hunter.webp','bard':'bard.webp','paladin':'paladin.webp','druid':'druid.webp',
+        'priest':'priest.webp','hp':'hp.webp','mana':'mana.webp','gold':'gold.webp',
+        'exp':'exp.webp','level':'level.gif','weapon':'weapon.webp','armor':'armor.webp',
+        'offhand':'offhand.webp','accessories':'accessories.webp','book':'book.webp',
+        'food':'food.webp','materials':'materials.webp','spell':'spell.webp',
+        'chat':'chat.webp','settings':'settings.webp','sparkles':'sparkles.webp',
+        'fight':'fight.webp','day':'time_day.webp','night':'time_night.webp',
+        'male':'male.webp','female':'female.webp','non_binary':'non_binary.webp',
+        'pickaxe':'pickaxe.webp',
+        'owner':'owner.webp','admin':'admin.webp',
+        'terminal':'terminal.webp','online':'online.webp'
     };
 
     function renderMsg(text) {

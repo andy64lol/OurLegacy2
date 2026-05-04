@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Dict, Any, List, Optional
 from cryptography.fernet import Fernet, InvalidToken
 
-SAVES_DIR = "data/saves"
+SAVES_DIR = "game_data/saves"
 SAVE_VERSION = "4.0"
 GAME_VERSION = "1.0.0"
 

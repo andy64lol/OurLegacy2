@@ -1012,17 +1012,25 @@ function initSidebarToggle() {
     btn.setAttribute('aria-label', 'Toggle sidebar');
     document.body.appendChild(btn);
 
+    function getSidebarWidth() {
+        var sidebar = document.querySelector('.sidebar');
+        if (!sidebar) return 250;
+        return sidebar.getBoundingClientRect().width;
+    }
+
     function setCollapsed(collapsed) {
         if (collapsed) {
             layout.classList.add('sidebar-collapsed');
             btn.classList.add('collapsed');
-            btn.innerHTML = '&#9654;'; // ▶
+            btn.innerHTML = '&#9654;';
             btn.style.left = '0px';
         } else {
             layout.classList.remove('sidebar-collapsed');
             btn.classList.remove('collapsed');
-            btn.innerHTML = '&#9664;'; // ◀
-            btn.style.left = '250px';
+            btn.innerHTML = '&#9664;';
+            requestAnimationFrame(function() {
+                btn.style.left = getSidebarWidth() + 'px';
+            });
         }
         try { localStorage.setItem('ol2-sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
     }
@@ -1034,6 +1042,12 @@ function initSidebarToggle() {
 
     btn.addEventListener('click', function() {
         setCollapsed(!layout.classList.contains('sidebar-collapsed'));
+    });
+
+    window.addEventListener('resize', function() {
+        if (!layout.classList.contains('sidebar-collapsed')) {
+            btn.style.left = getSidebarWidth() + 'px';
+        }
     });
 }
 

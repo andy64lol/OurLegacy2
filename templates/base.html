@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Legacy 2</title>
-    <link rel="icon" href="/game_assets/game_title_our_legacy_2.png" type="image/png">
+    <link rel="icon" href="/game_assets/game_title_our_legacy_2.webp" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="/static/css/style.css">
@@ -14,7 +14,7 @@
 
     
     <div id="page-loader">
-        <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" id="page-loader-logo">
+        <img src="/game_assets/game_title_main_menu.webp" alt="Our Legacy 2" id="page-loader-logo">
         <div class="loader">
             <div class="box box0"><div></div></div>
             <div class="box box1"><div></div></div>
@@ -423,14 +423,14 @@
         </div>
     </div>
 
-    <div id="chat-widget" style="position:fixed;bottom:20px;right:20px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+    <div id="chat-widget" style="position:sticky;bottom:20px;float:right;margin-right:20px;z-index:8000;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none;">
 
         
         <div id="chat-panel" style="display:none;position:fixed;inset:0;z-index:8900;background:rgba(0,0,0,0.78);align-items:center;justify-content:center;">
             <div style="width:min(860px,98vw);height:min(700px,96vh);background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.6);display:flex;flex-direction:column;overflow:hidden;">
                 <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--wood-dark);border-bottom:2px solid var(--border);flex-shrink:0;">
                     <span style="font-size:13px;font-weight:700;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;display:flex;align-items:center;gap:8px;">
-                        <img src="/game_assets/glyphs/chat.png" alt="" style="width:20px;height:20px;image-rendering:pixelated;"> Global Chat
+                        <img src="/game_assets/glyphs/chat.webp" alt="" style="width:20px;height:20px;image-rendering:pixelated;"> Global Chat
                     </span>
                     <button onclick="toggleChat()" style="background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer;line-height:1;padding:0 2px;" title="Close chat">&times;</button>
                 </div>
@@ -439,8 +439,8 @@
         </div>
 
         
-        <button class="widget-fab" id="groups-widget-fab" onclick="openGroupsOverlay()" title="Adventure Group">
-            <img src="/game_assets/glyphs/fight.png" alt="group" style="width:22px;height:22px;image-rendering:pixelated;">
+        <button class="widget-fab" id="groups-widget-fab" onclick="openGroupsOverlay()" title="Adventure Group" style="pointer-events:all;">
+            <img src="/game_assets/glyphs/fight.webp" alt="group" style="width:22px;height:22px;image-rendering:pixelated;">
             <span id="groups-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--bg-main);width:14px;height:14px;font-size:9px;line-height:14px;text-align:center;font-weight:700;"></span>
         </button>
     </div>
@@ -465,7 +465,7 @@
                     </div>
                     <div style="display:flex;gap:6px;align-items:center;">
                         <input id="trade-gold-input" type="number" min="0" placeholder="Gold to offer" style="flex:1;padding:6px 8px;background:var(--bg-panel-dark);border:1px solid var(--border);color:var(--gold);font-size:12px;outline:none;font-family:'Tiny5',monospace;" oninput="tradeSetGold(this.value)">
-                        <img src="/game_assets/glyphs/gold.png" alt="gold" style="width:18px;height:18px;image-rendering:pixelated;">
+                        <img src="/game_assets/glyphs/gold.webp" alt="gold" style="width:18px;height:18px;image-rendering:pixelated;">
                     </div>
                     <div id="trade-my-gold-label" style="font-size:10px;color:var(--text-dim);margin-top:4px;"></div>
                 </div>
@@ -880,7 +880,7 @@
     
     <style>
         #chat-toggle-btn {
-            position: fixed;
+            position: sticky;
             bottom: 20px;
             right: 20px;
             z-index: 8100;
@@ -896,6 +896,7 @@
             justify-content: center;
             border-radius: 50%;
             transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+            margin-left: auto;
         }
         #chat-toggle-btn:hover {
             background: var(--wood-mid, #5a3a18);
@@ -909,10 +910,11 @@
         /* terminal fab — above chat button, owner only */
         #terminal-fab {
             display: none;
-            position: fixed;
+            position: sticky;
             bottom: 80px;
             right: 20px;
             z-index: 8100;
+            margin-left: auto;
             width: 50px;
             height: 50px;
             background: #0c1018;
@@ -932,7 +934,7 @@
             position: fixed;
             bottom: 142px;
             right: 20px;
-            z-index: 8050;
+            z-index: 9000;
             width: min(520px, 96vw);
             height: 340px;
             background: #060709;
@@ -999,7 +1001,7 @@
             padding: 2px 8px;
             font-size: 10px;
             font-family: 'Courier New', monospace;
-            cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+            cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
         }
         .t-run-btn:hover { background: rgba(34,197,94,0.2); }
     </style>
@@ -1007,7 +1009,7 @@
     
     <div id="terminal-overlay">
         <div id="term-hdr">
-            <img src="/game_assets/glyphs/terminal.png" alt="terminal">
+            <img src="/game_assets/glyphs/terminal.webp" alt="terminal">
             <span id="term-hdr-label">owner terminal</span>
             <button id="term-hdr-close" onclick="toggleTerminal()" title="close">&times;</button>
         </div>
@@ -1019,14 +1021,14 @@
         </div>
     </div>
 
-    <button id="terminal-fab" onclick="toggleTerminal()" title="Owner Terminal">
-        <img src="/game_assets/glyphs/terminal.png" alt="terminal" style="width:22px;height:22px;image-rendering:pixelated;">
+    <button id="terminal-fab" onclick="toggleTerminal()" title="Owner Terminal" style="pointer-events:all;">
+        <img src="/game_assets/glyphs/terminal.webp" alt="terminal" style="width:22px;height:22px;image-rendering:pixelated;">
     </button>
 
-    <button id="chat-toggle-btn"
+    <button id="chat-toggle-btn" style="pointer-events:all;"
             onclick="if(typeof toggleChat==='function'){toggleChat();}else{window.location.href='/chat';}"
             title="Global Chat">
-        <img src="/game_assets/glyphs/chat.png" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
+        <img src="/game_assets/glyphs/chat.webp" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
         <span id="chat-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red,#c0392b);color:#fff;width:15px;height:15px;font-size:9px;line-height:15px;text-align:center;font-weight:700;border-radius:50%;"></span>
     </button>
 
@@ -1091,11 +1093,9 @@
             try {
                 switch (cmd) {
                     case 'help':
-                        tPrint('server: ban unban kick mute unmute warn addmod removemod online', 'info');
-                        tPrint('char:   stats inventory heal  give gold/xp/item/mxp  set level/stat/mining  remove item', 'info');
-                        break;
-                    case 'clear':
-                        document.getElementById('term-out').innerHTML = '';
+                        tPrint('server:  ban unban kick mute unmute warn addmod removemod online', 'info');
+                        tPrint('char:    stats inventory heal  give gold/xp/item/mxp  set level/stat/mining  remove item', 'info');
+                        tPrint('travel:  tp <area>  |  tp <user> <area>  |  tp all <area>', 'info');
                         break;
                     case 'stats': {
                         var d = await tApi('GET', '/api/admin/game/stats');
@@ -1182,6 +1182,49 @@
                         tPrint('online (' + d.online_count + '): ' + (d.online_users.join(', ') || 'none'), 'info');
                         break;
                     }
+                    case 'tp': {
+                        if (!parts[1]) { tPrint('usage: tp <area>  |  tp <user> <area>  |  tp all <area>', 'warn'); break; }
+                        var target, area;
+                        if (parts[1].toLowerCase() === 'all') {
+                            target = 'all';
+                            area = parts.slice(2).join('_').toLowerCase();
+                        } else if (parts.length >= 3) {
+                            target = parts[1];
+                            area = parts.slice(2).join('_').toLowerCase();
+                        } else {
+                            target = 'self';
+                            area = parts.slice(1).join('_').toLowerCase();
+                        }
+                        if (!area) { tPrint('usage: tp <area>  |  tp <user> <area>  |  tp all <area>', 'warn'); break; }
+                        var r = await tApi('POST', '/api/admin/tp', { target: target, area: area });
+                        tPrint(r.message, r.ok ? 'ok' : 'err');
+                        break;
+                    }
+                    case 'listbans': {
+                        var d = await tApi('GET', '/api/admin/data');
+                        if (!d.ok) { tPrint(d.message, 'err'); break; }
+                        tPrint('banned (' + d.bans.length + '):', 'head');
+                        if (d.bans.length) d.bans.forEach(function(b) { tPrint('  ' + b.username + ' — ' + (b.reason||'no reason') + ' (by ' + (b.banned_by||'?') + ')', 'dim'); });
+                        else tPrint('  none', 'dim');
+                        break;
+                    }
+                    case 'listmutes': {
+                        var d = await tApi('GET', '/api/admin/data');
+                        if (!d.ok) { tPrint(d.message, 'err'); break; }
+                        tPrint('muted (' + d.mutes.length + '):', 'head');
+                        if (d.mutes.length) d.mutes.forEach(function(m) { tPrint('  ' + m.username + ' — ' + (m.reason||'no reason'), 'dim'); });
+                        else tPrint('  none', 'dim');
+                        break;
+                    }
+                    case 'listmods': {
+                        var d = await tApi('GET', '/api/admin/data');
+                        if (!d.ok) { tPrint(d.message, 'err'); break; }
+                        tPrint('mods: ' + (d.mods.join(', ') || 'none'), 'info');
+                        break;
+                    }
+                    case 'clear':
+                        document.getElementById('term-out').innerHTML = '';
+                        break;
                     default:
                         tPrint('unknown: ' + cmd + '  (type help)', 'err');
                 }

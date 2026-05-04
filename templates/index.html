@@ -176,7 +176,7 @@
     <div class="mainmenu-wrap">
         <div class="mainmenu-logo-area">
             <div class="mainmenu-logo-wrap">
-                <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="mainmenu-logo">
+                <img src="/game_assets/game_title_main_menu.webp" alt="Our Legacy 2" class="mainmenu-logo">
                 {% if splash_text %}
                 <div class="mainmenu-splash">{{ splash_text }}</div>
                 {% endif %}
@@ -222,7 +222,7 @@
         <div style="text-align:center;margin-bottom:18px;">
             <div
                 style="font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:var(--mana-bright);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:5px;">
-                <img src="/game_assets/glyphs/chat.png" alt="chat"
+                <img src="/game_assets/glyphs/chat.webp" alt="chat"
                     style="width:22px;height:22px;image-rendering:pixelated;"> Online Account</div>
         </div>
         {% if online_user %}
@@ -306,7 +306,7 @@
 <div class="wizard-outer" id="wizard-outer">
     <div class="wizard-npc-row">
         <div class="wizard-portrait">
-            <img src="/game_assets/keeper_of_fates.png" alt="Keeper of Fates" class="wizard-portrait-img">
+            <img src="/game_assets/keeper_of_fates.webp" alt="Keeper of Fates" class="wizard-portrait-img">
         </div>
         <div class="wizard-bubble">
             <p id="npc-text"></p>
@@ -343,7 +343,7 @@
             {% if enemy.is_boss %}
             <div
                 style="font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:0.18em;margin-bottom:6px;font-weight:700;opacity:0.85;">
-                <img class="type-glyph" src="/game_assets/glyphs/fight.png" alt="boss battle"> Boss Encounter
+                <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="boss battle"> Boss Encounter
             </div>
             <div
                 style="font-size:22px;font-weight:700;color:var(--gold);letter-spacing:0.04em;text-shadow:0 0 20px rgba(255,180,60,0.5);">
@@ -359,7 +359,7 @@
 
         {% if boss_dialogue and enemy.is_boss %}
         <div class="boss-dialogue-banner">
-            <div class="boss-dialogue-icon"><img src="/game_assets/glyphs/fight.png" alt="boss" style="width:28px;height:28px;image-rendering:pixelated;"></div>
+            <div class="boss-dialogue-icon"><img src="/game_assets/glyphs/fight.webp" alt="boss" style="width:28px;height:28px;image-rendering:pixelated;"></div>
             <div class="boss-dialogue-body">
                 <div class="boss-dialogue-label">{{ enemy.name }} declares</div>
                 <div class="boss-dialogue-text">"{{ boss_dialogue }}"</div>
@@ -404,7 +404,7 @@
         <div class="battle-arena">
             <div class="panel">
                 <div class="panel-title"><img class="class-glyph"
-                        src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png"
+                        src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.webp"
                         alt="{{ player['class'] }}" title="{{ player['class'] }}">{{ player.name }}</div>
                 <div class="panel-body">
                     <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
@@ -412,7 +412,7 @@
                             alt="level"> Lv.{{ player.level }}
                     </div>
                     <div class="bar-group">
-                        <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.png" alt="hp"> HP
+                        <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP
                             <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
                         <div class="bar-track">
                             <div class="bar-fill bar-hp"
@@ -420,7 +420,7 @@
                         </div>
                     </div>
                     <div class="bar-group">
-                        <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/mana.png" alt="mp"> MP
+                        <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/mana.webp" alt="mp"> MP
                             <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
                         <div class="bar-track">
                             <div class="bar-fill bar-mp"
@@ -453,7 +453,7 @@
                 <div class="panel-body">
                     {% set _ehp_pct = [(enemy.hp / enemy.max_hp * 100)|int, 100]|min %}
                     {% if enemy.is_boss %}
-                    <div class="boss-header-label"><img class="type-glyph" src="/game_assets/glyphs/hp.png" alt="hp">
+                    <div class="boss-header-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp">
                         Boss Vitality</div>
                     <div class="{% if _ehp_pct <= 25 %}boss-hp-low{% endif %}">
                         <div class="boss-hp-track">
@@ -466,7 +466,7 @@
                     </div>
                     {% else %}
                     <div class="bar-group">
-                        <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.png" alt="hp"> HP
+                        <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP
                             <span class="bar-nums">{{ enemy.hp }} / {{ enemy.max_hp }}</span></div>
                         <div class="bar-track">
                             <div class="bar-fill bar-hp" style="width:{{ _ehp_pct }}%"></div>
@@ -609,7 +609,7 @@
     <div class="battle-spell-sidebar">
         <div class="panel battle-spellbook-panel">
             <div class="panel-title" style="color:var(--mana-bright);"><img class="class-glyph"
-                    src="/game_assets/glyphs/sparkles.png" alt="spells">Spellbook</div>
+                    src="/game_assets/glyphs/sparkles.webp" alt="spells">Spellbook</div>
             <div class="panel-body">
 
                 
@@ -636,7 +636,7 @@
                                 class="btn-spell spell-{{ stype }} {% if not can_cast %}btn-disabled{% endif %}" {% if
                                 not can_cast %}disabled{% endif %}>
                                 <div class="spell-header">
-                                    <img class="type-glyph" src="/game_assets/glyphs/spell.png" alt="spell"><span
+                                    <img class="type-glyph" src="/game_assets/glyphs/spell.webp" alt="spell"><span
                                         class="spell-name">{{ spell.name }}</span>
                                     <span class="spell-cost-badge">{{ spell.mp_cost }} MP</span>
                                 </div>
@@ -699,12 +699,12 @@
 
         <div class="sidebar-scroll">
         <div class="sidebar-top">
-            <img src="/game_assets/game_title_our_legacy_2_720px_300px.png" alt="Our Legacy 2" class="sidebar-banner">
+            <img src="/game_assets/game_title_our_legacy_2_720px_300px.webp" alt="Our Legacy 2" class="sidebar-banner">
         </div>
 
         <div class="panel sidebar-panel">
             <div class="panel-title"><img class="class-glyph"
-                    src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png"
+                    src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.webp"
                     alt="{{ player['class'] }}" title="{{ player['class'] }}">{{ player.name }}</div>
             <div class="panel-body">
                 <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
@@ -714,7 +714,7 @@
                     player.get('race', 'Unknown') }}</div>
 
                 <div class="bar-group">
-                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.png" alt="hp"> HP <span
+                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP <span
                             class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
                     <div class="bar-track">
                         <div class="bar-fill bar-hp"
@@ -722,7 +722,7 @@
                     </div>
                 </div>
                 <div class="bar-group">
-                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/mana.png" alt="mp"> MP <span
+                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/mana.webp" alt="mp"> MP <span
                             class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
                     <div class="bar-track">
                         <div class="bar-fill bar-mp"
@@ -730,7 +730,7 @@
                     </div>
                 </div>
                 <div class="bar-group">
-                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/exp.png" alt="exp"> EXP
+                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/exp.webp" alt="exp"> EXP
                         <span class="bar-nums">{{ player.experience }} / {{ player.experience_to_next }}</span></div>
                     <div class="bar-track">
                         <div class="bar-fill bar-exp"
@@ -739,7 +739,7 @@
                     </div>
                 </div>
 
-                <div class="gold-display"><img class="type-glyph" src="/game_assets/glyphs/gold.png" alt="gold"> Gold:
+                <div class="gold-display"><img class="type-glyph" src="/game_assets/glyphs/gold.webp" alt="gold"> Gold:
                     <span class="gold-amount">{{ player.gold }}</span></div>
 
                 <div class="stat-mini-grid">
@@ -759,9 +759,9 @@
                         <span class="sidebar-status-key">Time</span>
                         <span class="sidebar-status-val">
                             {% if game_time in ['Dawn','Morning','Noon','Afternoon'] %}
-                            <img class="type-glyph" src="/game_assets/glyphs/time_day.png" alt="day">
+                            <img class="type-glyph" src="/game_assets/glyphs/time_day.webp" alt="day">
                             {% else %}
-                            <img class="type-glyph" src="/game_assets/glyphs/time_night.png" alt="night">
+                            <img class="type-glyph" src="/game_assets/glyphs/time_night.webp" alt="night">
                             {% endif %}
                             {{ game_time }}
                         </span>
@@ -824,7 +824,7 @@
             {% else %}
             <div
                 style="font-size:11px;color:var(--mana-bright);text-align:center;padding:3px 0;opacity:0.85;display:flex;align-items:center;justify-content:center;gap:4px;">
-                <img src="/game_assets/glyphs/chat.png" alt="chat"
+                <img src="/game_assets/glyphs/chat.webp" alt="chat"
                     style="width:22px;height:22px;image-rendering:pixelated;"> {{ online_user }}</div>
             {% if user_has_email is defined and not user_has_email %}
             <button onclick="openEmailSetupModal()" title="{% if user_email_pending %}Verify your email address{% else %}Add an email address for password recovery{% endif %}"
@@ -847,7 +847,7 @@
             </button>
             {% endif %}
             <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;"><img
-                    class="type-glyph" src="/game_assets/glyphs/settings.png" alt="settings"> Settings</button>
+                    class="type-glyph" src="/game_assets/glyphs/settings.webp" alt="settings"> Settings</button>
         </div>
     </aside>
 
@@ -910,7 +910,7 @@
             
             <div id="news-ticker" class="news-ticker">
             <div class="news-ticker-label">
-                <span class="news-ticker-icon"><img src="/game_assets/glyphs/sparkles.png" alt="" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle;"></span>
+                <span class="news-ticker-icon"><img src="/game_assets/glyphs/sparkles.webp" alt="" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle;"></span>
                 <span>News</span>
             </div>
             <div class="news-ticker-track">
@@ -1134,7 +1134,7 @@
                         {% for slot in ['weapon','armor','offhand','accessory_1','accessory_2','accessory_3'] %}
                         <div class="equip-slot-card">
                             <div class="equip-slot-label">{% if _sglyph.get(slot) %}<img class="type-glyph"
-                                    src="/game_assets/glyphs/{{ _sglyph.get(slot) }}.png" alt="{{ slot }}">{% endif %}{{
+                                    src="/game_assets/glyphs/{{ _sglyph.get(slot) }}.webp" alt="{{ slot }}">{% endif %}{{
                                 slot.replace('_',' ').title() }}</div>
                             {% if equipped_details.get(slot) %}
                             {% set eq = equipped_details[slot] %}
@@ -1219,7 +1219,7 @@
                             class="inv-card rarity-border-{{ item.rarity }} pageable-item{% if item.equippable and not item.can_equip %} cannot-equip{% endif %}">
                             <div class="inv-card-name">
                                 {% if _tglyph.get(item.type) %}<img class="type-glyph"
-                                    src="/game_assets/glyphs/{{ _tglyph.get(item.type) }}.png" alt="{{ item.type }}"
+                                    src="/game_assets/glyphs/{{ _tglyph.get(item.type) }}.webp" alt="{{ item.type }}"
                                     title="{{ item.type | title }}">{% endif %}<span class="rarity-{{ item.rarity }}">{{
                                     item.name }}</span>
                                 {% if item.count > 1 %}<span class="inv-qty">x{{ item.count }}</span>{% endif %}
@@ -1300,7 +1300,7 @@
                                         Difficulty: <span
                                             style="color:{% if conn.difficulty <= 2 %}var(--green-bright){% elif conn.difficulty <= 3 %}var(--gold){% else %}var(--red){% endif %}">
                                             {% for i in range(conn.difficulty) %}<img class="diff-glyph"
-                                                src="/game_assets/glyphs/fight.png" alt="*">{% endfor %}{% for i in
+                                                src="/game_assets/glyphs/fight.webp" alt="*">{% endfor %}{% for i in
                                             range(5 - conn.difficulty) %}<span class="diff-empty">-</span>{% endfor %}
                                         </span>
                                     </div>
@@ -1355,7 +1355,7 @@
                         <div class="shop-card pageable-item {% if not item.can_afford %}cannot-afford{% endif %}">
                             <div class="shop-card-name rarity-{{ item.rarity }}">{{ item.name }}</div>
                             <div class="shop-card-type">{% if _tglyph.get(item.type) %}<img class="type-glyph"
-                                    src="/game_assets/glyphs/{{ _tglyph.get(item.type) }}.png" alt="{{ item.type }}"
+                                    src="/game_assets/glyphs/{{ _tglyph.get(item.type) }}.webp" alt="{{ item.type }}"
                                     title="{{ item.type | title }}">{% endif %}{{ item.type | title }}</div>
                             {% if item.stats %}
                             <div class="shop-card-stats">{{ item.stats }}</div>
@@ -1654,7 +1654,7 @@
             </div>
 
             <div class="panel land-section">
-                <div class="panel-title"><img class="class-glyph" src="/game_assets/glyphs/fight.png"
+                <div class="panel-title"><img class="class-glyph" src="/game_assets/glyphs/fight.webp"
                         alt="training">Training Grounds</div>
                 <div class="panel-body">
                     {% if not land_data.has_training_place %}
@@ -1999,7 +1999,7 @@
                                     <span class="quest-progress-val {% if prog.done %}done{% endif %}">
                                         {{ prog.current }} / {{ prog.target }}
                                         {% if prog.done %} <img class="type-glyph"
-                                            src="/game_assets/glyphs/sparkles.png" alt="done">{% endif %}
+                                            src="/game_assets/glyphs/sparkles.webp" alt="done">{% endif %}
                                     </span>
                                 </div>
                                 {% endfor %}
@@ -2050,7 +2050,7 @@
                                         {{ ch.name }}
                                         {% if ch.claimed %}<span
                                             style="font-size:12px;color:var(--green-bright);font-weight:normal;"> <img
-                                                class="type-glyph" src="/game_assets/glyphs/sparkles.png" alt="claimed">
+                                                class="type-glyph" src="/game_assets/glyphs/sparkles.webp" alt="claimed">
                                             Claimed</span>{% endif %}
                                     </div>
                                     <div style="font-size:13px;color:var(--text-dim);margin-top:3px;">{{ ch.description
@@ -2159,12 +2159,12 @@
                         style="display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-bottom:18px;">
                         <div class="cs-row"><span class="stat-name">Name</span><span class="stat-val"><img
                                     class="class-glyph"
-                                    src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png"
+                                    src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.webp"
                                     alt="{{ player['class'] }}" title="{{ player['class'] }}">{{ player.name }}</span>
                         </div>
                         <div class="cs-row"><span class="stat-name">Gender</span><span class="stat-val">{% set _gk =
                                 player.get('gender','') %}{% if _gglyph.get(_gk) %}<img class="type-glyph"
-                                    src="/game_assets/glyphs/{{ _gglyph.get(_gk) }}.png" alt="{{ _gk }}">{% endif %}{{
+                                    src="/game_assets/glyphs/{{ _gglyph.get(_gk) }}.webp" alt="{{ _gk }}">{% endif %}{{
                                 _gk.title() or '—' }}</span></div>
                         <div class="cs-row"><span class="stat-name">Class</span><span class="stat-val">{{
                                 player['class'] }}</span></div>
@@ -2287,7 +2287,7 @@
                                     {{ ev.name }}
                                     {% if ev.is_claimed %}
                                     <span style="font-size:12px;color:var(--green-bright);font-weight:normal;"> <img
-                                            class="type-glyph" src="/game_assets/glyphs/sparkles.png" alt="claimed">
+                                            class="type-glyph" src="/game_assets/glyphs/sparkles.webp" alt="claimed">
                                         Claimed</span>
                                     {% endif %}
                                 </div>
@@ -2566,7 +2566,7 @@
                                 </div>
                             </div>
                             <div class="ag-card">
-                                <div class="ag-card-title"><img src="/game_assets/glyphs/gold.png" alt="gold" style="width:16px;height:16px;image-rendering:pixelated;vertical-align:middle;"> Treasury</div>
+                                <div class="ag-card-title"><img src="/game_assets/glyphs/gold.webp" alt="gold" style="width:16px;height:16px;image-rendering:pixelated;vertical-align:middle;"> Treasury</div>
                                 <div class="ag-card-body">
                                     <div style="display:flex;align-items:center;justify-content:space-between;">
                                         <span id="ag-gold" style="font-size:14px;color:var(--gold);font-weight:700;"></span>
@@ -2875,24 +2875,24 @@
     
     <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
         <button class="mobile-nav-btn" onclick="mobileToggleSidebar()" id="mob-nav-char" aria-label="Character panel">
-            <img src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.png" alt="Character">
+            <img src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.webp" alt="Character">
             <span>{{ player.name | truncate(8, True, '') }}</span>
         </button>
         <button class="mobile-nav-btn" onclick="switchTab('explore',false);mobileCloseSidebar();" aria-label="Explore">
-            <img src="/game_assets/glyphs/fight.png" alt="Explore">
+            <img src="/game_assets/glyphs/fight.webp" alt="Explore">
             <span>Explore</span>
         </button>
         <button class="mobile-nav-btn" onclick="switchTab('inventory',false);mobileCloseSidebar();"
             aria-label="Inventory">
-            <img src="/game_assets/glyphs/armor.png" alt="Equipment">
+            <img src="/game_assets/glyphs/armor.webp" alt="Equipment">
             <span>Equip</span>
         </button>
         <button class="mobile-nav-btn" onclick="switchTab('travel',false);mobileCloseSidebar();" aria-label="Travel">
-            <img src="/game_assets/glyphs/book.png" alt="Travel">
+            <img src="/game_assets/glyphs/book.webp" alt="Travel">
             <span>Travel</span>
         </button>
         <button class="mobile-nav-btn" onclick="openSettings();mobileCloseSidebar();" aria-label="Settings">
-            <img src="/game_assets/glyphs/settings.png" alt="Settings">
+            <img src="/game_assets/glyphs/settings.webp" alt="Settings">
             <span>Settings</span>
         </button>
     </nav>
@@ -4083,7 +4083,7 @@
 <div id="session-expired-overlay"
     style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.88);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
     <div style="background:linear-gradient(160deg,rgba(22,10,40,0.99),rgba(10,4,20,0.99));border:2px solid rgba(255,80,80,0.55);border-radius:14px;padding:36px 28px;width:100%;max-width:360px;box-shadow:0 0 60px rgba(200,40,40,0.4);text-align:center;">
-        <div style="margin-bottom:12px;"><img src="/game_assets/glyphs/settings.png" alt="" style="width:32px;height:32px;image-rendering:pixelated;opacity:0.7;"></div>
+        <div style="margin-bottom:12px;"><img src="/game_assets/glyphs/settings.webp" alt="" style="width:32px;height:32px;image-rendering:pixelated;opacity:0.7;"></div>
         <div style="font-size:16px;font-weight:bold;color:#ff6060;margin-bottom:10px;letter-spacing:0.03em;">Session Expired</div>
         <p style="font-size:13px;color:var(--text-dim);line-height:1.6;margin:0 0 20px 0;">
             You have been inactive for 30 minutes. Returning to the main page&hellip;

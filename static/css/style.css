@@ -274,7 +274,7 @@ body {
     line-height: 1.55;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
 }
 
 
@@ -283,7 +283,7 @@ a:hover,
 .btn:hover,
 select:hover,
 [role="button"]:hover {
-    cursor: url('/game_assets/UI/cursor/3.%20Hand%20Hover.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/3.%20Hand%20Hover.webp') 0 0, pointer;
 }
 
 button:active,
@@ -291,7 +291,7 @@ a:active,
 .btn:active,
 select:active,
 [role="button"]:active {
-    cursor: url('/game_assets/UI/cursor/4.%20Hand%20Grab.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/4.%20Hand%20Grab.webp') 0 0, pointer;
 }
 
 a {
@@ -338,7 +338,7 @@ strong {
     font-family: 'Tiny5', monospace;
     font-size: 15px;
     font-weight: 500;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     border: 2px solid;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -563,7 +563,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
 
 
 .btn-wood {
-    background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.png');
+    background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.webp');
     background-size: 100% 100%;
     background-color: transparent;
     color: #3a1a06;
@@ -579,14 +579,14 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
 }
 
 .btn-wood:hover:not(:disabled):not(.btn-disabled) {
-    background-image: url('/game_assets/UI/button_normal/%5B3%5D%20Hover.png');
+    background-image: url('/game_assets/UI/button_normal/%5B3%5D%20Hover.webp');
     background-size: 100% 100%;
     background-color: transparent;
     color: #3a1a06;
 }
 
 .btn-wood:active:not(:disabled):not(.btn-disabled) {
-    background-image: url('/game_assets/UI/button_normal/%5B2%5D%20Clicked.png');
+    background-image: url('/game_assets/UI/button_normal/%5B2%5D%20Clicked.webp');
     background-size: 100% 100%;
     background-color: transparent;
 }
@@ -888,19 +888,19 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
 }
 
 body.ol2-bg-1 .welcome-screen {
-    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/1.png') center/cover no-repeat;
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/1.webp') center/cover no-repeat;
 }
 
 body.ol2-bg-2 .welcome-screen {
-    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/2.png') center/cover no-repeat;
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/2.webp') center/cover no-repeat;
 }
 
 body.ol2-bg-3 .welcome-screen {
-    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/3.png') center/cover no-repeat;
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/3.webp') center/cover no-repeat;
 }
 
 body.ol2-bg-4 .welcome-screen {
-    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/4.png') center/cover no-repeat;
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/4.webp') center/cover no-repeat;
 }
 
 .welcome-inner {
@@ -1089,7 +1089,7 @@ body.ol2-bg-4 .welcome-screen {
     width: 100%;
     aspect-ratio: 3 / 1;
     padding: 0 14px 0.2em;
-    background-image: url('/game_assets/UI/button_silver/%5B1%5D%20Normal.png');
+    background-image: url('/game_assets/UI/button_silver/%5B1%5D%20Normal.webp');
     background-size: 100% 100%;
     background-color: transparent;
     background-repeat: no-repeat;
@@ -1101,7 +1101,7 @@ body.ol2-bg-4 .welcome-screen {
     text-transform: uppercase;
     text-align: center;
     text-decoration: none;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     transition: filter 0.1s;
@@ -1111,7 +1111,7 @@ body.ol2-bg-4 .welcome-screen {
 
 .mainmenu-btn:hover,
 .mainmenu-btn:focus {
-    background-image: url('/game_assets/UI/button_silver/%5B3%5D%20Hover.png');
+    background-image: url('/game_assets/UI/button_silver/%5B3%5D%20Hover.webp');
     background-size: 100% 100%;
     color: #1a0e04;
     outline: none;
@@ -1119,25 +1119,25 @@ body.ol2-bg-4 .welcome-screen {
 }
 
 .mainmenu-btn:active {
-    background-image: url('/game_assets/UI/button_silver/%5B2%5D%20Clicked.png');
+    background-image: url('/game_assets/UI/button_silver/%5B2%5D%20Clicked.webp');
     background-size: 100% 100%;
     filter: brightness(0.95);
 }
 
 .mainmenu-btn-highlight {
-    background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.png');
+    background-image: url('/game_assets/UI/button_normal/%5B1%5D%20Normal.webp');
     color: var(--gold-bright);
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
 }
 
 .mainmenu-btn-highlight:hover,
 .mainmenu-btn-highlight:focus {
-    background-image: url('/game_assets/UI/button_normal/%5B3%5D%20Hover.png');
+    background-image: url('/game_assets/UI/button_normal/%5B3%5D%20Hover.webp');
     color: var(--gold-bright);
 }
 
 .mainmenu-btn-highlight:active {
-    background-image: url('/game_assets/UI/button_normal/%5B2%5D%20Clicked.png');
+    background-image: url('/game_assets/UI/button_normal/%5B2%5D%20Clicked.webp');
 }
 
 .mainmenu-cursor {
@@ -1251,7 +1251,7 @@ body.ol2-bg-4 .welcome-screen {
 
 .class-card {
     display: flex;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     height: 100%;
 }
 
@@ -1310,7 +1310,7 @@ body.ol2-bg-4 .welcome-screen {
 
 .race-card {
     display: flex;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     height: 100%;
 }
 
@@ -1363,7 +1363,7 @@ body.ol2-bg-4 .welcome-screen {
 
 .gender-card {
     display: block;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
 }
 
 .gender-card input[type="radio"] {
@@ -1418,7 +1418,7 @@ body.ol2-bg-4 .welcome-screen {
 
 .background-card {
     display: block;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
 }
 
 .background-card input[type="radio"] {
@@ -1627,7 +1627,7 @@ body.ol2-bg-4 .welcome-screen {
 
 .wiz-card {
     display: flex;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     height: 100%;
 }
 
@@ -1642,7 +1642,7 @@ body.ol2-bg-4 .welcome-screen {
     border-radius: 8px;
     text-align: center;
     transition: border-color 0.12s, background 0.12s;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -2225,7 +2225,7 @@ body.ol2-bg-4 .welcome-screen {
     color: var(--gold);
     font-family: 'Tiny5', monospace;
     font-size: 10px;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2326,28 +2326,28 @@ body.ol2-bg-4 .welcome-screen {
 }
 
 body.ol2-bg-1 .main-content {
-    background-image: url('/game_assets/backgrounds/1.png');
+    background-image: url('/game_assets/backgrounds/1.webp');
     background-size: cover;
     background-position: center top;
     background-attachment: local;
 }
 
 body.ol2-bg-2 .main-content {
-    background-image: url('/game_assets/backgrounds/2.png');
+    background-image: url('/game_assets/backgrounds/2.webp');
     background-size: cover;
     background-position: center top;
     background-attachment: local;
 }
 
 body.ol2-bg-3 .main-content {
-    background-image: url('/game_assets/backgrounds/3.png');
+    background-image: url('/game_assets/backgrounds/3.webp');
     background-size: cover;
     background-position: center top;
     background-attachment: local;
 }
 
 body.ol2-bg-4 .main-content {
-    background-image: url('/game_assets/backgrounds/4.png');
+    background-image: url('/game_assets/backgrounds/4.webp');
     background-size: cover;
     background-position: center top;
     background-attachment: local;
@@ -2461,7 +2461,7 @@ body.ol2-bg-4 .main-content {
     min-width: 60px;
     height: 4px;
     accent-color: var(--gold);
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
 }
 
 .music-vol-label {
@@ -2505,7 +2505,7 @@ body.ol2-bg-4 .main-content {
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     transition: background 0.12s, color 0.12s, border-color 0.12s;
     white-space: nowrap;
     position: relative;
@@ -2573,7 +2573,7 @@ body.ol2-bg-4 .main-content {
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     text-align: left;
     transition: background 0.1s, color 0.1s;
     white-space: nowrap;
@@ -3074,7 +3074,7 @@ body.page-fade-out {
     font-size: 18px;
     line-height: 1;
     padding: 4px 10px;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     font-family: 'Tiny5', monospace;
     transition: background 0.12s;
 }
@@ -3815,7 +3815,7 @@ body.page-fade-out {
     border-left-width: 4px;
     color: var(--text-light);
     padding: 11px 13px;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     font-family: 'Tiny5', monospace;
     font-size: 13px;
     text-align: left;
@@ -4643,7 +4643,7 @@ body.page-fade-out {
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
 
@@ -4930,7 +4930,7 @@ body.page-fade-out {
     padding: 5px 8px;
     font-size: 13px;
     font-family: inherit;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
     appearance: none;
     -webkit-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23e8c460'/%3E%3C/svg%3E");
@@ -5133,7 +5133,7 @@ body.page-fade-out {
         color: var(--text-dim);
         font-family: 'Tiny5', monospace;
         font-size: 9px;
-        cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.png') 0 0, pointer;
+        cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
         padding: 6px 4px;
         text-transform: uppercase;
         letter-spacing: 0.04em;

@@ -79,7 +79,7 @@ class Character:
 
     def _load_pets_data(self) -> Dict[str, Any]:
         try:
-            with open('data/pets.json', 'r', encoding='utf-8') as f:
+            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'game_data', 'content', 'pets.json'), 'r', encoding='utf-8') as f:
                 return json.load(f)
         except (OSError, ValueError, KeyError):
             return {}

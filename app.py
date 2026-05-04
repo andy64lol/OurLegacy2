@@ -1002,48 +1002,66 @@ def ratelimit_handler(e):
 
 dice = Dice()
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+_BASE_DIR = os.path.dirname(__file__)
+DATA_DIR = os.path.join(_BASE_DIR, "game_data")
+_CONTENT_DIR = os.path.join(DATA_DIR, "content")
+_WORLD_DIR = os.path.join(DATA_DIR, "world")
+_UI_DIR = os.path.join(DATA_DIR, "ui")
 
-def load_json(filename) -> dict[str, Any]:
+def _load_json_from(path) -> dict[str, Any]:
     try:
-        with open(os.path.join(DATA_DIR, filename), "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
             return data if isinstance(data, dict) else {}
     except (OSError, ValueError, KeyError):
         return {}
 
-def load_json_list(filename) -> list:
+def _load_json_list_from(path) -> list:
     try:
-        with open(os.path.join(DATA_DIR, filename), "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
             return data if isinstance(data, list) else []
     except (OSError, ValueError, KeyError):
         return []
 
+def load_json(filename) -> dict[str, Any]:
+    for d in (_CONTENT_DIR, _WORLD_DIR, _UI_DIR, DATA_DIR):
+        p = os.path.join(d, filename)
+        if os.path.exists(p):
+            return _load_json_from(p)
+    return {}
+
+def load_json_list(filename) -> list:
+    for d in (_CONTENT_DIR, _WORLD_DIR, _UI_DIR, DATA_DIR):
+        p = os.path.join(d, filename)
+        if os.path.exists(p):
+            return _load_json_list_from(p)
+    return []
+
 GAME_DATA: dict[str, Any] = {
-    "classes": load_json("classes.json"),
-    "races": load_json("races.json"),
-    "areas": load_json("areas.json"),
-    "enemies": load_json("enemies.json"),
-    "items": load_json("items.json"),
-    "missions": load_json("missions.json"),
-    "bosses": load_json("bosses.json"),
-    "spells": load_json("spells.json"),
-    "shops": load_json("shops.json"),
-    "companions": load_json("companions.json"),
-    "crafting": load_json("crafting.json"),
-    "housing": load_json("housing.json"),
-    "farming": load_json("farming.json"),
-    "pets": load_json("pets.json"),
-    "dungeons": load_json("dungeons.json"),
+    "classes":           load_json("classes.json"),
+    "races":             load_json("races.json"),
+    "areas":             load_json("areas.json"),
+    "enemies":           load_json("enemies.json"),
+    "items":             load_json("items.json"),
+    "missions":          load_json("missions.json"),
+    "bosses":            load_json("bosses.json"),
+    "spells":            load_json("spells.json"),
+    "shops":             load_json("shops.json"),
+    "companions":        load_json("companions.json"),
+    "crafting":          load_json("crafting.json"),
+    "housing":           load_json("housing.json"),
+    "farming":           load_json("farming.json"),
+    "pets":              load_json("pets.json"),
+    "dungeons":          load_json("dungeons.json"),
     "weekly_challenges": load_json("weekly_challenges.json").get("challenges", []),
-    "weather": load_json("weather.json"),
-    "times": load_json("times.json"),
-    "dialogues": load_json("dialogues.json"),
-    "cutscenes": load_json("cutscenes.json"),
-    "splash_texts": load_json_list("splash_text.json"),
-    "events": load_json("events.json").get("events", []),
-    "effects": load_json("effects.json"),
+    "weather":           load_json("weather.json"),
+    "times":             load_json("times.json"),
+    "dialogues":         load_json("dialogues.json"),
+    "cutscenes":         load_json("cutscenes.json"),
+    "splash_texts":      load_json_list("splash_text.json"),
+    "events":            load_json("events.json").get("events", []),
+    "effects":           load_json("effects.json"),
 }
 
 GAME_VERSION = "2.7.2"
@@ -2396,7 +2414,7 @@ def get_mission_progress_display(mission_id, player):
 
 @app.route("/game_assets/<path:filename>")
 def serve_game_asset(filename):
-    return send_from_directory("data/assets", filename)
+    return send_from_directory("game_data/assets", filename)
 
 @app.route("/ping")
 def health_ping():
@@ -4611,6 +4629,7 @@ def action_sort_inventory():
     player["inventory"] = sorted(player.get("inventory", []), key=sort_key)
     add_message("Inventory sorted by type.", "var(--text-dim)")
     save_player(player)
+    _autosave()
     return redirect(url_for("game") + "?tab=character")
 
 @app.route("/action/equip", methods=["POST"])
@@ -5272,6 +5291,7 @@ def battle_attack():
     session["battle_player_effects"] = player_effects
     session["battle_enemy_effects"] = enemy_effects
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 @app.route("/battle/defend", methods=["POST"])
@@ -5336,6 +5356,7 @@ def battle_defend():
     session["battle_player_effects"] = player_effects
     session["battle_enemy_effects"] = enemy_effects
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 @app.route("/battle/use_item", methods=["POST"])
@@ -5451,6 +5472,7 @@ def battle_use_item():
     session["battle_player_effects"] = player_effects
     session["battle_enemy_effects"] = enemy_effects
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 @app.route("/battle/flee", methods=["POST"])
@@ -5471,6 +5493,7 @@ def battle_flee():
         session.pop("battle_companions", None)
         session["battle_log"] = []
         save_player(player)
+        _autosave()
         return redirect(url_for("game"))
     else:
         e_dmg = max(1, enemy["attack"] - player["defense"] + dice.between(0, 5))
@@ -5485,6 +5508,7 @@ def battle_flee():
     session["battle_enemy"] = enemy
     session["battle_log"] = log
     save_player(player)
+    _autosave()
     return redirect(url_for("game"))
 
 def _handle_victory(player, enemy, log):

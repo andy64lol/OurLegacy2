@@ -10,8 +10,14 @@ BIRTHDAY_MONTH = 3
 BIRTHDAY_DAY = 24
 BIRTHDAY_ITEM_NAME = "Talisman of Andy"
 
-_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
-_ITEMS_FILE = os.path.join(_DATA_DIR, "items.json")
+_BASE = os.path.dirname(os.path.dirname(__file__))
+_DATA_DIR = os.path.join(_BASE, "game_data")
+_ITEMS_FILE = next(
+    (os.path.join(d, "items.json") for d in
+     [os.path.join(_DATA_DIR, "content"), _DATA_DIR]
+     if os.path.exists(os.path.join(d, "items.json"))),
+    os.path.join(_DATA_DIR, "content", "items.json")
+)
 
 ELITE_RARITIES = {"rare", "legendary"}
 ELITE_TYPES = {"weapon", "armor", "accessory", "consumable"}

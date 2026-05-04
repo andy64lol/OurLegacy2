@@ -11,7 +11,7 @@
         padding: 32px 20px;
         background:
             linear-gradient(to bottom, rgba(10,6,20,0.72) 0%, rgba(6,3,14,0.92) 100%),
-            url('/game_assets/backgrounds/1.png') center/cover no-repeat fixed;
+            url('/game_assets/backgrounds/1.webp') center/cover no-repeat fixed;
     }
     .ve-logo {
         width: 240px;
@@ -108,14 +108,14 @@
 {% endblock %}
 {% block content %}
 <div class="ve-page">
-    <img src="/game_assets/game_title_main_menu.png" alt="Our Legacy 2" class="ve-logo">
+    <img src="/game_assets/game_title_main_menu.webp" alt="Our Legacy 2" class="ve-logo">
 
     <div class="ve-card">
         <div class="ve-eyebrow">Email Verification</div>
 
         {% if not token %}
         <div class="ve-state-box ve-state-err">
-            <img src="/game_assets/glyphs/settings.png" alt="" class="ve-state-icon" style="opacity:0.5;">
+            <img src="/game_assets/glyphs/settings.webp" alt="" class="ve-state-icon" style="opacity:0.5;">
             <div class="ve-state-title" style="color:var(--red);">No Token Found</div>
             <div class="ve-state-body">
                 No verification token was provided.<br>
@@ -125,7 +125,7 @@
 
         {% elif result and result.ok %}
         <div class="ve-state-box ve-state-ok">
-            <img src="/game_assets/glyphs/sparkles.png" alt="" class="ve-state-icon">
+            <img src="/game_assets/glyphs/sparkles.webp" alt="" class="ve-state-icon">
             <div class="ve-state-title" style="color:var(--green-bright);">Email Verified!</div>
             <div class="ve-state-body">
                 Your address has been confirmed and your account is now fully secured.
@@ -136,7 +136,7 @@
 
         {% else %}
         <div class="ve-state-box ve-state-err">
-            <img src="/game_assets/glyphs/fight.png" alt="" class="ve-state-icon" style="opacity:0.55;">
+            <img src="/game_assets/glyphs/fight.webp" alt="" class="ve-state-icon" style="opacity:0.55;">
             <div class="ve-state-title" style="color:var(--red);">Verification Failed</div>
             <div class="ve-state-body">
                 {{ result.message if result else "The link may be invalid or expired." }}<br><br>

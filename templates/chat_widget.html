@@ -148,7 +148,7 @@
             <div id="glyph-grid-w" style="display:flex;flex-wrap:wrap;gap:3px;"></div>
         </div>
         <div id="input-row">
-            <button class="glyph-btn-w" onclick="toggleGlyphPicker()" title="Insert glyph"><img src="/game_assets/glyphs/sparkles.png" alt="glyph" style="width:13px;height:13px;image-rendering:pixelated;vertical-align:middle;"></button>
+            <button class="glyph-btn-w" onclick="toggleGlyphPicker()" title="Insert glyph"><img src="/game_assets/glyphs/sparkles.webp" alt="glyph" style="width:13px;height:13px;image-rendering:pixelated;vertical-align:middle;"></button>
             <input id="chat-input-w" type="text" maxlength="200" placeholder="Message the realm..." autocomplete="off"
                 onkeydown="if(event.key==='Enter')chatSend()">
             <button id="chat-send-w" onclick="chatSend()">Send</button>
@@ -172,18 +172,18 @@
     window.addEventListener('focus', function() { hasFocus = true; });
 
     var GLYPHS = {
-        'warrior':'warrior.png','mage':'mage.png','rogue':'rouge.png','rouge':'rouge.png',
-        'hunter':'hunter.png','bard':'bard.png','paladin':'paladin.png','druid':'druid.png',
-        'priest':'priest.png','hp':'hp.png','mana':'mana.png','gold':'gold.png',
-        'exp':'exp.png','level':'level.gif','weapon':'weapon.png','armor':'armor.png',
-        'offhand':'offhand.png','accessories':'accessories.png','book':'book.png',
-        'food':'food.png','materials':'materials.png','spell':'spell.png',
-        'chat':'chat.png','settings':'settings.png','sparkles':'sparkles.png',
-        'fight':'fight.png','day':'time_day.png','night':'time_night.png',
-        'male':'male.png','female':'female.png','non_binary':'non_binary.png',
-        'pickaxe':'pickaxe.png',
-        'owner':'owner.png','admin':'admin.png',
-        'terminal':'terminal.png','online':'online.png'
+        'warrior':'warrior.webp','mage':'mage.webp','rogue':'rouge.webp','rouge':'rouge.webp',
+        'hunter':'hunter.webp','bard':'bard.webp','paladin':'paladin.webp','druid':'druid.webp',
+        'priest':'priest.webp','hp':'hp.webp','mana':'mana.webp','gold':'gold.webp',
+        'exp':'exp.webp','level':'level.gif','weapon':'weapon.webp','armor':'armor.webp',
+        'offhand':'offhand.webp','accessories':'accessories.webp','book':'book.webp',
+        'food':'food.webp','materials':'materials.webp','spell':'spell.webp',
+        'chat':'chat.webp','settings':'settings.webp','sparkles':'sparkles.webp',
+        'fight':'fight.webp','day':'time_day.webp','night':'time_night.webp',
+        'male':'male.webp','female':'female.webp','non_binary':'non_binary.webp',
+        'pickaxe':'pickaxe.webp',
+        'owner':'owner.webp','admin':'admin.webp',
+        'terminal':'terminal.webp','online':'online.webp'
     };
 
     function escHtml(s) {
@@ -245,7 +245,7 @@
             }
             var bgColor = isMe ? 'var(--wood-dark)' : (isMod ? 'rgba(80,55,10,0.4)' : 'var(--bg-panel)');
             var borderColor = isMe ? 'var(--wood-bright)' : (isMod ? 'var(--gold-dim)' : 'var(--border)');
-            var modBadge = isMod ? '<img src="/game_assets/glyphs/admin.png" style="width:11px;height:11px;vertical-align:middle;margin-left:3px;image-rendering:pixelated;" alt="mod" title="Moderator">' : '';
+            var modBadge = isMod ? '<img src="/game_assets/glyphs/admin.webp" style="width:11px;height:11px;vertical-align:middle;margin-left:3px;image-rendering:pixelated;" alt="mod" title="Moderator">' : '';
             div.innerHTML =
                 '<div style="max-width:230px;padding:4px 9px;background:' + bgColor +
                 ';border:1px solid ' + borderColor + ';word-break:break-word;">' +
@@ -377,7 +377,7 @@
                 innerEl.innerHTML = users.map(function(u) {
                     var isMe = (u === CURRENT_USER);
                     var isMod = MOD_LIST.indexOf(u.toLowerCase()) !== -1;
-                    var badge = isMod ? '<img src="/game_assets/glyphs/admin.png" style="width:10px;height:10px;vertical-align:middle;margin-left:2px;image-rendering:pixelated;" alt="mod">' : '';
+                    var badge = isMod ? '<img src="/game_assets/glyphs/admin.webp" style="width:10px;height:10px;vertical-align:middle;margin-left:2px;image-rendering:pixelated;" alt="mod">' : '';
                     if (isMe) return '<span class="user-pill user-pill-me">' + escHtml(u) + badge + ' (you)</span>';
                     return '<a href="/friends?dm=' + encodeURIComponent(u) + '" target="_parent" class="user-pill">' + escHtml(u) + badge + '</a>';
                 }).join('');
