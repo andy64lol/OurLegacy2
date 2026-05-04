@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Owner Console — Our Legacy 2</title>
+<title>{% if is_owner %}Owner{% else %}Mod{% endif %} Console — Our Legacy 2</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -34,7 +34,6 @@ body {
     flex-direction: column;
 }
 
-/* ── Header ── */
 .adm-header {
     display: flex;
     align-items: center;
@@ -49,7 +48,7 @@ body {
     color: var(--gold);
     letter-spacing: 0.06em;
 }
-.adm-logo span { color: var(--red); }
+.adm-logo span { color: {% if is_owner %}var(--red){% else %}var(--blue){% endif %}; }
 .adm-meta { font-size: 11px; color: var(--text-dim); }
 .adm-meta b { color: var(--green); }
 .adm-back {
@@ -63,7 +62,6 @@ body {
 }
 .adm-back:hover { color: var(--text); }
 
-/* ── Layout ── */
 .adm-body {
     display: grid;
     grid-template-columns: 1fr 280px;
@@ -73,7 +71,6 @@ body {
     height: calc(100vh - 52px);
 }
 
-/* ── Terminal column ── */
 .adm-terminal {
     display: flex;
     flex-direction: column;
@@ -136,7 +133,6 @@ body {
 }
 .adm-run-btn:hover { background: rgba(34,197,94,0.22); }
 
-/* ── Sidebar ── */
 .adm-sidebar {
     display: flex;
     flex-direction: column;
@@ -212,31 +208,31 @@ body {
 <body>
 
 <div class="adm-header">
-    <div class="adm-logo">OL2 <span>OWNER CONSOLE</span></div>
-    <div class="adm-meta">Signed in as <b>{{ online_user }}</b></div>
+    <div class="adm-logo">OL2 <span>{% if is_owner %}OWNER{% else %}MOD{% endif %} CONSOLE</span></div>
+    <div class="adm-meta">Signed in as <b>{{ online_user }}</b>{% if not is_owner %} &mdash; <span style="color:var(--blue)">Moderator</span>{% endif %}</div>
     <a href="/" class="adm-back">&#8592; Main Menu</a>
 </div>
 
 <div class="adm-body">
 
-    <!-- Terminal -->
     <div class="adm-terminal">
         <div class="adm-output" id="output">
-            <div class="adm-line head">Our Legacy 2 — Owner Console</div>
+            <div class="adm-line head">Our Legacy 2 — {% if is_owner %}Owner{% else %}Mod{% endif %} Console</div>
             <div class="adm-line dim">Type <span style="color:var(--blue)">help</span> for a list of commands. Use ↑↓ for history.</div>
+            {% if not is_owner %}
+            <div class="adm-line warn">You are a moderator. Some commands are restricted to the owner.</div>
+            {% endif %}
             <div class="adm-line dim">────────────────────────────────────────</div>
         </div>
         <div class="adm-input-row">
-            <span class="adm-prompt">owner@ol2 &gt;</span>
+            <span class="adm-prompt">{% if is_owner %}owner{% else %}mod{% endif %}@ol2 &gt;</span>
             <input id="cmd-input" class="adm-input" type="text" placeholder="Enter command..." autocomplete="off" spellcheck="false">
             <button class="adm-run-btn" onclick="runCommand()">Run</button>
         </div>
     </div>
 
-    <!-- Sidebar -->
     <div class="adm-sidebar">
 
-        <!-- Stats card -->
         <div class="adm-card">
             <div class="adm-card-title">Server Stats <b id="online-count">—</b> online</div>
             <div class="adm-card-body" id="stat-body">
@@ -247,25 +243,21 @@ body {
             </div>
         </div>
 
-        <!-- Bans -->
         <div class="adm-card">
             <div class="adm-card-title">Banned Players</div>
             <div class="adm-card-body" id="ban-list"><span class="adm-empty">Loading…</span></div>
         </div>
 
-        <!-- Mutes -->
         <div class="adm-card">
             <div class="adm-card-title">Muted Players</div>
             <div class="adm-card-body" id="mute-list"><span class="adm-empty">Loading…</span></div>
         </div>
 
-        <!-- Mods -->
         <div class="adm-card">
             <div class="adm-card-title">Moderators</div>
             <div class="adm-card-body" id="mod-list"><span class="adm-empty">Loading…</span></div>
         </div>
 
-        <!-- Command reference -->
         <div class="adm-card">
             <div class="adm-card-title">Commands</div>
             <div class="adm-card-body">
@@ -278,41 +270,48 @@ body {
 </div>
 
 <script>
-const COMMANDS = [
-    { name: "── SERVER ──",           desc: "", header: true },
-    { name: "ban <user>",             desc: "Ban a player (optional reason after username)" },
-    { name: "unban <user>",           desc: "Lift a ban" },
-    { name: "kick <user>",            desc: "Force-logout a player immediately" },
-    { name: "mute <user>",            desc: "Mute permanently or: mute <user> <mins> [reason]" },
-    { name: "unmute <user>",          desc: "Lift a mute" },
-    { name: "warn <user>",            desc: "Warn a player (optional reason)" },
-    { name: "clearwarn <user>",       desc: "Clear all warnings for a player" },
-    { name: "addmod <user>",          desc: "Promote a player to moderator" },
-    { name: "removemod <user>",       desc: "Demote a moderator" },
-    { name: "listbans",               desc: "List all banned players" },
-    { name: "listmutes",              desc: "List all muted players" },
-    { name: "listmods",               desc: "List all moderators" },
-    { name: "online",                 desc: "Show online players" },
-    { name: "setowner <user>",        desc: "Transfer ownership (IRREVERSIBLE)" },
-    { name: "── CHARACTER ──",        desc: "", header: true },
-    { name: "stats",                  desc: "Show your current character stats" },
-    { name: "inventory",              desc: "List your inventory" },
-    { name: "heal",                   desc: "Fully restore your HP and MP" },
-    { name: "give gold <n>",          desc: "Add gold to your character" },
-    { name: "give xp <n>",            desc: "Add XP (triggers level-ups)" },
-    { name: "give item <name> [qty]", desc: "Add an item to your inventory" },
-    { name: "give mxp <n>",          desc: "Add mining XP to your character" },
-    { name: "set level <n>",          desc: "Set your character level (1–999)" },
-    { name: "set stat <name> <n>",    desc: "Set a stat: hp max_hp mp max_mp attack defense speed gold" },
-    { name: "set mining <n>",         desc: "Set your mining level (1–25)" },
-    { name: "remove item <name> [n]", desc: "Remove item(s) from inventory" },
-    { name: "── CONSOLE ──",          desc: "", header: true },
-    { name: "refresh",                desc: "Refresh sidebar data" },
-    { name: "clear",                  desc: "Clear the console output" },
-    { name: "help",                   desc: "Show this command list" },
+const IS_OWNER = {{ 'true' if is_owner else 'false' }};
+
+const ALL_COMMANDS = [
+    { name: "── MODERATION ──",        desc: "", header: true },
+    { name: "ban <user>",              desc: "Ban a player", ownerOnly: false },
+    { name: "unban <user>",            desc: "Lift a ban", ownerOnly: false },
+    { name: "kick <user>",             desc: "Force-logout a player immediately", ownerOnly: false },
+    { name: "mute <user>",             desc: "Mute: mute <user> <mins> [reason]", ownerOnly: false },
+    { name: "unmute <user>",           desc: "Lift a mute", ownerOnly: false },
+    { name: "warn <user>",             desc: "Warn a player (optional reason)", ownerOnly: false },
+    { name: "clearwarn <user>",        desc: "Clear all warnings for a player", ownerOnly: false },
+    { name: "online",                  desc: "Show online players", ownerOnly: false },
+    { name: "listbans",                desc: "List all banned players", ownerOnly: false },
+    { name: "listmutes",               desc: "List all muted players", ownerOnly: false },
+    { name: "listmods",                desc: "List all moderators", ownerOnly: false },
+    { name: "── OWNER ONLY ──",        desc: "", header: true },
+    { name: "addmod <user>",           desc: "Promote a player to moderator", ownerOnly: true },
+    { name: "removemod <user>",        desc: "Demote a moderator", ownerOnly: true },
+    { name: "setowner <user>",         desc: "Transfer ownership (IRREVERSIBLE)", ownerOnly: true },
+    { name: "tp <area>",               desc: "Teleport yourself to an area", ownerOnly: true },
+    { name: "tp <user> <area>",        desc: "Teleport a player to an area", ownerOnly: true },
+    { name: "tp all <area>",           desc: "Teleport everyone to an area", ownerOnly: true },
+    { name: "── CHARACTER ──",         desc: "", header: true },
+    { name: "stats",                   desc: "Show your current character stats", ownerOnly: true },
+    { name: "inventory",               desc: "List your inventory", ownerOnly: true },
+    { name: "heal",                    desc: "Fully restore your HP and MP", ownerOnly: true },
+    { name: "give gold <n>",           desc: "Add gold to your character", ownerOnly: true },
+    { name: "give xp <n>",             desc: "Add XP (triggers level-ups)", ownerOnly: true },
+    { name: "give item <name> [qty]",  desc: "Add an item to your inventory", ownerOnly: true },
+    { name: "give mxp <n>",           desc: "Add mining XP to your character", ownerOnly: true },
+    { name: "set level <n>",           desc: "Set your character level (1–999)", ownerOnly: true },
+    { name: "set stat <name> <n>",     desc: "Set a stat: hp max_hp mp max_mp attack defense speed gold", ownerOnly: true },
+    { name: "set mining <n>",          desc: "Set your mining level (1–25)", ownerOnly: true },
+    { name: "remove item <name> [n]",  desc: "Remove item(s) from inventory", ownerOnly: true },
+    { name: "── CONSOLE ──",           desc: "", header: true },
+    { name: "refresh",                 desc: "Refresh sidebar data", ownerOnly: false },
+    { name: "clear",                   desc: "Clear the console output", ownerOnly: false },
+    { name: "help",                    desc: "Show this command list", ownerOnly: false },
 ];
 
-// Render command reference in sidebar
+const COMMANDS = ALL_COMMANDS.filter(c => c.header || IS_OWNER || !c.ownerOnly);
+
 const cmdRef = document.getElementById('cmd-ref');
 COMMANDS.forEach(c => {
     const el = document.createElement('div');
@@ -321,7 +320,8 @@ COMMANDS.forEach(c => {
         el.textContent = c.name;
     } else {
         el.className = 'adm-cmd-item';
-        el.innerHTML = `<span class="adm-cmd-name">${c.name}</span><span class="adm-cmd-desc">${c.desc}</span>`;
+        const nameColor = c.ownerOnly ? 'var(--gold)' : 'var(--blue)';
+        el.innerHTML = `<span class="adm-cmd-name" style="color:${nameColor}">${c.name}</span><span class="adm-cmd-desc">${c.desc}</span>`;
         el.addEventListener('click', () => {
             const base = c.name.split(' ')[0];
             document.getElementById('cmd-input').value = base + ' ';
@@ -331,7 +331,6 @@ COMMANDS.forEach(c => {
     cmdRef.appendChild(el);
 });
 
-// Output helpers
 const output = document.getElementById('output');
 function print(text, cls = '') {
     const d = document.createElement('div');
@@ -348,7 +347,11 @@ function printHTML(html, cls = '') {
     output.scrollTop = output.scrollHeight;
 }
 
-// Command history
+function permErr() {
+    print('Err: permission not enogh.', 'err');
+    print('Are you owner?', 'err');
+}
+
 let history = [], histIdx = -1;
 document.getElementById('cmd-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') { runCommand(); return; }
@@ -363,7 +366,6 @@ document.getElementById('cmd-input').addEventListener('keydown', e => {
     }
 });
 
-// API helper
 async function api(method, endpoint, body) {
     const opts = { method, headers: { 'Content-Type': 'application/json' } };
     if (body) opts.body = JSON.stringify(body);
@@ -371,7 +373,6 @@ async function api(method, endpoint, body) {
     return r.json();
 }
 
-// Sidebar refresh
 async function refreshData() {
     try {
         const d = await api('GET', '/api/admin/data');
@@ -407,7 +408,6 @@ async function refreshData() {
 refreshData();
 setInterval(refreshData, 15000);
 
-// Command runner
 async function runCommand() {
     const input = document.getElementById('cmd-input');
     const raw = input.value.trim();
@@ -426,7 +426,11 @@ async function runCommand() {
         switch (cmd) {
             case 'help': {
                 print('──── Available Commands ────', 'head');
-                COMMANDS.forEach(c => print(`  ${c.name.padEnd(22)} ${c.desc}`, 'dim'));
+                COMMANDS.forEach(c => {
+                    if (c.header) print('  ' + c.name, 'dim');
+                    else print(`  ${c.name.padEnd(24)} ${c.desc}`, c.ownerOnly ? 'warn' : 'dim');
+                });
+                await refreshData();
                 break;
             }
             case 'clear': {
@@ -444,6 +448,7 @@ async function runCommand() {
                 print(`Online players (${d.online_count}):`, 'head');
                 if (d.online_users.length) d.online_users.forEach(u => print('  · ' + u, 'info'));
                 else print('  No players currently online.', 'dim');
+                await refreshData();
                 break;
             }
             case 'listbans': {
@@ -473,6 +478,7 @@ async function runCommand() {
                 print(`Moderators (${d.mods.length}):`, 'head');
                 if (d.mods.length) d.mods.forEach(m => print('  · ' + m, 'info'));
                 else print('  No moderators assigned.', 'dim');
+                await refreshData();
                 break;
             }
             case 'ban': {
@@ -481,7 +487,7 @@ async function runCommand() {
                 const reason = parts.slice(2).join(' ') || 'No reason given.';
                 const r = await api('POST', '/api/admin/ban', { username: user, reason });
                 print(r.message, r.ok ? 'ok' : 'err');
-                if (r.ok) await refreshData();
+                await refreshData();
                 break;
             }
             case 'unban': {
@@ -489,7 +495,7 @@ async function runCommand() {
                 if (!user) { print('Usage: unban <username>', 'warn'); break; }
                 const r = await api('POST', '/api/admin/unban', { username: user });
                 print(r.message, r.ok ? 'ok' : 'err');
-                if (r.ok) await refreshData();
+                await refreshData();
                 break;
             }
             case 'kick': {
@@ -497,6 +503,7 @@ async function runCommand() {
                 if (!user) { print('Usage: kick <username>', 'warn'); break; }
                 const r = await api('POST', '/api/admin/kick', { username: user });
                 print(r.message, r.ok ? 'ok' : 'err');
+                await refreshData();
                 break;
             }
             case 'mute': {
@@ -508,7 +515,7 @@ async function runCommand() {
                 const reason = parts.slice(reasonStart).join(' ') || 'No reason given.';
                 const r = await api('POST', '/api/admin/mute', { username: user, reason, duration_minutes });
                 print(r.message, r.ok ? 'ok' : 'err');
-                if (r.ok) await refreshData();
+                await refreshData();
                 break;
             }
             case 'unmute': {
@@ -516,7 +523,7 @@ async function runCommand() {
                 if (!user) { print('Usage: unmute <username>', 'warn'); break; }
                 const r = await api('POST', '/api/admin/unmute', { username: user });
                 print(r.message, r.ok ? 'ok' : 'err');
-                if (r.ok) await refreshData();
+                await refreshData();
                 break;
             }
             case 'warn': {
@@ -525,6 +532,7 @@ async function runCommand() {
                 const reason = parts.slice(2).join(' ') || 'No reason given.';
                 const r = await api('POST', '/api/admin/warn', { username: user, reason });
                 print(r.message, r.ok ? 'ok' : 'err');
+                await refreshData();
                 break;
             }
             case 'clearwarn': {
@@ -532,32 +540,38 @@ async function runCommand() {
                 if (!user) { print('Usage: clearwarn <username>', 'warn'); break; }
                 const r = await api('POST', '/api/admin/clearwarn', { username: user });
                 print(r.message, r.ok ? 'ok' : 'err');
+                await refreshData();
                 break;
             }
             case 'addmod': {
+                if (!IS_OWNER) { permErr(); break; }
                 const user = parts[1];
                 if (!user) { print('Usage: addmod <username>', 'warn'); break; }
                 const r = await api('POST', '/api/admin/add_admin', { username: user });
                 print(r.message, r.ok ? 'ok' : 'err');
-                if (r.ok) await refreshData();
+                await refreshData();
                 break;
             }
             case 'removemod': {
+                if (!IS_OWNER) { permErr(); break; }
                 const user = parts[1];
                 if (!user) { print('Usage: removemod <username>', 'warn'); break; }
                 const r = await api('POST', '/api/admin/remove_admin', { username: user });
                 print(r.message, r.ok ? 'ok' : 'err');
-                if (r.ok) await refreshData();
+                await refreshData();
                 break;
             }
             case 'setowner': {
+                if (!IS_OWNER) { permErr(); break; }
                 const user = parts[1];
                 if (!user) { print('Usage: setowner <username>', 'warn'); break; }
                 print(`WARNING: This will transfer ownership to "${user}" and you will lose owner access.`, 'warn');
                 print('Type  confirm setowner ' + user + '  to proceed.', 'warn');
+                await refreshData();
                 break;
             }
             case 'confirm': {
+                if (!IS_OWNER) { permErr(); break; }
                 if (parts[1] === 'setowner' && parts[2]) {
                     const r = await api('POST', '/api/admin/setowner', { username: parts[2] });
                     print(r.message, r.ok ? 'ok' : 'err');
@@ -568,10 +582,31 @@ async function runCommand() {
                 } else {
                     print('Nothing to confirm.', 'dim');
                 }
+                await refreshData();
                 break;
             }
-            // ── Character commands ──────────────────────────────────────
+            case 'tp': {
+                if (!IS_OWNER) { permErr(); break; }
+                if (!parts[1]) { print('Usage: tp <area>  |  tp <user> <area>  |  tp all <area>', 'warn'); break; }
+                let target, area;
+                if (parts[1].toLowerCase() === 'all') {
+                    target = 'all';
+                    area = parts.slice(2).join('_').toLowerCase().replace(/ /g, '_');
+                } else if (parts.length >= 3) {
+                    target = parts[1];
+                    area = parts.slice(2).join('_').toLowerCase().replace(/ /g, '_');
+                } else {
+                    target = 'self';
+                    area = parts.slice(1).join('_').toLowerCase().replace(/ /g, '_');
+                }
+                if (!area) { print('Usage: tp <area>  |  tp <user> <area>  |  tp all <area>', 'warn'); break; }
+                const r = await api('POST', '/api/admin/tp', { target, area });
+                print(r.message, r.ok ? 'ok' : 'err');
+                await refreshData();
+                break;
+            }
             case 'stats': {
+                if (!IS_OWNER) { permErr(); break; }
                 const d = await api('GET', '/api/admin/game/stats');
                 if (!d.ok) { print(d.message, 'err'); break; }
                 print('──── Character Stats ────', 'head');
@@ -584,9 +619,11 @@ async function runCommand() {
                 print(`  Gold     : ${d.gold}g`, 'warn');
                 print(`  Mining   : Lv ${d.mining_level}  (${d.mining_xp} XP)`, 'dim');
                 print(`  Inventory: ${d.inventory_count} items`, 'dim');
+                await refreshData();
                 break;
             }
             case 'inventory': {
+                if (!IS_OWNER) { permErr(); break; }
                 const d = await api('GET', '/api/admin/game/inventory');
                 if (!d.ok) { print(d.message, 'err'); break; }
                 print(`──── Inventory (Gold: ${d.gold}g) ────`, 'head');
@@ -595,14 +632,18 @@ async function runCommand() {
                 entries.sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name, qty]) => {
                     print(`  ${qty > 1 ? qty + 'x ' : '   '}${name}`, 'dim');
                 });
+                await refreshData();
                 break;
             }
             case 'heal': {
+                if (!IS_OWNER) { permErr(); break; }
                 const r = await api('POST', '/api/admin/game/heal');
                 print(r.message, r.ok ? 'ok' : 'err');
+                await refreshData();
                 break;
             }
             case 'give': {
+                if (!IS_OWNER) { permErr(); break; }
                 const sub = (parts[1] || '').toLowerCase();
                 if (sub === 'gold') {
                     const n = parseInt(parts[2]);
@@ -631,9 +672,11 @@ async function runCommand() {
                 } else {
                     print('Usage: give gold|xp|mxp|item <value>', 'warn');
                 }
+                await refreshData();
                 break;
             }
             case 'set': {
+                if (!IS_OWNER) { permErr(); break; }
                 const sub = (parts[1] || '').toLowerCase();
                 if (sub === 'level') {
                     const n = parseInt(parts[2]);
@@ -653,9 +696,11 @@ async function runCommand() {
                 } else {
                     print('Usage: set level|stat|mining <value>', 'warn');
                 }
+                await refreshData();
                 break;
             }
             case 'remove': {
+                if (!IS_OWNER) { permErr(); break; }
                 const sub = (parts[1] || '').toLowerCase();
                 if (sub === 'item') {
                     const lastPart = parts[parts.length - 1];
@@ -669,17 +714,18 @@ async function runCommand() {
                 } else {
                     print('Usage: remove item <name> [qty]', 'warn');
                 }
+                await refreshData();
                 break;
             }
             default:
                 print(`Unknown command: ${cmd}. Type help for a list.`, 'err');
+                await refreshData();
         }
     } catch (e) {
         print('Error: ' + e.message, 'err');
     }
 }
 
-// Focus input on load
 document.getElementById('cmd-input').focus();
 </script>
 </body>

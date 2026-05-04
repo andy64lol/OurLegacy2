@@ -16,7 +16,8 @@
       "tavern",
       "your_land",
       "taiga_outskirts",
-      "eldenmoor_city"
+      "eldenmoor_city",
+      "mountain_base"
     ],
     "rest_cost": 5,
     "can_rest": true,
@@ -118,7 +119,9 @@
     "connections": [
       "forest_path",
       "crystal_caves",
-      "moonlit_glade"
+      "moonlit_glade",
+      "swamp_of_shadows",
+      "sacred_grove"
     ],
     "difficulty": 2,
     "can_rest": false,
@@ -155,7 +158,8 @@
     "connections": [
       "starting_village",
       "underground_tombs",
-      "obsidian_temple"
+      "obsidian_temple",
+      "mountain_base"
     ],
     "difficulty": 2,
     "rest_cost": 8,
@@ -374,7 +378,8 @@
     "missions_available": false,
     "connections": [
       "void_cavern",
-      "echoing_void"
+      "echoing_void",
+      "hellfire_citadel"
     ],
     "difficulty": 5,
     "rest_cost": 25,
@@ -535,7 +540,8 @@
     "missions_available": true,
     "connections": [
       "mountain_base",
-      "sky_sanctuary"
+      "sky_sanctuary",
+      "crystal_peaks"
     ],
     "difficulty": 4,
     "can_rest": false,
@@ -603,7 +609,8 @@
     "shops": [],
     "missions_available": true,
     "connections": [
-      "thunder_peak"
+      "thunder_peak",
+      "crystal_peaks"
     ],
     "difficulty": 6,
     "boss_area": true,
@@ -688,7 +695,8 @@
     "missions_available": true,
     "connections": [
       "port_lesben",
-      "elmenburg"
+      "elmenburg",
+      "the_coldwater_crossing"
     ],
     "difficulty": 3,
     "rest_cost": 20,
@@ -732,7 +740,8 @@
     "missions_available": true,
     "connections": [
       "elmenburg",
-      "outskirts_lenbenburg"
+      "outskirts_lenbenburg",
+      "outlaw_lands_of_bridagrak_oblast"
     ],
     "difficulty": 4,
     "rest_cost": 30,
@@ -835,7 +844,8 @@
     ],
     "missions_available": true,
     "connections": [
-      "whispering_canyon"
+      "whispering_canyon",
+      "desert_of_aukrahama"
     ],
     "difficulty": 3,
     "rest_cost": 5,
@@ -856,7 +866,8 @@
     "shops": [],
     "missions_available": true,
     "connections": [
-      "forgotten_oasis"
+      "forgotten_oasis",
+      "port_nova_terrabla"
     ],
     "difficulty": 4,
     "rest_cost": 15,
@@ -918,7 +929,8 @@
     "connections": [
       "port_nova_terrabla",
       "temple_of_eternity",
-      "rivers_crown"
+      "rivers_crown",
+      "golden_temple"
     ],
     "difficulty": 3,
     "rest_cost": 15,
@@ -1018,8 +1030,7 @@
     "missions_available": true,
     "connections": [
       "bamboo_forest",
-      "thunder_mountain",
-      "sky_palace"
+      "thunder_mountain"
     ],
     "difficulty": 5,
     "rest_cost": 25,
@@ -1072,7 +1083,8 @@
     "connections": [
       "sacred_lake",
       "floating_islands",
-      "forbidden_city"
+      "forbidden_city",
+      "mountain_treasury"
     ],
     "difficulty": 5,
     "rest_cost": 30,
@@ -1272,7 +1284,8 @@
     "connections": [
       "forbidden_city",
       "shadow_realm",
-      "true_void"
+      "true_void",
+      "echoing_void"
     ],
     "difficulty": 7,
     "rest_cost": 30,
@@ -1344,7 +1357,8 @@
     ],
     "missions_available": true,
     "connections": [
-      "heavenly_gate"
+      "heavenly_gate",
+      "cathedral_of_light"
     ],
     "difficulty": 8,
     "rest_cost": 50,
@@ -1954,7 +1968,8 @@
     "missions_available": false,
     "connections": [
       "kapali_mountains",
-      "sultan_hunting_grounds"
+      "sultan_hunting_grounds",
+      "karastani_plains"
     ],
     "difficulty": 7,
     "can_rest": false,
@@ -2131,7 +2146,8 @@
     "connections": [
       "port_lianghai",
       "ghost_river_stretch",
-      "jade_examination_hall"
+      "jade_examination_hall",
+      "spine_of_heaven_pass"
     ],
     "difficulty": 4,
     "rest_cost": 22,

@@ -193,6 +193,7 @@ _active_sessions: dict = {}
 _session_last_activity: dict = {}
 _kicked_usernames: set = set()
 _username_to_userid: dict = {}
+_pending_tp: dict = {}
 CHAT_COOLDOWN_SECS = 10
 CHAT_MAX_LEN = 200
 
@@ -264,18 +265,10 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
     parts = raw.split(None, 2)
     cmd = parts[0].lower()
     is_admin = _is_admin_user(username)
-    is_owner = _is_owner(username)
 
     if cmd == "/help":
         lines = ["Available commands: /me <action>  /mods  /help"]
-        if is_admin:
-            lines.append("Mod: /mute <user> [mins] [reason]  /unmute <user>")
-            lines.append("Mod: /ban <user> [reason]  /unban <user>")
-            lines.append("Mod: /warn <user> [reason]  /clearwarn <user>  /kick <user>")
-            lines.append("Mod: /announce <text>")
-        if is_owner:
-            lines.append("Owner: /addmod <user>  /removemod <user>")
-            lines.append("Owner: /setowner <user>  /clearall  /listbans  /listmutes")
+        lines.append("Admin commands are now in the console at /admin")
         for line in lines:
             await _broadcast_system(line, to_sid=sid)
         return True
@@ -310,239 +303,9 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
             })
         return True
 
-    if cmd in ("/mute", "/unmute", "/ban", "/unban", "/warn", "/clearwarn",
-               "/kick", "/announce", "/addmod", "/removemod",
-               "/setowner", "/clearall", "/listbans", "/listmutes"):
-        if not is_admin:
-            await sio.emit(
-                "chat_error",
-                {"message": "You do not have permission to use that command."},
-                to=sid,
-            )
-            return True
-
-    if cmd == "/announce":
-        text = " ".join(parts[1:]) if len(parts) > 1 else ""
-        if not text:
-            await sio.emit("chat_error", {"message": "Usage: /announce <text>"}, to=sid)
-            return True
-        import datetime as _dt
-        ts = _dt.datetime.utcnow().strftime("%H:%M UTC")
-        _server_announcements.append((ts, text))
-        if len(_server_announcements) > 5:
-            _server_announcements.pop(0)
-        await _broadcast_system(f"\u2605 ANNOUNCEMENT: {text}")
-        return True
-
-    if cmd in ("/mute", "/unmute", "/ban", "/unban", "/warn", "/clearwarn", "/kick"):
-        target = parts[1].strip() if len(parts) > 1 else ""
-        if not target:
-            await sio.emit(
-                "chat_error",
-                {"message": f"Usage: {cmd} <username>"},
-                to=sid,
-            )
-            return True
-        extra = parts[2].strip() if len(parts) > 2 else ""
-
-        if cmd == "/ban":
-            if _is_owner(target) or (_is_admin_user(target) and not is_owner):
-                await sio.emit("chat_error", {"message": "You cannot ban a moderator."}, to=sid)
-                return True
-            admin_ban(target, extra or "No reason given", username)
-            for s, u in list(_chat_online.items()):
-                if u.lower() == target.lower():
-                    await sio.emit("chat_error", {"message": "You have been banned from chat."}, to=s)
-                    await sio.disconnect(s)
-            await _broadcast_system(
-                f"{target} has been banned." + (f" Reason: {extra}" if extra else ""),
-                to_sid=sid,
-            )
-            return True
-
-        if cmd == "/unban":
-            if admin_unban(target):
-                await _broadcast_system(f"{target} has been unbanned.", to_sid=sid)
-            else:
-                await sio.emit("chat_error", {"message": f"{target} is not banned."}, to=sid)
-            return True
-
-        if cmd == "/mute":
-            mins = 60
-            reason_text = extra
-            if extra:
-                tok = extra.split(None, 1)
-                if tok[0].isdigit():
-                    mins = max(1, int(tok[0]))
-                    reason_text = tok[1] if len(tok) > 1 else ""
-            admin_mute(target, _time_module.time() + mins * 60, reason_text or "No reason given", username)
-            for s, u in list(_chat_online.items()):
-                if u.lower() == target.lower():
-                    await sio.emit(
-                        "chat_error",
-                        {"message": f"You have been muted for {mins} minutes." + (f" Reason: {reason_text}" if reason_text else "")},
-                        to=s,
-                    )
-            await _broadcast_system(
-                f"{target} has been muted for {mins} minutes." + (f" Reason: {reason_text}" if reason_text else ""),
-                to_sid=sid,
-            )
-            return True
-
-        if cmd == "/unmute":
-            if admin_unmute(target):
-                await _broadcast_system(f"{target} has been unmuted.", to_sid=sid)
-            else:
-                await sio.emit("chat_error", {"message": f"{target} is not muted."}, to=sid)
-            return True
-
-        if cmd == "/warn":
-            count = _warn_user_in_admins(target, extra)
-            for s, u in list(_chat_online.items()):
-                if u.lower() == target.lower():
-                    await sio.emit(
-                        "chat_error",
-                        {"message": f"\u26a0\ufe0f Warning {count}/3: {extra or 'Behaviour not acceptable.'}"},
-                        to=s,
-                    )
-            await _broadcast_system(
-                f"{target} has been warned ({count}/3)." + (f" Reason: {extra}" if extra else ""),
-                to_sid=sid,
-            )
-            if count >= 3:
-                admin_mute(target, _time_module.time() + 30 * 60, "3 warnings accumulated", "SYSTEM")
-                for s, u in list(_chat_online.items()):
-                    if u.lower() == target.lower():
-                        await sio.emit(
-                            "chat_error",
-                            {"message": "You have been auto-muted for 30 minutes (3 warnings reached)."},
-                            to=s,
-                        )
-                await _broadcast_system(
-                    f"{target} has been auto-muted for 30 minutes (3 warnings).",
-                    to_sid=sid,
-                )
-            return True
-
-        if cmd == "/clearwarn":
-            if admin_clear_warns(target):
-                await _broadcast_system(f"Warnings cleared for {target}.", to_sid=sid)
-            else:
-                await sio.emit("chat_error", {"message": f"No warnings on record for {target}."}, to=sid)
-            return True
-
-        if cmd == "/kick":
-            kicked = [s for s, u in list(_chat_online.items()) if u.lower() == target.lower()]
-            if not kicked:
-                await sio.emit("chat_error", {"message": f"{target} is not online."}, to=sid)
-                return True
-            for s in kicked:
-                await sio.emit("chat_error", {"message": "You have been kicked from chat."}, to=s)
-                await sio.disconnect(s)
-            await _broadcast_system(f"{target} was kicked from chat.", to_sid=sid)
-            return True
-
-    if cmd == "/addmod":
-        if not is_owner:
-            await sio.emit("chat_error", {"message": "Only the owner can add moderators."}, to=sid)
-            return True
-        target = parts[1].strip() if len(parts) > 1 else ""
-        if not target:
-            await sio.emit("chat_error", {"message": "Usage: /addmod <username>"}, to=sid)
-            return True
-        if admin_add_mod(target):
-            mods = _get_all_mods()
-            await sio.emit("mod_list", [m.lower() for m in mods])
-            await _broadcast_system(f"{target} has been made a moderator.", to_sid=sid)
-        else:
-            await sio.emit("chat_error", {"message": f"{target} is already a moderator."}, to=sid)
-        return True
-
-    if cmd == "/removemod":
-        if not is_owner:
-            await sio.emit("chat_error", {"message": "Only the owner can remove moderators."}, to=sid)
-            return True
-        target = parts[1].strip() if len(parts) > 1 else ""
-        if not target:
-            await sio.emit("chat_error", {"message": "Usage: /removemod <username>"}, to=sid)
-            return True
-        if admin_remove_mod(target):
-            mods = _get_all_mods()
-            await sio.emit("mod_list", [m.lower() for m in mods])
-            await _broadcast_system(f"{target} is no longer a moderator.", to_sid=sid)
-        else:
-            await sio.emit("chat_error", {"message": f"{target} is not a moderator."}, to=sid)
-        return True
-
-    if cmd == "/setowner":
-        if not is_owner:
-            await sio.emit("chat_error", {"message": "Only the owner can transfer ownership."}, to=sid)
-            return True
-        target = parts[1].strip() if len(parts) > 1 else ""
-        if not target:
-            await sio.emit("chat_error", {"message": "Usage: /setowner <username>"}, to=sid)
-            return True
-        old_owner = admin_get_owner()
-        admin_set_owner(target)
-        admin_remove_mod(target)
-        if old_owner:
-            admin_add_mod(old_owner)
-        mods = _get_all_mods()
-        await sio.emit("mod_list", [m.lower() for m in mods])
-        await sio.emit("owner_name", target.lower())
-        await _broadcast_system(f"\u2605 {target} is now the server owner.", to_sid=sid)
-        return True
-
-    if cmd == "/clearall":
-        if not is_owner:
-            await sio.emit("chat_error", {"message": "Only the owner can clear the chat."}, to=sid)
-            return True
-        result = await _asyncio.get_event_loop().run_in_executor(None, clear_chat_history)
-        if result.get("ok"):
-            await sio.emit("chat_cleared", {})
-            await _broadcast_system("\u2605 Chat history has been cleared by the owner.")
-        else:
-            await sio.emit("chat_error", {"message": "Failed to clear chat history."}, to=sid)
-        return True
-
-    if cmd == "/listbans":
-        if not is_owner:
-            await sio.emit("chat_error", {"message": "Only the owner can list bans."}, to=sid)
-            return True
-        banned = admin_list_bans()
-        if not banned:
-            await _broadcast_system("No users are currently banned.", to_sid=sid)
-        else:
-            for row in banned:
-                reason = row.get("reason", "No reason")
-                by = row.get("banned_by", "unknown")
-                await _broadcast_system(f"  Banned: {row['username']} — {reason} (by {by})", to_sid=sid)
-        return True
-
-    if cmd == "/listmutes":
-        if not is_owner:
-            await sio.emit("chat_error", {"message": "Only the owner can list mutes."}, to=sid)
-            return True
-        active = admin_list_mutes()
-        if not active:
-            await _broadcast_system("No users are currently muted.", to_sid=sid)
-        else:
-            import datetime as _dtlist
-            now = _dtlist.datetime.now(_dtlist.timezone.utc)
-            for row in active:
-                reason = row.get("reason", "No reason")
-                exp = row.get("expires_at")
-                if exp:
-                    exp_dt = _dtlist.datetime.fromisoformat(exp.replace("Z", "+00:00"))
-                    mins_left = max(0, int((exp_dt - now).total_seconds() / 60))
-                    await _broadcast_system(f"  Muted: {row['username']} — {reason} ({mins_left}m left)", to_sid=sid)
-                else:
-                    await _broadcast_system(f"  Muted: {row['username']} — {reason} (permanent)", to_sid=sid)
-        return True
-
     await sio.emit(
         "chat_error",
-        {"message": f"Unknown command: {cmd}. Type /help for a list."},
+        {"message": f"Commands have moved to the console (/admin). Chat commands: /me /mods /help"},
         to=sid,
     )
     return True
@@ -1278,7 +1041,6 @@ GAME_DATA: dict[str, Any] = {
     "times": load_json("times.json"),
     "dialogues": load_json("dialogues.json"),
     "cutscenes": load_json("cutscenes.json"),
-    "books": load_json("books.json"),
     "splash_texts": load_json_list("splash_text.json"),
     "events": load_json("events.json").get("events", []),
     "effects": load_json("effects.json"),
@@ -2862,6 +2624,19 @@ def game():
             world_events=list(reversed(_world_events[-8:])),
         )
 
+    username_key = (session.get("online_username") or "").lower()
+    if username_key and username_key in _pending_tp:
+        tp_dest = _pending_tp.pop(username_key)
+        if tp_dest in GAME_DATA.get("areas", {}):
+            session["current_area"] = tp_dest
+            va = session.get("visited_areas", [])
+            if tp_dest not in va:
+                va.append(tp_dest)
+                session["visited_areas"] = va
+            tp_area_name = GAME_DATA["areas"][tp_dest].get("name", tp_dest)
+            add_message(f"You have been teleported to {tp_area_name}.", "var(--gold)")
+        session.modified = True
+
     _game_user_id = session.get("online_user_id")
     _user_has_email = True
     _user_email_pending = None
@@ -3037,7 +2812,6 @@ def game():
             if class_req:
                 parts.append(class_req)
             req_label = " · ".join(parts)
-        _book_key = item_data.get("book_key", "") if item_type == "book" else ""
         inventory_items.append(
             {
                 "name": item_name,
@@ -3051,9 +2825,6 @@ def game():
                 "equip_block_reason": equip_block_reason,
                 "req_label": req_label,
                 "stats": _item_stat_summary(item_data),
-                "is_book": item_type == "book",
-                "book_key": _book_key,
-                "already_read": _book_key in player.get("read_books", []),
             }
         )
 
@@ -4702,8 +4473,6 @@ def action_use_item():
             f"+{regen_hp} HP and +{regen_mp} MP per turn for {regen_turns} turns.",
             "var(--gold)",
         )
-    elif item_type == "book":
-        return redirect(url_for("action_read_book") + f"?item={item_name}")
     elif item_type == "consumable":
         effect = item_data.get("effect", "")
         value = item_data.get("value", 0)
@@ -4843,53 +4612,6 @@ def action_sort_inventory():
     add_message("Inventory sorted by type.", "var(--text-dim)")
     save_player(player)
     return redirect(url_for("game") + "?tab=character")
-
-@app.route("/action/read_book", methods=["GET", "POST"])
-def action_read_book():
-    player = get_player()
-    if not player:
-        return redirect(url_for("index"))
-
-    item_name = request.values.get("item", "")
-    if item_name not in player.get("inventory", []):
-        add_message("You do not have that book.", "var(--red)")
-        return redirect(url_for("game"))
-
-    item_data = GAME_DATA["items"].get(item_name, {})
-    if not isinstance(item_data, dict) or item_data.get("type") != "book":
-        add_message("That item cannot be read.", "var(--red)")
-        return redirect(url_for("game"))
-
-    book_key = item_data.get("book_key", "")
-    book_meta = GAME_DATA["books"].get(book_key, {})
-    book_file = book_meta.get("file", "")
-
-    content = "(The pages of this book are damaged beyond reading.)"
-    if book_file:
-        try:
-            with open(os.path.join(DATA_DIR, book_file), "r", encoding="utf-8") as bf:
-                content = bf.read()
-        except OSError:
-            pass
-
-    read_books = player.setdefault("read_books", [])
-    already_read = book_key and book_key in read_books
-    if book_key and not already_read:
-        read_books.append(book_key)
-        add_message(
-            f'You read "{item_name}" and add it to your library.', "var(--gold)"
-        )
-
-    save_player(player)
-    return render_template(
-        "book.html",
-        book_title=book_meta.get("title", item_name),
-        book_author=book_meta.get("author", "Unknown"),
-        book_description=book_meta.get("description", ""),
-        book_content=content,
-        already_read=already_read,
-        item_name=item_name,
-    )
 
 @app.route("/action/equip", methods=["POST"])
 def action_equip():
@@ -7451,9 +7173,10 @@ def api_admin_remove_admin():
 @app.route("/admin")
 def admin_console():
     caller = session.get("online_username", "")
-    if not _is_owner(caller):
+    if not _is_admin_user(caller):
         return redirect(url_for("index"))
-    return render_template("admin.html", online_user=caller)
+    is_owner = _is_owner(caller)
+    return render_template("admin.html", online_user=caller, is_owner=is_owner)
 
 @app.route("/items")
 def items_debug():
@@ -7757,6 +7480,44 @@ def api_game_inventory():
     for item in inv:
         counts[item] = counts.get(item, 0) + 1
     return jsonify({"ok": True, "inventory": counts, "gold": player.get("gold", 0)})
+
+@app.route("/api/admin/tp", methods=["POST"])
+def api_admin_tp():
+    caller = session.get("online_username", "")
+    if not _is_owner(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    target = body.get("target", "self").strip()
+    area_key = body.get("area", "").strip().lower().replace(" ", "_")
+    if not area_key or area_key not in GAME_DATA.get("areas", {}):
+        close = [k for k in GAME_DATA.get("areas", {}) if area_key in k]
+        hint = f" Did you mean: {', '.join(close[:4])}?" if close else ""
+        return jsonify({"ok": False, "message": f"Unknown area: '{area_key}'.{hint}"})
+    area_name = GAME_DATA["areas"][area_key].get("name", area_key)
+    if target == "self" or target.lower() == caller.lower():
+        session["current_area"] = area_key
+        va = session.get("visited_areas", [])
+        if area_key not in va:
+            va.append(area_key)
+            session["visited_areas"] = va
+        session.modified = True
+        return jsonify({"ok": True, "message": f"Teleported yourself to {area_name}."})
+    elif target == "all":
+        known = list(set(list(_chat_online.values()) + list(_username_to_userid.keys())))
+        count = 0
+        for uname in known:
+            _pending_tp[uname.lower()] = area_key
+            count += 1
+        session["current_area"] = area_key
+        va = session.get("visited_areas", [])
+        if area_key not in va:
+            va.append(area_key)
+            session["visited_areas"] = va
+        session.modified = True
+        return jsonify({"ok": True, "message": f"Teleporting everyone ({count} known players) to {area_name}. Takes effect on their next page load."})
+    else:
+        _pending_tp[target.lower()] = area_key
+        return jsonify({"ok": True, "message": f"Teleport queued for {target} → {area_name}. Takes effect on their next page load."})
 
 from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi
 
