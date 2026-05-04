@@ -274,16 +274,32 @@ body {
     line-height: 1.55;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/1.%20Pointer.webp') 4 2, default;
 }
 
+button,
+a,
+.btn,
+select,
+[role="button"],
+[onclick],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+label[for] {
+    cursor: url('/game_assets/UI/cursor/2.%20Hand%20Pointer.webp') 8 2, pointer !important;
+}
 
 button:hover,
 a:hover,
 .btn:hover,
 select:hover,
-[role="button"]:hover {
-    cursor: url('/game_assets/UI/cursor/3.%20Hand%20Hover.webp') 0 0, pointer;
+[role="button"]:hover,
+[onclick]:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+label[for]:hover {
+    cursor: url('/game_assets/UI/cursor/3.%20Hand%20Hover.webp') 8 2, pointer !important;
 }
 
 button:active,
@@ -291,7 +307,22 @@ a:active,
 .btn:active,
 select:active,
 [role="button"]:active {
-    cursor: url('/game_assets/UI/cursor/4.%20Hand%20Grab.webp') 0 0, pointer;
+    cursor: url('/game_assets/UI/cursor/4.%20Hand%20Grab.webp') 8 2, pointer !important;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="search"],
+textarea {
+    cursor: text !important;
+}
+
+:disabled,
+[disabled],
+.btn-disabled {
+    cursor: not-allowed !important;
 }
 
 a {
@@ -4268,45 +4299,58 @@ body.page-fade-out {
 }
 
 
-/* ── Dungeon card grid ── */
-.dcard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 12px;
-}
-
-.dcard {
+/* ── Dungeon list ── */
+.dg-list {
     display: flex;
     flex-direction: column;
+    gap: 8px;
+}
+
+.dg-entry {
+    display: flex;
+    align-items: stretch;
     background: var(--slate-dark);
     border: 1px solid var(--border);
     overflow: hidden;
 }
 
-.dcard-open  { border-color: var(--wood-mid); }
-.dcard-done  { border-color: var(--green); }
-.dcard-locked { opacity: 0.65; }
-.dcard-fog   { opacity: 0.5; filter: blur(0.4px); border-style: dashed; }
-
-.dcard-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 10px 14px;
-    background: rgba(0,0,0,0.28);
-    border-bottom: 1px solid var(--border);
+.dg-accent {
+    width: 4px;
+    flex-shrink: 0;
+    background: var(--border);
 }
 
-.dcard-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-bright);
+.dg-open   .dg-accent { background: var(--wood-mid); }
+.dg-done   .dg-accent { background: var(--green); }
+.dg-locked .dg-accent { background: var(--red-dark); }
+.dg-fog    .dg-accent { background: var(--slate-darkest); }
+
+.dg-fog    { opacity: 0.55; }
+.dg-locked { opacity: 0.7; }
+
+.dg-info {
     flex: 1;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
     min-width: 0;
 }
 
-.dcard-badge {
+.dg-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dg-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-bright);
+}
+
+.dg-pill {
     font-size: 10px;
     padding: 2px 8px;
     text-transform: uppercase;
@@ -4314,44 +4358,40 @@ body.page-fade-out {
     white-space: nowrap;
     flex-shrink: 0;
 }
-.dcard-badge-locked { background: var(--red-dark); color: #f8c0a0; }
-.dcard-badge-done   { background: var(--green-dark, #1a3a1a); color: var(--green-bright); border: 1px solid var(--green); }
-.dcard-badge-open   { background: var(--wood-dark); color: var(--gold); border: 1px solid var(--wood-mid); }
+.dg-pill-open   { background: var(--wood-dark); color: var(--gold); border: 1px solid var(--wood-mid); }
+.dg-pill-done   { background: var(--green-dark, #1a3a1a); color: var(--green-bright); border: 1px solid var(--green); }
+.dg-pill-locked { background: var(--red-dark); color: #f8c0a0; }
+.dg-pill-fog    { background: var(--slate-darkest); color: var(--text-dim); border: 1px solid var(--border); }
 
-.dcard-body {
-    padding: 10px 14px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.dcard-desc {
+.dg-desc {
     font-size: 13px;
     color: var(--text-dim);
     line-height: 1.5;
 }
 
-.dcard-stats {
+.dg-tags {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
     font-size: 12px;
     color: var(--text-dim);
+    margin-top: 2px;
 }
 
-.dcard-stat-diff { color: var(--red); }
+.dg-tag-diff   { color: var(--red); }
+.dg-tag-reward { color: var(--gold-dim); }
+.dg-tag-area   { color: var(--text-dim); font-style: italic; }
+.dg-tag-items  { color: var(--text-dim); }
 
-.dcard-reward {
-    font-size: 12px;
-    color: var(--gold-dim);
-    line-height: 1.5;
-}
-
-.dcard-footer {
-    padding: 8px 14px;
-    border-top: 1px solid var(--border);
-    background: rgba(0,0,0,0.18);
+.dg-action {
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-left: 1px solid var(--border);
+    min-width: 116px;
+    background: rgba(0,0,0,0.12);
 }
 
 
@@ -5217,8 +5257,15 @@ body.page-fade-out {
     }
 
     
-    .dcard-grid {
-        grid-template-columns: 1fr;
+    .dg-entry {
+        flex-wrap: wrap;
+    }
+    .dg-action {
+        border-left: none;
+        border-top: 1px solid var(--border);
+        width: 100%;
+        justify-content: flex-start;
+        min-width: unset;
     }
 
     

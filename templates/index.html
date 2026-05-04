@@ -1513,14 +1513,14 @@
         <div class="tab-content" id="tab-dungeons">
 
             {% if active_dungeon %}
-            <div class="panel" style="margin-bottom:14px;border-color:var(--gold);">
+            <div class="panel" style="margin-bottom:12px;border-color:var(--gold);">
                 <div class="panel-title" style="background:var(--wood-mid);">Active Dungeon</div>
                 <div class="panel-body">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
                         <div>
                             <div style="font-size:16px;color:var(--gold);font-weight:600;">{{ active_dungeon.dungeon.name }}</div>
-                            <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">Room {{ active_dungeon.room_index + 1 }} of {{ active_dungeon.rooms|length }}</div>
-                            <div class="bar-track" style="width:180px;margin-top:8px;">
+                            <div style="font-size:13px;color:var(--text-dim);margin-top:3px;">Room {{ active_dungeon.room_index + 1 }} of {{ active_dungeon.rooms|length }}</div>
+                            <div class="bar-track" style="width:160px;margin-top:7px;">
                                 <div class="bar-fill bar-exp" style="width:{{ (((active_dungeon.room_index + 1) / (active_dungeon.rooms|length)) * 100)|int }}%"></div>
                             </div>
                         </div>
@@ -1537,81 +1537,87 @@
             {% endif %}
 
             <div class="panel">
-                <div class="panel-title">Dungeon Entrances</div>
+                <div class="panel-title">Dungeons</div>
                 <div class="panel-body">
-                    <p class="panel-note">Dungeons are tied to specific areas &mdash; explore the world to discover them.</p>
+                    <p class="panel-note">Explore the world to discover dungeons. You must be in the correct area to enter one.</p>
                     {% if not dungeon_list %}
                     <p class="empty-notice">No dungeons found.</p>
                     {% else %}
-                    <div class="dcard-grid">
-                        {% for d in dungeon_list %}
+                    <div class="dg-list">
 
+                        {% for d in dungeon_list %}
                         {% if not d.discovered %}
-                        <div class="dcard dcard-fog">
-                            <div class="dcard-header">
-                                <span class="dcard-name" style="letter-spacing:3px;opacity:0.6;">???????????????</span>
-                                <span class="dcard-badge dcard-badge-locked">Undiscovered</span>
-                            </div>
-                            <div class="dcard-body">
-                                <div class="dcard-desc" style="font-style:italic;">
+
+                        <div class="dg-entry dg-fog">
+                            <div class="dg-accent"></div>
+                            <div class="dg-info">
+                                <div class="dg-header">
+                                    <span class="dg-name" style="letter-spacing:4px;opacity:0.5;">???????????</span>
+                                    <span class="dg-pill dg-pill-fog">Undiscovered</span>
+                                </div>
+                                <div class="dg-desc" style="font-style:italic;">
                                     Explore <strong>{{ d.hint_area_name }}</strong> to reveal this dungeon.
                                 </div>
                             </div>
                         </div>
 
                         {% else %}
-                        <div class="dcard {% if d.completed %}dcard-done{% elif d.available %}dcard-open{% else %}dcard-locked{% endif %}">
-                            <div class="dcard-header">
-                                <span class="dcard-name">{{ d.name }}</span>
-                                {% if d.completed %}
-                                <span class="dcard-badge dcard-badge-done">Cleared</span>
-                                {% elif d.available %}
-                                <span class="dcard-badge dcard-badge-open">Available</span>
-                                {% elif not d.in_area %}
-                                <span class="dcard-badge dcard-badge-locked">Wrong Area</span>
-                                {% else %}
-                                <span class="dcard-badge dcard-badge-locked">Lvl {{ d.min_level }}+</span>
-                                {% endif %}
-                            </div>
-                            <div class="dcard-body">
-                                <div class="dcard-desc">{{ d.description }}</div>
-                                <div class="dcard-stats">
-                                    <span class="dcard-stat dcard-stat-diff">Diff {{ d.difficulty[0] }}&ndash;{{ d.difficulty[1] }}</span>
-                                    <span class="dcard-stat">{{ d.rooms }} rooms</span>
+
+                        <div class="dg-entry {% if d.completed %}dg-done{% elif d.available %}dg-open{% else %}dg-locked{% endif %}">
+                            <div class="dg-accent"></div>
+                            <div class="dg-info">
+                                <div class="dg-header">
+                                    <span class="dg-name">{{ d.name }}</span>
+                                    {% if d.completed %}
+                                    <span class="dg-pill dg-pill-done">Cleared</span>
+                                    {% elif d.available %}
+                                    <span class="dg-pill dg-pill-open">Available</span>
+                                    {% elif not d.in_area %}
+                                    <span class="dg-pill dg-pill-locked">Wrong Area</span>
+                                    {% else %}
+                                    <span class="dg-pill dg-pill-locked">Lvl {{ d.min_level }}+</span>
+                                    {% endif %}
+                                </div>
+                                <div class="dg-desc">{{ d.description }}</div>
+                                <div class="dg-tags">
+                                    <span class="dg-tag-diff">Difficulty {{ d.difficulty[0] }}&ndash;{{ d.difficulty[1] }}</span>
+                                    <span>&bull;</span>
+                                    <span>{{ d.rooms }} rooms</span>
                                     {% if not d.in_area %}
-                                    <span class="dcard-stat" style="color:var(--text-dim);">&rarr; {{ d.hint_area_name }}</span>
+                                    <span>&bull;</span>
+                                    <span class="dg-tag-area">Go to {{ d.hint_area_name }}</span>
                                     {% endif %}
-                                </div>
-                                {% if d.completion_reward %}
-                                <div class="dcard-reward">
-                                    <span style="color:var(--gold);">{{ d.completion_reward.get('gold', 0) }}g</span>
-                                    &bull; {{ d.completion_reward.get('experience', 0) }} EXP
+                                    {% if d.completion_reward %}
+                                    <span>&bull;</span>
+                                    <span class="dg-tag-reward">{{ d.completion_reward.get('gold',0) }}g &middot; {{ d.completion_reward.get('experience',0) }} EXP</span>
                                     {% if d.completion_reward.get('items') %}
-                                    &bull; <span style="color:var(--text-dim);">{{ d.completion_reward['items']|join(', ') }}</span>
+                                    <span>&bull;</span>
+                                    <span class="dg-tag-items">{{ d.completion_reward['items']|join(', ') }}</span>
+                                    {% endif %}
                                     {% endif %}
                                 </div>
-                                {% endif %}
                             </div>
-                            <div class="dcard-footer">
+                            <div class="dg-action">
                                 {% if d.available and not active_dungeon %}
                                 <form method="post" action="/action/dungeon/enter" style="margin:0;">
                                     <input type="hidden" name="dungeon_id" value="{{ d.id }}">
                                     <button type="submit" class="btn {% if d.completed %}btn-secondary{% else %}btn-primary{% endif %} btn-small">
-                                        {% if d.completed %}Run Again{% else %}Enter Dungeon{% endif %}
+                                        {% if d.completed %}Replay{% else %}Enter{% endif %}
                                     </button>
                                 </form>
                                 {% elif d.available and active_dungeon %}
-                                <span style="font-size:12px;color:var(--text-dim);">Finish active dungeon first</span>
+                                <span style="font-size:11px;color:var(--text-dim);text-align:center;line-height:1.4;">Finish active<br>dungeon first</span>
                                 {% elif not d.in_area %}
-                                <span style="font-size:12px;color:var(--text-dim);">Travel to {{ d.hint_area_name }}</span>
+                                <span style="font-size:11px;color:var(--text-dim);text-align:center;line-height:1.4;">Travel to<br>{{ d.hint_area_name }}</span>
                                 {% else %}
-                                <span style="font-size:12px;color:var(--text-dim);">Level {{ d.min_level }} required</span>
+                                <span style="font-size:11px;color:var(--text-dim);text-align:center;">Lvl {{ d.min_level }}+</span>
                                 {% endif %}
                             </div>
                         </div>
-                        {% endif %}
 
+                        {% endif %}
                         {% endfor %}
+
                     </div>
                     {% endif %}
                 </div>
