@@ -3,9 +3,9 @@
     {
       "id": "forest_crypt",
       "name": "Forest Crypt",
-      "description": "An overgrown crypt hidden deep within the whispering woods.",
-      "allowed_areas": ["whispering_woods", "forest_outskirts"],
-      "possible_enemies": ["orc", "skeleton", "forest_guardian", "wolf", "goblin"],
+      "description": "An overgrown crypt hidden deep within the dark forest.",
+      "allowed_areas": ["forest_path", "deep_woods"],
+      "possible_enemies": ["orc", "skeleton", "wolf", "goblin", "goblin_archer"],
       "difficulty": [1, 2],
       "rooms": 5,
       "boss_id": "orc_chieftain",
@@ -28,8 +28,8 @@
       "id": "goblin_cave",
       "name": "Goblin Cave",
       "description": "A foul-smelling cave system infested with greedy goblins.",
-      "allowed_areas": ["mountain_pass", "rocky_hills"],
-      "possible_enemies": ["goblin", "goblin_archer", "wolf", "cave_bear", "bandit"],
+      "allowed_areas": ["forest_path", "deep_woods"],
+      "possible_enemies": ["goblin", "goblin_archer", "wolf", "bandit"],
       "difficulty": [2, 3],
       "rooms": 6,
       "boss_id": "goblin_king",
@@ -52,8 +52,8 @@
       "id": "ancient_ruins",
       "name": "Ancient Ruins",
       "description": "Crumbling remains of a long-forgotten civilization.",
-      "allowed_areas": ["ruined_city", "desert_plains"],
-      "possible_enemies": ["skeleton", "ghost", "ancient_golem", "evil_sorcerer", "troll"],
+      "allowed_areas": ["ancient_ruins", "underground_tombs"],
+      "possible_enemies": ["skeleton", "ancient_golem", "shadow_knight", "troll"],
       "difficulty": [3, 4],
       "rooms": 7,
       "boss_id": "troll_king",
@@ -73,59 +73,11 @@
       }
     },
     {
-      "id": "swamp_den",
-      "name": "Swamp Den",
-      "description": "A murky, poisonous den located in the heart of the marsh.",
-      "allowed_areas": ["poisonous_marsh", "swamp_village"],
-      "possible_enemies": ["swamp_rat", "poison_elemental", "giant_spider", "wraith", "troll"],
-      "difficulty": [3, 4],
-      "rooms": 7,
-      "boss_id": "swamp_hydra",
-      "completion_reward": {
-        "gold": 700,
-        "experience": 1200,
-        "items": ["Hydra Fang", "Poison Crystal"]
-      },
-      "room_weights": {
-        "question": 10,
-        "battle": 35,
-        "chest": 10,
-        "trap_chest": 15,
-        "multi_choice": 5,
-        "shrine": 15,
-        "ambush": 10
-      }
-    },
-    {
-      "id": "crystal_cavern",
-      "name": "Crystal Cavern",
-      "description": "A beautiful but deadly cavern filled with razor-sharp crystals.",
-      "allowed_areas": ["crystal_mountains", "frozen_peaks"],
-      "possible_enemies": ["ice_elemental", "rock_golem", "cave_bear", "wind_elemental", "ancient_golem"],
-      "difficulty": [4, 5],
-      "rooms": 8,
-      "boss_id": "ice_queen",
-      "completion_reward": {
-        "gold": 900,
-        "experience": 1500,
-        "items": ["Ice Queen's Crown", "Boreas"]
-      },
-      "room_weights": {
-        "question": 20,
-        "battle": 30,
-        "chest": 15,
-        "trap_chest": 10,
-        "multi_choice": 10,
-        "shrine": 10,
-        "ambush": 5
-      }
-    },
-    {
       "id": "shadow_fortress",
       "name": "Shadow Fortress",
       "description": "A dark citadel where shadows themselves come to life.",
-      "allowed_areas": ["shadow_valley", "dark_forest"],
-      "possible_enemies": ["shadow_knight", "dark_mage", "wraith", "death_knight", "ghost"],
+      "allowed_areas": ["ancient_ruins", "underground_tombs"],
+      "possible_enemies": ["shadow_knight", "dark_mage", "skeleton"],
       "difficulty": [4, 5],
       "rooms": 8,
       "boss_id": "shadow_lord",
@@ -145,83 +97,35 @@
       }
     },
     {
-      "id": "fire_temple",
-      "name": "Fire Temple",
-      "description": "A temple built over a lake of molten lava.",
-      "allowed_areas": ["fire_volcano", "lava_fields"],
-      "possible_enemies": ["fire_wraith", "fire_demon", "infernal_imp", "hell_knight", "demon"],
-      "difficulty": [5, 6],
-      "rooms": 9,
-      "boss_id": "fire_elemental_lord",
+      "id": "crystal_cavern",
+      "name": "Crystal Cavern",
+      "description": "A beautiful but deadly cavern filled with razor-sharp crystals.",
+      "allowed_areas": ["crystal_caves"],
+      "possible_enemies": ["ice_elemental", "ancient_golem", "fire_wraith", "orc"],
+      "difficulty": [4, 5],
+      "rooms": 8,
+      "boss_id": "ice_queen",
       "completion_reward": {
-        "gold": 1200,
-        "experience": 2200,
-        "items": ["Fire Gem", "Dragon Scale Armor"]
-      },
-      "room_weights": {
-        "question": 25,
-        "battle": 35,
-        "chest": 10,
-        "trap_chest": 10,
-        "multi_choice": 5,
-        "shrine": 10,
-        "ambush": 5
-      }
-    },
-    {
-      "id": "ice_citadel",
-      "name": "Ice Citadel",
-      "description": "A fortress of eternal frost atop the world's highest peak.",
-      "allowed_areas": ["frozen_peaks", "ice_wastes"],
-      "possible_enemies": ["ice_elemental", "rock_golem", "lightning_golem", "wind_elemental", "ancient_golem"],
-      "difficulty": [5, 6],
-      "rooms": 9,
-      "boss_id": "ice_giant_king",
-      "completion_reward": {
-        "gold": 1300,
-        "experience": 2500,
-        "items": ["Frostbite", "Glacial Shield"]
+        "gold": 900,
+        "experience": 1500,
+        "items": ["Ice Queen's Crown", "Boreas"]
       },
       "room_weights": {
         "question": 20,
-        "battle": 35,
-        "chest": 10,
+        "battle": 30,
+        "chest": 15,
         "trap_chest": 10,
         "multi_choice": 10,
         "shrine": 10,
         "ambush": 5
-      }
-    },
-    {
-      "id": "thunder_peak",
-      "name": "Thunder Peak",
-      "description": "Where lightning never stops and the air hums with power.",
-      "allowed_areas": ["storm_mountains", "lightning_valley"],
-      "possible_enemies": ["storm_elemental", "thunder_bird", "lightning_golem", "storm_dragon", "wind_elemental"],
-      "difficulty": [6, 6],
-      "rooms": 10,
-      "boss_id": "storm_giant",
-      "completion_reward": {
-        "gold": 1500,
-        "experience": 3000,
-        "items": ["Thunder Hammer", "Lightning Crystal"]
-      },
-      "room_weights": {
-        "question": 15,
-        "battle": 40,
-        "chest": 10,
-        "trap_chest": 10,
-        "multi_choice": 10,
-        "shrine": 5,
-        "ambush": 10
       }
     },
     {
       "id": "undead_crypt",
       "name": "Undead Crypt",
       "description": "A massive burial ground where the dead do not rest.",
-      "allowed_areas": ["graveyard_hills", "cursed_forest"],
-      "possible_enemies": ["skeleton", "ghost", "wraith", "death_knight", "lich", "undead_knight"],
+      "allowed_areas": ["underground_tombs", "ancient_ruins"],
+      "possible_enemies": ["skeleton", "shadow_knight", "troll"],
       "difficulty": [6, 7],
       "rooms": 10,
       "boss_id": "necromancer_lord",
@@ -241,59 +145,11 @@
       }
     },
     {
-      "id": "demon_portal",
-      "name": "Demon Portal",
-      "description": "A rift between worlds spewing forth chaotic energy.",
-      "allowed_areas": ["hell_gate", "chaos_realm"],
-      "possible_enemies": ["infernal_imp", "hell_knight", "fire_demon", "demon", "death_knight"],
-      "difficulty": [7, 8],
-      "rooms": 11,
-      "boss_id": "demon_prince",
-      "completion_reward": {
-        "gold": 2000,
-        "experience": 4000,
-        "items": ["Demon Prince's Crown", "Infernal Blade"]
-      },
-      "room_weights": {
-        "question": 10,
-        "battle": 45,
-        "chest": 5,
-        "trap_chest": 15,
-        "multi_choice": 5,
-        "shrine": 5,
-        "ambush": 15
-      }
-    },
-    {
-      "id": "void_realm",
-      "name": "Void Realm",
-      "description": "A dimension of nothingness where reality begins to fade.",
-      "allowed_areas": ["void_edge", "nothingness"],
-      "possible_enemies": ["spectral_wyrm", "corrupted_priest", "evil_sorcerer", "wraith", "lich"],
-      "difficulty": [8, 8],
-      "rooms": 12,
-      "boss_id": "void_tyrant",
-      "completion_reward": {
-        "gold": 2500,
-        "experience": 5000,
-        "items": ["Void Heart", "Dragonsoul Blade"]
-      },
-      "room_weights": {
-        "question": 15,
-        "battle": 35,
-        "chest": 10,
-        "trap_chest": 10,
-        "multi_choice": 10,
-        "shrine": 5,
-        "ambush": 15
-      }
-    },
-    {
       "id": "dragons_lair",
       "name": "Dragon's Lair",
-      "description": "The golden-filled nest of the world's most feared dragon.",
-      "allowed_areas": ["dragon_mountains", "fire_volcano"],
-      "possible_enemies": ["dragon", "fire_wraith", "ancient_golem", "fire_demon", "hell_knight"],
+      "description": "The golden-filled nest of the world's most feared dragon, carved deep into the crystal mountains.",
+      "allowed_areas": ["crystal_caves", "taiga_outskirts"],
+      "possible_enemies": ["fire_wraith", "ancient_golem", "ice_elemental"],
       "difficulty": [8, 9],
       "rooms": 13,
       "boss_id": "fire_dragon_boss",
@@ -310,54 +166,6 @@
         "multi_choice": 5,
         "shrine": 5,
         "ambush": 10
-      }
-    },
-    {
-      "id": "celestial_tower",
-      "name": "Celestial Tower",
-      "description": "A tower reaching into the heavens, guarded by holy beings.",
-      "allowed_areas": ["heavenly_reaches", "divine_plains"],
-      "possible_enemies": ["corrupted_priest", "evil_sorcerer", "ancient_golem", "lightning_golem", "wind_elemental"],
-      "difficulty": [9, 9],
-      "rooms": 14,
-      "boss_id": "celestial_guardian",
-      "completion_reward": {
-        "gold": 3500,
-        "experience": 7000,
-        "items": ["Crown of the Dawn", "Divine Sword"]
-      },
-      "room_weights": {
-        "question": 35,
-        "battle": 25,
-        "chest": 10,
-        "trap_chest": 5,
-        "multi_choice": 10,
-        "shrine": 10,
-        "ambush": 5
-      }
-    },
-    {
-      "id": "supreme_realm",
-      "name": "Supreme Realm",
-      "description": "The final test for any hero. Only the strongest survive.",
-      "allowed_areas": ["supreme_peak", "eternal_void"],
-      "possible_enemies": ["spectral_wyrm", "lich", "void_tyrant", "death_knight", "demon", "corrupted_priest"],
-      "difficulty": [10, 10],
-      "rooms": 15,
-      "boss_id": "supreme_being",
-      "completion_reward": {
-        "gold": 5000,
-        "experience": 10000,
-        "items": ["Supreme Artifact", "Eternal Essence", "Legendary Crown"]
-      },
-      "room_weights": {
-        "question": 15,
-        "battle": 40,
-        "chest": 10,
-        "trap_chest": 10,
-        "multi_choice": 5,
-        "shrine": 5,
-        "ambush": 15
       }
     }
   ],
@@ -695,262 +503,7 @@
           }
         ]
       },
-      "failure_damage": 25,
-      "success_reward": {"gold": 100, "experience": 200}
-    },
-    "selection": {
-      "name": "Choice Challenge",
-      "description": "Make the right choice to proceed",
-      "types": [
-        {
-          "id": "path_selection",
-          "question": "You come to a fork in the road. One path leads to certain doom, the other to potential glory. Which do you choose?",
-          "options": [
-            {"text": "Left path", "correct": true, "reason": "Fortune favors the bold!"},
-            {"text": "Right path", "correct": false, "reason": "Cowardice leads to stagnation."},
-            {"text": "Stay put", "correct": false, "reason": "Indecision is its own punishment."}
-          ],
-          "time_limit": 30,
-          "failure_damage": 10,
-          "success_reward": {"gold": 75, "experience": 150}
-        },
-        {
-          "id": "chest_selection",
-          "question": "Three chests appear before you. One contains treasure, one contains a trap, one is empty. Which do you open?",
-          "options": [
-            {"text": "Golden Chest", "correct": false, "reason": "All that glitters is not gold."},
-            {"text": "Silver Chest", "correct": true, "reason": "Silver brings fortune!"},
-            {"text": "Bronze Chest", "correct": false, "reason": "The humble path reveals true value."}
-          ],
-          "time_limit": 30,
-          "failure_damage": 20,
-          "success_reward": {"gold": 150, "experience": 200}
-        },
-        {
-          "id": "ally_selection",
-          "question": "You encounter three travelers. One claims to be a guide, one seeks the same goal, one hides dark intentions. Which do you trust?",
-          "options": [
-            {"text": "The Guide", "correct": false, "reason": "Many claim to lead astray."},
-            {"text": "The Seeker", "correct": true, "reason": "Shared purpose builds trust!"},
-            {"text": "Trust None", "correct": false, "reason": "Solitude has its own perils."}
-          ],
-          "time_limit": 30,
-          "failure_damage": 10,
-          "success_reward": {"gold": 75, "experience": 150}
-        },
-        {
-          "id": "puzzle_selection",
-          "question": "Ancient runes glow before you. They form a phrase. Which word completes it? 'Darkness comes before the ___'?",
-          "options": [
-            {"text": "Light", "correct": true, "reason": "The eternal cycle completes!"},
-            {"text": "Night", "correct": false, "reason": "The darkness IS the night."},
-            {"text": "Shadow", "correct": false, "reason": "Shadows follow darkness."}
-          ],
-          "time_limit": 30,
-          "failure_damage": 15,
-          "success_reward": {"gold": 100, "experience": 175}
-        },
-        {
-          "id": "moral_selection",
-          "question": "A dying merchant offers you his fortune, but asks you to avenge his death. Do you:",
-          "options": [
-            {"text": "Take the gold", "correct": false, "reason": "Greed has its price."},
-            {"text": "Promise vengeance", "correct": true, "reason": "Honor demands action!"},
-            {"text": "Refuse both", "correct": false, "reason": "Neutrality is its own choice."}
-          ],
-          "time_limit": 30,
-          "failure_damage": 15,
-          "success_reward": {"gold": 100, "experience": 175}
-        },
-        {
-          "id": "torch_selection",
-          "question": "Three torches light a chamber. One flickers red, one burns blue, one glows steady white. Which leads to the treasure vault?",
-          "options": [
-            {"text": "Red torch", "correct": false, "reason": "The red flame hides a pit trap!"},
-            {"text": "Blue torch", "correct": false, "reason": "The blue flame leads to a dead end."},
-            {"text": "White torch", "correct": true, "reason": "Steady light reveals the true path!"}
-          ],
-          "time_limit": 30,
-          "failure_damage": 20,
-          "success_reward": {"gold": 120, "experience": 180}
-        },
-        {
-          "id": "potion_selection",
-          "question": "A mysterious alchemist offers you a potion. Red restores strength, blue grants vision, green grants speed. Which do you drink?",
-          "options": [
-            {"text": "Red Potion", "correct": true, "reason": "Strength surges through your veins!"},
-            {"text": "Blue Potion", "correct": false, "reason": "Visions overwhelm your senses — pain!"},
-            {"text": "Green Potion", "correct": false, "reason": "You run in circles and lose time."}
-          ],
-          "time_limit": 30,
-          "failure_damage": 15,
-          "success_reward": {"gold": 90, "experience": 160}
-        },
-        {
-          "id": "door_selection",
-          "question": "Three doors stand before you: one made of iron, one of oak, one of stone. The dungeon's treasure lies behind one. Which do you open?",
-          "options": [
-            {"text": "Iron door", "correct": false, "reason": "The iron door conceals a trap!"},
-            {"text": "Oak door", "correct": true, "reason": "The humble door holds the greatest reward!"},
-            {"text": "Stone door", "correct": false, "reason": "The stone door is sealed shut — you hurt yourself forcing it."}
-          ],
-          "time_limit": 30,
-          "failure_damage": 20,
-          "success_reward": {"gold": 130, "experience": 190}
-        },
-        {
-          "id": "inscription_selection",
-          "question": "Ancient runes on the floor read: 'Step on me to gain, step off to lose.' What do you do?",
-          "options": [
-            {"text": "Step on the rune", "correct": true, "reason": "Ancient power flows into you!"},
-            {"text": "Step around it", "correct": false, "reason": "A hidden floor panel snaps upward — pain!"},
-            {"text": "Smash the rune", "correct": false, "reason": "Destroying the rune releases a curse!"}
-          ],
-          "time_limit": 30,
-          "failure_damage": 15,
-          "success_reward": {"gold": 100, "experience": 175}
-        },
-        {
-          "id": "statue_selection",
-          "question": "Three statues depict a warrior, a scholar, and a thief. The dungeon's guardian asks: 'Which of these serves a dungeon best?'",
-          "options": [
-            {"text": "The Warrior", "correct": false, "reason": "Brawn alone shatters against stone walls."},
-            {"text": "The Scholar", "correct": true, "reason": "Knowledge reveals every secret!"},
-            {"text": "The Thief", "correct": false, "reason": "Cunning alone is not enough down here."}
-          ],
-          "time_limit": 30,
-          "failure_damage": 20,
-          "success_reward": {"gold": 110, "experience": 185}
-        }
-      ]
-    },
-    "trap": {
-      "name": "Trap Challenge",
-      "description": "Test your luck and skill",
-      "mechanic": "roll_d20",
-      "success_threshold": 10,
-      "difficulty_modifiers": {
-        "easy": {"threshold": 8, "failure_damage_multiplier": 0.5},
-        "normal": {"threshold": 10, "failure_damage_multiplier": 1.0},
-        "hard": {"threshold": 12, "failure_damage_multiplier": 1.5}
-      },
-      "types": [
-        {
-          "id": "arrow_trap",
-          "name": "Arrow Trap",
-          "description": "Darts shoot from the walls! Roll to dodge!",
-          "base_damage": 20,
-          "difficulty": "normal"
-        },
-        {
-          "id": "pit_trap",
-          "name": "Pit Trap",
-          "description": "The floor gives way beneath you! Roll to catch the edge!",
-          "base_damage": 25,
-          "difficulty": "normal"
-        },
-        {
-          "id": "crusher_trap",
-          "name": "Crusher Trap",
-          "description": "Massive walls close in! Roll to find the gap!",
-          "base_damage": 30,
-          "difficulty": "hard"
-        },
-        {
-          "id": "poison_trap",
-          "name": "Poison Gas Trap",
-          "description": "Deadly gas fills the room! Roll to hold your breath!",
-          "base_damage": 15,
-          "difficulty": "easy"
-        },
-        {
-          "id": "fire_trap",
-          "name": "Fire Trap",
-          "description": "Flames erupt from the floor! Roll to find safety!",
-          "base_damage": 25,
-          "difficulty": "normal"
-        },
-        {
-          "id": "lightning_trap",
-          "name": "Lightning Trap",
-          "description": "Lightning strikes from above! Roll to avoid the bolts!",
-          "base_damage": 25,
-          "difficulty": "normal"
-        },
-        {
-          "id": "blade_trap",
-          "name": "Swinging Blade Trap",
-          "description": "Giant blades swing through the corridor! Roll to time your move!",
-          "base_damage": 30,
-          "difficulty": "hard"
-        },
-        {
-          "id": "illusion_trap",
-          "name": "Illusion Trap",
-          "description": "Reality warps around you! Roll to maintain your senses!",
-          "base_damage": 10,
-          "difficulty": "easy"
-        }
-      ],
-      "failure_damage_base": 20,
-      "success_reward": {"gold": 50, "experience": 100}
-    }
-  },
-  "chest_templates": {
-    "small": {
-      "name": "Small Chest",
-      "gold_range": [50, 150],
-      "item_count_range": [1, 2],
-      "item_rarity": ["common", "uncommon"],
-      "experience": 100
-    },
-    "medium": {
-      "name": "Medium Chest",
-      "gold_range": [150, 400],
-      "item_count_range": [2, 3],
-      "item_rarity": ["uncommon", "rare"],
-      "experience": 250
-    },
-    "large": {
-      "name": "Large Chest",
-      "gold_range": [400, 800],
-      "item_count_range": [3, 5],
-      "item_rarity": ["rare", "epic"],
-      "experience": 500
-    },
-    "boss": {
-      "name": "Boss Chest",
-      "gold_range": [1000, 2000],
-      "item_count_range": [4, 6],
-      "item_rarity": ["epic", "legendary"],
-      "guaranteed_legendary": true,
-      "experience": 1000
-    },
-    "legendary": {
-      "name": "Legendary Chest",
-      "gold_range": [2000, 5000],
-      "item_count_range": [5, 8],
-      "item_rarity": ["legendary"],
-      "guaranteed_legendary": 2,
-      "experience": 2000
-    }
-  },
-  "dungeon_generation_rules": {
-    "difficulty_scaling": {
-      "base_difficulty": 1,
-      "difficulty_per_challenge": 0.5,
-      "boss_difficulty_bonus": 2
-    },
-    "reward_scaling": {
-      "base_gold": 100,
-      "gold_per_difficulty": 50,
-      "base_experience": 200,
-      "experience_per_difficulty": 100
-    },
-    "random_seed_options": {
-      "include_time_seed": true,
-      "include_player_level": true,
-      "include_area_difficulty": true
+      "failure_damage": 25
     }
   }
 }

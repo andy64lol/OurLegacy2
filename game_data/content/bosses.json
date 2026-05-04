@@ -1,85 +1,130 @@
 {
-  "fire_dragon_boss": {
-    "name": "Ancient Fire Dragon",
-    "hp": 3000,
-    "attack": 350,
-    "defense": 200,
-    "speed": 15,
-    "description": "The legendary Ancient Fire Dragon, ruler of the mountains. Its breath can melt stone and its roar shakes the very earth.",
+  "orc_chieftain": {
+    "name": "Orc Chieftain",
+    "hp": 720,
+    "attack": 132,
+    "defense": 60,
+    "speed": 12,
+    "description": "The brutal leader of the orc clan in the Deep Woods, wielding a massive war axe.",
     "special_abilities": [
       {
-        "name": "Fire Breath",
-        "description": "Deals massive fire damage to all enemies",
-        "damage": 50,
-        "mp_cost": 20,
-        "cooldown": 3
-      },
-      {
-        "name": "Dragon Roar",
-        "description": "Intimidates enemies, reducing their attack and defense",
-        "effect": "debuff",
-        "attack_reduction": 10,
-        "defense_reduction": 5,
+        "name": "War Cry",
+        "description": "Roars to boost its own attack and intimidate the enemy",
+        "attack_bonus": 8,
+        "enemy_attack_penalty": 5,
         "duration": 5,
-        "mp_cost": 15,
+        "mp_cost": 10,
         "cooldown": 4
       },
       {
-        "name": "Wing Buffet",
-        "description": "A powerful physical attack that may stun the enemy",
-        "damage": 40,
-        "stun_chance": 0.3,
+        "name": "Heavy Strike",
+        "description": "A devastating blow that ignores some defense",
+        "damage": 35,
+        "defense_ignore": 0.5,
         "mp_cost": 0,
+        "cooldown": 3
+      }
+    ],
+    "phases": [
+      {
+        "hp_threshold": 0.4,
+        "description": "Wounded but still fierce, the Chieftain fights with increased desperation",
+        "attack_multiplier": 1.3,
+        "special_abilities_unlocked": [
+          "War Cry",
+          "Heavy Strike"
+        ]
+      }
+    ],
+    "experience_reward": 200,
+    "gold_reward": 100,
+    "unique_loot": [
+      "Chieftain's Axe",
+      "Orc War Banner",
+      "Bone Necklace"
+    ],
+    "unlock_conditions": {
+      "level": 3,
+      "missions_required": [
+        "orc_invasion"
+      ]
+    },
+    "tags": [
+      "humanoid",
+      "strong",
+      "armored"
+    ]
+  },
+  "goblin_king": {
+    "name": "Goblin King",
+    "hp": 840,
+    "attack": 120,
+    "defense": 48,
+    "speed": 14,
+    "description": "The greedy and cunning ruler of the goblin cave, wielding a dagger made from stolen treasures.",
+    "special_abilities": [
+      {
+        "name": "Backstab",
+        "description": "A sneaky attack from behind dealing critical damage",
+        "damage": 35,
+        "critical_chance": 0.4,
+        "mp_cost": 0,
+        "cooldown": 3
+      },
+      {
+        "name": "Summon Minions",
+        "description": "Calls forth goblin minions to aid in battle",
+        "effect": "summon",
+        "summon_count": 2,
+        "summon_type": "goblin",
+        "mp_cost": 20,
+        "cooldown": 5
+      },
+      {
+        "name": "Gold Toss",
+        "description": "Throws stolen gold coins to distract and damage enemies",
+        "damage": 15,
+        "hit_count": 3,
+        "mp_cost": 10,
         "cooldown": 2
       }
     ],
     "phases": [
       {
-        "hp_threshold": 0.7,
-        "description": "The dragon fights with typical draconic fury",
-        "attack_multiplier": 1.0
-      },
-      {
-        "hp_threshold": 0.4,
-        "description": "Enraged by its wounds, the dragon becomes more aggressive",
-        "attack_multiplier": 1.3,
-        "defense_multiplier": 0.8
-      },
-      {
-        "hp_threshold": 0.2,
-        "description": "In its final moments, the dragon unleashes all its power",
-        "attack_multiplier": 1.5,
-        "defense_multiplier": 0.6,
+        "hp_threshold": 0.5,
+        "description": "The Goblin King becomes desperate and calls for help",
+        "attack_multiplier": 1.1,
         "special_abilities_unlocked": [
-          "Fire Breath",
-          "Dragon Roar"
+          "Summon Minions"
+        ]
+      },
+      {
+        "hp_threshold": 0.25,
+        "description": "Cornered and furious, the King fights with all his cunning",
+        "attack_multiplier": 1.3,
+        "special_abilities_unlocked": [
+          "Backstab",
+          "Gold Toss"
         ]
       }
     ],
-    "experience_reward": 1000,
-    "gold_reward": 500,
+    "experience_reward": 250,
+    "gold_reward": 120,
     "unique_loot": [
-      "Dragon Scale Armor",
-      "Fire Gem",
-      "Dragon Heart",
-      "Ancient Dragon Scale"
+      "Goblin King's Dagger",
+      "Stolen Gold Necklace",
+      "Crown of Greed"
     ],
     "unlock_conditions": {
-      "level": 8,
+      "level": 4,
       "missions_required": [
-        "crystal_guardian",
-        "troll_slayer"
+        "forest_cleaning"
       ]
     },
-    "dialogues": {
-      "on_start_battle": "dragon.boss.start",
-      "on_defeat": "dragon.boss.defeat"
-    },
     "tags": [
-      "dragon",
-      "fire",
-      "flying",
-      "large"
+      "humanoid",
+      "small",
+      "spellcaster"
     ]
   },
   "troll_king": {
@@ -281,180 +326,13 @@
       "spellcaster"
     ]
   },
-  "orc_chieftain": {
-    "name": "Orc Chieftain",
-    "hp": 720,
-    "attack": 132,
-    "defense": 60,
-    "speed": 12,
-    "description": "The brutal leader of the orc clan in the Deep Woods, wielding a massive war axe.",
-    "special_abilities": [
-      {
-        "name": "War Cry",
-        "description": "Roars to boost its own attack and intimidate the enemy",
-        "attack_bonus": 8,
-        "enemy_attack_penalty": 5,
-        "duration": 5,
-        "mp_cost": 10,
-        "cooldown": 4
-      },
-      {
-        "name": "Heavy Strike",
-        "description": "A devastating blow that ignores some defense",
-        "damage": 35,
-        "defense_ignore": 0.5,
-        "mp_cost": 0,
-        "cooldown": 3
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.4,
-        "description": "Wounded but still fierce, the Chieftain fights with increased desperation",
-        "attack_multiplier": 1.3,
-        "special_abilities_unlocked": [
-          "War Cry",
-          "Heavy Strike"
-        ]
-      }
-    ],
-    "experience_reward": 200,
-    "gold_reward": 100,
-    "unique_loot": [
-      "Chieftain's Axe",
-      "Orc War Banner",
-      "Bone Necklace"
-    ],
-    "unlock_conditions": {
-      "level": 3,
-      "missions_required": [
-        "orc_invasion"
-      ]
-    },
-    "tags": [
-      "humanoid",
-      "strong",
-      "armored"
-    ]
-  },
-  "void_tyrant": {
-    "name": "Void Tyrant Kael'dor",
-    "hp": 4000,
-    "attack": 400,
-    "defense": 250,
-    "speed": 14,
-    "description": "An ancient being of cosmic horror that dwells beyond reality itself. The strongest challenge.",
-    "experience_reward": 500,
-    "gold_reward": 400,
-    "unique_loot": [
-      "Dragonsoul Blade",
-      "Crown of the Dawn",
-      "Void Heart",
-      "Eternal Essence"
-    ],
-    "unlock_conditions": {
-      "level": 8,
-      "missions_required": [
-        "void_walker",
-        "dragon_slayer"
-      ]
-    },
-    "tags": [
-      "void",
-      "spellcaster",
-      "large"
-    ]
-  },
-  "swamp_hydra": {
-    "name": "Swamp Hydra",
-    "hp": 1320,
-    "attack": 150,
-    "defense": 84,
-    "speed": 10,
-    "description": "A massive serpentine beast dwelling in the poisonous waters of the Swamp of Shadows. Each head must be destroyed separately.",
-    "special_abilities": [
-      {
-        "name": "Venomous Bite",
-        "description": "Delivers a toxic bite that causes poison damage over time",
-        "damage": 20,
-        "poison_damage": 5,
-        "duration": 4,
-        "mp_cost": 10,
-        "cooldown": 2
-      },
-      {
-        "name": "Multi-Head Attack",
-        "description": "Attacks with multiple heads simultaneously",
-        "damage": 15,
-        "hit_count": 3,
-        "mp_cost": 15,
-        "cooldown": 3
-      },
-      {
-        "name": "Toxic Cloud",
-        "description": "Releases poisonous gas that affects all enemies",
-        "damage": 10,
-        "poison_damage": 3,
-        "duration": 5,
-        "mp_cost": 20,
-        "cooldown": 4
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.7,
-        "description": "The hydra attacks with its primary heads",
-        "attack_multiplier": 1.0,
-        "head_count": 3
-      },
-      {
-        "hp_threshold": 0.4,
-        "description": "The hydra grows more heads as it takes damage",
-        "attack_multiplier": 1.2,
-        "head_count": 4,
-        "special_abilities_unlocked": [
-          "Toxic Cloud"
-        ]
-      },
-      {
-        "hp_threshold": 0.2,
-        "description": "The final heads of the hydra unleash devastating attacks",
-        "attack_multiplier": 1.4,
-        "head_count": 5,
-        "special_abilities_unlocked": [
-          "Multi-Head Attack",
-          "Toxic Cloud"
-        ]
-      }
-    ],
-    "experience_reward": 350,
-    "gold_reward": 180,
-    "unique_loot": [
-      "Hydra Fang",
-      "Venom Sac",
-      "Swamp Scale",
-      "Poison Crystal"
-    ],
-    "unlock_conditions": {
-      "level": 4,
-      "missions_required": [
-        "orc_invasion",
-        "forest_cleaning"
-      ]
-    },
-    "tags": [
-      "beast",
-      "poisonous",
-      "large"
-    ]
-  },
   "necromancer_lord": {
     "name": "Necromancer Lord Vorthak",
     "hp": 1440,
     "attack": 224,
     "defense": 80,
     "speed": 16,
-    "description": "A master of dark magic who commands the undead from his throne in the Haunted Cemetery.",
+    "description": "A master of dark magic who commands the undead from his throne deep within the Underground Tombs.",
     "special_abilities": [
       {
         "name": "Army of the Dead",
@@ -522,1406 +400,96 @@
     "unlock_conditions": {
       "level": 6,
       "missions_required": [
-        "undead_horde",
-        "temple_protector"
-      ]
-    },
-    "tags": [
-      "humanoid",
-      "undead",
-      "spellcaster"
-    ]
-  },
-  "storm_giant": {
-    "name": "Thunder Lord Thorigar",
-    "hp": 2800,
-    "attack": 320,
-    "defense": 220,
-    "speed": 12,
-    "description": "A colossal giant who commands the storms atop Thunder Peak, wielding a massive hammer forged from lightning.",
-    "special_abilities": [
-      {
-        "name": "Lightning Strike",
-        "description": "Calls down a bolt of lightning to strike enemies",
-        "damage": 45,
-        "mp_cost": 25,
-        "cooldown": 2
-      },
-      {
-        "name": "Thunder Clap",
-        "description": "Creates a deafening roar that stuns and damages enemies",
-        "damage": 25,
-        "stun_chance": 0.4,
-        "mp_cost": 15,
-        "cooldown": 4
-      },
-      {
-        "name": "Storm Shield",
-        "description": "Surrounds himself with crackling lightning that damages attackers",
-        "damage_reflection": 0.3,
-        "duration": 5,
-        "mp_cost": 30,
-        "cooldown": 6
-      },
-      {
-        "name": "Meteor Smash",
-        "description": "A devastating hammer strike that causes massive damage",
-        "damage": 50,
-        "mp_cost": 35,
-        "cooldown": 5
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.6,
-        "description": "Thorigar fights with thunderous might",
-        "attack_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Lightning Strike"
-        ]
-      },
-      {
-        "hp_threshold": 0.3,
-        "description": "Enraged, the giant calls upon the full fury of the storm",
-        "attack_multiplier": 1.4,
-        "special_abilities_unlocked": [
-          "Thunder Clap",
-          "Storm Shield",
-          "Meteor Smash"
-        ]
-      }
-    ],
-    "experience_reward": 450,
-    "gold_reward": 300,
-    "unique_loot": [
-      "Thunder Hammer",
-      "Storm Giant's Belt",
-      "Lightning Crystal",
-      "Thundercloud Cloak",
-      "Giant's Gauntlets"
-    ],
-    "unlock_conditions": {
-      "level": 7,
-      "missions_required": [
-        "crystal_guardian",
-        "inferno_slayer"
-      ]
-    },
-    "tags": [
-      "giant",
-      "lightning",
-      "armored"
-    ]
-  },
-  "lich_king": {
-    "name": "Lich King Malachar",
-    "hp": 3500,
-    "attack": 380,
-    "defense": 200,
-    "speed": 15,
-    "description": "The undying ruler of the Crypt of Eternity, wielding ancient necromantic power that defies death itself.",
-    "special_abilities": [
-      {
-        "name": "Frost Blast",
-        "description": "Releases a wave of necrotic cold that freezes enemies",
-        "damage": 35,
-        "speed_reduction": 8,
-        "duration": 3,
-        "mp_cost": 25,
-        "cooldown": 3
-      },
-      {
-        "name": "Death's Embrace",
-        "description": "Creates a zone of death energy that drains life",
-        "damage_per_second": 10,
-        "heal_per_second": 5,
-        "duration": 5,
-        "mp_cost": 35,
-        "cooldown": 6
-      },
-      {
-        "name": "Army of Eternity",
-        "description": "Raises powerful undead champions to fight",
-        "effect": "summon_elite_undead",
-        "undead_count": 2,
-        "undead_type": "death_knight",
-        "mp_cost": 40,
-        "cooldown": 7
-      },
-      {
-        "name": "Soul Shackles",
-        "description": "Binds the souls of enemies, preventing escape",
-        "effect": "root",
-        "duration": 3,
-        "mp_cost": 30,
-        "cooldown": 5
-      },
-      {
-        "name": "Resurrection",
-        "description": "Instantly revives with partial health",
-        "heal_amount": 0.3,
-        "max_uses": 1,
-        "mp_cost": 50,
-        "cooldown": 0
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.7,
-        "description": "The Lich King tests his power against intruders",
-        "attack_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Frost Blast"
-        ]
-      },
-      {
-        "hp_threshold": 0.4,
-        "description": "Malachar summons his elite undead guardians",
-        "attack_multiplier": 1.2,
-        "special_abilities_unlocked": [
-          "Death's Embrace",
-          "Army of Eternity"
-        ]
-      },
-      {
-        "hp_threshold": 0.15,
-        "description": "The Lich King reveals his ultimate power and immortality",
-        "attack_multiplier": 1.5,
-        "special_abilities_unlocked": [
-          "Soul Shackles",
-          "Resurrection"
-        ]
-      }
-    ],
-    "experience_reward": 550,
-    "gold_reward": 400,
-    "unique_loot": [
-      "Crown of Malachar",
-      "Necrotic Blade",
-      "Phylactery",
-      "Death Knight's Shield",
-      "Soul Reaver",
-      "Lich King's Robes"
-    ],
-    "unlock_conditions": {
-      "level": 8,
-      "missions_required": [
-        "necromancer_defeat",
-        "shadow_plague",
         "troll_slayer"
       ]
     },
     "tags": [
+      "humanoid",
       "undead",
       "spellcaster"
     ]
   },
-  "demon_prince": {
-    "name": "Demon Prince Azgorath",
-    "hp": 5460,
-    "attack": 585,
-    "defense": 364,
-    "speed": 16,
-    "description": "The heir to the infernal throne, ruling from the heart of Hellfire Citadel with fiery wrath and demonic power.",
+  "fire_dragon_boss": {
+    "name": "Ancient Fire Dragon",
+    "hp": 3000,
+    "attack": 350,
+    "defense": 200,
+    "speed": 15,
+    "description": "The legendary Ancient Fire Dragon, ruler of the crystal mountains. Its breath can melt stone and its roar shakes the very earth.",
     "special_abilities": [
       {
-        "name": "Hellfire Inferno",
-        "description": "Unleashes devastating fire damage to all enemies",
-        "damage": 55,
-        "mp_cost": 35,
-        "cooldown": 3
-      },
-      {
-        "name": "Demon Summoning",
-        "description": "Calls forth lesser demons to battle",
-        "effect": "summon_demons",
-        "demon_count": 3,
-        "demon_type": "infernal_imp",
-        "mp_cost": 30,
-        "cooldown": 5
-      },
-      {
-        "name": "Soul Cleave",
-        "description": "A devastating attack that also damages MP",
-        "damage": 40,
-        "mp_damage": 20,
-        "mp_cost": 25,
-        "cooldown": 4
-      },
-      {
-        "name": "Demon Form",
-        "description": "Transforms into a more powerful demonic state",
-        "attack_bonus": 15,
-        "defense_bonus": 10,
-        "speed_bonus": 5,
-        "duration": 6,
-        "mp_cost": 50,
-        "cooldown": 10
-      },
-      {
-        "name": "Chaos Portal",
-        "description": "Creates unstable portals that damage anyone nearby",
-        "damage": 30,
-        "effect": "chaos_zone",
-        "duration": 4,
-        "mp_cost": 40,
-        "cooldown": 6
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.7,
-        "description": "Azgorath fights with his demonic minions",
-        "attack_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Hellfire Inferno"
-        ]
-      },
-      {
-        "hp_threshold": 0.4,
-        "description": "The Demon Prince shows his true power",
-        "attack_multiplier": 1.3,
-        "special_abilities_unlocked": [
-          "Demon Summoning",
-          "Soul Cleave"
-        ]
-      },
-      {
-        "hp_threshold": 0.2,
-        "description": "Azgorath enters his ultimate Demon Form",
-        "attack_multiplier": 1.6,
-        "special_abilities_unlocked": [
-          "Demon Form",
-          "Chaos Portal"
-        ]
-      }
-    ],
-    "experience_reward": 600,
-    "gold_reward": 500,
-    "unique_loot": [
-      "Demon Prince's Crown",
-      "Infernal Blade",
-      "Hellfire Shield",
-      "Demon Heart",
-      "Chaos Orb",
-      "Azgorath's Cloak",
-      "Soul Fragment"
-    ],
-    "unlock_conditions": {
-      "level": 9,
-      "missions_required": [
-        "demon_gate",
-        "lich_king_defeat"
-      ]
-    },
-    "tags": [
-      "demon",
-      "fire",
-      "large"
-    ]
-  },
-  "elder_dragon": {
-    "name": "Elder Dragon Zephyr",
-    "hp": 6500,
-    "attack": 650,
-    "defense": 455,
-    "speed": 20,
-    "description": "An ancient dragon of immense power who guards the Sky Sanctuary, commanding the winds themselves.",
-    "special_abilities": [
-      {
-        "name": "Cyclone Breath",
-        "description": "Unleashes a devastating wind attack that shreds defenses",
+        "name": "Fire Breath",
+        "description": "Deals massive fire damage to all enemies",
         "damage": 50,
-        "defense_reduction": 8,
-        "duration": 3,
-        "mp_cost": 30,
-        "cooldown": 3
-      },
-      {
-        "name": "Sky Dash",
-        "description": "Blasts across the arena dealing massive damage",
-        "damage": 45,
-        "mp_cost": 25,
-        "cooldown": 4
-      },
-      {
-        "name": "Tempest Shield",
-        "description": "Surrounds with protective winds that deflect attacks",
-        "damage_reduction": 0.25,
-        "duration": 5,
-        "mp_cost": 35,
-        "cooldown": 6
-      },
-      {
-        "name": "Wind Slash",
-        "description": "Creates invisible blades of wind to slice enemies",
-        "damage": 40,
-        "hit_count": 5,
-        "mp_cost": 30,
-        "cooldown": 4
-      },
-      {
-        "name": "Ancient Dragon's Roar",
-        "description": "A terrifying roar that reduces all enemy stats",
-        "attack_reduction": 12,
-        "defense_reduction": 8,
-        "speed_reduction": 6,
-        "duration": 5,
-        "mp_cost": 40,
-        "cooldown": 8
-      },
-      {
-        "name": "Divine Regeneration",
-        "description": "Rapidly heals over time using ancient dragon magic",
-        "heal_per_second": 15,
-        "duration": 5,
-        "mp_cost": 45,
-        "cooldown": 10
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.75,
-        "description": "Zephyr surveys his domain with regal calm",
-        "attack_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Cyclone Breath"
-        ]
-      },
-      {
-        "hp_threshold": 0.5,
-        "description": "The elder dragon becomes more aggressive",
-        "attack_multiplier": 1.2,
-        "special_abilities_unlocked": [
-          "Sky Dash",
-          "Tempest Shield"
-        ]
-      },
-      {
-        "hp_threshold": 0.25,
-        "description": "Zephyr unleashes the full fury of the skies",
-        "attack_multiplier": 1.5,
-        "special_abilities_unlocked": [
-          "Wind Slash",
-          "Ancient Dragon's Roar"
-        ]
-      },
-      {
-        "hp_threshold": 0.1,
-        "description": "The dragon's final stand with all powers unleashed",
-        "attack_multiplier": 1.8,
-        "special_abilities_unlocked": [
-          "Divine Regeneration"
-        ]
-      }
-    ],
-    "experience_reward": 700,
-    "gold_reward": 600,
-    "unique_loot": [
-      "Zephyr's Scale",
-      "Wind Dragon's Heart",
-      "Stormbreaker",
-      "Sky Crown",
-      "Dragon Soul Gem",
-      "Eternal Feather",
-      "Wind Walkers",
-      "Cloudstrider Boots"
-    ],
-    "unlock_conditions": {
-      "level": 9,
-      "missions_required": [
-        "storm_giant_defeat",
-        "demon_prince_defeat"
-      ]
-    },
-    "tags": [
-      "dragon",
-      "flying",
-      "large",
-      "armored"
-    ]
-  },
-  "Dalokurg": {
-    "name": "The infamous bandit leader, D\u00e4lokurg",
-    "hp": 1360,
-    "attack": 320,
-    "defense": 256,
-    "speed": 28,
-    "description": "D\u00e4lokurg, the notorious bandit leader known for his cunning and ruthlessness. He commands a large group of bandits and has a reputation for ambushing travelers on the roads.",
-    "special_abilities": [
-      {
-        "name": "Ambush Strike",
-        "description": "A surprise attack that deals extra damage when D\u00e4lokurg is at full health",
-        "damage": 50,
-        "mp_cost": 15,
-        "cooldown": 3
-      },
-      {
-        "name": "Warhammer Smash",
-        "description": "A powerful attack with his warhammer",
-        "damage": 45,
-        "mp_cost": 0,
-        "cooldown": 2
-      },
-      {
-        "name": "Strength of million bears",
-        "description": "Boosts his attack power temporarily",
-        "attack_bonus": 15,
-        "duration": 4,
         "mp_cost": 20,
-        "cooldown": 5
-      }
-    ],
-    "phases": [],
-    "experience_reward": 100,
-    "gold_reward": 50,
-    "unique_loot": [
-      "D\u00e4lokurg's Warhammer",
-      "Bandit Leader's Cloak"
-    ],
-    "tags": [
-      "humanoid",
-      "outlaw",
-      "armored"
-    ]
-  },
-  "purple_sandworm": {
-    "name": "Purple Sandworm",
-    "hp": 5200,
-    "attack": 720,
-    "defense": 720,
-    "speed": 12,
-    "description": "A massive sandworm that dwells beneath the desert sands. Its purple scales shimmer in the sunlight, and it can burrow quickly to ambush prey.",
-    "special_abilities": [
+        "cooldown": 3
+      },
       {
-        "name": "Sand Burrow",
-        "description": "Dives underground to avoid attacks and reemerge elsewhere",
-        "effect": "evasion",
-        "duration": 2,
+        "name": "Dragon Roar",
+        "description": "Intimidates enemies, reducing their attack and defense",
+        "effect": "debuff",
+        "attack_reduction": 10,
+        "defense_reduction": 5,
+        "duration": 5,
         "mp_cost": 15,
         "cooldown": 4
       },
       {
-        "name": "Tail Swipe",
-        "description": "A powerful tail attack that hits all nearby enemies",
-        "damage": 35,
-        "mp_cost": 10,
-        "cooldown": 3
-      },
-      {
-        "name": "Sandstorm",
-        "description": "Creates a sandstorm that reduces enemy accuracy",
-        "accuracy_reduction": 10,
-        "duration": 4,
-        "mp_cost": 25,
-        "cooldown": 5
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.5,
-        "description": "The sandworm becomes more aggressive as it takes damage",
-        "attack_multiplier": 1.2,
-        "special_abilities_unlocked": [
-          "Sandstorm"
-        ]
-      }
-    ],
-    "experience_reward": 300,
-    "gold_reward": 150,
-    "unique_loot": [
-      "Sandworm Scale",
-      "Desert Crystal",
-      "Burrower's Fang"
-    ],
-    "tags": [
-      "beast",
-      "large",
-      "burrowing"
-    ]
-  },
-  "goblin_king": {
-    "name": "Goblin King",
-    "hp": 840,
-    "attack": 120,
-    "defense": 48,
-    "speed": 14,
-    "description": "The greedy and cunning ruler of the goblin cave, wielding a dagger made from stolen treasures.",
-    "special_abilities": [
-      {
-        "name": "Backstab",
-        "description": "A sneaky attack from behind dealing critical damage",
-        "damage": 35,
-        "critical_chance": 0.4,
-        "mp_cost": 0,
-        "cooldown": 3
-      },
-      {
-        "name": "Summon Minions",
-        "description": "Calls forth goblin minions to aid in battle",
-        "effect": "summon",
-        "summon_count": 2,
-        "summon_type": "goblin",
-        "mp_cost": 20,
-        "cooldown": 5
-      },
-      {
-        "name": "Gold Toss",
-        "description": "Throws stolen gold coins to distract and damage enemies",
-        "damage": 15,
-        "hit_count": 3,
-        "mp_cost": 10,
-        "cooldown": 2
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.5,
-        "description": "The Goblin King becomes desperate and calls for help",
-        "attack_multiplier": 1.1,
-        "special_abilities_unlocked": [
-          "Summon Minions"
-        ]
-      },
-      {
-        "hp_threshold": 0.25,
-        "description": "Cornered and furious, the King fights with all his cunning",
-        "attack_multiplier": 1.3,
-        "special_abilities_unlocked": [
-          "Backstab",
-          "Gold Toss"
-        ]
-      }
-    ],
-    "experience_reward": 250,
-    "gold_reward": 120,
-    "unique_loot": [
-      "Goblin King's Dagger",
-      "Stolen Gold Necklace",
-      "Crown of Greed"
-    ],
-    "unlock_conditions": {
-      "level": 4,
-      "missions_required": [
-        "goblin_hunt"
-      ]
-    },
-    "tags": [
-      "humanoid",
-      "small",
-      "spellcaster"
-    ]
-  },
-  "fire_elemental_lord": {
-    "name": "Fire Elemental Lord Ignaros",
-    "hp": 2600,
-    "attack": 320,
-    "defense": 180,
-    "speed": 16,
-    "description": "A towering being of pure flame that rules over the Fire Temple. Its presence causes the very air to burn.",
-    "special_abilities": [
-      {
-        "name": "Inferno Wave",
-        "description": "Unleashes a wave of fire that burns all enemies",
+        "name": "Wing Buffet",
+        "description": "A powerful physical attack that may stun the enemy",
         "damage": 40,
-        "burn_damage": 8,
-        "duration": 4,
-        "mp_cost": 25,
-        "cooldown": 3
-      },
-      {
-        "name": "Magma Armor",
-        "description": "Covers itself in molten rock, increasing defense and damaging attackers",
-        "defense_bonus": 12,
-        "damage_reflection": 0.2,
-        "duration": 5,
-        "mp_cost": 30,
-        "cooldown": 6
-      },
-      {
-        "name": "Eruption",
-        "description": "Causes the ground to erupt with volcanic force",
-        "damage": 50,
         "stun_chance": 0.3,
-        "mp_cost": 35,
-        "cooldown": 5
-      },
-      {
-        "name": "Flame Dash",
-        "description": "Moves with incredible speed through flames",
-        "speed_bonus": 10,
-        "duration": 3,
-        "mp_cost": 20,
-        "cooldown": 4
+        "mp_cost": 0,
+        "cooldown": 2
       }
     ],
     "phases": [
       {
         "hp_threshold": 0.7,
-        "description": "Ignaros tests intruders with controlled flames",
-        "attack_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Inferno Wave"
-        ]
+        "description": "The dragon fights with typical draconic fury",
+        "attack_multiplier": 1.0
       },
       {
         "hp_threshold": 0.4,
-        "description": "The Lord's flames intensify with anger",
+        "description": "Enraged by its wounds, the dragon becomes more aggressive",
         "attack_multiplier": 1.3,
-        "special_abilities_unlocked": [
-          "Magma Armor",
-          "Eruption"
-        ]
+        "defense_multiplier": 0.8
       },
       {
         "hp_threshold": 0.2,
-        "description": "Ignaros becomes a being of pure destructive flame",
+        "description": "In its final moments, the dragon unleashes all its power",
         "attack_multiplier": 1.5,
+        "defense_multiplier": 0.6,
         "special_abilities_unlocked": [
-          "Flame Dash"
-        ]
-      }
-    ],
-    "experience_reward": 500,
-    "gold_reward": 280,
-    "unique_loot": [
-      "Ember Core",
-      "Flame Lord's Crown",
-      "Magma Stone",
-      "Ignaros's Heart"
-    ],
-    "unlock_conditions": {
-      "level": 7,
-      "missions_required": [
-        "fire_dragon_defeat",
-        "crystal_caves_clear"
-      ]
-    },
-    "tags": [
-      "elemental",
-      "fire",
-      "large"
-    ]
-  },
-  "ice_giant_king": {
-    "name": "Ice Giant King Thrym",
-    "hp": 2800,
-    "attack": 300,
-    "defense": 220,
-    "speed": 10,
-    "description": "The colossal ruler of the frozen peaks, wielding a massive club of eternal ice. His breath freezes the very soul.",
-    "special_abilities": [
-      {
-        "name": "Frost Slam",
-        "description": "A devastating blow that freezes the ground and enemies",
-        "damage": 45,
-        "freeze_chance": 0.4,
-        "mp_cost": 25,
-        "cooldown": 3
-      },
-      {
-        "name": "Blizzard Breath",
-        "description": "Exhales a freezing storm that reduces enemy speed",
-        "damage": 25,
-        "speed_reduction": 8,
-        "duration": 4,
-        "mp_cost": 20,
-        "cooldown": 4
-      },
-      {
-        "name": "Ice Armor",
-        "description": "Encases itself in thick ice, greatly increasing defense",
-        "defense_bonus": 15,
-        "duration": 5,
-        "mp_cost": 30,
-        "cooldown": 6
-      },
-      {
-        "name": "Avalanche Call",
-        "description": "Triggers an avalanche that buries enemies",
-        "damage": 55,
-        "stun_chance": 0.5,
-        "mp_cost": 40,
-        "cooldown": 7
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.6,
-        "description": "Thrym fights with the cold fury of his kingdom",
-        "attack_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Frost Slam"
-        ]
-      },
-      {
-        "hp_threshold": 0.35,
-        "description": "The King calls upon the full power of winter",
-        "attack_multiplier": 1.25,
-        "special_abilities_unlocked": [
-          "Blizzard Breath",
-          "Ice Armor"
-        ]
-      },
-      {
-        "hp_threshold": 0.15,
-        "description": "Thrym unleashes the eternal winter's wrath",
-        "attack_multiplier": 1.5,
-        "special_abilities_unlocked": [
-          "Avalanche Call"
-        ]
-      }
-    ],
-    "experience_reward": 550,
-    "gold_reward": 320,
-    "unique_loot": [
-      "Frostbite",
-      "Glacial Shield",
-      "Thrym's Crown",
-      "Heart of Winter"
-    ],
-    "unlock_conditions": {
-      "level": 7,
-      "missions_required": [
-        "ice_queen_defeat",
-        "frozen_peaks_explore"
-      ]
-    },
-    "tags": [
-      "giant",
-      "ice",
-      "cold",
-      "armored"
-    ]
-  },
-  "celestial_guardian": {
-    "name": "Celestial Guardian Auriel",
-    "hp": 4940,
-    "attack": 494,
-    "defense": 364,
-    "speed": 22,
-    "description": "A divine being of pure light that guards the Celestial Tower. Its presence radiates holy power that burns the unworthy.",
-    "special_abilities": [
-      {
-        "name": "Holy Smite",
-        "description": "Strikes enemies with divine light, dealing massive damage",
-        "damage": 50,
-        "mp_cost": 25,
-        "cooldown": 3
-      },
-      {
-        "name": "Divine Shield",
-        "description": "Creates an impenetrable barrier of holy light",
-        "defense_bonus": 20,
-        "damage_reduction": 0.3,
-        "duration": 4,
-        "mp_cost": 35,
-        "cooldown": 6
-      },
-      {
-        "name": "Light of Judgment",
-        "description": "Calls down beams of purifying light from above",
-        "damage": 35,
-        "hit_count": 3,
-        "mp_cost": 30,
-        "cooldown": 4
-      },
-      {
-        "name": "Celestial Regeneration",
-        "description": "Heals using divine energy",
-        "heal_amount": 60,
-        "mp_cost": 40,
-        "cooldown": 5
-      },
-      {
-        "name": "Wings of Fury",
-        "description": "Unleashes a devastating attack with celestial wings",
-        "damage": 60,
-        "speed_bonus": 8,
-        "duration": 3,
-        "mp_cost": 45,
-        "cooldown": 7
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.75,
-        "description": "Auriel tests the worthiness of challengers",
-        "attack_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Holy Smite"
-        ]
-      },
-      {
-        "hp_threshold": 0.5,
-        "description": "The Guardian reveals more divine power",
-        "attack_multiplier": 1.2,
-        "special_abilities_unlocked": [
-          "Divine Shield",
-          "Light of Judgment"
-        ]
-      },
-      {
-        "hp_threshold": 0.25,
-        "description": "Auriel fights with the full fury of the heavens",
-        "attack_multiplier": 1.4,
-        "special_abilities_unlocked": [
-          "Celestial Regeneration",
-          "Wings of Fury"
-        ]
-      }
-    ],
-    "experience_reward": 650,
-    "gold_reward": 450,
-    "unique_loot": [
-      "Crown of the Dawn",
-      "Divine Sword",
-      "Auriel's Wings",
-      "Celestial Halo",
-      "Holy Relic"
-    ],
-    "unlock_conditions": {
-      "level": 9,
-      "missions_required": [
-        "void_tyrant_defeat",
-        "dragon_slayer_master"
-      ]
-    },
-    "tags": [
-      "holy",
-      "construct",
-      "flying"
-    ]
-  },
-  "supreme_being": {
-    "name": "Supreme Being Eternus",
-    "hp": 7800,
-    "attack": 715,
-    "defense": 520,
-    "speed": 30,
-    "description": "The ultimate entity that exists beyond time and space. Only the most legendary heroes may challenge this being of pure cosmic power.",
-    "special_abilities": [
-      {
-        "name": "Cosmic Blast",
-        "description": "Unleashes the raw power of the universe",
-        "damage": 70,
-        "mp_cost": 40,
-        "cooldown": 3
-      },
-      {
-        "name": "Time Stop",
-        "description": "Freezes time itself, preventing enemy actions",
-        "effect": "stun_all",
-        "duration": 2,
-        "mp_cost": 50,
-        "cooldown": 8
-      },
-      {
-        "name": "Reality Warp",
-        "description": "Bends reality to weaken enemies and strengthen itself",
-        "attack_bonus": 15,
-        "defense_bonus": 15,
-        "enemy_attack_reduction": 10,
-        "duration": 5,
-        "mp_cost": 45,
-        "cooldown": 6
-      },
-      {
-        "name": "Eternal Flames",
-        "description": "Summons flames that burn for eternity",
-        "damage": 45,
-        "burn_damage": 12,
-        "duration": 6,
-        "mp_cost": 35,
-        "cooldown": 4
-      },
-      {
-        "name": "Supreme Judgment",
-        "description": "Delivers the final judgment upon all enemies",
-        "damage": 100,
-        "mp_cost": 60,
-        "cooldown": 10
-      },
-      {
-        "name": "Cosmic Regeneration",
-        "description": "Heals by drawing power from the cosmos itself",
-        "heal_amount": 100,
-        "mp_cost": 50,
-        "cooldown": 7
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.8,
-        "description": "Eternus observes the challenger with minimal effort",
-        "attack_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Cosmic Blast"
-        ]
-      },
-      {
-        "hp_threshold": 0.6,
-        "description": "The Being begins to take the battle seriously",
-        "attack_multiplier": 1.2,
-        "special_abilities_unlocked": [
-          "Time Stop",
-          "Reality Warp"
-        ]
-      },
-      {
-        "hp_threshold": 0.4,
-        "description": "Eternus unleashes more cosmic power",
-        "attack_multiplier": 1.4,
-        "special_abilities_unlocked": [
-          "Eternal Flames"
-        ]
-      },
-      {
-        "hp_threshold": 0.2,
-        "description": "The Supreme Being fights at full power",
-        "attack_multiplier": 1.6,
-        "special_abilities_unlocked": [
-          "Supreme Judgment",
-          "Cosmic Regeneration"
-        ]
-      },
-      {
-        "hp_threshold": 0.1,
-        "description": "Eternus reveals its true, ultimate form",
-        "attack_multiplier": 2.0,
-        "special_abilities_unlocked": [
-          "Cosmic Blast",
-          "Time Stop",
-          "Reality Warp",
-          "Eternal Flames",
-          "Supreme Judgment"
+          "Fire Breath",
+          "Dragon Roar"
         ]
       }
     ],
     "experience_reward": 1000,
-    "gold_reward": 800,
-    "unique_loot": [
-      "Supreme Artifact",
-      "Eternal Essence",
-      "Legendary Crown",
-      "Cosmic Core",
-      "Timeless Shard",
-      "Infinity Gem"
-    ],
-    "unlock_conditions": {
-      "level": 10,
-      "missions_required": [
-        "celestial_guardian_defeat",
-        "all_dungeons_clear",
-        "legend_achieved"
-      ]
-    },
-    "tags": [
-      "void",
-      "holy",
-      "large"
-    ]
-  },
-  "archdruid_malfurion": {
-    "name": "Corrupted Archdruid Malfurion",
-    "hp": 3600,
-    "attack": 336,
-    "defense": 200,
-    "speed": 18,
-    "description": "A legendary druid fallen to the nightmare. He commands the very soul of the forest to crush intruders.",
-    "experience_reward": 800,
-    "gold_reward": 400,
-    "unique_loot": [
-      "Gaea's Wrath",
-      "Elder Grove Vestments",
-      "Nature Stone"
-    ],
-    "unlock_conditions": {
-      "level": 6
-    },
-    "tags": [
-      "humanoid",
-      "nature",
-      "spellcaster"
-    ]
-  },
-  "high_inquisitor_whitemane": {
-    "name": "High Inquisitor Whitemane",
-    "hp": 3200,
-    "attack": 304,
-    "defense": 160,
-    "speed": 22,
-    "description": "The leader of a fanatical sect, she uses her divine powers to judge and purify all who cross her path.",
-    "experience_reward": 750,
-    "gold_reward": 350,
-    "unique_loot": [
-      "Relic of the First Saint",
-      "High Oracle's Regalia",
-      "Divine Focus"
-    ],
-    "unlock_conditions": {
-      "level": 6
-    },
-    "tags": [
-      "humanoid",
-      "holy",
-      "armored",
-      "spellcaster"
-    ]
-  },
-  "uther_the_fallen": {
-    "name": "Uther the Fallen",
-    "hp": 5000,
-    "attack": 450,
-    "defense": 350,
-    "speed": 12,
-    "description": "A once-great paladin whose light has been extinguished. He remains a formidable guardian of the sacred halls.",
-    "experience_reward": 900,
     "gold_reward": 500,
     "unique_loot": [
-      "Aegis of the Eternal Light",
-      "Champion's Holy Bulwark",
-      "Divine Essence"
+      "Dragon Scale Armor",
+      "Fire Gem",
+      "Dragon Heart",
+      "Ancient Dragon Scale"
     ],
     "unlock_conditions": {
-      "level": 7
+      "level": 8,
+      "missions_required": [
+        "crystal_guardian",
+        "troll_slayer"
+      ]
+    },
+    "dialogues": {
+      "on_start_battle": "dragon.boss.start",
+      "on_defeat": "dragon.boss.defeat"
     },
     "tags": [
-      "undead",
-      "humanoid",
-      "armored",
-      "holy"
-    ]
-  },
-  "snowbinable": {
-    "name": "Snowbinable",
-    "hp": 7200,
-    "attack": 640,
-    "defense": 400,
-    "speed": 12,
-    "description": "A colossus born from the soul of the taiga itself. Part beast, part blizzard \u2014 it has haunted the permafrost for a thousand years. No hunter who tracked it ever returned.",
-    "special_abilities": [
-      {
-        "name": "Blizzard Breath",
-        "description": "Exhales a torrent of ice shards, dealing massive frost damage",
-        "damage": 55,
-        "cooldown": 3
-      },
-      {
-        "name": "Permafrost Slam",
-        "description": "Slams the frozen ground, sending shockwaves that can stun enemies",
-        "damage": 40,
-        "stun_chance": 0.4,
-        "cooldown": 4
-      },
-      {
-        "name": "Frozen Roar",
-        "description": "A terrifying roar that chills the blood, reducing attack and defense",
-        "effect": "debuff",
-        "attack_reduction": 12,
-        "defense_reduction": 8,
-        "cooldown": 3
-      },
-      {
-        "name": "Ice Burial",
-        "description": "Buries the enemy in a surge of permafrost, dealing severe damage",
-        "damage": 65,
-        "cooldown": 5
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.7,
-        "description": "The Snowbinable prowls cautiously, sizing up its prey",
-        "attack_multiplier": 1.0,
-        "defense_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Blizzard Breath",
-          "Frozen Roar"
-        ]
-      },
-      {
-        "hp_threshold": 0.4,
-        "description": "Wounded and furious, the Snowbinable unleashes its full blizzard power",
-        "attack_multiplier": 1.35,
-        "defense_multiplier": 0.9,
-        "special_abilities_unlocked": [
-          "Blizzard Breath",
-          "Permafrost Slam",
-          "Frozen Roar"
-        ]
-      },
-      {
-        "hp_threshold": 0.15,
-        "description": "At the edge of death, the Snowbinable becomes a living blizzard",
-        "attack_multiplier": 1.6,
-        "defense_multiplier": 0.7,
-        "special_abilities_unlocked": [
-          "Blizzard Breath",
-          "Permafrost Slam",
-          "Frozen Roar",
-          "Ice Burial"
-        ]
-      }
-    ],
-    "experience_reward": 1500,
-    "gold_reward": 750,
-    "unique_loot": [
-      "Snowbinable Heart",
-      "Snowbinable Fang Sword",
-      "Permafrost Core"
-    ],
-    "unlock_conditions": {
-      "level": 12
-    },
-    "tags": [
-      "beast",
-      "ice",
-      "cold",
+      "dragon",
+      "fire",
+      "flying",
       "large"
-    ]
-  },
-  "kalidran_pirate_lord": {
-    "name": "Pirate Lord Barbaros",
-    "hp": 2800,
-    "attack": 300,
-    "defense": 140,
-    "speed": 15,
-    "description": "The legendary commander of the Kalidran corsair fleet, Barbaros has plundered a hundred ports. His scarred face and booming laugh are the last things most men ever see.",
-    "special_abilities": [
-      {
-        "name": "Boarding Strike",
-        "description": "Leaps forward with a ferocious cutting attack",
-        "damage": 45,
-        "cooldown": 3
-      },
-      {
-        "name": "Corsair's Roar",
-        "description": "A battle cry that reduces the enemy's will to fight",
-        "effect": "debuff",
-        "attack_reduction": 10,
-        "defense_reduction": 6,
-        "cooldown": 4
-      },
-      {
-        "name": "Cannon Volley",
-        "description": "Calls in ship cannons \u2014 devastating ranged bombardment",
-        "damage": 55,
-        "stun_chance": 0.25,
-        "cooldown": 5
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.6,
-        "description": "Barbaros fights with swaggering confidence",
-        "attack_multiplier": 1.0,
-        "defense_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Boarding Strike",
-          "Corsair's Roar"
-        ]
-      },
-      {
-        "hp_threshold": 0.25,
-        "description": "Wounded, Barbaros fights with desperate savagery",
-        "attack_multiplier": 1.4,
-        "defense_multiplier": 0.85,
-        "special_abilities_unlocked": [
-          "Boarding Strike",
-          "Corsair's Roar",
-          "Cannon Volley"
-        ]
-      }
-    ],
-    "experience_reward": 900,
-    "gold_reward": 450,
-    "unique_loot": [
-      "Corsair Cutlass",
-      "Corsair Flag",
-      "Corsair's Amulet"
-    ],
-    "unlock_conditions": {
-      "level": 8
-    },
-    "tags": [
-      "humanoid",
-      "outlaw",
-      "armored"
-    ]
-  },
-  "grand_vizier_karamanli": {
-    "name": "Grand Vizier Karamanli",
-    "hp": 6080,
-    "attack": 576,
-    "defense": 288,
-    "speed": 13,
-    "description": "The cunning Grand Vizier of the Osmano\u011flu Empire, Karamanli controls the Sultan's court through manipulation, sorcery, and iron will. He fights with a forbidden blend of court magic and political ruthlessness.",
-    "special_abilities": [
-      {
-        "name": "Court Sorcery",
-        "description": "Channels dark Kalidran court magic into a devastating blast",
-        "damage": 50,
-        "cooldown": 3
-      },
-      {
-        "name": "Political Decree",
-        "description": "Issues a binding decree that saps the enemy's strength and resolve",
-        "effect": "debuff",
-        "attack_reduction": 14,
-        "defense_reduction": 10,
-        "cooldown": 4
-      },
-      {
-        "name": "Shadow Edict",
-        "description": "Summons shadow agents that strike from all sides",
-        "damage": 40,
-        "stun_chance": 0.35,
-        "cooldown": 4
-      },
-      {
-        "name": "Grand Seal",
-        "description": "Channels the full power of the empire through his seal \u2014 an overwhelming magical surge",
-        "damage": 70,
-        "cooldown": 6
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.65,
-        "description": "The Vizier fights with cold, calculated precision",
-        "attack_multiplier": 1.0,
-        "defense_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Court Sorcery",
-          "Political Decree"
-        ]
-      },
-      {
-        "hp_threshold": 0.35,
-        "description": "The Vizier drops his composure and unleashes forbidden magic",
-        "attack_multiplier": 1.3,
-        "defense_multiplier": 0.85,
-        "special_abilities_unlocked": [
-          "Court Sorcery",
-          "Political Decree",
-          "Shadow Edict"
-        ]
-      },
-      {
-        "hp_threshold": 0.15,
-        "description": "In desperation, Karamanli pours everything into one final ritual",
-        "attack_multiplier": 1.6,
-        "defense_multiplier": 0.65,
-        "special_abilities_unlocked": [
-          "Court Sorcery",
-          "Shadow Edict",
-          "Grand Seal"
-        ]
-      }
-    ],
-    "experience_reward": 1200,
-    "gold_reward": 650,
-    "unique_loot": [
-      "Grand Vizier's Grimoire",
-      "Vizier Staff",
-      "Vizier's Silken Robes"
-    ],
-    "unlock_conditions": {
-      "level": 11
-    },
-    "tags": [
-      "humanoid",
-      "spellcaster",
-      "armored"
-    ]
-  },
-  "sultan_yildirim": {
-    "name": "Sultan Yildirim",
-    "hp": 11000,
-    "attack": 960,
-    "defense": 600,
-    "speed": 14,
-    "description": "The thunderous Sultan of the Osmano\u011flu Empire \u2014 Yildirim, The Lightning. He has conquered thirty kingdoms and his empire stretches to the horizon in every direction. He does not merely fight; he annihilates.",
-    "special_abilities": [
-      {
-        "name": "Lightning Decree",
-        "description": "Calls down a bolt of divine power granted by the heavens \u2014 punishment for those who defy the Sultan",
-        "damage": 65,
-        "cooldown": 3
-      },
-      {
-        "name": "Imperial Wrath",
-        "description": "The Sultan's fury given form \u2014 a brutal barrage of strikes",
-        "damage": 50,
-        "stun_chance": 0.4,
-        "cooldown": 4
-      },
-      {
-        "name": "Sultan's Condemnation",
-        "description": "Declares the enemy an enemy of the empire, drastically weakening them",
-        "effect": "debuff",
-        "attack_reduction": 18,
-        "defense_reduction": 15,
-        "cooldown": 5
-      },
-      {
-        "name": "Thunderstrike of Yildirim",
-        "description": "The Sultan's legendary finishing strike \u2014 strikes with the force of a lightning bolt",
-        "damage": 90,
-        "stun_chance": 0.5,
-        "cooldown": 6
-      }
-    ],
-    "phases": [
-      {
-        "hp_threshold": 0.7,
-        "description": "The Sultan tests his challenger, fighting with restrained imperial might",
-        "attack_multiplier": 1.0,
-        "defense_multiplier": 1.0,
-        "special_abilities_unlocked": [
-          "Lightning Decree",
-          "Sultan's Condemnation"
-        ]
-      },
-      {
-        "hp_threshold": 0.4,
-        "description": "Impressed by your survival, the Sultan fights in earnest",
-        "attack_multiplier": 1.35,
-        "defense_multiplier": 0.9,
-        "special_abilities_unlocked": [
-          "Lightning Decree",
-          "Imperial Wrath",
-          "Sultan's Condemnation"
-        ]
-      },
-      {
-        "hp_threshold": 0.2,
-        "description": "The Sultan rises to his full, terrifying power \u2014 the storm made flesh",
-        "attack_multiplier": 1.65,
-        "defense_multiplier": 0.75,
-        "special_abilities_unlocked": [
-          "Lightning Decree",
-          "Imperial Wrath",
-          "Sultan's Condemnation",
-          "Thunderstrike of Yildirim"
-        ]
-      }
-    ],
-    "experience_reward": 2500,
-    "gold_reward": 1500,
-    "unique_loot": [
-      "Blade of Yildirim",
-      "Sultan's Gilded Plate",
-      "Sultan's Seal"
-    ],
-    "unlock_conditions": {
-      "level": 14
-    },
-    "tags": [
-      "humanoid",
-      "armored",
-      "humanoid"
     ]
   }
 }

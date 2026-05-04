@@ -1,231 +1,120 @@
 {
-  "companion_1": {
-    "name": "Borin the Brave",
-    "class": "Fighter",
-    "rank": "common",
-    "description": "A stalwart fighter who increases your attack and draws enemy attention.",
-    "attack_bonus": 3,
-    "defense_bonus": 2,
-    "action_chance": 0.6,
+  "companion_warrior": {
+    "name": "Gareth the Ironclad",
+    "class": "Warrior",
+    "rank": "uncommon",
+    "description": "A battle-hardened warrior who fights at the front line, boosting your attack and drawing enemy aggression.",
+    "attack_bonus": 5,
+    "defense_bonus": 3,
+    "action_chance": 0.65,
     "abilities": [
       {
         "name": "Shield Bash",
         "type": "taunt",
-        "chance": 15,
+        "chance": 20,
         "duration": 1
-      }
-    ],
-    "price": 100
-  },
-  "companion_2": {
-    "name": "Lyra the Swift",
-    "class": "Scout",
-    "rank": "uncommon",
-    "description": "A nimble scout who increases your speed and critical chance.",
-    "speed_bonus": 4,
-    "crit_chance": 5,
-    "action_chance": 0.7,
-    "abilities": [
-      {
-        "name": "Quick Strike",
-        "type": "attack_boost",
-        "attack_bonus": 2,
-        "duration": 2
-      }
-    ],
-    "price": 120
-  },
-  "companion_3": {
-    "name": "Eldon the Wise",
-    "class": "Mage",
-    "rank": "rare",
-    "description": "A sage who bolsters your magic and restores a small amount of MP each battle.",
-    "mp_bonus": 15,
-    "spell_power_bonus": 5,
-    "action_chance": 0.6,
-    "abilities": [
-      {
-        "name": "Arcane Insight",
-        "type": "mp_regen",
-        "mp_per_turn": 3,
-        "duration": 4
       }
     ],
     "price": 150
   },
-  "companion_4": {
-    "name": "Mira the Healer",
-    "class": "Support",
-    "rank": "rare",
-    "description": "A caring companion who provides occasional healing during exploration and battles.",
-    "healing_bonus": 25,
-    "action_chance": 0.6,
-    "abilities": [
-      {
-        "name": "Tend Wounds",
-        "type": "heal",
-        "healing": 20,
-        "chance": 60
-      }
-    ],
-    "price": 140
-  },
-  "companion_5": {
-    "name": "Tharos the Bulwark",
-    "class": "Guardian",
-    "rank": "epic",
-    "description": "A veteran guardian whose presence greatly increases defense and enemy taunt chance.",
-    "defense_bonus": 8,
-    "taunt_chance": 20,
-    "action_chance": 0.75,
-    "abilities": [
-      {
-        "name": "Hold The Line",
-        "type": "taunt",
-        "chance": 30,
-        "duration": 2
-      }
-    ],
-    "price": 350
-  },
-  "companion_6": {
+  "companion_mage": {
     "name": "Seraphine the Arcane",
     "class": "Mage",
-    "rank": "epic",
-    "description": "A master of the arcane who significantly boosts MP and spell power for the party.",
-    "mp_bonus": 50,
-    "spell_power_bonus": 10,
-    "action_chance": 0.65,
+    "rank": "rare",
+    "description": "A master of the arcane arts who significantly boosts MP and spell power, restoring mana each turn.",
+    "mp_bonus": 40,
+    "spell_power_bonus": 8,
+    "action_chance": 0.6,
     "abilities": [
       {
         "name": "Arcane Surge",
-        "type": "spell_power",
-        "spell_power_bonus": 8,
-        "duration": 3
+        "type": "mp_regen",
+        "mp_per_turn": 4,
+        "duration": 4
       }
     ],
-    "price": 400
+    "price": 250
   },
-  "companion_7": {
-    "name": "Ragnar the Warlord",
-    "class": "Berserker",
-    "rank": "legendary",
-    "description": "A fearsome warrior that drastically increases attack and critical damage.",
-    "attack_bonus": 12,
-    "crit_damage_bonus": 15,
-    "action_chance": 0.8,
-    "abilities": [
-      {
-        "name": "Rage",
-        "type": "attack_boost",
-        "attack_bonus": 8,
-        "duration": 2
-      }
-    ],
-    "price": 420
-  },
-  "companion_8": {
-    "name": "Astra the Lifegiver",
-    "class": "Cleric",
-    "rank": "legendary",
-    "description": "A legendary healer whose aura restores HP after each battle and provides large healing boosts.",
-    "healing_bonus": 80,
-    "post_battle_heal": 30,
-    "action_chance": 0.6,
-    "abilities": [
-      {
-        "name": "Sanctuary",
-        "type": "post_battle_heal",
-        "heal": 30
-      }
-    ],
-    "price": 450
-  },
-  "companion_9": {
+  "companion_rogue": {
     "name": "Nyx the Shadow",
-    "class": "Assassin",
+    "class": "Rogue",
     "rank": "rare",
-    "description": "A silent killer that increases critical chance and deals extra damage from stealth.",
+    "description": "A silent killer who increases your critical strike chance and deals devastating damage from the shadows.",
     "attack_bonus": 6,
     "crit_chance": 10,
-    "action_chance": 0.55,
+    "action_chance": 0.6,
     "abilities": [
       {
         "name": "Backstab",
         "type": "crit_boost",
-        "crit_damage_bonus": 10,
-        "duration": 1
+        "crit_damage_bonus": 12,
+        "duration": 2
       }
     ],
     "price": 220
   },
-  "companion_10": {
-    "name": "Galen the Tactician",
-    "class": "Strategist",
+  "companion_hunter": {
+    "name": "Lyra the Swift",
+    "class": "Hunter",
     "rank": "uncommon",
-    "description": "A battlefield planner who grants small party-wide buffs and improves mission rewards.",
-    "attack_bonus": 2,
-    "defense_bonus": 2,
-    "action_chance": 0.5,
-    "abilities": [
-      {
-        "name": "Inspire",
-        "type": "party_buff",
-        "attack_bonus": 2,
-        "defense_bonus": 2,
-        "duration": 3
-      }
-    ],
-    "price": 160
-  },
-  "companion_11": {
-    "name": "Skiff von Stratoscrate",
-    "class": "Warlock",
-    "rank": "legendary",
-    "description": "A master of forbidden magics who greatly enhances spell power and MP regeneration, born from the darkness of the abyss, she's known as the lord of the abyss.",
-    "mp_bonus": 700,
-    "attack_bonus": 190,
-    "crit_damage_bonus": 150,
-    "speed_bonus": 100,
-    "spell_power_bonus": 150,
+    "description": "A nimble hunter who reads the land and increases your speed and critical hit chance in combat.",
+    "speed_bonus": 5,
+    "crit_chance": 6,
     "action_chance": 0.7,
     "abilities": [
       {
-        "name": "Forbidden Knowledge",
-        "type": "mp_regen",
-        "mp_per_turn": 7,
-        "duration": 5
+        "name": "Rapid Shot",
+        "type": "attack_boost",
+        "attack_bonus": 3,
+        "duration": 2
       }
     ],
-    "price": 900
+    "price": 180
   },
-  "companion_12": {
-    "name": "Baijiang the shade",
-    "class": "Ninja",
-    "rank": "legendary",
-    "description": "A stealthy ninja who excels in speed and critical strikes, mastering the art of silent elimination.",
-    "attack_bonus": 190,
-    "speed_bonus": 300,
-    "crit_chance": 50,
-    "crit_damage_bonus": 200,
-    "action_chance": 0.9,
+  "companion_bard": {
+    "name": "Fenwick the Ironvoice",
+    "class": "Bard",
+    "rank": "rare",
+    "description": "A travelling bard whose battle-songs inspire the party, granting party-wide attack and defense bonuses.",
+    "attack_bonus": 4,
+    "mp_bonus": 20,
+    "action_chance": 0.65,
     "abilities": [
       {
-        "name": "Shadow Strike",
-        "type": "crit_boost",
-        "crit_damage_bonus": 20,
+        "name": "Battle-Song",
+        "type": "party_buff",
+        "attack_bonus": 4,
+        "defense_bonus": 3,
         "duration": 3
       }
     ],
-    "price": 950
+    "price": 200
   },
-  "companion_13": {
+  "companion_paladin": {
+    "name": "Sir Aldric the Just",
+    "class": "Paladin",
+    "rank": "epic",
+    "description": "A noble paladin who shields allies with divine grace, combining strong defense with retributive holy power.",
+    "defense_bonus": 12,
+    "attack_bonus": 7,
+    "action_chance": 0.7,
+    "abilities": [
+      {
+        "name": "Holy Shield",
+        "type": "buff",
+        "effect": "shield",
+        "duration": 2
+      }
+    ],
+    "price": 400
+  },
+  "companion_druid": {
     "name": "Kaelen of the Wild",
     "class": "Druid",
     "rank": "rare",
-    "description": "A wild druid who brings the power of nature to your side.",
+    "description": "A wild druid who channels the power of nature, entangling enemies and bolstering your magical reserves.",
     "attack_bonus": 5,
-    "mp_bonus": 20,
+    "mp_bonus": 25,
     "action_chance": 0.65,
     "abilities": [
       {
@@ -237,328 +126,21 @@
     ],
     "price": 280
   },
-  "companion_14": {
-    "name": "Father Thomas",
+  "companion_priest": {
+    "name": "Sister Astra the Lifegiver",
     "class": "Priest",
-    "rank": "uncommon",
-    "description": "A humble priest who provides consistent healing and protection.",
-    "healing_bonus": 30,
-    "defense_bonus": 4,
+    "rank": "epic",
+    "description": "A devoted priest whose divine aura restores HP after each battle and provides significant healing to keep the party alive.",
+    "healing_bonus": 60,
+    "post_battle_heal": 25,
     "action_chance": 0.6,
     "abilities": [
       {
-        "name": "Blessing",
-        "type": "buff",
-        "effect": "defense_boost",
-        "duration": 3
+        "name": "Sanctuary",
+        "type": "post_battle_heal",
+        "heal": 25
       }
     ],
-    "price": 200
-  },
-  "companion_15": {
-    "name": "Sir Galahad",
-    "class": "Paladin",
-    "rank": "epic",
-    "description": "A noble paladin who shields his allies with divine grace.",
-    "defense_bonus": 12,
-    "attack_bonus": 8,
-    "action_chance": 0.7,
-    "abilities": [
-      {
-        "name": "Holy Shield",
-        "type": "buff",
-        "effect": "shield",
-        "duration": 2
-      }
-    ],
-    "price": 500
-  },
-  "companion_16": {
-    "name": "Brynja Ironvoice",
-    "class": "Skald",
-    "rank": "rare",
-    "description": "A Varak Zevari singer who traded her clan's longhouse for the open road. Her battle-songs harden allies and rattle enemies.",
-    "attack_bonus": 5,
-    "mp_bonus": 20,
-    "action_chance": 0.65,
-    "abilities": [
-      {
-        "name": "Battle-Song",
-        "type": "party_buff",
-        "attack_bonus": 4,
-        "duration": 3
-      }
-    ],
-    "price": 280,
-    "lore_origin": "varak_iron_steppe"
-  },
-  "companion_17": {
-    "name": "Ulfar Bear-Hand",
-    "class": "Berserker",
-    "rank": "epic",
-    "description": "A Varak Bear Warrior cast out of his order for refusing to stop fighting after the war ended. Still the most dangerous fighter on any field.",
-    "attack_bonus": 14,
-    "defense_bonus": 5,
-    "crit_damage_bonus": 12,
-    "action_chance": 0.78,
-    "abilities": [
-      {
-        "name": "Bear Frenzy",
-        "type": "attack_boost",
-        "attack_bonus": 10,
-        "duration": 2
-      }
-    ],
-    "price": 520,
-    "lore_origin": "greymount_clan_hold"
-  },
-  "companion_18": {
-    "name": "Sigrid of Greymount",
-    "class": "Shaman",
-    "rank": "rare",
-    "description": "The clan healer of Greymount Hold, skilled in northern herb medicine and spirit-binding. Keeps the party alive with stubborn efficiency.",
-    "healing_bonus": 40,
-    "defense_bonus": 6,
-    "action_chance": 0.62,
-    "abilities": [
-      {
-        "name": "Ancestor's Ward",
-        "type": "heal",
-        "healing": 28,
-        "chance": 65
-      }
-    ],
-    "price": 320,
-    "lore_origin": "greymount_clan_hold"
-  },
-  "companion_19": {
-    "name": "Scholar Wei Linhua",
-    "class": "Scholar",
-    "rank": "uncommon",
-    "description": "A four-times examination candidate from River's Crown whose practical knowledge of eastern lore is unrivalled. Improves item discovery and magical reserves.",
-    "mp_bonus": 30,
-    "spell_power_bonus": 6,
-    "action_chance": 0.55,
-    "abilities": [
-      {
-        "name": "Studied Insight",
-        "type": "mp_regen",
-        "mp_per_turn": 4,
-        "duration": 4
-      }
-    ],
-    "price": 180,
-    "lore_origin": "rivers_crown"
-  },
-  "companion_20": {
-    "name": "Brother Chen",
-    "class": "Monk",
-    "rank": "rare",
-    "description": "The keeper of the River Temple on the Ghost River. Calm, precise, and deeply unsettling in combat for someone who looks so peaceful.",
-    "healing_bonus": 35,
-    "speed_bonus": 5,
-    "action_chance": 0.68,
-    "abilities": [
-      {
-        "name": "River Form",
-        "type": "heal",
-        "healing": 22,
-        "chance": 55
-      }
-    ],
-    "price": 300,
-    "lore_origin": "ghost_river_stretch"
-  },
-  "companion_21": {
-    "name": "Jade Automaton Unit-7",
-    "class": "Construct",
-    "rank": "legendary",
-    "description": "A jade automaton from the Examination Hall that was reprogrammed after a malfunction. Obedient, tireless, and made of hardened jade. Excellent at absorbing damage.",
-    "defense_bonus": 18,
-    "mp_bonus": 40,
-    "action_chance": 0.72,
-    "abilities": [
-      {
-        "name": "Jade Shell",
-        "type": "taunt",
-        "chance": 40,
-        "duration": 2
-      }
-    ],
-    "price": 700,
-    "lore_origin": "jade_examination_hall"
-  },
-  "companion_22": {
-    "name": "Grand Examiner's Apprentice Mei",
-    "class": "Arcanist",
-    "rank": "epic",
-    "description": "A prodigy from the Jade Examination Hall who scored highest in the magical theory section. Brings extraordinary spell support and a habit of narrating what she is doing.",
-    "mp_bonus": 60,
-    "spell_power_bonus": 14,
-    "action_chance": 0.6,
-    "abilities": [
-      {
-        "name": "Arcane Notation",
-        "type": "spell_power",
-        "spell_power_bonus": 10,
-        "duration": 4
-      }
-    ],
-    "price": 480,
-    "lore_origin": "jade_examination_hall"
-  },
-  "companion_23": {
-    "name": "Zara the Corsair",
-    "class": "Corsair",
-    "rank": "rare",
-    "description": "A former Kalovar corsair first mate who turned freelance after her captain tried to have her killed. Quick, ruthless, and very well-informed about harbour taxes.",
-    "attack_bonus": 9,
-    "speed_bonus": 5,
-    "action_chance": 0.7,
-    "abilities": [
-      {
-        "name": "Cutlass Flurry",
-        "type": "attack_boost",
-        "attack_bonus": 6,
-        "duration": 2
-      }
-    ],
-    "price": 340,
-    "lore_origin": "kostantora_docks"
-  },
-  "companion_24": {
-    "name": "Mirza the Freed",
-    "class": "Liberator",
-    "rank": "uncommon",
-    "description": "A man who bought his freedom from the Kalovar slavers and spent twenty years afterward helping others do the same. Resilient and quietly furious.",
-    "attack_bonus": 6,
-    "healing_bonus": 20,
-    "action_chance": 0.62,
-    "abilities": [
-      {
-        "name": "Rallying Cry",
-        "type": "party_buff",
-        "attack_bonus": 3,
-        "defense_bonus": 3,
-        "duration": 2
-      }
-    ],
-    "price": 210,
-    "lore_origin": "port_kostantora"
-  },
-  "companion_25": {
-    "name": "Kalovar War Mage Reza",
-    "class": "War Mage",
-    "rank": "epic",
-    "description": "A Kalovar court war mage who defected after the Grand Vizier ordered him to burn a village. Still has all his spells. Uses them differently now.",
-    "mp_bonus": 55,
-    "spell_power_bonus": 12,
-    "attack_bonus": 7,
-    "action_chance": 0.65,
-    "abilities": [
-      {
-        "name": "Kalovar Fire",
-        "type": "spell_power",
-        "spell_power_bonus": 9,
-        "duration": 3
-      }
-    ],
-    "price": 460,
-    "lore_origin": "kostantora_city"
-  },
-  "companion_26": {
-    "name": "Kassandros the Exile",
-    "class": "Legionnaire",
-    "rank": "epic",
-    "description": "A descendant of the Byzantra legionnaires, trained in the old fighting style and carrying armour three hundred years out of date. Every part of it still works.",
-    "attack_bonus": 10,
-    "defense_bonus": 14,
-    "action_chance": 0.74,
-    "abilities": [
-      {
-        "name": "Testudo",
-        "type": "taunt",
-        "chance": 35,
-        "duration": 2
-      }
-    ],
-    "price": 500,
-    "lore_origin": "ruins_of_constanplea"
-  },
-  "companion_27": {
-    "name": "Archaeologist Theodora",
-    "class": "Scholar",
-    "rank": "uncommon",
-    "description": "The excavator of Constanplea's buried ruins. Knows where all the old things are buried, which turns out to be surprisingly useful everywhere.",
-    "action_chance": 0.5,
-    "abilities": [
-      {
-        "name": "Ancient Knowledge",
-        "type": "party_buff",
-        "attack_bonus": 2,
-        "defense_bonus": 2,
-        "duration": 3
-      }
-    ],
-    "price": 190,
-    "lore_origin": "ruins_of_constanplea"
-  },
-  "companion_28": {
-    "name": "Tara the Mountain Guide",
-    "class": "Ranger",
-    "rank": "rare",
-    "description": "The guide who has led more crossings of the Spine of Heaven Pass than anyone alive. Knows every trail, every ambush point, and exactly when to run.",
-    "speed_bonus": 8,
-    "attack_bonus": 7,
-    "action_chance": 0.72,
-    "abilities": [
-      {
-        "name": "Sure Footing",
-        "type": "attack_boost",
-        "attack_bonus": 5,
-        "duration": 2
-      }
-    ],
-    "price": 310,
-    "lore_origin": "spine_of_heaven_pass"
-  },
-  "companion_29": {
-    "name": "Treaty Keeper Aldo",
-    "class": "Diplomat",
-    "rank": "uncommon",
-    "description": "The border treaty keeper at the Coldwater Crossing. Better in negotiations than in fights, but twelve years at a violent border has made him surprisingly capable at both.",
-    "defense_bonus": 5,
-    "healing_bonus": 18,
-    "action_chance": 0.55,
-    "abilities": [
-      {
-        "name": "Parley",
-        "type": "debuff",
-        "effect": "slow",
-        "duration": 2
-      }
-    ],
-    "price": 220,
-    "lore_origin": "the_coldwater_crossing"
-  },
-  "companion_30": {
-    "name": "Lira the Void-Touched",
-    "class": "Void Walker",
-    "rank": "legendary",
-    "description": "A scholar who spent six months studying the Echoing Void and came back subtly wrong in ways that make her extraordinarily effective in combat. She is fine. She says she is fine.",
-    "mp_bonus": 80,
-    "attack_bonus": 15,
-    "crit_chance": 12,
-    "crit_damage_bonus": 20,
-    "action_chance": 0.75,
-    "abilities": [
-      {
-        "name": "Void Pulse",
-        "type": "crit_boost",
-        "crit_damage_bonus": 18,
-        "duration": 3
-      }
-    ],
-    "price": 850
+    "price": 350
   }
 }
