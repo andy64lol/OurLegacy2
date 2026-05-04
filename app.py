@@ -1,5 +1,8 @@
 
 import sys
+import warnings
+warnings.filterwarnings("ignore", message="urllib3")
+warnings.filterwarnings("ignore", message="chardet")
 
 """
 Our Legacy 2 - Flask Web Interface

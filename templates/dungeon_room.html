@@ -24,74 +24,84 @@
                 <div class="gold-display">Gold: <span class="gold-amount">{{ player.gold }}</span></div>
             </div>
         </div>
+
         <div class="panel sidebar-panel">
             <div class="panel-title">Dungeon Progress</div>
             <div class="panel-body">
-                <div style="font-size:14px;color:var(--text-light);font-weight:600;">{{ dungeon.name }}</div>
-                <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">Room {{ room_num }} of {{ total_rooms }}</div>
+                <div style="font-size:14px;color:var(--gold);font-weight:600;">{{ dungeon.name }}</div>
+                <div style="font-size:12px;color:var(--text-dim);margin-top:3px;">Room {{ room_num }} of {{ total_rooms }}</div>
                 <div class="bar-group" style="margin-top:8px;">
                     <div class="bar-track">
                         <div class="bar-fill bar-exp" style="width:{{ (room_num / total_rooms * 100)|int }}%"></div>
                     </div>
                 </div>
-                <div class="dungeon-room-map">
+                <div class="dungeon-room-map" style="margin-top:10px;">
                     {% for i in range(1, total_rooms + 1) %}
                     <div class="dmap-dot {% if i < room_num %}dmap-done{% elif i == room_num %}dmap-current{% else %}dmap-ahead{% endif %}"></div>
                     {% endfor %}
                 </div>
+                <form method="POST" action="/dungeon/abandon" style="margin-top:14px;">
+                    <button type="button" class="btn btn-danger btn-small" style="width:100%;"
+                        onclick="var b=this;gameConfirm('Retreat from the dungeon? All progress will be lost.',function(){b.closest('form').submit();})">
+                        Retreat
+                    </button>
+                </form>
             </div>
         </div>
     </aside>
 
     <main class="main-area">
 
-        <!-- Messages from previous action -->
         {% if messages %}
         <div class="panel" style="margin-bottom:12px;">
             <div class="panel-body">
                 {% for msg in messages %}
-                <div style="color:{{ msg.color }};">{{ msg.text }}</div>
+                <div style="color:{{ msg.color }};padding:2px 0;line-height:1.5;">{{ msg.text }}</div>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
 
         <div class="panel">
-            <div class="panel-title">
-                Room {{ room_num }} / {{ total_rooms }} &mdash;
-                <span style="color:var(--gold);text-transform:capitalize;">
-                    {% if room.type == 'boss' %}Final Boss Chamber
-                    {% elif room.type == 'chest' %}Treasure Chamber
-                    {% elif room.type == 'trap_chest' %}Trapped Chest
-                    {% elif room.type == 'battle' %}Combat Chamber
-                    {% elif room.type == 'ambush' %}Ambush Chamber
-                    {% elif room.type == 'shrine' %}Sacred Shrine
-                    {% elif room.type == 'question' %}Riddle Chamber
-                    {% elif room.type == 'multi_choice' %}Choice Chamber
-                    {% elif room.type == 'empty' %}Empty Chamber
-                    {% else %}{{ room.type.replace('_',' ').title() }} Chamber
-                    {% endif %}
+            <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <span>
+                    Room {{ room_num }} / {{ total_rooms }}
+                    &mdash;
+                    <span style="color:var(--gold);">
+                        {% if room.type == 'boss' %}Boss Chamber
+                        {% elif room.type == 'chest' %}Treasure Chamber
+                        {% elif room.type == 'trap_chest' %}Trapped Chest
+                        {% elif room.type == 'battle' %}Combat Chamber
+                        {% elif room.type == 'ambush' %}Ambush Chamber
+                        {% elif room.type == 'shrine' %}Sacred Shrine
+                        {% elif room.type == 'question' %}Riddle Chamber
+                        {% elif room.type == 'multi_choice' %}Choice Chamber
+                        {% elif room.type == 'empty' %}Empty Chamber
+                        {% else %}{{ room.type.replace('_',' ').title() }}
+                        {% endif %}
+                    </span>
+                </span>
+                <span style="font-size:11px;color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;">
+                    {{ dungeon.name }}
                 </span>
             </div>
             <div class="panel-body">
 
-                <!-- ── BOSS ROOM ── -->
+                <!-- BOSS ROOM -->
                 {% if room.type == 'boss' %}
-                <div class="room-boss-banner">
-                    <div class="room-boss-icon" style="font-size:15px;letter-spacing:0.12em;border:2px solid var(--red);padding:6px 18px;display:inline-block;color:var(--red);">BOSS</div>
-                    <div class="room-boss-text">The final guardian stirs in the darkness...</div>
-                    <div class="room-boss-sub">Prepare for battle. There is no retreat.</div>
+                <div style="text-align:center;padding:28px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.18em;border:2px solid var(--red);padding:6px 22px;display:inline-block;color:var(--red);margin-bottom:16px;">BOSS</div>
+                    <div style="font-size:18px;font-weight:700;color:var(--red);margin-bottom:8px;">The final guardian stirs in the darkness...</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">Prepare for battle. There is no retreat.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-battle-large">Face the Boss</button>
+                    </form>
                 </div>
-                <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary btn-battle-large" style="margin-top:16px;">
-                        Face the Boss
-                    </button>
-                </form>
 
-                <!-- ── RIDDLE ROOM ── -->
+                <!-- RIDDLE ROOM -->
                 {% elif room.type == 'question' and current_challenge %}
                 <div class="room-riddle-box">
-                    <div class="room-riddle-icon">?</div>
+                    <div style="font-size:11px;letter-spacing:0.14em;border:1px solid var(--gold-dim);padding:3px 12px;display:inline-block;color:var(--gold-dim);margin-bottom:14px;">RIDDLE</div>
                     <div class="room-riddle-text">{{ current_challenge.question }}</div>
                     {% if current_challenge.hints %}
                     <div class="room-riddle-hint">Hint: {{ current_challenge.hints[0] }}</div>
@@ -105,7 +115,7 @@
                     <div style="display:flex;gap:10px;flex-wrap:wrap;">
                         <input type="text" name="answer" placeholder="Enter your answer..."
                                class="dungeon-text-input" autocomplete="off" autofocus>
-                        <button type="submit" class="btn btn-primary btn-wood">Answer</button>
+                        <button type="submit" class="btn btn-primary btn-wood">Submit</button>
                     </div>
                 </form>
                 <form method="POST" action="/dungeon/answer" style="margin-top:8px;">
@@ -113,10 +123,10 @@
                     <button type="submit" class="btn btn-secondary btn-small">Skip (take damage)</button>
                 </form>
 
-                <!-- ── MULTI-CHOICE ROOM ── -->
+                <!-- MULTI-CHOICE ROOM -->
                 {% elif room.type == 'multi_choice' and current_challenge %}
                 <div class="room-choice-box">
-                    <div class="room-choice-icon" style="font-size:13px;letter-spacing:0.1em;border:1px solid var(--gold-dim);padding:3px 12px;display:inline-block;color:var(--gold-dim);">CHOICE</div>
+                    <div style="font-size:11px;letter-spacing:0.14em;border:1px solid var(--gold-dim);padding:3px 12px;display:inline-block;color:var(--gold-dim);margin-bottom:14px;">CHOICE</div>
                     <div class="room-choice-text">{{ current_challenge.question }}</div>
                     <div class="room-choice-meta">
                         Correct: +{{ current_challenge.success_reward.get('gold', 0) }}g, +{{ current_challenge.success_reward.get('experience', 0) }} EXP
@@ -132,88 +142,76 @@
                     {% endfor %}
                 </div>
 
-                <!-- ── BATTLE ROOM ── -->
+                <!-- BATTLE ROOM -->
                 {% elif room.type == 'battle' %}
-                <div class="room-battle-banner">
-                    <div style="font-size:13px;letter-spacing:0.12em;border:2px solid var(--red);padding:5px 18px;display:inline-block;color:var(--red);margin-bottom:10px;">ENCOUNTER</div>
-                    <div style="color:var(--red);font-weight:600;font-size:16px;">An enemy blocks your path!</div>
-                    <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">You will be taken to the battle screen.</div>
+                <div style="text-align:center;padding:24px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.14em;border:2px solid var(--red);padding:5px 20px;display:inline-block;color:var(--red);margin-bottom:14px;">ENCOUNTER</div>
+                    <div style="color:var(--red);font-weight:600;font-size:16px;margin-bottom:6px;">An enemy blocks your path!</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">You will be taken to the battle screen.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">Engage!</button>
+                    </form>
                 </div>
-                <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">Engage!</button>
-                </form>
 
-                <!-- ── AMBUSH ROOM ── -->
+                <!-- AMBUSH ROOM -->
                 {% elif room.type == 'ambush' %}
-                <div class="room-battle-banner">
-                    <div style="font-size:13px;letter-spacing:0.12em;border:2px solid var(--red);padding:5px 18px;display:inline-block;color:var(--red);margin-bottom:10px;animation:pulse 1s infinite alternate;">AMBUSH!</div>
-                    <div style="color:var(--red);font-weight:700;font-size:17px;">Something lurks in the shadows ahead!</div>
-                    <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">A powerful foe waits to strike — rewards are greater but so is the danger.</div>
+                <div style="text-align:center;padding:24px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.14em;border:2px solid var(--red);padding:5px 20px;display:inline-block;color:var(--red);margin-bottom:14px;animation:pulse 0.8s infinite alternate;">AMBUSH!</div>
+                    <div style="color:var(--red);font-weight:700;font-size:17px;margin-bottom:6px;">Something lurks in the shadows!</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:4px;">A powerful foe waits to strike.</div>
+                    <div style="font-size:12px;color:var(--gold-dim);margin-bottom:20px;">Greater danger &mdash; greater rewards.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">Face the Ambush!</button>
+                    </form>
                 </div>
-                <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">Face the Ambush!</button>
-                </form>
 
-                <!-- ── SHRINE ROOM ── -->
+                <!-- SHRINE ROOM -->
                 {% elif room.type == 'shrine' %}
-                <div class="room-chest-banner">
-                    <div style="font-size:13px;letter-spacing:0.12em;border:2px solid var(--green-bright);padding:5px 18px;display:inline-block;color:var(--green-bright);margin-bottom:10px;">SHRINE</div>
-                    <div style="color:var(--green-bright);font-weight:600;font-size:16px;">A sacred shrine glows in the darkness!</div>
-                    <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">Approach and receive the blessing — HP and MP restored.</div>
+                <div style="text-align:center;padding:24px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.14em;border:2px solid var(--green-bright);padding:5px 20px;display:inline-block;color:var(--green-bright);margin-bottom:14px;">SHRINE</div>
+                    <div style="color:var(--green-bright);font-weight:600;font-size:16px;margin-bottom:6px;">A sacred shrine glows in the darkness!</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">Approach to restore HP and MP.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">Approach the Shrine</button>
+                    </form>
                 </div>
-                <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">Approach the Shrine</button>
-                </form>
 
-                <!-- ── CHEST ROOM ── -->
+                <!-- CHEST ROOM -->
                 {% elif room.type == 'chest' %}
-                <div class="room-chest-banner">
-                    <div style="font-size:13px;letter-spacing:0.12em;border:2px solid var(--gold-dim);padding:5px 18px;display:inline-block;color:var(--gold);margin-bottom:10px;">TREASURE</div>
-                    <div style="color:var(--gold);font-weight:600;font-size:16px;">A treasure chest awaits!</div>
+                <div style="text-align:center;padding:24px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.14em;border:2px solid var(--gold-dim);padding:5px 20px;display:inline-block;color:var(--gold);margin-bottom:14px;">TREASURE</div>
+                    <div style="color:var(--gold);font-weight:600;font-size:16px;margin-bottom:6px;">A treasure chest awaits!</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">Gold and items lie within.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">Open Chest</button>
+                    </form>
                 </div>
-                <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">Open Chest</button>
-                </form>
 
-                <!-- ── TRAP CHEST ROOM ── -->
+                <!-- TRAP CHEST ROOM -->
                 {% elif room.type == 'trap_chest' %}
                 {% set trap = room.challenge or {} %}
-                <div class="room-trap-banner">
-                    <div style="font-size:13px;letter-spacing:0.12em;border:2px solid var(--red);padding:5px 18px;display:inline-block;color:var(--red);margin-bottom:10px;">TRAP</div>
-                    <div style="color:var(--gold);font-weight:600;font-size:16px;">
-                        {{ trap.name or 'Trapped Chest' }}
-                    </div>
-                    <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">
-                        {{ trap.description or 'Something looks suspicious...' }}
-                    </div>
-                    <div style="font-size:12px;color:var(--red);margin-top:4px;">
-                        You must roll d20 ≥ {{ trap.threshold or 10 }} to disarm the trap!
-                    </div>
+                <div style="text-align:center;padding:24px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.14em;border:2px solid var(--red);padding:5px 20px;display:inline-block;color:var(--red);margin-bottom:14px;">TRAP</div>
+                    <div style="color:var(--gold);font-weight:600;font-size:16px;margin-bottom:6px;">{{ trap.name or 'Trapped Chest' }}</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:6px;">{{ trap.description or 'Something looks suspicious...' }}</div>
+                    <div style="font-size:12px;color:var(--red);margin-bottom:20px;">Roll d20 &ge; {{ trap.threshold or 10 }} to disarm!</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">Roll to Disarm &amp; Open</button>
+                    </form>
                 </div>
-                <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">Roll to Disarm & Open</button>
-                </form>
 
-                <!-- ── EMPTY ROOM ── -->
+                <!-- EMPTY ROOM -->
                 {% else %}
-                <div class="room-empty-banner">
-                    <div style="font-size:28px;opacity:0.5;">~</div>
-                    <div style="color:var(--text-dim);font-size:15px;">The chamber is still and silent.</div>
+                <div style="text-align:center;padding:28px 16px;">
+                    <div style="font-size:32px;opacity:0.35;margin-bottom:10px;">~</div>
+                    <div style="color:var(--text-dim);font-size:15px;margin-bottom:20px;">The chamber is still and silent.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">
+                            {% if room_num == total_rooms %}Complete Dungeon{% else %}Proceed{% endif %}
+                        </button>
+                    </form>
                 </div>
-                <form method="POST" action="/action/dungeon/proceed">
-                    <button type="submit" class="btn btn-primary btn-wood" style="margin-top:16px;">
-                        {% if room_num == total_rooms %}Complete Dungeon{% else %}Proceed{% endif %}
-                    </button>
-                </form>
                 {% endif %}
-
-                <!-- Abandon -->
-                <form method="POST" action="/dungeon/abandon" style="margin-top:14px;">
-                    <button type="button" class="btn btn-danger btn-small"
-                        onclick="var b=this;gameConfirm('Abandon the dungeon? All progress will be lost.',function(){b.closest('form').submit();})">
-                        Retreat from Dungeon
-                    </button>
-                </form>
 
             </div>
         </div>
@@ -221,7 +219,5 @@
 </div>
 {% endblock %}
 {% block extra_scripts %}
-<script>
-// Make enumerate filter work
-</script>
+<script></script>
 {% endblock %}
