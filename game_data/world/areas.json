@@ -241,7 +241,7 @@
     ]
   },
   "tavern": {
-    "name": "The Rusty Tankard",
+    "name": "The Tavern",
     "description": "A warm tavern in the heart of the town. Adventurers meet here to swap stories and hire companions.",
     "possible_enemies": [],
     "possible_bosses": [],

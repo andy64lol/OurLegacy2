@@ -24,7 +24,7 @@
         "type": "house"
     },
     "stone_wall_medium_house":{
-        "name": "Middle sized stone house",
+        "name": "Stone house",
         "description": "A medium-sized house with stone walls for durability and comfort.",
         "price": 500,
         "comfort_points": 35,
@@ -40,8 +40,8 @@
         "type": "house"
     },
     "elven_treehouse":{
-        "name": "Elven Treehouse",
-        "description": "A beautifully crafted treehouse in elven style, blending with nature for a serene living space.",
+        "name": "Treehouse",
+        "description": "A crafted treehouse built among the branches, blending with nature for a serene living space.",
         "price": 1200,
         "comfort_points": 60,
         "rarity": "epic",
@@ -49,15 +49,15 @@
     },
     "large_house_with_tower":{
         "name": "Large house with tower",
-        "description": "A grand residence featuring a tall tower, offering both luxury and panoramic views.",
+        "description": "A large residence featuring a tall tower, offering both space and panoramic views.",
         "price": 2200,
         "comfort_points": 120,
         "rarity": "legendary",
         "type": "house"
     },
     "stone_castle_with_golden_dragon_statues_and_marbled_floors":{
-        "name": "Stone castle with golden dragon statues and marbled floors",
-        "description": "A magnificent stone castle featuring golden dragon statues and elegant marbled floors, symbolizing grandeur and strength.",
+        "name": "Stone castle",
+        "description": "A large stone castle with sturdy walls and wide halls, built to last for generations.",
         "price": 10000,
         "comfort_points": 500,
         "rarity": "legendary",
@@ -80,8 +80,8 @@
         "type": "decoration"
     },
     "tribal_statue":{
-        "name": "Tribal statue",
-        "description": "An intricately carved tribal statue that adds cultural significance and aesthetic appeal.",
+        "name": "Stone statue",
+        "description": "A carved stone statue that adds character and a sense of history to your home.",
         "price": 300,
         "comfort_points": 20,
         "rarity": "uncommon",
@@ -89,31 +89,31 @@
     },
     "garden_with_fountain":{
         "name": "Garden with fountain",
-        "description": "A beautifully landscaped garden featuring a decorative fountain, enhancing the serenity of your home.",
+        "description": "A landscaped garden featuring a decorative fountain, enhancing the serenity of your home.",
         "price": 700,
         "comfort_points": 40,
         "rarity": "epic",
         "type": "decoration"
     },
     "dragon_statue":{
-        "name": "Dragon statue",
-        "description": "A majestic dragon statue that symbolizes power and protection for your home.",
+        "name": "Stone carving",
+        "description": "A large stone carving that stands as a decorative centrepiece for your home.",
         "price": 1100,
         "comfort_points": 55,
         "rarity": "epic",
         "type": "decoration"
     },
     "grand_stone_tower":{
-        "name": "Grand stone tower",
-        "description": "An imposing grand stone tower that stands as a testament to strength and elegance.",
+        "name": "Stone tower",
+        "description": "A solid stone tower that stands tall on your land.",
         "price": 2000,
         "comfort_points": 100,
         "rarity": "legendary",
         "type": "decoration"
     },
     "dragon_nest":{
-        "name": "Dragon nest",
-        "description": "A mystical dragon nest that radiates ancient power and offers unparalleled protection.",
+        "name": "Stone pit",
+        "description": "A large stone pit built into the ground, radiating an air of mystery.",
         "price": 2500,
         "comfort_points": 200,
         "rarity": "legendary",
@@ -128,8 +128,8 @@
         "type": "fencing"
     },
     "golden_gates_with_marble_walls":{
-        "name": "Golden gates with marble walls",
-        "description": "Luxurious golden gates paired with elegant marble walls, providing both security and opulence.",
+        "name": "Stone gate",
+        "description": "A sturdy stone gate with solid walls, providing security and a clear boundary to your land.",
         "price": 1200,
         "comfort_points": 90,
         "rarity": "legendary",
@@ -144,8 +144,8 @@
         "type": "garden"
     },
     "enchanted_garden":{
-        "name": "Enchanted garden",
-        "description": "A magical garden filled with glowing plants and mystical creatures, creating a wondrous atmosphere.",
+        "name": "Garden",
+        "description": "A well-kept garden filled with lush plants and vibrant flowers, creating a pleasant atmosphere.",
         "price": 1800,
         "comfort_points": 90,
         "rarity": "legendary",
@@ -176,7 +176,7 @@
         "type": "storage"
     },
     "basic_training_dummy":{
-        "name": "Basic Training Dummy",
+        "name": "Training dummy",
         "description": "A simple wooden dummy for basic combat training exercises.",
         "price": 300,
         "comfort_points": 5,
@@ -184,15 +184,15 @@
         "type": "training_place"
     },
     "advanced_gymnasium":{
-        "name": "Advanced Gymnasium",
-        "description": "A comprehensive training facility with various equipment for intense physical conditioning.",
+        "name": "Training yard",
+        "description": "An open training area with various equipment for physical conditioning and practice.",
         "price": 1500,
         "comfort_points": 25,
         "rarity": "rare",
         "type": "training_place"
     },
     "dwarven_forge":{
-        "name": "Dwarven Forge",
+        "name": "Forge",
         "description": "A sturdy forge for crafting weapons and armor, complete with anvils and tools.",
         "price": 1800,
         "comfort_points": 40,
