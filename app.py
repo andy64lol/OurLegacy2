@@ -1111,6 +1111,22 @@ BUILDING_TYPES = {
     "crafting": {"label": "Crafting", "slots": 2},
 }
 
+BUILDING_TILE_SIZES: dict[str, tuple[int, int]] = {
+    "small_tent": (3, 3), "large_tent": (4, 4),
+    "small_hut": (3, 4), "stone_wall_medium_house": (4, 5),
+    "large_stone_house": (6, 8), "elven_treehouse": (3, 4),
+    "large_house_with_tower": (5, 7),
+    "stone_castle_with_golden_dragon_statues_and_marbled_floors": (9, 12),
+    "makeshift_campfire": (2, 2), "stone_bench": (3, 2),
+    "tribal_statue": (2, 3), "garden_with_fountain": (4, 4),
+    "dragon_statue": (2, 3), "grand_stone_tower": (2, 4),
+    "dragon_nest": (4, 4), "wooden_fence_border": (5, 2),
+    "golden_gates_with_marble_walls": (4, 3), "small_garden": (3, 3),
+    "enchanted_garden": (5, 4), "small_farm": (4, 3), "large_farm": (7, 5),
+    "storage_shed": (3, 4), "basic_training_dummy": (3, 4),
+    "advanced_gymnasium": (6, 8), "dwarven_forge": (3, 4),
+}
+
 EQUIPPABLE_TYPES = {"weapon", "armor", "offhand", "accessory"}
 
 MATERIALS_BY_TIER = {
@@ -2629,6 +2645,148 @@ def create():
         _set_activity(player, f"beginning their legend as {cls}")
         _autosave()
         return redirect(url_for("game"))
+
+def _build_land_data(player: dict) -> dict:
+    """Build the land_data dict for 'your_land' area."""
+    housing_data: dict[str, Any] = GAME_DATA["housing"]
+    farming_data: dict[str, Any] = GAME_DATA["farming"].get("crops", {})
+    pets_data: dict[str, Any] = GAME_DATA["pets"]
+    owned_set = set(player.get("housing_owned", []))
+    building_slots = player.get("building_slots", {})
+    crops = player.get("crops", {})
+
+    housing_by_type: dict[str, list] = {}
+    for h_key, h_item in housing_data.items():
+        h_type = h_item.get("type", "decoration")
+        if h_type not in housing_by_type:
+            housing_by_type[h_type] = []
+        housing_by_type[h_type].append({
+            "key": h_key,
+            "name": h_item.get("name", h_key),
+            "description": h_item.get("description", ""),
+            "price": h_item.get("price", 100),
+            "comfort": h_item.get("comfort_points", 5),
+            "rarity": h_item.get("rarity", "common"),
+            "owned": h_key in owned_set,
+            "can_afford": player["gold"] >= h_item.get("price", 100),
+        })
+
+    placed_by_type: dict[str, list] = {}
+    building_positions_raw = player.get("building_positions", {})
+    placed_buildings_map: list = []
+    for slot_id, h_key in building_slots.items():
+        if h_key:
+            slot_type = slot_id.rsplit("_", 1)[0]
+            h_item = housing_data.get(h_key, {})
+            if slot_type not in placed_by_type:
+                placed_by_type[slot_type] = []
+            placed_by_type[slot_type].append({
+                "slot_id": slot_id,
+                "key": h_key,
+                "name": h_item.get("name", h_key),
+                "comfort": h_item.get("comfort_points", 0),
+            })
+            pos = building_positions_raw.get(slot_id, {})
+            placed_buildings_map.append({
+                "slot_id": slot_id,
+                "key": h_key,
+                "name": h_item.get("name", h_key),
+                "type": h_item.get("type", "decoration"),
+                "x": pos.get("x", -1),
+                "y": pos.get("y", -1),
+            })
+
+    farm_crops = []
+    for i in range(1, 5):
+        slot_id = f"farm_{i}"
+        crop_info = crops.get(slot_id)
+        if crop_info:
+            crop_def = farming_data.get(crop_info["crop_key"], {})
+            farm_crops.append({
+                "slot_id": slot_id,
+                "crop_key": crop_info["crop_key"],
+                "name": crop_def.get("name", crop_info["crop_key"]),
+                "ready": crop_info.get("ready", False),
+                "turns": crop_info.get("turns", 0),
+                "growth_time": crop_info.get("growth_time", 5),
+                "sell_price": crop_def.get("sell_price", 15),
+                "harvest_amount": crop_def.get("harvest_amount", 3),
+            })
+        else:
+            farm_crops.append({"slot_id": slot_id, "crop_key": None})
+
+    pet_data_current = None
+    if player.get("pet"):
+        pd = pets_data.get(player["pet"], {})
+        pet_data_current = {
+            "key": player["pet"],
+            "name": pd.get("name", player["pet"]),
+            "boosts": pd.get("boosts", {}),
+        }
+
+    has_training_place = any(k.startswith("training_place") and v for k, v in building_slots.items())
+    has_garden = any(k.startswith("garden") and v for k, v in building_slots.items())
+    has_house = any(k.startswith("house") and v for k, v in building_slots.items())
+    has_storage = any(k.startswith("storage") and v for k, v in building_slots.items())
+    has_crafting = any(k.startswith("crafting") and v for k, v in building_slots.items())
+    has_farming = any(k.startswith("farming") and v for k, v in building_slots.items())
+    storage_capacity = sum(1 for k, v in building_slots.items() if k.startswith("storage") and v) * 10
+
+    inventory_counts: dict[str, int] = {}
+    for item in player.get("inventory", []):
+        inventory_counts[item] = inventory_counts.get(item, 0) + 1
+
+    all_recipes = GAME_DATA.get("crafting", {}).get("recipes", {})
+    crafting_recipes = []
+    for r_key, recipe in all_recipes.items():
+        materials = recipe.get("materials", {})
+        can_craft = all(inventory_counts.get(mat, 0) >= qty for mat, qty in materials.items())
+        crafting_recipes.append({
+            "key": r_key,
+            "name": recipe.get("name", r_key),
+            "description": recipe.get("description", ""),
+            "category": recipe.get("category", ""),
+            "output": recipe.get("output", {}),
+            "materials": materials,
+            "rarity": recipe.get("rarity", "common"),
+            "can_craft": can_craft,
+            "have": {mat: inventory_counts.get(mat, 0) for mat in materials},
+        })
+
+    return {
+        "housing_by_type": housing_by_type,
+        "placed_by_type": placed_by_type,
+        "placed_buildings_map": placed_buildings_map,
+        "comfort_points": player.get("comfort_points", 0),
+        "building_slots": building_slots,
+        "building_types": BUILDING_TYPES,
+        "farm_crops": farm_crops,
+        "farming_crops": farming_data,
+        "pets": {
+            k: {
+                "key": k,
+                "name": v.get("name", k),
+                "description": v.get("description", ""),
+                "price": v.get("price", 500),
+                "boosts": v.get("boosts", {}),
+                "can_afford": player["gold"] >= v.get("price", 500),
+            }
+            for k, v in pets_data.items()
+        },
+        "current_pet": pet_data_current,
+        "owned_housing": owned_set,
+        "training_options": TRAINING_OPTIONS,
+        "has_training_place": has_training_place,
+        "has_garden": has_garden,
+        "has_house": has_house,
+        "has_storage": has_storage,
+        "has_crafting": has_crafting,
+        "has_farming": has_farming,
+        "stored_items": player.get("stored_items", []),
+        "storage_capacity": storage_capacity,
+        "crafting_recipes": crafting_recipes,
+    }
+
 
 @app.route("/game")
 def game():
@@ -4877,7 +5035,8 @@ def land_buy_housing():
     _set_activity(player, f"building {h_data.get('name', h_key)} on their land")
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=land")
+    return_to = request.form.get("return_to", "")
+    return redirect(url_for("land_shop_page") if return_to == "land_shop" else url_for("game") + "?tab=land")
 
 @app.route("/action/land/place_housing", methods=["POST"])
 def land_place_housing():
@@ -4888,16 +5047,18 @@ def land_place_housing():
     h_key = request.form.get("housing_key", "")
     tile_x_str = request.form.get("tile_x", "")
     tile_y_str = request.form.get("tile_y", "")
+    return_to = request.form.get("return_to", "")
+    redirect_url = url_for("land_map_page") if return_to == "land_map" else url_for("game") + "?tab=land"
 
     if h_key not in player.get("housing_owned", []):
         add_message("You do not own that structure.", "var(--red)")
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return redirect(redirect_url)
 
     h_data = GAME_DATA["housing"].get(h_key, {})
     if not h_data:
         add_message("That structure does not exist.", "var(--red)")
-        return redirect(url_for("game") + "?tab=land")
+        return redirect(redirect_url)
 
     h_type = h_data.get("type", "decoration")
     comfort = h_data.get("comfort_points", 0)
@@ -4919,7 +5080,7 @@ def land_place_housing():
             "var(--red)",
         )
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return redirect(redirect_url)
 
     _TILE_COLS = 60
     _TILE_ROWS = 50
@@ -4932,11 +5093,28 @@ def land_place_housing():
         except ValueError:
             add_message("Invalid placement position.", "var(--red)")
             save_player(player)
-            return redirect(url_for("game") + "?tab=land")
+            return redirect(redirect_url)
         if tile_x < 0 or tile_x >= _TILE_COLS or tile_y < _BLOCKED_ROWS or tile_y >= _TILE_ROWS:
-            add_message("Cannot place there — position out of bounds or in blocked zone.", "var(--red)")
+            add_message("Cannot place there — out of bounds or in blocked zone.", "var(--red)")
             save_player(player)
-            return redirect(url_for("game") + "?tab=land")
+            return redirect(redirect_url)
+
+        tw, th = BUILDING_TILE_SIZES.get(h_key, (3, 3))
+        for exist_slot, exist_pos in positions.items():
+            if exist_slot == slot_id:
+                continue
+            exist_key = slots.get(exist_slot)
+            if not exist_key:
+                continue
+            ex, ey = exist_pos.get("x", -1), exist_pos.get("y", -1)
+            if ex < 0 or ey < 0:
+                continue
+            etw, eth = BUILDING_TILE_SIZES.get(exist_key, (3, 3))
+            if tile_x < ex + etw and tile_x + tw > ex and tile_y < ey + eth and tile_y + th > ey:
+                add_message("Cannot place here — overlaps with an existing building.", "var(--red)")
+                save_player(player)
+                return redirect(redirect_url)
+
         positions[slot_id] = {"x": tile_x, "y": tile_y}
         player["building_positions"] = positions
 
@@ -4949,7 +5127,7 @@ def land_place_housing():
     )
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=land")
+    return redirect(redirect_url)
 
 @app.route("/action/land/remove_housing", methods=["POST"])
 def land_remove_housing():
@@ -4978,7 +5156,8 @@ def land_remove_housing():
 
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=land")
+    return_to = request.form.get("return_to", "")
+    return redirect(url_for("land_map_page") if return_to == "land_map" else url_for("game") + "?tab=land")
 
 @app.route("/action/land/plant", methods=["POST"])
 def land_plant():
@@ -5284,7 +5463,8 @@ def land_buy_pet():
 
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=land")
+    return_to = request.form.get("return_to", "")
+    return redirect(url_for("land_pets_page") if return_to == "land_pets" else url_for("game") + "?tab=land")
 
 @app.route("/action/land/train", methods=["POST"])
 def land_train():
@@ -7817,6 +7997,51 @@ asgi_app = _socketio_module.ASGIApp(
     other_asgi_app=_WsgiToAsgi(app),
     on_startup=_on_startup,
 )
+
+@app.route("/land/map")
+def land_map_page():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+    if session.get("current_area") != "your_land":
+        return redirect(url_for("game") + "?tab=land")
+    land_data = _build_land_data(player)
+    return render_template("land_map.html",
+        player=player,
+        land_data=land_data,
+        online_username=session.get("online_username"),
+    )
+
+
+@app.route("/land/shop")
+def land_shop_page():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+    if session.get("current_area") != "your_land":
+        return redirect(url_for("game") + "?tab=land")
+    land_data = _build_land_data(player)
+    return render_template("land_shop.html",
+        player=player,
+        land_data=land_data,
+        online_username=session.get("online_username"),
+    )
+
+
+@app.route("/land/pets")
+def land_pets_page():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+    if session.get("current_area") != "your_land":
+        return redirect(url_for("game") + "?tab=land")
+    land_data = _build_land_data(player)
+    return render_template("land_pets.html",
+        player=player,
+        land_data=land_data,
+        online_username=session.get("online_username"),
+    )
+
 
 port = int(os.environ.get("PORT", 5000))
 if __name__ == "__main__":

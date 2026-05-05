@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+    .subpage-outer { max-width: 960px; margin: 0 auto; padding: 14px; min-height: 100vh; }
+    .subpage-header {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 14px; padding: 10px 14px;
+        background: var(--bg-panel); border: 1px solid var(--border);
+    }
+    .subpage-title { flex: 1; font-size: 15px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="subpage-outer">
+    <div class="subpage-header">
+        <a href="/game?tab=land" class="btn btn-secondary btn-small">← Back to Land</a>
+        <span class="subpage-title">Land Map Editor</span>
+        <a href="/land/shop" class="btn btn-secondary btn-small">Housing Shop</a>
+    </div>
+
+    <div class="panel land-section" style="margin-bottom:14px;">
+        <div class="panel-title">Map</div>
+        <div class="panel-body land-map-body" style="padding:0;">
+            <div id="land-place-mode-bar" class="land-place-bar" style="display:none;">
+                <span class="land-place-bar-label">Placing: <strong id="land-placing-name"></strong> &mdash; click a tile to place</span>
+                <button class="btn btn-xsmall btn-danger" onclick="LandEditor.cancel()">Cancel</button>
+            </div>
+            <div class="land-map-container">
+                <canvas id="land-map-canvas" class="land-map-canvas"></canvas>
+            </div>
+            <form id="land-place-form" method="post" action="/action/land/place_housing" style="display:none;">
+                <input type="hidden" name="housing_key" id="land-place-key">
+                <input type="hidden" name="tile_x" id="land-place-x">
+                <input type="hidden" name="tile_y" id="land-place-y">
+                <input type="hidden" name="return_to" value="land_map">
+            </form>
+        </div>
+    </div>
+
+    <div class="panel land-section" style="margin-bottom:14px;">
+        <div class="panel-title">Owned Structures &mdash; Click to Place</div>
+        <div class="panel-body">
+            {% set owned_list = [] %}
+            {% for type_key, buildings in land_data.housing_by_type.items() %}
+                {% for h in buildings %}{% if h.owned %}{% set _ = owned_list.append(h) %}{% endif %}{% endfor %}
+            {% endfor %}
+            {% if owned_list %}
+            <p class="panel-note" style="margin-bottom:10px;">Select a structure then click the map to place it.</p>
+            <div class="housing-shop-grid">
+                {% for h in owned_list %}
+                <div class="housing-card owned-card">
+                    <div class="housing-name rarity-{{ h.rarity }}">{{ h.name }}</div>
+                    <div class="housing-desc">{{ h.description[:60] }}</div>
+                    <div class="housing-actions">
+                        <button class="btn btn-xsmall btn-secondary"
+                            onclick="LandEditor.startPlacing('{{ h.key }}', '{{ h.name | replace("'", "\\'") }}')">Place</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="dim-notice">You don't own any structures yet.
+                <a href="/land/shop" style="color:var(--gold);">Visit the Housing Shop</a> to buy some.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if land_data.placed_buildings_map %}
+    <div class="panel land-section">
+        <div class="panel-title">Placed Structures</div>
+        <div class="panel-body">
+            <div class="land-placed-list" style="padding:0;">
+                {% for b in land_data.placed_buildings_map %}
+                <div class="land-placed-item">
+                    <span class="land-placed-name">{{ b.name }}</span>
+                    {% if b.x >= 0 %}<span class="land-placed-pos">tile ({{ b.x }}, {{ b.y }})</span>{% endif %}
+                    <form method="post" action="/action/land/remove_housing" style="display:inline;">
+                        <input type="hidden" name="slot_id" value="{{ b.slot_id }}">
+                        <input type="hidden" name="return_to" value="land_map">
+                        <button type="submit" class="btn btn-xsmall btn-danger">Remove</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+(function() {
+    const canvas = document.getElementById('land-map-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const TILE = 16, COLS = 60, ROWS = 50, BLOCKED = 5;
+
+    const BUILDING_TILES = {
+        'small_tent': [3, 3], 'large_tent': [4, 4],
+        'small_hut': [3, 4], 'stone_wall_medium_house': [4, 5],
+        'large_stone_house': [6, 8], 'elven_treehouse': [3, 4],
+        'large_house_with_tower': [5, 7],
+        'stone_castle_with_golden_dragon_statues_and_marbled_floors': [9, 12],
+        'makeshift_campfire': [2, 2], 'stone_bench': [3, 2],
+        'tribal_statue': [2, 3], 'garden_with_fountain': [4, 4],
+        'dragon_statue': [2, 3], 'grand_stone_tower': [2, 4],
+        'dragon_nest': [4, 4], 'wooden_fence_border': [5, 2],
+        'golden_gates_with_marble_walls': [4, 3], 'small_garden': [3, 3],
+        'enchanted_garden': [5, 4], 'small_farm': [4, 3], 'large_farm': [7, 5],
+        'storage_shed': [3, 4], 'basic_training_dummy': [3, 4],
+        'advanced_gymnasium': [6, 8], 'dwarven_forge': [3, 4],
+    };
+
+    const BUILDING_IMG_FILE = {
+        'small_tent': 'simple_tent.png', 'large_tent': 'simple_tent.png',
+        'small_hut': 'simple_house.png', 'stone_wall_medium_house': 'simple_house.png',
+        'large_stone_house': 'simple_house.png', 'elven_treehouse': 'simple_house.png',
+        'large_house_with_tower': 'simple_house.png',
+        'stone_castle_with_golden_dragon_statues_and_marbled_floors': 'simple_house.png',
+        'makeshift_campfire': 'campfire.png',
+        'dwarven_forge': 'simple_workshop.png', 'advanced_gymnasium': 'simple_workshop.png',
+        'basic_training_dummy': 'simple_workshop.png',
+    };
+
+    const TYPE_COLORS = {
+        'house': 'rgba(139,105,20,0.88)', 'decoration': 'rgba(107,75,138,0.88)',
+        'fencing': 'rgba(90,74,58,0.88)', 'garden': 'rgba(45,106,45,0.88)',
+        'farming': 'rgba(74,122,45,0.88)', 'training_place': 'rgba(138,45,45,0.88)',
+        'storage': 'rgba(58,90,122,0.88)', 'crafting': 'rgba(122,74,45,0.88)',
+    };
+
+    canvas.width = COLS * TILE;
+    canvas.height = ROWS * TILE;
+
+    const mapImg = new Image();
+    mapImg.src = '/game_assets/maps/your_land.png';
+
+    const loadedImgs = {};
+    ['simple_tent.png','simple_house.png','campfire.png','simple_workshop.png'].forEach(f => {
+        const img = new Image();
+        img.src = '/game_assets/maps/your_land_buildings/' + f;
+        img.onload = draw;
+        loadedImgs[f] = img;
+    });
+
+    let placingKey = null, placingName = null, hoverTile = null;
+    const placed = {{ land_data.placed_buildings_map | tojson | safe }};
+
+    function getTiles(key) { return BUILDING_TILES[key] || [3, 3]; }
+
+    function footprintOverlaps(ax, ay, aw, ah, bx, by, bw, bh) {
+        return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+    }
+
+    function isValidPlacement(tx, ty, tw, th) {
+        if (ty < BLOCKED || tx < 0 || tx + tw > COLS || ty + th > ROWS) return false;
+        for (const b of placed) {
+            if (b.x < 0 || b.y < 0) continue;
+            const [btw, bth] = getTiles(b.key);
+            if (footprintOverlaps(tx, ty, tw, th, b.x, b.y, btw, bth)) return false;
+        }
+        return true;
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (mapImg.complete && mapImg.naturalWidth > 0) {
+            ctx.drawImage(mapImg, 0, 0, canvas.width, canvas.height);
+        } else {
+            ctx.fillStyle = '#2a3520';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 0.5;
+        for (let x = 0; x <= COLS; x++) {
+            ctx.beginPath(); ctx.moveTo(x*TILE, 0); ctx.lineTo(x*TILE, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y <= ROWS; y++) {
+            ctx.beginPath(); ctx.moveTo(0, y*TILE); ctx.lineTo(canvas.width, y*TILE); ctx.stroke();
+        }
+
+        ctx.fillStyle = 'rgba(180,0,0,0.20)';
+        ctx.fillRect(0, 0, canvas.width, BLOCKED * TILE);
+        ctx.strokeStyle = 'rgba(220,60,60,0.75)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6,4]);
+        ctx.beginPath();
+        ctx.moveTo(0, BLOCKED*TILE); ctx.lineTo(canvas.width, BLOCKED*TILE); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(220,100,100,0.9)';
+        ctx.font = 'bold 9px monospace';
+        ctx.fillText('NO BUILD ZONE', 6, BLOCKED*TILE - 5);
+
+        placed.forEach(b => {
+            if (b.x < 0 || b.y < 0) return;
+            const [tw, th] = getTiles(b.key);
+            const px = b.x*TILE, py = b.y*TILE, pw = tw*TILE, ph = th*TILE;
+            const imgFile = BUILDING_IMG_FILE[b.key];
+            if (imgFile && loadedImgs[imgFile] && loadedImgs[imgFile].complete && loadedImgs[imgFile].naturalWidth > 0) {
+                ctx.drawImage(loadedImgs[imgFile], px, py, pw, ph);
+            } else {
+                ctx.fillStyle = TYPE_COLORS[b.type] || 'rgba(100,100,100,0.8)';
+                ctx.fillRect(px, py, pw, ph);
+            }
+            ctx.strokeStyle = 'rgba(255,220,80,0.85)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(px, py, pw, ph);
+            ctx.fillStyle = 'rgba(0,0,0,0.62)';
+            ctx.fillRect(px, py + ph - 14, pw, 14);
+            ctx.fillStyle = '#fff';
+            ctx.font = '8px monospace';
+            const maxChars = Math.max(1, Math.floor(pw / 5.4));
+            ctx.fillText(b.name.substring(0, maxChars), px + 2, py + ph - 3);
+        });
+
+        if (placingKey && hoverTile) {
+            const [tw, th] = getTiles(placingKey);
+            const {tx, ty} = hoverTile;
+            const valid = isValidPlacement(tx, ty, tw, th);
+            ctx.fillStyle = valid ? 'rgba(80,200,80,0.32)' : 'rgba(200,60,60,0.32)';
+            ctx.fillRect(tx*TILE, ty*TILE, tw*TILE, th*TILE);
+            ctx.strokeStyle = valid ? 'rgba(100,255,100,0.9)' : 'rgba(255,80,80,0.9)';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(tx*TILE, ty*TILE, tw*TILE, th*TILE);
+        }
+    }
+
+    function getTile(e) {
+        const r = canvas.getBoundingClientRect();
+        const sx = canvas.width / r.width, sy = canvas.height / r.height;
+        return { tx: Math.floor((e.clientX - r.left)*sx / TILE), ty: Math.floor((e.clientY - r.top)*sy / TILE) };
+    }
+
+    canvas.addEventListener('mousemove', function(e) {
+        if (!placingKey) { hoverTile = null; return; }
+        hoverTile = getTile(e); draw();
+    });
+    canvas.addEventListener('mouseleave', function() { hoverTile = null; if (placingKey) draw(); });
+    canvas.addEventListener('click', function(e) {
+        if (!placingKey) return;
+        const {tx, ty} = getTile(e);
+        const [tw, th] = getTiles(placingKey);
+        if (!isValidPlacement(tx, ty, tw, th)) return;
+        document.getElementById('land-place-key').value = placingKey;
+        document.getElementById('land-place-x').value = tx;
+        document.getElementById('land-place-y').value = ty;
+        document.getElementById('land-place-form').submit();
+    });
+
+    mapImg.onload = draw;
+    draw();
+
+    window.LandEditor = {
+        startPlacing: function(key, name) {
+            placingKey = key; placingName = name; hoverTile = null;
+            document.getElementById('land-place-mode-bar').style.display = 'flex';
+            document.getElementById('land-placing-name').textContent = name;
+            canvas.style.cursor = 'crosshair';
+            canvas.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            draw();
+        },
+        cancel: function() {
+            placingKey = null; placingName = null; hoverTile = null;
+            document.getElementById('land-place-mode-bar').style.display = 'none';
+            canvas.style.cursor = '';
+            draw();
+        }
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoKey = urlParams.get('place_key');
+    const autoName = urlParams.get('place_name');
+    if (autoKey && autoName) {
+        setTimeout(function() { LandEditor.startPlacing(autoKey, decodeURIComponent(autoName)); }, 200);
+    }
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+    .subpage-outer { max-width: 960px; margin: 0 auto; padding: 14px; min-height: 100vh; }
+    .subpage-header {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 14px; padding: 10px 14px;
+        background: var(--bg-panel); border: 1px solid var(--border);
+    }
+    .subpage-title { flex: 1; font-size: 15px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="subpage-outer">
+    <div class="subpage-header">
+        <a href="/game?tab=land" class="btn btn-secondary btn-small">← Back to Land</a>
+        <span class="subpage-title">Housing Shop</span>
+        <span style="font-size:13px;color:var(--gold);">Gold: <strong>{{ player.gold }}</strong>g</span>
+    </div>
+
+    {% for type_key, type_info in land_data.building_types.items() %}
+    {% if land_data.housing_by_type.get(type_key) %}
+    <div class="panel land-section" style="margin-bottom:14px;">
+        <div class="panel-title">
+            {{ type_info.label }}
+            <span class="panel-subtitle">{{ type_info.slots }} slot{{ 's' if type_info.slots != 1 }}</span>
+        </div>
+        <div class="panel-body">
+            <div class="housing-shop-grid">
+                {% for h in land_data.housing_by_type[type_key] %}
+                <div class="housing-card {% if h.owned %}owned-card{% endif %}">
+                    <div class="housing-name rarity-{{ h.rarity }}">{{ h.name }}</div>
+                    <div class="housing-desc">{{ h.description[:70] }}</div>
+                    <div class="housing-meta">
+                        <span class="housing-price">{{ h.price }}g</span>
+                        <span class="housing-comfort">+{{ h.comfort }} comfort</span>
+                    </div>
+                    <div class="housing-actions">
+                        {% if not h.owned %}
+                        <form method="post" action="/action/land/buy_housing">
+                            <input type="hidden" name="housing_key" value="{{ h.key }}">
+                            <input type="hidden" name="return_to" value="land_shop">
+                            <button type="submit" class="btn btn-xsmall btn-primary"
+                                {% if not h.can_afford %}disabled{% endif %}>Buy</button>
+                        </form>
+                        {% else %}
+                        <span style="font-size:12px;color:var(--green-bright);">Owned</span>
+                        <a href="/land/map?place_key={{ h.key }}&place_name={{ h.name | urlencode }}"
+                            class="btn btn-xsmall btn-secondary">Place on Map &rarr;</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

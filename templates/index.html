@@ -987,10 +987,58 @@
 
                     <div class="area-map-wrap" id="area-map-wrap">
                         {% if area.map_image %}
+                        {% if land_data %}
+                        <canvas id="explore-minimap" class="area-map-img" style="display:block;width:100%;"></canvas>
+                        <script>
+                        (function(){
+                            const canvas = document.getElementById('explore-minimap');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = 960; canvas.height = 800;
+                            const TILE = 16;
+                            const BTILES = {
+                                'small_tent':[3,3],'large_tent':[4,4],'small_hut':[3,4],
+                                'stone_wall_medium_house':[4,5],'large_stone_house':[6,8],
+                                'elven_treehouse':[3,4],'large_house_with_tower':[5,7],
+                                'stone_castle_with_golden_dragon_statues_and_marbled_floors':[9,12],
+                                'makeshift_campfire':[2,2],'stone_bench':[3,2],'tribal_statue':[2,3],
+                                'garden_with_fountain':[4,4],'dragon_statue':[2,3],'grand_stone_tower':[2,4],
+                                'dragon_nest':[4,4],'wooden_fence_border':[5,2],
+                                'golden_gates_with_marble_walls':[4,3],'small_garden':[3,3],
+                                'enchanted_garden':[5,4],'small_farm':[4,3],'large_farm':[7,5],
+                                'storage_shed':[3,4],'basic_training_dummy':[3,4],
+                                'advanced_gymnasium':[6,8],'dwarven_forge':[3,4],
+                            };
+                            const BCOLORS = {
+                                'house':'rgba(180,130,30,0.9)','decoration':'rgba(130,90,180,0.9)',
+                                'fencing':'rgba(110,90,70,0.9)','garden':'rgba(60,140,60,0.9)',
+                                'farming':'rgba(90,150,60,0.9)','training_place':'rgba(180,60,60,0.9)',
+                                'storage':'rgba(70,110,160,0.9)','crafting':'rgba(160,100,60,0.9)',
+                            };
+                            const placed = {{ land_data.placed_buildings_map | tojson | safe }};
+                            const mapImg = new Image();
+                            mapImg.src = '/game_assets/maps/your_land.png';
+                            mapImg.onload = function(){
+                                ctx.drawImage(mapImg, 0, 0, 960, 800);
+                                placed.forEach(function(b){
+                                    if (b.x < 0 || b.y < 0) return;
+                                    const tiles = BTILES[b.key] || [3,3];
+                                    const tw = tiles[0], th = tiles[1];
+                                    ctx.fillStyle = BCOLORS[b.type] || 'rgba(180,180,180,0.85)';
+                                    ctx.fillRect(b.x*TILE, b.y*TILE, tw*TILE, th*TILE);
+                                    ctx.strokeStyle = 'rgba(255,220,60,0.9)';
+                                    ctx.lineWidth = 2;
+                                    ctx.strokeRect(b.x*TILE, b.y*TILE, tw*TILE, th*TILE);
+                                });
+                            };
+                            if (mapImg.complete && mapImg.naturalWidth > 0) mapImg.onload();
+                        })();
+                        </script>
+                        {% else %}
                         <img src="/game_assets/maps/{{ area.map_image }}"
                              alt="Map of {{ area_name }}"
                              class="area-map-img"
                              onerror="this.style.display='none';document.getElementById('no-map-label').style.display='block'">
+                        {% endif %}
                         <p id="no-map-label" style="display:none;text-align:center;color:var(--text-dim);font-size:13px;padding:14px 0;font-style:italic;">None</p>
                         {% else %}
                         <p style="text-align:center;color:var(--text-dim);font-size:13px;padding:14px 0;font-style:italic;">None</p>
@@ -1717,76 +1765,18 @@
                 </div>
             </div>
 
-            <!-- Land Map Editor -->
-            <div class="panel land-section">
-                <div class="panel-title">Land Map</div>
-                <div class="panel-body land-map-body">
-                    <div id="land-place-mode-bar" class="land-place-bar" style="display:none;">
-                        <span class="land-place-bar-label">Placing: <strong id="land-placing-name"></strong> — click a tile to place</span>
-                        <button class="btn btn-xsmall btn-danger" onclick="LandEditor.cancel()">Cancel</button>
-                    </div>
-                    <div class="land-map-container">
-                        <canvas id="land-map-canvas" class="land-map-canvas"></canvas>
-                    </div>
-                    <form id="land-place-form" method="post" action="/action/land/place_housing" style="display:none;">
-                        <input type="hidden" name="housing_key" id="land-place-key">
-                        <input type="hidden" name="tile_x" id="land-place-x">
-                        <input type="hidden" name="tile_y" id="land-place-y">
-                    </form>
-                    {% if land_data.placed_buildings_map %}
-                    <div class="land-placed-list">
-                        <div class="land-placed-list-title">Placed Structures</div>
-                        {% for b in land_data.placed_buildings_map %}
-                        <div class="land-placed-item">
-                            <span class="land-placed-name">{{ b.name }}</span>
-                            {% if b.x >= 0 %}<span class="land-placed-pos">tile ({{ b.x }}, {{ b.y }})</span>{% endif %}
-                            <form method="post" action="/action/land/remove_housing" style="display:inline;">
-                                <input type="hidden" name="slot_id" value="{{ b.slot_id }}">
-                                <button type="submit" class="btn btn-xsmall btn-danger">Remove</button>
-                            </form>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="panel land-section">
-                <div class="panel-title">Housing Shop</div>
-                <div class="panel-body">
-                    {% for type_key, type_info in land_data.building_types.items() %}
-                    {% if land_data.housing_by_type.get(type_key) %}
-                    <div class="building-type-block">
-                        <div class="building-type-label">{{ type_info.label }} ({{ type_info.slots }} slot{{ 's' if
-                            type_info.slots != 1 }})</div>
-                        <div class="housing-shop-grid">
-                            {% for h in land_data.housing_by_type[type_key] %}
-                            <div class="housing-card {% if h.owned %}owned-card{% endif %}">
-                                <div class="housing-name rarity-{{ h.rarity }}">{{ h.name }}</div>
-                                <div class="housing-desc">{{ h.description[:70] }}</div>
-                                <div class="housing-meta">
-                                    <span class="housing-price">{{ h.price }}g</span>
-                                    <span class="housing-comfort">+{{ h.comfort }} comfort</span>
-                                </div>
-                                <div class="housing-actions">
-                                    {% if not h.owned %}
-                                    <form method="post" action="/action/land/buy_housing">
-                                        <input type="hidden" name="housing_key" value="{{ h.key }}">
-                                        <button type="submit" class="btn btn-xsmall btn-primary" {% if not h.can_afford
-                                            %}disabled{% endif %}>Buy</button>
-                                    </form>
-                                    {% else %}
-                                    <span style="font-size:12px;color:var(--green-bright);">Owned</span>
-                                    <button class="btn btn-xsmall btn-secondary"
-                                        onclick="LandEditor.startPlacing('{{ h.key }}', '{{ h.name }}')">Place on Map</button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% endfor %}
+            <div class="panel land-section" style="margin-bottom:14px;">
+                <div class="panel-title">Land Pages</div>
+                <div class="panel-body" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;">
+                    <a href="/land/map" class="btn btn-secondary" style="flex:1;min-width:140px;text-align:center;padding:10px 8px;font-size:13px;">
+                        &#128205; Map Editor
+                    </a>
+                    <a href="/land/shop" class="btn btn-secondary" style="flex:1;min-width:140px;text-align:center;padding:10px 8px;font-size:13px;">
+                        &#127968; Housing Shop
+                    </a>
+                    <a href="/land/pets" class="btn btn-secondary" style="flex:1;min-width:140px;text-align:center;padding:10px 8px;font-size:13px;">
+                        &#128062; Companion Pets
+                    </a>
                 </div>
             </div>
 
@@ -1964,59 +1954,12 @@
                 </div>
             </div>
 
-            <div class="panel land-section">
-                <div class="panel-title">Companion Pets</div>
-                <div class="panel-body">
-                    {% if land_data.current_pet %}
-                    <div class="current-pet-box">
-                        <div class="current-pet-label">Current Companion</div>
-                        <div class="current-pet-name">{{ land_data.current_pet.name }}</div>
-                        {% if land_data.current_pet.boosts %}
-                        <div class="current-pet-boosts">
-                            Bonuses:
-                            {% for stat, val in land_data.current_pet.boosts.items() %}
-                            +{{ val }} {{ stat.replace('_',' ') }}{% if not loop.last %}, {% endif %}
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-
-                    <div class="pet-grid">
-                        {% for pet_key, pet in land_data.pets.items() %}
-                        <div
-                            class="pet-card {% if land_data.current_pet and land_data.current_pet.key == pet_key %}active-pet{% endif %}">
-                            <div class="pet-name">{{ pet.name }}</div>
-                            <div class="pet-desc">{{ pet.description }}</div>
-                            {% if pet.boosts %}
-                            <div class="pet-boosts">
-                                {% for stat, val in pet.boosts.items() %}
-                                +{{ val }} {{ stat.replace('_',' ') }}{% if not loop.last %}, {% endif %}
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                            <div class="pet-price">{{ pet.price }}g</div>
-                            <form method="post" action="/action/land/buy_pet">
-                                <input type="hidden" name="pet_key" value="{{ pet_key }}">
-                                <button type="submit" class="btn btn-xsmall btn-primary" {% if not pet.can_afford
-                                    %}disabled{% endif %}>
-                                    {% if land_data.current_pet and land_data.current_pet.key == pet_key %}Active{% else
-                                    %}Adopt{% endif %}
-                                </button>
-                            </form>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
         </div>
         {% endif %}
 
         <script>
         (function() {
-            if (!document.getElementById('land-map-canvas')) return;
-
+            if (false) {
             const TILE = 16;
             const COLS = 60;
             const ROWS = 50;
@@ -2198,6 +2141,7 @@
                     draw();
                 }
             };
+            }
         })();
         </script>
 

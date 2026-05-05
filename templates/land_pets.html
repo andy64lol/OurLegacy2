@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+    .subpage-outer { max-width: 960px; margin: 0 auto; padding: 14px; min-height: 100vh; }
+    .subpage-header {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 14px; padding: 10px 14px;
+        background: var(--bg-panel); border: 1px solid var(--border);
+    }
+    .subpage-title { flex: 1; font-size: 15px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="subpage-outer">
+    <div class="subpage-header">
+        <a href="/game?tab=land" class="btn btn-secondary btn-small">← Back to Land</a>
+        <span class="subpage-title">Companion Pets</span>
+        <span style="font-size:13px;color:var(--gold);">Gold: <strong>{{ player.gold }}</strong>g</span>
+    </div>
+
+    {% if land_data.current_pet %}
+    <div class="panel land-section" style="margin-bottom:14px;">
+        <div class="panel-title">Current Companion</div>
+        <div class="panel-body">
+            <div class="current-pet-box">
+                <div class="current-pet-label">Active Pet</div>
+                <div class="current-pet-name">{{ land_data.current_pet.name }}</div>
+                {% if land_data.current_pet.boosts %}
+                <div class="current-pet-boosts">
+                    Bonuses:
+                    {% for stat, val in land_data.current_pet.boosts.items() %}
+                    +{{ val }} {{ stat.replace('_',' ') }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="panel land-section">
+        <div class="panel-title">Available Pets</div>
+        <div class="panel-body">
+            <div class="pet-grid">
+                {% for pet_key, pet in land_data.pets.items() %}
+                <div class="pet-card {% if land_data.current_pet and land_data.current_pet.key == pet_key %}active-pet{% endif %}">
+                    <div class="pet-name">{{ pet.name }}</div>
+                    <div class="pet-desc">{{ pet.description }}</div>
+                    {% if pet.boosts %}
+                    <div class="pet-boosts">
+                        {% for stat, val in pet.boosts.items() %}
+                        +{{ val }} {{ stat.replace('_',' ') }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="pet-price">{{ pet.price }}g</div>
+                    <form method="post" action="/action/land/buy_pet">
+                        <input type="hidden" name="pet_key" value="{{ pet_key }}">
+                        <input type="hidden" name="return_to" value="land_pets">
+                        <button type="submit" class="btn btn-xsmall btn-primary"
+                            {% if not pet.can_afford %}disabled{% endif %}>
+                            {% if land_data.current_pet and land_data.current_pet.key == pet_key %}Active
+                            {% else %}Adopt{% endif %}
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
