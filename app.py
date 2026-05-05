@@ -151,6 +151,29 @@ app.config["SESSION_PERMANENT"] = False
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
 
+@app.after_request
+def apply_cors_and_iframe_headers(response):
+    origin = request.headers.get("Origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    response.headers["X-Frame-Options"] = "ALLOWALL"
+    response.headers.pop("Content-Security-Policy", None)
+    return response
+
+@app.route("/", methods=["OPTIONS"])
+@app.route("/<path:path>", methods=["OPTIONS"])
+def handle_options(path=""):
+    response = make_response()
+    origin = request.headers.get("Origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    response.headers["X-Frame-Options"] = "ALLOWALL"
+    return response, 204
+
 sio = _socketio_module.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
 
 _asyncio_loop: _asyncio.AbstractEventLoop | None = None
