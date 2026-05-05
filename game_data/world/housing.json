@@ -15,54 +15,6 @@
         "rarity": "uncommon",
         "type": "house"
     },
-    "makeshift_campfire":{
-        "name": "Makeshift campfire",
-        "description": "A simple campfire setup for warmth and cooking.",
-        "price": 30,
-        "comfort_points": 10,
-        "rarity": "common",
-        "type": "decoration"
-    },
-    "Bonfire":{
-        "name": "Bonfire",
-        "description": "A large bonfire that provides ample warmth and a cozy atmosphere.",
-        "price": 80,
-        "comfort_points": 15,
-        "rarity": "uncommon",
-        "type":"decoration"
-    },
-    "oak_tree":{
-        "name": "Oak tree",
-        "description": "A sturdy oak tree that provides shade and a natural ambiance.",
-        "price": 200,
-        "comfort_points": 15,
-        "rarity": "uncommon",
-        "type": "decoration"
-    },
-    "stone_bench":{
-        "name": "Stone bench",
-        "description": "A sturdy stone bench for seating and relaxation.",
-        "price": 100,
-        "comfort_points": 10,
-        "rarity": "common",
-        "type": "decoration"
-    },
-    "small_pond":{
-        "name": "Small pond",
-        "description": "A tranquil pond that adds a touch of nature to your campsite.",
-        "price": 250,
-        "comfort_points": 20,
-        "rarity": "rare",
-        "type": "decoration"
-    },
-    "pile_of_firewood":{
-        "name": "Pile of firewood",
-        "description": "A stack of firewood to keep your campfire burning.",
-        "price": 40,
-        "comfort_points": 5,
-        "rarity": "common",
-        "type": "decoration"
-    },
     "small_hut":{
         "name": "Small hut",
         "description": "A cozy hut that provides better shelter and comfort.",
@@ -70,38 +22,6 @@
         "comfort_points": 30,
         "rarity": "uncommon",
         "type": "house"
-    },
-    "wooden_fence_border":{
-        "name": "Wooden fence",
-        "description": "A wooden fence that adds a sense of security and boundary to your place.",
-        "price": 150,
-        "comfort_points": 10,
-        "rarity": "common",
-        "type": "fencing"
-    },
-    "small_garden":{
-        "name": "Small garden",
-        "description": "A small garden with flowers and plants to enhance the ambiance.",
-        "price": 200,
-        "comfort_points": 20,
-        "rarity": "uncommon",
-        "type": "garden"
-    },
-    "metal_gates_stone_walls":{
-        "name": "Stone walls with metal gates",
-        "description": "Sturdy metal gates that provide security. The stone walls makes a grand entrance for your home.",
-        "price": 400,
-        "comfort_points": 30,
-        "rarity": "rare",
-        "type": "fencing"
-    },
-    "wooden_bridge_over_stream":{
-        "name": "Wooden bridge over stream",
-        "description": "A charming wooden bridge that crosses a gentle stream, adding beauty and functionality.",
-        "price": 350,
-        "comfort_points": 25,
-        "rarity": "rare",
-        "type": "decoration"
     },
     "stone_wall_medium_house":{
         "name": "Middle sized stone house",
@@ -111,38 +31,6 @@
         "rarity": "rare",
         "type": "house"
     },
-    "tribal_statue":{
-        "name": "Tribal statue",
-        "description": "An intricately carved tribal statue that adds cultural significance and aesthetic appeal.",
-        "price": 300,
-        "comfort_points": 20,
-        "rarity": "uncommon",
-        "type": "decoration"
-    },
-    "shooting_range":{
-        "name": "Shooting range",
-        "description": "A designated area for practicing archery and improving your skills.",
-        "price": 250,
-        "comfort_points": 15,
-        "rarity": "uncommon",
-        "type": "training_place"
-    },
-    "wooden_watchtower":{
-        "name": "Wooden watchtower",
-        "description": "A tall wooden watchtower that provides a vantage point for observing the surroundings.",
-        "price": 450,
-        "comfort_points": 25,
-        "rarity": "rare",
-        "type": "decoration"
-    },
-    "stone_bridge_over_river":{
-        "name": "Stone bridge over river",
-        "description": "A sturdy stone bridge that spans a flowing river, adding both beauty and functionality.",
-        "price": 600,
-        "comfort_points": 30,
-        "rarity": "epic",
-        "type": "decoration"
-    },
     "large_stone_house":{
         "name": "Large stone house",
         "description": "A spacious house made of stone, offering excellent protection and comfort.",
@@ -151,147 +39,19 @@
         "rarity": "epic",
         "type": "house"
     },
-    "garden_with_fountain":{
-        "name": "Garden with fountain",
-        "description": "A beautifully landscaped garden featuring a decorative fountain, enhancing the serenity of your home.",
-        "price": 700,
-        "comfort_points": 40,
-        "rarity": "epic",
-        "type": "decoration"
-    },
-    "crystal_greenhouse":{
-        "name": "Crystal greenhouse",
-        "description": "A greenhouse made of crystal, perfect for cultivating rare and exotic plants.",
-        "price": 900,
-        "comfort_points": 45,
-        "rarity": "epic",
-        "type": "farming"
-    },
-    "golden_gates_with_marble_walls":{
-        "name": "Golden gates with marble walls",
-        "description": "Luxurious golden gates paired with elegant marble walls, providing both security and opulence.",
+    "elven_treehouse":{
+        "name": "Elven Treehouse",
+        "description": "A beautifully crafted treehouse in elven style, blending with nature for a serene living space.",
         "price": 1200,
-        "comfort_points": 90,
-        "rarity": "legendary",
-        "type": "fencing"
-    },
-    "private_dock_on_lake":{
-        "name": "Private dock on a lake",
-        "description": "A serene private dock extending over a peaceful lake, perfect for relaxation and boating.",
-        "price": 1000,
-        "comfort_points": 90,
-        "rarity": "legendary",
-        "type": "decoration"
-    },
-    "dragon_statue":{
-        "name": "Dragon statue",
-        "description": "A majestic dragon statue that symbolizes power and protection for your home.",
-        "price": 1100,
-        "comfort_points": 55,
-        "rarity": "epic",
-        "type": "decoration"
-    },
-    "stone_tower":{
-        "name": "Stone tower",
-        "description": "A tall stone tower that serves as a lookout and adds grandeur to your property.",
-        "price": 1300,
-        "comfort_points": 70,
-        "rarity": "legendary",
-        "type": "decoration"
-    },
-    "grand_stone_tower":{
-        "name": "Grand stone tower",
-        "description": "An imposing grand stone tower that stands as a testament to strength and elegance.",
-        "price": 2000,
-        "comfort_points": 100,
-        "rarity": "legendary",
-        "type": "decoration"
-    },
-    "small_farm":{
-        "name": "Small farm",
-        "description": "A modest farm setup for growing crops and raising livestock.",
-        "price": 400,
-        "comfort_points": 20,
-        "rarity": "uncommon",
-        "type": "farming"
-    },
-    "crop_field":{
-        "name": "Crop field",
-        "description": "A large field dedicated to cultivating various crops for sustenance.",
-        "price": 600,
-        "comfort_points": 80,
-        "rarity": "rare",
-        "type": "farming"
-    },
-    "large_farm":{
-        "name": "Large farm",
-        "description": "An extensive farm with multiple fields and facilities for large-scale agriculture.",
-        "price": 1000,
-        "comfort_points": 150,
-        "rarity": "epic",
-        "type": "farming"
-    },
-    "dragon_nest":{
-        "name": "Dragon nest",
-        "description": "A mystical dragon nest that radiates ancient power and offers unparalleled protection.",
-        "price": 2500,
-        "comfort_points": 200,
-        "rarity": "legendary",
-        "type": "decoration"
-    },
-    "troll_hut":{
-        "name": "Troll hut",
-        "description": "A rustic hut built in the style of the forest trolls, providing a unique living experience.",
-        "price": 700,
-        "comfort_points": 40,
-        "rarity": "rare",
-        "type": "house"
-    },
-    "storage_shed":{
-        "name": "Storage shed",
-        "description": "A practical storage shed for keeping tools and supplies organized.",
-        "price": 150,
-        "comfort_points": 20,
-        "rarity": "common",
-        "type": "storage"
-    },
-    "aquamarine_pond":{
-        "name": "Aquamarine pond",
-        "description": "A beautiful pond filled with aquamarine water, enhancing the tranquility of your surroundings.",
-        "price": 800,
         "comfort_points": 60,
         "rarity": "epic",
-        "type": "decoration"
-    },
-    "statue_of_Laincer":{
-        "name": "Statue of Laincer",
-        "description": "A magnificent statue dedicated to Laincer, the legendary hero, symbolizing courage and honor.",
-        "price": 1500,
-        "comfort_points": 80,
-        "rarity": "legendary",
-        "type": "decoration"
-    },
-    "enchanted_garden":{
-        "name": "Enchanted garden",
-        "description": "A magical garden filled with glowing plants and mystical creatures, creating a wondrous atmosphere.",
-        "price": 1800,
-        "comfort_points": 90,
-        "rarity": "legendary",
-        "type": "garden"
+        "type": "house"
     },
     "large_house_with_tower":{
         "name": "Large house with tower",
         "description": "A grand residence featuring a tall tower, offering both luxury and panoramic views.",
         "price": 2200,
         "comfort_points": 120,
-        "rarity": "legendary",
-        "type": "house"
-    },
-    "luxurious_mansion_with_limestone_walls_and_high_quality_decor":{
-        "name": "Luxurious mansion with limestone walls and high quality decor",
-        "description": "An opulent mansion constructed with fine limestone walls and adorned with exquisite decor, epitomizing luxury living.",
-        "price": 5000,
-        "comfort_points": 300,
         "rarity": "legendary",
         "type": "house"
     },
@@ -303,45 +63,117 @@
         "rarity": "legendary",
         "type": "house"
     },
-    "imperial_palace_with_jade_walls_and_diamond_encrusted_furnishings":{
-        "name": "Imperial palace with jade walls and diamond encrusted furnishings",
-        "description": "An extraordinary imperial palace adorned with jade walls and lavish diamond-encrusted furnishings, representing the pinnacle of opulence.",
-        "price": 20000,
-        "comfort_points": 1000,
-        "rarity": "legendary",
-        "type": "house"
+    "makeshift_campfire":{
+        "name": "Makeshift campfire",
+        "description": "A simple campfire setup for warmth and cooking.",
+        "price": 30,
+        "comfort_points": 10,
+        "rarity": "common",
+        "type": "decoration"
     },
-    "oriental_small_hut":{
-        "name": "Oriental small hut",
-        "description": "A quaint hut designed in traditional oriental style, offering a peaceful retreat.",
-        "price": 350,
-        "comfort_points": 30,
+    "stone_bench":{
+        "name": "Stone bench",
+        "description": "A sturdy stone bench for seating and relaxation.",
+        "price": 100,
+        "comfort_points": 10,
+        "rarity": "common",
+        "type": "decoration"
+    },
+    "tribal_statue":{
+        "name": "Tribal statue",
+        "description": "An intricately carved tribal statue that adds cultural significance and aesthetic appeal.",
+        "price": 300,
+        "comfort_points": 20,
         "rarity": "uncommon",
-        "type": "house"
+        "type": "decoration"
     },
-    "scarab_statue":{
-        "name": "Scarab statue",
-        "description": "An ancient scarab statue that brings good fortune and protection to your home.",
-        "price": 900,
-        "comfort_points": 50,
+    "garden_with_fountain":{
+        "name": "Garden with fountain",
+        "description": "A beautifully landscaped garden featuring a decorative fountain, enhancing the serenity of your home.",
+        "price": 700,
+        "comfort_points": 40,
         "rarity": "epic",
         "type": "decoration"
     },
-    "statue_of_petricor":{
-        "name": "Statue of Petricor",
-        "description": "A revered statue dedicated to Petricor, the deity of rain and fertility, symbolizing prosperity and growth.",
-        "price": 1600,
-        "comfort_points": 85,
-        "rarity": "legendary",
+    "dragon_statue":{
+        "name": "Dragon statue",
+        "description": "A majestic dragon statue that symbolizes power and protection for your home.",
+        "price": 1100,
+        "comfort_points": 55,
+        "rarity": "epic",
         "type": "decoration"
     },
-    "statue_of_the_spear_of_justice":{
-        "name": "Statue of the Spear of Justice",
-        "description": "A powerful statue representing the Spear of Justice, embodying fairness and righteousness.",
+    "grand_stone_tower":{
+        "name": "Grand stone tower",
+        "description": "An imposing grand stone tower that stands as a testament to strength and elegance.",
         "price": 2000,
         "comfort_points": 100,
         "rarity": "legendary",
         "type": "decoration"
+    },
+    "dragon_nest":{
+        "name": "Dragon nest",
+        "description": "A mystical dragon nest that radiates ancient power and offers unparalleled protection.",
+        "price": 2500,
+        "comfort_points": 200,
+        "rarity": "legendary",
+        "type": "decoration"
+    },
+    "wooden_fence_border":{
+        "name": "Wooden fence",
+        "description": "A wooden fence that adds a sense of security and boundary to your place.",
+        "price": 150,
+        "comfort_points": 10,
+        "rarity": "common",
+        "type": "fencing"
+    },
+    "golden_gates_with_marble_walls":{
+        "name": "Golden gates with marble walls",
+        "description": "Luxurious golden gates paired with elegant marble walls, providing both security and opulence.",
+        "price": 1200,
+        "comfort_points": 90,
+        "rarity": "legendary",
+        "type": "fencing"
+    },
+    "small_garden":{
+        "name": "Small garden",
+        "description": "A small garden with flowers and plants to enhance the ambiance.",
+        "price": 200,
+        "comfort_points": 20,
+        "rarity": "uncommon",
+        "type": "garden"
+    },
+    "enchanted_garden":{
+        "name": "Enchanted garden",
+        "description": "A magical garden filled with glowing plants and mystical creatures, creating a wondrous atmosphere.",
+        "price": 1800,
+        "comfort_points": 90,
+        "rarity": "legendary",
+        "type": "garden"
+    },
+    "small_farm":{
+        "name": "Small farm",
+        "description": "A modest farm setup for growing crops and raising livestock.",
+        "price": 400,
+        "comfort_points": 20,
+        "rarity": "uncommon",
+        "type": "farming"
+    },
+    "large_farm":{
+        "name": "Large farm",
+        "description": "An extensive farm with multiple fields and facilities for large-scale agriculture.",
+        "price": 1000,
+        "comfort_points": 150,
+        "rarity": "epic",
+        "type": "farming"
+    },
+    "storage_shed":{
+        "name": "Storage shed",
+        "description": "A practical storage shed for keeping tools and supplies organized.",
+        "price": 150,
+        "comfort_points": 20,
+        "rarity": "common",
+        "type": "storage"
     },
     "basic_training_dummy":{
         "name": "Basic Training Dummy",
@@ -349,14 +181,6 @@
         "price": 300,
         "comfort_points": 5,
         "rarity": "common",
-        "type": "training_place"
-    },
-    "stone_training_area":{
-        "name": "Stone Training Area",
-        "description": "A designated stone area for various training activities and exercises.",
-        "price": 800,
-        "comfort_points": 15,
-        "rarity": "uncommon",
         "type": "training_place"
     },
     "advanced_gymnasium":{
@@ -367,14 +191,6 @@
         "rarity": "rare",
         "type": "training_place"
     },
-    "elven_treehouse":{
-        "name": "Elven Treehouse",
-        "description": "A beautifully crafted treehouse in elven style, blending with nature for a serene living space.",
-        "price": 1200,
-        "comfort_points": 60,
-        "rarity": "epic",
-        "type": "house"
-    },
     "dwarven_forge":{
         "name": "Dwarven Forge",
         "description": "A sturdy forge for crafting weapons and armor, complete with anvils and tools.",
@@ -382,29 +198,5 @@
         "comfort_points": 40,
         "rarity": "rare",
         "type": "crafting"
-    },
-    "magical_library":{
-        "name": "Magical Library",
-        "description": "A library filled with enchanted books and tomes, perfect for studying magic.",
-        "price": 2000,
-        "comfort_points": 70,
-        "rarity": "epic",
-        "type": "decoration"
-    },
-    "underground_bunker":{
-        "name": "Underground Bunker",
-        "description": "A hidden underground shelter for protection during sieges or disasters.",
-        "price": 2500,
-        "comfort_points": 80,
-        "rarity": "rare",
-        "type": "house"
-    },
-    "floating_island_garden":{
-        "name": "Floating Island Garden",
-        "description": "A magical floating garden suspended in the air, offering breathtaking views.",
-        "price": 3000,
-        "comfort_points": 150,
-        "rarity": "legendary",
-        "type": "garden"
     }
 }
