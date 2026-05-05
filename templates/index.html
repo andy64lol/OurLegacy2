@@ -2022,19 +2022,35 @@
             const ROWS = 50;
             const BLOCKED = 5;
 
+            // Tile footprints sized to match image aspect ratios:
+            // simple_tent.png = 192x192 (1:1), simple_house.png = 192x256 (3:4 W:H),
+            // campfire.png = 192x192 (1:1), simple_workshop.png = 192x256 (3:4 W:H)
             const BUILDING_TILES = {
-                'small_tent': [2, 2], 'large_tent': [3, 2], 'small_hut': [3, 3],
-                'stone_wall_medium_house': [4, 3], 'large_stone_house': [5, 4],
-                'elven_treehouse': [3, 4], 'large_house_with_tower': [5, 5],
-                'stone_castle_with_golden_dragon_statues_and_marbled_floors': [8, 6],
-                'makeshift_campfire': [1, 1], 'stone_bench': [2, 1],
-                'tribal_statue': [2, 2], 'garden_with_fountain': [4, 3],
-                'dragon_statue': [3, 3], 'grand_stone_tower': [2, 4],
-                'dragon_nest': [4, 4], 'wooden_fence_border': [3, 1],
-                'golden_gates_with_marble_walls': [4, 2], 'small_garden': [3, 2],
-                'enchanted_garden': [5, 3], 'small_farm': [4, 3], 'large_farm': [6, 4],
-                'storage_shed': [2, 2], 'basic_training_dummy': [2, 2],
-                'advanced_gymnasium': [5, 4], 'dwarven_forge': [3, 3],
+                'small_tent': [4, 4],           // tent 1:1
+                'large_tent': [5, 5],           // tent 1:1
+                'small_hut': [3, 4],            // house 3:4
+                'stone_wall_medium_house': [4, 5],  // house ~3:4
+                'large_stone_house': [5, 7],    // house ~3:4
+                'elven_treehouse': [4, 5],      // house ~3:4
+                'large_house_with_tower': [5, 7],   // house ~3:4
+                'stone_castle_with_golden_dragon_statues_and_marbled_floors': [9, 12], // house ~3:4
+                'makeshift_campfire': [3, 3],   // campfire 1:1
+                'stone_bench': [4, 2],
+                'tribal_statue': [3, 4],
+                'garden_with_fountain': [5, 4],
+                'dragon_statue': [3, 4],
+                'grand_stone_tower': [3, 5],
+                'dragon_nest': [5, 5],
+                'wooden_fence_border': [6, 2],
+                'golden_gates_with_marble_walls': [5, 3],
+                'small_garden': [4, 3],
+                'enchanted_garden': [6, 4],
+                'small_farm': [5, 3],
+                'large_farm': [8, 5],
+                'storage_shed': [3, 4],
+                'basic_training_dummy': [3, 4], // workshop 3:4
+                'advanced_gymnasium': [6, 8],   // workshop ~3:4
+                'dwarven_forge': [3, 4],        // workshop 3:4
             };
 
             const BUILDING_IMG_FILE = {

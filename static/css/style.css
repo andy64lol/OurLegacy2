@@ -4912,18 +4912,16 @@ body.page-fade-out {
 }
 
 .land-map-container {
-    overflow: auto;
-    max-height: 480px;
+    overflow: hidden;
     border-bottom: 1px solid var(--border);
     background: #111;
-    cursor: default;
 }
 
 .land-map-canvas {
     display: block;
     width: 100%;
-    max-width: 960px;
     image-rendering: pixelated;
+    cursor: default;
 }
 
 .land-placed-list {
