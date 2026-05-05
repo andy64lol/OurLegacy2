@@ -61,6 +61,7 @@ class Character:
         self.comfort_points: int = 0
         self.building_slots: Dict[str, Optional[str]] = {}
         self.farm_plots: Dict[str, List] = {"farm_1": [], "farm_2": []}
+        self.stored_items: List[str] = []
 
         self.day = 1
         self.hour = 8.0
@@ -286,6 +287,7 @@ class Character:
             "housing_owned": self.housing_owned,
             "comfort_points": self.comfort_points,
             "building_slots": self.building_slots,
+            "stored_items": self.stored_items,
             "active_pet": self.active_pet,
             "pets_owned": self.pets_owned,
             "day": self.day,

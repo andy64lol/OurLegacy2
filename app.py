@@ -1105,8 +1105,10 @@ BUILDING_TYPES = {
     "decoration": {"label": "Decoration", "slots": 10},
     "fencing": {"label": "Fencing", "slots": 1},
     "garden": {"label": "Garden", "slots": 3},
-    "farm": {"label": "Farm", "slots": 2},
+    "farming": {"label": "Farming", "slots": 2},
     "training_place": {"label": "Training Place", "slots": 3},
+    "storage": {"label": "Storage", "slots": 2},
+    "crafting": {"label": "Crafting", "slots": 2},
 }
 
 EQUIPPABLE_TYPES = {"weapon", "armor", "offhand", "accessory"}
@@ -2587,6 +2589,7 @@ def create():
             "comfort_points": 0,
             "housing_owned": [],
             "building_slots": {},
+            "stored_items": [],
             "crops": {},
             "pet": None,
             "explore_count": 0,
@@ -2987,6 +2990,46 @@ def game():
         has_garden = any(
             k.startswith("garden") and v for k, v in building_slots.items()
         )
+        has_house = any(
+            k.startswith("house") and v for k, v in building_slots.items()
+        )
+        has_storage = any(
+            k.startswith("storage") and v for k, v in building_slots.items()
+        )
+        has_crafting = any(
+            k.startswith("crafting") and v for k, v in building_slots.items()
+        )
+        has_farming = any(
+            k.startswith("farming") and v for k, v in building_slots.items()
+        )
+
+        storage_capacity = sum(
+            1 for k, v in building_slots.items() if k.startswith("storage") and v
+        ) * 10
+
+        inventory_counts: dict[str, int] = {}
+        for item in player.get("inventory", []):
+            inventory_counts[item] = inventory_counts.get(item, 0) + 1
+
+        all_recipes = GAME_DATA.get("crafting", {}).get("recipes", {})
+        crafting_recipes = []
+        for r_key, recipe in all_recipes.items():
+            materials = recipe.get("materials", {})
+            can_craft = all(
+                inventory_counts.get(mat, 0) >= qty
+                for mat, qty in materials.items()
+            )
+            crafting_recipes.append({
+                "key": r_key,
+                "name": recipe.get("name", r_key),
+                "description": recipe.get("description", ""),
+                "category": recipe.get("category", ""),
+                "output": recipe.get("output", {}),
+                "materials": materials,
+                "rarity": recipe.get("rarity", "common"),
+                "can_craft": can_craft,
+                "have": {mat: inventory_counts.get(mat, 0) for mat in materials},
+            })
 
         land_data = {
             "housing_by_type": housing_by_type,
@@ -3012,6 +3055,13 @@ def game():
             "training_options": TRAINING_OPTIONS,
             "has_training_place": has_training_place,
             "has_garden": has_garden,
+            "has_house": has_house,
+            "has_storage": has_storage,
+            "has_crafting": has_crafting,
+            "has_farming": has_farming,
+            "stored_items": player.get("stored_items", []),
+            "storage_capacity": storage_capacity,
+            "crafting_recipes": crafting_recipes,
         }
 
     active_companions = []
@@ -4954,16 +5004,165 @@ def land_harvest():
     sell_each = crop_def.get("sell_price", 15)
     gold_earned = amount * sell_each
 
+    building_slots = player.get("building_slots", {})
+    has_farming = any(k.startswith("farming") and v for k, v in building_slots.items())
+    farming_bonus_msg = ""
+    if has_farming:
+        bonus = int(gold_earned * 0.5)
+        gold_earned += bonus
+        farming_bonus_msg = f" (+{bonus}g farming bonus)"
+
     player["gold"] += gold_earned
     crops[slot_id] = {}
     player["crops"] = crops
     add_message(
-        f"You harvest {amount}x {crop_def.get('name', crop_info['crop_key'])} and earn {gold_earned} gold!",
+        f"You harvest {amount}x {crop_def.get('name', crop_info['crop_key'])} and earn {gold_earned} gold!{farming_bonus_msg}",
         "var(--gold)",
     )
     save_player(player)
     _autosave()
     return redirect(url_for("game") + "?tab=land")
+
+@app.route("/action/land/rest", methods=["POST"])
+def land_rest():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+
+    building_slots = player.get("building_slots", {})
+    has_house = any(k.startswith("house") and v for k, v in building_slots.items())
+    if not has_house:
+        add_message("You need a house on your land to rest here.", "var(--red)")
+        return redirect(url_for("game") + "?tab=land")
+
+    hp = player.get("hp", 1)
+    max_hp = player.get("max_hp", 100)
+    mp = player.get("mp", 0)
+    max_mp = player.get("max_mp", 50)
+
+    if hp >= max_hp and mp >= max_mp:
+        add_message("You are already at full health and mana.", "var(--text-dim)")
+        save_player(player)
+        return redirect(url_for("game") + "?tab=land")
+
+    comfort = player.get("comfort_points", 0)
+    hp_restore = max(10, comfort * 2)
+    mp_restore = max(5, comfort)
+
+    old_hp, old_mp = hp, mp
+    player["hp"] = min(max_hp, hp + hp_restore)
+    player["mp"] = min(max_mp, mp + mp_restore)
+    gained_hp = player["hp"] - old_hp
+    gained_mp = player["mp"] - old_mp
+
+    add_message(
+        f"You rest at home and recover +{gained_hp} HP, +{gained_mp} MP.",
+        "var(--green-bright)",
+    )
+    save_player(player)
+    _autosave()
+    return redirect(url_for("game") + "?tab=land")
+
+
+@app.route("/action/land/store_item", methods=["POST"])
+def land_store_item():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+
+    building_slots = player.get("building_slots", {})
+    has_storage = any(k.startswith("storage") and v for k, v in building_slots.items())
+    if not has_storage:
+        add_message("You need a storage building on your land first.", "var(--red)")
+        return redirect(url_for("game") + "?tab=land")
+
+    item_name = request.form.get("item_name", "")
+    inventory = player.get("inventory", [])
+    if item_name not in inventory:
+        add_message(f"{item_name} is not in your inventory.", "var(--red)")
+        return redirect(url_for("game") + "?tab=land")
+
+    storage_count = sum(1 for k, v in building_slots.items() if k.startswith("storage") and v)
+    capacity = storage_count * 10
+    stored = player.get("stored_items", [])
+    if len(stored) >= capacity:
+        add_message(f"Storage is full ({capacity} items max). Build more storage to expand.", "var(--red)")
+        return redirect(url_for("game") + "?tab=land")
+
+    inventory.remove(item_name)
+    player["inventory"] = inventory
+    stored.append(item_name)
+    player["stored_items"] = stored
+    add_message(f"Stored {item_name} in your storage.", "var(--text-dim)")
+    save_player(player)
+    return redirect(url_for("game") + "?tab=land")
+
+
+@app.route("/action/land/retrieve_item", methods=["POST"])
+def land_retrieve_item():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+
+    item_name = request.form.get("item_name", "")
+    stored = player.get("stored_items", [])
+    if item_name not in stored:
+        add_message(f"{item_name} is not in your storage.", "var(--red)")
+        return redirect(url_for("game") + "?tab=land")
+
+    stored.remove(item_name)
+    player["stored_items"] = stored
+    player.setdefault("inventory", []).append(item_name)
+    add_message(f"Retrieved {item_name} from storage.", "var(--green-bright)")
+    save_player(player)
+    return redirect(url_for("game") + "?tab=land")
+
+
+@app.route("/action/land/craft", methods=["POST"])
+def land_craft():
+    player = get_player()
+    if not player:
+        return redirect(url_for("index"))
+
+    building_slots = player.get("building_slots", {})
+    has_crafting = any(k.startswith("crafting") and v for k, v in building_slots.items())
+    if not has_crafting:
+        add_message("You need a crafting building (like the Dwarven Forge) on your land first.", "var(--red)")
+        return redirect(url_for("game") + "?tab=land")
+
+    recipe_key = request.form.get("recipe_key", "")
+    recipe = GAME_DATA.get("crafting", {}).get("recipes", {}).get(recipe_key)
+    if not recipe:
+        add_message("Unknown recipe.", "var(--red)")
+        return redirect(url_for("game") + "?tab=land")
+
+    inventory = player.get("inventory", [])
+    inv_counts: dict[str, int] = {}
+    for item in inventory:
+        inv_counts[item] = inv_counts.get(item, 0) + 1
+
+    materials = recipe.get("materials", {})
+    for mat, qty in materials.items():
+        if inv_counts.get(mat, 0) < qty:
+            add_message(f"Not enough materials: need {qty}x {mat}.", "var(--red)")
+            return redirect(url_for("game") + "?tab=land")
+
+    for mat, qty in materials.items():
+        for _ in range(qty):
+            inventory.remove(mat)
+
+    output = recipe.get("output", {})
+    for out_item, out_qty in output.items():
+        for _ in range(out_qty):
+            inventory.append(out_item)
+
+    player["inventory"] = inventory
+    out_str = ", ".join(f"{q}x {n}" for n, q in output.items())
+    add_message(f"You craft {out_str}!", "var(--green-bright)")
+    save_player(player)
+    _autosave()
+    return redirect(url_for("game") + "?tab=land")
+
 
 @app.route("/action/land/buy_pet", methods=["POST"])
 def land_buy_pet():

@@ -1659,6 +1659,33 @@
             </div>
 
             <div class="panel land-section">
+                <div class="panel-title">Rest at Home</div>
+                <div class="panel-body">
+                    {% if not land_data.has_house %}
+                    <div class="land-locked-notice">
+                        <div class="land-locked-text">
+                            <strong>House Required</strong>
+                            <p>Build a house on your land to rest and recover HP &amp; MP.</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="panel-note">Rest at your home to recover HP and MP. The more comfort points you have, the more you recover.</p>
+                    <div style="margin-bottom:10px;font-size:14px;">
+                        HP: <strong>{{ player.hp }} / {{ player.max_hp }}</strong> &nbsp;|&nbsp;
+                        MP: <strong>{{ player.mp }} / {{ player.max_mp }}</strong> &nbsp;|&nbsp;
+                        Comfort: <strong>{{ land_data.comfort_points }}</strong>
+                    </div>
+                    <form method="post" action="/action/land/rest">
+                        <button type="submit" class="btn btn-primary"
+                            {% if player.hp >= player.max_hp and player.mp >= player.max_mp %}disabled{% endif %}>
+                            Rest (recover ~{{ [10, land_data.comfort_points * 2]|max }} HP / ~{{ [5, land_data.comfort_points]|max }} MP)
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="panel land-section">
                 <div class="panel-title"><img class="class-glyph" src="/game_assets/glyphs/fight.webp"
                         alt="training">Training Grounds</div>
                 <div class="panel-body">
@@ -1815,6 +1842,123 @@
                         </div>
                         {% endfor %}
                     </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="panel land-section">
+                <div class="panel-title">Crafting Forge</div>
+                <div class="panel-body">
+                    {% if not land_data.has_crafting %}
+                    <div class="land-locked-notice">
+                        <div class="land-locked-text">
+                            <strong>Crafting Building Required</strong>
+                            <p>Place a crafting building like the Dwarven Forge to unlock recipes.</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="panel-note">Use materials from your inventory to craft potions, weapons, and more.</p>
+                    {% set categories = [] %}
+                    {% for r in land_data.crafting_recipes %}
+                        {% if r.category not in categories %}{% set _ = categories.append(r.category) %}{% endif %}
+                    {% endfor %}
+                    {% for cat in categories %}
+                    <div class="building-type-block">
+                        <div class="building-type-label">{{ cat }}</div>
+                        <div class="housing-shop-grid">
+                            {% for r in land_data.crafting_recipes if r.category == cat %}
+                            <div class="housing-card {% if r.can_craft %}owned-card{% endif %}">
+                                <div class="housing-name rarity-{{ r.rarity }}">{{ r.name }}</div>
+                                <div class="housing-desc">{{ r.description[:70] }}</div>
+                                <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">
+                                    <strong>Needs:</strong>
+                                    {% for mat, qty in r.materials.items() %}
+                                    <span style="color:{% if r.have[mat] >= qty %}var(--green-bright){% else %}var(--red){% endif %};">
+                                        {{ qty }}x {{ mat }} ({{ r.have[mat] }})
+                                    </span>{% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div style="font-size:12px;color:var(--gold);margin-top:2px;">
+                                    <strong>Output:</strong> {% for name, qty in r.output.items() %}{{ qty }}x {{ name }}{% endfor %}
+                                </div>
+                                <div class="housing-actions" style="margin-top:6px;">
+                                    <form method="post" action="/action/land/craft">
+                                        <input type="hidden" name="recipe_key" value="{{ r.key }}">
+                                        <button type="submit" class="btn btn-xsmall btn-primary" {% if not r.can_craft %}disabled{% endif %}>Craft</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="panel land-section">
+                <div class="panel-title">Home Storage</div>
+                <div class="panel-body">
+                    {% if not land_data.has_storage %}
+                    <div class="land-locked-notice">
+                        <div class="land-locked-text">
+                            <strong>Storage Building Required</strong>
+                            <p>Place a Storage Shed on your land to store items from your inventory.</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="panel-note">Store items here to free up your inventory. Capacity: {{ land_data.stored_items|length }} / {{ land_data.storage_capacity }}</p>
+
+                    {% if land_data.stored_items %}
+                    <div class="building-type-label" style="margin-bottom:6px;">Stored Items</div>
+                    <div class="slots-grid" style="margin-bottom:14px;">
+                        {% set stored_counts = {} %}
+                        {% for item in land_data.stored_items %}
+                            {% if item in stored_counts %}
+                                {% set _ = stored_counts.update({item: stored_counts[item] + 1}) %}
+                            {% else %}
+                                {% set _ = stored_counts.update({item: 1}) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% for item, count in stored_counts.items() %}
+                        <div class="slot-card slot-filled" style="min-width:120px;">
+                            <div class="slot-item rarity-common">{{ item }}</div>
+                            {% if count > 1 %}<div style="font-size:12px;color:var(--text-dim);">x{{ count }}</div>{% endif %}
+                            <form method="post" action="/action/land/retrieve_item" style="margin-top:4px;">
+                                <input type="hidden" name="item_name" value="{{ item }}">
+                                <button type="submit" class="btn btn-xsmall btn-secondary">Retrieve</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p style="font-size:13px;color:var(--text-dim);font-style:italic;">Storage is empty.</p>
+                    {% endif %}
+
+                    {% if player.inventory %}
+                    <div class="building-type-label" style="margin-bottom:6px;">Store from Inventory</div>
+                    <div class="slots-grid">
+                        {% set inv_counts = {} %}
+                        {% for item in player.inventory %}
+                            {% if item in inv_counts %}
+                                {% set _ = inv_counts.update({item: inv_counts[item] + 1}) %}
+                            {% else %}
+                                {% set _ = inv_counts.update({item: 1}) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% for item, count in inv_counts.items() %}
+                        <div class="slot-card" style="min-width:120px;">
+                            <div class="slot-item rarity-common">{{ item }}</div>
+                            {% if count > 1 %}<div style="font-size:12px;color:var(--text-dim);">x{{ count }}</div>{% endif %}
+                            <form method="post" action="/action/land/store_item" style="margin-top:4px;">
+                                <input type="hidden" name="item_name" value="{{ item }}">
+                                <button type="submit" class="btn btn-xsmall btn-primary"
+                                    {% if land_data.stored_items|length >= land_data.storage_capacity %}disabled{% endif %}>Store</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>
