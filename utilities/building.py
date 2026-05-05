@@ -29,6 +29,14 @@ BUILDING_TYPES = {
         "label": "Training Place",
         "slots": 3
     },
+    "storage": {
+        "label": "Storage",
+        "slots": 2
+    },
+    "crafting": {
+        "label": "Crafting",
+        "slots": 2
+    },
 }
 
 def get_building_status(player: Dict[str, Any],
