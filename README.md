@@ -10,6 +10,22 @@ Our Legacy 2 is a medieval fantasy RPG featuring turn-based combat, dungeon craw
 
 ---
 
+## Desktop Launcher Builds
+
+Pre-built desktop launchers are available in the [`builds/`](builds/) directory.
+
+### v0.0.1b (Beta)
+
+| Platform | File |
+|---|---|
+| Windows | `builds/v0.0.1b/Our Legacy 2 Launcher Beta Windows.zip` |
+| Mac | `builds/v0.0.1b/Our Legacy 2 Launcher Beta Mac.zip` |
+| Linux | `builds/v0.0.1b/Our Legacy 2 Launcher Beta Linux.zip` |
+
+Download the zip for your platform, extract it, and run the launcher.
+
+---
+
 ## Setup
 
 **Requirements:** Python 3.11+
