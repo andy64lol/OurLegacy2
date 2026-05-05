@@ -148,6 +148,8 @@ app.config["SESSION_FILE_DIR"] = os.path.join(
     os.path.dirname(__file__), ".flask_sessions"
 )
 app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config["SESSION_COOKIE_SECURE"] = True
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
 

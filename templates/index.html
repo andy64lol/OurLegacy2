@@ -42,11 +42,84 @@
     /* online modal form redesign */
     #online-modal-box {
         background: linear-gradient(160deg, rgba(24,16,8,0.99), rgba(14,8,2,0.99)) !important;
-        border: 1px solid rgba(200,165,90,0.32) !important;
-        border-radius: 16px !important;
-        padding: 28px 26px !important;
-        box-shadow: 0 0 50px rgba(100,60,10,0.22) !important;
+        border: 2px solid rgba(200,165,90,0.45) !important;
+        border-radius: 4px !important;
+        padding: 0 !important;
+        box-shadow: 0 0 50px rgba(120,70,10,0.45), 4px 4px 0 rgba(0,0,0,0.6) !important;
+        overflow: hidden !important;
     }
+    .ol-modal-header {
+        background: linear-gradient(180deg, rgba(70,36,14,0.95), rgba(46,24,8,0.95));
+        border-bottom: 2px solid rgba(200,165,90,0.4);
+        padding: 14px 20px 12px;
+        text-align: center;
+        position: relative;
+    }
+    .ol-modal-header-eyebrow {
+        font-size: 9px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 6px;
+        font-family: 'Tiny5', monospace;
+    }
+    .ol-modal-header-title {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--gold);
+        font-family: 'Tiny5', monospace;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .ol-modal-body {
+        padding: 22px 22px 18px;
+    }
+    .ol-modal-close {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        font-size: 18px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0;
+        opacity: 0.7;
+        transition: opacity 0.15s, color 0.15s;
+    }
+    .ol-modal-close:hover { opacity: 1; color: var(--gold); }
+    .ol-savebox {
+        background: rgba(36,20,8,0.7);
+        border: 1px solid rgba(200,165,90,0.3);
+        border-radius: 4px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        font-size: 12px;
+        color: var(--text-dim);
+    }
+    .ol-savebox-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--gold);
+        margin-bottom: 6px;
+        font-family: 'Tiny5', monospace;
+        opacity: 0.8;
+    }
+    .ol-welcome {
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-light);
+        margin-bottom: 14px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(200,165,90,0.15);
+    }
+    .ol-welcome strong { color: var(--gold); }
     .ol-form-title {
         font-size: 11px;
         font-weight: 700;
@@ -214,49 +287,44 @@
 
 
 <div id="online-modal-overlay" onclick="closeOnlineModal(event)"
-    style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.75);backdrop-filter:blur(3px);align-items:center;justify-content:center;overflow:hidden;">
-    <div id="online-modal-box"
-        style="background:linear-gradient(160deg,rgba(18,12,38,0.98),rgba(10,6,28,0.98));border:1px solid rgba(180,130,255,0.45);border-radius:14px;padding:28px 24px;width:100%;max-width:360px;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 0 40px rgba(140,90,255,0.25);" onclick="event.stopPropagation()">
-        <button onclick="closeOnlineModal()"
-            style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;">&times;</button>
-        <div style="text-align:center;margin-bottom:18px;">
-            <div
-                style="font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:var(--mana-bright);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:5px;">
-                <img src="/game_assets/glyphs/chat.webp" alt="chat"
-                    style="width:22px;height:22px;image-rendering:pixelated;"> Online Account</div>
+    style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);align-items:center;justify-content:center;overflow:hidden;">
+    <div id="online-modal-box" style="width:100%;max-width:360px;max-height:92vh;overflow-y:auto;position:relative;" onclick="event.stopPropagation()">
+
+        <div class="ol-modal-header">
+            <button class="ol-modal-close" onclick="closeOnlineModal()">&times;</button>
+            <div class="ol-modal-header-eyebrow">Our Legacy 2</div>
+            <div class="ol-modal-header-title">
+                <img src="/game_assets/glyphs/level.gif" alt="" style="width:16px;height:16px;image-rendering:pixelated;">
+                Adventurer Account
+            </div>
         </div>
+
+        <div class="ol-modal-body">
         {% if online_user %}
-        
+
         <div id="online-logged-in">
-            <div style="text-align:center;font-size:14px;color:var(--mana-bright);margin-bottom:14px;">
+            <div class="ol-welcome">
                 Welcome back, <strong>{{ online_user }}</strong>
             </div>
             {% if cloud_meta %}
-            <div
-                style="background:rgba(60,40,100,0.4);border:1px solid rgba(180,130,255,0.3);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text-dim);">
-                <div
-                    style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:5px;">
-                    Cloud Save</div>
-                <strong style="color:var(--gold);font-size:15px;">{{ cloud_meta.player_name }}</strong>
-                &mdash; Lv.{{ cloud_meta.level }} {{ cloud_meta.character_class }}
-                <br><span style="font-size:11px;margin-top:3px;display:inline-block;">{{
-                    cloud_meta.current_area|replace('_',' ')|title }}</span>
+            <div class="ol-savebox">
+                <div class="ol-savebox-label">&#9654; Cloud Save</div>
+                <div style="font-size:15px;font-weight:700;color:var(--gold);margin-bottom:3px;">{{ cloud_meta.player_name }}</div>
+                <div style="font-size:12px;color:var(--text-light);">Lv.{{ cloud_meta.level }} {{ cloud_meta.character_class }}</div>
+                <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">{{ cloud_meta.current_area|replace('_',' ')|title }}</div>
             </div>
-            <button class="btn btn-primary" onclick="cloudLoad()"
-                style="width:100%;margin-bottom:8px;font-size:14px;">Continue Adventure</button>
+            <button class="ol-submit" onclick="cloudLoad()" style="margin-bottom:8px;">&#9654; Continue Adventure</button>
             {% else %}
-            <div
-                style="text-align:center;font-size:12px;color:var(--text-dim);margin-bottom:14px;padding:12px;background:rgba(0,0,0,0.25);border-radius:8px;line-height:1.5;">
-                No cloud save yet.<br>Begin a new journey and your progress will be saved online.
+            <div style="text-align:center;font-size:12px;color:var(--text-dim);margin-bottom:14px;padding:12px;background:rgba(0,0,0,0.3);border:1px solid rgba(200,165,90,0.12);line-height:1.6;">
+                No save found.<br>Begin a new journey — your progress will be saved to the cloud.
             </div>
-            <a href="/create" class="btn btn-primary"
-                style="display:block;width:100%;box-sizing:border-box;text-align:center;margin-bottom:8px;font-size:14px;">Start New Journey</a>
+            <a href="/game" class="ol-submit" style="display:block;text-align:center;margin-bottom:8px;text-decoration:none;">&#9654; Start New Journey</a>
             {% endif %}
-            <button class="btn btn-secondary" onclick="onlineLogout()"
-                style="width:100%;font-size:12px;opacity:0.6;">Logout</button>
+            <button class="ol-submit" onclick="onlineLogout()" style="background:rgba(0,0,0,0.35);color:var(--text-dim);box-shadow:none;">Log Out</button>
         </div>
+
         {% else %}
-        
+
         <div id="online-tab-bar" style="display:flex;">
             <button class="btn tab-active" id="tab-login" onclick="switchOnlineTab('login')" style="flex:1;">Sign In</button>
             <button class="btn" id="tab-register" onclick="switchOnlineTab('register')" style="flex:1;">Register</button>
@@ -269,27 +337,27 @@
             <div style="text-align:right;margin-bottom:12px;">
                 <button type="button" class="ol-link-btn" onclick="switchOnlineTab('forgot')">Forgot password?</button>
             </div>
-            <button type="submit" class="ol-submit" id="login-btn">Sign In &amp; Play</button>
+            <button type="submit" class="ol-submit" id="login-btn">&#9654; Sign In &amp; Play</button>
             <p class="ol-footnote">No account? <a href="#" onclick="switchOnlineTab('register');return false;">Register here</a></p>
         </form>
         <form id="online-register-form" onsubmit="onlineRegister();return false;" autocomplete="on" style="display:none;">
             <input class="ol-input" type="text" id="ol-reg-username" name="username"
-                placeholder="Choose username (3–20 chars)" autocomplete="username" maxlength="20">
+                placeholder="Username (3–20 characters)" autocomplete="username" maxlength="20">
             <input class="ol-input" type="email" id="ol-reg-email" name="email"
                 placeholder="Email address (optional)" autocomplete="email">
             <input class="ol-input" type="password" id="ol-reg-password" name="password"
-                placeholder="Choose password (min 6 chars)" autocomplete="new-password">
+                placeholder="Password (min. 6 characters)" autocomplete="new-password">
             <input class="ol-input" type="password" id="ol-reg-confirm" name="confirm"
                 placeholder="Confirm password" autocomplete="new-password" style="margin-bottom:14px;">
-            <button type="submit" class="ol-submit ol-submit-reg" id="register-btn">Create Account &amp; Play</button>
+            <button type="submit" class="ol-submit ol-submit-reg" id="register-btn">&#9654; Create Account &amp; Play</button>
             <p class="ol-footnote">Already have one? <a href="#" onclick="switchOnlineTab('login');return false;">Sign in</a></p>
         </form>
-        
+
         <div id="online-forgot-form" style="display:none;">
             <button type="button" class="ol-link-btn" onclick="switchOnlineTab('login')"
                 style="margin-bottom:14px;display:block;">&#8592; Back to Sign In</button>
             <p style="font-size:12px;color:var(--text-dim);margin:0 0 12px 0;line-height:1.6;">
-                Enter the email linked to your account and we'll send you a reset link.
+                Enter the email linked to your account and we'll send a reset link.
             </p>
             <input class="ol-input" type="email" id="ol-forgot-email" placeholder="Your email address"
                 autocomplete="email" onkeydown="if(event.key==='Enter')onlineForgotPassword()">
@@ -297,7 +365,8 @@
                 style="margin-top:4px;">Send Reset Link</button>
         </div>
         {% endif %}
-        <div id="online-status" style="margin-top:12px;text-align:center;font-size:12px;min-height:18px;"></div>
+        <div id="online-status" style="margin-top:12px;text-align:center;font-size:12px;min-height:18px;color:var(--gold);"></div>
+        </div>
     </div>
 </div>
 
