@@ -2939,6 +2939,8 @@ def game():
             )
 
         placed_by_type: dict[str, list[Any]] = {}
+        building_positions_raw = player.get("building_positions", {})
+        placed_buildings_map: list[Any] = []
         for slot_id, h_key in building_slots.items():
             if h_key:
                 slot_type = slot_id.rsplit("_", 1)[0]
@@ -2951,6 +2953,17 @@ def game():
                         "key": h_key,
                         "name": h_item.get("name", h_key),
                         "comfort": h_item.get("comfort_points", 0),
+                    }
+                )
+                pos = building_positions_raw.get(slot_id, {})
+                placed_buildings_map.append(
+                    {
+                        "slot_id": slot_id,
+                        "key": h_key,
+                        "name": h_item.get("name", h_key),
+                        "type": h_item.get("type", "decoration"),
+                        "x": pos.get("x", -1),
+                        "y": pos.get("y", -1),
                     }
                 )
 
@@ -3034,6 +3047,7 @@ def game():
         land_data = {
             "housing_by_type": housing_by_type,
             "placed_by_type": placed_by_type,
+            "placed_buildings_map": placed_buildings_map,
             "comfort_points": player.get("comfort_points", 0),
             "building_slots": building_slots,
             "building_types": BUILDING_TYPES,
@@ -4872,7 +4886,8 @@ def land_place_housing():
         return redirect(url_for("index"))
 
     h_key = request.form.get("housing_key", "")
-    slot_id = request.form.get("slot_id", "")
+    tile_x_str = request.form.get("tile_x", "")
+    tile_y_str = request.form.get("tile_y", "")
 
     if h_key not in player.get("housing_owned", []):
         add_message("You do not own that structure.", "var(--red)")
@@ -4880,19 +4895,56 @@ def land_place_housing():
         return redirect(url_for("game") + "?tab=land")
 
     h_data = GAME_DATA["housing"].get(h_key, {})
+    if not h_data:
+        add_message("That structure does not exist.", "var(--red)")
+        return redirect(url_for("game") + "?tab=land")
+
+    h_type = h_data.get("type", "decoration")
     comfort = h_data.get("comfort_points", 0)
     slots = player.get("building_slots", {})
+    positions = player.get("building_positions", {})
 
-    if slot_id in slots and slots[slot_id]:
-        old_h = GAME_DATA["housing"].get(slots[slot_id], {})
-        old_cp = old_h.get("comfort_points", 0)
-        player["comfort_points"] = max(0, player.get("comfort_points", 0) - old_cp)
+    type_info = BUILDING_TYPES.get(h_type, {"slots": 1, "label": h_type})
+    max_slots = type_info["slots"]
+    slot_id = None
+    for i in range(1, max_slots + 1):
+        candidate = f"{h_type}_{i}"
+        if not slots.get(candidate):
+            slot_id = candidate
+            break
+
+    if slot_id is None:
+        add_message(
+            f"No more {type_info.get('label', h_type)} slots available. Remove one first.",
+            "var(--red)",
+        )
+        save_player(player)
+        return redirect(url_for("game") + "?tab=land")
+
+    _TILE_COLS = 60
+    _TILE_ROWS = 50
+    _BLOCKED_ROWS = 5
+
+    if tile_x_str != "" and tile_y_str != "":
+        try:
+            tile_x = int(tile_x_str)
+            tile_y = int(tile_y_str)
+        except ValueError:
+            add_message("Invalid placement position.", "var(--red)")
+            save_player(player)
+            return redirect(url_for("game") + "?tab=land")
+        if tile_x < 0 or tile_x >= _TILE_COLS or tile_y < _BLOCKED_ROWS or tile_y >= _TILE_ROWS:
+            add_message("Cannot place there — position out of bounds or in blocked zone.", "var(--red)")
+            save_player(player)
+            return redirect(url_for("game") + "?tab=land")
+        positions[slot_id] = {"x": tile_x, "y": tile_y}
+        player["building_positions"] = positions
 
     slots[slot_id] = h_key
     player["building_slots"] = slots
     player["comfort_points"] = player.get("comfort_points", 0) + comfort
     add_message(
-        f"You place {h_data.get('name', h_key)} at {slot_id}. +{comfort} comfort",
+        f"You place {h_data.get('name', h_key)}. +{comfort} comfort",
         "var(--green-bright)",
     )
     save_player(player)
@@ -4915,8 +4967,11 @@ def land_remove_housing():
         player["comfort_points"] = max(0, player.get("comfort_points", 0) - cp)
         slots[slot_id] = None
         player["building_slots"] = slots
+        positions = player.get("building_positions", {})
+        positions.pop(slot_id, None)
+        player["building_positions"] = positions
         add_message(
-            f"Removed {h_data.get('name', h_key)} from {slot_id}.", "var(--text-dim)"
+            f"Removed {h_data.get('name', h_key)} from your land.", "var(--text-dim)"
         )
     else:
         add_message("That slot is already empty.", "var(--text-dim)")

@@ -59,7 +59,7 @@
     ],
     "rest_cost": 0,
     "can_rest": true,
-    "map_image": "your_land.webp"
+    "map_image": "your_land.png"
   },
   "forest_path": {
     "name": "Dark Forest",
@@ -241,7 +241,7 @@
     ]
   },
   "tavern": {
-    "name": "The Tavern",
+    "name": "The Rusty Tankard",
     "description": "A warm tavern in the heart of the town. Adventurers meet here to swap stories and hire companions.",
     "possible_enemies": [],
     "possible_bosses": [],

@@ -4888,6 +4888,83 @@ body.page-fade-out {
     animation: pulse-gold 1.5s ease-in-out infinite;
 }
 
+.land-map-body {
+    padding: 0 !important;
+}
+
+.land-place-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    background: rgba(80, 180, 80, 0.12);
+    border-bottom: 1px solid rgba(80, 200, 80, 0.3);
+}
+
+.land-place-bar-label {
+    font-size: 13px;
+    color: var(--green-bright);
+}
+
+.land-place-bar-label strong {
+    color: var(--text-bright);
+}
+
+.land-map-container {
+    overflow: auto;
+    max-height: 480px;
+    border-bottom: 1px solid var(--border);
+    background: #111;
+    cursor: default;
+}
+
+.land-map-canvas {
+    display: block;
+    width: 100%;
+    max-width: 960px;
+    image-rendering: pixelated;
+}
+
+.land-placed-list {
+    padding: 12px 14px;
+}
+
+.land-placed-list-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--wood-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.land-placed-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-wrap: wrap;
+}
+
+.land-placed-item:last-child {
+    border-bottom: none;
+}
+
+.land-placed-name {
+    font-size: 13px;
+    color: var(--text-bright);
+    flex: 1;
+    min-width: 100px;
+}
+
+.land-placed-pos {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: monospace;
+}
+
 @keyframes pulse-gold {
 
     0%,
