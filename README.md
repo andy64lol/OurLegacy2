@@ -23,6 +23,30 @@ Open `http://localhost:5000` in your browser.
 
 ---
 
+## Builds
+
+### Development
+
+```bash
+python app.py
+```
+
+Starts the Flask development server on port 5000 with debug output.
+
+### Production
+
+```bash
+gunicorn --bind=0.0.0.0:5000 --reuse-port app:app
+```
+
+Runs the app via Gunicorn (WSGI). For ASGI/SocketIO support, Uvicorn is also available:
+
+```bash
+uvicorn app:asgi_app --host 0.0.0.0 --port 5000
+```
+
+---
+
 ## Environment Variables
 
 | Variable | Required | Description |
