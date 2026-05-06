@@ -1,16 +1,16 @@
-import sys
-import warnings
-
-warnings.filterwarnings("ignore", message="urllib3")
-warnings.filterwarnings("ignore", message="chardet")
-
 """
 Our Legacy 2 - Flask Web Interface
 Medieval fantasy RPG playable in the browser.
 """
 
+import warnings
+
+warnings.filterwarnings("ignore", message="urllib3")
+warnings.filterwarnings("ignore", message="chardet")
+
 from flask import (
     Flask,
+    g,
     render_template,
     request,
     session,
@@ -31,7 +31,6 @@ import os
 import time as _time_module
 import uuid
 import urllib.request as _urllib_request
-import urllib.error as _urllib_error
 from typing import Any
 
 from utilities.dice import Dice
@@ -78,9 +77,7 @@ from utilities.supabase_db import (
     get_cloud_save_meta,
     send_chat_message,
     get_chat_history,
-    clear_chat_history,
     censor_text,
-    contains_profanity,
     send_friend_request,
     respond_friend_request,
     remove_friend,
@@ -95,7 +92,6 @@ from utilities.supabase_db import (
     get_blocked_by_me,
     character_autosave,
     character_autoload,
-    character_delete,
     create_group,
     join_group,
     leave_group,
@@ -112,7 +108,6 @@ from utilities.supabase_db import (
     request_email_verification,
     verify_email_token,
     try_acquire_or_renew_world_tick_lock,
-    release_world_tick_lock,
     admin_get_owner,
     admin_set_owner,
     admin_get_mods,
@@ -134,9 +129,17 @@ from utilities.email_sender import (
     send_email as _send_email,
     is_configured as _email_configured,
 )
+from utilities.api_keys import (
+    generate_api_key as _gen_api_key,
+    validate_api_key as _val_api_key,
+    list_api_keys as _list_api_keys,
+    revoke_api_key as _revoke_api_key,
+    VALID_SCOPES as _API_SCOPES,
+    has_scope as _api_has_scope,
+)
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)  # type: ignore[assignment]
 app.secret_key = os.environ.get("SECRET_KEY") or os.environ.get(
     "SESSION_SECRET", "ol2-default-dev-key-change-in-prod"
 )
@@ -158,6 +161,78 @@ app.config["SESSION_COOKIE_SECURE"] = True
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
 
+def _extract_raw_api_key() -> str:
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        candidate = auth[7:].strip()
+        if candidate.startswith("ol2_"):
+            return candidate
+    candidate2 = request.headers.get("X-API-Key", "").strip()
+    return candidate2 if candidate2.startswith("ol2_") else ""
+
+
+def _api_load_state(uid: str) -> dict:
+    path = os.path.join(app.config["SESSION_FILE_DIR"], f"api_state_{uid}.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def _api_save_state(uid: str, state: dict) -> None:
+    path = os.path.join(app.config["SESSION_FILE_DIR"], f"api_state_{uid}.json")
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(state, f)
+    except OSError:
+        pass
+
+
+_API_STATE_KEYS = [
+    "battle_enemy", "battle_log", "battle_player_effects",
+    "battle_enemy_effects", "battle_companions",
+    "current_area", "visited_areas",
+]
+
+
+@app.before_request
+def _api_key_before_request():
+    """Load API key user data into session before /api/* routes."""
+    if not request.path.startswith("/api/"):
+        return
+    raw = _extract_raw_api_key()
+    if not raw:
+        return
+    meta = _val_api_key(raw)
+    if not meta:
+        g._api_key_invalid = True
+        return
+    g._api_uid = meta["user_id"]
+    g._api_meta = meta
+    session["online_user_id"] = meta["user_id"]
+    session["online_username"] = meta["username"]
+    player = character_autoload(meta["user_id"], meta["username"])
+    if player:
+        save_player(player)
+    state = _api_load_state(meta["user_id"])
+    for k in _API_STATE_KEYS:
+        if k in state:
+            session[k] = state[k]
+
+
+@app.after_request
+def _api_key_after_request(response):
+    """Persist battle/area state for API key users after /api/* routes."""
+    if not request.path.startswith("/api/"):
+        return response
+    uid = getattr(g, "_api_uid", None)
+    if not uid:
+        return response
+    state = {k: session[k] for k in _API_STATE_KEYS if k in session and session[k] is not None}
+    _api_save_state(uid, state)
+    return response
+
 
 @app.after_request
 def apply_cors_and_iframe_headers(response):
@@ -168,7 +243,7 @@ def apply_cors_and_iframe_headers(response):
         "GET, POST, PUT, PATCH, DELETE, OPTIONS"
     )
     response.headers["Access-Control-Allow-Headers"] = (
-        "Content-Type, Authorization, X-Requested-With"
+        "Content-Type, Authorization, X-Requested-With, X-API-Key"
     )
     response.headers["X-Frame-Options"] = "ALLOWALL"
     response.headers.pop("Content-Security-Policy", None)
@@ -374,7 +449,7 @@ async def _handle_mod_command(sid: str, username: str, raw: str) -> bool:
     await sio.emit(
         "chat_error",
         {
-            "message": f"Commands have moved to the console (/admin). Chat commands: /me /mods /help"
+            "message": "Commands have moved to the console (/admin). Chat commands: /me /mods /help"
         },
         to=sid,
     )
@@ -466,7 +541,7 @@ def _inject_chat_globals():
     return {"online_username": session.get("online_username")}
 
 
-@sio.on("connect")
+@sio.on("connect")  # type: ignore[misc]
 async def _on_chat_connect(sid, environ, auth=None):
     global _asyncio_loop, _bg_started
     sess = await _asyncio.get_event_loop().run_in_executor(
@@ -504,7 +579,7 @@ async def _on_chat_connect(sid, environ, auth=None):
     await sio.emit("chat_history", history, to=sid)
 
 
-@sio.on("disconnect")
+@sio.on("disconnect")  # type: ignore[misc]
 async def _on_chat_disconnect(sid):
     username = _chat_online.pop(sid, None)
     await sio.emit("online_users", sorted(set(_chat_online.values())))
@@ -530,7 +605,7 @@ async def _on_chat_disconnect(sid):
                 _active_trades.pop(tid, None)
 
 
-@sio.on("chat_send")
+@sio.on("chat_send")  # type: ignore[misc]
 async def _on_chat_send(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -664,7 +739,7 @@ async def _emit_trade_update(trade: dict):
         await sio.emit("trade_update", _trade_payload(trade, trade["player_b"]), to=s)
 
 
-@sio.on("trade_request")
+@sio.on("trade_request")  # type: ignore[misc]
 async def _on_trade_request(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -716,7 +791,7 @@ async def _on_trade_request(sid, data):
     await sio.emit("trade_invite_sent", {"trade_id": trade_id, "to": target}, to=sid)
 
 
-@sio.on("trade_accept")
+@sio.on("trade_accept")  # type: ignore[misc]
 async def _on_trade_accept(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -740,7 +815,7 @@ async def _on_trade_accept(sid, data):
     await _emit_trade_update(trade)
 
 
-@sio.on("trade_decline")
+@sio.on("trade_decline")  # type: ignore[misc]
 async def _on_trade_decline(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -759,7 +834,7 @@ async def _on_trade_decline(sid, data):
     _active_trades.pop(trade_id, None)
 
 
-@sio.on("trade_add_item")
+@sio.on("trade_add_item")  # type: ignore[misc]
 async def _on_trade_add_item(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -805,7 +880,7 @@ async def _on_trade_add_item(sid, data):
     await _emit_trade_update(trade)
 
 
-@sio.on("trade_remove_item")
+@sio.on("trade_remove_item")  # type: ignore[misc]
 async def _on_trade_remove_item(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -831,7 +906,7 @@ async def _on_trade_remove_item(sid, data):
     await _emit_trade_update(trade)
 
 
-@sio.on("trade_set_gold")
+@sio.on("trade_set_gold")  # type: ignore[misc]
 async def _on_trade_set_gold(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -863,7 +938,7 @@ async def _on_trade_set_gold(sid, data):
     await _emit_trade_update(trade)
 
 
-@sio.on("trade_confirm")
+@sio.on("trade_confirm")  # type: ignore[misc]
 async def _on_trade_confirm(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -908,7 +983,7 @@ async def _on_trade_confirm(sid, data):
         await _emit_trade_update(trade)
 
 
-@sio.on("trade_cancel")
+@sio.on("trade_cancel")  # type: ignore[misc]
 async def _on_trade_cancel(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -3627,7 +3702,6 @@ def game():
 
     def _get_events_display(p):
         today = _dt.date.today()
-        today_str = today.isoformat()
         raw_events = GAME_DATA.get("events", [])
         claimed = set(p.get("claimed_events", []))
         boss_kills = p.get("total_bosses_defeated", 0)
@@ -3780,7 +3854,6 @@ def _item_stat_summary(item_data):
             if val:
                 parts.append(f"+{int(val)} {label}")
 
-        wtype = item_data.get("weapon_type", "")
         for proc_key, label in [
             ("crit_chance", "Crit"),
             ("bleed_chance", "Bleed"),
@@ -3905,7 +3978,7 @@ def _get_weapon_combat_effects(player, enemy):
             )
         elif "holy" in enemy_tags:
             bonus = 0
-            effects.append((0, f"Smiting has no effect on holy beings."))
+            effects.append((0, "Smiting has no effect on holy beings."))
         else:
             bonus = smiting
             effects.append((bonus, f"+{bonus} blessed damage."))
@@ -3986,8 +4059,6 @@ def _get_weapon_on_hit_procs(player, enemy, enemy_effects):
         return []
 
     messages = []
-    wtype = weapon.get("weapon_type", "sword")
-    tags = weapon.get("tags", [])
     enemy_tags = set(enemy.get("tags", []))
 
     def _roll(chance_pct):
@@ -4200,8 +4271,6 @@ def action_explore():
     advance_crops(player)
     advance_game_time(player)
     apply_regen_effects(player)
-
-    current_weather = get_real_weather(area.get("name", ""))
 
     if possible_bosses and random.random() < 0.08:
         boss_key = random.choice(possible_bosses)
@@ -4451,10 +4520,6 @@ def action_mine():
 
     inventory = player.get("inventory", [])
     best_tier = max((_PICKAXE_TIERS.get(i, 0) for i in inventory), default=0)
-    best_pickaxe = next(
-        (i for i in reversed(inventory) if _PICKAXE_TIERS.get(i, 0) == best_tier),
-        None,
-    )
 
     if best_tier == 0:
         add_message(
@@ -7334,7 +7399,7 @@ def api_friend_request():
     timestamps = [t for t in timestamps if now - t < 60]
     if len(timestamps) >= FR_MAX_PER_MINUTE:
         return jsonify(
-            {"ok": False, "message": f"Too many requests. Try again in a moment."}
+            {"ok": False, "message": "Too many requests. Try again in a moment."}
         )
     timestamps.append(now)
     _fr_cooldowns[username] = timestamps
@@ -7619,7 +7684,7 @@ GROUP_CHAT_COOLDOWN = 5
 _group_chat_cooldowns: dict = {}
 
 
-@sio.on("group_chat_send")
+@sio.on("group_chat_send")  # type: ignore[misc]
 async def on_group_chat_send(sid, data):
     username = _chat_online.get(sid)
     if not username:
@@ -8746,38 +8811,140 @@ def api_online_profile():
 # JSON Game APIs
 # ═══════════════════════════════════════════════════════════════
 
+def _api_resolve_player(scope: str = "game:read"):
+    """
+    Resolve player for an API request — supports both API key and browser session.
+    Returns (player, None) on success or (None, error_response_tuple) on failure.
+    """
+    if getattr(g, "_api_key_invalid", False):
+        return None, (jsonify({"ok": False, "message": "Invalid or expired API key."}), 401)
+    meta = getattr(g, "_api_meta", None)
+    if meta is not None:
+        if not _api_has_scope(meta, scope):
+            return None, (
+                jsonify({
+                    "ok": False,
+                    "message": f"API key missing scope '{scope}'. Key scopes: {meta.get('scopes', [])}",
+                }),
+                403,
+            )
+        player = get_player()
+        if not player:
+            return None, (jsonify({"ok": False, "message": "No active character found for this API key."}), 404)
+        return player, None
+    player = get_player()
+    if not player:
+        return None, (
+            jsonify({
+                "ok": False,
+                "message": "Not authenticated. Provide an X-API-Key header or log in via the browser.",
+            }),
+            401,
+        )
+    return player, None
+
+
+# ── GET /api/keys/scopes ───────────────────────────────────────────────────────
+@app.route("/api/keys/scopes", methods=["GET"])
+def api_keys_scopes():
+    """List all available API scopes."""
+    return jsonify({"ok": True, "scopes": {k: v for k, v in _API_SCOPES.items()}})
+
+
+# ── POST /api/keys ─────────────────────────────────────────────────────────────
+@app.route("/api/keys", methods=["POST"])
+@limiter.limit("10 per minute")
+def api_keys_create():
+    """Create a new API key (requires browser session or a key with keys:manage scope)."""
+    player, err = _api_resolve_player("keys:manage")
+    if err:
+        # Also allow session-authenticated users (no scope needed from session)
+        if not get_player():
+            return err
+    data = request.get_json(force=True, silent=True) or {}
+    name = data.get("name", "My API Key").strip()[:80]
+    if not name:
+        return jsonify({"ok": False, "message": "Key name required."}), 400
+    scopes = data.get("scopes", None)
+    meta = getattr(g, "_api_meta", None)
+    if meta:
+        user_id = meta["user_id"]
+        username = meta["username"]
+    else:
+        user_id = session.get("online_user_id", "")
+        username = session.get("online_username", "")
+    if not user_id or not username:
+        return jsonify({"ok": False, "message": "Online account required to create API keys."}), 400
+    result = _gen_api_key(user_id, username, name, scopes)
+    return jsonify(result), (200 if result["ok"] else 400)
+
+
+# ── GET /api/keys ──────────────────────────────────────────────────────────────
+@app.route("/api/keys", methods=["GET"])
+def api_keys_list():
+    """List all API keys for the current user."""
+    meta = getattr(g, "_api_meta", None)
+    if meta:
+        user_id = meta["user_id"]
+    else:
+        user_id = session.get("online_user_id", "")
+    if not user_id:
+        return jsonify({"ok": False, "message": "Online account required."}), 401
+    keys = _list_api_keys(user_id)
+    return jsonify({"ok": True, "keys": keys, "count": len(keys)})
+
+
+# ── DELETE /api/keys/<key_id> ──────────────────────────────────────────────────
+@app.route("/api/keys/<key_id>", methods=["DELETE"])
+def api_keys_revoke(key_id: str):
+    """Revoke an API key by ID."""
+    meta = getattr(g, "_api_meta", None)
+    if meta:
+        user_id = meta["user_id"]
+    else:
+        user_id = session.get("online_user_id", "")
+    if not user_id:
+        return jsonify({"ok": False, "message": "Online account required."}), 401
+    revoked = _revoke_api_key(key_id.strip(), user_id)
+    if revoked:
+        return jsonify({"ok": True, "message": f"Key {key_id} revoked."})
+    return jsonify({"ok": False, "message": "Key not found or not owned by you."}), 404
+
+
 def _api_player_summary(player):
     return {
-        "name":         player.get("name"),
-        "level":        player.get("level"),
-        "hp":           player.get("hp"),
-        "max_hp":       player.get("max_hp"),
-        "mp":           player.get("mp"),
-        "max_mp":       player.get("max_mp"),
-        "attack":       player.get("attack"),
-        "defense":      player.get("defense"),
-        "speed":        player.get("speed"),
-        "gold":         player.get("gold"),
-        "xp":           player.get("xp"),
-        "race":         player.get("race"),
-        "char_class":   player.get("char_class"),
+        "name": player.get("name"),
+        "level": player.get("level"),
+        "hp": player.get("hp"),
+        "max_hp": player.get("max_hp"),
+        "mp": player.get("mp"),
+        "max_mp": player.get("max_mp"),
+        "attack": player.get("attack"),
+        "defense": player.get("defense"),
+        "speed": player.get("speed"),
+        "gold": player.get("gold"),
+        "xp": player.get("xp"),
+        "race": player.get("race"),
+        "char_class": player.get("char_class"),
         "current_area": session.get("current_area"),
-        "in_battle":    bool(session.get("battle_enemy")),
-        "equipment":    player.get("equipment", {}),
-        "attributes":   player.get("attributes", {}),
+        "in_battle": bool(session.get("battle_enemy")),
+        "equipment": player.get("equipment", {}),
+        "attributes": player.get("attributes", {}),
     }
+
 
 def _api_battle_summary():
     enemy = session.get("battle_enemy") or {}
     return {
-        "enemy_name":    enemy.get("name"),
-        "enemy_hp":      enemy.get("hp"),
-        "enemy_max_hp":  enemy.get("max_hp"),
-        "enemy_attack":  enemy.get("attack"),
+        "enemy_name": enemy.get("name"),
+        "enemy_hp": enemy.get("hp"),
+        "enemy_max_hp": enemy.get("max_hp"),
+        "enemy_attack": enemy.get("attack"),
         "enemy_defense": enemy.get("defense"),
-        "is_boss":       enemy.get("is_boss", False),
-        "log":           (session.get("battle_log") or [])[-10:],
+        "is_boss": enemy.get("is_boss", False),
+        "log": (session.get("battle_log") or [])[-10:],
     }
+
 
 def _api_battle_outcome(player, enemy, log):
     """Determine and handle battle outcome; returns a JSON response."""
@@ -8785,7 +8952,9 @@ def _api_battle_outcome(player, enemy, log):
         log.append(f"The {enemy['name']} falls! Victory!")
         exp = enemy.get("exp_reward", enemy.get("experience_reward", 30))
         gold_gain = enemy.get("gold_reward", 10)
-        _area_name_bw = GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "")
+        _area_name_bw = (
+            GAME_DATA["areas"].get(session.get("current_area", ""), {}).get("name", "")
+        )
         current_weather = get_real_weather(_area_name_bw)
         exp_bonus_pct, gold_bonus_pct = get_weather_bonuses(current_weather)
         if exp_bonus_pct > 0:
@@ -8794,10 +8963,14 @@ def _api_battle_outcome(player, enemy, log):
             gold_gain += int(gold_gain * gold_bonus_pct)
         player["gold"] += gold_gain
         leveled = gain_experience(player, exp)
-        _group_contribute(exp, gold_gain, f"defeated {enemy.get('name','an enemy')} in battle")
+        _group_contribute(
+            exp, gold_gain, f"defeated {enemy.get('name', 'an enemy')} in battle"
+        )
         loot_item = None
         loot = enemy.get("loot_table", [])
-        if loot and random.random() < min(0.80, 0.35 + player.get("attr_discovery", 0.0)):
+        if loot and random.random() < min(
+            0.80, 0.35 + player.get("attr_discovery", 0.0)
+        ):
             loot_item = random.choice(loot)
             player["inventory"].append(loot_item)
             log.append(f"The enemy drops: {loot_item}.")
@@ -8817,13 +8990,19 @@ def _api_battle_outcome(player, enemy, log):
         session["battle_enemy"] = None
         save_player(player)
         _autosave()
-        return jsonify({
-            "ok": True, "outcome": "victory",
-            "log": log[-10:], "exp_gained": exp, "gold_gained": gold_gain,
-            "loot_item": loot_item, "leveled_up": leveled,
-            "player": _api_player_summary(player),
-            "message": f"You defeated the {enemy['name']}! +{exp} EXP, +{gold_gain} gold.",
-        })
+        return jsonify(
+            {
+                "ok": True,
+                "outcome": "victory",
+                "log": log[-10:],
+                "exp_gained": exp,
+                "gold_gained": gold_gain,
+                "loot_item": loot_item,
+                "leveled_up": leveled,
+                "player": _api_player_summary(player),
+                "message": f"You defeated the {enemy['name']}! +{exp} EXP, +{gold_gain} gold.",
+            }
+        )
     if player["hp"] <= 0:
         log.append("You fall in battle...")
         player["hp"] = max(1, int(player["max_hp"] * 0.25))
@@ -8836,29 +9015,36 @@ def _api_battle_outcome(player, enemy, log):
         session["battle_enemy"] = None
         save_player(player)
         _autosave()
-        return jsonify({
-            "ok": True, "outcome": "defeat",
-            "log": log[-10:],
-            "player": _api_player_summary(player),
-            "message": f"You were defeated by the {enemy['name']}.",
-        })
+        return jsonify(
+            {
+                "ok": True,
+                "outcome": "defeat",
+                "log": log[-10:],
+                "player": _api_player_summary(player),
+                "message": f"You were defeated by the {enemy['name']}.",
+            }
+        )
     session["battle_enemy"] = enemy
     session["battle_log"] = log
     save_player(player)
     _autosave()
-    return jsonify({
-        "ok": True, "outcome": "ongoing",
-        "log": log[-10:],
-        "player": _api_player_summary(player),
-        "battle": _api_battle_summary(),
-    })
+    return jsonify(
+        {
+            "ok": True,
+            "outcome": "ongoing",
+            "log": log[-10:],
+            "player": _api_player_summary(player),
+            "battle": _api_battle_summary(),
+        }
+    )
+
 
 # ── GET /api/game/state ─────────────────────────────────────────────────────────
 @app.route("/api/game/state", methods=["GET"])
 def api_game_state():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("game:read")
+    if err:
+        return err
     area_key = session.get("current_area", "starting_village")
     area = GAME_DATA["areas"].get(area_key, {})
     in_battle = bool(session.get("battle_enemy"))
@@ -8868,15 +9054,15 @@ def api_game_state():
         "inventory": player.get("inventory", []),
         "messages": (session.get("messages") or [])[-20:],
         "area": {
-            "key":         area_key,
-            "name":        area.get("name", area_key.replace("_", " ").title()),
+            "key": area_key,
+            "name": area.get("name", area_key.replace("_", " ").title()),
             "description": area.get("description", ""),
             "connections": area.get("connections", []),
-            "can_rest":    area.get("can_rest", False),
-            "rest_cost":   area.get("rest_cost", 0),
-            "has_shop":    bool(area.get("shop")),
-            "has_mine":    bool(area.get("mine")),
-            "difficulty":  area.get("difficulty", 1),
+            "can_rest": area.get("can_rest", False),
+            "rest_cost": area.get("rest_cost", 0),
+            "has_shop": bool(area.get("shop")),
+            "has_mine": bool(area.get("mine")),
+            "difficulty": area.get("difficulty", 1),
         },
         "in_battle": in_battle,
     }
@@ -8884,118 +9070,178 @@ def api_game_state():
         state["battle"] = _api_battle_summary()
     return jsonify(state)
 
+
 # ── GET /api/battle/state ───────────────────────────────────────────────────────
 @app.route("/api/battle/state", methods=["GET"])
 def api_battle_state():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("game:read")
+    if err:
+        return err
     enemy = session.get("battle_enemy")
     if not enemy:
         return jsonify({"ok": False, "in_battle": False, "message": "Not in battle."})
-    return jsonify({
-        "ok": True, "in_battle": True,
-        "player": _api_player_summary(player),
-        "battle": _api_battle_summary(),
-    })
+    return jsonify(
+        {
+            "ok": True,
+            "in_battle": True,
+            "player": _api_player_summary(player),
+            "battle": _api_battle_summary(),
+        }
+    )
+
 
 # ── POST /api/action/explore ────────────────────────────────────────────────────
 @app.route("/api/action/explore", methods=["POST"])
 @limiter.limit("30 per minute")
 def api_action_explore():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
     if session.get("battle_enemy"):
         return jsonify({"ok": False, "message": "You are in battle."}), 409
     area_key = session.get("current_area", "starting_village")
     area = GAME_DATA["areas"].get(area_key, {})
     possible_enemies = area.get("possible_enemies", [])
-    possible_bosses  = area.get("possible_bosses", [])
+    possible_bosses = area.get("possible_bosses", [])
     player["explore_count"] = player.get("explore_count", 0) + 1
-    advance_crops(player); advance_game_time(player); apply_regen_effects(player)
+    advance_crops(player)
+    advance_game_time(player)
+    apply_regen_effects(player)
     if possible_bosses and random.random() < 0.08:
         boss_key = random.choice(possible_bosses)
         boss_data = GAME_DATA.get("bosses", {}).get(boss_key, {})
         if boss_data:
-            lvl = _effective_mob_level(player["level"]); scale = 1 + (lvl - 1) * 0.12
+            lvl = _effective_mob_level(player["level"])
+            scale = 1 + (lvl - 1) * 0.12
             enemy = {
                 "key": boss_key,
                 "name": boss_data.get("name", boss_key.replace("_", " ").title()),
-                "hp": int(boss_data.get("hp", 200) * scale), "max_hp": int(boss_data.get("hp", 200) * scale),
-                "attack": int(boss_data.get("attack", 20) * scale), "defense": int(boss_data.get("defense", 10) * scale),
-                "speed": boss_data.get("speed", 12), "exp_reward": int(boss_data.get("experience_reward", 200) * scale),
+                "hp": int(boss_data.get("hp", 200) * scale),
+                "max_hp": int(boss_data.get("hp", 200) * scale),
+                "attack": int(boss_data.get("attack", 20) * scale),
+                "defense": int(boss_data.get("defense", 10) * scale),
+                "speed": boss_data.get("speed", 12),
+                "exp_reward": int(boss_data.get("experience_reward", 200) * scale),
                 "gold_reward": int(boss_data.get("gold_reward", 100) * scale),
-                "loot_table": boss_data.get("unique_loot", []), "is_boss": True,
+                "loot_table": boss_data.get("unique_loot", []),
+                "is_boss": True,
                 "tags": boss_data.get("tags", ["humanoid"]),
             }
             session["battle_enemy"] = enemy
-            session["battle_log"] = [f"{enemy['name']} blocks your path! Boss battle! (HP: {enemy['hp']})"]
-            session["battle_player_effects"] = {}; session["battle_enemy_effects"] = {}
+            session["battle_log"] = [
+                f"{enemy['name']} blocks your path! Boss battle! (HP: {enemy['hp']})"
+            ]
+            session["battle_player_effects"] = {}
+            session["battle_enemy_effects"] = {}
             session["battle_companions"] = _build_battle_companions(player)
-            session.modified = True; save_player(player)
-            return jsonify({"ok": True, "outcome": "battle_started", "battle": _api_battle_summary(), "player": _api_player_summary(player)})
+            session.modified = True
+            save_player(player)
+            return jsonify(
+                {
+                    "ok": True,
+                    "outcome": "battle_started",
+                    "battle": _api_battle_summary(),
+                    "player": _api_player_summary(player),
+                }
+            )
     if possible_enemies and random.random() < 0.55:
         enemy_key = random.choice(possible_enemies)
         enemy_data = GAME_DATA["enemies"].get(enemy_key, {})
         if isinstance(enemy_data, dict) and enemy_data:
-            lvl = _effective_mob_level(player["level"]); scale = 1 + (lvl - 1) * 0.12
+            lvl = _effective_mob_level(player["level"])
+            scale = 1 + (lvl - 1) * 0.12
             enemy = {
                 "key": enemy_key,
                 "name": enemy_data.get("name", enemy_key.replace("_", " ").title()),
-                "hp": int(enemy_data.get("hp", 50) * scale), "max_hp": int(enemy_data.get("hp", 50) * scale),
-                "attack": int(enemy_data.get("attack", 10) * scale), "defense": int(enemy_data.get("defense", 5) * scale),
-                "speed": enemy_data.get("speed", 10), "exp_reward": int(enemy_data.get("experience_reward", 30) * scale),
-                "gold_reward": max(1, int(enemy_data.get("gold_reward", 10)) + dice.between(-3, 10)),
-                "loot_table": enemy_data.get("loot_table", []), "tags": enemy_data.get("tags", ["humanoid"]),
+                "hp": int(enemy_data.get("hp", 50) * scale),
+                "max_hp": int(enemy_data.get("hp", 50) * scale),
+                "attack": int(enemy_data.get("attack", 10) * scale),
+                "defense": int(enemy_data.get("defense", 5) * scale),
+                "speed": enemy_data.get("speed", 10),
+                "exp_reward": int(enemy_data.get("experience_reward", 30) * scale),
+                "gold_reward": max(
+                    1, int(enemy_data.get("gold_reward", 10)) + dice.between(-3, 10)
+                ),
+                "loot_table": enemy_data.get("loot_table", []),
+                "tags": enemy_data.get("tags", ["humanoid"]),
             }
             session["battle_enemy"] = enemy
             session["battle_log"] = [f"A {enemy['name']} emerges! (HP: {enemy['hp']})"]
-            session["battle_player_effects"] = {}; session["battle_enemy_effects"] = {}
+            session["battle_player_effects"] = {}
+            session["battle_enemy_effects"] = {}
             session["battle_companions"] = _build_battle_companions(player)
-            session.modified = True; save_player(player)
-            return jsonify({"ok": True, "outcome": "battle_started", "battle": _api_battle_summary(), "player": _api_player_summary(player)})
+            session.modified = True
+            save_player(player)
+            return jsonify(
+                {
+                    "ok": True,
+                    "outcome": "battle_started",
+                    "battle": _api_battle_summary(),
+                    "player": _api_player_summary(player),
+                }
+            )
     events = []
     roll = random.random()
     if roll < 0.08:
         dmg = dice.between(5, max(6, player.get("level", 1) * 3))
-        player["hp"] = max(1, player["hp"] - dmg); events.append(f"Trap! You take {dmg} damage.")
+        player["hp"] = max(1, player["hp"] - dmg)
+        events.append(f"Trap! You take {dmg} damage.")
     elif roll < 0.14:
-        mp_r = dice.between(10, 30); player["mp"] = min(player["max_mp"], player["mp"] + mp_r)
+        mp_r = dice.between(10, 30)
+        player["mp"] = min(player["max_mp"], player["mp"] + mp_r)
         events.append(f"Ancient shrine: +{mp_r} MP.")
     elif roll < 0.19:
-        xp_b = dice.between(15, 40); gain_experience(player, xp_b); events.append(f"Worn tome: +{xp_b} EXP.")
+        xp_b = dice.between(15, 40)
+        gain_experience(player, xp_b)
+        events.append(f"Worn tome: +{xp_b} EXP.")
     elif roll < 0.23:
-        finds = random.choice([["Health Potion"], ["Mana Potion"], ["Health Potion", "Rope"]])
-        for i in finds: player["inventory"].append(i)
+        finds = random.choice(
+            [["Health Potion"], ["Mana Potion"], ["Health Potion", "Rope"]]
+        )
+        for i in finds:
+            player["inventory"].append(i)
         events.append(f"Supplies found: {', '.join(finds)}.")
     if random.random() < 0.30:
-        g = dice.between(5, 20); player["gold"] += g; events.append(f"+{g} gold.")
+        gold_find = dice.between(5, 20)
+        player["gold"] += gold_find
+        events.append(f"+{gold_find} gold.")
     if random.random() < 0.40:
         tier = max(1, min(area.get("difficulty", 1), 5))
         mats = MATERIALS_BY_TIER.get(tier, MATERIALS_BY_TIER[1])
         gathered = random.choices(mats, k=dice.roll_1d(3))
-        for m in gathered: player["inventory"].append(m)
+        for m in gathered:
+            player["inventory"].append(m)
         events.append(f"Materials: {', '.join(gathered)}.")
     roll2 = random.random()
     if roll2 < 0.20:
-        h = dice.between(10, 30); player["hp"] = min(player["max_hp"], player["hp"] + h); events.append(f"Healing herb: +{h} HP.")
+        h = dice.between(10, 30)
+        player["hp"] = min(player["max_hp"], player["hp"] + h)
+        events.append(f"Healing herb: +{h} HP.")
     elif roll2 < min(0.60, 0.35 + player.get("attr_discovery", 0.0)):
-        player["inventory"].append("Health Potion"); events.append("Found a Health Potion.")
-    save_player(player); _autosave()
-    return jsonify({
-        "ok": True, "outcome": "explored",
-        "events": events, "player": _api_player_summary(player),
-        "message": " ".join(events) if events else "You explore the area but find nothing notable.",
-    })
+        player["inventory"].append("Health Potion")
+        events.append("Found a Health Potion.")
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "outcome": "explored",
+            "events": events,
+            "player": _api_player_summary(player),
+            "message": " ".join(events)
+            if events
+            else "You explore the area but find nothing notable.",
+        }
+    )
+
 
 # ── POST /api/action/travel ─────────────────────────────────────────────────────
 @app.route("/api/action/travel", methods=["POST"])
 @limiter.limit("30 per minute")
 def api_action_travel():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
     if session.get("battle_enemy"):
         return jsonify({"ok": False, "message": "You are in battle."}), 409
     data = request.get_json(force=True, silent=True) or {}
@@ -9005,29 +9251,40 @@ def api_action_travel():
     area_key = session.get("current_area", "starting_village")
     area = GAME_DATA["areas"].get(area_key, {})
     if dest_key not in area.get("connections", []):
-        return jsonify({"ok": False, "message": "That destination is not reachable from here."}), 400
+        return jsonify(
+            {"ok": False, "message": "That destination is not reachable from here."}
+        ), 400
     session["current_area"] = dest_key
     dest_area = GAME_DATA["areas"].get(dest_key, {})
     dest_name = dest_area.get("name", dest_key.replace("_", " ").title())
     visited = session.get("visited_areas", [])
     first_visit = dest_key not in visited
     if first_visit:
-        visited.append(dest_key); session["visited_areas"] = visited
+        visited.append(dest_key)
+        session["visited_areas"] = visited
     _set_activity(player, f"wandering {dest_name}")
-    session.modified = True; save_player(player); _autosave()
-    return jsonify({
-        "ok": True, "message": f"You travel to {dest_name}.",
-        "area_key": dest_key, "area_name": dest_name, "first_visit": first_visit,
-        "player": _api_player_summary(player),
-    })
+    session.modified = True
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "message": f"You travel to {dest_name}.",
+            "area_key": dest_key,
+            "area_name": dest_name,
+            "first_visit": first_visit,
+            "player": _api_player_summary(player),
+        }
+    )
+
 
 # ── POST /api/action/rest ───────────────────────────────────────────────────────
 @app.route("/api/action/rest", methods=["POST"])
 @limiter.limit("20 per minute")
 def api_action_rest():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
     if session.get("battle_enemy"):
         return jsonify({"ok": False, "message": "You are in battle."}), 409
     area_key = session.get("current_area", "starting_village")
@@ -9036,55 +9293,84 @@ def api_action_rest():
         return jsonify({"ok": False, "message": "There is nowhere to rest here."}), 400
     cost = area.get("rest_cost", 0)
     if cost > 0 and player["gold"] < cost:
-        return jsonify({"ok": False, "message": f"You need {cost} gold to rest here."}), 400
+        return jsonify(
+            {"ok": False, "message": f"You need {cost} gold to rest here."}
+        ), 400
     player["gold"] -= cost
-    player["hp"] = player["max_hp"]; player["mp"] = player["max_mp"]
-    advance_crops(player); advance_game_time(player); apply_regen_effects(player)
+    player["hp"] = player["max_hp"]
+    player["mp"] = player["max_mp"]
+    advance_crops(player)
+    advance_game_time(player)
+    apply_regen_effects(player)
     _revive_companions(player)
-    save_player(player); _autosave()
-    return jsonify({
-        "ok": True,
-        "message": f"You rest{f' for {cost} gold' if cost else ''}. HP and MP fully restored.",
-        "player": _api_player_summary(player),
-    })
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "message": f"You rest{f' for {cost} gold' if cost else ''}. HP and MP fully restored.",
+            "player": _api_player_summary(player),
+        }
+    )
+
 
 # ── POST /api/action/mine ───────────────────────────────────────────────────────
 @app.route("/api/action/mine", methods=["POST"])
 @limiter.limit("30 per minute")
 def api_action_mine():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
     if session.get("battle_enemy"):
         return jsonify({"ok": False, "message": "You are in battle."}), 409
     area_key = session.get("current_area", "starting_village")
     area = GAME_DATA["areas"].get(area_key, {})
     if not area.get("mine"):
         return jsonify({"ok": False, "message": "There is no mine here."}), 400
-    has_pickaxe = any("pickaxe" in i.lower() for i in player.get("inventory", []) + [player.get("equipment", {}).get("weapon", "")])
+    has_pickaxe = any(
+        "pickaxe" in i.lower()
+        for i in player.get("inventory", [])
+        + [player.get("equipment", {}).get("weapon", "")]
+    )
     if not has_pickaxe:
         return jsonify({"ok": False, "message": "You need a pickaxe to mine."}), 400
     str_bonus = player.get("attributes", {}).get("str", 0) * 0.5
     success_chance = min(0.95, 0.55 + str_bonus / 100)
     if random.random() > success_chance:
         save_player(player)
-        return jsonify({"ok": True, "message": "You swing your pickaxe but find nothing useful.", "found": None, "player": _api_player_summary(player)})
+        return jsonify(
+            {
+                "ok": True,
+                "message": "You swing your pickaxe but find nothing useful.",
+                "found": None,
+                "player": _api_player_summary(player),
+            }
+        )
     mine_data = area.get("mine", {})
     ore_pool = mine_data.get("ore_pool", ["Iron Ore"])
     ore = random.choice(ore_pool)
     player["inventory"].append(ore)
     mining_xp = random.randint(8, 20)
     player["mining_xp"] = player.get("mining_xp", 0) + mining_xp
-    save_player(player); _autosave()
-    return jsonify({"ok": True, "message": f"You mine {ore}. (+{mining_xp} mining XP)", "found": ore, "player": _api_player_summary(player)})
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "message": f"You mine {ore}. (+{mining_xp} mining XP)",
+            "found": ore,
+            "player": _api_player_summary(player),
+        }
+    )
+
 
 # ── POST /api/action/buy ────────────────────────────────────────────────────────
 @app.route("/api/action/buy", methods=["POST"])
 @limiter.limit("60 per minute")
 def api_action_buy():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("shop:write")
+    if err:
+        return err
     data = request.get_json(force=True, silent=True) or {}
     item_name = data.get("item", "").strip()
     if not item_name:
@@ -9096,19 +9382,34 @@ def api_action_buy():
     discount = min(0.50, player.get("attr_gold_discount", 0.0))
     price = max(1, int(base_price * (1.0 - discount)))
     if player["gold"] < price:
-        return jsonify({"ok": False, "message": f"Not enough gold. Need {price}g, have {player['gold']}g."}), 400
+        return jsonify(
+            {
+                "ok": False,
+                "message": f"Not enough gold. Need {price}g, have {player['gold']}g.",
+            }
+        ), 400
     player["gold"] -= price
     player["inventory"].append(item_name)
-    save_player(player); _autosave()
-    return jsonify({"ok": True, "message": f"Bought {item_name} for {price}g.", "item": item_name, "price": price, "player": _api_player_summary(player)})
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "message": f"Bought {item_name} for {price}g.",
+            "item": item_name,
+            "price": price,
+            "player": _api_player_summary(player),
+        }
+    )
+
 
 # ── POST /api/action/sell ───────────────────────────────────────────────────────
 @app.route("/api/action/sell", methods=["POST"])
 @limiter.limit("60 per minute")
 def api_action_sell():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("shop:write")
+    if err:
+        return err
     data = request.get_json(force=True, silent=True) or {}
     item_name = data.get("item", "").strip()
     if not item_name:
@@ -9121,46 +9422,66 @@ def api_action_sell():
     sell_price = max(1, int(item_data.get("price", item_data.get("value", 5)) * 0.5))
     player["inventory"].remove(item_name)
     player["gold"] += sell_price
-    save_player(player); _autosave()
-    return jsonify({"ok": True, "message": f"Sold {item_name} for {sell_price}g.", "item": item_name, "gold_received": sell_price, "player": _api_player_summary(player)})
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "message": f"Sold {item_name} for {sell_price}g.",
+            "item": item_name,
+            "gold_received": sell_price,
+            "player": _api_player_summary(player),
+        }
+    )
+
 
 # ── POST /api/action/equip ──────────────────────────────────────────────────────
 @app.route("/api/action/equip", methods=["POST"])
 @limiter.limit("60 per minute")
 def api_action_equip():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("inventory:write")
+    if err:
+        return err
     data = request.get_json(force=True, silent=True) or {}
     item_name = data.get("item", "").strip()
     if not item_name:
         return jsonify({"ok": False, "message": "Item name required."}), 400
     ok, msg = equip_item(player, item_name)
-    save_player(player); _autosave()
-    return jsonify({"ok": ok, "message": msg, "player": _api_player_summary(player)}), (200 if ok else 400)
+    save_player(player)
+    _autosave()
+    return jsonify({"ok": ok, "message": msg, "player": _api_player_summary(player)}), (
+        200 if ok else 400
+    )
+
 
 # ── POST /api/action/unequip ────────────────────────────────────────────────────
 @app.route("/api/action/unequip", methods=["POST"])
 @limiter.limit("60 per minute")
 def api_action_unequip():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("inventory:write")
+    if err:
+        return err
     data = request.get_json(force=True, silent=True) or {}
     slot = data.get("slot", "").strip()
     if not slot:
-        return jsonify({"ok": False, "message": "Slot required (weapon, armor, accessory, etc.)."}), 400
+        return jsonify(
+            {"ok": False, "message": "Slot required (weapon, armor, accessory, etc.)."}
+        ), 400
     ok, msg = unequip_item(player, slot)
-    save_player(player); _autosave()
-    return jsonify({"ok": ok, "message": msg, "player": _api_player_summary(player)}), (200 if ok else 400)
+    save_player(player)
+    _autosave()
+    return jsonify({"ok": ok, "message": msg, "player": _api_player_summary(player)}), (
+        200 if ok else 400
+    )
+
 
 # ── POST /api/action/use_item ───────────────────────────────────────────────────
 @app.route("/api/action/use_item", methods=["POST"])
 @limiter.limit("60 per minute")
 def api_action_use_item():
-    player = get_player()
-    if not player:
-        return jsonify({"ok": False, "message": "No active character."}), 401
+    player, err = _api_resolve_player("inventory:write")
+    if err:
+        return err
     data = request.get_json(force=True, silent=True) or {}
     item_name = data.get("item", "").strip()
     if not item_name:
@@ -9168,42 +9489,64 @@ def api_action_use_item():
     if item_name not in player.get("inventory", []):
         return jsonify({"ok": False, "message": f"You don't have {item_name}."}), 400
     item_data = GAME_DATA["items"].get(item_name, {})
-    if not isinstance(item_data, dict): item_data = {}
+    if not isinstance(item_data, dict):
+        item_data = {}
     lower = item_name.lower()
     msg = ""
     if "health" in lower or ("potion" in lower and "mana" not in lower):
-        heal = dice.between(70, 130) if ("large" in lower or "greater" in lower) else dice.between(40, 70)
+        heal = (
+            dice.between(70, 130)
+            if ("large" in lower or "greater" in lower)
+            else dice.between(40, 70)
+        )
         player["hp"] = min(player["max_hp"], player["hp"] + heal)
         player["inventory"].remove(item_name)
         msg = f"You use {item_name}: +{heal} HP."
     elif "mana" in lower:
-        r = dice.between(25, 50); player["mp"] = min(player["max_mp"], player["mp"] + r)
-        player["inventory"].remove(item_name); msg = f"You use {item_name}: +{r} MP."
+        r = dice.between(25, 50)
+        player["mp"] = min(player["max_mp"], player["mp"] + r)
+        player["inventory"].remove(item_name)
+        msg = f"You use {item_name}: +{r} MP."
     elif "elixir" in lower or "tears" in lower:
-        heal = dice.between(50, 100); player["hp"] = min(player["max_hp"], player["hp"] + heal)
-        player["inventory"].remove(item_name); msg = f"You use {item_name}: +{heal} HP."
+        heal = dice.between(50, 100)
+        player["hp"] = min(player["max_hp"], player["hp"] + heal)
+        player["inventory"].remove(item_name)
+        msg = f"You use {item_name}: +{heal} HP."
     else:
-        return jsonify({"ok": False, "message": f"{item_name} cannot be used directly."}), 400
-    save_player(player); _autosave()
+        return jsonify(
+            {"ok": False, "message": f"{item_name} cannot be used directly."}
+        ), 400
+    save_player(player)
+    _autosave()
     return jsonify({"ok": True, "message": msg, "player": _api_player_summary(player)})
+
 
 # ── POST /api/battle/attack ─────────────────────────────────────────────────────
 @app.route("/api/battle/attack", methods=["POST"])
 @limiter.limit("60 per minute")
 def api_battle_attack():
-    player = get_player()
+    player, err = _api_resolve_player("battle:write")
+    if err:
+        return err
     enemy = session.get("battle_enemy") or {}
-    if not player or not enemy:
+    if not enemy:
         return jsonify({"ok": False, "message": "Not in battle."}), 400
     log = session.get("battle_log", [])
     player_effects = session.get("battle_player_effects") or {}
-    enemy_effects  = session.get("battle_enemy_effects") or {}
+    enemy_effects = session.get("battle_enemy_effects") or {}
     battle_companions = session.get("battle_companions", [])
     enemy_name = enemy.get("name", "Enemy")
     stunned = process_turn_effects(player, player_effects, log, "You")
-    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True, player_level=player.get("level", 1))
+    process_turn_effects(
+        enemy,
+        enemy_effects,
+        log,
+        enemy_name,
+        is_enemy=True,
+        player_level=player.get("level", 1),
+    )
     session["battle_player_effects"] = player_effects
-    session["battle_enemy_effects"]  = enemy_effects
+    session["battle_enemy_effects"] = enemy_effects
     if player["hp"] <= 0 or enemy.get("hp", 1) <= 0:
         return _api_battle_outcome(player, enemy, log)
     if not stunned:
@@ -9212,29 +9555,47 @@ def api_battle_attack():
         else:
             eff_def = enemy["defense"]
             if enemy_effects.get("weaken", {}).get("turns", 0) > 0:
-                eff_def = max(0, eff_def - enemy_effects["weaken"].get("def_reduction", 0))
+                eff_def = max(
+                    0, eff_def - enemy_effects["weaken"].get("def_reduction", 0)
+                )
             if enemy_effects.get("armor_crushed", {}).get("turns", 0) > 0:
-                eff_def = max(0, eff_def - enemy_effects["armor_crushed"].get("def_reduction", 0))
-            eq_weapon = GAME_DATA["items"].get(player.get("equipment", {}).get("weapon", ""), {})
-            armor_pen = eq_weapon.get("armor_penetration", 0) if isinstance(eq_weapon, dict) else 0
-            if armor_pen: eff_def = int(eff_def * (1 - armor_pen / 100.0))
+                eff_def = max(
+                    0, eff_def - enemy_effects["armor_crushed"].get("def_reduction", 0)
+                )
+            eq_weapon = GAME_DATA["items"].get(
+                player.get("equipment", {}).get("weapon", ""), {}
+            )
+            armor_pen = (
+                eq_weapon.get("armor_penetration", 0)
+                if isinstance(eq_weapon, dict)
+                else 0
+            )
+            if armor_pen:
+                eff_def = int(eff_def * (1 - armor_pen / 100.0))
             p_dmg = max(1, player["attack"] - eff_def + dice.between(-3, 6))
             crit_rate = 0.10 + min(0.40, player.get("attr_crit_chance", 0) / 100.0)
             if random.random() < crit_rate:
                 p_dmg = int(p_dmg * (1.6 + player.get("attr_crit_damage", 0) / 100.0))
-                log.append(f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy_name}!")
+                log.append(
+                    f"CRITICAL STRIKE! You deal {p_dmg} damage to the {enemy_name}!"
+                )
             else:
                 log.append(f"You attack the {enemy_name} for {p_dmg} damage.")
             enemy["hp"] = max(0, enemy["hp"] - p_dmg)
             for bonus_dmg, bonus_msg in _get_weapon_combat_effects(player, enemy):
-                if bonus_dmg > 0: enemy["hp"] = max(0, enemy["hp"] - bonus_dmg); log.append(bonus_msg)
-            for msg in _get_weapon_on_hit_procs(player, enemy, enemy_effects): log.append(msg)
+                if bonus_dmg > 0:
+                    enemy["hp"] = max(0, enemy["hp"] - bonus_dmg)
+                    log.append(bonus_msg)
+            for msg in _get_weapon_on_hit_procs(player, enemy, enemy_effects):
+                log.append(msg)
     if enemy["hp"] <= 0:
-        _sync_companion_hp_to_player(player, battle_companions); _restore_companion_hp(player)
+        _sync_companion_hp_to_player(player, battle_companions)
+        _restore_companion_hp(player)
         return _api_battle_outcome(player, enemy, log)
     _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
     if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
-        _sync_companion_hp_to_player(player, battle_companions); _restore_companion_hp(player)
+        _sync_companion_hp_to_player(player, battle_companions)
+        _restore_companion_hp(player)
         session["battle_companions"] = battle_companions
         return _api_battle_outcome(player, enemy, log)
     session["battle_companions"] = battle_companions
@@ -9242,39 +9603,63 @@ def api_battle_attack():
         won = _companion_last_stand(battle_companions, enemy, log)
         _sync_companion_hp_to_player(player, battle_companions)
         if won:
-            player["hp"] = 1; _restore_companion_hp(player)
+            player["hp"] = 1
+            _restore_companion_hp(player)
             log.append("Your companions fought on and saved you!")
         session["battle_player_effects"] = player_effects
-        session["battle_enemy_effects"]  = enemy_effects
+        session["battle_enemy_effects"] = enemy_effects
         return _api_battle_outcome(player, enemy, log)
-    session["battle_enemy"] = enemy; session["battle_log"] = log
-    session["battle_player_effects"] = player_effects; session["battle_enemy_effects"] = enemy_effects
-    save_player(player); _autosave()
-    return jsonify({"ok": True, "outcome": "ongoing", "log": log[-10:], "player": _api_player_summary(player), "battle": _api_battle_summary()})
+    session["battle_enemy"] = enemy
+    session["battle_log"] = log
+    session["battle_player_effects"] = player_effects
+    session["battle_enemy_effects"] = enemy_effects
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "outcome": "ongoing",
+            "log": log[-10:],
+            "player": _api_player_summary(player),
+            "battle": _api_battle_summary(),
+        }
+    )
+
 
 # ── POST /api/battle/defend ─────────────────────────────────────────────────────
 @app.route("/api/battle/defend", methods=["POST"])
 @limiter.limit("60 per minute")
 def api_battle_defend():
-    player = get_player()
+    player, err = _api_resolve_player("battle:write")
+    if err:
+        return err
     enemy = session.get("battle_enemy") or {}
-    if not player or not enemy:
+    if not enemy:
         return jsonify({"ok": False, "message": "Not in battle."}), 400
     log = session.get("battle_log", [])
     player_effects = session.get("battle_player_effects") or {}
-    enemy_effects  = session.get("battle_enemy_effects") or {}
+    enemy_effects = session.get("battle_enemy_effects") or {}
     battle_companions = session.get("battle_companions", [])
     enemy_name = enemy.get("name", "Enemy")
     process_turn_effects(player, player_effects, log, "You")
-    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True, player_level=player.get("level", 1))
+    process_turn_effects(
+        enemy,
+        enemy_effects,
+        log,
+        enemy_name,
+        is_enemy=True,
+        player_level=player.get("level", 1),
+    )
     if player["hp"] <= 0 or enemy.get("hp", 1) <= 0:
         return _api_battle_outcome(player, enemy, log)
     log.append("You brace yourself, raising your guard.")
-    real_def = player["defense"]; player["defense"] = real_def * 2
+    real_def = player["defense"]
+    player["defense"] = real_def * 2
     _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
     player["defense"] = real_def
     if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
-        _sync_companion_hp_to_player(player, battle_companions); _restore_companion_hp(player)
+        _sync_companion_hp_to_player(player, battle_companions)
+        _restore_companion_hp(player)
         session["battle_companions"] = battle_companions
         return _api_battle_outcome(player, enemy, log)
     session["battle_companions"] = battle_companions
@@ -9282,79 +9667,150 @@ def api_battle_defend():
         won = _companion_last_stand(battle_companions, enemy, log)
         _sync_companion_hp_to_player(player, battle_companions)
         if won:
-            player["hp"] = 1; _restore_companion_hp(player); log.append("Your companions saved you!")
-        session["battle_player_effects"] = player_effects; session["battle_enemy_effects"] = enemy_effects
+            player["hp"] = 1
+            _restore_companion_hp(player)
+            log.append("Your companions saved you!")
+        session["battle_player_effects"] = player_effects
+        session["battle_enemy_effects"] = enemy_effects
         return _api_battle_outcome(player, enemy, log)
-    session["battle_enemy"] = enemy; session["battle_log"] = log
-    session["battle_player_effects"] = player_effects; session["battle_enemy_effects"] = enemy_effects
-    save_player(player); _autosave()
-    return jsonify({"ok": True, "outcome": "ongoing", "log": log[-10:], "player": _api_player_summary(player), "battle": _api_battle_summary()})
+    session["battle_enemy"] = enemy
+    session["battle_log"] = log
+    session["battle_player_effects"] = player_effects
+    session["battle_enemy_effects"] = enemy_effects
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "outcome": "ongoing",
+            "log": log[-10:],
+            "player": _api_player_summary(player),
+            "battle": _api_battle_summary(),
+        }
+    )
+
 
 # ── POST /api/battle/flee ───────────────────────────────────────────────────────
 @app.route("/api/battle/flee", methods=["POST"])
 @limiter.limit("30 per minute")
 def api_battle_flee():
-    player = get_player()
+    player, err = _api_resolve_player("battle:write")
+    if err:
+        return err
     enemy = session.get("battle_enemy") or {}
-    if not player or not enemy:
+    if not enemy:
         return jsonify({"ok": False, "message": "Not in battle."}), 400
     log = session.get("battle_log", [])
     if random.random() < 0.55:
         log.append("You break away and escape!")
-        session.pop("battle_enemy", None); session.pop("battle_player_effects", None)
-        session.pop("battle_enemy_effects", None); session.pop("battle_companions", None)
+        session.pop("battle_enemy", None)
+        session.pop("battle_player_effects", None)
+        session.pop("battle_enemy_effects", None)
+        session.pop("battle_companions", None)
         session["battle_log"] = []
-        save_player(player); _autosave()
-        return jsonify({"ok": True, "outcome": "fled", "message": f"You fled from the {enemy.get('name','enemy')}.", "player": _api_player_summary(player)})
+        save_player(player)
+        _autosave()
+        return jsonify(
+            {
+                "ok": True,
+                "outcome": "fled",
+                "message": f"You fled from the {enemy.get('name', 'enemy')}.",
+                "player": _api_player_summary(player),
+            }
+        )
     e_dmg = max(1, enemy["attack"] - player["defense"] + dice.between(0, 5))
     player["hp"] = max(0, player["hp"] - e_dmg)
-    log.append(f"Flee failed! The {enemy.get('name','enemy')} deals {e_dmg} damage!")
+    log.append(f"Flee failed! The {enemy.get('name', 'enemy')} deals {e_dmg} damage!")
     if player["hp"] <= 0:
         return _api_battle_outcome(player, enemy, log)
-    session["battle_enemy"] = enemy; session["battle_log"] = log
-    save_player(player); _autosave()
-    return jsonify({"ok": True, "outcome": "ongoing", "log": log[-10:], "player": _api_player_summary(player), "battle": _api_battle_summary()})
+    session["battle_enemy"] = enemy
+    session["battle_log"] = log
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "outcome": "ongoing",
+            "log": log[-10:],
+            "player": _api_player_summary(player),
+            "battle": _api_battle_summary(),
+        }
+    )
+
 
 # ── POST /api/battle/spell ──────────────────────────────────────────────────────
 @app.route("/api/battle/spell", methods=["POST"])
 @limiter.limit("60 per minute")
 def api_battle_spell():
-    player = get_player()
+    player, err = _api_resolve_player("battle:write")
+    if err:
+        return err
     enemy = session.get("battle_enemy") or {}
-    if not player or not enemy:
+    if not enemy:
         return jsonify({"ok": False, "message": "Not in battle."}), 400
     data = request.get_json(force=True, silent=True) or {}
     spell_name = data.get("spell", "").strip()
     if not spell_name:
         return jsonify({"ok": False, "message": "Spell name required."}), 400
-    spells_data = GAME_DATA["spells"]; items_data = GAME_DATA["items"]
+    spells_data = GAME_DATA["spells"]
+    items_data = GAME_DATA["items"]
     weapon = player.get("equipment", {}).get("weapon")
-    available = [s["name"] for s in get_available_spells(weapon, items_data, spells_data)]
+    available = [
+        s["name"] for s in get_available_spells(weapon, items_data, spells_data)
+    ]
     if spell_name not in available:
-        return jsonify({"ok": False, "message": "That spell is not available with your current weapon."}), 400
+        return jsonify(
+            {
+                "ok": False,
+                "message": "That spell is not available with your current weapon.",
+            }
+        ), 400
     log = session.get("battle_log", [])
     player_effects = session.get("battle_player_effects") or {}
-    enemy_effects  = session.get("battle_enemy_effects") or {}
+    enemy_effects = session.get("battle_enemy_effects") or {}
     battle_companions = session.get("battle_companions", [])
     enemy_name = enemy.get("name", "Enemy")
     stunned = process_turn_effects(player, player_effects, log, "You")
-    process_turn_effects(enemy, enemy_effects, log, enemy_name, is_enemy=True, player_level=player.get("level", 1))
-    session["battle_player_effects"] = player_effects; session["battle_enemy_effects"] = enemy_effects
+    process_turn_effects(
+        enemy,
+        enemy_effects,
+        log,
+        enemy_name,
+        is_enemy=True,
+        player_level=player.get("level", 1),
+    )
+    session["battle_player_effects"] = player_effects
+    session["battle_enemy_effects"] = enemy_effects
     if player["hp"] <= 0 or enemy.get("hp", 1) <= 0:
         return _api_battle_outcome(player, enemy, log)
     if stunned:
-        session["battle_log"] = log; session["battle_enemy"] = enemy; save_player(player)
-        return jsonify({"ok": True, "outcome": "ongoing", "log": log[-10:], "player": _api_player_summary(player), "battle": _api_battle_summary()})
+        session["battle_log"] = log
+        session["battle_enemy"] = enemy
+        save_player(player)
+        return jsonify(
+            {
+                "ok": True,
+                "outcome": "ongoing",
+                "log": log[-10:],
+                "player": _api_player_summary(player),
+                "battle": _api_battle_summary(),
+            }
+        )
     spell_data = spells_data.get(spell_name, {})
-    result = cast_spell(player, enemy, spell_name, spell_data, spell_data.get("effects_data", {}))
-    for m in result.get("messages", []): log.append(m["text"])
+    result = cast_spell(
+        player, enemy, spell_name, spell_data, spell_data.get("effects_data", {})
+    )
+    for m in result.get("messages", []):
+        log.append(m["text"])
     session["battle_enemy"] = enemy
     if enemy.get("hp", 1) <= 0:
-        _sync_companion_hp_to_player(player, battle_companions); _restore_companion_hp(player)
+        _sync_companion_hp_to_player(player, battle_companions)
+        _restore_companion_hp(player)
         return _api_battle_outcome(player, enemy, log)
     _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
     if enemy["hp"] > 0 and _companion_take_action(battle_companions, enemy, log):
-        _sync_companion_hp_to_player(player, battle_companions); _restore_companion_hp(player)
+        _sync_companion_hp_to_player(player, battle_companions)
+        _restore_companion_hp(player)
         session["battle_companions"] = battle_companions
         return _api_battle_outcome(player, enemy, log)
     session["battle_companions"] = battle_companions
@@ -9362,21 +9818,38 @@ def api_battle_spell():
         won = _companion_last_stand(battle_companions, enemy, log)
         _sync_companion_hp_to_player(player, battle_companions)
         if won:
-            player["hp"] = 1; _restore_companion_hp(player); log.append("Companions saved you!")
-        session["battle_player_effects"] = player_effects; session["battle_enemy_effects"] = enemy_effects
+            player["hp"] = 1
+            _restore_companion_hp(player)
+            log.append("Companions saved you!")
+        session["battle_player_effects"] = player_effects
+        session["battle_enemy_effects"] = enemy_effects
         return _api_battle_outcome(player, enemy, log)
-    session["battle_log"] = log; session["battle_enemy"] = enemy
-    session["battle_player_effects"] = player_effects; session["battle_enemy_effects"] = enemy_effects
-    save_player(player); _autosave()
-    return jsonify({"ok": True, "outcome": "ongoing", "log": log[-10:], "player": _api_player_summary(player), "battle": _api_battle_summary()})
+    session["battle_log"] = log
+    session["battle_enemy"] = enemy
+    session["battle_player_effects"] = player_effects
+    session["battle_enemy_effects"] = enemy_effects
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "outcome": "ongoing",
+            "log": log[-10:],
+            "player": _api_player_summary(player),
+            "battle": _api_battle_summary(),
+        }
+    )
+
 
 # ── POST /api/battle/use_item ───────────────────────────────────────────────────
 @app.route("/api/battle/use_item", methods=["POST"])
 @limiter.limit("60 per minute")
 def api_battle_use_item():
-    player = get_player()
+    player, err = _api_resolve_player("battle:write")
+    if err:
+        return err
     enemy = session.get("battle_enemy") or {}
-    if not player or not enemy:
+    if not enemy:
         return jsonify({"ok": False, "message": "Not in battle."}), 400
     data = request.get_json(force=True, silent=True) or {}
     item_name = data.get("item", "").strip()
@@ -9386,28 +9859,51 @@ def api_battle_use_item():
         return jsonify({"ok": False, "message": f"You don't have {item_name}."}), 400
     log = session.get("battle_log", [])
     player_effects = session.get("battle_player_effects") or {}
-    enemy_effects  = session.get("battle_enemy_effects") or {}
+    enemy_effects = session.get("battle_enemy_effects") or {}
     battle_companions = session.get("battle_companions", [])
     lower = item_name.lower()
     used = False
     if "health" in lower or ("potion" in lower and "mana" not in lower):
-        heal = dice.between(70, 130) if ("large" in lower or "greater" in lower) else dice.between(40, 70)
+        heal = (
+            dice.between(70, 130)
+            if ("large" in lower or "greater" in lower)
+            else dice.between(40, 70)
+        )
         player["hp"] = min(player["max_hp"], player["hp"] + heal)
-        player["inventory"].remove(item_name); log.append(f"You use {item_name}: +{heal} HP."); used = True
+        player["inventory"].remove(item_name)
+        log.append(f"You use {item_name}: +{heal} HP.")
+        used = True
     elif "mana" in lower:
-        r = dice.between(25, 50); player["mp"] = min(player["max_mp"], player["mp"] + r)
-        player["inventory"].remove(item_name); log.append(f"You use {item_name}: +{r} MP."); used = True
+        r = dice.between(25, 50)
+        player["mp"] = min(player["max_mp"], player["mp"] + r)
+        player["inventory"].remove(item_name)
+        log.append(f"You use {item_name}: +{r} MP.")
+        used = True
     if not used:
-        return jsonify({"ok": False, "message": f"{item_name} cannot be used in battle."}), 400
-    enemy_name = enemy.get("name", "Enemy")
+        return jsonify(
+            {"ok": False, "message": f"{item_name} cannot be used in battle."}
+        ), 400
     _enemy_take_turn(enemy, player, player_effects, log, battle_companions)
     if player["hp"] <= 0 or enemy.get("hp", 1) <= 0:
-        session["battle_player_effects"] = player_effects; session["battle_enemy_effects"] = enemy_effects
+        session["battle_player_effects"] = player_effects
+        session["battle_enemy_effects"] = enemy_effects
         return _api_battle_outcome(player, enemy, log)
-    session["battle_enemy"] = enemy; session["battle_log"] = log
-    session["battle_player_effects"] = player_effects; session["battle_enemy_effects"] = enemy_effects
-    save_player(player); _autosave()
-    return jsonify({"ok": True, "outcome": "ongoing", "log": log[-10:], "player": _api_player_summary(player), "battle": _api_battle_summary()})
+    session["battle_enemy"] = enemy
+    session["battle_log"] = log
+    session["battle_player_effects"] = player_effects
+    session["battle_enemy_effects"] = enemy_effects
+    save_player(player)
+    _autosave()
+    return jsonify(
+        {
+            "ok": True,
+            "outcome": "ongoing",
+            "log": log[-10:],
+            "player": _api_player_summary(player),
+            "battle": _api_battle_summary(),
+        }
+    )
+
 
 port = int(os.environ.get("PORT", 5000))
 if __name__ == "__main__":

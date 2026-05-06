@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"app.py" = ["E402"]
+"utilities/supabase_db.py" = ["E402"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+reportMissingModuleSource = false
+reportOptionalCall = "none"

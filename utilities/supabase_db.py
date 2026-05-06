@@ -10,22 +10,24 @@ def _run(fn, *args, **kwargs):
 from supabase import create_client, Client
 from utilities.save_load import encrypt_save, decrypt_save
 
+_profanity: Any = None  # type: ignore[assignment]
+_PROFANITY_AVAILABLE = False
 try:
-    from better_profanity import profanity as _profanity
+    from better_profanity import profanity as _profanity  # type: ignore[assignment]
     _profanity.load_censor_words()
     _PROFANITY_AVAILABLE = True
 except Exception:
-    _PROFANITY_AVAILABLE = False
+    pass
 
 def contains_profanity(text: str) -> bool:
-    if not _PROFANITY_AVAILABLE:
+    if not _PROFANITY_AVAILABLE or _profanity is None:
         return False
-    return _profanity.contains_profanity(text)
+    return bool(_profanity.contains_profanity(text))
 
 def censor_text(text: str) -> str:
-    if not _PROFANITY_AVAILABLE:
+    if not _PROFANITY_AVAILABLE or _profanity is None:
         return text
-    return _profanity.censor(text)
+    return str(_profanity.censor(text))
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "").strip()
@@ -644,7 +646,7 @@ def leave_group(username: str) -> Dict[str, Any]:
         if group["leader"] == username:
             new_leader = all_members.data[0]["username"]
             client.table("ol2_groups").update({"leader": new_leader}).eq("id", group_id).execute()
-            client.table("ol2_group_log").insert({"group_id": group_id, "username": new_leader, "action": f"became the new leader (previous leader left).", "xp_awarded": 0, "gold_awarded": 0}).execute()
+            client.table("ol2_group_log").insert({"group_id": group_id, "username": new_leader, "action": "became the new leader (previous leader left).", "xp_awarded": 0, "gold_awarded": 0}).execute()
         else:
             client.table("ol2_group_log").insert({"group_id": group_id, "username": username, "action": "left the group.", "xp_awarded": 0, "gold_awarded": 0}).execute()
         return {"ok": True, "message": f"You left the group \"{group['name']}\"."}

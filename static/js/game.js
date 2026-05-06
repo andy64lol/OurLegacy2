@@ -539,7 +539,7 @@ function settingsToggleButtonStyle() {
 }
 
 var OL2_THEMES = ['default', 'forest', 'crimson', 'midnight', 'amethyst'];
-var OL2_THEME_LABELS = { default: 'Default', forest: 'Forest', crimson: 'Crimson', midnight: 'Midnight', amethyst: 'Amethyst' };
+var OL2_THEME_LABELS = { default: 'Default', forest: 'Forest', crimson: 'Crimson', midnight: 'Midnight', amethyst: 'Amethyst' }; // eslint-disable-line no-unused-vars
 
 function initTheme() {
     var theme = localStorage.getItem('ol2_theme') || 'default';
@@ -557,7 +557,7 @@ function _applyTheme(theme) {
     });
 }
 
-function applyTheme(theme) {
+function applyTheme(theme) { // eslint-disable-line no-unused-vars
     _applyTheme(theme);
     localStorage.setItem('ol2_theme', theme);
 }
