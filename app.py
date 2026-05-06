@@ -8102,25 +8102,38 @@ def api_login():
         "session_token": session_token,
     })
 
-@app.route("/api/online/profile", methods=["GET"])
+@app.route("/api/online/profile", methods=["POST"])
+@limiter.limit("20 per minute")
 def api_online_profile():
-    user_id = session.get("online_user_id")
-    username = session.get("online_username")
-    if not user_id or not username:
-        return jsonify({"ok": False, "message": "Not logged in."}), 401
-    if not _is_session_valid():
-        return jsonify({"ok": False, "message": "Session expired."}), 401
-    player = get_player()
+    data = request.get_json(force=True, silent=True) or {}
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
+    if not username or not password:
+        return jsonify({"ok": False, "message": "Username and password are required."}), 400
+    result = login_user(username, password)
+    if not result["ok"]:
+        return jsonify({"ok": False, "message": result["message"]}), 401
+    if _is_banned(result.get("username") or username):
+        return jsonify({"ok": False, "message": "Your account has been banned."}), 403
+    user_id = result["user_id"]
+    actual_username = result.get("username") or username.lower()
     email = get_user_email(user_id)
     pending_email = get_pending_email_verification(user_id)
+    if pending_email and not email:
+        return jsonify({
+            "ok": False,
+            "message": "Your email address has not been verified yet. Please check your inbox and confirm before accessing your profile.",
+            "email_pending": pending_email,
+        }), 403
+    player = get_player()
     profile = {
         "user_id": user_id,
-        "username": username,
+        "username": actual_username,
         "email": email,
         "email_verified": email is not None,
         "email_pending": pending_email,
     }
-    if player:
+    if player and session.get("online_user_id") == user_id:
         profile["character"] = {
             "name": player.get("name"),
             "race": player.get("race"),
