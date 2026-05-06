@@ -25,6 +25,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import socketio as _socketio_module
 import asyncio as _asyncio
+import collections
 import json
 import random
 import os
@@ -151,6 +152,10 @@ limiter = Limiter(
     storage_uri="memory://",
 )
 
+# Per-IP sliding-window bucket for /api/* rate limiting (60 req/min)
+_api_rate_buckets: dict = collections.defaultdict(list)
+_API_RATE_LIMIT = 60
+
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = os.path.join(
     os.path.dirname(__file__), ".flask_sessions"
@@ -198,9 +203,27 @@ _API_STATE_KEYS = [
 
 @app.before_request
 def _api_key_before_request():
-    """Load API key user data into session before /api/* routes."""
+    """Rate-limit and load API key user data before /api/* routes."""
     if not request.path.startswith("/api/"):
         return
+    # ── Global per-IP rate limit: 60 req/min ──────────────────────────────
+    ip = get_remote_address()
+    now = _time_module.monotonic()
+    bucket = _api_rate_buckets[ip]
+    cutoff = now - 60.0
+    while bucket and bucket[0] < cutoff:
+        bucket.pop(0)
+    if len(bucket) >= _API_RATE_LIMIT:
+        resp = jsonify({
+            "ok": False,
+            "message": "Rate limit exceeded: 60 requests/minute per IP.",
+            "retry_after": 60,
+        })
+        resp.status_code = 429
+        resp.headers["Retry-After"] = "60"
+        return resp
+    bucket.append(now)
+    # ── API key auth ───────────────────────────────────────────────────────
     raw = _extract_raw_api_key()
     if not raw:
         return
@@ -212,9 +235,14 @@ def _api_key_before_request():
     g._api_meta = meta
     session["online_user_id"] = meta["user_id"]
     session["online_username"] = meta["username"]
-    player = character_autoload(meta["user_id"], meta["username"])
-    if player:
-        save_player(player)
+    result = character_autoload(meta["user_id"])
+    if result.get("ok") and result.get("data"):
+        data = result["data"]
+        if "player" in data:
+            save_player(data["player"])
+        for k in ("current_area", "visited_areas", "completed_missions", "quest_progress"):
+            if k in data:
+                session[k] = data[k]
     state = _api_load_state(meta["user_id"])
     for k in _API_STATE_KEYS:
         if k in state:
@@ -9904,6 +9932,522 @@ def api_battle_use_item():
         }
     )
 
+
+# ── Jinja2 filter: format unix timestamps ────────────────────────────────────
+
+@app.template_filter("timestamp_fmt")
+def _timestamp_fmt(ts):
+    if not ts:
+        return "—"
+    try:
+        import datetime
+        dt = datetime.datetime.fromtimestamp(float(ts), tz=datetime.timezone.utc)
+        return dt.strftime("%Y-%m-%d %H:%M UTC")
+    except Exception:
+        return str(ts)
+
+
+# ── Developer portal ─────────────────────────────────────────────────────────
+
+@app.route("/developer")
+def developer():
+    username = session.get("online_username")
+    user_id = session.get("online_user_id")
+    keys = []
+    if user_id:
+        try:
+            from utilities.api_keys import list_keys as _list_keys, VALID_SCOPES as ALL_SCOPES
+            keys = _list_keys(user_id)
+        except Exception:
+            ALL_SCOPES = {}
+            keys = []
+    else:
+        try:
+            from utilities.api_keys import VALID_SCOPES as ALL_SCOPES
+        except Exception:
+            ALL_SCOPES = {}
+    endpoints = {
+        "auth": [
+            {"method": "GET",    "path": "/api/keys/scopes",    "desc": "List all available scopes.",                   "scope": None},
+            {"method": "GET",    "path": "/api/keys",           "desc": "List your API keys.",                          "scope": "keys:manage"},
+            {"method": "POST",   "path": "/api/keys",           "desc": "Create a new API key.",                        "scope": "keys:manage"},
+            {"method": "DELETE", "path": "/api/keys/<id>",      "desc": "Revoke an API key.",                           "scope": "keys:manage"},
+        ],
+        "game": [
+            {"method": "GET",  "path": "/api/game/state",       "desc": "Full game state (player, inventory, area, battle).", "scope": "game:read"},
+            {"method": "GET",  "path": "/api/battle/state",     "desc": "Current battle state and combat log.",         "scope": "game:read"},
+        ],
+        "actions": [
+            {"method": "POST", "path": "/api/action/explore",   "desc": "Explore current area. May trigger a battle or find loot.", "scope": "game:write"},
+            {"method": "POST", "path": "/api/action/travel",    "desc": "Travel to a connected area. Body: {dest}",     "scope": "game:write"},
+            {"method": "POST", "path": "/api/action/rest",      "desc": "Rest to restore HP/MP (if rest spot exists).", "scope": "game:write"},
+            {"method": "POST", "path": "/api/action/mine",      "desc": "Mine ore (requires pickaxe).",                 "scope": "game:write"},
+            {"method": "POST", "path": "/api/action/buy",       "desc": "Buy item from area shop. Body: {item}",        "scope": "shop:write"},
+            {"method": "POST", "path": "/api/action/sell",      "desc": "Sell item from inventory. Body: {item}",       "scope": "shop:write"},
+            {"method": "POST", "path": "/api/action/equip",     "desc": "Equip item. Body: {item}",                     "scope": "inventory:write"},
+            {"method": "POST", "path": "/api/action/unequip",   "desc": "Unequip slot. Body: {slot}",                   "scope": "inventory:write"},
+            {"method": "POST", "path": "/api/action/use_item",  "desc": "Use consumable. Body: {item}",                 "scope": "inventory:write"},
+        ],
+        "battle": [
+            {"method": "POST", "path": "/api/battle/attack",    "desc": "Attack the current enemy.",                    "scope": "battle:write"},
+            {"method": "POST", "path": "/api/battle/defend",    "desc": "Defend (reduces incoming damage this turn).",   "scope": "battle:write"},
+            {"method": "POST", "path": "/api/battle/flee",      "desc": "Attempt to flee (55% chance).",                "scope": "battle:write"},
+            {"method": "POST", "path": "/api/battle/spell",     "desc": "Cast a spell. Body: {spell}",                  "scope": "battle:write"},
+            {"method": "POST", "path": "/api/battle/use_item",  "desc": "Use item in battle. Body: {item}",             "scope": "battle:write"},
+        ],
+        "player": [
+            {"method": "GET", "path": "/api/player/profile",    "desc": "Full player profile: stats, equipment, attributes.", "scope": "game:read"},
+            {"method": "GET", "path": "/api/player/inventory",  "desc": "Player inventory list.",                       "scope": "game:read"},
+            {"method": "GET", "path": "/api/player/quests",     "desc": "Active and completed missions.",                "scope": "game:read"},
+            {"method": "GET", "path": "/api/player/companions", "desc": "Hired companions with HP and stats.",           "scope": "game:read"},
+            {"method": "GET", "path": "/api/player/land",       "desc": "Land parcels, buildings, and farm slots.",     "scope": "game:read"},
+            {"method": "GET", "path": "/api/player/challenges", "desc": "Weekly challenge progress.",                   "scope": "game:read"},
+        ],
+        "social": [
+            {"method": "GET",  "path": "/api/social/chat",      "desc": "Global chat history. Query: ?limit=50",        "scope": "profile:read"},
+            {"method": "POST", "path": "/api/social/chat",      "desc": "Send a global chat message. Body: {message}",  "scope": "game:write"},
+            {"method": "GET",  "path": "/api/social/leaderboard","desc": "Player and group leaderboards.",              "scope": None},
+        ],
+        "world": [
+            {"method": "GET", "path": "/api/world/areas",       "desc": "All world areas with connections and features.", "scope": None},
+            {"method": "GET", "path": "/api/world/area/<key>",  "desc": "Detail for a specific area.",                  "scope": None},
+            {"method": "GET", "path": "/api/world/events",      "desc": "Active world events.",                         "scope": None},
+            {"method": "GET", "path": "/api/world/challenges",  "desc": "Current weekly challenges.",                   "scope": None},
+            {"method": "GET", "path": "/api/world/weather",     "desc": "Current weather. Query: ?area=",               "scope": None},
+        ],
+        "catalog": [
+            {"method": "GET", "path": "/api/catalog/items",         "desc": "All items. Query: ?search=&type=",         "scope": None},
+            {"method": "GET", "path": "/api/catalog/items/<name>",  "desc": "Single item by exact name.",               "scope": None},
+            {"method": "GET", "path": "/api/catalog/spells",        "desc": "All spells.",                              "scope": None},
+            {"method": "GET", "path": "/api/catalog/classes",       "desc": "All character classes.",                   "scope": None},
+            {"method": "GET", "path": "/api/catalog/races",         "desc": "All playable races.",                      "scope": None},
+            {"method": "GET", "path": "/api/catalog/crafting",      "desc": "All crafting recipes.",                    "scope": None},
+            {"method": "GET", "path": "/api/catalog/shops",         "desc": "Shop inventories by area.",                "scope": None},
+            {"method": "GET", "path": "/api/catalog/companions",    "desc": "Companions available for hire.",           "scope": None},
+            {"method": "GET", "path": "/api/catalog/enemies",       "desc": "All enemies.",                             "scope": None},
+            {"method": "GET", "path": "/api/catalog/bosses",        "desc": "All boss encounters.",                     "scope": None},
+            {"method": "GET", "path": "/api/catalog/housing",       "desc": "Housing and building types.",              "scope": None},
+            {"method": "GET", "path": "/api/catalog/farming",       "desc": "Farmable crops and yields.",               "scope": None},
+        ],
+    }
+    host = request.host
+    return render_template(
+        "developer.html",
+        username=username,
+        keys=keys,
+        all_scopes=ALL_SCOPES,
+        endpoints=endpoints,
+        host=host,
+    )
+
+
+# ── Static: serve ol2_client.py ──────────────────────────────────────────────
+
+@app.route("/static/ol2_client.py")
+def serve_ol2_client():
+    return send_from_directory(".", "ol2_client.py", mimetype="text/plain")
+
+
+# ── New API: Player ───────────────────────────────────────────────────────────
+
+@app.route("/api/player/profile")
+@limiter.limit("60 per minute")
+def api_player_profile():
+    player, err = _api_resolve_player()
+    if err:
+        return err
+    attrs = player.get("attributes") or {}
+    equipment = player.get("equipment") or {}
+    return jsonify({
+        "ok": True,
+        "player": {
+            "name":        player.get("name"),
+            "level":       player.get("level"),
+            "xp":          player.get("xp"),
+            "xp_needed":   player.get("xp_needed"),
+            "hp":          player.get("hp"),
+            "max_hp":      player.get("max_hp"),
+            "mp":          player.get("mp"),
+            "max_mp":      player.get("max_mp"),
+            "gold":        player.get("gold"),
+            "class":       player.get("class"),
+            "race":        player.get("race"),
+            "title":       player.get("title"),
+            "attributes":  attrs,
+            "equipment":   equipment,
+            "current_area": session.get("current_area", player.get("current_area")),
+            "visited_areas": list(session.get("visited_areas") or []),
+            "days":        player.get("days", 1),
+            "time_of_day": player.get("time_of_day", "Morning"),
+            "land_plots":  player.get("land_plots", 0),
+            "total_kills": player.get("total_kills", 0),
+            "deaths":      player.get("deaths", 0),
+            "reputation":  player.get("reputation", 0),
+        },
+    })
+
+
+@app.route("/api/player/quests")
+@limiter.limit("60 per minute")
+def api_player_quests():
+    player, err = _api_resolve_player()
+    if err:
+        return err
+    completed = list(session.get("completed_missions") or [])
+    quest_progress = dict(session.get("quest_progress") or {})
+    missions = GAME_DATA.get("missions") or {}
+    active = []
+    for mid, prog in quest_progress.items():
+        m = missions.get(mid) or {}
+        active.append({"id": mid, "name": m.get("name", mid), "progress": prog})
+    completed_info = []
+    for mid in completed:
+        m = missions.get(mid) or {}
+        completed_info.append({"id": mid, "name": m.get("name", mid)})
+    return jsonify({"ok": True, "active_quests": active, "completed_quests": completed_info})
+
+
+@app.route("/api/player/companions")
+@limiter.limit("60 per minute")
+def api_player_companions():
+    player, err = _api_resolve_player()
+    if err:
+        return err
+    hired = player.get("hired_companions") or []
+    comp_data = GAME_DATA.get("companions") or {}
+    result = []
+    for c in hired:
+        key = c if isinstance(c, str) else c.get("key", "")
+        info = comp_data.get(key) or {}
+        hp_key = f"companion_hp_{key}"
+        result.append({
+            "key":    key,
+            "name":   info.get("name", key),
+            "hp":     player.get(hp_key, info.get("hp", "?")),
+            "max_hp": info.get("hp"),
+            "attack": info.get("attack"),
+            "class":  info.get("class"),
+            "cost":   info.get("cost"),
+        })
+    return jsonify({"ok": True, "companions": result})
+
+
+@app.route("/api/player/land")
+@limiter.limit("60 per minute")
+def api_player_land():
+    player, err = _api_resolve_player()
+    if err:
+        return err
+    building_slots = player.get("building_slots") or {}
+    housing_data = GAME_DATA.get("housing") or {}
+    buildings = []
+    for slot, b_key in building_slots.items():
+        if b_key:
+            info = housing_data.get(b_key) or {}
+            buildings.append({"slot": slot, "key": b_key, "name": info.get("name", b_key)})
+    farming_data = (GAME_DATA.get("farming") or {}).get("crops") or {}
+    farm_crops = []
+    for i in range(1, 9):
+        slot_id = f"farm_{i}"
+        crop_info = player.get(slot_id)
+        if crop_info and isinstance(crop_info, dict):
+            crop_def = farming_data.get(crop_info.get("crop_key", "")) or {}
+            farm_crops.append({
+                "slot":       slot_id,
+                "crop_key":   crop_info.get("crop_key"),
+                "crop_name":  crop_def.get("name", crop_info.get("crop_key")),
+                "planted_at": crop_info.get("planted_at"),
+                "ready":      crop_info.get("ready", False),
+            })
+        else:
+            farm_crops.append({"slot": slot_id, "crop_key": None})
+    return jsonify({
+        "ok":         True,
+        "land_plots": player.get("land_plots", 0),
+        "buildings":  buildings,
+        "farm_crops": farm_crops,
+    })
+
+
+@app.route("/api/player/challenges")
+@limiter.limit("60 per minute")
+def api_player_challenges():
+    player, err = _api_resolve_player()
+    if err:
+        return err
+    challenges = GAME_DATA.get("weekly_challenges") or []
+    progress = player.get("weekly_challenges_progress") or {}
+    result = []
+    for ch in challenges:
+        cid = ch.get("id", "")
+        prog = progress.get(cid, {})
+        completed = prog.get("completed", False) if isinstance(prog, dict) else False
+        current = prog.get("current", 0) if isinstance(prog, dict) else 0
+        result.append({
+            "id":          cid,
+            "name":        ch.get("name"),
+            "desc":        ch.get("description") or ch.get("desc"),
+            "goal":        ch.get("goal"),
+            "reward_xp":   ch.get("reward_xp"),
+            "reward_gold": ch.get("reward_gold"),
+            "current":     current,
+            "completed":   completed,
+        })
+    return jsonify({"ok": True, "challenges": result})
+
+
+# ── New API: Social ───────────────────────────────────────────────────────────
+
+@app.route("/api/social/chat", methods=["GET"])
+@limiter.limit("60 per minute")
+def api_social_chat_get():
+    try:
+        limit = min(int(request.args.get("limit", 50)), 100)
+    except (TypeError, ValueError):
+        limit = 50
+    try:
+        messages = get_chat_history(limit) or []
+    except Exception:
+        messages = []
+    return jsonify({"ok": True, "messages": messages})
+
+
+@app.route("/api/social/chat", methods=["POST"])
+@limiter.limit("20 per minute")
+def api_social_chat_post():
+    player, err = _api_resolve_player(scope="game:write")
+    if err:
+        return err
+    username = session.get("online_username")
+    if not username:
+        return jsonify({"ok": False, "message": "Account required to send chat."}), 401
+    body = request.get_json(silent=True) or {}
+    raw_msg = str(body.get("message", "")).strip()
+    if not raw_msg:
+        return jsonify({"ok": False, "message": "message is required."}), 400
+    if len(raw_msg) > 400:
+        return jsonify({"ok": False, "message": "Message too long (max 400 chars)."}), 400
+    try:
+        from utilities.supabase_db import censor_text as _ct
+        censored = _ct(raw_msg)
+    except Exception:
+        censored = raw_msg
+    result = send_chat_message(username, censored)
+    return jsonify({"ok": True, "message": "Sent.", "row": result.get("row")})
+
+
+@app.route("/api/social/leaderboard")
+@limiter.limit("30 per minute")
+def api_social_leaderboard():
+    try:
+        players = get_player_leaderboard() or []
+    except Exception:
+        players = []
+    try:
+        groups = get_group_leaderboard() or []
+    except Exception:
+        groups = []
+    return jsonify({"ok": True, "players": players, "groups": groups})
+
+
+# ── New API: World ────────────────────────────────────────────────────────────
+
+@app.route("/api/world/areas")
+@limiter.limit("60 per minute")
+def api_world_areas():
+    areas = GAME_DATA.get("areas") or {}
+    result = {}
+    for key, area in areas.items():
+        result[key] = {
+            "key":         key,
+            "name":        area.get("name"),
+            "description": area.get("description") or area.get("desc"),
+            "level_range": area.get("level_range") or area.get("level"),
+            "connections": area.get("connections") or area.get("exits") or [],
+            "has_shop":    bool(area.get("shop") or area.get("shops")),
+            "has_rest":    bool(area.get("rest") or area.get("inn")),
+            "has_mine":    bool(area.get("mine") or area.get("mining")),
+            "has_boss":    bool(area.get("boss")),
+            "enemies":     list(area.get("enemies") or []),
+        }
+    return jsonify({"ok": True, "areas": result, "count": len(result)})
+
+
+@app.route("/api/world/area/<area_key>")
+@limiter.limit("60 per minute")
+def api_world_area(area_key):
+    areas = GAME_DATA.get("areas") or {}
+    area = areas.get(area_key)
+    if not area:
+        return jsonify({"ok": False, "message": f"Area '{area_key}' not found."}), 404
+    shops = GAME_DATA.get("shops") or {}
+    shop_data = None
+    shop_key = area.get("shop") or area.get("shops")
+    if shop_key and isinstance(shop_key, str):
+        shop_data = shops.get(shop_key)
+    enemies_data = GAME_DATA.get("enemies") or {}
+    enemy_list = []
+    for eid in (area.get("enemies") or []):
+        e = enemies_data.get(eid) or {}
+        enemy_list.append({"key": eid, "name": e.get("name", eid), "level": e.get("level")})
+    return jsonify({
+        "ok":          True,
+        "key":         area_key,
+        "name":        area.get("name"),
+        "description": area.get("description") or area.get("desc"),
+        "level_range": area.get("level_range") or area.get("level"),
+        "connections": area.get("connections") or area.get("exits") or [],
+        "enemies":     enemy_list,
+        "has_shop":    bool(shop_key),
+        "shop":        shop_data,
+        "has_rest":    bool(area.get("rest") or area.get("inn")),
+        "has_mine":    bool(area.get("mine") or area.get("mining")),
+        "boss":        area.get("boss"),
+        "raw":         area,
+    })
+
+
+@app.route("/api/world/events")
+@limiter.limit("60 per minute")
+def api_world_events():
+    events_data = GAME_DATA.get("events") or []
+    recent = list(reversed(_world_events[-20:])) if _world_events else []
+    return jsonify({
+        "ok":      True,
+        "events":  events_data,
+        "recent_world_log": recent,
+    })
+
+
+@app.route("/api/world/challenges")
+@limiter.limit("60 per minute")
+def api_world_challenges():
+    challenges = GAME_DATA.get("weekly_challenges") or []
+    return jsonify({"ok": True, "challenges": challenges})
+
+
+@app.route("/api/world/weather")
+@limiter.limit("60 per minute")
+def api_world_weather():
+    area_name = request.args.get("area", "")
+    try:
+        weather = get_real_weather(area_name)
+    except Exception:
+        weather = "Clear"
+    try:
+        bonuses = get_weather_bonuses(weather)
+    except Exception:
+        bonuses = {}
+    return jsonify({"ok": True, "weather": weather, "area": area_name, "bonuses": bonuses})
+
+
+# ── New API: Catalog ──────────────────────────────────────────────────────────
+
+@app.route("/api/catalog/items")
+@limiter.limit("60 per minute")
+def api_catalog_items():
+    items = GAME_DATA.get("items") or {}
+    search = (request.args.get("search") or "").lower()
+    type_filter = (request.args.get("type") or "").lower()
+    result = {}
+    for name, item in items.items():
+        if not isinstance(item, dict):
+            continue
+        if search and search not in name.lower() and search not in str(item.get("description", "")).lower():
+            continue
+        if type_filter and (item.get("type") or "").lower() != type_filter:
+            continue
+        result[name] = item
+    return jsonify({"ok": True, "items": result, "count": len(result)})
+
+
+@app.route("/api/catalog/items/<item_name>")
+@limiter.limit("60 per minute")
+def api_catalog_item(item_name):
+    items = GAME_DATA.get("items") or {}
+    item = items.get(item_name)
+    if not item or not isinstance(item, dict):
+        for name, data in items.items():
+            if isinstance(data, dict) and name.lower() == item_name.lower():
+                item = data
+                item_name = name
+                break
+    if not item or not isinstance(item, dict):
+        return jsonify({"ok": False, "message": f"Item '{item_name}' not found."}), 404
+    return jsonify({"ok": True, "name": item_name, "item": item})
+
+
+@app.route("/api/catalog/spells")
+@limiter.limit("60 per minute")
+def api_catalog_spells():
+    spells = GAME_DATA.get("spells") or {}
+    return jsonify({"ok": True, "spells": spells, "count": len(spells)})
+
+
+@app.route("/api/catalog/classes")
+@limiter.limit("60 per minute")
+def api_catalog_classes():
+    classes = GAME_DATA.get("classes") or {}
+    return jsonify({"ok": True, "classes": classes, "count": len(classes)})
+
+
+@app.route("/api/catalog/races")
+@limiter.limit("60 per minute")
+def api_catalog_races():
+    races = GAME_DATA.get("races") or {}
+    return jsonify({"ok": True, "races": races, "count": len(races)})
+
+
+@app.route("/api/catalog/crafting")
+@limiter.limit("60 per minute")
+def api_catalog_crafting():
+    crafting = GAME_DATA.get("crafting") or {}
+    return jsonify({"ok": True, "crafting": crafting})
+
+
+@app.route("/api/catalog/shops")
+@limiter.limit("60 per minute")
+def api_catalog_shops():
+    shops = GAME_DATA.get("shops") or {}
+    return jsonify({"ok": True, "shops": shops})
+
+
+@app.route("/api/catalog/companions")
+@limiter.limit("60 per minute")
+def api_catalog_companions():
+    companions = GAME_DATA.get("companions") or {}
+    return jsonify({"ok": True, "companions": companions, "count": len(companions)})
+
+
+@app.route("/api/catalog/enemies")
+@limiter.limit("60 per minute")
+def api_catalog_enemies():
+    enemies = GAME_DATA.get("enemies") or {}
+    return jsonify({"ok": True, "enemies": enemies, "count": len(enemies)})
+
+
+@app.route("/api/catalog/bosses")
+@limiter.limit("60 per minute")
+def api_catalog_bosses():
+    bosses = GAME_DATA.get("bosses") or {}
+    return jsonify({"ok": True, "bosses": bosses, "count": len(bosses)})
+
+
+@app.route("/api/catalog/housing")
+@limiter.limit("60 per minute")
+def api_catalog_housing():
+    housing = GAME_DATA.get("housing") or {}
+    return jsonify({"ok": True, "housing": housing})
+
+
+@app.route("/api/catalog/farming")
+@limiter.limit("60 per minute")
+def api_catalog_farming():
+    farming = GAME_DATA.get("farming") or {}
+    return jsonify({"ok": True, "farming": farming})
+
+
+# ── Server startup ────────────────────────────────────────────────────────────
 
 port = int(os.environ.get("PORT", 5000))
 if __name__ == "__main__":
