@@ -1057,7 +1057,7 @@
                     <div class="area-map-wrap" id="area-map-wrap">
                         {% if area.map_image %}
                         {% if land_data %}
-                        <canvas id="explore-minimap" class="area-map-img" style="display:block;width:100%;"></canvas>
+                        <canvas id="explore-minimap" style="display:block;width:100%;height:auto;border-radius:8px;image-rendering:pixelated;aspect-ratio:960/800;"></canvas>
                         <script>
                         (function(){
                             const canvas = document.getElementById('explore-minimap');
@@ -1065,41 +1065,68 @@
                             canvas.width = 960; canvas.height = 800;
                             const TILE = 16;
                             const BTILES = {
-                                'small_tent':[3,3],'large_tent':[4,4],'small_hut':[3,4],
-                                'stone_wall_medium_house':[4,5],'large_stone_house':[6,8],
-                                'elven_treehouse':[3,4],'large_house_with_tower':[5,7],
+                                'small_tent':[4,4],'large_tent':[5,5],'small_hut':[3,4],
+                                'stone_wall_medium_house':[4,5],'large_stone_house':[5,7],
+                                'elven_treehouse':[4,5],'large_house_with_tower':[5,7],
                                 'stone_castle_with_golden_dragon_statues_and_marbled_floors':[9,12],
-                                'makeshift_campfire':[2,2],'stone_bench':[3,2],'tribal_statue':[2,3],
-                                'garden_with_fountain':[4,4],'dragon_statue':[2,3],'grand_stone_tower':[2,4],
-                                'dragon_nest':[4,4],'wooden_fence_border':[5,2],
-                                'golden_gates_with_marble_walls':[4,3],'small_garden':[3,3],
-                                'enchanted_garden':[5,4],'small_farm':[4,3],'large_farm':[7,5],
+                                'makeshift_campfire':[3,3],'stone_bench':[4,2],'tribal_statue':[3,4],
+                                'garden_with_fountain':[5,4],'dragon_statue':[3,4],'grand_stone_tower':[3,5],
+                                'dragon_nest':[5,5],'wooden_fence_border':[6,2],
+                                'golden_gates_with_marble_walls':[5,3],'small_garden':[4,3],
+                                'enchanted_garden':[6,4],'small_farm':[5,3],'large_farm':[8,5],
                                 'storage_shed':[3,4],'basic_training_dummy':[3,4],
                                 'advanced_gymnasium':[6,8],'dwarven_forge':[3,4],
                             };
+                            const BIMG = {
+                                'small_tent':'simple_tent.png','large_tent':'simple_tent.png',
+                                'small_hut':'simple_house.png','stone_wall_medium_house':'simple_house.png',
+                                'large_stone_house':'simple_house.png','elven_treehouse':'simple_house.png',
+                                'large_house_with_tower':'simple_house.png',
+                                'stone_castle_with_golden_dragon_statues_and_marbled_floors':'simple_house.png',
+                                'makeshift_campfire':'campfire.png',
+                                'dwarven_forge':'simple_workshop.png','advanced_gymnasium':'simple_workshop.png',
+                                'basic_training_dummy':'simple_workshop.png',
+                            };
                             const BCOLORS = {
-                                'house':'rgba(180,130,30,0.9)','decoration':'rgba(130,90,180,0.9)',
-                                'fencing':'rgba(110,90,70,0.9)','garden':'rgba(60,140,60,0.9)',
-                                'farming':'rgba(90,150,60,0.9)','training_place':'rgba(180,60,60,0.9)',
-                                'storage':'rgba(70,110,160,0.9)','crafting':'rgba(160,100,60,0.9)',
+                                'house':'rgba(139,105,20,0.88)','decoration':'rgba(107,75,138,0.88)',
+                                'fencing':'rgba(90,74,58,0.88)','garden':'rgba(45,106,45,0.88)',
+                                'farming':'rgba(74,122,45,0.88)','training_place':'rgba(138,45,45,0.88)',
+                                'storage':'rgba(58,90,122,0.88)','crafting':'rgba(122,74,45,0.88)',
                             };
                             const placed = {{ land_data.placed_buildings_map | tojson | safe }};
+                            const loadedImgs = {};
+                            var pending = 4;
+                            function onImgLoad() { pending--; if (pending <= 0 && mapReady) drawAll(); }
+                            ['simple_tent.png','simple_house.png','campfire.png','simple_workshop.png'].forEach(function(f){
+                                const img = new Image();
+                                img.onload = onImgLoad; img.onerror = onImgLoad;
+                                img.src = '/game_assets/maps/your_land_buildings/' + f;
+                                loadedImgs[f] = img;
+                            });
+                            var mapReady = false;
                             const mapImg = new Image();
                             mapImg.src = '/game_assets/maps/your_land.png';
-                            mapImg.onload = function(){
+                            function drawAll() {
                                 ctx.drawImage(mapImg, 0, 0, 960, 800);
                                 placed.forEach(function(b){
                                     if (b.x < 0 || b.y < 0) return;
                                     const tiles = BTILES[b.key] || [3,3];
                                     const tw = tiles[0], th = tiles[1];
-                                    ctx.fillStyle = BCOLORS[b.type] || 'rgba(180,180,180,0.85)';
-                                    ctx.fillRect(b.x*TILE, b.y*TILE, tw*TILE, th*TILE);
+                                    const px = b.x*TILE, py = b.y*TILE, pw = tw*TILE, ph = th*TILE;
+                                    const imgFile = BIMG[b.key];
+                                    if (imgFile && loadedImgs[imgFile] && loadedImgs[imgFile].naturalWidth > 0) {
+                                        ctx.drawImage(loadedImgs[imgFile], px, py, pw, ph);
+                                    } else {
+                                        ctx.fillStyle = BCOLORS[b.type] || 'rgba(180,180,180,0.85)';
+                                        ctx.fillRect(px, py, pw, ph);
+                                    }
                                     ctx.strokeStyle = 'rgba(255,220,60,0.9)';
                                     ctx.lineWidth = 2;
-                                    ctx.strokeRect(b.x*TILE, b.y*TILE, tw*TILE, th*TILE);
+                                    ctx.strokeRect(px, py, pw, ph);
                                 });
-                            };
-                            if (mapImg.complete && mapImg.naturalWidth > 0) mapImg.onload();
+                            }
+                            mapImg.onload = function(){ mapReady = true; if (pending <= 0) drawAll(); };
+                            if (mapImg.complete && mapImg.naturalWidth > 0) { mapReady = true; if (pending <= 0) drawAll(); }
                         })();
                         </script>
                         {% else %}
