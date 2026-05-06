@@ -33,7 +33,8 @@ def send_email(
 
     try:
         result = resend.Emails.send(params)
-        if result and result.get("id"):
+        email_id = getattr(result, "id", None) or (result.get("id") if isinstance(result, dict) else None)
+        if email_id:
             return {"ok": True, "message": f"Email sent to {to}."}
         return {"ok": False, "message": f"Resend returned unexpected response: {result}"}
     except Exception as e:
