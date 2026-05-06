@@ -8068,6 +8068,70 @@ def land_pets_page():
     )
 
 
+@app.route("/api/login", methods=["POST"])
+@limiter.limit("10 per minute")
+def api_login():
+    data = request.get_json(force=True, silent=True) or {}
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
+    if not username or not password:
+        return jsonify({"ok": False, "message": "Username and password are required."}), 400
+    result = login_user(username, password)
+    if not result["ok"]:
+        return jsonify({"ok": False, "message": result["message"]}), 401
+    user_id = result["user_id"]
+    actual_username = result.get("username") or username.lower()
+    if _is_banned(actual_username):
+        return jsonify({"ok": False, "message": "Your account has been banned."}), 403
+    other_active = [uid for uid in _active_sessions if uid != user_id]
+    if len(other_active) >= 100:
+        return jsonify({"ok": False, "server_full": True, "message": "The server is full. Please try again later."}), 503
+    session_token = str(uuid.uuid4())
+    _active_sessions[user_id] = session_token
+    _session_last_activity[user_id] = _time_module.time()
+    _username_to_userid[actual_username.lower()] = user_id
+    session["online_username"] = actual_username
+    session["online_user_id"] = user_id
+    session["session_token"] = session_token
+    session.modified = True
+    return jsonify({
+        "ok": True,
+        "message": result["message"],
+        "user_id": user_id,
+        "username": actual_username,
+        "session_token": session_token,
+    })
+
+@app.route("/api/online/profile", methods=["GET"])
+def api_online_profile():
+    user_id = session.get("online_user_id")
+    username = session.get("online_username")
+    if not user_id or not username:
+        return jsonify({"ok": False, "message": "Not logged in."}), 401
+    if not _is_session_valid():
+        return jsonify({"ok": False, "message": "Session expired."}), 401
+    player = get_player()
+    email = get_user_email(user_id)
+    pending_email = get_pending_email_verification(user_id)
+    profile = {
+        "user_id": user_id,
+        "username": username,
+        "email": email,
+        "email_verified": email is not None,
+        "email_pending": pending_email,
+    }
+    if player:
+        profile["character"] = {
+            "name": player.get("name"),
+            "race": player.get("race"),
+            "char_class": player.get("char_class"),
+            "level": player.get("level"),
+            "xp": player.get("xp"),
+            "gold": player.get("gold"),
+            "current_area": session.get("current_area"),
+        }
+    return jsonify({"ok": True, "profile": profile})
+
 port = int(os.environ.get("PORT", 5000))
 if __name__ == "__main__":
     import uvicorn

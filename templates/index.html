@@ -4566,9 +4566,13 @@
         setTimeout(function () { var i = document.getElementById('email-setup-input'); if (i) i.focus(); }, 80);
         {% endif %}
     }
+    var EMAIL_REMIND_KEY = 'email_remind_until';
+    var EMAIL_REMIND_HOURS = 24;
     function dismissEmailSetup() {
         var el = document.getElementById('email-setup-overlay');
         if (el) { el.style.display = 'none'; document.body.style.overflow = ''; }
+        var until = Date.now() + EMAIL_REMIND_HOURS * 60 * 60 * 1000;
+        try { localStorage.setItem(EMAIL_REMIND_KEY, String(until)); } catch(e) {}
     }
     async function saveEmailSetup() {
         var input = document.getElementById('email-setup-input');
@@ -4601,7 +4605,11 @@
         }
     }
     document.addEventListener('DOMContentLoaded', function () {
-        openEmailSetupModal();
+        var remindUntil = 0;
+        try { remindUntil = parseInt(localStorage.getItem(EMAIL_REMIND_KEY) || '0', 10); } catch(e) {}
+        if (Date.now() >= remindUntil) {
+            openEmailSetupModal();
+        }
     });
 </script>
 {% endif %}
