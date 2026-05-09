@@ -2280,8 +2280,8 @@ body.ol2-bg-4 .welcome-screen {
 .sidebar-toggle-btn {
     position: fixed;
     top: 50%;
-    left: 250px;
-    transform: translate(-50%, -50%);
+    left: 285px;
+    transform: translateY(-50%);
     z-index: 300;
     width: 20px;
     height: 44px;
@@ -2558,7 +2558,7 @@ body.ol2-bg-4 .main-content {
 }
 
 .tab-btn {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     text-align: center;
     padding: 7px 11px 9px;
     background: var(--slate-darkest);
@@ -5213,7 +5213,7 @@ body.page-fade-out {
 
 
 .tab-btn {
-    flex-shrink: 0;
+    flex: 0 0 auto;
 }
 
 @media (max-width: 700px) {

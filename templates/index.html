@@ -13,31 +13,7 @@
     {% endif %}
 
     /* github fab */
-    #gh-fab {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 8000;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: rgba(20,12,4,0.72);
-        border: 1px solid rgba(200,165,90,0.28);
-        color: rgba(220,190,130,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        backdrop-filter: blur(6px);
-        transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-    }
-    #gh-fab:hover {
-        background: rgba(200,165,90,0.12);
-        color: #fff8ee;
-        border-color: rgba(220,185,110,0.65);
-        transform: scale(1.12);
-        box-shadow: 0 0 18px rgba(180,130,40,0.35);
-    }
+    #gh-fab { display: none !important; }
 
     /* online modal form redesign */
     #online-modal-box {
@@ -3392,10 +3368,10 @@
         <div style="padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;margin-bottom:10px;">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:7px;">UI Scale</div>
             <div style="display:flex;align-items:center;gap:8px;">
-                <input id="settings-uiscale-slider" type="range" min="50" max="125" value="75"
+                <input id="settings-uiscale-slider" type="range" min="50" max="150" value="100"
                     oninput="settingsSetUIScale(this.value / 100)"
                     style="flex:1;accent-color:var(--gold);">
-                <span id="settings-uiscale-val" style="font-size:11px;color:var(--text-dim);min-width:36px;text-align:right;">75%</span>
+                <span id="settings-uiscale-val" style="font-size:11px;color:var(--text-dim);min-width:36px;text-align:right;">100%</span>
             </div>
         </div>
 
