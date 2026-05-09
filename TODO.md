@@ -86,8 +86,10 @@
 - [ ] Rate limiting on all game actions — combat, crafting, trading
 
 ## 9. Infrastructure & DevOps
-- [x] Gunicorn + gevent single-worker deployment (Render-ready via `render.yaml` and `Procfile`)
-- [x] Both `Procfile` and `render.yaml` route through `gunicorn.conf.py` so `control_socket_disable = True` applies in production (fixes gevent Timer KeyError on Render)
+- [x] Node.js API gateway (Express 4 + Socket.IO 4) proxies all HTTP and WebSocket traffic to Python on internal port 8000
+- [x] Python backend (Flask + uvicorn worker via Gunicorn) binds to 127.0.0.1:8000 — not publicly exposed
+- [x] `start.sh` launches Python first, waits for `/ping`, then starts Node.js gateway
+- [x] Gunicorn + uvicorn worker deployment (Render-ready via `render.yaml` and `Procfile`)
 - [x] ProxyFix middleware for correct IP detection behind reverse proxy
 - [ ] Redis pub/sub or Supabase Realtime to sync SocketIO events across multiple workers
 - [ ] Supabase Row Level Security (RLS) policies on all tables

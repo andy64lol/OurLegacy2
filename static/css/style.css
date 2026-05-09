@@ -994,6 +994,12 @@ body.ol2-bg-4 .welcome-screen {
     image-rendering: pixelated;
     animation: mainmenu-glow 3s ease-in-out infinite alternate;
     display: block;
+    transition: transform 0.28s ease;
+    transform-origin: center bottom;
+}
+
+.mainmenu-logo-wrap:hover .mainmenu-logo {
+    transform: scale(1.07);
 }
 
 @keyframes mainmenu-glow {

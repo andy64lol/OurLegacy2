@@ -1,0 +1,24 @@
+{
+  "include": [
+    "app.py",
+    "utilities"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/__pycache__",
+    ".flask_sessions",
+    "static",
+    "templates",
+    "builds"
+  ],
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Linux",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": "warning",
+  "reportMissingModuleSource": "none",
+  "reportOptionalMemberAccess": "none",
+  "reportOptionalSubscript": "none",
+  "reportGeneralTypeIssues": "warning",
+  "venvPath": ".",
+  "venv": ".venv"
+}

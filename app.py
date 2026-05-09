@@ -130,14 +130,6 @@ from utilities.email_sender import (
     send_email as _send_email,
     is_configured as _email_configured,
 )
-from utilities.api_keys import (
-    generate_api_key as _gen_api_key,
-    validate_api_key as _val_api_key,
-    list_api_keys as _list_api_keys,
-    revoke_api_key as _revoke_api_key,
-    VALID_SCOPES as _API_SCOPES,
-    has_scope as _api_has_scope,
-)
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)  # type: ignore[assignment]
@@ -166,47 +158,11 @@ app.config["SESSION_COOKIE_SECURE"] = True
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
 
-def _extract_raw_api_key() -> str:
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        candidate = auth[7:].strip()
-        if candidate.startswith("ol2_"):
-            return candidate
-    candidate2 = request.headers.get("X-API-Key", "").strip()
-    return candidate2 if candidate2.startswith("ol2_") else ""
-
-
-def _api_load_state(uid: str) -> dict:
-    path = os.path.join(app.config["SESSION_FILE_DIR"], f"api_state_{uid}.json")
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (OSError, ValueError):
-        return {}
-
-
-def _api_save_state(uid: str, state: dict) -> None:
-    path = os.path.join(app.config["SESSION_FILE_DIR"], f"api_state_{uid}.json")
-    try:
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(state, f)
-    except OSError:
-        pass
-
-
-_API_STATE_KEYS = [
-    "battle_enemy", "battle_log", "battle_player_effects",
-    "battle_enemy_effects", "battle_companions",
-    "current_area", "visited_areas",
-]
-
-
 @app.before_request
-def _api_key_before_request():
-    """Rate-limit and load API key user data before /api/* routes."""
+def _api_rate_limit():
+    """Global per-IP rate limit on /api/* routes: 60 req/min."""
     if not request.path.startswith("/api/"):
         return
-    # ── Global per-IP rate limit: 60 req/min ──────────────────────────────
     ip = get_remote_address()
     now = _time_module.monotonic()
     bucket = _api_rate_buckets[ip]
@@ -223,43 +179,6 @@ def _api_key_before_request():
         resp.headers["Retry-After"] = "60"
         return resp
     bucket.append(now)
-    # ── API key auth ───────────────────────────────────────────────────────
-    raw = _extract_raw_api_key()
-    if not raw:
-        return
-    meta = _val_api_key(raw)
-    if not meta:
-        g._api_key_invalid = True
-        return
-    g._api_uid = meta["user_id"]
-    g._api_meta = meta
-    session["online_user_id"] = meta["user_id"]
-    session["online_username"] = meta["username"]
-    result = character_autoload(meta["user_id"])
-    if result.get("ok") and result.get("data"):
-        data = result["data"]
-        if "player" in data:
-            save_player(data["player"])
-        for k in ("current_area", "visited_areas", "completed_missions", "quest_progress"):
-            if k in data:
-                session[k] = data[k]
-    state = _api_load_state(meta["user_id"])
-    for k in _API_STATE_KEYS:
-        if k in state:
-            session[k] = state[k]
-
-
-@app.after_request
-def _api_key_after_request(response):
-    """Persist battle/area state for API key users after /api/* routes."""
-    if not request.path.startswith("/api/"):
-        return response
-    uid = getattr(g, "_api_uid", None)
-    if not uid:
-        return response
-    state = {k: session[k] for k in _API_STATE_KEYS if k in session and session[k] is not None}
-    _api_save_state(uid, state)
-    return response
 
 
 @app.after_request
@@ -271,7 +190,7 @@ def apply_cors_and_iframe_headers(response):
         "GET, POST, PUT, PATCH, DELETE, OPTIONS"
     )
     response.headers["Access-Control-Allow-Headers"] = (
-        "Content-Type, Authorization, X-Requested-With, X-API-Key"
+        "Content-Type, Authorization, X-Requested-With"
     )
     response.headers["X-Frame-Options"] = "ALLOWALL"
     response.headers.pop("Content-Security-Policy", None)
@@ -8841,102 +8760,19 @@ def api_online_profile():
 
 def _api_resolve_player(scope: str = "game:read"):
     """
-    Resolve player for an API request — supports both API key and browser session.
+    Resolve player for an API request via browser session.
     Returns (player, None) on success or (None, error_response_tuple) on failure.
     """
-    if getattr(g, "_api_key_invalid", False):
-        return None, (jsonify({"ok": False, "message": "Invalid or expired API key."}), 401)
-    meta = getattr(g, "_api_meta", None)
-    if meta is not None:
-        if not _api_has_scope(meta, scope):
-            return None, (
-                jsonify({
-                    "ok": False,
-                    "message": f"API key missing scope '{scope}'. Key scopes: {meta.get('scopes', [])}",
-                }),
-                403,
-            )
-        player = get_player()
-        if not player:
-            return None, (jsonify({"ok": False, "message": "No active character found for this API key."}), 404)
-        return player, None
     player = get_player()
     if not player:
         return None, (
             jsonify({
                 "ok": False,
-                "message": "Not authenticated. Provide an X-API-Key header or log in via the browser.",
+                "message": "Not authenticated. Log in via the browser.",
             }),
             401,
         )
     return player, None
-
-
-# ── GET /api/keys/scopes ───────────────────────────────────────────────────────
-@app.route("/api/keys/scopes", methods=["GET"])
-def api_keys_scopes():
-    """List all available API scopes."""
-    return jsonify({"ok": True, "scopes": {k: v for k, v in _API_SCOPES.items()}})
-
-
-# ── POST /api/keys ─────────────────────────────────────────────────────────────
-@app.route("/api/keys", methods=["POST"])
-@limiter.limit("10 per minute")
-def api_keys_create():
-    """Create a new API key (requires browser session or a key with keys:manage scope)."""
-    player, err = _api_resolve_player("keys:manage")
-    if err:
-        # Also allow session-authenticated users (no scope needed from session)
-        if not get_player():
-            return err
-    data = request.get_json(force=True, silent=True) or {}
-    name = data.get("name", "My API Key").strip()[:80]
-    if not name:
-        return jsonify({"ok": False, "message": "Key name required."}), 400
-    scopes = data.get("scopes", None)
-    meta = getattr(g, "_api_meta", None)
-    if meta:
-        user_id = meta["user_id"]
-        username = meta["username"]
-    else:
-        user_id = session.get("online_user_id", "")
-        username = session.get("online_username", "")
-    if not user_id or not username:
-        return jsonify({"ok": False, "message": "Online account required to create API keys."}), 400
-    result = _gen_api_key(user_id, username, name, scopes)
-    return jsonify(result), (200 if result["ok"] else 400)
-
-
-# ── GET /api/keys ──────────────────────────────────────────────────────────────
-@app.route("/api/keys", methods=["GET"])
-def api_keys_list():
-    """List all API keys for the current user."""
-    meta = getattr(g, "_api_meta", None)
-    if meta:
-        user_id = meta["user_id"]
-    else:
-        user_id = session.get("online_user_id", "")
-    if not user_id:
-        return jsonify({"ok": False, "message": "Online account required."}), 401
-    keys = _list_api_keys(user_id)
-    return jsonify({"ok": True, "keys": keys, "count": len(keys)})
-
-
-# ── DELETE /api/keys/<key_id> ──────────────────────────────────────────────────
-@app.route("/api/keys/<key_id>", methods=["DELETE"])
-def api_keys_revoke(key_id: str):
-    """Revoke an API key by ID."""
-    meta = getattr(g, "_api_meta", None)
-    if meta:
-        user_id = meta["user_id"]
-    else:
-        user_id = session.get("online_user_id", "")
-    if not user_id:
-        return jsonify({"ok": False, "message": "Online account required."}), 401
-    revoked = _revoke_api_key(key_id.strip(), user_id)
-    if revoked:
-        return jsonify({"ok": True, "message": f"Key {key_id} revoked."})
-    return jsonify({"ok": False, "message": "Key not found or not owned by you."}), 404
 
 
 def _api_player_summary(player):
@@ -9945,107 +9781,6 @@ def _timestamp_fmt(ts):
         return dt.strftime("%Y-%m-%d %H:%M UTC")
     except Exception:
         return str(ts)
-
-
-# ── Developer portal ─────────────────────────────────────────────────────────
-
-@app.route("/developer")
-def developer():
-    username = session.get("online_username")
-    user_id = session.get("online_user_id")
-    keys = []
-    if user_id:
-        try:
-            from utilities.api_keys import list_keys as _list_keys, VALID_SCOPES as ALL_SCOPES
-            keys = _list_keys(user_id)
-        except Exception:
-            ALL_SCOPES = {}
-            keys = []
-    else:
-        try:
-            from utilities.api_keys import VALID_SCOPES as ALL_SCOPES
-        except Exception:
-            ALL_SCOPES = {}
-    endpoints = {
-        "auth": [
-            {"method": "GET",    "path": "/api/keys/scopes",    "desc": "List all available scopes.",                   "scope": None},
-            {"method": "GET",    "path": "/api/keys",           "desc": "List your API keys.",                          "scope": "keys:manage"},
-            {"method": "POST",   "path": "/api/keys",           "desc": "Create a new API key.",                        "scope": "keys:manage"},
-            {"method": "DELETE", "path": "/api/keys/<id>",      "desc": "Revoke an API key.",                           "scope": "keys:manage"},
-        ],
-        "game": [
-            {"method": "GET",  "path": "/api/game/state",       "desc": "Full game state (player, inventory, area, battle).", "scope": "game:read"},
-            {"method": "GET",  "path": "/api/battle/state",     "desc": "Current battle state and combat log.",         "scope": "game:read"},
-        ],
-        "actions": [
-            {"method": "POST", "path": "/api/action/explore",   "desc": "Explore current area. May trigger a battle or find loot.", "scope": "game:write"},
-            {"method": "POST", "path": "/api/action/travel",    "desc": "Travel to a connected area. Body: {dest}",     "scope": "game:write"},
-            {"method": "POST", "path": "/api/action/rest",      "desc": "Rest to restore HP/MP (if rest spot exists).", "scope": "game:write"},
-            {"method": "POST", "path": "/api/action/mine",      "desc": "Mine ore (requires pickaxe).",                 "scope": "game:write"},
-            {"method": "POST", "path": "/api/action/buy",       "desc": "Buy item from area shop. Body: {item}",        "scope": "shop:write"},
-            {"method": "POST", "path": "/api/action/sell",      "desc": "Sell item from inventory. Body: {item}",       "scope": "shop:write"},
-            {"method": "POST", "path": "/api/action/equip",     "desc": "Equip item. Body: {item}",                     "scope": "inventory:write"},
-            {"method": "POST", "path": "/api/action/unequip",   "desc": "Unequip slot. Body: {slot}",                   "scope": "inventory:write"},
-            {"method": "POST", "path": "/api/action/use_item",  "desc": "Use consumable. Body: {item}",                 "scope": "inventory:write"},
-        ],
-        "battle": [
-            {"method": "POST", "path": "/api/battle/attack",    "desc": "Attack the current enemy.",                    "scope": "battle:write"},
-            {"method": "POST", "path": "/api/battle/defend",    "desc": "Defend (reduces incoming damage this turn).",   "scope": "battle:write"},
-            {"method": "POST", "path": "/api/battle/flee",      "desc": "Attempt to flee (55% chance).",                "scope": "battle:write"},
-            {"method": "POST", "path": "/api/battle/spell",     "desc": "Cast a spell. Body: {spell}",                  "scope": "battle:write"},
-            {"method": "POST", "path": "/api/battle/use_item",  "desc": "Use item in battle. Body: {item}",             "scope": "battle:write"},
-        ],
-        "player": [
-            {"method": "GET", "path": "/api/player/profile",    "desc": "Full player profile: stats, equipment, attributes.", "scope": "game:read"},
-            {"method": "GET", "path": "/api/player/inventory",  "desc": "Player inventory list.",                       "scope": "game:read"},
-            {"method": "GET", "path": "/api/player/quests",     "desc": "Active and completed missions.",                "scope": "game:read"},
-            {"method": "GET", "path": "/api/player/companions", "desc": "Hired companions with HP and stats.",           "scope": "game:read"},
-            {"method": "GET", "path": "/api/player/land",       "desc": "Land parcels, buildings, and farm slots.",     "scope": "game:read"},
-            {"method": "GET", "path": "/api/player/challenges", "desc": "Weekly challenge progress.",                   "scope": "game:read"},
-        ],
-        "social": [
-            {"method": "GET",  "path": "/api/social/chat",      "desc": "Global chat history. Query: ?limit=50",        "scope": "profile:read"},
-            {"method": "POST", "path": "/api/social/chat",      "desc": "Send a global chat message. Body: {message}",  "scope": "game:write"},
-            {"method": "GET",  "path": "/api/social/leaderboard","desc": "Player and group leaderboards.",              "scope": None},
-        ],
-        "world": [
-            {"method": "GET", "path": "/api/world/areas",       "desc": "All world areas with connections and features.", "scope": None},
-            {"method": "GET", "path": "/api/world/area/<key>",  "desc": "Detail for a specific area.",                  "scope": None},
-            {"method": "GET", "path": "/api/world/events",      "desc": "Active world events.",                         "scope": None},
-            {"method": "GET", "path": "/api/world/challenges",  "desc": "Current weekly challenges.",                   "scope": None},
-            {"method": "GET", "path": "/api/world/weather",     "desc": "Current weather. Query: ?area=",               "scope": None},
-        ],
-        "catalog": [
-            {"method": "GET", "path": "/api/catalog/items",         "desc": "All items. Query: ?search=&type=",         "scope": None},
-            {"method": "GET", "path": "/api/catalog/items/<name>",  "desc": "Single item by exact name.",               "scope": None},
-            {"method": "GET", "path": "/api/catalog/spells",        "desc": "All spells.",                              "scope": None},
-            {"method": "GET", "path": "/api/catalog/classes",       "desc": "All character classes.",                   "scope": None},
-            {"method": "GET", "path": "/api/catalog/races",         "desc": "All playable races.",                      "scope": None},
-            {"method": "GET", "path": "/api/catalog/crafting",      "desc": "All crafting recipes.",                    "scope": None},
-            {"method": "GET", "path": "/api/catalog/shops",         "desc": "Shop inventories by area.",                "scope": None},
-            {"method": "GET", "path": "/api/catalog/companions",    "desc": "Companions available for hire.",           "scope": None},
-            {"method": "GET", "path": "/api/catalog/enemies",       "desc": "All enemies.",                             "scope": None},
-            {"method": "GET", "path": "/api/catalog/bosses",        "desc": "All boss encounters.",                     "scope": None},
-            {"method": "GET", "path": "/api/catalog/housing",       "desc": "Housing and building types.",              "scope": None},
-            {"method": "GET", "path": "/api/catalog/farming",       "desc": "Farmable crops and yields.",               "scope": None},
-        ],
-    }
-    host = request.host
-    return render_template(
-        "developer.html",
-        username=username,
-        keys=keys,
-        all_scopes=ALL_SCOPES,
-        endpoints=endpoints,
-        host=host,
-    )
-
-
-# ── Static: serve ol2_client.py ──────────────────────────────────────────────
-
-@app.route("/static/ol2_client.py")
-def serve_ol2_client():
-    return send_from_directory(".", "ol2_client.py", mimetype="text/plain")
 
 
 # ── New API: Player ───────────────────────────────────────────────────────────

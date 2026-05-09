@@ -1126,8 +1126,18 @@
                                 });
                             }
                             mapImg.onload = function(){ mapReady = true; if (pending <= 0) drawAll(); };
+                            mapImg.onerror = function(){ mapReady = true; if (pending <= 0) drawAll(); };
                             if (mapImg.complete && mapImg.naturalWidth > 0) { mapReady = true; if (pending <= 0) drawAll(); }
+                            canvas._redrawMini = drawAll;
                         })();
+                        </script>
+                        <script>
+                        document.addEventListener('tabChanged', function(e) {
+                            if (e.detail === 'explore') {
+                                var _mc = document.getElementById('explore-minimap');
+                                if (_mc && typeof _mc._redrawMini === 'function') _mc._redrawMini();
+                            }
+                        });
                         </script>
                         {% else %}
                         <img src="/game_assets/maps/{{ area.map_image }}"
@@ -2055,7 +2065,8 @@
 
         <script>
         (function() {
-            if (false) {
+            var _landCanvas = document.getElementById('land-map-canvas');
+            if (!_landCanvas) { return; }
             const TILE = 16;
             const COLS = 60;
             const ROWS = 50;
@@ -2237,7 +2248,6 @@
                     draw();
                 }
             };
-            }
         })();
         </script>
 
