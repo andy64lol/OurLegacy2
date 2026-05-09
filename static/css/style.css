@@ -75,8 +75,26 @@
     --rarity-rare: #3888c8;
     --rarity-epic: #a840cc;
     --rarity-legendary: #d8bc30;
+
+    --ui-scale: 0.75;
 }
 
+body {
+    zoom: var(--ui-scale);
+    min-height: calc(100vh / var(--ui-scale));
+    min-width: calc(100vw / var(--ui-scale));
+}
+
+.cutscene-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9800;
+    background: rgba(0, 0, 0, 0.90);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
 
 body.ol2-theme-forest {
     --bg-tint-rgb: 10, 18, 8;
@@ -263,9 +281,12 @@ body.ol2-theme-amethyst {
     padding: 0;
 }
 
-html,
-body {
+html {
     height: 100%;
+    background: var(--bg-main);
+}
+
+body {
     background: var(--bg-main);
     color: var(--text-light);
     font-family: 'Tiny5', monospace;
@@ -908,7 +929,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
 
 
 .welcome-screen {
-    min-height: 100vh;
+    min-height: calc(100vh / var(--ui-scale));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -973,7 +994,7 @@ body.ol2-bg-4 .welcome-screen {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: calc(100vh / var(--ui-scale));
     padding: 40px 20px;
     text-align: center;
 }
@@ -1494,7 +1515,7 @@ body.ol2-bg-4 .welcome-screen {
 
 
 .wizard-outer {
-    min-height: 100vh;
+    min-height: calc(100vh / var(--ui-scale));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2176,7 +2197,7 @@ body.ol2-bg-4 .welcome-screen {
 .game-layout {
     display: grid;
     grid-template-columns: 280px 5px 1fr;
-    min-height: 100vh;
+    min-height: calc(100vh / var(--ui-scale));
     transition: grid-template-columns 0.22s ease;
 }
 
@@ -2209,8 +2230,8 @@ body.ol2-bg-4 .welcome-screen {
     border-right: 2px solid var(--border);
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    max-height: 100vh;
+    height: calc(100vh / var(--ui-scale));
+    max-height: calc(100vh / var(--ui-scale));
     overflow: hidden;
     position: sticky;
     top: 0;
@@ -3485,7 +3506,7 @@ body.page-fade-out {
 
 
 .result-screen {
-    min-height: 100vh;
+    min-height: calc(100vh / var(--ui-scale));
     display: flex;
     align-items: flex-start;
     justify-content: center;

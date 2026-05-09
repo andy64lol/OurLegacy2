@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initBackground();
     initButtonStyle();
     initTheme();
+    initUIScale();
     initLowHpWarning();
     initBattleKeys();
     checkMobile();
@@ -562,6 +563,22 @@ function applyTheme(theme) { // eslint-disable-line no-unused-vars
     localStorage.setItem('ol2_theme', theme);
 }
 
+function initUIScale() {
+    var scale = parseFloat(localStorage.getItem('ol2_ui_scale'));
+    if (isNaN(scale) || scale < 0.5 || scale > 1.5) scale = 0.75;
+    document.documentElement.style.setProperty('--ui-scale', scale);
+}
+
+function settingsSetUIScale(val) { // eslint-disable-line no-unused-vars
+    var scale = parseFloat(val);
+    if (isNaN(scale)) scale = 0.75;
+    scale = Math.max(0.5, Math.min(1.5, scale));
+    document.documentElement.style.setProperty('--ui-scale', scale);
+    localStorage.setItem('ol2_ui_scale', String(scale));
+    var label = document.getElementById('settings-uiscale-val');
+    if (label) label.textContent = Math.round(scale * 100) + '%';
+}
+
 function initBackground() {
     var bg = localStorage.getItem('ol2_bg');
     if (!bg) {
@@ -621,6 +638,13 @@ function openSettings() {
     document.querySelectorAll('.theme-option-btn').forEach(function(btn) {
         btn.classList.toggle('active', btn.dataset.theme === curTheme);
     });
+
+    var savedScale = parseFloat(localStorage.getItem('ol2_ui_scale'));
+    if (isNaN(savedScale) || savedScale < 0.5 || savedScale > 1.5) savedScale = 0.75;
+    var scaleSlider = document.getElementById('settings-uiscale-slider');
+    var scaleLabel  = document.getElementById('settings-uiscale-val');
+    if (scaleSlider) scaleSlider.value = Math.round(savedScale * 100);
+    if (scaleLabel)  scaleLabel.textContent = Math.round(savedScale * 100) + '%';
 
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
