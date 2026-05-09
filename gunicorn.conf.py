@@ -1,3 +1,3 @@
 workers = 1
-bind = "127.0.0.1:8000"
+bind = "0.0.0.0:5000"
 worker_class = "uvicorn.workers.UvicornWorker"

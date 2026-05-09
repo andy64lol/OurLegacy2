@@ -132,7 +132,10 @@ from utilities.email_sender import (
     is_configured as _email_configured,
 )
 
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app, supports_credentials=True, origins="*", allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-API-Key"])
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)  # type: ignore[assignment]
 app.secret_key = os.environ.get("SECRET_KEY") or os.environ.get(
     "SESSION_SECRET", "ol2-default-dev-key-change-in-prod"
@@ -10198,8 +10201,8 @@ def api_catalog_farming():
 
 # ── Server startup ────────────────────────────────────────────────────────────
 
-port = int(os.environ.get("PYTHON_PORT", 8000))
+port = int(os.environ.get("PORT", 5000))
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(asgi_app, host="127.0.0.1", port=port)
+    uvicorn.run(asgi_app, host="0.0.0.0", port=port)

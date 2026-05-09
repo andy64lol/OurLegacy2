@@ -91,3 +91,4 @@ socketio
 supabase
 uvicorn
 werkzeug
+flask-cors
