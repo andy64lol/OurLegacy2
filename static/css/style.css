@@ -76,7 +76,7 @@
     --rarity-epic: #a840cc;
     --rarity-legendary: #d8bc30;
 
-    --ui-scale: 0.75;
+    --ui-scale: 0.90;
 }
 
 body {
@@ -821,7 +821,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
 .title-banner {
     display: block;
     width: 100%;
-    max-width: 720px;
+    max-width: 600px;
     margin: 0 auto 28px;
     image-rendering: pixelated;
 }
@@ -829,7 +829,7 @@ body.ol2-btn-rounded .mainmenu-btn-highlight:focus {
 .title-banner-small {
     display: block;
     width: 100%;
-    max-width: 380px;
+    max-width: 320px;
     margin: 0 auto 18px;
     image-rendering: pixelated;
 }
@@ -1542,8 +1542,8 @@ body.ol2-bg-4 .welcome-screen {
 
 .wizard-portrait {
     flex-shrink: 0;
-    width: 80px;
-    height: 80px;
+    width: 66px;
+    height: 66px;
     border: 3px solid var(--wood-bright);
     background: linear-gradient(160deg, var(--slate-dark) 0%, var(--wood-darkest) 100%);
     border-radius: 10px;
@@ -2828,7 +2828,7 @@ body.page-fade-out {
 .area-map-img {
     display: block;
     width: 100%;
-    max-height: 320px;
+    max-height: 270px;
     object-fit: contain;
     image-rendering: pixelated;
 }
@@ -5097,8 +5097,8 @@ body.page-fade-out {
 
 
 .class-glyph {
-    width: 32px;
-    height: 32px;
+    width: 27px;
+    height: 27px;
     vertical-align: middle;
     margin-right: 8px;
     image-rendering: pixelated;
@@ -5107,8 +5107,8 @@ body.page-fade-out {
 }
 
 .type-glyph {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
     vertical-align: middle;
     margin-right: 6px;
     image-rendering: pixelated;

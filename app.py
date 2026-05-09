@@ -4,6 +4,7 @@ Medieval fantasy RPG playable in the browser.
 """
 
 import warnings
+import redis as _redis_module
 
 warnings.filterwarnings("ignore", message="urllib3")
 warnings.filterwarnings("ignore", message="chardet")
@@ -137,25 +138,38 @@ app.secret_key = os.environ.get("SECRET_KEY") or os.environ.get(
     "SESSION_SECRET", "ol2-default-dev-key-change-in-prod"
 )
 
+_REDIS_URL = os.environ.get("REDIS_URL")
+_redis_client = None
+if _REDIS_URL:
+    try:
+        _redis_client = _redis_module.from_url(_REDIS_URL)
+        _redis_client.ping()
+    except Exception:
+        _redis_client = None
+
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
     default_limits=[],
-    storage_uri="memory://",
+    storage_uri=_REDIS_URL if _redis_client else "memory://",
 )
 
 # Per-IP sliding-window bucket for /api/* rate limiting (60 req/min)
 _api_rate_buckets: dict = collections.defaultdict(list)
 _API_RATE_LIMIT = 60
 
-app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_FILE_DIR"] = os.path.join(
-    os.path.dirname(__file__), ".flask_sessions"
-)
+if _redis_client:
+    app.config["SESSION_TYPE"] = "redis"
+    app.config["SESSION_REDIS"] = _redis_client
+else:
+    app.config["SESSION_TYPE"] = "filesystem"
+    app.config["SESSION_FILE_DIR"] = os.path.join(
+        os.path.dirname(__file__), ".flask_sessions"
+    )
+    os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
 app.config["SESSION_COOKIE_SECURE"] = True
-os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 Session(app)
 
 @app.before_request
@@ -10184,8 +10198,8 @@ def api_catalog_farming():
 
 # ── Server startup ────────────────────────────────────────────────────────────
 
-port = int(os.environ.get("PYTHON_PORT", 8000))
+port = int(os.environ.get("PORT", os.environ.get("PYTHON_PORT", 5000)))
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(asgi_app, host="127.0.0.1", port=port)
+    uvicorn.run(asgi_app, host="0.0.0.0", port=port)
