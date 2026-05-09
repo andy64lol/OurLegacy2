@@ -247,7 +247,6 @@ def _emit_sync(event: str, data, **kwargs) -> None:
 
 def _load_session_for_socket(environ: dict) -> dict:
     from http.cookies import SimpleCookie
-    import cachelib.file as _clf
 
     cookie_str = environ.get("HTTP_COOKIE", "")
     if not cookie_str:
@@ -261,14 +260,30 @@ def _load_session_for_socket(environ: dict) -> dict:
     if session_key not in cookie:
         return {}
     session_id = cookie[session_key].value
-    cache = _clf.FileSystemCache(
-        cache_dir=app.config["SESSION_FILE_DIR"], threshold=500, mode=0o600
-    )
-    try:
-        data = cache.get("session:" + session_id)
-        return dict(data) if isinstance(data, dict) else {}
-    except Exception:
-        return {}
+
+    session_type = app.config.get("SESSION_TYPE", "filesystem")
+
+    if session_type == "redis" and _redis_client is not None:
+        import json as _json
+        try:
+            raw = _redis_client.get("session:" + session_id)
+            if raw is None:
+                return {}
+            data = _json.loads(raw)
+            return dict(data) if isinstance(data, dict) else {}
+        except Exception:
+            return {}
+    else:
+        import cachelib.file as _clf
+        cache_dir = app.config.get("SESSION_FILE_DIR")
+        if not cache_dir:
+            return {}
+        try:
+            cache = _clf.FileSystemCache(cache_dir=cache_dir, threshold=500, mode=0o600)
+            data = cache.get("session:" + session_id)
+            return dict(data) if isinstance(data, dict) else {}
+        except Exception:
+            return {}
 
 
 _chat_online: dict = {}
