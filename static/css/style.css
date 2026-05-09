@@ -4949,6 +4949,8 @@ body.page-fade-out {
 .land-map-canvas {
     display: block;
     width: 100%;
+    height: auto;
+    aspect-ratio: 960 / 800;
     image-rendering: pixelated;
     cursor: default;
 }
