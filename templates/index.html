@@ -1057,7 +1057,7 @@
                     <div class="area-map-wrap" id="area-map-wrap">
                         {% if area.map_image %}
                         {% if land_data %}
-                        <canvas id="explore-minimap" style="display:block;width:100%;height:auto;border-radius:8px;image-rendering:pixelated;aspect-ratio:960/800;"></canvas>
+                        <canvas id="explore-minimap" style="display:block;width:50%;height:auto;border-radius:8px;image-rendering:pixelated;aspect-ratio:960/800;margin:0 auto;"></canvas>
                         <script>
                         (function(){
                             const canvas = document.getElementById('explore-minimap');
@@ -1097,10 +1097,16 @@
                             const loadedImgs = {};
                             var pending = 4;
                             function onImgLoad() { pending--; if (pending <= 0 && mapReady) drawAll(); }
+                            const IMG_FILE_MAP = {
+                                'simple_tent.png':'simple_tent_3_3_ratio_16px_each_tiles.png',
+                                'simple_house.png':'simple_house_3_4_ratio_16px_each_tiles.png',
+                                'campfire.png':'campfire_3_3_ratio_16px_each_tiles.png',
+                                'simple_workshop.png':'simple_workshop_3_4_ratio_16px_each_tiles.png',
+                            };
                             ['simple_tent.png','simple_house.png','campfire.png','simple_workshop.png'].forEach(function(f){
                                 const img = new Image();
                                 img.onload = onImgLoad; img.onerror = onImgLoad;
-                                img.src = '/game_assets/maps/your_land_buildings/' + f;
+                                img.src = '/game_assets/maps/your_land_buildings/' + IMG_FILE_MAP[f];
                                 loadedImgs[f] = img;
                             });
                             var mapReady = false;

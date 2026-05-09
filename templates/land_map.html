@@ -136,9 +136,15 @@
     mapImg.src = '/game_assets/maps/your_land.png';
 
     const loadedImgs = {};
+    const IMG_FILE_MAP = {
+        'simple_tent.png': 'simple_tent_3_3_ratio_16px_each_tiles.png',
+        'simple_house.png': 'simple_house_3_4_ratio_16px_each_tiles.png',
+        'campfire.png': 'campfire_3_3_ratio_16px_each_tiles.png',
+        'simple_workshop.png': 'simple_workshop_3_4_ratio_16px_each_tiles.png',
+    };
     ['simple_tent.png','simple_house.png','campfire.png','simple_workshop.png'].forEach(f => {
         const img = new Image();
-        img.src = '/game_assets/maps/your_land_buildings/' + f;
+        img.src = '/game_assets/maps/your_land_buildings/' + IMG_FILE_MAP[f];
         img.onload = draw;
         loadedImgs[f] = img;
     });
