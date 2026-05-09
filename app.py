@@ -10198,8 +10198,8 @@ def api_catalog_farming():
 
 # ── Server startup ────────────────────────────────────────────────────────────
 
-port = int(os.environ.get("PORT", os.environ.get("PYTHON_PORT", 5000)))
+port = int(os.environ.get("PYTHON_PORT", 8000))
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(asgi_app, host="0.0.0.0", port=port)
+    uvicorn.run(asgi_app, host="127.0.0.1", port=port)

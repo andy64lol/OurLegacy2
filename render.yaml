@@ -1,9 +1,8 @@
 services:
   - type: web
     name: ourlegacy2
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn -c gunicorn.conf.py --bind 0.0.0.0:$PORT app:app
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: SECRET_KEY
         generateValue: true
@@ -12,4 +11,6 @@ services:
       - key: SUPABASE_SERVICE_KEY
         sync: false
       - key: SECRET_SALT
+        sync: false
+      - key: REDIS_URL
         sync: false
