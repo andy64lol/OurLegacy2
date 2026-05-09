@@ -73,7 +73,7 @@ function initToastContainer() {
     }
 }
 
-function showToast(text, color, duration) {
+var showToast = function(text, color, duration) {
     duration = duration || 4000;
     var container = document.getElementById('toast-container');
     if (!container) return;
@@ -99,7 +99,7 @@ function showToast(text, color, duration) {
             if (toast.parentNode) toast.parentNode.removeChild(toast);
         }, 320);
     });
-}
+};
 
 function showPendingToasts() {
     if (typeof window._gameMessages !== 'undefined' && Array.isArray(window._gameMessages)) {
@@ -407,7 +407,7 @@ function initMusic() {
     var savedTime = parseFloat(localStorage.getItem('ol2_music_time'));
     function startPlayback() {
         if (!isNaN(savedTime) && savedTime > 0 && savedTime < _musicAudio.duration) {
-            try { _musicAudio.currentTime = savedTime; } catch {}
+            try { _musicAudio.currentTime = savedTime; } catch (_e) { /* ignored */ }
         }
         if (_musicMuted) return;
         var playPromise = _musicAudio.play();
@@ -1058,11 +1058,11 @@ function initSidebarToggle() {
                 btn.style.left = getSidebarWidth() + 'px';
             });
         }
-        try { localStorage.setItem('ol2-sidebar-collapsed', collapsed ? '1' : '0'); } catch {}
+        try { localStorage.setItem('ol2-sidebar-collapsed', collapsed ? '1' : '0'); } catch (_e) { /* ignored */ }
     }
 
     var saved;
-    try { saved = localStorage.getItem('ol2-sidebar-collapsed'); } catch {}
+    try { saved = localStorage.getItem('ol2-sidebar-collapsed'); } catch (_e) { /* ignored */ }
     var startCollapsed = saved !== null ? saved === '1' : window.innerWidth < 900;
     setCollapsed(startCollapsed);
 

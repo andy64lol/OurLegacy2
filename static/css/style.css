@@ -284,13 +284,15 @@ body.ol2-theme-amethyst {
 html {
     height: 100%;
     background: var(--bg-main);
+    overflow-x: hidden;
 }
 
 body {
     background: var(--bg-main);
     color: var(--text-light);
     font-family: 'Tiny5', monospace;
-    font-size: 16px;
+    font-size: 18px;
+    overflow-x: hidden;
     font-weight: 400;
     line-height: 1.55;
     image-rendering: pixelated;

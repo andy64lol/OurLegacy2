@@ -38,7 +38,7 @@ def can_cast_spell(
     return {"ok": True}
 
 def cast_spell(
-    player: Dict[str, Any],
+    player: Dict[str, Any] | None,
     enemy_dict: Dict[str, Any],
     spell_name: str,
     spell_data: Dict[str, Any],

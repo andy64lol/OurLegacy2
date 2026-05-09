@@ -1373,7 +1373,9 @@ def get_player() -> dict[str, Any] | None:
     return session.get("player")
 
 
-def save_player(player: dict[str, Any]) -> None:
+def save_player(player: dict[str, Any] | None) -> None:
+    if player is None:
+        return
     player["visited_areas"] = list(
         set(player.get("visited_areas", []) + session.get("visited_areas", []))
     )
@@ -1521,7 +1523,9 @@ def _autosave() -> None:
         session.modified = True
 
 
-def _set_activity(player: dict, status: str) -> None:
+def _set_activity(player: dict | None, status: str) -> None:
+    if player is None:
+        return
     player["activity_status"] = status
     username = session.get("online_username")
     area = session.get("current_area", "")
