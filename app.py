@@ -173,6 +173,7 @@ else:
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
 app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_SERIALIZATION_FORMAT"] = "json"
 Session(app)
 
 @app.before_request
@@ -1165,6 +1166,13 @@ def forbidden_handler(e):
 def not_found_handler(e):
     if request.path.startswith("/api/"):
         return jsonify({"ok": False, "message": "Not found."}), 404
+    return e
+
+
+@app.errorhandler(500)
+def internal_error_handler(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"ok": False, "message": "Internal server error."}), 500
     return e
 
 
