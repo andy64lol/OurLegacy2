@@ -1147,6 +1147,27 @@ def ratelimit_handler(e):
     ), 429
 
 
+@app.errorhandler(401)
+def unauthorized_handler(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"ok": False, "message": "Unauthorized."}), 401
+    return e
+
+
+@app.errorhandler(403)
+def forbidden_handler(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    return e
+
+
+@app.errorhandler(404)
+def not_found_handler(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"ok": False, "message": "Not found."}), 404
+    return e
+
+
 dice = Dice()
 
 _BASE_DIR = os.path.dirname(__file__)
@@ -2701,7 +2722,7 @@ def chat_page():
 def chat_widget_page():
     username = session.get("online_username")
     if not username:
-        return ("Unauthorized", 401)
+        return jsonify({"ok": False, "message": "Unauthorized."}), 401
     return render_template("chat_widget.html", online_username=username)
 
 
