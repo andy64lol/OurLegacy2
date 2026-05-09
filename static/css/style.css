@@ -2201,6 +2201,7 @@ body.ol2-bg-4 .welcome-screen {
     grid-template-columns: 280px 5px 1fr;
     min-height: calc(100vh / var(--ui-scale));
     transition: grid-template-columns 0.22s ease;
+    background: var(--bg-panel-dark);
 }
 
 .game-layout.sidebar-collapsed {
@@ -2351,8 +2352,8 @@ body.ol2-bg-4 .welcome-screen {
 }
 
 .sidebar-nav {
-    padding: 14px 12px;
-    margin-top: auto;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
 }
 
 .bg-option-btn.active {
@@ -2383,6 +2384,7 @@ body.ol2-bg-4 .welcome-screen {
 
 .sidebar-nav {
     flex-shrink: 0;
+    margin-top: auto;
 }
 
 .main-content {
