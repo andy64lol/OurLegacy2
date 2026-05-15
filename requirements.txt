@@ -92,3 +92,12 @@ supabase
 uvicorn
 werkzeug
 flask-cors
+eventlet
+flask-limiter
+flask-session
+flask-socketio
+redis
+aiohttp
+asgiref
+python-socketio[asyncio_client]
+uvicorn
