@@ -4268,6 +4268,51 @@ def api_spend_attr_point():
     )
 
 
+def spa_action_response(redirect_url=None, tab=None):
+    """
+    Smart response for game action routes.
+    - AJAX callers (X-Requested-With: XMLHttpRequest) receive JSON with messages and player stats.
+    - Regular browser form submissions receive a redirect.
+    - Automatically forces a redirect if a battle was started in the session.
+    """
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        player = get_player()
+        in_battle = bool(session.get("battle_enemy"))
+        effective_redirect = redirect_url
+        if in_battle and not effective_redirect:
+            effective_redirect = url_for("game")
+        player_data = {}
+        if player:
+            max_hp = player.get("max_hp", 1) or 1
+            max_mp = player.get("max_mp", 1) or 1
+            exp_to_next = player.get("experience_to_next", 100) or 100
+            player_data = {
+                "hp": player.get("hp", 0),
+                "max_hp": max_hp,
+                "mp": player.get("mp", 0),
+                "max_mp": max_mp,
+                "gold": player.get("gold", 0),
+                "level": player.get("level", 1),
+                "experience": player.get("experience", 0),
+                "experience_to_next": exp_to_next,
+                "attack": player.get("attack", 0),
+                "defense": player.get("defense", 0),
+                "speed": player.get("speed", 0),
+            }
+        msgs = get_messages()
+        return jsonify({
+            "ok": True,
+            "messages": msgs,
+            "player": player_data,
+            "redirect": effective_redirect,
+            "tab": tab,
+        })
+    target = redirect_url or url_for("game")
+    if tab:
+        return redirect(target + "?tab=" + tab)
+    return redirect(target)
+
+
 @app.route("/action/explore", methods=["POST"])
 def action_explore():
     player = get_player()
@@ -4317,7 +4362,7 @@ def action_explore():
             _set_activity(player, f"battling {enemy['name']} [Boss]")
             session.modified = True
             save_player(player)
-            return redirect(url_for("game"))
+            return spa_action_response()
 
     roll = random.random()
     if possible_enemies and roll < 0.55:
@@ -4352,7 +4397,7 @@ def action_explore():
         _set_activity(player, f"fighting a {enemy['name']}")
         session.modified = True
         save_player(player)
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     area_npcs = area.get("npcs", [])
     npc_talked = False
@@ -4459,7 +4504,7 @@ def action_explore():
 
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return spa_action_response()
 
 
 @app.route("/action/rest", methods=["POST"])
@@ -4473,12 +4518,12 @@ def action_rest():
 
     if not area.get("can_rest", False):
         add_message("There is nowhere suitable to rest here.", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     cost = area.get("rest_cost", 10)
     if cost > 0 and player["gold"] < cost:
         add_message(f"You need {cost} gold coins to rest here.", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     player["gold"] = player["gold"] - cost
     player["hp"] = player["max_hp"]
@@ -4511,7 +4556,7 @@ def action_rest():
     _set_activity(player, f"resting in {area_name}")
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return spa_action_response()
 
 
 @app.route("/action/mine", methods=["POST"])
@@ -4528,7 +4573,7 @@ def action_mine():
 
     if not mine_pool:
         add_message("There are no mines in this area.", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     inventory = player.get("inventory", [])
     best_tier = max((_PICKAXE_TIERS.get(i, 0) for i in inventory), default=0)
@@ -4538,7 +4583,7 @@ def action_mine():
             "You need a pickaxe to mine. Buy a Wooden Pickaxe from a shop (20g).",
             "var(--red)",
         )
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     mining_lvl = _get_mining_level(player)
     accessible: list[str] = []
@@ -4551,7 +4596,7 @@ def action_mine():
             "You need a better pickaxe or higher Mining Level to find ore here.",
             "var(--text-dim)",
         )
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     str_val = int(player.get("attributes", {}).get("str", 0))
     success_chance = min(0.95, 0.65 + str_val * 0.005)
@@ -4565,7 +4610,7 @@ def action_mine():
         )
         save_player(player)
         _autosave()
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     _rw = {"junk": 80, "common": 60, "uncommon": 30, "rare": 8, "legendary": 2}
     pool_names: list[str] = []
@@ -4612,7 +4657,7 @@ def action_mine():
     _set_activity(player, f"mining in {area_name}")
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return spa_action_response()
 
 
 @app.route("/action/travel", methods=["POST"])
@@ -4663,7 +4708,7 @@ def action_travel():
 
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?autosaved=1")
+    return spa_action_response()
 
 
 @app.route("/action/challenge_boss", methods=["POST"])
@@ -4678,12 +4723,12 @@ def action_challenge_boss():
 
     if boss_key not in area.get("possible_bosses", []):
         add_message("That boss is not available in this area.", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     boss_data = GAME_DATA["bosses"].get(boss_key, {})
     if not boss_data:
         add_message("Unknown boss.", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     now_ts = _time_module.time()
     boss_cooldowns = player.get("boss_cooldowns", {})
@@ -4696,7 +4741,7 @@ def action_challenge_boss():
             f"{boss_data.get('name')} is not ready to fight yet. Cooldown: {h}h {m}m.",
             "var(--red)",
         )
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     boss_cooldowns[boss_key] = now_ts + BOSS_CHALLENGE_COOLDOWN
     player["boss_cooldowns"] = boss_cooldowns
@@ -4729,7 +4774,7 @@ def action_challenge_boss():
     session["battle_companions"] = _build_battle_companions(player)
     session.modified = True
     save_player(player)
-    return redirect(url_for("game"))
+    return spa_action_response()
 
 
 @app.route("/action/buy", methods=["POST"])
@@ -4767,7 +4812,7 @@ def action_buy():
     _set_activity(player, f"shopping in {area_name}")
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return spa_action_response()
 
 
 @app.route("/action/sell", methods=["POST"])
@@ -4793,7 +4838,7 @@ def action_sell():
     _set_activity(player, "selling gear at the shop")
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=inventory")
+    return spa_action_response(tab="inventory")
 
 
 @app.route("/action/hire_companion", methods=["POST"])
@@ -4806,24 +4851,24 @@ def action_hire_companion():
         add_message(
             "You must be at The Rusty Tankard to hire companions.", "var(--red)"
         )
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     comp_id = request.form.get("companion_id", "")
     comp_data = GAME_DATA["companions"].get(comp_id)
     if not comp_data:
         add_message("Unknown companion.", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     companions = player.setdefault("companions", [])
     if len(companions) >= 4:
         add_message("Your party is full (max 4 companions).", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     if any(c.get("id") == comp_id for c in companions if isinstance(c, dict)):
         add_message(
             f"{comp_data.get('name')} is already in your party.", "var(--text-dim)"
         )
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     base_price = comp_data.get("price", 100)
     discount = min(0.50, player.get("attr_gold_discount", 0.0))
@@ -4833,7 +4878,7 @@ def action_hire_companion():
             f"Not enough gold. Need {price}g to hire {comp_data.get('name')}.",
             "var(--red)",
         )
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     player["gold"] -= price
 
@@ -4882,7 +4927,7 @@ def action_hire_companion():
     add_message(f"{comp_data.get('name')} joins your party!", "var(--gold)")
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return spa_action_response()
 
 
 @app.route("/action/dismiss_companion", methods=["POST"])
@@ -4899,7 +4944,7 @@ def action_dismiss_companion():
 
     if not to_remove:
         add_message("Companion not found in your party.", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     comp_data = GAME_DATA["companions"].get(comp_id, {})
 
@@ -4942,7 +4987,7 @@ def action_dismiss_companion():
     add_message(f"{name} has left your party.", "var(--text-dim)")
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return spa_action_response()
 
 
 @app.route("/action/use_item", methods=["POST"])
@@ -4954,7 +4999,7 @@ def action_use_item():
     item_name = request.form.get("item", "")
     if item_name not in player["inventory"]:
         add_message("You do not have that item.", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     item_data = GAME_DATA["items"].get(item_name, {})
     if not isinstance(item_data, dict):
@@ -4966,7 +5011,7 @@ def action_use_item():
         color = "var(--green-bright)" if ok else "var(--red)"
         add_message(msg, color)
         save_player(player)
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     lower = item_name.lower()
     if "health" in lower or ("potion" in lower and "mana" not in lower):
@@ -5112,7 +5157,7 @@ def action_use_item():
     _set_activity(player, "using a consumable item")
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return spa_action_response()
 
 
 @app.route("/action/quick_heal", methods=["POST"])
@@ -5132,7 +5177,7 @@ def action_quick_heal():
     if not potions:
         add_message("You have no healing items to use.", "var(--red)")
         save_player(player)
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     def potion_priority(name):
         n = name.lower()
@@ -5157,7 +5202,7 @@ def action_quick_heal():
     _set_activity(player, "healing up between battles")
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return spa_action_response()
 
 
 @app.route("/action/sort_inventory", methods=["POST"])
@@ -5200,7 +5245,7 @@ def action_equip():
     add_message(msg, "var(--green-bright)" if ok else "var(--red)")
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=inventory")
+    return spa_action_response(tab="inventory")
 
 
 @app.route("/action/unequip", methods=["POST"])
@@ -5213,7 +5258,7 @@ def action_unequip():
     add_message(msg, "var(--text-dim)" if ok else "var(--red)")
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=inventory")
+    return spa_action_response(tab="inventory")
 
 
 @app.route("/action/auto_equip", methods=["POST"])
@@ -5226,7 +5271,7 @@ def action_auto_equip():
         add_message(msg, "var(--green-bright)")
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=inventory")
+    return spa_action_response(tab="inventory")
 
 
 @app.route("/action/complete_mission", methods=["POST"])
@@ -5240,12 +5285,12 @@ def action_complete_mission():
 
     if mission_id in completed:
         add_message("That mission is already completed.", "var(--text-dim)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     can_complete, reason = check_mission_completable(mission_id, player)
     if not can_complete:
         add_message(f"Cannot complete mission: {reason}", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     mission = GAME_DATA["missions"].get(mission_id, {})
 
@@ -5287,7 +5332,7 @@ def action_complete_mission():
     _set_activity(player, f"completing quest: {mission.get('name', mission_id)}")
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return spa_action_response()
 
 
 @app.route("/action/claim_challenge", methods=["POST"])
@@ -5349,7 +5394,7 @@ def land_buy_housing():
     h_data = GAME_DATA["housing"].get(h_key)
     if not h_data:
         add_message("That structure does not exist.", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     base_price = h_data.get("price", 100)
     discount = min(0.50, player.get("attr_gold_discount", 0.0))
@@ -5360,7 +5405,7 @@ def land_buy_housing():
             "var(--red)",
         )
         save_player(player)
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     player["gold"] -= price
     owned = player.get("housing_owned", [])
@@ -5539,7 +5584,7 @@ def land_plant():
             "You need to build a Garden on your land before you can farm!", "var(--red)"
         )
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     crop_key = request.form.get("crop_key", "")
     slot_id = request.form.get("slot_id", "")
@@ -5549,7 +5594,7 @@ def land_plant():
     if not crop_def:
         add_message("Unknown crop.", "var(--red)")
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     crops = player.get("crops", {})
     if crops.get(slot_id, {}).get("crop_key"):
@@ -5558,7 +5603,7 @@ def land_plant():
             "var(--red)",
         )
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     crops[slot_id] = {
         "crop_key": crop_key,
@@ -5573,7 +5618,7 @@ def land_plant():
     )
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=land")
+    return spa_action_response(tab="land")
 
 
 @app.route("/action/land/harvest", methods=["POST"])
@@ -5589,7 +5634,7 @@ def land_harvest():
     if not crop_info or not crop_info.get("crop_key"):
         add_message("Nothing planted in that slot.", "var(--red)")
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     if not crop_info.get("ready", False):
         turns_left = crop_info.get("growth_time", 5) - crop_info.get("turns", 0)
@@ -5598,7 +5643,7 @@ def land_harvest():
             "var(--text-dim)",
         )
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     crops_db = GAME_DATA["farming"].get("crops", {})
     crop_def = crops_db.get(crop_info["crop_key"], {})
@@ -5623,7 +5668,7 @@ def land_harvest():
     )
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=land")
+    return spa_action_response(tab="land")
 
 
 @app.route("/action/land/rest", methods=["POST"])
@@ -5636,7 +5681,7 @@ def land_rest():
     has_house = any(k.startswith("house") and v for k, v in building_slots.items())
     if not has_house:
         add_message("You need a house on your land to rest here.", "var(--red)")
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     hp = player.get("hp", 1)
     max_hp = player.get("max_hp", 100)
@@ -5646,7 +5691,7 @@ def land_rest():
     if hp >= max_hp and mp >= max_mp:
         add_message("You are already at full health and mana.", "var(--text-dim)")
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     comfort = player.get("comfort_points", 0)
     hp_restore = max(10, comfort * 2)
@@ -5664,7 +5709,7 @@ def land_rest():
     )
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=land")
+    return spa_action_response(tab="land")
 
 
 @app.route("/action/land/store_item", methods=["POST"])
@@ -5677,13 +5722,13 @@ def land_store_item():
     has_storage = any(k.startswith("storage") and v for k, v in building_slots.items())
     if not has_storage:
         add_message("You need a storage building on your land first.", "var(--red)")
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     item_name = request.form.get("item_name", "")
     inventory = player.get("inventory", [])
     if item_name not in inventory:
         add_message(f"{item_name} is not in your inventory.", "var(--red)")
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     storage_count = sum(
         1 for k, v in building_slots.items() if k.startswith("storage") and v
@@ -5695,7 +5740,7 @@ def land_store_item():
             f"Storage is full ({capacity} items max). Build more storage to expand.",
             "var(--red)",
         )
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     inventory.remove(item_name)
     player["inventory"] = inventory
@@ -5703,7 +5748,7 @@ def land_store_item():
     player["stored_items"] = stored
     add_message(f"Stored {item_name} in your storage.", "var(--text-dim)")
     save_player(player)
-    return redirect(url_for("game") + "?tab=land")
+    return spa_action_response(tab="land")
 
 
 @app.route("/action/land/retrieve_item", methods=["POST"])
@@ -5716,14 +5761,14 @@ def land_retrieve_item():
     stored = player.get("stored_items", [])
     if item_name not in stored:
         add_message(f"{item_name} is not in your storage.", "var(--red)")
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     stored.remove(item_name)
     player["stored_items"] = stored
     player.setdefault("inventory", []).append(item_name)
     add_message(f"Retrieved {item_name} from storage.", "var(--green-bright)")
     save_player(player)
-    return redirect(url_for("game") + "?tab=land")
+    return spa_action_response(tab="land")
 
 
 @app.route("/action/land/craft", methods=["POST"])
@@ -5741,13 +5786,13 @@ def land_craft():
             "You need a crafting building (like the Dwarven Forge) on your land first.",
             "var(--red)",
         )
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     recipe_key = request.form.get("recipe_key", "")
     recipe = GAME_DATA.get("crafting", {}).get("recipes", {}).get(recipe_key)
     if not recipe:
         add_message("Unknown recipe.", "var(--red)")
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     inventory = player.get("inventory", [])
     inv_counts: dict[str, int] = {}
@@ -5758,7 +5803,7 @@ def land_craft():
     for mat, qty in materials.items():
         if inv_counts.get(mat, 0) < qty:
             add_message(f"Not enough materials: need {qty}x {mat}.", "var(--red)")
-            return redirect(url_for("game") + "?tab=land")
+            return spa_action_response(tab="land")
 
     for mat, qty in materials.items():
         for _ in range(qty):
@@ -5774,7 +5819,7 @@ def land_craft():
     add_message(f"You craft {out_str}!", "var(--green-bright)")
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=land")
+    return spa_action_response(tab="land")
 
 
 @app.route("/action/land/buy_pet", methods=["POST"])
@@ -5789,7 +5834,7 @@ def land_buy_pet():
     if not pet_data:
         add_message("Unknown pet.", "var(--red)")
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     price = pet_data.get("price", 500)
     if player["gold"] < price:
@@ -5798,7 +5843,7 @@ def land_buy_pet():
             "var(--red)",
         )
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     if player.get("pet"):
         old_pet = GAME_DATA["pets"].get(player["pet"], {})
@@ -5858,7 +5903,7 @@ def land_train():
 
     if session.get("current_area") != "your_land":
         add_message("You can only train at Your Land.", "var(--red)")
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     building_slots = player.get("building_slots", {})
     has_training_place = any(
@@ -5869,19 +5914,19 @@ def land_train():
             "You need to build a Training Place on your land first!", "var(--red)"
         )
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     training_key = request.form.get("training_key", "")
     option = TRAINING_OPTIONS.get(training_key)
     if not option:
         add_message("Unknown training option.", "var(--red)")
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     cost = option["cost"]
     if player["gold"] < cost:
         add_message(f"Not enough gold. Training costs {cost} gold.", "var(--red)")
         save_player(player)
-        return redirect(url_for("game") + "?tab=land")
+        return spa_action_response(tab="land")
 
     player["gold"] -= cost
     stat = str(option["stat"])
@@ -5898,7 +5943,7 @@ def land_train():
     )
     save_player(player)
     _autosave()
-    return redirect(url_for("game") + "?tab=land")
+    return spa_action_response(tab="land")
 
 
 @app.route("/battle")
@@ -6759,7 +6804,7 @@ def dungeon_proceed():
             active["current_challenge"] = None
             session["active_dungeon"] = active
             save_player(player)
-            return redirect(url_for("game"))
+            return spa_action_response()
         else:
             for msg in result.get("messages", []):
                 add_message(msg["text"], msg.get("color", "var(--text-light)"))
@@ -6781,7 +6826,7 @@ def dungeon_proceed():
             active["current_challenge"] = None
             session["active_dungeon"] = active
             save_player(player)
-            return redirect(url_for("game"))
+            return spa_action_response()
         else:
             for msg in result.get("messages", []):
                 add_message(msg["text"], msg.get("color", "var(--text-light)"))
@@ -6853,7 +6898,7 @@ def dungeon_proceed():
         active["current_challenge"] = None
         session["active_dungeon"] = active
         save_player(player)
-        return redirect(url_for("game"))
+        return spa_action_response()
 
     elif room_type == "question":
         add_message("A riddle challenge awaits in the chamber!", "var(--gold)")
@@ -8672,7 +8717,12 @@ def api_admin_tp():
         )
 
 
-from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi
+from asgiref.sync import sync_to_async as _sync_to_async
+from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi, WsgiToAsgiInstance as _WsgiToAsgiInstance
+
+_WsgiToAsgiInstance.run_wsgi_app = _sync_to_async(
+    _WsgiToAsgiInstance.run_wsgi_app.__wrapped__, thread_sensitive=False
+)
 
 
 async def _on_startup():

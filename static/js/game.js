@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
     hookParticleEvents();
     applyNumFmt();
     initFabScrollBehavior();
+    initSpaForms();
 });
 
 function checkAutosaved() {
@@ -1267,6 +1268,106 @@ function applyNumFmt() {
 }
 
 /* ── FAB Scroll Behavior ────────────────────────────────────────── */
+function initSpaForms() {
+    document.addEventListener('submit', function(e) {
+        var form = e.target;
+        if (!form || form.tagName !== 'FORM') return;
+        var action = form.getAttribute('action') || '';
+        if (!action.match(/^\/action\//)) return;
+        if (form.hasAttribute('data-no-spa')) return;
+        e.preventDefault();
+        var formData = new FormData(form);
+        var btn = form.querySelector('[type="submit"]');
+        if (btn) { btn.disabled = true; }
+        fetch(action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+        })
+        .then(function(r) {
+            if (!r.ok) throw new Error('Request failed: ' + r.status);
+            return r.json();
+        })
+        .then(function(data) {
+            if (btn) { btn.disabled = false; }
+            if (!data.ok) { form.submit(); return; }
+            if (data.redirect) {
+                document.body.classList.add('page-fade-out');
+                setTimeout(function() { window.location.href = data.redirect; }, 120);
+                return;
+            }
+            if (data.messages && data.messages.length) {
+                spaUpdateMessages(data.messages);
+            }
+            if (data.player) {
+                spaUpdatePlayerStats(data.player);
+            }
+            if (data.tab) {
+                switchTab(data.tab);
+            }
+        })
+        .catch(function() {
+            if (btn) { btn.disabled = false; }
+            form.removeEventListener('submit', arguments.callee);
+            form.submit();
+        });
+    }, true);
+}
+
+function spaUpdateMessages(messages) {
+    if (!messages || !messages.length) return;
+    messages.forEach(function(msg, i) {
+        setTimeout(function() {
+            showToast(msg.text, msg.color, 5000);
+        }, i * 180);
+    });
+    var panel = document.getElementById('recent-events-panel');
+    if (panel) {
+        var body = panel.querySelector('.panel-body');
+        if (body) {
+            var html = '';
+            messages.slice(0, 5).forEach(function(m) {
+                html += '<div class="log-entry" style="color:' + _esc(m.color) +
+                    ';font-size:13px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+                    _esc(m.text) + '</div>';
+            });
+            html += '<div style="margin-top:8px;"><button class="btn btn-xsmall btn-secondary" onclick="switchTab(\'diary\')">Full Diary &rarr;</button></div>';
+            body.innerHTML = html;
+            panel.style.display = '';
+        }
+    }
+}
+
+function spaUpdatePlayerStats(player) {
+    if (!player) return;
+    var maxHp  = player.max_hp  || 1;
+    var maxMp  = player.max_mp  || 1;
+    var expMax = player.experience_to_next || 1;
+    var hpPct  = Math.min(100, Math.round(player.hp / maxHp * 100));
+    var mpPct  = Math.min(100, Math.round(player.mp / maxMp * 100));
+    var expPct = Math.min(100, Math.round(player.experience / expMax * 100));
+
+    document.querySelectorAll('.bar-group').forEach(function(group) {
+        var fill = group.querySelector('.bar-fill');
+        var nums = group.querySelector('.bar-nums');
+        if (!fill) return;
+        if (fill.classList.contains('bar-hp')) {
+            fill.style.width = hpPct + '%';
+            if (nums) nums.textContent = player.hp + ' / ' + maxHp;
+        } else if (fill.classList.contains('bar-mp')) {
+            fill.style.width = mpPct + '%';
+            if (nums) nums.textContent = player.mp + ' / ' + maxMp;
+        } else if (fill.classList.contains('bar-exp')) {
+            fill.style.width = expPct + '%';
+            if (nums) nums.textContent = player.experience + ' / ' + expMax;
+        }
+    });
+    document.querySelectorAll('.gold-amount').forEach(function(el) {
+        el.textContent = player.gold;
+    });
+    if (typeof initLowHpWarning === 'function') initLowHpWarning();
+}
+
 function initFabScrollBehavior() {
     var chat = document.getElementById('chat-toggle-btn');
     var term = document.getElementById('terminal-fab');

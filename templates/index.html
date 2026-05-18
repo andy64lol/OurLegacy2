@@ -253,6 +253,9 @@
             <button class="mainmenu-btn" onclick="openSettings()">
                 Settings
             </button>
+            <a class="mainmenu-btn" href="/wiki" target="_blank" rel="noopener">
+                Wiki
+            </a>
         </nav>
         {% if online_count is defined and online_count %}
         <div class="mainmenu-online-count">{{ online_count }} adventurer{{ 's' if online_count != 1 else '' }} online</div>
@@ -1204,7 +1207,7 @@
 
             
             {% if messages %}
-            <div class="panel" style="margin-bottom:14px;">
+            <div class="panel" id="recent-events-panel" style="margin-bottom:14px;">
                 <div class="panel-title">Recent Events</div>
                 <div class="panel-body" style="padding-bottom:10px;">
                     {% for entry in messages[:5] %}
