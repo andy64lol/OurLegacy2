@@ -7873,6 +7873,21 @@ def leaderboard_page():
     return render_template("leaderboard.html", online_username=online_username)
 
 
+@app.route("/wiki")
+def wiki_page():
+    raw_items = GAME_DATA.get("items", {})
+    wiki_items = {k: v for k, v in raw_items.items() if isinstance(v, dict)}
+    return render_template(
+        "wiki.html",
+        enemies=GAME_DATA.get("enemies", {}),
+        bosses=GAME_DATA.get("bosses", {}),
+        items=wiki_items,
+        classes=GAME_DATA.get("classes", {}),
+        races=GAME_DATA.get("races", {}),
+        spells=GAME_DATA.get("spells", {}),
+    )
+
+
 @app.route("/api/leaderboard")
 def api_leaderboard():
     groups = get_group_leaderboard()

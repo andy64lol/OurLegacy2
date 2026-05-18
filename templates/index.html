@@ -391,14 +391,18 @@
                 <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="boss battle"> Boss Encounter
             </div>
             <div
-                style="font-size:22px;font-weight:700;color:var(--gold);letter-spacing:0.04em;text-shadow:0 0 20px rgba(255,180,60,0.5);">
+                style="font-size:22px;font-weight:700;color:var(--gold);letter-spacing:0.04em;text-shadow:0 0 20px rgba(255,180,60,0.5);display:flex;align-items:center;justify-content:center;gap:10px;">
+                <img src="/game_assets/glyphs/{{ enemy.key }}.webp" alt="{{ enemy.name }}" style="width:28px;height:28px;image-rendering:pixelated;" onerror="this.src='/game_assets/glyphs/fight.webp'">
                 {{ enemy.name }}
             </div>
             {% else %}
             <div
                 style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">
                 Combat</div>
-            <div style="font-size:20px;font-weight:600;color:var(--red);">{{ enemy.name }}</div>
+            <div style="font-size:20px;font-weight:600;color:var(--red);display:flex;align-items:center;gap:8px;">
+                <img src="/game_assets/glyphs/{{ enemy.key }}.webp" alt="{{ enemy.name }}" style="width:22px;height:22px;image-rendering:pixelated;" onerror="this.src='/game_assets/glyphs/fight.webp'">
+                {{ enemy.name }}
+            </div>
             {% endif %}
         </div>
 
@@ -494,7 +498,10 @@
             <div class="battle-vs">VS</div>
 
             <div class="panel{% if enemy.is_boss %} boss-panel{% endif %}">
-                <div class="panel-title panel-title-enemy">{{ enemy.name }}{% if enemy.is_boss %} ☠{% endif %}</div>
+                <div class="panel-title panel-title-enemy" style="display:flex;align-items:center;gap:7px;">
+                    <img src="/game_assets/glyphs/{{ enemy.key }}.webp" alt="{{ enemy.name }}" class="type-glyph" onerror="this.src='/game_assets/glyphs/fight.webp'">
+                    {{ enemy.name }}{% if enemy.is_boss %} ☠{% endif %}
+                </div>
                 <div class="panel-body">
                     {% set _ehp_pct = [(enemy.hp / enemy.max_hp * 100)|int, 100]|min %}
                     {% if enemy.is_boss %}

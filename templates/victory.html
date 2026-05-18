@@ -7,7 +7,10 @@
         <div class="panel result-panel result-victory" style="margin-bottom:18px;">
             <div class="panel-title panel-title-victory">Victory</div>
             <div class="panel-body">
-                <p class="result-summary">The {{ enemy.name }} has been defeated.</p>
+                <p class="result-summary" style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
+                    <img src="/game_assets/glyphs/{{ enemy.key }}.webp" alt="{{ enemy.name }}" style="width:20px;height:20px;image-rendering:pixelated;vertical-align:middle;" onerror="this.src='/game_assets/glyphs/fight.webp'">
+                    The {{ enemy.name }} has been defeated.
+                </p>
 
                 <div class="reward-list">
                     <div class="reward-row">

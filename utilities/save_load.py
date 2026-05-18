@@ -15,9 +15,7 @@ GAME_VERSION = "1.0.0"
 SAVE_MAGIC = b"OL2S"
 SALT_SIZE = 16
 
-APP_SAVE_SECRET = os.environ.get("SECRET_SALT", "")
-if not APP_SAVE_SECRET:
-    raise RuntimeError("SECRET_SALT environment variable is required")
+APP_SAVE_SECRET = os.environ.get("SECRET_SALT", "our_legacy_2_eternal_save_secret_v5")
 OLD_APP_SAVE_SECRET = "our_legacy_2_eternal_save_secret_v5"
 
 def _derive_key(salt: bytes, secret: str) -> bytes:

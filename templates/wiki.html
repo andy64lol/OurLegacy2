@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Legacy 2 — Wiki</title>
+    <style>
+        :root {
+            --bg: #0a0614;
+            --bg2: #100920;
+            --panel: #130e1f;
+            --border: rgba(160,110,30,0.35);
+            --gold: #c8a050;
+            --gold-dim: #9a7830;
+            --text: #e8dfc8;
+            --text-dim: #8a7a60;
+            --text-muted: #5a5040;
+            --red: #c04040;
+            --green: #50a060;
+            --blue: #5080c0;
+            --purple: #9060c0;
+            --radius: 8px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        a { color: var(--gold); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Header */
+        .wiki-header {
+            background: linear-gradient(180deg, #1a0d30, #0d0820);
+            border-bottom: 2px solid var(--border);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .wiki-header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .wiki-header-sub {
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .wiki-back {
+            margin-left: auto;
+            padding: 7px 18px;
+            background: rgba(200,160,80,0.12);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--gold);
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .wiki-back:hover { background: rgba(200,160,80,0.22); }
+
+        /* Nav tabs */
+        .wiki-nav {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            gap: 2px;
+            overflow-x: auto;
+        }
+        .wiki-tab {
+            padding: 12px 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+            background: none;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            font-family: inherit;
+        }
+        .wiki-tab:hover { color: var(--text); }
+        .wiki-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+        /* Layout */
+        .wiki-body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 24px 60px;
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .section-note {
+            background: rgba(200,160,80,0.06);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .section-note strong { color: var(--gold-dim); }
+
+        /* Grid layouts */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+        }
+        .card-grid-wide {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 14px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            transition: border-color 0.15s;
+        }
+        .card:hover { border-color: rgba(200,160,80,0.6); }
+        .card-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .card-thumb {
+            width: 40px;
+            height: 40px;
+            image-rendering: pixelated;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .card-thumb-placeholder {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.04);
+            border: 1px dashed rgba(200,160,80,0.2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.2;
+            flex-shrink: 0;
+        }
+        .card-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .card-sub {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 1px;
+        }
+        .card-body { font-size: 12px; color: var(--text-dim); line-height: 1.55; }
+        .card-body p { margin-bottom: 5px; }
+        .card-body p:last-child { margin-bottom: 0; }
+
+        /* Stat row */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 12px;
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: var(--text-dim); }
+        .stat-val { color: var(--text); font-weight: 600; }
+
+        /* Rarity badge */
+        .rarity {
+            display: inline-block;
+            padding: 1px 7px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .rarity-common { background: rgba(180,180,180,0.15); color: #bbb; border: 1px solid #555; }
+        .rarity-uncommon { background: rgba(80,160,80,0.15); color: #70c070; border: 1px solid var(--green); }
+        .rarity-rare { background: rgba(60,100,200,0.15); color: #70a0e0; border: 1px solid var(--blue); }
+        .rarity-epic { background: rgba(140,80,200,0.15); color: #b080e0; border: 1px solid var(--purple); }
+        .rarity-legendary { background: rgba(200,140,40,0.15); color: var(--gold); border: 1px solid var(--gold-dim); }
+        .rarity-boss { background: rgba(200,40,40,0.15); color: #e07070; border: 1px solid var(--red); }
+
+        /* Tag */
+        .tag {
+            display: inline-block;
+            padding: 1px 6px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            font-size: 10px;
+            color: var(--text-dim);
+            margin: 1px 2px;
+        }
+
+        /* Items image grid */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 12px;
+        }
+
+        /* Loot table */
+        .loot-list { font-size: 11px; color: var(--text-dim); }
+        .loot-list span { margin-right: 6px; }
+
+        /* Spells list */
+        .spell-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .spell-icon {
+            width: 32px;
+            height: 32px;
+            image-rendering: pixelated;
+            flex-shrink: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .wiki-body { padding: 16px 12px 40px; }
+            .card-grid { grid-template-columns: 1fr 1fr; }
+            .items-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="wiki-header">
+    <div>
+        <div class="wiki-header-title">&#9776; Our Legacy 2 — Wiki</div>
+        <div class="wiki-header-sub">v2.7.5 &mdash; Towards a New World</div>
+    </div>
+    <a href="/" class="wiki-back">&#8592; Back to Game</a>
+</header>
+
+<nav class="wiki-nav">
+    <button class="wiki-tab active" onclick="showSection('enemies')">Enemies</button>
+    <button class="wiki-tab" onclick="showSection('bosses')">Bosses</button>
+    <button class="wiki-tab" onclick="showSection('items')">Items</button>
+    <button class="wiki-tab" onclick="showSection('classes')">Classes</button>
+    <button class="wiki-tab" onclick="showSection('races')">Races</button>
+    <button class="wiki-tab" onclick="showSection('spells')">Spells</button>
+</nav>
+
+<div class="wiki-body">
+
+    <!-- ENEMIES -->
+    <section id="sec-enemies" class="section active">
+        <div class="section-title">Enemies</div>
+        <div class="section-note">
+            <strong>Note on textures:</strong> Enemy textures are not yet added to the game.
+            Glyphs shown below use the <code>fight</code> fallback icon. Custom per-enemy art is planned for a future update.
+        </div>
+        <div class="card-grid">
+            {% for key, e in enemies.items() %}
+            <div class="card">
+                <div class="card-head">
+                    <img class="card-thumb" src="/game_assets/glyphs/{{ key }}.webp" alt="{{ e.name }}"
+                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>No Texture</div>'">
+                    <div>
+                        <div class="card-name">{{ e.name }}</div>
+                        <div class="card-sub">
+                            {% for t in e.get('tags', []) %}<span class="tag">{{ t }}</span>{% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="stat-row"><span class="stat-label">HP</span><span class="stat-val">{{ e.hp }}</span></div>
+                    <div class="stat-row"><span class="stat-label">ATK</span><span class="stat-val">{{ e.attack }}</span></div>
+                    <div class="stat-row"><span class="stat-label">DEF</span><span class="stat-val">{{ e.defense }}</span></div>
+                    <div class="stat-row"><span class="stat-label">SPD</span><span class="stat-val">{{ e.speed }}</span></div>
+                    <div class="stat-row"><span class="stat-label">EXP</span><span class="stat-val">{{ e.experience_reward }}</span></div>
+                    <div class="stat-row"><span class="stat-label">Gold</span><span class="stat-val">{{ e.gold_reward }}g</span></div>
+                    {% if e.get('loot_table') %}
+                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">Drops</div>
+                    <div class="loot-list">
+                        {% for item in e.loot_table %}<span>&#9654; {{ item }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- BOSSES -->
+    <section id="sec-bosses" class="section">
+        <div class="section-title">Bosses</div>
+        <div class="section-note">
+            <strong>Note on textures:</strong> Boss textures are not yet added to the game.
+            Each boss will receive unique artwork in a future content update.
+        </div>
+        <div class="card-grid-wide">
+            {% for key, b in bosses.items() %}
+            <div class="card">
+                <div class="card-head">
+                    <img class="card-thumb" src="/game_assets/glyphs/{{ key }}.webp" alt="{{ b.name }}"
+                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>No Texture</div>'">
+                    <div>
+                        <div class="card-name" style="color:var(--red);">{{ b.name }} &#9760;</div>
+                        <div class="card-sub">
+                            <span class="rarity rarity-boss">Boss</span>
+                            {% for t in b.get('tags', []) %}<span class="tag">{{ t }}</span>{% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if b.get('description') %}
+                    <p style="color:var(--text-dim);font-style:italic;margin-bottom:8px;">{{ b.description }}</p>
+                    {% endif %}
+                    <div class="stat-row"><span class="stat-label">HP</span><span class="stat-val">{{ b.hp }}</span></div>
+                    <div class="stat-row"><span class="stat-label">ATK</span><span class="stat-val">{{ b.attack }}</span></div>
+                    <div class="stat-row"><span class="stat-label">DEF</span><span class="stat-val">{{ b.defense }}</span></div>
+                    <div class="stat-row"><span class="stat-label">SPD</span><span class="stat-val">{{ b.speed }}</span></div>
+                    <div class="stat-row"><span class="stat-label">EXP</span><span class="stat-val">{{ b.experience_reward }}</span></div>
+                    <div class="stat-row"><span class="stat-label">Gold</span><span class="stat-val">{{ b.gold_reward }}g</span></div>
+                    {% if b.get('phases') %}
+                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">Phases: {{ b.phases | length }}</div>
+                    {% endif %}
+                    {% if b.get('special_abilities') %}
+                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">Abilities</div>
+                    {% for ab in b.special_abilities %}
+                    <div style="font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <strong style="color:var(--text);">{{ ab.name }}</strong>
+                        {% if ab.get('description') %} &mdash; {{ ab.description }}{% endif %}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% if b.get('unique_loot') %}
+                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">Unique Loot</div>
+                    <div class="loot-list">
+                        {% for item in b.unique_loot %}<span>&#9654; {{ item }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- ITEMS -->
+    <section id="sec-items" class="section">
+        <div class="section-title">Items</div>
+        <div class="section-note">
+            <strong>Note on textures:</strong> Some items do not yet have textures assigned. These are shown with a placeholder below.
+            Textures for remaining items are planned for a future update.
+        </div>
+        <div class="items-grid">
+            {% for name, item in items.items() %}
+            <div class="card">
+                <div class="card-head">
+                    {% if item.get('texture') %}
+                    <img class="card-thumb" src="/game_assets/{{ item.texture }}" alt="{{ name }}"
+                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>No Texture</div>'">
+                    {% else %}
+                    <div class="card-thumb-placeholder">No<br>Texture</div>
+                    {% endif %}
+                    <div>
+                        <div class="card-name" style="font-size:12px;">{{ name }}</div>
+                        <div class="card-sub">
+                            {% if item.get('rarity') %}<span class="rarity rarity-{{ item.rarity }}">{{ item.rarity }}</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if item.get('description') %}
+                    <p style="margin-bottom:6px;">{{ item.description }}</p>
+                    {% endif %}
+                    {% if item.get('type') %}<div class="stat-row"><span class="stat-label">Type</span><span class="stat-val">{{ item.type }}</span></div>{% endif %}
+                    {% if item.get('price') %}<div class="stat-row"><span class="stat-label">Price</span><span class="stat-val">{{ item.price }}g</span></div>{% endif %}
+                    {% if item.get('value') %}<div class="stat-row"><span class="stat-label">Value</span><span class="stat-val">{{ item.value }}</span></div>{% endif %}
+                    {% if item.get('attack') %}<div class="stat-row"><span class="stat-label">ATK</span><span class="stat-val">+{{ item.attack }}</span></div>{% endif %}
+                    {% if item.get('defense') %}<div class="stat-row"><span class="stat-label">DEF</span><span class="stat-val">+{{ item.defense }}</span></div>{% endif %}
+                    {% if item.get('speed') %}<div class="stat-row"><span class="stat-label">SPD</span><span class="stat-val">{{ item.speed }}</span></div>{% endif %}
+                    {% if item.get('tags') %}
+                    <div style="margin-top:6px;">{% for t in item.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- CLASSES -->
+    <section id="sec-classes" class="section">
+        <div class="section-title">Classes</div>
+        <div class="card-grid">
+            {% for name, cls in classes.items() %}
+            {% set _cglyph = {'Warrior':'warrior','Mage':'mage','Rogue':'rouge','Hunter':'hunter','Bard':'bard','Paladin':'paladin','Druid':'druid','Priest':'priest'} %}
+            <div class="card">
+                <div class="card-head">
+                    <img class="card-thumb" src="/game_assets/glyphs/{{ _cglyph.get(name, name.lower()) }}.webp" alt="{{ name }}"
+                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>No Texture</div>'">
+                    <div>
+                        <div class="card-name">{{ name }}</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if cls.get('description') %}<p style="font-style:italic;margin-bottom:8px;">{{ cls.description }}</p>{% endif %}
+                    {% if cls.get('base_stats') %}
+                    {% for stat, val in cls.base_stats.items() %}
+                    <div class="stat-row">
+                        <span class="stat-label">{{ stat.upper() }}</span>
+                        <span class="stat-val">{{ val }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% if cls.get('starting_gold') %}
+                    <div class="stat-row"><span class="stat-label">Start Gold</span><span class="stat-val">{{ cls.starting_gold }}g</span></div>
+                    {% endif %}
+                    {% if cls.get('starting_items') %}
+                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">Starting Items</div>
+                    <div class="loot-list">
+                        {% for item in cls.starting_items %}<span>&#9654; {{ item }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- RACES -->
+    <section id="sec-races" class="section">
+        <div class="section-title">Races</div>
+        <div class="section-note">
+            <strong>Note on textures:</strong> Race portrait textures are not yet added.
+            Each race will receive unique artwork in a future update.
+        </div>
+        <div class="card-grid">
+            {% for name, race in races.items() %}
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-thumb-placeholder">No<br>Texture</div>
+                    <div>
+                        <div class="card-name">{{ name }}</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if race.get('description') %}<p style="font-style:italic;margin-bottom:8px;">{{ race.description }}</p>{% endif %}
+                    {% if race.get('stat_modifiers') %}
+                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Stat Modifiers</div>
+                    {% for stat, val in race.stat_modifiers.items() %}
+                    <div class="stat-row">
+                        <span class="stat-label">{{ stat.upper() }}</span>
+                        <span class="stat-val" style="color:{{ 'var(--green)' if val > 0 else 'var(--red)' }};">{{ '+' if val > 0 else '' }}{{ val }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% if race.get('notes') %}<p style="margin-top:8px;font-size:11px;color:var(--text-muted);">{{ race.notes }}</p>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- SPELLS -->
+    <section id="sec-spells" class="section">
+        <div class="section-title">Spells</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            {% for name, spell in spells.items() %}
+            <div class="spell-card">
+                <img class="spell-icon" src="/game_assets/glyphs/spell.webp" alt="spell">
+                <div style="flex:1;">
+                    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                        {{ name }}
+                        <span class="rarity rarity-{% if spell.type == 'damage' %}boss{% elif spell.type == 'heal' %}uncommon{% else %}rare{% endif %}" style="margin-left:6px;">{{ spell.type }}</span>
+                    </div>
+                    {% if spell.get('description') %}<div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:6px;">{{ spell.description }}</div>{% endif %}
+                    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;">
+                        <span style="color:var(--text-dim);">MP Cost: <strong style="color:var(--text);">{{ spell.mp_cost }}</strong></span>
+                        <span style="color:var(--text-dim);">Power: <strong style="color:var(--text);">{{ spell.power }}</strong></span>
+                    </div>
+                    {% if spell.get('allowed_weapons') %}
+                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">
+                        Usable with: {{ spell.allowed_weapons | join(', ') }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+
+<script>
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.wiki-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('sec-' + id).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+</script>
+</body>
+</html>
