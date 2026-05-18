@@ -2771,6 +2771,7 @@ def index():
         online_user=online_user,
         cloud_meta=cloud_meta,
         online_count=len(_active_sessions),
+        is_admin=_is_admin_user(online_user or ""),
     )
 
 
@@ -7920,6 +7921,8 @@ def leaderboard_page():
 
 @app.route("/wiki")
 def wiki_page():
+    if not _is_admin_user(session.get("online_username", "")):
+        return render_template("wiki_disabled.html"), 403
     raw_items = GAME_DATA.get("items", {})
     wiki_items = {k: v for k, v in raw_items.items() if isinstance(v, dict)}
     return render_template(

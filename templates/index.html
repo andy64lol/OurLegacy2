@@ -253,9 +253,11 @@
             <button class="mainmenu-btn" onclick="openSettings()">
                 Settings
             </button>
+            {% if is_admin %}
             <a class="mainmenu-btn" href="/wiki" target="_blank" rel="noopener">
                 Wiki
             </a>
+            {% endif %}
         </nav>
         {% if online_count is defined and online_count %}
         <div class="mainmenu-online-count">{{ online_count }} adventurer{{ 's' if online_count != 1 else '' }} online</div>
