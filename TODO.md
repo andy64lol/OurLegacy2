@@ -38,6 +38,10 @@ Create a modern single-page application (SPA) experience using Flask for the bac
    - Verify navigation works without full page refreshes.
    - Test game flows: login, play, shop, inventory, battles, and logout.
    - Confirm templates and API responses are stable.
+8. Extras
+   - Remove the secret salt variable since it's irrelevant rn.
+   - Add a small minimalistic wiki in html not jinja2 were all info are displayed along with textures, add a small note on textures and etc that are not added.
+   - Add that enemies have their glyphs also next to their names, use also a fallback texture if none was found.
 
 ## Notes
 - Keep the existing game logic in `utilities/` and `game_data/` where possible.
