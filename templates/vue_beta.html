@@ -508,10 +508,47 @@
                             <div class="stat-mini"><span>SPD</span><strong>[[ player.speed ]]</strong></div>
                         </div>
 
-                        <div v-if="gameTime || weatherDisplay" style="margin-top:8px;font-size:12px;color:var(--text-dim);">
-                            <span v-if="gameTime">[[ gameTimeIcon ]] [[ gameTime ]]</span>
-                            <span v-if="weatherDisplay" style="margin-left:8px;">[[ weatherDisplay ]]</span>
+                        <div class="sidebar-status-row" v-if="gameTime || weatherDisplay">
+                            <div class="sidebar-status-item" v-if="gameTime">
+                                <span class="sidebar-status-key">Time</span>
+                                <span class="sidebar-status-val">
+                                    <img v-if="isDayTime" class="type-glyph" src="/game_assets/glyphs/time_day.webp" alt="day">
+                                    <img v-else class="type-glyph" src="/game_assets/glyphs/time_night.webp" alt="night">
+                                    [[ gameTime ]]
+                                </span>
+                            </div>
+                            <div class="sidebar-status-item" v-if="weatherDisplay">
+                                <span class="sidebar-status-key">Weather</span>
+                                <span class="sidebar-status-val">[[ weatherDisplay ]]</span>
+                            </div>
+                            <div v-if="weatherBonusExp > 0 || weatherBonusGold > 0" class="sidebar-status-item">
+                                <span class="sidebar-status-key"></span>
+                                <span style="font-size:11px;color:var(--green-bright);">+[[ weatherBonusExp ]]% EXP / +[[ weatherBonusGold ]]% gold</span>
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Location panel -->
+                <div class="panel sidebar-panel" style="margin-top:0;" v-if="area">
+                    <div class="panel-title">Location</div>
+                    <div class="panel-body">
+                        <div class="location-name">[[ area.name ]]</div>
+                        <div class="location-desc" v-if="area.description">[[ area.description.slice(0, 110) ]][[ area.description.length > 110 ? '...' : '' ]]</div>
+                        <div v-if="area.can_rest" class="rest-notice">
+                            <span v-if="area.rest_cost > 0">Inn available ([[ area.rest_cost ]] gold)</span>
+                            <span v-else>Rest freely on your land</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigate panel -->
+                <div class="panel sidebar-panel" style="margin-top:0;">
+                    <div class="panel-title">Navigate</div>
+                    <div class="panel-body" style="display:flex;flex-direction:column;gap:6px;">
+                        <button @click="switchTab('dungeons')" class="btn btn-secondary btn-small" style="text-align:center;">Dungeons</button>
+                        <button @click="switchTab('crafting')" class="btn btn-secondary btn-small" style="text-align:center;">Crafting</button>
+                        <button @click="switchTab('market')" class="btn btn-secondary btn-small" style="text-align:center;">Elite Market</button>
                     </div>
                 </div>
 
@@ -540,11 +577,23 @@
                     </div>
                 </div>
 
-                <div style="padding:10px 0 4px;">
-                    <a href="/" class="sidebar-back-btn">&#8592; Back to main game</a>
-                </div>
-
             </div>
+
+            <div class="sidebar-save-section">
+                <div v-if="onlineUsername"
+                    style="font-size:11px;color:var(--mana-bright);text-align:center;padding:3px 0;opacity:0.85;display:flex;align-items:center;justify-content:center;gap:4px;">
+                    <img src="/game_assets/glyphs/chat.webp" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
+                    [[ onlineUsername ]]
+                </div>
+            </div>
+
+            <div class="sidebar-nav">
+                <a href="/" class="btn btn-danger btn-small" style="display:block;text-align:center;">Exit to Menu</a>
+                <a href="/" class="btn btn-secondary btn-small" style="display:block;text-align:center;margin-top:4px;">
+                    <img class="type-glyph" src="/game_assets/glyphs/settings.webp" alt="settings"> Main Game
+                </a>
+            </div>
+
         </aside>
 
         <div id="sidebar-resize-handle"></div>
@@ -599,54 +648,86 @@
                     </div>
                 </div>
 
+                <!-- news ticker -->
+                <div id="beta-news-ticker" class="news-ticker" style="margin-bottom:0;">
+                    <div class="news-ticker-label">
+                        <span class="news-ticker-icon"><img src="/game_assets/glyphs/sparkles.webp" alt="" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle;"></span>
+                        <span>News</span>
+                    </div>
+                    <div class="news-ticker-track">
+                        <div class="news-ticker-inner" id="beta-ticker-inner">No announcements at this time.</div>
+                    </div>
+                </div>
+
                 <!-- ═══ EXPLORE tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'explore' }">
 
-                    <div v-if="area" class="area-header">
-                        <div>
-                            <div class="area-name-big">[[ area.name ]]</div>
-                            <div class="area-difficulty">Difficulty [[ area.difficulty ]]
-                                <span v-if="weatherDisplay" style="margin-left:8px;">&bull; [[ weatherDisplay ]]
-                                    <span v-if="weatherBonusExp" style="color:var(--green-bright);">+[[ weatherBonusExp ]]% EXP</span>
-                                    <span v-if="weatherBonusGold" style="color:var(--gold);"> +[[ weatherBonusGold ]]% Gold</span>
-                                </span>
+                    <!-- area description panel -->
+                    <div class="panel" style="margin-bottom:14px;">
+                        <div class="panel-title" v-if="area">[[ area.name ]]</div>
+                        <div class="panel-title" v-else>Explore</div>
+                        <div class="panel-body">
+                            <p class="area-description" v-if="area && area.description">[[ area.description ]]</p>
+
+                            <div class="danger-notice" v-if="area && area.possible_enemies && area.possible_enemies.length">
+                                Known threats: [[ area.possible_enemies.map(e => e.replace(/_/g,' ')).join(', ') ]]
+                            </div>
+
+                            <div v-if="inBattle" class="action-row" style="margin-top:10px;">
+                                <button class="btn btn-danger" @click="switchTab('battle')">Go to Battle!</button>
+                            </div>
+                            <div v-else class="action-row" style="margin-top:10px;">
+                                <button class="btn btn-primary btn-wood" @click="explore" :disabled="actionPending || !player">
+                                    [[ actionPending ? 'Working...' : 'Venture Forth' ]]
+                                </button>
+                                <button v-if="area && area.can_rest" class="btn btn-secondary" @click="rest" :disabled="actionPending">
+                                    <span v-if="area && area.rest_cost > 0">Rest at Inn ([[ area.rest_cost ]] gold)</span>
+                                    <span v-else>Rest on Your Land</span>
+                                </button>
+                            </div>
+
+                            <!-- area map image -->
+                            <div class="area-map-wrap" v-if="area && area.map_image">
+                                <img :src="'/game_assets/maps/' + area.map_image"
+                                     :alt="'Map of ' + area.name"
+                                     class="area-map-img"
+                                     @error="$event.target.style.display='none'">
                             </div>
                         </div>
                     </div>
 
-                    <div v-if="inBattle" class="panel" style="border-color:rgba(200,60,60,0.4);margin-bottom:12px;">
-                        <div class="panel-body" style="color:var(--red);font-size:14px;">
-                            You are in battle!
-                            <button class="btn btn-danger" style="margin-left:10px;" @click="switchTab('battle')">Go to Battle</button>
+                    <!-- nearby sightings (online only) -->
+                    <div class="panel" v-if="onlineUsername && nearbyPlayers && nearbyPlayers.length" style="margin-bottom:14px;">
+                        <div class="panel-title" style="display:flex;align-items:center;gap:8px;">
+                            <span>Sightings</span>
+                            <span style="font-size:11px;font-weight:400;color:var(--text-dim);font-style:italic;">Others have been seen here recently</span>
+                        </div>
+                        <div class="panel-body" style="padding:4px 16px 10px;">
+                            <div v-for="(p, i) in nearbyPlayers" :key="p.username"
+                                 :style="{ padding:'8px 0', borderBottom: i < nearbyPlayers.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', lineHeight: 1.55 }">
+                                <span style="font-weight:700;color:var(--gold);font-size:13px;">[[ p.username ]]</span>
+                                <span style="color:var(--text-dim);font-size:13px;"> was seen </span>
+                                <span style="color:var(--text-light);font-size:13px;font-style:italic;">[[ p.narrative ]]</span>
+                                <span style="color:var(--text-dim);font-size:11px;"> &mdash; [[ p.when ]]</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div v-if="!inBattle" class="action-row">
-                        <button class="btn btn-primary" @click="explore" :disabled="actionPending || !player">
-                            [[ actionPending ? 'Working...' : 'Explore' ]]
-                        </button>
-                        <button v-if="area && area.can_rest" class="btn btn-secondary" @click="rest" :disabled="actionPending">
-                            Rest<span v-if="area && area.rest_cost" style="font-size:11px;margin-left:4px;">([[ area.rest_cost ]]g)</span>
-                        </button>
-                        <button v-if="mineData" class="btn btn-secondary" @click="mine" :disabled="actionPending">
-                            Mine
-                        </button>
-                    </div>
-
                     <!-- boss challenges -->
-                    <div v-if="availableBosses && availableBosses.length" style="margin-bottom:12px;">
-                        <div class="panel">
-                            <div class="panel-title">Boss Challenges</div>
-                            <div class="panel-body">
-                                <div v-for="boss in availableBosses" :key="boss.key" class="boss-card">
-                                    <div>
-                                        <div class="boss-name">[[ boss.name ]]</div>
-                                        <div class="boss-cooldown" v-if="boss.on_cooldown">Cooldown: [[ boss.cooldown_str ]]</div>
-                                    </div>
-                                    <button class="btn btn-danger btn-small"
+                    <div v-if="availableBosses && availableBosses.length" class="panel" style="margin-bottom:14px;">
+                        <div class="panel-title">Boss Challenges</div>
+                        <div class="panel-body">
+                            <p class="panel-note">Challenge a boss directly. Each boss has an 8-hour cooldown after defeat.</p>
+                            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                                <div v-for="boss in availableBosses" :key="boss.key"
+                                     style="background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;padding:12px;min-width:180px;">
+                                    <div style="font-size:15px;font-weight:600;color:var(--red);margin-bottom:6px;">[[ boss.name ]]</div>
+                                    <div v-if="boss.on_cooldown" style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">Cooldown: [[ boss.cooldown_str ]]</div>
+                                    <button v-if="boss.on_cooldown" class="btn btn-small btn-secondary" disabled>On Cooldown</button>
+                                    <button v-else class="btn btn-small btn-danger"
                                             @click="challengeBoss(boss.key)"
-                                            :disabled="actionPending || inBattle || boss.on_cooldown">
-                                        Challenge
+                                            :disabled="actionPending || inBattle">
+                                        Challenge!
                                     </button>
                                 </div>
                             </div>
@@ -654,25 +735,21 @@
                     </div>
 
                     <!-- recent events -->
-                    <div class="panel" v-if="messages && messages.length">
+                    <div class="panel" v-if="messages && messages.length" style="margin-bottom:14px;">
                         <div class="panel-title">Recent Events</div>
-                        <div class="panel-body events-list">
-                            <div v-for="(msg, i) in recentMessages" :key="i"
+                        <div class="panel-body" style="padding-bottom:10px;">
+                            <div v-for="(msg, i) in recentMessages.slice(0,5)" :key="i"
                                  class="log-entry"
+                                 style="font-size:13px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);"
                                  :style="{ color: msg.color || 'var(--text-light)' }">
                                 [[ msg.text ]]
+                            </div>
+                            <div style="margin-top:8px;">
+                                <button class="btn btn-xsmall btn-secondary" @click="switchTab('diary')">Full Diary &rarr;</button>
                             </div>
                         </div>
                     </div>
 
-                    <div v-if="area && area.description" style="margin-top:10px;">
-                        <div class="panel">
-                            <div class="panel-title">About this area</div>
-                            <div class="panel-body" style="font-size:13px;color:var(--text-dim);">
-                                [[ area.description ]]
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- ═══ BATTLE tab ═══ -->
@@ -769,7 +846,13 @@
                             <div class="panel-body">
                                 <div class="equip-slot-grid">
                                     <div v-for="slot in equipSlots" :key="slot" class="equip-slot">
-                                        <div class="equip-slot-label">[[ slot ]]</div>
+                                        <div class="equip-slot-label">
+                                            <img v-if="slotGlyph(slot)" class="type-glyph"
+                                                 :src="'/game_assets/glyphs/' + slotGlyph(slot) + '.webp'"
+                                                 :alt="slot"
+                                                 style="vertical-align:middle;margin-right:3px;">
+                                            [[ slot.replace(/_/g, ' ') ]]
+                                        </div>
                                         <div v-if="equippedDetails[slot]">
                                             <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
                                                 <img v-if="equippedDetails[slot].texture && equippedDetails[slot].texture !== 'missing.webp'"
@@ -1457,5 +1540,39 @@
 
 <script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
 <script src="/static/js/vue_beta.js"></script>
+<script>
+(function(){
+    function setBetaTickerContent(items) {
+        var inner = document.getElementById('beta-ticker-inner');
+        if (!inner) return;
+        if (!items || !items.length) {
+            inner.textContent = 'No announcements at this time.';
+            inner.style.animation = 'none';
+            inner.style.left = '0';
+            inner.style.position = 'relative';
+            inner.style.transform = 'translateY(-50%)';
+            inner.style.textAlign = 'center';
+            inner.style.width = '100%';
+            return;
+        }
+        inner.style.position = 'absolute';
+        inner.style.textAlign = '';
+        inner.style.width = '';
+        var combined = items.map(function(a){ return a.text + '  \u00b7  ' + a.ts; }).join('          \u2015\u2015          ');
+        inner.textContent = combined + '          \u2015\u2015          ' + combined;
+        inner.style.animation = 'none';
+        inner.offsetHeight;
+        var duration = Math.max(20, combined.length * 0.15);
+        inner.style.animation = 'tickerScroll ' + duration + 's linear infinite';
+    }
+    function loadBetaAnnouncements() {
+        fetch('/api/announcements').then(function(r){ return r.json(); }).then(function(data){
+            setBetaTickerContent(data.announcements || []);
+        }).catch(function(){});
+    }
+    loadBetaAnnouncements();
+    setInterval(loadBetaAnnouncements, 30000);
+})();
+</script>
 </body>
 </html>

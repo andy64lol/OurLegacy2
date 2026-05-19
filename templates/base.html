@@ -797,7 +797,7 @@
             }
 
             var theirConfirmLabel = document.getElementById('trade-their-confirm-label');
-            if (theirConfirmLabel) theirConfirmLabel.textContent = data.their_confirmed ? '✔ ' + (data.other || 'They') + ' confirmed' : '';
+            if (theirConfirmLabel) theirConfirmLabel.textContent = data.their_confirmed ? '[confirmed] ' + (data.other || 'They') : '';
 
             var confirmBtn = document.getElementById('trade-confirm-btn');
             if (confirmBtn) {

@@ -259,7 +259,7 @@
             </a>
             <a class="mainmenu-btn" href="/beta" target="_blank" rel="noopener"
                style="border-color:rgba(160,80,255,0.5);color:#d0a0ff;">
-                ⚗ Vue Beta
+                <img src="/game_assets/glyphs/sparkles.webp" alt="beta" class="type-glyph" style="vertical-align:middle;margin-right:4px;"> Vue Beta
             </a>
             {% endif %}
         </nav>
@@ -509,7 +509,7 @@
             <div class="panel{% if enemy.is_boss %} boss-panel{% endif %}">
                 <div class="panel-title panel-title-enemy" style="display:flex;align-items:center;gap:7px;">
                     <img src="/game_assets/glyphs/{{ enemy.key }}.webp" alt="{{ enemy.name }}" class="type-glyph" onerror="this.src='/game_assets/glyphs/fight.webp'">
-                    {{ enemy.name }}{% if enemy.is_boss %} ☠{% endif %}
+                    {{ enemy.name }}{% if enemy.is_boss %} <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="boss" style="opacity:0.8;">{% endif %}
                 </div>
                 <div class="panel-body">
                     {% set _ehp_pct = [(enemy.hp / enemy.max_hp * 100)|int, 100]|min %}

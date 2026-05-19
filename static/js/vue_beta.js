@@ -87,7 +87,11 @@ createApp({
             friendsLoading:       false,
             groupData:            null,
 
-            equipSlots: ['weapon', 'offhand', 'helmet', 'chest', 'legs', 'accessory'],
+            equipSlots: ['weapon', 'armor', 'offhand', 'accessory_1', 'accessory_2', 'accessory_3'],
+
+            worldEvents:     [],
+            nearbyPlayers:   [],
+            onlineCount:     0,
         };
     },
 
@@ -103,6 +107,9 @@ createApp({
         expPct() {
             if (!this.player) return 0;
             return Math.min(100, Math.round(this.player.experience / (this.player.experience_to_next || 100) * 100));
+        },
+        isDayTime() {
+            return ['Dawn', 'Morning', 'Noon', 'Afternoon'].includes(this.gameTime);
         },
         recentMessages() {
             return [...this.messages].slice(-12).reverse();
@@ -399,18 +406,41 @@ createApp({
 
         glyphFor(charClass) {
             const map = {
-                Warrior: 'warrior', Mage: 'mage', Rogue: 'rogue',
-                Archer: 'archer', Paladin: 'paladin', Cleric: 'cleric',
-                Necromancer: 'necromancer', Druid: 'druid', Ranger: 'ranger',
-                Monk: 'monk', Bard: 'bard', Summoner: 'summoner',
+                Warrior: 'warrior', Mage: 'mage', Rogue: 'rouge', Rouge: 'rouge',
+                Archer: 'hunter', Hunter: 'hunter', Paladin: 'paladin', Cleric: 'priest',
+                Priest: 'priest', Necromancer: 'mage', Druid: 'druid', Ranger: 'hunter',
+                Monk: 'warrior', Bard: 'bard', Summoner: 'mage',
             };
             return map[charClass] || 'warrior';
+        },
+
+        slotGlyph(slot) {
+            const map = {
+                weapon: 'weapon', armor: 'armor', offhand: 'offhand',
+                accessory_1: 'accessories', accessory_2: 'accessories', accessory_3: 'accessories',
+            };
+            return map[slot] || null;
+        },
+
+        async loadNearby() {
+            if (!this.onlineUsername) return;
+            try {
+                const r = await fetch('/api/area_activity', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (r.ok) {
+                    const data = await r.json();
+                    this.nearbyPlayers = (data.ok && data.players) ? data.players.slice(0, 5) : [];
+                }
+            } catch (_) {}
         },
     },
 
     mounted() {
         this.fetchState();
         this.resetPoll();
+        if (this.onlineUsername) {
+            this.loadNearby();
+            setInterval(() => this.loadNearby(), 20000);
+        }
 
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
