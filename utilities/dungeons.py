@@ -342,16 +342,14 @@ def process_battle_room(_player: Dict[str, Any], room: Dict[str, Any],
             }]
         }
 
-    difficulty = room.get('difficulty', 1)
     scaled = dict(enemy_data)
-    scale = 0.8 + difficulty * 0.2
     scaled['key'] = enemy_key
-    scaled['hp'] = int(scaled.get('hp', 50) * scale)
+    scaled['hp'] = int(scaled.get('hp', 50))
     scaled['max_hp'] = scaled['hp']
-    scaled['attack'] = int(scaled.get('attack', 5) * scale)
-    scaled['defense'] = int(scaled.get('defense', 2) * scale)
+    scaled['attack'] = int(scaled.get('attack', 5))
+    scaled['defense'] = int(scaled.get('defense', 2))
     scaled['speed'] = scaled.get('speed', 10)
-    scaled['exp_reward'] = int(scaled.get('experience_reward', 30) * scale)
+    scaled['exp_reward'] = int(scaled.get('experience_reward', 30))
     scaled['gold_reward'] = max(
         1,
         int(scaled.get('gold_reward', 10)) + random.randint(-2, 8))
@@ -432,26 +430,17 @@ def process_ambush_room(_player: Dict[str, Any], room: Dict[str, Any],
             'messages': [{'text': 'The ambush melts away.', 'color': 'var(--text-dim)'}]
         }
 
-    difficulty = room.get('difficulty', 1)
-    scale = 1.0 + difficulty * 0.25
     scaled = dict(enemy_data)
     scaled['key'] = enemy_key
-    scaled['hp'] = int(scaled.get('hp', 50) * scale)
+    scaled['hp'] = int(scaled.get('hp', 50))
     scaled['max_hp'] = scaled['hp']
-    scaled['attack'] = int(scaled.get('attack', 5) * scale)
-    scaled['defense'] = int(scaled.get('defense', 2) * scale)
+    scaled['attack'] = int(scaled.get('attack', 5))
+    scaled['defense'] = int(scaled.get('defense', 2))
     scaled['speed'] = scaled.get('speed', 10)
-    scaled['exp_reward'] = int(scaled.get('experience_reward', 30) * scale * 1.5)
-    scaled['gold_reward'] = max(1, int(scaled.get('gold_reward', 10) * 1.5) + random.randint(5, 15))
+    scaled['exp_reward'] = int(scaled.get('experience_reward', 30) * 1.5)
+    scaled['gold_reward'] = max(1, int(scaled.get('gold_reward', 10)) + random.randint(5, 15))
     scaled['loot_table'] = scaled.get('loot_table', [])
     scaled['is_ambush'] = True
-
-    player_level = _player.get('level', 1)
-    if player_level >= 10:
-        level_buff = 1.0 + (player_level - 10) * 0.05
-        scaled['hp'] = int(scaled['hp'] * level_buff)
-        scaled['max_hp'] = scaled['hp']
-        scaled['attack'] = int(scaled['attack'] * level_buff)
 
     return {
         'type': 'ambush',

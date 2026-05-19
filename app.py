@@ -4334,18 +4334,16 @@ def action_explore():
         boss_key = random.choice(possible_bosses)
         boss_data = GAME_DATA.get("bosses", {}).get(boss_key, {})
         if boss_data:
-            lvl = _effective_mob_level(player["level"])
-            scale = 1 + (lvl - 1) * 0.12
             enemy = {
                 "key": boss_key,
                 "name": boss_data.get("name", boss_key.replace("_", " ").title()),
-                "hp": int(boss_data.get("hp", 200) * scale),
-                "max_hp": int(boss_data.get("hp", 200) * scale),
-                "attack": int(boss_data.get("attack", 20) * scale),
-                "defense": int(boss_data.get("defense", 10) * scale),
+                "hp": int(boss_data.get("hp", 200)),
+                "max_hp": int(boss_data.get("hp", 200)),
+                "attack": int(boss_data.get("attack", 20)),
+                "defense": int(boss_data.get("defense", 10)),
                 "speed": boss_data.get("speed", 12),
-                "exp_reward": int(boss_data.get("experience_reward", 200) * scale),
-                "gold_reward": int(boss_data.get("gold_reward", 100) * scale),
+                "exp_reward": int(boss_data.get("experience_reward", 200)),
+                "gold_reward": int(boss_data.get("gold_reward", 100)),
                 "loot_table": boss_data.get("unique_loot", []),
                 "is_boss": True,
                 "tags": boss_data.get("tags", ["humanoid"]),
@@ -4371,17 +4369,15 @@ def action_explore():
         enemy_data = GAME_DATA["enemies"].get(enemy_key, {})
         if not isinstance(enemy_data, dict):
             enemy_data = {}
-        lvl = _effective_mob_level(player["level"])
-        scale = 1 + (lvl - 1) * 0.12
         enemy = {
             "key": enemy_key,
             "name": enemy_data.get("name", enemy_key.replace("_", " ").title()),
-            "hp": int(enemy_data.get("hp", 50) * scale),
-            "max_hp": int(enemy_data.get("hp", 50) * scale),
-            "attack": int(enemy_data.get("attack", 10) * scale),
-            "defense": int(enemy_data.get("defense", 5) * scale),
+            "hp": int(enemy_data.get("hp", 50)),
+            "max_hp": int(enemy_data.get("hp", 50)),
+            "attack": int(enemy_data.get("attack", 10)),
+            "defense": int(enemy_data.get("defense", 5)),
             "speed": enemy_data.get("speed", 10),
-            "exp_reward": int(enemy_data.get("experience_reward", 30) * scale),
+            "exp_reward": int(enemy_data.get("experience_reward", 30)),
             "gold_reward": max(
                 1, int(enemy_data.get("gold_reward", 10)) + dice.between(-3, 10)
             ),
@@ -4747,18 +4743,16 @@ def action_challenge_boss():
     boss_cooldowns[boss_key] = now_ts + BOSS_CHALLENGE_COOLDOWN
     player["boss_cooldowns"] = boss_cooldowns
 
-    lvl = _effective_mob_level(player["level"])
-    scale = 1 + (lvl - 1) * 0.12
     enemy = {
         "key": boss_key,
         "name": boss_data.get("name", boss_key.replace("_", " ").title()),
-        "hp": int(boss_data.get("hp", 200) * scale),
-        "max_hp": int(boss_data.get("hp", 200) * scale),
-        "attack": int(boss_data.get("attack", 20) * scale),
-        "defense": int(boss_data.get("defense", 10) * scale),
+        "hp": int(boss_data.get("hp", 200)),
+        "max_hp": int(boss_data.get("hp", 200)),
+        "attack": int(boss_data.get("attack", 20)),
+        "defense": int(boss_data.get("defense", 10)),
         "speed": boss_data.get("speed", 12),
-        "exp_reward": int(boss_data.get("experience_reward", 200) * scale),
-        "gold_reward": int(boss_data.get("gold_reward", 100) * scale),
+        "exp_reward": int(boss_data.get("experience_reward", 200)),
+        "gold_reward": int(boss_data.get("gold_reward", 100)),
         "loot_table": boss_data.get("unique_loot", []),
         "is_boss": True,
         "tags": boss_data.get("tags", ["humanoid"]),
@@ -6853,18 +6847,16 @@ def dungeon_proceed():
         bosses_data: dict[str, Any] = GAME_DATA.get("bosses", {})
         boss_data: dict[str, Any] = bosses_data.get(boss_id, {})
         if boss_data:
-            difficulty = room.get("difficulty", 1)
-            scale = 0.8 + difficulty * 0.2
             enemy = {
                 "key": boss_id,
                 "name": boss_data.get("name", boss_id.replace("_", " ").title()),
-                "hp": int(boss_data.get("hp", 200) * scale),
-                "max_hp": int(boss_data.get("hp", 200) * scale),
-                "attack": int(boss_data.get("attack", 20) * scale),
-                "defense": int(boss_data.get("defense", 10) * scale),
+                "hp": int(boss_data.get("hp", 200)),
+                "max_hp": int(boss_data.get("hp", 200)),
+                "attack": int(boss_data.get("attack", 20)),
+                "defense": int(boss_data.get("defense", 10)),
                 "speed": boss_data.get("speed", 12),
-                "exp_reward": int(boss_data.get("experience_reward", 200) * scale),
-                "gold_reward": int(boss_data.get("gold_reward", 100) * scale),
+                "exp_reward": int(boss_data.get("experience_reward", 200)),
+                "gold_reward": int(boss_data.get("gold_reward", 100)),
                 "loot_table": boss_data.get("loot_table", []),
                 "is_boss": True,
                 "tags": boss_data.get("tags", ["humanoid"]),
@@ -8525,18 +8517,16 @@ def api_action_explore():
         boss_key = random.choice(possible_bosses)
         boss_data = GAME_DATA.get("bosses", {}).get(boss_key, {})
         if boss_data:
-            lvl = _effective_mob_level(player["level"])
-            scale = 1 + (lvl - 1) * 0.12
             enemy = {
                 "key": boss_key,
                 "name": boss_data.get("name", boss_key.replace("_", " ").title()),
-                "hp": int(boss_data.get("hp", 200) * scale),
-                "max_hp": int(boss_data.get("hp", 200) * scale),
-                "attack": int(boss_data.get("attack", 20) * scale),
-                "defense": int(boss_data.get("defense", 10) * scale),
+                "hp": int(boss_data.get("hp", 200)),
+                "max_hp": int(boss_data.get("hp", 200)),
+                "attack": int(boss_data.get("attack", 20)),
+                "defense": int(boss_data.get("defense", 10)),
                 "speed": boss_data.get("speed", 12),
-                "exp_reward": int(boss_data.get("experience_reward", 200) * scale),
-                "gold_reward": int(boss_data.get("gold_reward", 100) * scale),
+                "exp_reward": int(boss_data.get("experience_reward", 200)),
+                "gold_reward": int(boss_data.get("gold_reward", 100)),
                 "loot_table": boss_data.get("unique_loot", []),
                 "is_boss": True,
                 "tags": boss_data.get("tags", ["humanoid"]),
@@ -8562,17 +8552,15 @@ def api_action_explore():
         enemy_key = random.choice(possible_enemies)
         enemy_data = GAME_DATA["enemies"].get(enemy_key, {})
         if isinstance(enemy_data, dict) and enemy_data:
-            lvl = _effective_mob_level(player["level"])
-            scale = 1 + (lvl - 1) * 0.12
             enemy = {
                 "key": enemy_key,
                 "name": enemy_data.get("name", enemy_key.replace("_", " ").title()),
-                "hp": int(enemy_data.get("hp", 50) * scale),
-                "max_hp": int(enemy_data.get("hp", 50) * scale),
-                "attack": int(enemy_data.get("attack", 10) * scale),
-                "defense": int(enemy_data.get("defense", 5) * scale),
+                "hp": int(enemy_data.get("hp", 50)),
+                "max_hp": int(enemy_data.get("hp", 50)),
+                "attack": int(enemy_data.get("attack", 10)),
+                "defense": int(enemy_data.get("defense", 5)),
                 "speed": enemy_data.get("speed", 10),
-                "exp_reward": int(enemy_data.get("experience_reward", 30) * scale),
+                "exp_reward": int(enemy_data.get("experience_reward", 30)),
                 "gold_reward": max(
                     1, int(enemy_data.get("gold_reward", 10)) + dice.between(-3, 10)
                 ),
@@ -9317,6 +9305,29 @@ def api_battle_use_item():
             "battle": _api_battle_summary(),
         }
     )
+
+
+# ── Jinja2 filter: abbreviate large numbers ──────────────────────────────────
+
+@app.template_filter("fmt_num")
+def _fmt_num(n):
+    try:
+        n = float(n)
+    except (TypeError, ValueError):
+        return str(n)
+    neg = n < 0
+    a = abs(n)
+    if a < 10_000:
+        result = str(int(round(a)))
+    elif a < 1_000_000:
+        result = f"{a/1_000:.1f}".rstrip('0').rstrip('.') + 'K'
+    elif a < 1_000_000_000:
+        result = f"{a/1_000_000:.2f}".rstrip('0').rstrip('.') + 'M'
+    elif a < 1_000_000_000_000:
+        result = f"{a/1_000_000_000:.2f}".rstrip('0').rstrip('.') + 'B'
+    else:
+        result = f"{a:.2e}".replace('e+0', 'e').replace('e+', 'e')
+    return ('-' if neg else '') + result
 
 
 # ── Jinja2 filter: format unix timestamps ────────────────────────────────────

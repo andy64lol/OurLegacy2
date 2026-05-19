@@ -15,6 +15,7 @@
     var _lastMsgCount = 0;
     var _pollTimer = null;
     var _pollInterval = 5000;
+    var _shownMsgIds = new Set();
 
     function _setText(id, val) {
         var el = document.getElementById(id);
@@ -89,18 +90,32 @@
 
     /* ── Message updater ─────────────────────────────────────────────────── */
 
+    function _msgId(msg, index) {
+        return (msg.text || '') + '|' + (msg.color || '') + '|' + index;
+    }
+
     function spaUpdateMessages(messages, onlyNew) {
         if (!messages || !messages.length) return;
 
-        var toShow = onlyNew ? messages.slice(_lastMsgCount) : messages;
+        var toShow = onlyNew ? messages.slice(_lastMsgCount) : messages.slice(_lastMsgCount);
         _lastMsgCount = messages.length;
 
-        toShow.forEach(function (msg, i) {
+        var queued = 0;
+        toShow.forEach(function (msg) {
+            var id = _msgId(msg, _lastMsgCount - toShow.length + queued);
+            if (_shownMsgIds.has(id)) return;
+            _shownMsgIds.add(id);
+            if (_shownMsgIds.size > 200) {
+                var first = _shownMsgIds.values().next().value;
+                _shownMsgIds.delete(first);
+            }
+            var delay = queued * 180;
+            queued++;
             setTimeout(function () {
                 if (typeof showToast === 'function') {
                     showToast(msg.text, msg.color, 5000);
                 }
-            }, i * 180);
+            }, delay);
         });
 
         /* update the recent-events panel with last 5 */
@@ -155,8 +170,7 @@
                     return;
                 }
                 if (data.messages && data.messages.length) {
-                    _lastMsgCount = 0;
-                    spaUpdateMessages(data.messages, false);
+                    spaUpdateMessages(data.messages, true);
                 }
                 if (data.player) {
                     spaUpdatePlayerStats(data.player);
@@ -198,7 +212,13 @@
             !document.getElementById('sidebar-atk-val')) {
             return;
         }
-        _lastMsgCount = 0;
+        /* Seed count from page-load messages so we don't re-toast old ones */
+        if (window._gameMessages && Array.isArray(window._gameMessages)) {
+            _lastMsgCount = window._gameMessages.length;
+            window._gameMessages.forEach(function (msg, i) {
+                _shownMsgIds.add(_msgId(msg, i));
+            });
+        }
         spaPoll();
         _pollTimer = setInterval(spaPoll, _pollInterval);
     }
