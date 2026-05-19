@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height:100%;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Legacy 2 — Vue Beta</title>
     <link rel="icon" href="/game_assets/game_title_our_legacy_2.webp" type="image/png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
+        html, body { height: 100%; margin: 0; }
+
         [v-cloak] { display: none !important; }
 
         .beta-badge {
@@ -54,7 +54,7 @@
         .vtab-panel { display: none; padding: 14px 2px; }
         .vtab-panel.vtab-panel-active { display: block; }
 
-        .vtab-btn.vtab-battle {
+        .tab-btn.vtab-battle {
             color: var(--red) !important;
             animation: pulse-tab 1.2s ease infinite;
         }
@@ -201,7 +201,7 @@
                 </div>
 
                 <div class="beta-banner">
-                    ⚗ Vue 3 Beta &mdash; admin preview
+                    Vue 3 Beta &mdash; admin preview
                 </div>
 
                 <div class="panel sidebar-panel" v-if="player">
@@ -278,22 +278,24 @@
             </div>
         </aside>
 
+        <div id="sidebar-resize-handle"></div>
+
         <div class="main-content">
             <div style="padding: 0 0 12px 0; max-width: 900px; margin: 0 auto;">
 
                 <div class="tab-nav-wrap">
                     <div class="tab-nav">
                         <button class="tab-btn" :class="{ active: activeTab === 'play' }"
-                                @click="switchTab('play')">&#9876; Play</button>
+                                @click="switchTab('play')">Play</button>
                         <button class="tab-btn vtab-battle" v-if="inBattle"
                                 :class="{ active: activeTab === 'battle' }"
-                                @click="switchTab('battle')">&#9876; Battle!</button>
+                                @click="switchTab('battle')">Battle!</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'inventory' }"
-                                @click="switchTab('inventory')">&#9764; Inventory</button>
+                                @click="switchTab('inventory')">Inventory</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'character' }"
-                                @click="switchTab('character')">&#9872; Character</button>
+                                @click="switchTab('character')">Character</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'travel' }"
-                                @click="switchTab('travel')">&#9760; Travel</button>
+                                @click="switchTab('travel')">Travel</button>
                     </div>
                 </div>
 
@@ -309,23 +311,23 @@
 
                     <div v-if="inBattle" class="panel" style="border-color:rgba(200,60,60,0.4);margin-bottom:12px;">
                         <div class="panel-body" style="color:var(--red);font-size:14px;">
-                            &#9876; You are in battle! Switch to the <strong>Battle</strong> tab.
+                            You are in battle! Switch to the <strong>Battle</strong> tab.
                             <button class="btn btn-danger" style="margin-left:10px;" @click="switchTab('battle')">Go to Battle</button>
                         </div>
                     </div>
 
                     <div v-if="!inBattle" class="action-row">
                         <button class="btn btn-primary" @click="explore" :disabled="actionPending || !player">
-                            [[ actionPending ? 'Working…' : '⚔ Explore' ]]
+                            [[ actionPending ? 'Working...' : 'Explore' ]]
                         </button>
                         <button v-if="canRest" class="btn btn-secondary" @click="rest" :disabled="actionPending">
-                            &#10041; Rest
+                            Rest
                             <span v-if="area && area.rest_cost" style="font-size:11px;margin-left:4px;">
                                 ([[ area.rest_cost ]]g)
                             </span>
                         </button>
                         <button v-if="canMine" class="btn btn-secondary" @click="mine" :disabled="actionPending">
-                            &#9935; Mine
+                            Mine
                         </button>
                     </div>
 
@@ -356,7 +358,7 @@
                         <div class="battle-enemy-header">
                             <div>
                                 <div class="battle-enemy-name">
-                                    <span v-if="battle.is_boss">&#9878; </span>[[ battle.enemy_name ]]
+                                    [[ battle.enemy_name ]]
                                     <span v-if="battle.is_boss" class="beta-badge">BOSS</span>
                                 </div>
                             </div>
@@ -381,13 +383,13 @@
 
                         <div class="battle-actions">
                             <button class="btn btn-danger btn-attack" @click="battleAttack" :disabled="actionPending">
-                                &#9876; Attack
+                                Attack
                             </button>
                             <button class="btn btn-secondary btn-defend" @click="battleDefend" :disabled="actionPending">
-                                &#9748; Defend
+                                Defend
                             </button>
                             <button class="btn btn-secondary" @click="battleFlee" :disabled="actionPending">
-                                &#8594; Flee
+                                Flee
                             </button>
                         </div>
                     </div>
@@ -399,7 +401,7 @@
                     <div v-if="inventoryCounts.length" class="inv-grid">
                         <div v-for="item in inventoryCounts" :key="item.name" class="inv-row">
                             <span class="inv-row-name">[[ item.name ]]</span>
-                            <span class="inv-row-qty">×[[ item.qty ]]</span>
+                            <span class="inv-row-qty">x[[ item.qty ]]</span>
                             <div class="inv-row-actions">
                                 <button class="btn btn-xsmall btn-secondary"
                                         @click="useItem(item.name)"
@@ -492,7 +494,7 @@
                                     class="btn btn-secondary"
                                     @click="travel(conn)"
                                     :disabled="actionPending || inBattle">
-                                &#9654; [[ conn.replace(/_/g, ' ') ]]
+                                [[ conn.replace(/_/g, ' ') ]]
                             </button>
                         </div>
                     </div>
