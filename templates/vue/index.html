@@ -1,0 +1,264 @@
+{% extends "vue/base.html" %}
+{% block title %}Our Legacy 2 — Medieval Fantasy RPG{% endblock %}
+{% block extra_head %}
+<script>
+window._init = {
+    player:          {{ player          | tojson if player else 'null' }},
+    has_save:        {{ has_save        | tojson }},
+    show_welcome:    {{ show_welcome    | tojson if show_welcome    is defined else 'false' }},
+    show_create:     {{ show_create     | tojson if show_create     is defined else 'false' }},
+    in_battle:       {{ in_battle       | tojson if in_battle       is defined else 'false' }},
+    online_username: {{ online_username | tojson }},
+    announcements:   {{ announcements   | tojson if announcements   is defined else '[]' }},
+    areas:           {{ areas           | tojson if areas           is defined else '[]' }},
+    class_data:      {{ class_data      | tojson if class_data      is defined else '{}' }},
+    race_data:       {{ race_data       | tojson if race_data       is defined else '{}' }},
+    messages:        {{ messages        | tojson if messages        is defined else '[]' }},
+    battle:          {{ battle          | tojson if battle          is defined else 'null' }},
+};
+</script>
+<style>
+    [v-cloak] { display: none !important; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-box { background: var(--bg-panel); border: 2px solid var(--border); border-radius: 12px; padding: 0; width: min(480px, 96vw); max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--wood-dark); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .modal-header-title { font-size: 15px; font-weight: 700; color: var(--gold); letter-spacing: 0.05em; text-transform: uppercase; }
+    .modal-body { padding: 18px; flex: 1; }
+    .modal-close { background: none; border: none; color: var(--text-dim); font-size: 22px; cursor: pointer; line-height: 1; padding: 0; }
+    .modal-close:hover { color: var(--text-light); }
+    .modal-tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 16px; }
+    .modal-tab { padding: 10px 16px; font-size: 12px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-dim); cursor: pointer; font-family: inherit; letter-spacing: 0.04em; transition: color 0.15s, border-color 0.15s; }
+    .modal-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .modal-tab:hover { color: var(--text-light); }
+    .modal-field-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .modal-input { width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 6px; color: var(--text-light); font-family: inherit; font-size: 13px; padding: 9px 12px; outline: none; margin-bottom: 10px; }
+    .modal-input:focus { border-color: rgba(200,160,60,0.5); }
+    .modal-btn { display: block; width: 100%; padding: 11px 0; background: linear-gradient(135deg, #e8d5a0, #c8a960); color: #1a0c02; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; transition: opacity 0.15s; margin-top: 4px; }
+    .modal-btn:hover { opacity: 0.9; }
+    .modal-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .modal-status { font-size: 12px; text-align: center; margin-top: 8px; min-height: 18px; }
+    .modal-divider { height: 1px; background: var(--border); margin: 14px 0; }
+    .class-grid-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .class-pick-card { background: rgba(255,255,255,0.03); border: 2px solid transparent; border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+    .class-pick-card:hover { background: rgba(255,255,255,0.06); }
+    .class-pick-card.selected { border-color: rgba(200,160,60,0.6); background: rgba(200,160,60,0.08); }
+    .class-pick-name { font-size: 13px; font-weight: 700; color: var(--gold); margin-bottom: 3px; }
+    .class-pick-desc { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+    .main-wrap { max-width: 960px; margin: 0 auto; padding: 14px; min-height: 100vh; }
+    .hero-banner { text-align: center; padding: 28px 20px 20px; }
+    .hero-title-img { max-width: 400px; width: 85%; image-rendering: pixelated; filter: drop-shadow(0 4px 24px rgba(160,110,30,0.45)); margin-bottom: 14px; }
+    .hero-sub { font-size: 13px; color: var(--text-dim); max-width: 480px; margin: 0 auto 20px; line-height: 1.6; }
+    .cta-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .cta-btn { padding: 10px 28px; font-size: 13px; font-weight: 700; border-radius: 8px; text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border: none; font-family: inherit; display: inline-block; }
+    .cta-primary { background: linear-gradient(135deg, #e8d5a0, #c8a960); color: #1a0c02; }
+    .cta-secondary { background: rgba(255,255,255,0.08); color: var(--text-light); border: 1px solid var(--border); }
+    .cta-secondary:hover { background: rgba(255,255,255,0.14); }
+    .news-panels { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 20px; }
+    .news-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    .news-card-title { font-size: 13px; font-weight: 700; color: var(--gold); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .news-card-body { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+    .saved-info { display: flex; align-items: center; gap: 10px; background: rgba(200,160,60,0.08); border: 1px solid rgba(200,160,60,0.25); border-radius: 8px; padding: 12px 16px; margin-bottom: 14px; }
+    .saved-name { font-size: 15px; font-weight: 700; color: var(--gold); }
+    .saved-meta { font-size: 12px; color: var(--text-dim); }
+    .vue-toast-wrap { position: fixed; top: 14px; right: 14px; z-index: 99999; display: flex; flex-direction: column; gap: 7px; pointer-events: none; max-width: 340px; }
+    .vue-toast { background: rgba(10,6,2,0.96); border: 1px solid rgba(200,165,90,0.38); border-radius: 5px; padding: 9px 14px; font-size: 13px; backdrop-filter: blur(8px); animation: vt-in 0.18s ease; }
+    @keyframes vt-in { from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);} }
+    .battle-quick-panel { background: rgba(80,10,10,0.18); border: 1px solid rgba(200,60,60,0.3); border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+    .online-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--green-bright); background: rgba(60,200,80,0.1); border: 1px solid rgba(60,200,80,0.3); border-radius: 20px; padding: 3px 10px; }
+    .online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-bright); }
+</style>
+{% endblock %}
+{% block content %}
+<div id="vue-index-app" v-cloak>
+
+    <div class="vue-toast-wrap">
+        <div v-for="t in toasts" :key="t.id" class="vue-toast" :style="{ color: t.color || 'var(--text-light)' }">[[ t.text ]]</div>
+    </div>
+
+    <!-- ONLINE MODAL -->
+    <div v-if="showOnlineModal" class="modal-overlay" @click.self="showOnlineModal = false">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span class="modal-header-title">Cloud Account</span>
+                <button class="modal-close" @click="showOnlineModal = false">&times;</button>
+            </div>
+            <div v-if="!onlineUsername">
+                <div class="modal-tabs">
+                    <button class="modal-tab" :class="{ active: onlineTab === 'login' }" @click="onlineTab = 'login'">Sign In</button>
+                    <button class="modal-tab" :class="{ active: onlineTab === 'register' }" @click="onlineTab = 'register'">Register</button>
+                    <button class="modal-tab" :class="{ active: onlineTab === 'save' }" @click="onlineTab = 'save'">Cloud Saves</button>
+                </div>
+
+                <div class="modal-body">
+                    <div v-if="onlineTab === 'login'">
+                        <div class="modal-field-label">Username</div>
+                        <input class="modal-input" type="text" v-model="loginUser" placeholder="Username" autocomplete="username" @keydown.enter="doLogin">
+                        <div class="modal-field-label">Password</div>
+                        <input class="modal-input" type="password" v-model="loginPass" placeholder="Password" autocomplete="current-password" @keydown.enter="doLogin">
+                        <button class="modal-btn" @click="doLogin" :disabled="authLoading">
+                            [[ authLoading ? 'Signing in...' : 'Sign In' ]]
+                        </button>
+                        <div class="modal-status" :style="{ color: authOk ? 'var(--green-bright)' : 'var(--red)' }">[[ authMsg ]]</div>
+                    </div>
+
+                    <div v-if="onlineTab === 'register'">
+                        <div class="modal-field-label">Username</div>
+                        <input class="modal-input" type="text" v-model="regUser" placeholder="Username (3–20 chars)" autocomplete="username" maxlength="20">
+                        <div class="modal-field-label">Password</div>
+                        <input class="modal-input" type="password" v-model="regPass" placeholder="Password (6+ chars)" autocomplete="new-password" @keydown.enter="doRegister">
+                        <div class="modal-field-label">Email (optional, for recovery)</div>
+                        <input class="modal-input" type="email" v-model="regEmail" placeholder="your@email.com" autocomplete="email">
+                        <button class="modal-btn" @click="doRegister" :disabled="authLoading">
+                            [[ authLoading ? 'Creating account...' : 'Create Account' ]]
+                        </button>
+                        <div class="modal-status" :style="{ color: authOk ? 'var(--green-bright)' : 'var(--red)' }">[[ authMsg ]]</div>
+                    </div>
+
+                    <div v-if="onlineTab === 'save'">
+                        <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px;line-height:1.6;">
+                            Sign in to save your progress to the cloud. Your save file works across all servers.
+                        </p>
+                        <div v-if="cloudSaves.length">
+                            <div v-for="save in cloudSaves" :key="save.username"
+                                 style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
+                                <div style="flex:1;">
+                                    <div style="font-weight:700;color:var(--gold);">[[ save.player_name ]]</div>
+                                    <div style="font-size:11px;color:var(--text-dim);">Lv.[[ save.level ]] [[ save.char_class ]] &bull; Last saved [[ save.updated_at ]]</div>
+                                </div>
+                                <button class="btn btn-small btn-secondary" @click="loadCloudSave(save.username)">Load</button>
+                            </div>
+                        </div>
+                        <div v-else-if="savesLoading" style="text-align:center;color:var(--text-dim);padding:20px;">Loading saves…</div>
+                        <div v-else style="text-align:center;color:var(--text-dim);padding:20px;">Sign in to see your cloud saves.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else class="modal-body">
+                <div class="online-badge" style="margin-bottom:14px;"><span class="online-dot"></span>[[ onlineUsername ]]</div>
+                <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px;">You are signed in to your cloud account. Your progress is automatically saved.</p>
+                <button class="modal-btn" @click="doLogout" :disabled="authLoading" style="background:rgba(255,80,80,0.15);color:var(--red);border:1px solid rgba(255,80,80,0.3);">
+                    Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE CHARACTER MODAL -->
+    <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
+        <div class="modal-box" style="max-width:560px;">
+            <div class="modal-header">
+                <span class="modal-header-title">Create Your Legend</span>
+                <button class="modal-close" @click="showCreateModal = false">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field-label">Character Name</div>
+                <input class="modal-input" type="text" v-model="newName" placeholder="Name your hero..." maxlength="24" autocomplete="off">
+
+                <div class="modal-field-label" style="margin-top:8px;">Choose Your Class</div>
+                <div class="class-grid-pick">
+                    <div v-for="(cls, key) in classData" :key="key"
+                         class="class-pick-card"
+                         :class="{ selected: selectedClass === key }"
+                         @click="selectedClass = key">
+                        <div class="class-pick-name">[[ key ]]</div>
+                        <div class="class-pick-desc">[[ cls.description ? cls.description.slice(0, 50) : '' ]]</div>
+                    </div>
+                </div>
+
+                <div v-if="selectedClass && classData[selectedClass]" style="margin-top:14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:6px;padding:10px 12px;">
+                    <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">[[ selectedClass ]]</div>
+                    <div style="font-size:11px;color:var(--text-dim);display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
+                        <span>HP: [[ classData[selectedClass].base_hp ]]</span>
+                        <span>MP: [[ classData[selectedClass].base_mp ]]</span>
+                        <span>ATK: [[ classData[selectedClass].base_attack ]]</span>
+                        <span>DEF: [[ classData[selectedClass].base_defense ]]</span>
+                        <span>SPD: [[ classData[selectedClass].base_speed ]]</span>
+                        <span>Gold: [[ classData[selectedClass].starting_gold ]]</span>
+                    </div>
+                </div>
+
+                <button class="modal-btn" style="margin-top:16px;" @click="doCreate" :disabled="createLoading || !newName.trim() || !selectedClass">
+                    [[ createLoading ? 'Creating...' : 'Begin Adventure!' ]]
+                </button>
+                <div class="modal-status" :style="{ color: createOk ? 'var(--green-bright)' : 'var(--red)' }">[[ createMsg ]]</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-wrap">
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+            <img src="/game_assets/game_title_main_menu.webp" alt="Our Legacy 2" class="hero-title-img">
+            <p class="hero-sub">A medieval fantasy RPG. Explore dungeons, battle monsters, and forge your legend.</p>
+
+            <div v-if="onlineUsername" style="margin-bottom:12px;">
+                <span class="online-badge"><span class="online-dot"></span>[[ onlineUsername ]]</span>
+            </div>
+
+            <div class="cta-row">
+                <template v-if="hasSave">
+                    <a href="/game" class="cta-btn cta-primary">Continue Adventure</a>
+                </template>
+                <template v-else>
+                    <button class="cta-btn cta-primary" @click="showCreateModal = true">Start New Game</button>
+                </template>
+                <a href="/play" class="cta-btn cta-secondary">Choose Server</a>
+                <button class="cta-btn cta-secondary" @click="showOnlineModal = true">
+                    [[ onlineUsername ? 'Cloud Account' : 'Sign In / Register' ]]
+                </button>
+            </div>
+        </div>
+
+        <!-- Player Save Info -->
+        <div v-if="player" class="saved-info">
+            <div style="flex:1;">
+                <div class="saved-name">[[ player.name ]]</div>
+                <div class="saved-meta">Lv.[[ player.level ]] [[ player.char_class || player['class'] ]] &bull; [[ player.race ]] &bull; [[ player.hp ]]/[[ player.max_hp ]] HP &bull; [[ player.gold ]]g</div>
+            </div>
+            <a href="/game" class="btn btn-primary btn-small">Play</a>
+        </div>
+
+        <!-- Battle quick banner (if in combat) -->
+        <div v-if="inBattle && battle" class="battle-quick-panel">
+            <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:8px;">⚔ Battle in Progress!</div>
+            <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">You are currently fighting [[ battle.enemy_name || 'an enemy' ]].</div>
+            <a href="/game?tab=battle" class="btn btn-danger btn-small">Return to Battle →</a>
+        </div>
+
+        <!-- Announcements / News -->
+        <div v-if="announcements && announcements.length" class="news-panels">
+            <div v-for="ann in announcements" :key="ann.id || ann.title" class="news-card">
+                <div class="news-card-title">[[ ann.title || 'Update' ]]</div>
+                <div class="news-card-body">[[ ann.body || ann.message || '' ]]</div>
+            </div>
+        </div>
+        <div v-else class="news-panels">
+            <div class="news-card">
+                <div class="news-card-title">Welcome</div>
+                <div class="news-card-body">Begin your adventure in the world of Our Legacy 2. Fight monsters, gather loot, and become a legend.</div>
+            </div>
+            <div class="news-card">
+                <div class="news-card-title">Multiplayer</div>
+                <div class="news-card-body">Sign in to enable real-time chat, groups, trading, and the global leaderboard.</div>
+            </div>
+            <div class="news-card">
+                <div class="news-card-title">Cloud Saves</div>
+                <div class="news-card-body">Register an account to back up your character to the cloud and play across multiple servers.</div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;justify-content:center;">
+            <a href="/wiki" class="btn btn-secondary btn-small">Wiki</a>
+            <a href="/leaderboard" class="btn btn-secondary btn-small">Leaderboard</a>
+            <a href="/chat" class="btn btn-secondary btn-small">Global Chat</a>
+            <a href="/groups" class="btn btn-secondary btn-small">Groups</a>
+            <a href="/friends" class="btn btn-secondary btn-small">Friends</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/vue/index.js"></script>
+{% endblock %}

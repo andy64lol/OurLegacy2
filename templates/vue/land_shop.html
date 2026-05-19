@@ -1,0 +1,63 @@
+{% extends "vue/base.html" %}
+{% block title %}Housing Shop — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<script>
+window._init = {
+    player: {{ player | tojson }},
+    land_data: {{ land_data | tojson }},
+};
+</script>
+<style>
+    .subpage-outer { max-width: 960px; margin: 0 auto; padding: 14px; min-height: 100vh; }
+    .subpage-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 10px 14px; background: var(--bg-panel); border: 1px solid var(--border); }
+    .subpage-title { flex: 1; font-size: 15px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+{% endblock %}
+{% block content %}
+<div id="vue-land-shop-app" v-cloak>
+<div class="subpage-outer">
+    <div class="subpage-header">
+        <a href="/game?tab=land" class="btn btn-secondary btn-small">&#8592; Back to Land</a>
+        <span class="subpage-title">Housing Shop</span>
+        <span style="font-size:13px;color:var(--gold);">Gold: <strong>[[ player.gold ]]</strong>g</span>
+    </div>
+
+    <template v-for="(typeInfo, typeKey) in land_data.building_types" :key="typeKey">
+        <div v-if="land_data.housing_by_type[typeKey] && land_data.housing_by_type[typeKey].length"
+             class="panel land-section" style="margin-bottom:14px;">
+            <div class="panel-title">
+                [[ typeInfo.label ]]
+                <span class="panel-subtitle">[[ typeInfo.slots ]] slot[[ typeInfo.slots !== 1 ? 's' : '' ]]</span>
+            </div>
+            <div class="panel-body">
+                <div class="housing-shop-grid">
+                    <div v-for="h in land_data.housing_by_type[typeKey]" :key="h.key"
+                         class="housing-card"
+                         :class="{ 'owned-card': h.owned }">
+                        <div class="housing-name" :class="'rarity-' + h.rarity">[[ h.name ]]</div>
+                        <div class="housing-desc">[[ h.description ? h.description.slice(0,70) : '' ]]</div>
+                        <div class="housing-meta">
+                            <span class="housing-price">[[ h.price ]]g</span>
+                            <span class="housing-comfort">+[[ h.comfort ]] comfort</span>
+                        </div>
+                        <div class="housing-actions">
+                            <button v-if="!h.owned" class="btn btn-xsmall btn-primary"
+                                    :disabled="!h.can_afford || actionPending"
+                                    @click="buyHousing(h.key)">Buy</button>
+                            <template v-else>
+                                <span style="font-size:12px;color:var(--green-bright);">Owned</span>
+                                <a :href="'/land/map?place_key=' + h.key + '&place_name=' + encodeURIComponent(h.name)"
+                                   class="btn btn-xsmall btn-secondary">Place on Map &#8594;</a>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/vue/land_shop.js"></script>
+{% endblock %}

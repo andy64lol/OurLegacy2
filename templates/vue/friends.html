@@ -1,0 +1,237 @@
+{% extends "vue/base.html" %}
+{% block title %}Friends &amp; Social — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+window._init = {
+    online_username: {{ online_username | tojson }},
+    friends:  {{ friends  | tojson }},
+    requests: {{ requests | tojson }},
+    blocked:  {{ blocked  | tojson }},
+};
+</script>
+<style>
+    [v-cloak] { display: none !important; }
+    .friends-page { display: grid; grid-template-columns: 280px 1fr; gap: 14px; padding: 14px; max-width: 1100px; margin: 0 auto; min-height: 100vh; }
+    @media (max-width: 700px) { .friends-page { grid-template-columns: 1fr; } }
+    .friends-sidebar { display: flex; flex-direction: column; gap: 12px; }
+    .friends-main { display: flex; flex-direction: column; gap: 12px; }
+    .add-friend-row { display: flex; gap: 6px; }
+    .add-friend-row input { flex: 1; }
+    .friend-list { display: flex; flex-direction: column; gap: 4px; }
+    .friend-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; transition: background 0.12s, border-color 0.12s; }
+    .friend-item:hover, .friend-item.active { background: rgba(255,255,255,0.05); border-color: rgba(200,160,60,0.25); }
+    .friend-item.active { border-color: rgba(200,160,60,0.5); }
+    .friend-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--wood-dark); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+    .friend-info { flex: 1; min-width: 0; }
+    .friend-name { font-size: 13px; font-weight: 700; color: var(--text-light); }
+    .friend-status { font-size: 10px; color: var(--text-dim); }
+    .friend-status.online { color: var(--green-bright); }
+    .online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-bright); display: inline-block; margin-right: 3px; }
+    .req-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: rgba(200,160,40,0.08); border: 1px solid rgba(200,160,40,0.2); border-radius: 6px; margin-bottom: 4px; }
+    .req-actions { display: flex; gap: 4px; margin-left: auto; }
+    .dm-panel { display: flex; flex-direction: column; height: 60vh; }
+    .dm-header { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--wood-dark); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .dm-messages { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+    .dm-msg { max-width: 80%; display: flex; flex-direction: column; }
+    .dm-msg.dm-self { align-self: flex-end; }
+    .dm-bubble { padding: 5px 10px; border-radius: 8px; font-size: 12px; line-height: 1.5; word-break: break-word; }
+    .dm-self .dm-bubble { background: rgba(200,160,60,0.14); border: 1px solid rgba(200,160,60,0.25); }
+    .dm-other .dm-bubble { background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
+    .dm-meta { font-size: 10px; color: var(--text-dim); margin-bottom: 2px; }
+    .dm-self .dm-meta { text-align: right; }
+    .dm-input-row { display: flex; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .dm-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 6px; color: var(--text-light); font-family: inherit; font-size: 12px; padding: 6px 10px; outline: none; }
+    .dm-input:focus { border-color: rgba(200,160,60,0.5); }
+    .dm-actions { display: flex; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .trade-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 9000; display: flex; align-items: center; justify-content: center; }
+    .trade-panel { background: var(--bg-panel); border: 2px solid var(--border); border-radius: 10px; padding: 0; width: min(680px, 95vw); max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+    .trade-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--wood-dark); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .trade-body { flex: 1; overflow-y: auto; padding: 16px; }
+    .trade-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .trade-col-title { font-size: 12px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; font-weight: 700; }
+    .trade-item { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 4px; cursor: pointer; transition: background 0.1s; font-size: 12px; }
+    .trade-item:hover { background: rgba(255,255,255,0.06); }
+    .trade-item.selected { background: rgba(200,160,60,0.1); border-color: rgba(200,160,60,0.4); }
+    .trade-gold-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .trade-gold-input { width: 80px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--text-light); font-family: inherit; font-size: 12px; padding: 4px 8px; outline: none; }
+    .trade-footer { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .toast-container { position: fixed; bottom: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast { background: var(--bg-panel); border: 1px solid rgba(200,160,60,0.4); border-radius: 8px; padding: 10px 16px; font-size: 12px; color: var(--text-light); box-shadow: 0 4px 16px rgba(0,0,0,0.5); animation: slideIn 0.3s ease; pointer-events: auto; }
+    @keyframes slideIn { from { transform: translateX(60px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .no-friend-selected { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; color: var(--text-dim); gap: 10px; }
+    .empty-icon { font-size: 48px; opacity: 0.2; }
+</style>
+{% endblock %}
+{% block content %}
+<div id="vue-friends-app" v-cloak>
+
+<div class="toast-container">
+    <div v-for="(t, i) in toasts" :key="i" class="toast">[[ t.text ]]</div>
+</div>
+
+<div v-if="showTrade" class="trade-overlay" @click.self="showTrade = false">
+    <div class="trade-panel">
+        <div class="trade-header">
+            <span style="font-size:14px;font-weight:700;color:var(--gold);">Trade with [[ activeFriend ]]</span>
+            <button @click="showTrade = false" style="background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;">&times;</button>
+        </div>
+        <div class="trade-body">
+            <div v-if="tradeState === 'invite'" style="text-align:center;padding:20px;">
+                <p style="color:var(--text-dim);margin-bottom:16px;">Send a trade invitation to [[ activeFriend ]]?</p>
+                <button class="btn btn-primary" @click="sendTradeInvite">Send Invite</button>
+            </div>
+            <div v-else-if="tradeState === 'waiting'" style="text-align:center;padding:20px;">
+                <p style="color:var(--text-dim);margin-bottom:16px;">Waiting for [[ activeFriend ]] to accept...</p>
+                <button class="btn btn-secondary" @click="cancelTrade">Cancel</button>
+            </div>
+            <div v-else-if="tradeState === 'active'">
+                <div class="trade-cols">
+                    <div>
+                        <div class="trade-col-title">Your Offer</div>
+                        <div class="trade-gold-row">
+                            <label style="font-size:12px;color:var(--text-dim);">Gold:</label>
+                            <input class="trade-gold-input" type="number" min="0" v-model.number="myGoldOffer">
+                        </div>
+                        <div style="margin-top:10px;">
+                            <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">Your Items</div>
+                            <div v-for="item in myInventory" :key="item.name"
+                                 class="trade-item"
+                                 :class="{ selected: myOfferedItems.includes(item.name) }"
+                                 @click="toggleMyItem(item.name)">
+                                [[ item.name ]]
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="trade-col-title">Their Offer</div>
+                        <div style="font-size:12px;color:var(--text-dim);padding-top:4px;">Gold: [[ theirGoldOffer ]]</div>
+                        <div style="margin-top:10px;">
+                            <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">Their Items</div>
+                            <div v-for="item in theirOfferedItems" :key="item" class="trade-item selected">[[ item ]]</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-if="tradeState === 'active'" class="trade-footer">
+            <button class="btn btn-secondary" @click="cancelTrade">Cancel Trade</button>
+            <button class="btn btn-primary" @click="confirmTrade" :disabled="tradeConfirmed">
+                [[ tradeConfirmed ? 'Waiting for confirmation...' : 'Confirm Trade' ]]
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="friends-page">
+    <div class="friends-sidebar">
+        <div class="panel">
+            <div class="panel-title">Add Friend</div>
+            <div class="panel-body">
+                <div class="add-friend-row">
+                    <input type="text" class="text-input" v-model="addName"
+                           placeholder="Username..." @keydown.enter="addFriend"
+                           maxlength="24" autocomplete="off">
+                    <button class="btn btn-primary btn-small" @click="addFriend">Add</button>
+                </div>
+                <div v-if="addMsg" style="font-size:11px;margin-top:6px;"
+                     :style="{ color: addMsgOk ? 'var(--green-bright)' : 'var(--red)' }">[[ addMsg ]]</div>
+            </div>
+        </div>
+
+        <div v-if="requests.length" class="panel">
+            <div class="panel-title">Friend Requests <span style="color:var(--gold);">[[ requests.length ]]</span></div>
+            <div class="panel-body" style="padding-top:6px;">
+                <div v-for="req in requests" :key="req.from_user" class="req-item">
+                    <span style="font-size:12px;font-weight:700;flex:1;">[[ req.from_user ]]</span>
+                    <div class="req-actions">
+                        <button class="btn btn-small btn-primary" @click="respondRequest(req.from_user, 'accept')">Accept</button>
+                        <button class="btn btn-small btn-danger" @click="respondRequest(req.from_user, 'decline')">Decline</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" style="flex:1;">
+            <div class="panel-title">Friends ([[ friends.length ]])</div>
+            <div class="panel-body">
+                <div v-if="!friends.length" style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 0;">
+                    No friends yet. Add some above!
+                </div>
+                <div class="friend-list">
+                    <div v-for="f in friends" :key="f.username"
+                         class="friend-item"
+                         :class="{ active: activeFriend === f.username }"
+                         @click="selectFriend(f.username)">
+                        <div class="friend-avatar">[[ f.username[0].toUpperCase() ]]</div>
+                        <div class="friend-info">
+                            <div class="friend-name">[[ f.username ]]</div>
+                            <div class="friend-status" :class="{ online: f.online }">
+                                <span v-if="f.online" class="online-dot"></span>
+                                [[ f.online ? 'Online' : 'Offline' ]]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="friends-main">
+        <div v-if="!activeFriend" class="panel" style="flex:1;">
+            <div class="panel-body">
+                <div class="no-friend-selected">
+                    <div class="empty-icon">&#128172;</div>
+                    <div>Select a friend to chat, trade, or manage.</div>
+                </div>
+            </div>
+        </div>
+
+        <div v-else class="panel dm-panel">
+            <div class="dm-header">
+                <div style="font-size:14px;font-weight:700;color:var(--text-light);">[[ activeFriend ]]</div>
+                <div class="dm-actions" style="padding:0;border:none;flex:0;">
+                    <button class="btn btn-small btn-secondary" @click="openTrade">Trade</button>
+                    <button class="btn btn-small btn-danger" @click="blockUser(activeFriend)">Block</button>
+                    <button class="btn btn-small btn-secondary" @click="removeFriend(activeFriend)">Unfriend</button>
+                </div>
+            </div>
+            <div class="dm-messages" ref="dmArea">
+                <div v-if="!dmMessages[activeFriend] || !dmMessages[activeFriend].length"
+                     style="text-align:center;color:var(--text-dim);padding:20px;font-size:12px;">
+                    No messages yet. Say hello!
+                </div>
+                <div v-for="(msg, i) in (dmMessages[activeFriend] || [])" :key="i"
+                     class="dm-msg"
+                     :class="msg.from === myUsername ? 'dm-self' : 'dm-other'">
+                    <div class="dm-meta">[[ msg.from ]]</div>
+                    <div class="dm-bubble">[[ msg.text ]]</div>
+                </div>
+            </div>
+            <div class="dm-input-row">
+                <input class="dm-input" ref="dmInput"
+                       v-model="dmText"
+                       @keydown.enter="sendDm"
+                       placeholder="Message..."
+                       maxlength="280"
+                       autocomplete="off">
+                <button class="btn btn-small btn-primary" @click="sendDm">Send</button>
+            </div>
+        </div>
+
+        <div v-if="blocked.length" class="panel">
+            <div class="panel-title">Blocked Users</div>
+            <div class="panel-body">
+                <div v-for="u in blocked" :key="u" style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                    <span style="flex:1;font-size:12px;">[[ u ]]</span>
+                    <button class="btn btn-xsmall btn-secondary" @click="unblockUser(u)">Unblock</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/vue/friends.js"></script>
+{% endblock %}

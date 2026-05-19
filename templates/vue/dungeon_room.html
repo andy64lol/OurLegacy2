@@ -1,0 +1,228 @@
+{% extends "vue/base.html" %}
+{% block title %}Dungeon — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<script>
+window._init = {
+    player: {{ player | tojson }},
+    dungeon: {{ dungeon | tojson }},
+    room: {{ room | tojson }},
+    room_num: {{ room_num | tojson }},
+    total_rooms: {{ total_rooms | tojson }},
+    messages: {{ messages | tojson if messages else '[]' }},
+    current_challenge: {{ current_challenge | tojson if current_challenge else 'null' }},
+};
+</script>
+{% endblock %}
+{% block content %}
+<div id="vue-dungeon-app" v-cloak>
+<div class="game-layout">
+    <div id="mobile-sidebar-backdrop" @click="mobileCloseSidebar()"></div>
+
+    <aside class="sidebar" id="main-sidebar">
+        <button @click="mobileCloseSidebar()" id="mobile-sidebar-close"
+            style="display:none;position:absolute;top:8px;right:8px;z-index:10;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;color:var(--text-dim);font-size:16px;cursor:pointer;line-height:1;align-items:center;justify-content:center;"
+            aria-label="Close menu">&times;</button>
+
+        <div class="sidebar-scroll">
+        <div class="sidebar-top">
+            <img src="/static/banner.webp" alt="Our Legacy 2" class="sidebar-banner">
+        </div>
+        <div class="panel sidebar-panel">
+            <div class="panel-title">[[ player.name ]]</div>
+            <div class="panel-body">
+                <div class="char-class">[[ player['class'] || player.character_class ]] &mdash; Lv.[[ player.level ]]</div>
+                <div class="bar-group">
+                    <div class="bar-label">HP <span class="bar-nums">[[ player.hp ]] / [[ player.max_hp ]]</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-hp" :style="{ width: hpPct + '%' }"></div>
+                    </div>
+                </div>
+                <div class="bar-group">
+                    <div class="bar-label">MP <span class="bar-nums">[[ player.mp ]] / [[ player.max_mp ]]</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-mp" :style="{ width: mpPct + '%' }"></div>
+                    </div>
+                </div>
+                <div class="gold-display">Gold: <span class="gold-amount">[[ player.gold ]]</span></div>
+            </div>
+        </div>
+
+        <div class="panel sidebar-panel">
+            <div class="panel-title">Dungeon Progress</div>
+            <div class="panel-body">
+                <div style="font-size:14px;color:var(--gold);font-weight:600;">[[ dungeon.name ]]</div>
+                <div style="font-size:12px;color:var(--text-dim);margin-top:3px;">Room [[ room_num ]] of [[ total_rooms ]]</div>
+                <div class="bar-group" style="margin-top:8px;">
+                    <div class="bar-track">
+                        <div class="bar-fill bar-exp" :style="{ width: roomPct + '%' }"></div>
+                    </div>
+                </div>
+                <div class="dungeon-room-map" style="margin-top:10px;">
+                    <div v-for="i in total_rooms" :key="i"
+                         class="dmap-dot"
+                         :class="i < room_num ? 'dmap-done' : i === room_num ? 'dmap-current' : 'dmap-ahead'"></div>
+                </div>
+                <div style="margin-top:14px;">
+                    <button type="button" class="btn btn-danger btn-small" style="width:100%;"
+                        @click="confirmRetreat()">
+                        Retreat
+                    </button>
+                    <form id="abandon-form" method="POST" action="/dungeon/abandon" style="display:none;"></form>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <div class="sidebar-nav">
+            <button class="btn btn-secondary btn-small" @click="openSettings()" style="margin-top:4px;">Settings</button>
+        </div>
+    </aside>
+
+    <div id="sidebar-resize-handle" title="Drag to resize sidebar"></div>
+
+    <main class="main-area">
+        <div v-if="messages.length" class="panel" style="margin-bottom:12px;">
+            <div class="panel-body">
+                <div v-for="(msg, i) in messages" :key="i" :style="{ color: msg.color, padding: '2px 0', lineHeight: '1.5' }">
+                    [[ msg.text ]]
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <span>
+                    Room [[ room_num ]] / [[ total_rooms ]]
+                    &mdash;
+                    <span style="color:var(--gold);">[[ roomTypeLabel ]]</span>
+                </span>
+                <span style="font-size:11px;color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;">
+                    [[ dungeon.name ]]
+                </span>
+            </div>
+            <div class="panel-body">
+
+                <!-- BOSS -->
+                <div v-if="room.type === 'boss'" style="text-align:center;padding:28px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.18em;border:2px solid var(--red);padding:6px 22px;display:inline-block;color:var(--red);margin-bottom:16px;">BOSS</div>
+                    <div style="font-size:18px;font-weight:700;color:var(--red);margin-bottom:8px;">The final guardian stirs in the darkness...</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">Prepare for battle. There is no retreat.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-battle-large">Face the Boss</button>
+                    </form>
+                </div>
+
+                <!-- RIDDLE -->
+                <template v-else-if="room.type === 'question' && current_challenge">
+                    <div class="room-riddle-box">
+                        <div style="font-size:11px;letter-spacing:0.14em;border:1px solid var(--gold-dim);padding:3px 12px;display:inline-block;color:var(--gold-dim);margin-bottom:14px;">RIDDLE</div>
+                        <div class="room-riddle-text">[[ current_challenge.question ]]</div>
+                        <div v-if="current_challenge.hints && current_challenge.hints.length" class="room-riddle-hint">Hint: [[ current_challenge.hints[0] ]]</div>
+                        <div class="room-riddle-meta">
+                            Correct: +[[ (current_challenge.success_reward || {}).gold || 0 ]]g, +[[ (current_challenge.success_reward || {}).experience || 0 ]] EXP
+                            &bull; Wrong: [[ current_challenge.failure_damage ]] damage
+                        </div>
+                    </div>
+                    <form method="POST" action="/dungeon/answer" style="margin-top:16px;">
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <input type="text" name="answer" placeholder="Enter your answer..."
+                                   class="dungeon-text-input" autocomplete="off" autofocus>
+                            <button type="submit" class="btn btn-primary btn-wood">Submit</button>
+                        </div>
+                    </form>
+                    <form method="POST" action="/dungeon/answer" style="margin-top:8px;">
+                        <input type="hidden" name="answer" value="__skip__">
+                        <button type="submit" class="btn btn-secondary btn-small">Skip (take damage)</button>
+                    </form>
+                </template>
+
+                <!-- MULTI-CHOICE -->
+                <template v-else-if="room.type === 'multi_choice' && current_challenge">
+                    <div class="room-choice-box">
+                        <div style="font-size:11px;letter-spacing:0.14em;border:1px solid var(--gold-dim);padding:3px 12px;display:inline-block;color:var(--gold-dim);margin-bottom:14px;">CHOICE</div>
+                        <div class="room-choice-text">[[ current_challenge.question ]]</div>
+                        <div class="room-choice-meta">
+                            Correct: +[[ (current_challenge.success_reward || {}).gold || 0 ]]g, +[[ (current_challenge.success_reward || {}).experience || 0 ]] EXP
+                            &bull; Wrong: [[ current_challenge.failure_damage ]] damage
+                        </div>
+                    </div>
+                    <div class="dungeon-choices" style="margin-top:16px;">
+                        <form v-for="(option, idx) in (current_challenge.options || [])" :key="idx" method="POST" action="/dungeon/choose">
+                            <input type="hidden" name="choice" :value="idx">
+                            <button type="submit" class="btn btn-secondary choice-btn">[[ option.text ]]</button>
+                        </form>
+                    </div>
+                </template>
+
+                <!-- BATTLE -->
+                <div v-else-if="room.type === 'battle'" style="text-align:center;padding:24px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.14em;border:2px solid var(--red);padding:5px 20px;display:inline-block;color:var(--red);margin-bottom:14px;">ENCOUNTER</div>
+                    <div style="color:var(--red);font-weight:600;font-size:16px;margin-bottom:6px;">An enemy blocks your path!</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">You will be taken to the battle screen.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">Engage!</button>
+                    </form>
+                </div>
+
+                <!-- AMBUSH -->
+                <div v-else-if="room.type === 'ambush'" style="text-align:center;padding:24px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.14em;border:2px solid var(--red);padding:5px 20px;display:inline-block;color:var(--red);margin-bottom:14px;animation:pulse 0.8s infinite alternate;">AMBUSH!</div>
+                    <div style="color:var(--red);font-weight:700;font-size:17px;margin-bottom:6px;">Something lurks in the shadows!</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:4px;">A powerful foe waits to strike.</div>
+                    <div style="font-size:12px;color:var(--gold-dim);margin-bottom:20px;">Greater danger &mdash; greater rewards.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">Face the Ambush!</button>
+                    </form>
+                </div>
+
+                <!-- SHRINE -->
+                <div v-else-if="room.type === 'shrine'" style="text-align:center;padding:24px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.14em;border:2px solid var(--green-bright);padding:5px 20px;display:inline-block;color:var(--green-bright);margin-bottom:14px;">SHRINE</div>
+                    <div style="color:var(--green-bright);font-weight:600;font-size:16px;margin-bottom:6px;">A sacred shrine glows in the darkness!</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">Approach to restore HP and MP.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">Approach the Shrine</button>
+                    </form>
+                </div>
+
+                <!-- CHEST -->
+                <div v-else-if="room.type === 'chest'" style="text-align:center;padding:24px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.14em;border:2px solid var(--gold-dim);padding:5px 20px;display:inline-block;color:var(--gold);margin-bottom:14px;">TREASURE</div>
+                    <div style="color:var(--gold);font-weight:600;font-size:16px;margin-bottom:6px;">A treasure chest awaits!</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">Gold and items lie within.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">Open Chest</button>
+                    </form>
+                </div>
+
+                <!-- TRAP CHEST -->
+                <div v-else-if="room.type === 'trap_chest'" style="text-align:center;padding:24px 16px;">
+                    <div style="font-size:12px;letter-spacing:0.14em;border:2px solid var(--red);padding:5px 20px;display:inline-block;color:var(--red);margin-bottom:14px;">TRAP</div>
+                    <div style="color:var(--gold);font-weight:600;font-size:16px;margin-bottom:6px;">[[ (room.challenge || {}).name || 'Trapped Chest' ]]</div>
+                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:6px;">[[ (room.challenge || {}).description || 'Something looks suspicious...' ]]</div>
+                    <div style="font-size:12px;color:var(--red);margin-bottom:20px;">Roll d20 &ge; [[ (room.challenge || {}).threshold || 10 ]] to disarm!</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">Roll to Disarm &amp; Open</button>
+                    </form>
+                </div>
+
+                <!-- EMPTY -->
+                <div v-else style="text-align:center;padding:28px 16px;">
+                    <div style="font-size:32px;opacity:0.35;margin-bottom:10px;">~</div>
+                    <div style="color:var(--text-dim);font-size:15px;margin-bottom:20px;">The chamber is still and silent.</div>
+                    <form method="POST" action="/action/dungeon/proceed">
+                        <button type="submit" class="btn btn-primary btn-wood">
+                            [[ room_num === total_rooms ? 'Complete Dungeon' : 'Proceed' ]]
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/vue/dungeon_room.js"></script>
+{% endblock %}

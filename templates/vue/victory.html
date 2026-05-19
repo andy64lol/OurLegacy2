@@ -1,0 +1,65 @@
+{% extends "vue/base.html" %}
+{% block extra_head %}
+<script>
+window._init = {
+    enemy: {{ enemy | tojson }},
+    player: {{ player | tojson }},
+    log: {{ log | tojson }},
+    exp: {{ exp | tojson }},
+    gold: {{ gold | tojson }},
+    loot_item: {{ loot_item | tojson if loot_item else 'null' }},
+    leveled: {{ leveled | tojson if leveled is defined else 'false' }},
+};
+</script>
+{% endblock %}
+{% block content %}
+<div id="vue-victory-app" v-cloak>
+    <div class="result-screen">
+        <div class="result-inner">
+            <img src="/static/banner.webp" alt="Our Legacy 2" class="title-banner-small">
+
+            <div class="panel result-panel result-victory" style="margin-bottom:18px;">
+                <div class="panel-title panel-title-victory">Victory</div>
+                <div class="panel-body">
+                    <p class="result-summary" style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
+                        <img :src="'/game_assets/glyphs/' + enemy.key + '.webp'"
+                             :alt="enemy.name"
+                             style="width:20px;height:20px;image-rendering:pixelated;vertical-align:middle;"
+                             @error="$event.target.src='/game_assets/glyphs/fight.webp'">
+                        The [[ enemy.name ]] has been defeated.
+                    </p>
+
+                    <div class="reward-list">
+                        <div class="reward-row">
+                            <span>Experience Gained</span>
+                            <span class="reward-val">+[[ exp ]]</span>
+                        </div>
+                        <div class="reward-row">
+                            <span>Gold Earned</span>
+                            <span class="reward-gold">+[[ gold ]]g</span>
+                        </div>
+                        <div v-if="loot_item" class="reward-row">
+                            <span>Item Found</span>
+                            <span class="reward-val">[[ loot_item ]]</span>
+                        </div>
+                        <div v-if="leveled" class="reward-row">
+                            <span>Level Up</span>
+                            <span class="reward-val">Now Level [[ player.level ]]</span>
+                        </div>
+                    </div>
+
+                    <div class="panel-title" style="margin-bottom:8px;font-size:13px;">Battle Record</div>
+                    <div class="battle-log-recap">
+                        <div v-for="(line, i) in log" :key="i">[[ line ]]</div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/game" class="btn btn-primary btn-large">Return to the World</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/vue/victory.js"></script>
+{% endblock %}

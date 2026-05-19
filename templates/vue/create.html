@@ -1,0 +1,83 @@
+{% extends "vue/base.html" %}
+{% block title %}Create Character — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<script>
+window._init = {
+    classData: {{ data.classes | tojson }},
+    error: {{ error | tojson if error else 'null' }},
+};
+</script>
+{% endblock %}
+{% block content %}
+<div id="vue-create-app" v-cloak>
+<div class="page-wrap">
+    <div class="page-header">
+        <img src="/static/banner.webp" alt="Our Legacy 2" class="title-banner-small">
+        <h1 class="page-title">Create Your Character</h1>
+    </div>
+
+    <div v-if="error" class="alert-box">[[ error ]]</div>
+
+    <form method="post" action="/create" class="create-form">
+        <div class="create-layout">
+            <div class="create-left">
+                <div class="panel">
+                    <div class="panel-title">Identity</div>
+                    <div class="panel-body">
+                        <label class="field-label">Character Name</label>
+                        <input type="text" name="name" class="text-input"
+                               placeholder="Enter your name..." maxlength="24"
+                               autocomplete="off" required>
+
+                        <label class="field-label" style="margin-top:16px;">Choose Your Class</label>
+                        <div class="class-grid">
+                            <label v-for="(clsData, clsName) in classData" :key="clsName" class="class-card">
+                                <input type="radio" name="class" :value="clsName"
+                                       v-model="selectedClass">
+                                <div class="class-card-inner">
+                                    <div class="class-name">[[ clsName ]]</div>
+                                    <div class="class-desc-short">[[ clsData.description ? clsData.description.slice(0, 40) + '...' : '' ]]</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large" style="width:100%;margin-top:16px;">
+                    Begin Adventure
+                </button>
+                <a href="/" class="btn btn-secondary" style="width:100%;margin-top:8px;display:block;text-align:center;">
+                    Back
+                </a>
+            </div>
+
+            <div class="create-right">
+                <div class="panel" v-if="currentClass">
+                    <div class="panel-title">[[ selectedClass ]]</div>
+                    <div class="panel-body">
+                        <p class="class-full-desc">[[ currentClass.description ]]</p>
+
+                        <div class="stats-grid">
+                            <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val">[[ currentClass.base_hp ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">MP</span><span class="stat-val">[[ currentClass.base_mp ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val">[[ currentClass.base_attack ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val">[[ currentClass.base_defense ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val">[[ currentClass.base_speed ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val">[[ currentClass.starting_gold ]]</span></div>
+                        </div>
+
+                        <div class="stat-label" style="margin-top:12px;">Starting Equipment</div>
+                        <ul class="item-list">
+                            <li v-for="item in (currentClass.starting_items || [])" :key="item">[[ item ]]</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/vue/create.js"></script>
+{% endblock %}

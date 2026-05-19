@@ -1,0 +1,68 @@
+{% extends "vue/base.html" %}
+{% block title %}Companion Pets — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<script>
+window._init = {
+    player: {{ player | tojson }},
+    land_data: {{ land_data | tojson }},
+};
+</script>
+<style>
+    .subpage-outer { max-width: 960px; margin: 0 auto; padding: 14px; min-height: 100vh; }
+    .subpage-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 10px 14px; background: var(--bg-panel); border: 1px solid var(--border); }
+    .subpage-title { flex: 1; font-size: 15px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+{% endblock %}
+{% block content %}
+<div id="vue-pets-app" v-cloak>
+<div class="subpage-outer">
+    <div class="subpage-header">
+        <a href="/game?tab=land" class="btn btn-secondary btn-small">&#8592; Back to Land</a>
+        <span class="subpage-title">Companion Pets</span>
+        <span style="font-size:13px;color:var(--gold);">Gold: <strong>[[ player.gold ]]</strong>g</span>
+    </div>
+
+    <div v-if="land_data.current_pet" class="panel land-section" style="margin-bottom:14px;">
+        <div class="panel-title">Current Companion</div>
+        <div class="panel-body">
+            <div class="current-pet-box">
+                <div class="current-pet-label">Active Pet</div>
+                <div class="current-pet-name">[[ land_data.current_pet.name ]]</div>
+                <div v-if="land_data.current_pet.boosts" class="current-pet-boosts">
+                    Bonuses:
+                    <span v-for="(val, stat) in land_data.current_pet.boosts" :key="stat">
+                        +[[ val ]] [[ stat.replace('_',' ') ]]
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel land-section">
+        <div class="panel-title">Available Pets</div>
+        <div class="panel-body">
+            <div class="pet-grid">
+                <div v-for="(pet, petKey) in land_data.pets" :key="petKey"
+                     class="pet-card"
+                     :class="{ 'active-pet': land_data.current_pet && land_data.current_pet.key === petKey }">
+                    <div class="pet-name">[[ pet.name ]]</div>
+                    <div class="pet-desc">[[ pet.description ]]</div>
+                    <div v-if="pet.boosts" class="pet-boosts">
+                        <span v-for="(val, stat) in pet.boosts" :key="stat">+[[ val ]] [[ stat.replace('_',' ') ]] </span>
+                    </div>
+                    <div class="pet-price">[[ pet.price ]]g</div>
+                    <button class="btn btn-xsmall btn-primary"
+                            :disabled="!pet.can_afford || actionPending"
+                            @click="buyPet(petKey)">
+                        [[ (land_data.current_pet && land_data.current_pet.key === petKey) ? 'Active' : 'Adopt' ]]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/vue/land_pets.js"></script>
+{% endblock %}

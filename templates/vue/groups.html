@@ -1,0 +1,196 @@
+{% extends "vue/base.html" %}
+{% block title %}Adventure Group — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+window._init = {
+    group: {{ group | tojson if group else 'null' }},
+    online_username: {{ online_username | tojson }},
+};
+</script>
+<style>
+    [v-cloak] { display: none !important; }
+    .groups-page { max-width: 1100px; margin: 0 auto; padding: 14px; min-height: 100vh; }
+    .groups-page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 10px 14px; background: var(--bg-panel); border: 1px solid var(--border); }
+    .groups-title { flex: 1; font-size: 15px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; }
+    .groups-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 700px) { .groups-layout { grid-template-columns: 1fr; } }
+    .xp-bar-track { height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+    .xp-bar-fill { height: 100%; background: var(--exp-purple); border-radius: 4px; transition: width 0.4s ease; }
+    .member-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 5px; border: 1px solid var(--border); margin-bottom: 4px; }
+    .member-name { flex: 1; font-size: 13px; font-weight: 700; color: var(--text-light); }
+    .member-contrib { font-size: 11px; color: var(--text-dim); }
+    .tab-bar { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+    .tab-btn { padding: 8px 16px; font-size: 12px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-dim); cursor: pointer; font-family: inherit; letter-spacing: 0.04em; transition: color 0.15s, border-color 0.15s; }
+    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .tab-btn:hover { color: var(--text-light); }
+    .activity-log { display: flex; flex-direction: column; gap: 4px; max-height: 280px; overflow-y: auto; }
+    .activity-entry { font-size: 11px; color: var(--text-dim); padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); line-height: 1.5; }
+    .group-chat-area { display: flex; flex-direction: column; gap: 0; max-height: 280px; }
+    .group-chat-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; max-height: 220px; }
+    .group-chat-msg { font-size: 12px; line-height: 1.5; padding: 2px 0; }
+    .group-chat-input-row { display: flex; gap: 6px; margin-top: 8px; }
+    .group-chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 6px; color: var(--text-light); font-family: inherit; font-size: 12px; padding: 6px 10px; outline: none; }
+    .group-chat-input:focus { border-color: rgba(200,160,60,0.5); }
+    .invite-code-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .invite-code { font-size: 14px; font-weight: 700; color: var(--gold); letter-spacing: 0.12em; background: rgba(200,160,60,0.1); border: 1px solid rgba(200,160,60,0.3); border-radius: 6px; padding: 6px 14px; }
+    .no-group-forms { display: flex; flex-direction: column; gap: 14px; max-width: 420px; margin: 0 auto; padding: 20px; }
+    .level-up-banner { text-align: center; padding: 16px; background: rgba(180,130,255,0.1); border: 1px solid rgba(180,130,255,0.3); border-radius: 8px; color: var(--exp-purple); font-size: 16px; font-weight: 700; margin-bottom: 12px; animation: pulse 0.6s ease 3; }
+</style>
+{% endblock %}
+{% block content %}
+<div id="vue-groups-app" v-cloak>
+<div class="groups-page">
+    <div class="groups-page-header">
+        <span class="groups-title">Adventure Group</span>
+        <a href="/leaderboard" class="btn btn-secondary btn-small">Leaderboard</a>
+        <a href="/game" class="btn btn-secondary btn-small">&#8592; Game</a>
+    </div>
+
+    <div v-if="levelUpMsg" class="level-up-banner">[[ levelUpMsg ]]</div>
+
+    <div v-if="!group">
+        <div class="no-group-forms">
+            <div class="panel">
+                <div class="panel-title">Create a Group</div>
+                <div class="panel-body">
+                    <label class="field-label">Group Name</label>
+                    <input type="text" class="text-input" v-model="createName"
+                           placeholder="Name your fellowship..." maxlength="32">
+                    <label class="field-label" style="margin-top:10px;">Description</label>
+                    <textarea class="text-input" v-model="createDesc" rows="2"
+                              placeholder="About your group..." maxlength="120"
+                              style="resize:vertical;"></textarea>
+                    <button class="btn btn-primary" style="margin-top:12px;width:100%;" @click="createGroup">
+                        Found Group
+                    </button>
+                    <div v-if="createMsg" style="font-size:11px;margin-top:6px;"
+                         :style="{ color: createOk ? 'var(--green-bright)' : 'var(--red)' }">[[ createMsg ]]</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Join a Group</div>
+                <div class="panel-body">
+                    <label class="field-label">Invite Code</label>
+                    <div style="display:flex;gap:6px;">
+                        <input type="text" class="text-input" v-model="joinCode"
+                               placeholder="Enter invite code..." maxlength="16"
+                               @keydown.enter="joinGroup" style="flex:1;">
+                        <button class="btn btn-primary" @click="joinGroup">Join</button>
+                    </div>
+                    <div v-if="joinMsg" style="font-size:11px;margin-top:6px;"
+                         :style="{ color: joinOk ? 'var(--green-bright)' : 'var(--red)' }">[[ joinMsg ]]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-else class="groups-layout">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="panel">
+                <div class="panel-title">[[ group.name ]]</div>
+                <div class="panel-body">
+                    <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">[[ group.description ]]</div>
+                    <div style="font-size:13px;color:var(--text-dim);">Led by <strong style="color:var(--gold);">[[ group.leader ]]</strong></div>
+                    <div style="margin-top:10px;">
+                        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+                            <span style="font-size:12px;color:var(--text-dim);">Group Level [[ group.level ]]</span>
+                            <span style="font-size:11px;color:var(--exp-purple);">[[ xpPct ]]% to Lv [[ group.level + 1 ]]</span>
+                        </div>
+                        <div class="xp-bar-track">
+                            <div class="xp-bar-fill" :style="{ width: xpPct + '%' }"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Treasury</div>
+                <div class="panel-body">
+                    <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:10px;">
+                        [[ group.treasury ]]g
+                    </div>
+                    <button class="btn btn-primary btn-small" @click="collectGold">Collect My Share</button>
+                    <div v-if="collectMsg" style="font-size:11px;margin-top:6px;"
+                         :style="{ color: collectOk ? 'var(--green-bright)' : 'var(--red)' }">[[ collectMsg ]]</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Members ([[ group.members.length ]]/6)</div>
+                <div class="panel-body">
+                    <div v-for="m in group.members" :key="m.username" class="member-row">
+                        <div style="font-size:14px;color:var(--gold);font-weight:700;width:20px;text-align:center;flex-shrink:0;">
+                            [[ m.username === group.leader ? '&#9813;' : '&mdash;' ]]
+                        </div>
+                        <div class="member-name">[[ m.username ]]</div>
+                        <span class="member-contrib">+[[ m.contribution || 0 ]] XP</span>
+                        <button v-if="isLeader && m.username !== myUsername"
+                                class="btn btn-xsmall btn-danger" @click="kickMember(m.username)">Kick</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Invite Code</div>
+                <div class="panel-body">
+                    <div class="invite-code-row">
+                        <span class="invite-code">[[ group.invite_code ]]</span>
+                        <button class="btn btn-xsmall btn-secondary" @click="copyCode">Copy</button>
+                    </div>
+                    <div v-if="copied" style="font-size:11px;color:var(--green-bright);margin-top:4px;">Copied!</div>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:8px;">
+                <button v-if="isLeader" class="btn btn-danger btn-small" @click="disbandGroup">Disband Group</button>
+                <button v-else class="btn btn-secondary btn-small" @click="leaveGroup">Leave Group</button>
+            </div>
+        </div>
+
+        <div class="panel" style="display:flex;flex-direction:column;">
+            <div class="panel-title" style="border-bottom:none;padding-bottom:0;">
+                <div class="tab-bar">
+                    <button class="tab-btn" :class="{ active: activeTab === 'activity' }" @click="activeTab = 'activity'">Activity Log</button>
+                    <button class="tab-btn" :class="{ active: activeTab === 'chat' }" @click="activeTab = 'chat'">Group Chat</button>
+                </div>
+            </div>
+            <div class="panel-body" style="flex:1;display:flex;flex-direction:column;">
+                <div v-if="activeTab === 'activity'" class="activity-log">
+                    <div v-if="!group.activity || !group.activity.length" style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 0;">
+                        No activity yet.
+                    </div>
+                    <div v-for="(entry, i) in (group.activity || [])" :key="i" class="activity-entry">
+                        [[ entry.text || entry ]]
+                    </div>
+                </div>
+                <div v-if="activeTab === 'chat'" class="group-chat-area" style="flex:1;">
+                    <div class="group-chat-msgs" ref="chatArea">
+                        <div v-if="!chatMessages.length" style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 0;">
+                            No messages yet.
+                        </div>
+                        <div v-for="(msg, i) in chatMessages" :key="i" class="group-chat-msg">
+                            <span style="color:var(--gold);font-weight:700;">[[ msg.username ]]:</span>
+                            <span style="color:var(--text-light);"> [[ msg.text ]]</span>
+                        </div>
+                    </div>
+                    <div class="group-chat-input-row">
+                        <input class="group-chat-input" ref="chatInput"
+                               v-model="chatText"
+                               @keydown.enter="sendChat"
+                               placeholder="Message group..."
+                               maxlength="200"
+                               autocomplete="off">
+                        <button class="btn btn-small btn-primary" @click="sendChat">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/vue/groups.js"></script>
+{% endblock %}

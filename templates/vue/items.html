@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Items Debug — Our Legacy 2</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script>
+window._init = {
+    total:           {{ total | tojson }},
+    with_texture:    {{ with_texture | tojson }},
+    without_texture: {{ without_texture | tojson }},
+    type_list:       {{ type_list | tojson }},
+    rarity_list:     {{ rarity_list | tojson }},
+    items:           {{ items | tojson }},
+};
+</script>
+<style>
+[v-cloak] { display: none !important; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --bg: #0a0c10; --surface: #111418; --surface2: #161b22; --border: #1e2530;
+    --border-bright: #2a3545; --gold: #f59e0b; --blue: #60a5fa; --green: #22c55e;
+    --red: #ef4444; --purple: #a78bfa; --orange: #fb923c; --muted: #4b5563;
+    --text: #e2e8f0; --text-dim: #64748b;
+    --rarity-common: #9ca3af; --rarity-uncommon: #22c55e; --rarity-rare: #60a5fa;
+    --rarity-epic: #a78bfa; --rarity-legendary: #f59e0b;
+}
+body { background: var(--bg); color: var(--text); font-family: 'Courier New', Courier, monospace; font-size: 13px; min-height: 100vh; }
+.header { display: flex; align-items: center; gap: 16px; padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
+.logo { font-size: 15px; font-weight: 700; color: var(--gold); letter-spacing: 0.06em; white-space: nowrap; }
+.logo span { color: var(--red); }
+.stat-pill { font-size: 11px; color: var(--text-dim); border: 1px solid var(--border-bright); border-radius: 4px; padding: 2px 8px; }
+.stat-pill b { color: var(--blue); }
+.controls { padding: 14px 24px; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.search-box { background: var(--surface); border: 1px solid var(--border-bright); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 13px; padding: 6px 12px; width: 260px; outline: none; }
+.search-box:focus { border-color: var(--blue); }
+.filter-select { background: var(--surface); border: 1px solid var(--border-bright); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 12px; padding: 5px 10px; outline: none; cursor: pointer; }
+.filter-select:focus { border-color: var(--blue); }
+.count-label { font-size: 11px; color: var(--text-dim); margin-left: auto; }
+.count-label b { color: var(--green); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; padding: 20px 24px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; transition: border-color 0.15s; }
+.card:hover { border-color: var(--border-bright); }
+.card.rarity-common    { border-left: 3px solid var(--rarity-common); }
+.card.rarity-uncommon  { border-left: 3px solid var(--rarity-uncommon); }
+.card.rarity-rare      { border-left: 3px solid var(--rarity-rare); }
+.card.rarity-epic      { border-left: 3px solid var(--rarity-epic); }
+.card.rarity-legendary { border-left: 3px solid var(--rarity-legendary); }
+.card-top { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.item-icon { width: 48px; height: 48px; object-fit: contain; image-rendering: pixelated; flex-shrink: 0; background: #0d1117; border-radius: 6px; border: 1px solid var(--border-bright); padding: 3px; }
+.no-icon { width: 48px; height: 48px; flex-shrink: 0; background: #0d1117; border-radius: 6px; border: 1px solid var(--border-bright); display: flex; align-items: center; justify-content: center; font-size: 22px; user-select: none; }
+.card-title-block { flex: 1; min-width: 0; }
+.item-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+.badge { font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 600; text-transform: capitalize; letter-spacing: 0.03em; }
+.badge-type { background: #1e2d45; color: var(--blue); }
+.badge-rarity-common    { background: #1f2937; color: var(--rarity-common); }
+.badge-rarity-uncommon  { background: #14291e; color: var(--rarity-uncommon); }
+.badge-rarity-rare      { background: #172035; color: var(--rarity-rare); }
+.badge-rarity-epic      { background: #201535; color: var(--rarity-epic); }
+.badge-rarity-legendary { background: #2a1f00; color: var(--rarity-legendary); }
+.badge-wtype { background: #231a00; color: var(--orange); }
+.card-body { padding: 10px 14px; flex: 1; }
+.desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
+.stats { width: 100%; border-collapse: collapse; }
+.stats td { font-size: 11px; padding: 2px 0; vertical-align: top; }
+.stat-key { color: var(--text-dim); width: 50%; padding-right: 6px; }
+.stat-val { color: var(--text); font-weight: 600; }
+.stat-val.positive { color: var(--green); }
+.stat-val.price { color: var(--gold); }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.tag { font-size: 10px; background: #1c2433; color: var(--muted); padding: 1px 6px; border-radius: 3px; }
+.card-footer { padding: 7px 14px; background: #0d1117; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-dim); word-break: break-all; font-family: 'Courier New', monospace; }
+.card-footer .filepath { color: #4a6fa5; }
+.card-footer .no-tex { color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+<div id="items-app" v-cloak>
+
+<div class="header">
+    <div class="logo">Our Legacy <span>2</span> &mdash; Items Debug</div>
+    <div class="stat-pill">Total: <b>[[ total ]]</b></div>
+    <div class="stat-pill">With Texture: <b>[[ with_texture ]]</b></div>
+    <div class="stat-pill">No Texture: <b>[[ without_texture ]]</b></div>
+    <div class="stat-pill">Types: <b>[[ type_list.length ]]</b></div>
+    <a href="/admin" style="margin-left:auto;font-size:11px;color:var(--text-dim);text-decoration:none;border:1px solid var(--border-bright);padding:4px 10px;border-radius:4px;">&larr; Admin</a>
+</div>
+
+<div class="controls">
+    <input class="search-box" type="text" v-model="searchQ" placeholder="Search by name, type, tag...">
+    <select class="filter-select" v-model="filterType">
+        <option value="">All Types</option>
+        <option v-for="t in type_list" :key="t" :value="t">[[ t ]]</option>
+    </select>
+    <select class="filter-select" v-model="filterRarity">
+        <option value="">All Rarities</option>
+        <option v-for="r in rarity_list" :key="r" :value="r">[[ r ]]</option>
+    </select>
+    <select class="filter-select" v-model="filterTex">
+        <option value="">All (texture)</option>
+        <option value="yes">Has Texture</option>
+        <option value="no">No Texture</option>
+    </select>
+    <div class="count-label">Showing <b>[[ filteredItems.length ]]</b> items</div>
+</div>
+
+<div class="grid">
+    <div v-for="item in filteredItems" :key="item.name"
+         class="card"
+         :class="'rarity-' + (item.rarity || 'common')">
+
+        <div class="card-top">
+            <template v-if="item.texture">
+                <img class="item-icon" :src="'/game_assets/' + item.texture" :alt="item.name"
+                     @error="$event.target.style.display='none'">
+            </template>
+            <template v-else>
+                <div class="no-icon">
+                    <img v-if="item.type === 'consumable'" src="/game_assets/glyphs/food.webp" alt="" style="width:24px;height:24px;image-rendering:pixelated;">
+                    <img v-else-if="item.type === 'book'"  src="/game_assets/glyphs/materials.webp" alt="" style="width:24px;height:24px;image-rendering:pixelated;">
+                    <img v-else-if="item.type === 'offhand'" src="/game_assets/glyphs/offhand.webp" alt="" style="width:24px;height:24px;image-rendering:pixelated;">
+                    <img v-else-if="item.type === 'accessory'" src="/game_assets/glyphs/accessories.webp" alt="" style="width:24px;height:24px;image-rendering:pixelated;">
+                    <img v-else src="/game_assets/glyphs/materials.webp" alt="" style="width:24px;height:24px;image-rendering:pixelated;">
+                </div>
+            </template>
+            <div class="card-title-block">
+                <div class="item-name" :title="item.name">[[ item.name ]]</div>
+                <div class="item-badges">
+                    <span class="badge badge-type">[[ item.type || 'unknown' ]]</span>
+                    <span v-if="item.rarity" class="badge" :class="'badge-rarity-' + item.rarity">[[ item.rarity ]]</span>
+                    <span v-if="item.weapon_type" class="badge badge-wtype">[[ item.weapon_type ]]</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div v-if="item.description" class="desc">[[ item.description ]]</div>
+            <table class="stats">
+                <tr v-if="item.price != null"><td class="stat-key">price</td><td class="stat-val price">[[ item.price ]]g</td></tr>
+                <tr v-if="item.attack_bonus != null"><td class="stat-key">attack bonus</td><td class="stat-val positive">+[[ item.attack_bonus ]]</td></tr>
+                <tr v-if="item.defense_bonus != null"><td class="stat-key">defense bonus</td><td class="stat-val positive">+[[ item.defense_bonus ]]</td></tr>
+                <tr v-if="item.magic_bonus != null"><td class="stat-key">magic bonus</td><td class="stat-val positive">+[[ item.magic_bonus ]]</td></tr>
+                <tr v-if="item.crit_chance != null"><td class="stat-key">crit chance</td><td class="stat-val">[[ item.crit_chance ]]%</td></tr>
+                <tr v-if="item.aim_accuracy != null"><td class="stat-key">aim accuracy</td><td class="stat-val">[[ item.aim_accuracy ]]%</td></tr>
+                <tr v-if="item.parry_chance != null"><td class="stat-key">parry chance</td><td class="stat-val">[[ item.parry_chance ]]%</td></tr>
+                <tr v-if="item.weight != null"><td class="stat-key">weight</td><td class="stat-val">[[ item.weight ]]</td></tr>
+                <tr v-if="item.sharpness != null"><td class="stat-key">sharpness</td><td class="stat-val">[[ item.sharpness ]]</td></tr>
+                <tr v-if="item.smiting != null"><td class="stat-key">smiting</td><td class="stat-val">[[ item.smiting ]]</td></tr>
+                <tr v-if="item.value != null && item.type === 'consumable'"><td class="stat-key">effect value</td><td class="stat-val positive">[[ item.value ]]</td></tr>
+                <tr v-if="item.min_value != null"><td class="stat-key">value range</td><td class="stat-val">[[ item.min_value ]]–[[ item.max_value ]]</td></tr>
+                <tr v-if="item.duration != null"><td class="stat-key">duration</td><td class="stat-val">[[ item.duration ]] turns</td></tr>
+                <tr v-if="item.effect"><td class="stat-key">effect</td><td class="stat-val">[[ item.effect ]]</td></tr>
+                <tr v-if="item.armor_type"><td class="stat-key">armor type</td><td class="stat-val">[[ item.armor_type ]]</td></tr>
+                <template v-if="item.requirements">
+                    <tr v-for="(rv, rk) in item.requirements" :key="rk">
+                        <td class="stat-key">req [[ rk ]]</td><td class="stat-val">[[ rv ]]</td>
+                    </tr>
+                </template>
+            </table>
+            <div v-if="item.tags && item.tags.length" class="tags">
+                <span v-for="tag in item.tags" :key="tag" class="tag">[[ tag ]]</span>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <span v-if="item.texture" class="filepath">data/assets/[[ item.texture ]]</span>
+            <span v-else class="no-tex">no texture assigned</span>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="/static/js/vue/items.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+{% extends "vue/base.html" %}
+{% block title %}Land Map — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<script>
+window._landData = {{ land_data | tojson }};
+window._placedBuildings = {{ land_data.placed_buildings_map | tojson }};
+</script>
+<style>
+    .subpage-outer { max-width: 960px; margin: 0 auto; padding: 14px; min-height: 100vh; }
+    .subpage-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 10px 14px; background: var(--bg-panel); border: 1px solid var(--border); }
+    .subpage-title { flex: 1; font-size: 15px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="subpage-outer">
+    <div class="subpage-header">
+        <a href="/game?tab=land" class="btn btn-secondary btn-small">&#8592; Back to Land</a>
+        <span class="subpage-title">Land Map Editor</span>
+        <a href="/land/shop" class="btn btn-secondary btn-small">Housing Shop</a>
+    </div>
+
+    <div class="panel land-section" style="margin-bottom:14px;">
+        <div class="panel-title">Map</div>
+        <div class="panel-body land-map-body" style="padding:0;">
+            <div id="land-place-mode-bar" class="land-place-bar" style="display:none;">
+                <span class="land-place-bar-label">Placing: <strong id="land-placing-name"></strong> &mdash; click a tile to place</span>
+                <button class="btn btn-xsmall btn-danger" onclick="LandEditor.cancel()">Cancel</button>
+            </div>
+            <div class="land-map-container">
+                <canvas id="land-map-canvas" class="land-map-canvas"></canvas>
+            </div>
+            <form id="land-place-form" method="post" action="/action/land/place_housing" style="display:none;">
+                <input type="hidden" name="housing_key" id="land-place-key">
+                <input type="hidden" name="tile_x" id="land-place-x">
+                <input type="hidden" name="tile_y" id="land-place-y">
+                <input type="hidden" name="return_to" value="land_map">
+            </form>
+        </div>
+    </div>
+
+    <div class="panel land-section" style="margin-bottom:14px;">
+        <div class="panel-title">Owned Structures &mdash; Click to Place</div>
+        <div class="panel-body">
+            {% set owned_list = [] %}
+            {% for type_key, buildings in land_data.housing_by_type.items() %}
+                {% for h in buildings %}{% if h.owned %}{% set _ = owned_list.append(h) %}{% endif %}{% endfor %}
+            {% endfor %}
+            {% if owned_list %}
+            <p class="panel-note" style="margin-bottom:10px;">Select a structure then click the map to place it.</p>
+            <div class="housing-shop-grid">
+                {% for h in owned_list %}
+                <div class="housing-card owned-card">
+                    <div class="housing-name rarity-{{ h.rarity }}">{{ h.name }}</div>
+                    <div class="housing-desc">{{ h.description[:60] }}</div>
+                    <div class="housing-actions">
+                        <button class="btn btn-xsmall btn-secondary"
+                            onclick="LandEditor.startPlacing('{{ h.key }}', {{ h.name | tojson }})">Place</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="dim-notice">You don't own any structures yet.
+                <a href="/land/shop" style="color:var(--gold);">Visit the Housing Shop</a> to buy some.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if land_data.placed_buildings_map %}
+    <div class="panel land-section">
+        <div class="panel-title">Placed Structures</div>
+        <div class="panel-body">
+            <div class="land-placed-list" style="padding:0;">
+                {% for b in land_data.placed_buildings_map %}
+                <div class="land-placed-item">
+                    <span class="land-placed-name">{{ b.name }}</span>
+                    {% if b.x >= 0 %}<span class="land-placed-pos">tile ({{ b.x }}, {{ b.y }})</span>{% endif %}
+                    <form method="post" action="/action/land/remove_housing" style="display:inline;">
+                        <input type="hidden" name="slot_id" value="{{ b.slot_id }}">
+                        <input type="hidden" name="return_to" value="land_map">
+                        <button type="submit" class="btn btn-xsmall btn-danger">Remove</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script src="/static/js/vue/land_map.js"></script>
+{% endblock %}
