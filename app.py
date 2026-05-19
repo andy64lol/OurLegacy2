@@ -1605,21 +1605,63 @@ def add_message(text, color="var(--text-light)"):
 
 def get_rank(level):
     if level < 5:
-        return "F-Tier Adventurer"
+        return "F"
     elif level < 10:
-        return "E-Tier Adventurer"
+        return "F+"
     elif level < 15:
-        return "D-Tier Adventurer"
+        return "E"
     elif level < 20:
-        return "C-Tier Adventurer"
+        return "E+"
+    elif level < 25:
+        return "D"
     elif level < 30:
-        return "B-Tier Adventurer"
+        return "D+"
+    elif level < 35:
+        return "C"
     elif level < 40:
-        return "A-Tier Adventurer"
+        return "C+"
+    elif level < 45:
+        return "B"
     elif level < 50:
-        return "S-Tier Adventurer"
+        return "B+"
+    elif level < 55:
+        return "A"
+    elif level < 60:
+        return "A+"
+    elif level < 65:
+        return "A++"
+    elif level < 75:
+        return "S"
+    elif level < 85:
+        return "S+"
+    elif level < 95:
+        return "S++"
+    elif level < 110:
+        return "SS"
+    elif level < 125:
+        return "SS+"
+    elif level < 140:
+        return "SS++"
+    elif level < 160:
+        return "SSS"
+    elif level < 180:
+        return "SSS+"
+    elif level < 200:
+        return "SSS++"
+    elif level < 225:
+        return "SR"
+    elif level < 250:
+        return "SR+"
+    elif level < 275:
+        return "SR++"
+    elif level < 300:
+        return "SRR"
+    elif level < 350:
+        return "SRR+"
+    elif level < 400:
+        return "SRR++"
     else:
-        return "Legendary Hero"
+        return "Archon"
 
 
 def gain_experience(player, amount):
