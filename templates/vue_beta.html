@@ -854,15 +854,8 @@
                                             [[ slot.replace(/_/g, ' ') ]]
                                         </div>
                                         <div v-if="equippedDetails[slot]">
-                                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
-                                                <img v-if="equippedDetails[slot].texture && equippedDetails[slot].texture !== 'missing.webp'"
-                                                     class="equip-slot-icon"
-                                                     :src="'/game_assets/' + equippedDetails[slot].texture"
-                                                     :alt="equippedDetails[slot].name"
-                                                     @error="$event.target.style.display='none'">
-                                                <div class="equip-slot-item" :class="'rarity-' + equippedDetails[slot].rarity">
-                                                    [[ equippedDetails[slot].name ]]
-                                                </div>
+                                            <div class="equip-slot-item" :class="'rarity-' + equippedDetails[slot].rarity">
+                                                [[ equippedDetails[slot].name ]]
                                             </div>
                                             <div class="equip-slot-stats" v-if="equippedDetails[slot].stats">
                                                 [[ equippedDetails[slot].stats ]]
@@ -922,25 +915,10 @@
                         </div>
                         <div class="inv-grid">
                             <div v-for="item in inventoryItems" :key="item.name" class="inv-row">
-                                <div class="item-icon-wrap">
-                                    <img v-if="item.texture && item.texture !== 'missing.webp'"
-                                         class="item-icon"
-                                         :src="'/game_assets/' + item.texture"
-                                         :alt="item.name"
-                                         @error="$event.target.style.display='none'">
-                                    <img v-else-if="item.type === 'consumable'"
-                                         class="item-icon-placeholder"
-                                         src="/game_assets/glyphs/food.webp" alt="">
-                                    <img v-else-if="item.type === 'accessory'"
-                                         class="item-icon-placeholder"
-                                         src="/game_assets/glyphs/accessories.webp" alt="">
-                                    <img v-else-if="item.type === 'offhand'"
-                                         class="item-icon-placeholder"
-                                         src="/game_assets/glyphs/offhand.webp" alt="">
-                                    <img v-else
-                                         class="item-icon-placeholder"
-                                         src="/game_assets/glyphs/materials.webp" alt="">
-                                </div>
+                                <img class="type-glyph"
+                                     :src="'/game_assets/glyphs/' + typeGlyph(item.type) + '.webp'"
+                                     :alt="item.type"
+                                     style="flex-shrink:0;width:20px;height:20px;opacity:0.7;">
                                 <div style="flex:1;min-width:0;">
                                     <div class="inv-row-name" :class="'rarity-' + item.rarity">[[ item.name ]]</div>
                                     <div class="inv-row-meta" v-if="item.stats">[[ item.stats ]]</div>
@@ -1004,22 +982,10 @@
                         <div class="area-name-big" style="margin-bottom:12px;">[[ shopName || 'Shop' ]]</div>
                         <div class="shop-grid">
                             <div v-for="item in shopItems" :key="item.name" class="shop-item">
-                                <div class="shop-item-icon">
-                                    <img v-if="item.texture && item.texture !== 'missing.webp'"
-                                         class="item-icon"
-                                         :src="'/game_assets/' + item.texture"
-                                         :alt="item.name"
-                                         @error="$event.target.style.display='none'">
-                                    <img v-else-if="item.type === 'consumable'"
-                                         class="item-icon-placeholder"
-                                         src="/game_assets/glyphs/food.webp" alt="">
-                                    <img v-else-if="item.type === 'accessory'"
-                                         class="item-icon-placeholder"
-                                         src="/game_assets/glyphs/accessories.webp" alt="">
-                                    <img v-else
-                                         class="item-icon-placeholder"
-                                         src="/game_assets/glyphs/materials.webp" alt="">
-                                </div>
+                                <img class="type-glyph"
+                                     :src="'/game_assets/glyphs/' + typeGlyph(item.type) + '.webp'"
+                                     :alt="item.type"
+                                     style="flex-shrink:0;width:20px;height:20px;opacity:0.7;">
                                 <div class="shop-item-info">
                                     <div class="shop-item-name" :class="'rarity-' + item.rarity">[[ item.name ]]</div>
                                     <div class="shop-item-meta" v-if="item.stats">[[ item.stats ]]</div>

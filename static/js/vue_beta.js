@@ -414,6 +414,16 @@ createApp({
             return map[charClass] || 'warrior';
         },
 
+        typeGlyph(type) {
+            const map = {
+                weapon: 'weapon', armor: 'armor', offhand: 'offhand',
+                accessory: 'accessories', consumable: 'food',
+                material: 'materials', pickaxe: 'pickaxe', spell: 'spell',
+                book: 'book',
+            };
+            return map[type] || 'materials';
+        },
+
         slotGlyph(slot) {
             const map = {
                 weapon: 'weapon', armor: 'armor', offhand: 'offhand',
