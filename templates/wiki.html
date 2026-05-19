@@ -20,200 +20,257 @@
             --blue: #5080c0;
             --purple: #9060c0;
             --radius: 8px;
+            --sidebar-w: 220px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
         body {
             background: var(--bg);
             color: var(--text);
             font-family: 'Segoe UI', system-ui, sans-serif;
             font-size: 14px;
             line-height: 1.5;
-            min-height: 100vh;
         }
         a { color: var(--gold); text-decoration: none; }
         a:hover { text-decoration: underline; }
 
+        /* header */
         .wiki-header {
             background: linear-gradient(180deg, #1a0d30, #0d0820);
             border-bottom: 2px solid var(--border);
-            padding: 20px 24px;
+            padding: 14px 20px;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 200;
         }
+        .wiki-hamburger {
+            background: rgba(200,160,80,0.10);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--gold);
+            font-size: 18px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.15s;
+            line-height: 1;
+        }
+        .wiki-hamburger:hover { background: rgba(200,160,80,0.22); }
         .wiki-header-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--gold);
-            letter-spacing: 0.08em;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
+            white-space: nowrap;
         }
         .wiki-header-sub {
             font-size: 11px;
             color: var(--text-dim);
-            letter-spacing: 0.12em;
+            letter-spacing: 0.10em;
             text-transform: uppercase;
+            white-space: nowrap;
         }
-        .wiki-back {
+        .wiki-search {
+            flex: 1;
+            max-width: 300px;
+            padding: 7px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 13px;
+            outline: none;
             margin-left: auto;
-            padding: 7px 18px;
-            background: rgba(200,160,80,0.12);
+        }
+        .wiki-search::placeholder { color: var(--text-muted); }
+        .wiki-search:focus { border-color: var(--gold-dim); }
+        .wiki-back {
+            padding: 7px 16px;
+            background: rgba(200,160,80,0.10);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             color: var(--gold);
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             transition: background 0.15s;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .wiki-back:hover { background: rgba(200,160,80,0.22); }
 
-        .wiki-nav {
+        /* layout */
+        .wiki-layout {
+            display: flex;
+            height: calc(100vh - 62px);
+        }
+
+        /* sidebar */
+        .wiki-sidebar {
+            width: var(--sidebar-w);
+            min-width: var(--sidebar-w);
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: width 0.22s ease, min-width 0.22s ease, opacity 0.18s;
+        }
+        .wiki-sidebar.collapsed {
+            width: 0;
+            min-width: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .wiki-sidebar-inner { padding: 10px 0; }
+        .wiki-sidebar-label {
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 10px 16px 6px;
+        }
+        .wiki-sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 9px 16px;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .wiki-sidebar-btn:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+        .wiki-sidebar-btn.active { background: rgba(200,160,80,0.10); color: var(--gold); }
+        .wiki-sidebar-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+        .wiki-sidebar-count {
+            margin-left: auto;
+            font-size: 11px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 10px;
+            padding: 1px 7px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .wiki-sidebar-btn.active .wiki-sidebar-count { background: rgba(200,160,80,0.18); color: var(--gold-dim); }
+
+        /* main area */
+        .wiki-main {
+            flex: 1;
+            overflow-y: auto;
+            min-width: 0;
+        }
+
+        /* tab nav (kept for mobile fallback) */
+        .wiki-tab-bar {
+            display: none;
             background: var(--bg2);
             border-bottom: 1px solid var(--border);
-            padding: 0 24px;
-            display: flex;
-            gap: 2px;
+            padding: 0 16px;
             overflow-x: auto;
+            gap: 2px;
         }
         .wiki-tab {
-            padding: 12px 20px;
+            padding: 10px 16px;
             font-size: 12px;
             font-weight: 600;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
             color: var(--text-dim);
             cursor: pointer;
             border-bottom: 2px solid transparent;
-            transition: color 0.15s, border-color 0.15s;
+            transition: color 0.12s, border-color 0.12s;
             white-space: nowrap;
             background: none;
-            border-left: none;
-            border-right: none;
-            border-top: none;
+            border-left: none; border-right: none; border-top: none;
             font-family: inherit;
         }
         .wiki-tab:hover { color: var(--text); }
         .wiki-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
 
+        /* content body */
         .wiki-body {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 28px 24px 60px;
+            padding: 24px 24px 60px;
+            max-width: 1100px;
         }
         .section { display: none; }
         .section.active { display: block; }
         .section-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: var(--gold);
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            margin-bottom: 18px;
-            padding-bottom: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 9px;
             border-bottom: 1px solid var(--border);
         }
         .section-note {
             background: rgba(200,160,80,0.06);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 10px 14px;
+            padding: 9px 13px;
             font-size: 12px;
             color: var(--text-dim);
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             line-height: 1.6;
         }
         .section-note strong { color: var(--gold-dim); }
 
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 14px;
-        }
-        .card-grid-wide {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 14px;
-        }
-        .card-grid-3col {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 14px;
-        }
+        /* grids */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+        .card-grid-wide { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+        .card-grid-3col { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+        .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 11px; }
 
+        /* cards */
         .card {
             background: var(--panel);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 14px;
-            transition: border-color 0.15s;
+            padding: 13px;
+            transition: border-color 0.15s, transform 0.12s;
+            cursor: pointer;
         }
-        .card:hover { border-color: rgba(200,160,80,0.6); }
-        .card-head {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .card-thumb {
-            width: 40px;
-            height: 40px;
-            image-rendering: pixelated;
-            object-fit: contain;
-            flex-shrink: 0;
-        }
+        .card:hover { border-color: rgba(200,160,80,0.6); transform: translateY(-1px); }
+        .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+        .card-thumb { width: 38px; height: 38px; image-rendering: pixelated; object-fit: contain; flex-shrink: 0; }
         .card-thumb-placeholder {
-            width: 40px;
-            height: 40px;
+            width: 38px; height: 38px;
             background: rgba(255,255,255,0.04);
             border: 1px dashed rgba(200,160,80,0.2);
             border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            color: var(--text-muted);
-            text-align: center;
-            line-height: 1.2;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px; color: var(--text-muted);
+            text-align: center; line-height: 1.2; flex-shrink: 0;
         }
-        .card-name {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text);
-        }
-        .card-sub {
-            font-size: 11px;
-            color: var(--text-dim);
-            margin-top: 1px;
-        }
+        .card-name { font-size: 13px; font-weight: 700; color: var(--text); }
+        .card-sub { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
         .card-body { font-size: 12px; color: var(--text-dim); line-height: 1.55; }
         .card-body p { margin-bottom: 5px; }
         .card-body p:last-child { margin-bottom: 0; }
+        .card-hint { font-size: 10px; color: var(--text-muted); margin-top: 8px; letter-spacing: 0.04em; }
 
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 3px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            font-size: 12px;
-        }
+        /* stat rows */
+        .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
         .stat-row:last-child { border-bottom: none; }
         .stat-label { color: var(--text-dim); }
         .stat-val { color: var(--text); font-weight: 600; }
 
-        .rarity {
-            display: inline-block;
-            padding: 1px 7px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
+        /* rarity badges */
+        .rarity { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
         .rarity-common { background: rgba(180,180,180,0.15); color: #bbb; border: 1px solid #555; }
         .rarity-uncommon { background: rgba(80,160,80,0.15); color: #70c070; border: 1px solid var(--green); }
         .rarity-rare { background: rgba(60,100,200,0.15); color: #70a0e0; border: 1px solid var(--blue); }
@@ -221,529 +278,878 @@
         .rarity-legendary { background: rgba(200,140,40,0.15); color: var(--gold); border: 1px solid var(--gold-dim); }
         .rarity-boss { background: rgba(200,40,40,0.15); color: #e07070; border: 1px solid var(--red); }
 
-        .tag {
-            display: inline-block;
-            padding: 1px 6px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 4px;
-            font-size: 10px;
-            color: var(--text-dim);
-            margin: 1px 2px;
-        }
-
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-            gap: 12px;
-        }
-
+        .tag { display: inline-block; padding: 1px 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: 4px; font-size: 10px; color: var(--text-dim); margin: 1px 2px; }
         .loot-list { font-size: 11px; color: var(--text-dim); }
         .loot-list span { margin-right: 6px; }
+        .conn-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+        .conn-pill { font-size: 10px; padding: 1px 7px; background: rgba(80,120,200,0.12); border: 1px solid rgba(80,120,200,0.3); border-radius: 10px; color: #80a0d8; }
+        .reward-row { margin-top: 6px; font-size: 11px; color: var(--gold-dim); }
 
-        .spell-card {
-            background: var(--panel);
+        /* spell cards */
+        .spell-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; cursor: pointer; transition: border-color 0.15s, transform 0.12s; }
+        .spell-card:hover { border-color: rgba(200,160,80,0.6); transform: translateY(-1px); }
+        .spell-icon { width: 32px; height: 32px; image-rendering: pixelated; flex-shrink: 0; }
+
+        /* recipe */
+        .recipe-materials { margin-top: 8px; font-size: 11px; }
+        .recipe-mat-row { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .recipe-mat-row:last-child { border-bottom: none; }
+        .recipe-output { margin-top: 6px; font-size: 11px; color: var(--green); }
+
+        /* detail page */
+        #wiki-detail { display: none; }
+        #wiki-detail.active { display: block; }
+        .detail-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            background: rgba(200,160,80,0.10);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 12px 14px;
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
+            color: var(--gold);
+            font-size: 12px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background 0.15s;
         }
-        .spell-icon {
-            width: 32px;
-            height: 32px;
+        .detail-back-btn:hover { background: rgba(200,160,80,0.22); }
+        .detail-hero {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .detail-hero-img {
+            width: 72px; height: 72px;
             image-rendering: pixelated;
+            object-fit: contain;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+        }
+        .detail-hero-placeholder {
+            width: 72px; height: 72px;
+            background: rgba(255,255,255,0.04);
+            border: 1px dashed rgba(200,160,80,0.2);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; color: var(--text-muted);
             flex-shrink: 0;
         }
+        .detail-hero-name { font-size: 22px; font-weight: 700; color: var(--gold); margin-bottom: 6px; }
+        .detail-hero-sub { font-size: 13px; color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .detail-block { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+        .detail-block-title { font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+        .detail-desc { font-style: italic; color: var(--text-dim); font-size: 13px; line-height: 1.6; margin-bottom: 16px; }
+        .detail-ability { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .detail-ability:last-child { border-bottom: none; }
+        .detail-ability-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+        .detail-ability-desc { font-size: 12px; color: var(--text-dim); }
 
-        /* crafting recipe card */
-        .recipe-materials {
-            margin-top: 8px;
-            font-size: 11px;
+        /* search results overlay */
+        .wiki-search-results {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 340px;
+            background: #16102a;
+            border: 1px solid var(--border);
+            border-radius: 0 0 8px 8px;
+            max-height: 340px;
+            overflow-y: auto;
+            z-index: 300;
+            display: none;
         }
-        .recipe-mat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 2px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+        .wiki-search-results.open { display: block; }
+        .wiki-search-wrap { position: relative; flex: 1; max-width: 300px; margin-left: auto; }
+        .search-result-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: background 0.1s;
         }
-        .recipe-mat-row:last-child { border-bottom: none; }
-        .recipe-output {
-            margin-top: 6px;
-            font-size: 11px;
-            color: var(--green);
-        }
+        .search-result-item:hover { background: rgba(200,160,80,0.10); }
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-type { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); min-width: 60px; }
+        .search-result-name { font-size: 13px; color: var(--text); }
+        .search-no-results { padding: 14px; text-align: center; color: var(--text-muted); font-size: 13px; }
 
-        /* area connections pill row */
-        .conn-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-        .conn-pill {
-            font-size: 10px;
-            padding: 1px 7px;
-            background: rgba(80,120,200,0.12);
-            border: 1px solid rgba(80,120,200,0.3);
-            border-radius: 10px;
-            color: #80a0d8;
-        }
-
-        /* mission reward line */
-        .reward-row {
-            margin-top: 6px;
-            font-size: 11px;
-            color: var(--gold-dim);
-        }
-
-        @media (max-width: 600px) {
-            .wiki-body { padding: 16px 12px 40px; }
-            .card-grid { grid-template-columns: 1fr 1fr; }
-            .items-grid { grid-template-columns: 1fr 1fr; }
-            .card-grid-3col { grid-template-columns: 1fr 1fr; }
+        /* mobile */
+        @media (max-width: 700px) {
+            .wiki-sidebar { display: none; }
+            .wiki-sidebar.mobile-open { display: block; position: fixed; top: 62px; left: 0; bottom: 0; z-index: 190; box-shadow: 4px 0 20px rgba(0,0,0,0.5); }
+            .wiki-tab-bar { display: flex; }
+            .wiki-body { padding: 14px 12px 40px; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .wiki-search-wrap { display: none; }
         }
     </style>
+    <script>
+        window.WIKI_DATA = {
+            enemies:    {{ enemies    | tojson }},
+            bosses:     {{ bosses     | tojson }},
+            items:      {{ items      | tojson }},
+            classes:    {{ classes    | tojson }},
+            races:      {{ races      | tojson }},
+            spells:     {{ spells     | tojson }},
+            crafting:   {{ craft_recipes | tojson }},
+            areas:      {{ areas      | tojson }},
+            missions:   {{ missions   | tojson }},
+            companions: {{ companions | tojson }},
+        };
+    </script>
 </head>
 <body>
 
-<header class="wiki-header">
+<header class="wiki-header" id="wiki-header">
+    <button class="wiki-hamburger" onclick="toggleSidebar()" title="Toggle sidebar">&#9776;</button>
     <div>
-        <div class="wiki-header-title">&#9776; Our Legacy 2 — Wiki</div>
+        <div class="wiki-header-title">Our Legacy 2 &mdash; Wiki</div>
         <div class="wiki-header-sub">v2.7.5 &mdash; Towards a New World</div>
+    </div>
+    <div class="wiki-search-wrap">
+        <input class="wiki-search" id="wiki-search" type="text" placeholder="Search everything..." autocomplete="off"
+               oninput="handleSearch(this.value)" onblur="setTimeout(()=>closeSearch(),200)">
+        <div class="wiki-search-results" id="search-results"></div>
     </div>
     <a href="/" class="wiki-back">&#8592; Back to Game</a>
 </header>
 
-<nav class="wiki-nav">
-    <button class="wiki-tab active" onclick="showSection('enemies')">Enemies</button>
-    <button class="wiki-tab" onclick="showSection('bosses')">Bosses</button>
-    <button class="wiki-tab" onclick="showSection('items')">Items</button>
-    <button class="wiki-tab" onclick="showSection('classes')">Classes</button>
-    <button class="wiki-tab" onclick="showSection('races')">Races</button>
-    <button class="wiki-tab" onclick="showSection('spells')">Spells</button>
-    <button class="wiki-tab" onclick="showSection('crafting')">Crafting</button>
-    <button class="wiki-tab" onclick="showSection('areas')">Areas</button>
-    <button class="wiki-tab" onclick="showSection('missions')">Missions</button>
-    <button class="wiki-tab" onclick="showSection('companions')">Companions</button>
-</nav>
+<div class="wiki-layout">
 
-<div class="wiki-body">
-
-    <!-- enemies -->
-    <section id="sec-enemies" class="section active">
-        <div class="section-title">Enemies</div>
-        <div class="section-note">
-            enemy textures are not yet added — glyphs use the fight fallback icon. custom art is planned.
+    <aside class="wiki-sidebar" id="wiki-sidebar">
+        <div class="wiki-sidebar-inner">
+            <div class="wiki-sidebar-label">Sections</div>
+            <button class="wiki-sidebar-btn active" id="snav-enemies"    onclick="showSection('enemies'   )"><span class="wiki-sidebar-icon">&#9876;</span> Enemies    <span class="wiki-sidebar-count" id="cnt-enemies"></span></button>
+            <button class="wiki-sidebar-btn"         id="snav-bosses"    onclick="showSection('bosses'    )"><span class="wiki-sidebar-icon">&#9760;</span> Bosses     <span class="wiki-sidebar-count" id="cnt-bosses"></span></button>
+            <button class="wiki-sidebar-btn"         id="snav-items"     onclick="showSection('items'     )"><span class="wiki-sidebar-icon">&#9830;</span> Items      <span class="wiki-sidebar-count" id="cnt-items"></span></button>
+            <button class="wiki-sidebar-btn"         id="snav-classes"   onclick="showSection('classes'   )"><span class="wiki-sidebar-icon">&#9872;</span> Classes    <span class="wiki-sidebar-count" id="cnt-classes"></span></button>
+            <button class="wiki-sidebar-btn"         id="snav-races"     onclick="showSection('races'     )"><span class="wiki-sidebar-icon">&#9775;</span> Races      <span class="wiki-sidebar-count" id="cnt-races"></span></button>
+            <button class="wiki-sidebar-btn"         id="snav-spells"    onclick="showSection('spells'    )"><span class="wiki-sidebar-icon">&#10024;</span> Spells    <span class="wiki-sidebar-count" id="cnt-spells"></span></button>
+            <button class="wiki-sidebar-btn"         id="snav-crafting"  onclick="showSection('crafting'  )"><span class="wiki-sidebar-icon">&#9874;</span> Crafting   <span class="wiki-sidebar-count" id="cnt-crafting"></span></button>
+            <button class="wiki-sidebar-btn"         id="snav-areas"     onclick="showSection('areas'     )"><span class="wiki-sidebar-icon">&#9968;</span> Areas      <span class="wiki-sidebar-count" id="cnt-areas"></span></button>
+            <button class="wiki-sidebar-btn"         id="snav-missions"  onclick="showSection('missions'  )"><span class="wiki-sidebar-icon">&#9993;</span> Missions   <span class="wiki-sidebar-count" id="cnt-missions"></span></button>
+            <button class="wiki-sidebar-btn"         id="snav-companions"onclick="showSection('companions')"><span class="wiki-sidebar-icon">&#9825;</span> Companions <span class="wiki-sidebar-count" id="cnt-companions"></span></button>
         </div>
-        <div class="card-grid">
-            {% for key, e in enemies.items() %}
-            <div class="card">
-                <div class="card-head">
-                    <img class="card-thumb" src="/game_assets/glyphs/{{ key }}.webp" alt="{{ e.name }}"
-                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no texture</div>'">
-                    <div>
-                        <div class="card-name">{{ e.name }}</div>
-                        <div class="card-sub">
-                            {% for t in e.get('tags', []) %}<span class="tag">{{ t }}</span>{% endfor %}
+    </aside>
+
+    <div class="wiki-main" id="wiki-main">
+
+        <!-- mobile tab bar -->
+        <nav class="wiki-tab-bar">
+            <button class="wiki-tab active" onclick="showSection('enemies'   )">Enemies</button>
+            <button class="wiki-tab"        onclick="showSection('bosses'    )">Bosses</button>
+            <button class="wiki-tab"        onclick="showSection('items'     )">Items</button>
+            <button class="wiki-tab"        onclick="showSection('classes'   )">Classes</button>
+            <button class="wiki-tab"        onclick="showSection('races'     )">Races</button>
+            <button class="wiki-tab"        onclick="showSection('spells'    )">Spells</button>
+            <button class="wiki-tab"        onclick="showSection('crafting'  )">Crafting</button>
+            <button class="wiki-tab"        onclick="showSection('areas'     )">Areas</button>
+            <button class="wiki-tab"        onclick="showSection('missions'  )">Missions</button>
+            <button class="wiki-tab"        onclick="showSection('companions')">Companions</button>
+        </nav>
+
+        <div class="wiki-body">
+
+        <!-- detail view (shown when a card is clicked) -->
+        <div id="wiki-detail"></div>
+
+        <!-- section: enemies -->
+        <section id="sec-enemies" class="section active">
+            <div class="section-title">Enemies</div>
+            <div class="section-note">enemy textures are not yet added &mdash; glyphs use the fight fallback icon. custom art is planned.</div>
+            <div class="card-grid">
+                {% for key, e in enemies.items() %}
+                <div class="card" onclick="showDetail('enemies','{{ key }}')">
+                    <div class="card-head">
+                        <img class="card-thumb" src="/game_assets/glyphs/{{ key }}.webp" alt="{{ e.name }}"
+                             onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no<br>texture</div>'">
+                        <div>
+                            <div class="card-name">{{ e.name }}</div>
+                            <div class="card-sub">{% for t in e.get('tags', []) %}<span class="tag">{{ t }}</span>{% endfor %}</div>
                         </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="stat-row"><span class="stat-label">HP</span><span class="stat-val">{{ e.hp }}</span></div>
-                    <div class="stat-row"><span class="stat-label">ATK</span><span class="stat-val">{{ e.attack }}</span></div>
-                    <div class="stat-row"><span class="stat-label">DEF</span><span class="stat-val">{{ e.defense }}</span></div>
-                    <div class="stat-row"><span class="stat-label">SPD</span><span class="stat-val">{{ e.speed }}</span></div>
-                    <div class="stat-row"><span class="stat-label">EXP</span><span class="stat-val">{{ e.experience_reward }}</span></div>
-                    <div class="stat-row"><span class="stat-label">Gold</span><span class="stat-val">{{ e.gold_reward }}g</span></div>
-                    {% if e.get('loot_table') %}
-                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">drops</div>
-                    <div class="loot-list">
-                        {% for item in e.loot_table %}<span>&#9654; {{ item }}</span>{% endfor %}
+                    <div class="card-body">
+                        <div class="stat-row"><span class="stat-label">HP</span><span class="stat-val">{{ e.hp }}</span></div>
+                        <div class="stat-row"><span class="stat-label">ATK</span><span class="stat-val">{{ e.attack }}</span></div>
+                        <div class="stat-row"><span class="stat-label">DEF</span><span class="stat-val">{{ e.defense }}</span></div>
+                        <div class="stat-row"><span class="stat-label">EXP</span><span class="stat-val">{{ e.experience_reward }}</span></div>
+                        <div class="stat-row"><span class="stat-label">Gold</span><span class="stat-val">{{ e.gold_reward }}g</span></div>
                     </div>
-                    {% endif %}
+                    <div class="card-hint">click for full page</div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </section>
+        </section>
 
-    <!-- bosses -->
-    <section id="sec-bosses" class="section">
-        <div class="section-title">Bosses</div>
-        <div class="section-note">
-            boss textures not yet added — each boss will receive unique artwork in a future update.
-        </div>
-        <div class="card-grid-wide">
-            {% for key, b in bosses.items() %}
-            <div class="card">
-                <div class="card-head">
-                    <img class="card-thumb" src="/game_assets/glyphs/{{ key }}.webp" alt="{{ b.name }}"
-                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no texture</div>'">
-                    <div>
-                        <div class="card-name" style="color:var(--red);">{{ b.name }} &#9760;</div>
-                        <div class="card-sub">
-                            <span class="rarity rarity-boss">boss</span>
-                            {% for t in b.get('tags', []) %}<span class="tag">{{ t }}</span>{% endfor %}
+        <!-- section: bosses -->
+        <section id="sec-bosses" class="section">
+            <div class="section-title">Bosses</div>
+            <div class="section-note">boss textures not yet added &mdash; each boss will receive unique artwork in a future update.</div>
+            <div class="card-grid-wide">
+                {% for key, b in bosses.items() %}
+                <div class="card" onclick="showDetail('bosses','{{ key }}')">
+                    <div class="card-head">
+                        <img class="card-thumb" src="/game_assets/glyphs/{{ key }}.webp" alt="{{ b.name }}"
+                             onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no<br>texture</div>'">
+                        <div>
+                            <div class="card-name" style="color:var(--red);">{{ b.name }}</div>
+                            <div class="card-sub"><span class="rarity rarity-boss">boss</span>{% for t in b.get('tags', []) %}<span class="tag">{{ t }}</span>{% endfor %}</div>
                         </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    {% if b.get('description') %}
-                    <p style="color:var(--text-dim);font-style:italic;margin-bottom:8px;">{{ b.description }}</p>
-                    {% endif %}
-                    <div class="stat-row"><span class="stat-label">HP</span><span class="stat-val">{{ b.hp }}</span></div>
-                    <div class="stat-row"><span class="stat-label">ATK</span><span class="stat-val">{{ b.attack }}</span></div>
-                    <div class="stat-row"><span class="stat-label">DEF</span><span class="stat-val">{{ b.defense }}</span></div>
-                    <div class="stat-row"><span class="stat-label">SPD</span><span class="stat-val">{{ b.speed }}</span></div>
-                    <div class="stat-row"><span class="stat-label">EXP</span><span class="stat-val">{{ b.experience_reward }}</span></div>
-                    <div class="stat-row"><span class="stat-label">Gold</span><span class="stat-val">{{ b.gold_reward }}g</span></div>
-                    {% if b.get('phases') %}
-                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">phases: {{ b.phases | length }}</div>
-                    {% endif %}
-                    {% if b.get('special_abilities') %}
-                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">abilities</div>
-                    {% for ab in b.special_abilities %}
-                    <div style="font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
-                        <strong style="color:var(--text);">{{ ab.name }}</strong>
-                        {% if ab.get('description') %} &mdash; {{ ab.description }}{% endif %}
+                    <div class="card-body">
+                        {% if b.get('description') %}<p style="font-style:italic;margin-bottom:6px;">{{ b.description }}</p>{% endif %}
+                        <div class="stat-row"><span class="stat-label">HP</span><span class="stat-val">{{ b.hp }}</span></div>
+                        <div class="stat-row"><span class="stat-label">ATK</span><span class="stat-val">{{ b.attack }}</span></div>
+                        <div class="stat-row"><span class="stat-label">EXP</span><span class="stat-val">{{ b.experience_reward }}</span></div>
                     </div>
-                    {% endfor %}
-                    {% endif %}
-                    {% if b.get('unique_loot') %}
-                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">unique loot</div>
-                    <div class="loot-list">
-                        {% for item in b.unique_loot %}<span>&#9654; {{ item }}</span>{% endfor %}
-                    </div>
-                    {% endif %}
+                    <div class="card-hint">click for full page</div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </section>
+        </section>
 
-    <!-- items -->
-    <section id="sec-items" class="section">
-        <div class="section-title">Items</div>
-        <div class="section-note">
-            some items do not yet have textures — shown with placeholder. more textures planned.
-        </div>
-        <div class="items-grid">
-            {% for name, item in items.items() %}
-            <div class="card">
-                <div class="card-head">
-                    {% if item.get('texture') %}
-                    <img class="card-thumb" src="/game_assets/{{ item.texture }}" alt="{{ name }}"
-                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no texture</div>'">
-                    {% else %}
-                    <div class="card-thumb-placeholder">no<br>texture</div>
-                    {% endif %}
-                    <div>
-                        <div class="card-name" style="font-size:12px;">{{ name }}</div>
-                        <div class="card-sub">
-                            {% if item.get('rarity') %}<span class="rarity rarity-{{ item.rarity }}">{{ item.rarity }}</span>{% endif %}
+        <!-- section: items -->
+        <section id="sec-items" class="section">
+            <div class="section-title">Items</div>
+            <div class="section-note">some items do not yet have textures &mdash; shown with placeholder. more textures planned.</div>
+            <div class="items-grid">
+                {% for name, item in items.items() %}
+                <div class="card" onclick="showDetail('items',{{ name | tojson }})">
+                    <div class="card-head">
+                        {% if item.get('texture') %}
+                        <img class="card-thumb" src="/game_assets/{{ item.texture }}" alt="{{ name }}"
+                             onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no<br>texture</div>'">
+                        {% else %}
+                        <div class="card-thumb-placeholder">no<br>texture</div>
+                        {% endif %}
+                        <div>
+                            <div class="card-name" style="font-size:12px;">{{ name }}</div>
+                            <div class="card-sub">{% if item.get('rarity') %}<span class="rarity rarity-{{ item.rarity }}">{{ item.rarity }}</span>{% endif %}</div>
                         </div>
                     </div>
+                    <div class="card-body">
+                        {% if item.get('type') %}<div class="stat-row"><span class="stat-label">type</span><span class="stat-val">{{ item.type }}</span></div>{% endif %}
+                        {% if item.get('price') %}<div class="stat-row"><span class="stat-label">price</span><span class="stat-val">{{ item.price }}g</span></div>{% endif %}
+                    </div>
+                    <div class="card-hint">click for full page</div>
                 </div>
-                <div class="card-body">
-                    {% if item.get('description') %}
-                    <p style="margin-bottom:6px;">{{ item.description }}</p>
-                    {% endif %}
-                    {% if item.get('type') %}<div class="stat-row"><span class="stat-label">type</span><span class="stat-val">{{ item.type }}</span></div>{% endif %}
-                    {% if item.get('price') %}<div class="stat-row"><span class="stat-label">price</span><span class="stat-val">{{ item.price }}g</span></div>{% endif %}
-                    {% if item.get('value') %}<div class="stat-row"><span class="stat-label">value</span><span class="stat-val">{{ item.value }}</span></div>{% endif %}
-                    {% if item.get('attack') %}<div class="stat-row"><span class="stat-label">atk</span><span class="stat-val">+{{ item.attack }}</span></div>{% endif %}
-                    {% if item.get('defense') %}<div class="stat-row"><span class="stat-label">def</span><span class="stat-val">+{{ item.defense }}</span></div>{% endif %}
-                    {% if item.get('speed') %}<div class="stat-row"><span class="stat-label">spd</span><span class="stat-val">{{ item.speed }}</span></div>{% endif %}
-                    {% if item.get('tags') %}
-                    <div style="margin-top:6px;">{% for t in item.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>
-                    {% endif %}
-                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </section>
+        </section>
 
-    <!-- classes -->
-    <section id="sec-classes" class="section">
-        <div class="section-title">Classes</div>
-        <div class="card-grid">
-            {% for name, cls in classes.items() %}
-            {% set _cglyph = {'Warrior':'warrior','Mage':'mage','Rogue':'rouge','Hunter':'hunter','Bard':'bard','Paladin':'paladin','Druid':'druid','Priest':'priest'} %}
-            <div class="card">
-                <div class="card-head">
-                    <img class="card-thumb" src="/game_assets/glyphs/{{ _cglyph.get(name, name.lower()) }}.webp" alt="{{ name }}"
-                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no texture</div>'">
-                    <div>
-                        <div class="card-name">{{ name }}</div>
+        <!-- section: classes -->
+        <section id="sec-classes" class="section">
+            <div class="section-title">Classes</div>
+            <div class="card-grid">
+                {% for name, cls in classes.items() %}
+                {% set _cglyph = {'Warrior':'warrior','Mage':'mage','Rogue':'rouge','Hunter':'hunter','Bard':'bard','Paladin':'paladin','Druid':'druid','Priest':'priest'} %}
+                <div class="card" onclick="showDetail('classes',{{ name | tojson }})">
+                    <div class="card-head">
+                        <img class="card-thumb" src="/game_assets/glyphs/{{ _cglyph.get(name, name.lower()) }}.webp" alt="{{ name }}"
+                             onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no<br>texture</div>'">
+                        <div><div class="card-name">{{ name }}</div></div>
                     </div>
+                    <div class="card-body">
+                        {% if cls.get('description') %}<p style="font-style:italic;">{{ cls.description }}</p>{% endif %}
+                    </div>
+                    <div class="card-hint">click for full page</div>
                 </div>
-                <div class="card-body">
-                    {% if cls.get('description') %}<p style="font-style:italic;margin-bottom:8px;">{{ cls.description }}</p>{% endif %}
-                    {% if cls.get('base_stats') %}
-                    {% for stat, val in cls.base_stats.items() %}
-                    <div class="stat-row">
-                        <span class="stat-label">{{ stat.upper() }}</span>
-                        <span class="stat-val">{{ val }}</span>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-                    {% if cls.get('starting_gold') %}
-                    <div class="stat-row"><span class="stat-label">start gold</span><span class="stat-val">{{ cls.starting_gold }}g</span></div>
-                    {% endif %}
-                    {% if cls.get('starting_items') %}
-                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">starting items</div>
-                    <div class="loot-list">
-                        {% for item in cls.starting_items %}<span>&#9654; {{ item }}</span>{% endfor %}
-                    </div>
-                    {% endif %}
-                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </section>
+        </section>
 
-    <!-- races -->
-    <section id="sec-races" class="section">
-        <div class="section-title">Races</div>
-        <div class="section-note">
-            race portrait textures not yet added — each race will receive unique artwork in a future update.
-        </div>
-        <div class="card-grid">
-            {% for name, race in races.items() %}
-            <div class="card">
-                <div class="card-head">
-                    <div class="card-thumb-placeholder">no<br>texture</div>
-                    <div>
-                        <div class="card-name">{{ name }}</div>
+        <!-- section: races -->
+        <section id="sec-races" class="section">
+            <div class="section-title">Races</div>
+            <div class="section-note">race portrait textures not yet added &mdash; each race will receive unique artwork in a future update.</div>
+            <div class="card-grid">
+                {% for name, race in races.items() %}
+                <div class="card" onclick="showDetail('races',{{ name | tojson }})">
+                    <div class="card-head">
+                        <div class="card-thumb-placeholder">no<br>texture</div>
+                        <div><div class="card-name">{{ name }}</div></div>
                     </div>
-                </div>
-                <div class="card-body">
-                    {% if race.get('description') %}<p style="font-style:italic;margin-bottom:8px;">{{ race.description }}</p>{% endif %}
-                    {% if race.get('stat_modifiers') %}
-                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">stat modifiers</div>
-                    {% for stat, val in race.stat_modifiers.items() %}
-                    <div class="stat-row">
-                        <span class="stat-label">{{ stat.upper() }}</span>
-                        <span class="stat-val" style="color:{{ 'var(--green)' if val > 0 else 'var(--red)' }};">{{ '+' if val > 0 else '' }}{{ val }}</span>
+                    <div class="card-body">
+                        {% if race.get('description') %}<p style="font-style:italic;">{{ race.description }}</p>{% endif %}
                     </div>
-                    {% endfor %}
-                    {% endif %}
-                    {% if race.get('notes') %}<p style="margin-top:8px;font-size:11px;color:var(--text-muted);">{{ race.notes }}</p>{% endif %}
+                    <div class="card-hint">click for full page</div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </section>
+        </section>
 
-    <!-- spells -->
-    <section id="sec-spells" class="section">
-        <div class="section-title">Spells</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-            {% for name, spell in spells.items() %}
-            <div class="spell-card">
-                <img class="spell-icon" src="/game_assets/glyphs/spell.webp" alt="spell">
-                <div style="flex:1;">
-                    <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
-                        {{ name }}
-                        <span class="rarity rarity-{% if spell.type == 'damage' %}boss{% elif spell.type == 'heal' %}uncommon{% else %}rare{% endif %}" style="margin-left:6px;">{{ spell.type }}</span>
-                    </div>
-                    {% if spell.get('description') %}<div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:6px;">{{ spell.description }}</div>{% endif %}
-                    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;">
-                        <span style="color:var(--text-dim);">mp cost: <strong style="color:var(--text);">{{ spell.mp_cost }}</strong></span>
-                        <span style="color:var(--text-dim);">power: <strong style="color:var(--text);">{{ spell.power }}</strong></span>
-                    </div>
-                    {% if spell.get('allowed_weapons') %}
-                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">
-                        weapons: {% for w in spell.allowed_weapons %}<span class="tag">{{ w }}</span>{% endfor %}
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </section>
-
-    <!-- crafting -->
-    <section id="sec-crafting" class="section">
-        <div class="section-title">Crafting Recipes</div>
-        <div class="card-grid-3col">
-            {% for key, recipe in craft_recipes.items() %}
-            <div class="card">
-                <div class="card-head">
-                    <div class="card-thumb-placeholder" style="font-size:16px;">&#9874;</div>
-                    <div>
-                        <div class="card-name">{{ recipe.name }}</div>
-                        <div class="card-sub">
-                            {% if recipe.get('category') %}<span class="tag">{{ recipe.category }}</span>{% endif %}
-                            {% if recipe.get('rarity') %}<span class="rarity rarity-{{ recipe.rarity }}">{{ recipe.rarity }}</span>{% endif %}
+        <!-- section: spells -->
+        <section id="sec-spells" class="section">
+            <div class="section-title">Spells</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                {% for name, spell in spells.items() %}
+                <div class="spell-card" onclick="showDetail('spells',{{ name | tojson }})">
+                    <img class="spell-icon" src="/game_assets/glyphs/spell.webp" alt="spell">
+                    <div style="flex:1;">
+                        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                            {{ name }}
+                            <span class="rarity rarity-{% if spell.type == 'damage' %}boss{% elif spell.type == 'heal' %}uncommon{% else %}rare{% endif %}" style="margin-left:6px;">{{ spell.type }}</span>
+                        </div>
+                        {% if spell.get('description') %}<div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:4px;">{{ spell.description }}</div>{% endif %}
+                        <div style="display:flex;gap:14px;font-size:12px;">
+                            <span style="color:var(--text-dim);">mp: <strong style="color:var(--text);">{{ spell.mp_cost }}</strong></span>
+                            <span style="color:var(--text-dim);">power: <strong style="color:var(--text);">{{ spell.power }}</strong></span>
                         </div>
                     </div>
+                    <div style="font-size:10px;color:var(--text-muted);align-self:flex-end;">click for full page</div>
                 </div>
-                <div class="card-body">
-                    {% if recipe.get('description') %}<p style="margin-bottom:6px;font-style:italic;">{{ recipe.description }}</p>{% endif %}
-                    {% if recipe.get('skill_requirement') %}
-                    <div class="stat-row"><span class="stat-label">skill req</span><span class="stat-val">{{ recipe.skill_requirement }}</span></div>
-                    {% endif %}
-                    {% if recipe.get('craft_time') %}
-                    <div class="stat-row"><span class="stat-label">craft time</span><span class="stat-val">{{ recipe.craft_time }}t</span></div>
-                    {% endif %}
-                    {% if recipe.get('materials') %}
-                    <div class="recipe-materials">
-                        <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px;">materials</div>
-                        {% for mat, qty in recipe.materials.items() %}
-                        <div class="recipe-mat-row">
-                            <span style="color:var(--text-dim);">{{ mat }}</span>
-                            <span style="color:var(--text);">×{{ qty }}</span>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% if recipe.get('output') %}
-                    <div class="recipe-output">
-                        output:
-                        {% for out, qty in recipe.output.items() %}
-                        <strong>{{ out }}</strong>{% if qty > 1 %} ×{{ qty }}{% endif %}{% if not loop.last %}, {% endif %}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </section>
+        </section>
 
-    <!-- areas -->
-    <section id="sec-areas" class="section">
-        <div class="section-title">World Areas</div>
-        <div class="card-grid-wide">
-            {% for key, area in areas.items() %}
-            <div class="card">
-                <div class="card-head">
-                    <div class="card-thumb-placeholder" style="font-size:16px;">&#9760;</div>
-                    <div>
-                        <div class="card-name">{{ area.name }}</div>
-                        <div class="card-sub">
-                            {% if area.get('difficulty') %}<span class="tag">diff {{ area.difficulty }}</span>{% endif %}
-                            {% if area.get('can_rest') %}<span class="tag">rest</span>{% endif %}
-                            {% if area.get('mine_pool') %}<span class="tag">mine</span>{% endif %}
+        <!-- section: crafting -->
+        <section id="sec-crafting" class="section">
+            <div class="section-title">Crafting Recipes</div>
+            <div class="card-grid-3col">
+                {% for key, recipe in craft_recipes.items() %}
+                <div class="card" onclick="showDetail('crafting','{{ key }}')">
+                    <div class="card-head">
+                        <div class="card-thumb-placeholder" style="font-size:16px;">&#9874;</div>
+                        <div>
+                            <div class="card-name">{{ recipe.name }}</div>
+                            <div class="card-sub">
+                                {% if recipe.get('category') %}<span class="tag">{{ recipe.category }}</span>{% endif %}
+                                {% if recipe.get('rarity') %}<span class="rarity rarity-{{ recipe.rarity }}">{{ recipe.rarity }}</span>{% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    {% if area.get('description') %}<p style="font-style:italic;margin-bottom:6px;">{{ area.description }}</p>{% endif %}
-                    {% if area.get('rest_cost') %}
-                    <div class="stat-row"><span class="stat-label">rest cost</span><span class="stat-val">{{ area.rest_cost }}g</span></div>
-                    {% endif %}
-                    {% if area.get('possible_enemies') %}
-                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">enemies</div>
-                    <div class="loot-list">{% for e in area.possible_enemies %}<span>{{ e }}</span>{% endfor %}</div>
-                    {% endif %}
-                    {% if area.get('possible_bosses') %}
-                    <div style="margin-top:4px;font-size:11px;color:var(--red);">bosses</div>
-                    <div class="loot-list">{% for b in area.possible_bosses %}<span>{{ b }}</span>{% endfor %}</div>
-                    {% endif %}
-                    {% if area.get('connections') %}
-                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">connects to</div>
-                    <div class="conn-pills">
-                        {% for conn in area.connections %}<span class="conn-pill">{{ conn.replace('_',' ') }}</span>{% endfor %}
+                    <div class="card-body">
+                        {% if recipe.get('materials') %}
+                        <div class="recipe-materials">
+                            {% for mat, qty in recipe.materials.items() %}
+                            <div class="recipe-mat-row">
+                                <span style="color:var(--text-dim);">{{ mat }}</span>
+                                <span style="color:var(--text);">x{{ qty }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if recipe.get('output') %}
+                        <div class="recipe-output">
+                            output: {% for out, qty in recipe.output.items() %}<strong>{{ out }}</strong>{% if qty > 1 %} x{{ qty }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
+                    <div class="card-hint">click for full page</div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </section>
+        </section>
 
-    <!-- missions -->
-    <section id="sec-missions" class="section">
-        <div class="section-title">Missions &amp; Quests</div>
-        <div class="card-grid-3col">
-            {% for key, mission in missions.items() %}
-            <div class="card">
-                <div class="card-head">
-                    <div class="card-thumb-placeholder" style="font-size:16px;">&#9830;</div>
-                    <div>
-                        <div class="card-name">{{ mission.name }}</div>
-                        <div class="card-sub">
-                            {% if mission.get('type') %}<span class="tag">{{ mission.type }}</span>{% endif %}
-                            {% if mission.get('area') %}<span class="tag">{{ mission.area.replace('_',' ') }}</span>{% endif %}
+        <!-- section: areas -->
+        <section id="sec-areas" class="section">
+            <div class="section-title">World Areas</div>
+            <div class="card-grid-wide">
+                {% for key, area in areas.items() %}
+                <div class="card" onclick="showDetail('areas','{{ key }}')">
+                    <div class="card-head">
+                        <div class="card-thumb-placeholder" style="font-size:16px;">&#9968;</div>
+                        <div>
+                            <div class="card-name">{{ area.name }}</div>
+                            <div class="card-sub">
+                                {% if area.get('difficulty') %}<span class="tag">diff {{ area.difficulty }}</span>{% endif %}
+                                {% if area.get('can_rest') %}<span class="tag">rest</span>{% endif %}
+                                {% if area.get('mine_pool') %}<span class="tag">mine</span>{% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    {% if mission.get('description') %}<p style="font-style:italic;margin-bottom:6px;">{{ mission.description }}</p>{% endif %}
-                    {% if mission.get('target') %}
-                    <div class="stat-row">
-                        <span class="stat-label">target</span>
-                        <span class="stat-val">{{ mission.target }} &times;{{ mission.get('target_count', 1) }}</span>
+                    <div class="card-body">
+                        {% if area.get('description') %}<p style="font-style:italic;margin-bottom:5px;">{{ area.description }}</p>{% endif %}
+                        {% if area.get('connections') %}
+                        <div class="conn-pills">
+                            {% for conn in area.connections %}<span class="conn-pill">{{ conn.replace('_',' ') }}</span>{% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
-                    {% if mission.get('unlock_level') %}
-                    <div class="stat-row"><span class="stat-label">unlock</span><span class="stat-val">lv {{ mission.unlock_level }}</span></div>
-                    {% endif %}
-                    {% if mission.get('reward') %}
-                    {% set r = mission.reward %}
-                    <div class="reward-row">
-                        reward:
-                        {% if r.get('experience') %} {{ r.experience }} exp{% endif %}
-                        {% if r.get('gold') %} &bull; {{ r.gold }}g{% endif %}
-                        {% if r.get('items') %} &bull; {{ r['items'] | join(', ') }}{% endif %}
-                    </div>
-                    {% endif %}
+                    <div class="card-hint">click for full page</div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </section>
+        </section>
 
-    <!-- companions -->
-    <section id="sec-companions" class="section">
-        <div class="section-title">Companions</div>
-        <div class="card-grid-3col">
-            {% for key, comp in companions.items() %}
-            {% set _cglyph = {'Warrior':'warrior','Mage':'mage','Rogue':'rouge','Hunter':'hunter','Bard':'bard','Paladin':'paladin','Druid':'druid','Priest':'priest'} %}
-            <div class="card">
-                <div class="card-head">
-                    <img class="card-thumb"
-                         src="/game_assets/glyphs/{{ _cglyph.get(comp.get('class',''), comp.get('class','').lower()) }}.webp"
-                         alt="{{ comp.name }}"
-                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no texture</div>'">
-                    <div>
-                        <div class="card-name">{{ comp.name }}</div>
-                        <div class="card-sub">
-                            {% if comp.get('class') %}<span class="tag">{{ comp['class'] }}</span>{% endif %}
-                            {% if comp.get('rank') %}<span class="rarity rarity-{{ comp.rank }}">{{ comp.rank }}</span>{% endif %}
+        <!-- section: missions -->
+        <section id="sec-missions" class="section">
+            <div class="section-title">Missions &amp; Quests</div>
+            <div class="card-grid-3col">
+                {% for key, mission in missions.items() %}
+                <div class="card" onclick="showDetail('missions','{{ key }}')">
+                    <div class="card-head">
+                        <div class="card-thumb-placeholder" style="font-size:16px;">&#9830;</div>
+                        <div>
+                            <div class="card-name">{{ mission.name }}</div>
+                            <div class="card-sub">
+                                {% if mission.get('type') %}<span class="tag">{{ mission.type }}</span>{% endif %}
+                                {% if mission.get('area') %}<span class="tag">{{ mission.area.replace('_',' ') }}</span>{% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    {% if comp.get('description') %}<p style="font-style:italic;margin-bottom:6px;">{{ comp.description }}</p>{% endif %}
-                    {% if comp.get('price') %}<div class="stat-row"><span class="stat-label">price</span><span class="stat-val">{{ comp.price }}g</span></div>{% endif %}
-                    {% if comp.get('attack_bonus') %}<div class="stat-row"><span class="stat-label">atk bonus</span><span class="stat-val">+{{ comp.attack_bonus }}</span></div>{% endif %}
-                    {% if comp.get('defense_bonus') %}<div class="stat-row"><span class="stat-label">def bonus</span><span class="stat-val">+{{ comp.defense_bonus }}</span></div>{% endif %}
-                    {% if comp.get('mp_bonus') %}<div class="stat-row"><span class="stat-label">mp bonus</span><span class="stat-val">+{{ comp.mp_bonus }}</span></div>{% endif %}
-                    {% if comp.get('action_chance') %}<div class="stat-row"><span class="stat-label">action chance</span><span class="stat-val">{{ (comp.action_chance * 100) | int }}%</span></div>{% endif %}
-                    {% if comp.get('abilities') %}
-                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">abilities</div>
-                    {% for ab in comp.abilities %}
-                    <div style="font-size:11px;padding:2px 0;">
-                        <span class="tag">{{ ab.name }}</span>
-                        {% if ab.get('chance') %}<span style="color:var(--text-muted);">{{ ab.chance }}%</span>{% endif %}
+                    <div class="card-body">
+                        {% if mission.get('description') %}<p style="font-style:italic;margin-bottom:5px;">{{ mission.description }}</p>{% endif %}
+                        {% if mission.get('target') %}
+                        <div class="stat-row"><span class="stat-label">target</span><span class="stat-val">{{ mission.target }} x{{ mission.get('target_count', 1) }}</span></div>
+                        {% endif %}
+                        {% if mission.get('reward') %}
+                        {% set r = mission.reward %}
+                        <div class="reward-row">reward:{% if r.get('experience') %} {{ r.experience }} exp{% endif %}{% if r.get('gold') %} &bull; {{ r.gold }}g{% endif %}{% if r.get('items') %} &bull; {{ r['items'] | join(', ') }}{% endif %}</div>
+                        {% endif %}
                     </div>
-                    {% endfor %}
-                    {% endif %}
+                    <div class="card-hint">click for full page</div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    </section>
+        </section>
 
-</div>
+        <!-- section: companions -->
+        <section id="sec-companions" class="section">
+            <div class="section-title">Companions</div>
+            <div class="card-grid-3col">
+                {% for key, comp in companions.items() %}
+                {% set _cglyph = {'Warrior':'warrior','Mage':'mage','Rogue':'rouge','Hunter':'hunter','Bard':'bard','Paladin':'paladin','Druid':'druid','Priest':'priest'} %}
+                <div class="card" onclick="showDetail('companions','{{ key }}')">
+                    <div class="card-head">
+                        <img class="card-thumb"
+                             src="/game_assets/glyphs/{{ _cglyph.get(comp.get('class',''), comp.get('class','').lower()) }}.webp"
+                             alt="{{ comp.name }}"
+                             onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no<br>texture</div>'">
+                        <div>
+                            <div class="card-name">{{ comp.name }}</div>
+                            <div class="card-sub">
+                                {% if comp.get('class') %}<span class="tag">{{ comp['class'] }}</span>{% endif %}
+                                {% if comp.get('rank') %}<span class="rarity rarity-{{ comp.rank }}">{{ comp.rank }}</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if comp.get('description') %}<p style="font-style:italic;margin-bottom:5px;">{{ comp.description }}</p>{% endif %}
+                        {% if comp.get('price') %}<div class="stat-row"><span class="stat-label">price</span><span class="stat-val">{{ comp.price }}g</span></div>{% endif %}
+                    </div>
+                    <div class="card-hint">click for full page</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        </div><!-- /wiki-body -->
+    </div><!-- /wiki-main -->
+</div><!-- /wiki-layout -->
 
 <script>
-    function showSection(id) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.wiki-tab').forEach(t => t.classList.remove('active'));
-        document.getElementById('sec-' + id).classList.add('active');
-        event.currentTarget.classList.add('active');
+var _currentSection = 'enemies';
+var _sidebarOpen = localStorage.getItem('wiki_sidebar') !== 'closed';
+
+/* sidebar toggle */
+function toggleSidebar() {
+    _sidebarOpen = !_sidebarOpen;
+    localStorage.setItem('wiki_sidebar', _sidebarOpen ? 'open' : 'closed');
+    applySidebar();
+}
+function applySidebar() {
+    var sb = document.getElementById('wiki-sidebar');
+    if (_sidebarOpen) { sb.classList.remove('collapsed'); }
+    else { sb.classList.add('collapsed'); }
+}
+applySidebar();
+
+/* section switching */
+function showSection(id) {
+    _currentSection = id;
+    document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+    var sec = document.getElementById('sec-' + id);
+    if (sec) sec.classList.add('active');
+
+    document.querySelectorAll('.wiki-sidebar-btn').forEach(function(b) { b.classList.remove('active'); });
+    var snav = document.getElementById('snav-' + id);
+    if (snav) snav.classList.add('active');
+
+    document.querySelectorAll('.wiki-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.wiki-tab').forEach(function(t) {
+        if (t.textContent.trim().toLowerCase() === id.replace('crafting','crafting')) {
+            if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'" + id + "'")) t.classList.add('active');
+        }
+    });
+
+    hideDetail();
+    window.location.hash = id;
+}
+
+/* detail page */
+function showDetail(type, key) {
+    var data = (window.WIKI_DATA[type] || {})[key];
+    if (!data) return;
+
+    document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+
+    var container = document.getElementById('wiki-detail');
+    container.innerHTML = buildDetail(type, key, data);
+    container.className = 'active';
+
+    window.location.hash = type + '/' + encodeURIComponent(key);
+    document.getElementById('wiki-main').scrollTop = 0;
+}
+
+function hideDetail() {
+    var container = document.getElementById('wiki-detail');
+    container.className = '';
+    container.innerHTML = '';
+}
+
+function goBack() {
+    showSection(_currentSection);
+}
+
+/* detail renderers */
+var CLASS_GLYPHS = {Warrior:'warrior',Mage:'mage',Rogue:'rouge',Hunter:'hunter',Bard:'bard',Paladin:'paladin',Druid:'druid',Priest:'priest'};
+
+function imgOrPlaceholder(src, alt, size) {
+    size = size || 72;
+    return '<img class="detail-hero-img" src="' + esc(src) + '" alt="' + esc(alt) + '" style="width:'+size+'px;height:'+size+'px;" onerror="this.outerHTML=\'<div class=\\\'detail-hero-placeholder\\\'>no<br>texture</div>\'">';
+}
+
+function statBlock(rows) {
+    if (!rows.length) return '';
+    return '<div class="detail-block"><div class="detail-block-title">Stats</div>' +
+        rows.map(function(r) {
+            return '<div class="stat-row"><span class="stat-label">' + esc(r[0]) + '</span><span class="stat-val">' + esc(String(r[1])) + '</span></div>';
+        }).join('') + '</div>';
+}
+
+function tagsHtml(tags) {
+    return (tags || []).map(function(t) { return '<span class="tag">' + esc(t) + '</span>'; }).join(' ');
+}
+
+function backBtn() {
+    return '<button class="detail-back-btn" onclick="goBack()">&#8592; Back to list</button>';
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildDetail(type, key, d) {
+    switch (type) {
+        case 'enemies':   return detailEnemy(key, d);
+        case 'bosses':    return detailBoss(key, d);
+        case 'items':     return detailItem(key, d);
+        case 'classes':   return detailClass(key, d);
+        case 'races':     return detailRace(key, d);
+        case 'spells':    return detailSpell(key, d);
+        case 'crafting':  return detailCrafting(key, d);
+        case 'areas':     return detailArea(key, d);
+        case 'missions':  return detailMission(key, d);
+        case 'companions':return detailCompanion(key, d);
+        default:          return '<p>Unknown type.</p>';
     }
+}
+
+function detailEnemy(key, d) {
+    var rows = [
+        ['HP', d.hp], ['Attack', d.attack], ['Defense', d.defense], ['Speed', d.speed],
+        ['EXP Reward', d.experience_reward], ['Gold Reward', d.gold_reward + 'g'],
+    ];
+    var loot = '';
+    if (d.loot_table && d.loot_table.length) {
+        loot = '<div class="detail-block"><div class="detail-block-title">Loot Table</div>' +
+            d.loot_table.map(function(i) { return '<div class="stat-row"><span class="stat-label">&#9654;</span><span class="stat-val">' + esc(i) + '</span></div>'; }).join('') + '</div>';
+    }
+    return backBtn() +
+        '<div class="detail-hero">' + imgOrPlaceholder('/game_assets/glyphs/'+key+'.webp', d.name) +
+        '<div><div class="detail-hero-name">' + esc(d.name) + '</div><div class="detail-hero-sub"><span class="tag">enemy</span>' + tagsHtml(d.tags) + '</div></div></div>' +
+        (d.description ? '<p class="detail-desc">' + esc(d.description) + '</p>' : '') +
+        '<div class="detail-grid">' + statBlock(rows) + loot + '</div>';
+}
+
+function detailBoss(key, d) {
+    var rows = [
+        ['HP', d.hp], ['Attack', d.attack], ['Defense', d.defense], ['Speed', d.speed],
+        ['EXP Reward', d.experience_reward], ['Gold Reward', d.gold_reward + 'g'],
+    ];
+    if (d.phases) rows.push(['Phases', d.phases.length]);
+    var abils = '';
+    if (d.special_abilities && d.special_abilities.length) {
+        abils = '<div class="detail-block" style="grid-column:1/-1;"><div class="detail-block-title">Special Abilities</div>' +
+            d.special_abilities.map(function(ab) {
+                return '<div class="detail-ability"><div class="detail-ability-name">' + esc(ab.name) + '</div>' +
+                    (ab.description ? '<div class="detail-ability-desc">' + esc(ab.description) + '</div>' : '') + '</div>';
+            }).join('') + '</div>';
+    }
+    var loot = '';
+    if (d.unique_loot && d.unique_loot.length) {
+        loot = '<div class="detail-block"><div class="detail-block-title">Unique Loot</div>' +
+            d.unique_loot.map(function(i) { return '<div class="stat-row"><span class="stat-label">&#9654;</span><span class="stat-val">' + esc(i) + '</span></div>'; }).join('') + '</div>';
+    }
+    return backBtn() +
+        '<div class="detail-hero">' + imgOrPlaceholder('/game_assets/glyphs/'+key+'.webp', d.name) +
+        '<div><div class="detail-hero-name" style="color:var(--red);">' + esc(d.name) + '</div>' +
+        '<div class="detail-hero-sub"><span class="rarity rarity-boss">boss</span>' + tagsHtml(d.tags) + '</div></div></div>' +
+        (d.description ? '<p class="detail-desc">' + esc(d.description) + '</p>' : '') +
+        '<div class="detail-grid">' + statBlock(rows) + loot + abils + '</div>';
+}
+
+function detailItem(key, d) {
+    var rows = [];
+    if (d.type)    rows.push(['Type', d.type]);
+    if (d.rarity)  rows.push(['Rarity', d.rarity]);
+    if (d.price)   rows.push(['Price', d.price + 'g']);
+    if (d.value)   rows.push(['Value', d.value]);
+    if (d.attack)  rows.push(['Attack Bonus', '+' + d.attack]);
+    if (d.defense) rows.push(['Defense Bonus', '+' + d.defense]);
+    if (d.speed)   rows.push(['Speed', d.speed]);
+    if (d.hp_restore) rows.push(['HP Restore', d.hp_restore]);
+    if (d.mp_restore) rows.push(['MP Restore', d.mp_restore]);
+    var src = d.texture ? '/game_assets/' + d.texture : null;
+    var imgHtml = src ? imgOrPlaceholder(src, key) : '<div class="detail-hero-placeholder">no<br>texture</div>';
+    var rarityTag = d.rarity ? '<span class="rarity rarity-' + esc(d.rarity) + '">' + esc(d.rarity) + '</span>' : '';
+    var tagsBlock = (d.tags && d.tags.length) ? '<div class="detail-block" style="grid-column:1/-1;"><div class="detail-block-title">Tags</div>' + tagsHtml(d.tags) + '</div>' : '';
+    return backBtn() +
+        '<div class="detail-hero">' + imgHtml +
+        '<div><div class="detail-hero-name">' + esc(key) + '</div><div class="detail-hero-sub">' + rarityTag + '</div></div></div>' +
+        (d.description ? '<p class="detail-desc">' + esc(d.description) + '</p>' : '') +
+        '<div class="detail-grid">' + statBlock(rows) + tagsBlock + '</div>';
+}
+
+function detailClass(key, d) {
+    var glyph = CLASS_GLYPHS[key] || key.toLowerCase();
+    var rows = [];
+    if (d.base_stats) Object.entries(d.base_stats).forEach(function(kv) { rows.push([kv[0].toUpperCase(), kv[1]]); });
+    if (d.starting_gold) rows.push(['Starting Gold', d.starting_gold + 'g']);
+    var startItems = '';
+    if (d.starting_items && d.starting_items.length) {
+        startItems = '<div class="detail-block"><div class="detail-block-title">Starting Items</div>' +
+            d.starting_items.map(function(i) { return '<div class="stat-row"><span class="stat-label">&#9654;</span><span class="stat-val">' + esc(i) + '</span></div>'; }).join('') + '</div>';
+    }
+    return backBtn() +
+        '<div class="detail-hero">' + imgOrPlaceholder('/game_assets/glyphs/'+glyph+'.webp', key) +
+        '<div><div class="detail-hero-name">' + esc(key) + '</div><div class="detail-hero-sub"><span class="tag">class</span></div></div></div>' +
+        (d.description ? '<p class="detail-desc">' + esc(d.description) + '</p>' : '') +
+        '<div class="detail-grid">' + statBlock(rows) + startItems + '</div>';
+}
+
+function detailRace(key, d) {
+    var rows = [];
+    if (d.stat_modifiers) Object.entries(d.stat_modifiers).forEach(function(kv) {
+        var v = kv[1];
+        rows.push([kv[0].toUpperCase(), (v > 0 ? '+' : '') + v]);
+    });
+    return backBtn() +
+        '<div class="detail-hero"><div class="detail-hero-placeholder">no<br>texture</div>' +
+        '<div><div class="detail-hero-name">' + esc(key) + '</div><div class="detail-hero-sub"><span class="tag">race</span></div></div></div>' +
+        (d.description ? '<p class="detail-desc">' + esc(d.description) + '</p>' : '') +
+        '<div class="detail-grid">' + statBlock(rows) +
+        (d.notes ? '<div class="detail-block"><div class="detail-block-title">Notes</div><p style="font-size:13px;color:var(--text-dim);">' + esc(d.notes) + '</p></div>' : '') + '</div>';
+}
+
+function detailSpell(key, d) {
+    var typeClass = d.type === 'damage' ? 'boss' : d.type === 'heal' ? 'uncommon' : 'rare';
+    var rows = [['MP Cost', d.mp_cost], ['Power', d.power], ['Type', d.type]];
+    var weapBlock = '';
+    if (d.allowed_weapons && d.allowed_weapons.length) {
+        weapBlock = '<div class="detail-block"><div class="detail-block-title">Allowed Weapons</div>' + tagsHtml(d.allowed_weapons) + '</div>';
+    }
+    return backBtn() +
+        '<div class="detail-hero"><img class="detail-hero-img" src="/game_assets/glyphs/spell.webp" alt="spell">' +
+        '<div><div class="detail-hero-name">' + esc(key) + '</div>' +
+        '<div class="detail-hero-sub"><span class="rarity rarity-' + typeClass + '">' + esc(d.type) + '</span></div></div></div>' +
+        (d.description ? '<p class="detail-desc">' + esc(d.description) + '</p>' : '') +
+        '<div class="detail-grid">' + statBlock(rows) + weapBlock + '</div>';
+}
+
+function detailCrafting(key, d) {
+    var rows = [];
+    if (d.category) rows.push(['Category', d.category]);
+    if (d.rarity)   rows.push(['Rarity', d.rarity]);
+    if (d.skill_requirement) rows.push(['Skill Req', d.skill_requirement]);
+    if (d.craft_time) rows.push(['Craft Time', d.craft_time + 't']);
+    var mats = '';
+    if (d.materials) {
+        mats = '<div class="detail-block"><div class="detail-block-title">Materials</div>' +
+            Object.entries(d.materials).map(function(kv) {
+                return '<div class="recipe-mat-row"><span style="color:var(--text-dim);">' + esc(kv[0]) + '</span><span style="color:var(--text);">x' + kv[1] + '</span></div>';
+            }).join('') + '</div>';
+    }
+    var output = '';
+    if (d.output) {
+        output = '<div class="detail-block"><div class="detail-block-title">Output</div>' +
+            Object.entries(d.output).map(function(kv) {
+                return '<div class="recipe-mat-row"><span style="color:var(--green);">' + esc(kv[0]) + '</span><span style="color:var(--text);">x' + kv[1] + '</span></div>';
+            }).join('') + '</div>';
+    }
+    return backBtn() +
+        '<div class="detail-hero"><div class="detail-hero-placeholder" style="font-size:24px;">&#9874;</div>' +
+        '<div><div class="detail-hero-name">' + esc(d.name || key) + '</div>' +
+        '<div class="detail-hero-sub"><span class="tag">recipe</span>' + (d.rarity ? '<span class="rarity rarity-' + esc(d.rarity) + '">' + esc(d.rarity) + '</span>' : '') + '</div></div></div>' +
+        (d.description ? '<p class="detail-desc">' + esc(d.description) + '</p>' : '') +
+        '<div class="detail-grid">' + statBlock(rows) + mats + output + '</div>';
+}
+
+function detailArea(key, d) {
+    var rows = [];
+    if (d.difficulty) rows.push(['Difficulty', d.difficulty]);
+    if (d.rest_cost)  rows.push(['Rest Cost', d.rest_cost + 'g']);
+    if (d.can_rest)   rows.push(['Can Rest', 'Yes']);
+    if (d.has_mine || (d.mine_pool && d.mine_pool.length)) rows.push(['Has Mine', 'Yes']);
+    var enemies = '';
+    if (d.possible_enemies && d.possible_enemies.length) {
+        enemies = '<div class="detail-block"><div class="detail-block-title">Enemies</div>' +
+            d.possible_enemies.map(function(e) { return '<div class="stat-row"><span class="stat-label">&#9876;</span><span class="stat-val">' + esc(e) + '</span></div>'; }).join('') + '</div>';
+    }
+    var bosses = '';
+    if (d.possible_bosses && d.possible_bosses.length) {
+        bosses = '<div class="detail-block"><div class="detail-block-title" style="color:var(--red);">Bosses</div>' +
+            d.possible_bosses.map(function(b) { return '<div class="stat-row"><span class="stat-label">&#9760;</span><span class="stat-val" style="color:var(--red);">' + esc(b) + '</span></div>'; }).join('') + '</div>';
+    }
+    var conns = '';
+    if (d.connections && d.connections.length) {
+        conns = '<div class="detail-block" style="grid-column:1/-1;"><div class="detail-block-title">Connected Areas</div><div class="conn-pills">' +
+            d.connections.map(function(c) { return '<span class="conn-pill">' + esc(c.replace(/_/g,' ')) + '</span>'; }).join('') + '</div></div>';
+    }
+    return backBtn() +
+        '<div class="detail-hero"><div class="detail-hero-placeholder" style="font-size:24px;">&#9968;</div>' +
+        '<div><div class="detail-hero-name">' + esc(d.name || key) + '</div>' +
+        '<div class="detail-hero-sub"><span class="tag">area</span></div></div></div>' +
+        (d.description ? '<p class="detail-desc">' + esc(d.description) + '</p>' : '') +
+        '<div class="detail-grid">' + statBlock(rows) + enemies + bosses + conns + '</div>';
+}
+
+function detailMission(key, d) {
+    var rows = [];
+    if (d.type)          rows.push(['Type', d.type]);
+    if (d.area)          rows.push(['Area', d.area.replace(/_/g,' ')]);
+    if (d.target)        rows.push(['Target', d.target + ' x' + (d.target_count || 1)]);
+    if (d.unlock_level)  rows.push(['Unlock Level', d.unlock_level]);
+    var reward = '';
+    if (d.reward) {
+        var r = d.reward;
+        var parts = [];
+        if (r.experience) parts.push(r.experience + ' EXP');
+        if (r.gold)       parts.push(r.gold + 'g');
+        if (r.items && r.items.length) parts.push(r.items.join(', '));
+        reward = '<div class="detail-block"><div class="detail-block-title">Reward</div>' +
+            parts.map(function(p) { return '<div class="stat-row"><span class="stat-label">&#9654;</span><span class="stat-val" style="color:var(--gold);">' + esc(p) + '</span></div>'; }).join('') + '</div>';
+    }
+    return backBtn() +
+        '<div class="detail-hero"><div class="detail-hero-placeholder" style="font-size:24px;">&#9830;</div>' +
+        '<div><div class="detail-hero-name">' + esc(d.name || key) + '</div>' +
+        '<div class="detail-hero-sub"><span class="tag">mission</span></div></div></div>' +
+        (d.description ? '<p class="detail-desc">' + esc(d.description) + '</p>' : '') +
+        '<div class="detail-grid">' + statBlock(rows) + reward + '</div>';
+}
+
+function detailCompanion(key, d) {
+    var glyph = CLASS_GLYPHS[d['class']] || (d['class'] || '').toLowerCase();
+    var rows = [];
+    if (d.price)         rows.push(['Price', d.price + 'g']);
+    if (d.attack_bonus)  rows.push(['Attack Bonus', '+' + d.attack_bonus]);
+    if (d.defense_bonus) rows.push(['Defense Bonus', '+' + d.defense_bonus]);
+    if (d.mp_bonus)      rows.push(['MP Bonus', '+' + d.mp_bonus]);
+    if (d.action_chance) rows.push(['Action Chance', Math.round(d.action_chance * 100) + '%']);
+    var abils = '';
+    if (d.abilities && d.abilities.length) {
+        abils = '<div class="detail-block"><div class="detail-block-title">Abilities</div>' +
+            d.abilities.map(function(ab) {
+                return '<div class="detail-ability"><div class="detail-ability-name">' + esc(ab.name) + (ab.chance ? ' <span style="color:var(--text-muted);font-weight:normal;font-size:11px;">' + ab.chance + '%</span>' : '') + '</div>' +
+                    (ab.description ? '<div class="detail-ability-desc">' + esc(ab.description) + '</div>' : '') + '</div>';
+            }).join('') + '</div>';
+    }
+    var rarityTag = d.rank ? '<span class="rarity rarity-' + esc(d.rank) + '">' + esc(d.rank) + '</span>' : '';
+    var classTag = d['class'] ? '<span class="tag">' + esc(d['class']) + '</span>' : '';
+    return backBtn() +
+        '<div class="detail-hero">' + imgOrPlaceholder('/game_assets/glyphs/'+(glyph||'warrior')+'.webp', d.name) +
+        '<div><div class="detail-hero-name">' + esc(d.name) + '</div>' +
+        '<div class="detail-hero-sub">' + classTag + rarityTag + '</div></div></div>' +
+        (d.description ? '<p class="detail-desc">' + esc(d.description) + '</p>' : '') +
+        '<div class="detail-grid">' + statBlock(rows) + abils + '</div>';
+}
+
+/* counts in sidebar */
+(function() {
+    var counts = {
+        enemies: Object.keys(window.WIKI_DATA.enemies).length,
+        bosses: Object.keys(window.WIKI_DATA.bosses).length,
+        items: Object.keys(window.WIKI_DATA.items).length,
+        classes: Object.keys(window.WIKI_DATA.classes).length,
+        races: Object.keys(window.WIKI_DATA.races).length,
+        spells: Object.keys(window.WIKI_DATA.spells).length,
+        crafting: Object.keys(window.WIKI_DATA.crafting).length,
+        areas: Object.keys(window.WIKI_DATA.areas).length,
+        missions: Object.keys(window.WIKI_DATA.missions).length,
+        companions: Object.keys(window.WIKI_DATA.companions).length,
+    };
+    Object.entries(counts).forEach(function(kv) {
+        var el = document.getElementById('cnt-' + kv[0]);
+        if (el) el.textContent = kv[1];
+    });
+})();
+
+/* search */
+function handleSearch(q) {
+    var box = document.getElementById('search-results');
+    q = q.trim().toLowerCase();
+    if (!q) { box.classList.remove('open'); box.innerHTML = ''; return; }
+    var results = [];
+    var TYPES = ['enemies','bosses','items','classes','races','spells','crafting','areas','missions','companions'];
+    TYPES.forEach(function(type) {
+        Object.entries(window.WIKI_DATA[type]).forEach(function(kv) {
+            var k = kv[0], d = kv[1];
+            var label = d.name || k;
+            if (label.toLowerCase().includes(q) || k.toLowerCase().includes(q)) {
+                results.push({ type: type, key: k, label: label });
+            }
+        });
+    });
+    results = results.slice(0, 20);
+    if (!results.length) {
+        box.innerHTML = '<div class="search-no-results">No results for "' + esc(q) + '"</div>';
+    } else {
+        box.innerHTML = results.map(function(r) {
+            return '<div class="search-result-item" onclick="wikiSearch(\'' + esc(r.type) + '\',\'' + esc(r.key).replace(/'/g,"\\'") + '\')">' +
+                '<span class="search-result-type">' + esc(r.type) + '</span>' +
+                '<span class="search-result-name">' + esc(r.label) + '</span></div>';
+        }).join('');
+    }
+    box.classList.add('open');
+}
+
+function wikiSearch(type, key) {
+    _currentSection = type;
+    document.getElementById('wiki-search').value = '';
+    closeSearch();
+    showDetail(type, key);
+}
+
+function closeSearch() {
+    var box = document.getElementById('search-results');
+    box.classList.remove('open');
+}
+
+/* hash routing on load */
+(function() {
+    var hash = window.location.hash.replace('#', '');
+    if (!hash) return;
+    var parts = hash.split('/');
+    var section = parts[0];
+    var key = parts[1] ? decodeURIComponent(parts[1]) : null;
+    var valid = ['enemies','bosses','items','classes','races','spells','crafting','areas','missions','companions'];
+    if (!valid.includes(section)) return;
+    _currentSection = section;
+    if (key && window.WIKI_DATA[section] && window.WIKI_DATA[section][key]) {
+        showSection(section);
+        showDetail(section, key);
+    } else {
+        showSection(section);
+    }
+})();
 </script>
 </body>
 </html>
