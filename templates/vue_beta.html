@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Legacy 2 — Vue Beta</title>
+    <link rel="icon" href="/game_assets/game_title_our_legacy_2.webp" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        [v-cloak] { display: none !important; }
+
+        .beta-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #7b35c8, #4a1880);
+            color: #e4c0ff;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid rgba(180,100,255,0.4);
+            letter-spacing: 1px;
+            vertical-align: middle;
+            margin-left: 6px;
+            text-transform: uppercase;
+        }
+
+        .vue-toast-wrap {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            pointer-events: none;
+            max-width: 340px;
+        }
+        .vue-toast {
+            background: rgba(10,6,2,0.96);
+            border: 1px solid rgba(200,165,90,0.38);
+            border-radius: 5px;
+            padding: 9px 14px;
+            font-size: 13px;
+            backdrop-filter: blur(8px);
+            animation: vt-in 0.18s ease;
+            transition: opacity 0.3s;
+        }
+        @keyframes vt-in {
+            from { opacity:0; transform: translateY(-8px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        .vtab-bar {
+            display: flex;
+            gap: 2px;
+            padding: 0 2px 0;
+            border-bottom: 2px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .vtab-btn {
+            padding: 7px 15px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-dim);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            font-family: inherit;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .vtab-btn:hover { color: var(--text-light); }
+        .vtab-btn.vtab-active {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
+        }
+        .vtab-btn.vtab-battle {
+            color: var(--red);
+            animation: pulse-tab 1.2s ease infinite;
+        }
+        @keyframes pulse-tab {
+            0%,100% { opacity:1; }
+            50%      { opacity:0.5; }
+        }
+        .vtab-panel { display: none; padding: 14px 2px; }
+        .vtab-panel.vtab-panel-active { display: block; }
+
+        .area-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .area-name-big {
+            font-size: 18px;
+            color: var(--gold);
+            font-weight: bold;
+        }
+        .area-difficulty {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .travel-btn-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .events-list .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
+
+        .inv-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .inv-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 10px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .inv-row-name { flex: 1; color: var(--text-light); }
+        .inv-row-qty { color: var(--text-dim); margin: 0 10px; min-width: 30px; text-align: right; }
+        .inv-row-actions { display: flex; gap: 4px; }
+
+        .stat-grid-big {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 5px;
+            padding: 10px 8px;
+            text-align: center;
+        }
+        .stat-card-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card-val { font-size: 18px; color: var(--gold); font-weight: bold; margin-top: 3px; }
+
+        .battle-panel-vue {
+            background: rgba(80,10,10,0.18);
+            border: 1px solid rgba(200,60,60,0.3);
+            border-radius: 6px;
+            padding: 14px;
+        }
+        .battle-enemy-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .battle-enemy-name { font-size: 16px; color: var(--red); font-weight: bold; }
+        .battle-log-wrap { max-height: 180px; overflow-y: auto; margin: 10px 0; }
+        .battle-log-entry {
+            font-size: 12px;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-dim);
+        }
+        .battle-log-entry:last-child { color: var(--text-light); }
+        .battle-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+        .empty-state { color: var(--text-dim); font-size: 13px; text-align: center; padding: 24px 0; }
+
+        .sidebar-back-btn {
+            display: block;
+            margin: 10px 0 14px;
+            font-size: 12px;
+            color: var(--text-dim);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .sidebar-back-btn:hover { color: var(--gold); }
+
+        .beta-banner {
+            background: linear-gradient(135deg, rgba(80,20,130,0.4), rgba(40,10,80,0.4));
+            border: 1px solid rgba(160,80,255,0.35);
+            border-radius: 5px;
+            padding: 6px 10px;
+            font-size: 11px;
+            color: #c9a0f0;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    </style>
+    <script>
+        window._betaInit = {
+            player: {{ (player | tojson) if player else 'null' }},
+            username: {{ online_username | tojson }},
+        };
+    </script>
+</head>
+<body>
+
+<div id="vue-beta-app" v-cloak>
+
+    <!-- Toast container -->
+    <div class="vue-toast-wrap">
+        <div
+            v-for="t in toasts"
+            :key="t.id"
+            class="vue-toast"
+            :style="{ color: t.color || 'var(--text-light)' }">
+            [[ t.text ]]
+        </div>
+    </div>
+
+    <div class="game-layout">
+
+        <!-- ── Sidebar ─────────────────────────────────────────────── -->
+        <aside class="sidebar" id="main-sidebar">
+            <div class="sidebar-scroll">
+
+                <div class="sidebar-top">
+                    <img src="/game_assets/game_title_our_legacy_2_720px_300px.webp"
+                         alt="Our Legacy 2" class="sidebar-banner">
+                </div>
+
+                <div class="beta-banner">
+                    ⚗ Vue 3 Beta &mdash; admin preview
+                </div>
+
+                <div class="panel sidebar-panel" v-if="player">
+                    <div class="panel-title">
+                        <img class="class-glyph"
+                             :src="'/game_assets/glyphs/' + glyphFor(player.char_class) + '.webp'"
+                             :alt="player.char_class">
+                        [[ player.name ]]
+                    </div>
+                    <div class="panel-body">
+                        <div class="char-class">[[ player.char_class ]] &mdash; [[ player.rank ]]</div>
+                        <div class="char-level">
+                            <img class="type-glyph" src="/game_assets/glyphs/level.gif" alt="level">
+                            Level [[ player.level ]]
+                        </div>
+                        <div style="font-size:12px;color:var(--text-dim);margin-top:2px;margin-bottom:4px;">
+                            [[ player.race ]]
+                        </div>
+
+                        <!-- HP bar -->
+                        <div class="bar-group">
+                            <div class="bar-label">
+                                <img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP
+                                <span class="bar-nums">[[ player.hp ]] / [[ player.max_hp ]]</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill bar-hp" :style="{ width: hpPct + '%' }"></div>
+                            </div>
+                        </div>
+
+                        <!-- MP bar -->
+                        <div class="bar-group">
+                            <div class="bar-label">
+                                <img class="type-glyph" src="/game_assets/glyphs/mana.webp" alt="mp"> MP
+                                <span class="bar-nums">[[ player.mp ]] / [[ player.max_mp ]]</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill bar-mp" :style="{ width: mpPct + '%' }"></div>
+                            </div>
+                        </div>
+
+                        <!-- EXP bar -->
+                        <div class="bar-group">
+                            <div class="bar-label">
+                                <img class="type-glyph" src="/game_assets/glyphs/exp.webp" alt="exp"> EXP
+                                <span class="bar-nums">[[ player.experience ]] / [[ player.experience_to_next ]]</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill bar-exp" :style="{ width: expPct + '%' }"></div>
+                            </div>
+                        </div>
+
+                        <!-- Gold -->
+                        <div class="gold-display">
+                            <img class="type-glyph" src="/game_assets/glyphs/gold.webp" alt="gold">
+                            Gold: <span class="gold-amount">[[ player.gold ]]</span>
+                        </div>
+
+                        <!-- ATK / DEF / SPD -->
+                        <div class="stat-mini-grid">
+                            <div class="stat-mini"><span>ATK</span><strong>[[ player.attack ]]</strong></div>
+                            <div class="stat-mini"><span>DEF</span><strong>[[ player.defense ]]</strong></div>
+                            <div class="stat-mini"><span>SPD</span><strong>[[ player.speed ]]</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel sidebar-panel" v-else>
+                    <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;">
+                        No character loaded.<br>
+                        <a href="/" style="color:var(--gold);">Go to main menu</a>
+                    </div>
+                </div>
+
+                <div style="padding:10px 0 4px;">
+                    <a href="/" class="sidebar-back-btn">&#8592; Back to main game</a>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- ── Main content ────────────────────────────────────────── -->
+        <div class="main-content">
+            <div style="padding: 0 0 12px 0; max-width: 900px; margin: 0 auto;">
+
+                <!-- Tab bar -->
+                <div class="vtab-bar">
+                    <button class="vtab-btn" :class="{ 'vtab-active': activeTab === 'play' }"
+                            @click="switchTab('play')">&#9876; Play</button>
+                    <button class="vtab-btn vtab-battle" v-if="inBattle"
+                            :class="{ 'vtab-active': activeTab === 'battle' }"
+                            @click="switchTab('battle')">&#9876; Battle!</button>
+                    <button class="vtab-btn" :class="{ 'vtab-active': activeTab === 'inventory' }"
+                            @click="switchTab('inventory')">&#9764; Inventory</button>
+                    <button class="vtab-btn" :class="{ 'vtab-active': activeTab === 'character' }"
+                            @click="switchTab('character')">&#9872; Character</button>
+                    <button class="vtab-btn" :class="{ 'vtab-active': activeTab === 'travel' }"
+                            @click="switchTab('travel')">&#9760; Travel</button>
+                </div>
+
+                <!-- ── Play tab ────────────────────────────────────── -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'play' }">
+
+                    <div v-if="area" class="area-header">
+                        <div>
+                            <div class="area-name-big">[[ area.name ]]</div>
+                            <div class="area-difficulty">Difficulty [[ area.difficulty ]]</div>
+                        </div>
+                    </div>
+
+                    <div v-if="inBattle" class="panel" style="border-color:rgba(200,60,60,0.4);margin-bottom:12px;">
+                        <div class="panel-body" style="color:var(--red);font-size:14px;">
+                            &#9876; You are in battle! Switch to the <strong>Battle</strong> tab.
+                            <button class="btn btn-danger" style="margin-left:10px;" @click="switchTab('battle')">Go to Battle</button>
+                        </div>
+                    </div>
+
+                    <div v-if="!inBattle" class="action-row">
+                        <button class="btn btn-primary" @click="explore" :disabled="actionPending || !player">
+                            [[ actionPending ? 'Working…' : '⚔ Explore' ]]
+                        </button>
+                        <button v-if="canRest" class="btn btn-secondary" @click="rest" :disabled="actionPending">
+                            &#10041; Rest
+                            <span v-if="area && area.rest_cost" style="font-size:11px;margin-left:4px;">
+                                ([[ area.rest_cost ]]g)
+                            </span>
+                        </button>
+                        <button v-if="canMine" class="btn btn-secondary" @click="mine" :disabled="actionPending">
+                            &#9935; Mine
+                        </button>
+                    </div>
+
+                    <!-- Recent events -->
+                    <div class="panel" v-if="recentMessages.length">
+                        <div class="panel-title">Recent Events</div>
+                        <div class="panel-body events-list">
+                            <div v-for="(msg, i) in recentMessages" :key="i"
+                                 class="log-entry"
+                                 :style="{ color: msg.color || 'var(--text-light)' }">
+                                [[ msg.text ]]
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="area && area.description" style="margin-top:10px;">
+                        <div class="panel">
+                            <div class="panel-title">About this area</div>
+                            <div class="panel-body" style="font-size:13px;color:var(--text-dim);">
+                                [[ area.description ]]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Battle tab ──────────────────────────────────── -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'battle' }">
+                    <div v-if="inBattle && battle" class="battle-panel-vue">
+                        <div class="battle-enemy-header">
+                            <div>
+                                <div class="battle-enemy-name">
+                                    <span v-if="battle.is_boss">&#9878; </span>[[ battle.enemy_name ]]
+                                    <span v-if="battle.is_boss" class="beta-badge">BOSS</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enemy HP bar -->
+                        <div class="bar-group">
+                            <div class="bar-label">
+                                Enemy HP <span class="bar-nums">[[ battle.enemy_hp ]] / [[ battle.enemy_max_hp ]]</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill bar-hp"
+                                     :style="{ width: Math.min(100, Math.round(battle.enemy_hp / (battle.enemy_max_hp || 1) * 100)) + '%' }">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Battle log -->
+                        <div class="battle-log-wrap" v-if="battle.log && battle.log.length">
+                            <div v-for="(entry, i) in battle.log" :key="i" class="battle-log-entry">
+                                [[ entry ]]
+                            </div>
+                        </div>
+
+                        <!-- Battle actions -->
+                        <div class="battle-actions">
+                            <button class="btn btn-danger" @click="battleAttack" :disabled="actionPending">
+                                &#9876; Attack
+                            </button>
+                            <button class="btn btn-secondary" @click="battleDefend" :disabled="actionPending">
+                                &#9748; Defend
+                            </button>
+                            <button class="btn btn-secondary" @click="battleFlee" :disabled="actionPending">
+                                &#8594; Flee
+                            </button>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">No active battle.</div>
+                </div>
+
+                <!-- ── Inventory tab ───────────────────────────────── -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'inventory' }">
+                    <div v-if="inventoryCounts.length" class="inv-grid">
+                        <div v-for="item in inventoryCounts" :key="item.name" class="inv-row">
+                            <span class="inv-row-name">[[ item.name ]]</span>
+                            <span class="inv-row-qty">×[[ item.qty ]]</span>
+                            <div class="inv-row-actions">
+                                <button class="btn btn-xsmall btn-secondary"
+                                        @click="useItem(item.name)"
+                                        :disabled="actionPending">
+                                    Use
+                                </button>
+                                <button class="btn btn-xsmall btn-secondary"
+                                        @click="equipItem(item.name)"
+                                        :disabled="actionPending">
+                                    Equip
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">Your inventory is empty.</div>
+                </div>
+
+                <!-- ── Character tab ───────────────────────────────── -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'character' }">
+                    <div v-if="player">
+                        <div class="panel" style="margin-bottom:12px;">
+                            <div class="panel-title">[[ player.name ]]</div>
+                            <div class="panel-body">
+                                <div style="font-size:14px;margin-bottom:4px;">
+                                    [[ player.char_class ]] &mdash; Rank [[ player.rank ]]
+                                </div>
+                                <div style="font-size:13px;color:var(--text-dim);">
+                                    [[ player.race ]] &bull; Level [[ player.level ]]
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-grid-big">
+                            <div class="stat-card">
+                                <div class="stat-card-label">HP</div>
+                                <div class="stat-card-val">[[ player.hp ]] / [[ player.max_hp ]]</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-label">MP</div>
+                                <div class="stat-card-val">[[ player.mp ]] / [[ player.max_mp ]]</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-label">EXP</div>
+                                <div class="stat-card-val">[[ player.experience ]] / [[ player.experience_to_next ]]</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-label">Attack</div>
+                                <div class="stat-card-val">[[ player.attack ]]</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-label">Defense</div>
+                                <div class="stat-card-val">[[ player.defense ]]</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-label">Speed</div>
+                                <div class="stat-card-val">[[ player.speed ]]</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-label">Gold</div>
+                                <div class="stat-card-val">[[ player.gold ]]</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-label">Level</div>
+                                <div class="stat-card-val">[[ player.level ]]</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-label">Rank</div>
+                                <div class="stat-card-val">[[ player.rank ]]</div>
+                            </div>
+                        </div>
+
+                        <div v-if="player.equipment && Object.keys(player.equipment).length" style="margin-top:14px;">
+                            <div class="panel">
+                                <div class="panel-title">Equipment</div>
+                                <div class="panel-body">
+                                    <div v-for="(item, slot) in player.equipment" :key="slot"
+                                         style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;">
+                                        <span style="color:var(--text-dim);text-transform:capitalize;">[[ slot ]]</span>
+                                        <span>[[ item ]]</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">No character data.</div>
+                </div>
+
+                <!-- ── Travel tab ──────────────────────────────────── -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'travel' }">
+                    <div v-if="area && area.connections && area.connections.length">
+                        <div class="panel-title" style="margin-bottom:10px;">Travel from [[ area.name ]]</div>
+                        <div class="travel-btn-grid">
+                            <button v-for="conn in area.connections" :key="conn"
+                                    class="btn btn-secondary"
+                                    @click="travel(conn)"
+                                    :disabled="actionPending || inBattle">
+                                &#9654; [[ conn.replace(/_/g, ' ') ]]
+                            </button>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">No connected areas.</div>
+                    <div v-if="inBattle" style="margin-top:10px;color:var(--red);font-size:13px;">
+                        You cannot travel while in battle.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div><!-- .game-layout -->
+</div><!-- #vue-beta-app -->
+
+<script src="https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js"></script>
+<script src="/static/js/vue_beta.js"></script>
+</body>
+</html>

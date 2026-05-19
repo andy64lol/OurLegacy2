@@ -8120,6 +8120,21 @@ def _require_admin():
 from routes.admin import admin_bp
 app.register_blueprint(admin_bp)
 
+
+# ── Vue Beta (admin-only preview) ─────────────────────────────────────────
+
+@app.route("/beta")
+def vue_beta():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return redirect(url_for("index"))
+    player = get_player()
+    return render_template(
+        "vue_beta.html",
+        player=player,
+        online_username=caller,
+    )
+
 from asgiref.sync import sync_to_async as _sync_to_async
 from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi, WsgiToAsgiInstance as _WsgiToAsgiInstance
 
