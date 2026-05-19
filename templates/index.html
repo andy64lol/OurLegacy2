@@ -253,18 +253,21 @@
             <button class="mainmenu-btn" onclick="openSettings()">
                 Settings
             </button>
-            {% if is_admin %}
-            <a class="mainmenu-btn" href="/wiki" target="_blank" rel="noopener">
-                Wiki
-            </a>
-            <a class="mainmenu-btn" href="/beta" target="_blank" rel="noopener"
-               style="border-color:rgba(160,80,255,0.5);color:#d0a0ff;">
-                <img src="/game_assets/glyphs/sparkles.webp" alt="beta" class="type-glyph" style="vertical-align:middle;margin-right:4px;"> Vue Beta
-            </a>
-            {% endif %}
         </nav>
         {% if online_count is defined and online_count %}
         <div class="mainmenu-online-count">{{ online_count }} adventurer{{ 's' if online_count != 1 else '' }} online</div>
+        {% endif %}
+        {% if is_admin %}
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
+            <a href="/wiki" target="_blank" rel="noopener"
+               style="font-size:11px;color:var(--text-dim);text-decoration:none;padding:3px 10px;border:1px solid rgba(255,255,255,0.1);border-radius:4px;opacity:0.6;">
+                Wiki
+            </a>
+            <a href="/beta" target="_blank" rel="noopener"
+               style="font-size:11px;color:#c090f0;text-decoration:none;padding:3px 10px;border:1px solid rgba(160,80,255,0.25);border-radius:4px;opacity:0.6;">
+                Vue Beta
+            </a>
+        </div>
         {% endif %}
         <div id="save-status" class="save-notice" style="display:none;text-align:center;margin-top:8px;"></div>
     </div>
