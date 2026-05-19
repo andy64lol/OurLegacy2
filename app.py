@@ -1402,6 +1402,7 @@ def save_player(player: dict[str, Any] | None) -> None:
     player["visited_areas"] = list(
         set(player.get("visited_areas", []) + session.get("visited_areas", []))
     )
+    player["rank"] = get_rank(player.get("level", 1))
     session["player"] = player
     session.modified = True
 
@@ -1410,6 +1411,7 @@ def _build_game_state() -> dict[str, Any]:
     player = session.get("player")
     if not player:
         return {}
+    player["rank"] = get_rank(player.get("level", 1))
     from utilities.stats import ensure_attributes
 
     ensure_attributes(player)
@@ -1438,6 +1440,7 @@ def _apply_game_state(data: dict[str, Any]) -> None:
     player.setdefault("weekly_challenges_progress", {})
     player.setdefault("boss_cooldowns", {})
     player.setdefault("race", "Descendants from another world")
+    player["rank"] = get_rank(player.get("level", 1))
     from utilities.stats import ensure_attributes
 
     ensure_attributes(player)
@@ -8371,7 +8374,7 @@ def _api_player_summary(player):
         "defense": player.get("defense"),
         "speed": player.get("speed"),
         "gold": player.get("gold"),
-        "rank": player.get("rank", "F"),
+        "rank": get_rank(player.get("level", 1)),
         "race": player.get("race"),
         "char_class": player.get("class", player.get("char_class", "")),
         "current_area": session.get("current_area"),

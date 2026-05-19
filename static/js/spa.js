@@ -46,6 +46,8 @@
         var mpPct  = Math.min(100, Math.round(mp / maxMp * 100));
         var expPct = Math.min(100, Math.round(exp / expMax * 100));
 
+        var _fmt = (typeof fmtNum === 'function') ? fmtNum : function(n) { return String(n); };
+
         /* bars — works in sidebar, battle panel, and anywhere else */
         document.querySelectorAll('.bar-group').forEach(function (group) {
             var fill = group.querySelector('.bar-fill');
@@ -53,19 +55,19 @@
             if (!fill) return;
             if (fill.classList.contains('bar-hp')) {
                 fill.style.width = hpPct + '%';
-                if (nums) nums.textContent = hp + ' / ' + maxHp;
+                if (nums) nums.textContent = _fmt(hp) + ' / ' + _fmt(maxHp);
             } else if (fill.classList.contains('bar-mp')) {
                 fill.style.width = mpPct + '%';
-                if (nums) nums.textContent = mp + ' / ' + maxMp;
+                if (nums) nums.textContent = _fmt(mp) + ' / ' + _fmt(maxMp);
             } else if (fill.classList.contains('bar-exp')) {
                 fill.style.width = expPct + '%';
-                if (nums) nums.textContent = exp + ' / ' + expMax;
+                if (nums) nums.textContent = _fmt(exp) + ' / ' + _fmt(expMax);
             }
         });
 
         /* gold */
         document.querySelectorAll('.gold-amount').forEach(function (el) {
-            el.textContent = player.gold !== undefined ? player.gold : el.textContent;
+            if (player.gold !== undefined) el.textContent = _fmt(player.gold);
         });
 
         /* sidebar specifics */
