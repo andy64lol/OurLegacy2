@@ -1426,6 +1426,7 @@ def _build_game_state() -> dict[str, Any]:
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
         "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
+        "game_settings": session.get("game_settings", {}),
         "signed_in": bool(user_id and user_id in _active_sessions),
         "save_version": "7.1",
     }
@@ -1460,6 +1461,9 @@ def _apply_game_state(data: dict[str, Any]) -> None:
     raw_slots = data.get("_save_slots")
     if isinstance(raw_slots, list):
         session["_save_slots"] = raw_slots
+    raw_settings = data.get("game_settings")
+    if isinstance(raw_settings, dict) and raw_settings:
+        session["game_settings"] = raw_settings
     session.modified = True
 
 
@@ -6620,6 +6624,7 @@ def api_save():
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
         "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
+        "game_settings": session.get("game_settings", {}),
         "save_version": "7.1",
         "game_version": GAME_VERSION,
     }
@@ -6678,8 +6683,15 @@ def api_load():
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
+    raw_settings = data.get("game_settings")
+    if isinstance(raw_settings, dict) and raw_settings:
+        session["game_settings"] = raw_settings
     session.modified = True
-    return jsonify({"ok": True, "player_name": player.get("name")})
+    return jsonify({
+        "ok": True,
+        "player_name": player.get("name"),
+        "game_settings": session.get("game_settings", {}),
+    })
 
 
 @app.route("/crafting")
@@ -7380,6 +7392,7 @@ def api_cloud_save():
         "messages": session.get("messages", [])[-20:],
         "diary": session.get("diary", []),
         "npc_unlocked_quests": session.get("npc_unlocked_quests", []),
+        "game_settings": session.get("game_settings", {}),
         "save_version": "7.1",
         "game_version": GAME_VERSION,
     }
@@ -7423,10 +7436,32 @@ def api_cloud_load():
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
+    raw_settings = data.get("game_settings")
+    if isinstance(raw_settings, dict) and raw_settings:
+        session["game_settings"] = raw_settings
     session.modified = True
-    return jsonify(
-        {"ok": True, "message": result["message"], "player_name": player.get("name")}
-    )
+    return jsonify({
+        "ok": True,
+        "message": result["message"],
+        "player_name": player.get("name"),
+        "game_settings": session.get("game_settings", {}),
+    })
+
+
+@app.route("/api/settings", methods=["GET"])
+def api_settings_get():
+    return jsonify({"ok": True, "settings": session.get("game_settings", {})})
+
+
+@app.route("/api/settings", methods=["POST"])
+def api_settings_save():
+    body = request.get_json(force=True, silent=True) or {}
+    allowed = {"ol2_theme", "ol2_bg", "ol2_btn_style", "ol2_ui_scale",
+               "ol2_music_volume", "ol2_music_muted", "ol2_bgm_track"}
+    settings = {k: v for k, v in body.items() if k in allowed}
+    session["game_settings"] = settings
+    session.modified = True
+    return jsonify({"ok": True})
 
 
 @app.route("/api/online/cloud_meta")

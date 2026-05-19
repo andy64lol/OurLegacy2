@@ -29,7 +29,8 @@ document.addEventListener('DOMContentLoaded', function () {
     hookParticleEvents();
     applyNumFmt();
     initFabScrollBehavior();
-    /* SPA form interceptor + live polling are in spa.js (loaded separately) */
+    loadSettingsFromServer();
+    /* spa form interceptor + live polling are in spa.js (loaded separately) */
 });
 
 function checkAutosaved() {
@@ -449,6 +450,7 @@ function setMusicVolume(val) {
         _musicAudio.volume = vol;
         if (!_musicMuted && _musicAudio.paused) _musicAudio.play();
     }
+    syncSettingsToServer();
 }
 
 function toggleMusicMute() {
@@ -462,6 +464,7 @@ function toggleMusicMute() {
         _musicAudio.volume = savedVol;
         if (_musicAudio.paused) _musicAudio.play();
     }
+    syncSettingsToServer();
 }
 
 function initPagination() {
@@ -532,6 +535,7 @@ function _applyButtonStyle(style) {
 function applyButtonStyle(style) {
     _applyButtonStyle(style);
     localStorage.setItem('ol2_btn_style', style);
+    syncSettingsToServer();
 }
 
 function settingsToggleButtonStyle() {
@@ -562,6 +566,7 @@ function _applyTheme(theme) {
 function applyTheme(theme) { // eslint-disable-line no-unused-vars
     _applyTheme(theme);
     localStorage.setItem('ol2_theme', theme);
+    syncSettingsToServer();
 }
 
 function initUIScale() {
@@ -579,6 +584,7 @@ function settingsSetUIScale(val) { // eslint-disable-line no-unused-vars
     var label = document.getElementById('settings-uiscale-val');
     if (label) label.textContent = Math.round(scale * 100) + '%';
     window.dispatchEvent(new Event('resize'));
+    syncSettingsToServer();
 }
 
 function initBackground() {
@@ -603,6 +609,7 @@ function applyBackground(val) {
     document.querySelectorAll('.bg-option-btn').forEach(function(btn) {
         btn.classList.toggle('active', btn.dataset.bg === val);
     });
+    syncSettingsToServer();
 }
 
 function openSettings() {
@@ -790,6 +797,7 @@ function settingsChangeBGM(track) {
     if (!newSrc) return;
     localStorage.setItem('ol2_bgm_track', String(track));
     localStorage.removeItem('ol2_music_time');
+    syncSettingsToServer();
     var wasPlaying = !audio.paused && !_musicMuted;
     audio.pause();
     var src = audio.querySelector('source');
@@ -1294,4 +1302,69 @@ function initFabScrollBehavior() {
     scrollTargets.forEach(function(el) {
         if (el) el.addEventListener('scroll', onScrollStart, { passive: true });
     });
+}
+
+/* ── Settings Server Sync ───────────────────────────────────────── */
+function _collectSettings() {
+    return {
+        ol2_theme: localStorage.getItem('ol2_theme') || 'dark',
+        ol2_bg: localStorage.getItem('ol2_bg') || '1',
+        ol2_btn_style: localStorage.getItem('ol2_btn_style') || 'classic',
+        ol2_ui_scale: localStorage.getItem('ol2_ui_scale') || '1',
+        ol2_music_volume: localStorage.getItem('ol2_music_volume') || '0.3',
+        ol2_music_muted: localStorage.getItem('ol2_music_muted') || 'false',
+        ol2_bgm_track: localStorage.getItem('ol2_bgm_track') || '1',
+    };
+}
+
+function _applySettingsObj(obj) {
+    if (!obj || typeof obj !== 'object') return;
+    var keys = ['ol2_theme', 'ol2_bg', 'ol2_btn_style', 'ol2_ui_scale',
+                'ol2_music_volume', 'ol2_music_muted', 'ol2_bgm_track'];
+    keys.forEach(function(k) {
+        if (obj[k] != null) localStorage.setItem(k, String(obj[k]));
+    });
+    if (obj.ol2_theme) _applyTheme(obj.ol2_theme);
+    if (obj.ol2_bg) _applyBgClass(obj.ol2_bg);
+    if (obj.ol2_btn_style) _applyButtonStyle(obj.ol2_btn_style);
+    if (obj.ol2_ui_scale) {
+        var scale = parseFloat(obj.ol2_ui_scale);
+        if (!isNaN(scale)) {
+            document.documentElement.style.setProperty('--ui-scale', scale);
+            var label = document.getElementById('settings-uiscale-val');
+            if (label) label.textContent = Math.round(scale * 100) + '%';
+        }
+    }
+    if (obj.ol2_music_volume != null && _musicAudio) {
+        var vol = parseFloat(obj.ol2_music_volume);
+        if (!isNaN(vol)) {
+            _musicMuted = (vol === 0) || obj.ol2_music_muted === 'true';
+            _musicAudio.volume = _musicMuted ? 0 : vol;
+        }
+    }
+    if (obj.ol2_bgm_track) _updateBGMButtons(obj.ol2_bgm_track);
+}
+
+var _settingsSyncTimer = null;
+function syncSettingsToServer() {
+    clearTimeout(_settingsSyncTimer);
+    _settingsSyncTimer = setTimeout(function() {
+        var player = document.querySelector('[data-player-name]');
+        if (!player) return;
+        fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(_collectSettings()),
+        }).catch(function() {});
+    }, 800);
+}
+
+function loadSettingsFromServer() {
+    fetch('/api/settings').then(function(r) {
+        return r.ok ? r.json() : null;
+    }).then(function(data) {
+        if (data && data.ok && data.settings && Object.keys(data.settings).length > 0) {
+            _applySettingsObj(data.settings);
+        }
+    }).catch(function() {});
 }
