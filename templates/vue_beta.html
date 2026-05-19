@@ -118,6 +118,52 @@
         .inv-row-qty { color: var(--text-dim); min-width: 28px; text-align: right; }
         .inv-row-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
+        .item-icon-wrap {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .item-icon {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+        .item-icon-placeholder {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            opacity: 0.45;
+        }
+        .equip-slot-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        .shop-item-icon {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
         .rarity-common    { color: var(--text-light); }
         .rarity-uncommon  { color: #4caf50; }
         .rarity-rare      { color: #2196f3; }
@@ -725,8 +771,15 @@
                                     <div v-for="slot in equipSlots" :key="slot" class="equip-slot">
                                         <div class="equip-slot-label">[[ slot ]]</div>
                                         <div v-if="equippedDetails[slot]">
-                                            <div class="equip-slot-item" :class="'rarity-' + equippedDetails[slot].rarity">
-                                                [[ equippedDetails[slot].name ]]
+                                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                                                <img v-if="equippedDetails[slot].texture && equippedDetails[slot].texture !== 'missing.webp'"
+                                                     class="equip-slot-icon"
+                                                     :src="'/game_assets/' + equippedDetails[slot].texture"
+                                                     :alt="equippedDetails[slot].name"
+                                                     @error="$event.target.style.display='none'">
+                                                <div class="equip-slot-item" :class="'rarity-' + equippedDetails[slot].rarity">
+                                                    [[ equippedDetails[slot].name ]]
+                                                </div>
                                             </div>
                                             <div class="equip-slot-stats" v-if="equippedDetails[slot].stats">
                                                 [[ equippedDetails[slot].stats ]]
@@ -786,6 +839,25 @@
                         </div>
                         <div class="inv-grid">
                             <div v-for="item in inventoryItems" :key="item.name" class="inv-row">
+                                <div class="item-icon-wrap">
+                                    <img v-if="item.texture && item.texture !== 'missing.webp'"
+                                         class="item-icon"
+                                         :src="'/game_assets/' + item.texture"
+                                         :alt="item.name"
+                                         @error="$event.target.style.display='none'">
+                                    <img v-else-if="item.type === 'consumable'"
+                                         class="item-icon-placeholder"
+                                         src="/game_assets/glyphs/food.webp" alt="">
+                                    <img v-else-if="item.type === 'accessory'"
+                                         class="item-icon-placeholder"
+                                         src="/game_assets/glyphs/accessories.webp" alt="">
+                                    <img v-else-if="item.type === 'offhand'"
+                                         class="item-icon-placeholder"
+                                         src="/game_assets/glyphs/offhand.webp" alt="">
+                                    <img v-else
+                                         class="item-icon-placeholder"
+                                         src="/game_assets/glyphs/materials.webp" alt="">
+                                </div>
                                 <div style="flex:1;min-width:0;">
                                     <div class="inv-row-name" :class="'rarity-' + item.rarity">[[ item.name ]]</div>
                                     <div class="inv-row-meta" v-if="item.stats">[[ item.stats ]]</div>
@@ -849,6 +921,22 @@
                         <div class="area-name-big" style="margin-bottom:12px;">[[ shopName || 'Shop' ]]</div>
                         <div class="shop-grid">
                             <div v-for="item in shopItems" :key="item.name" class="shop-item">
+                                <div class="shop-item-icon">
+                                    <img v-if="item.texture && item.texture !== 'missing.webp'"
+                                         class="item-icon"
+                                         :src="'/game_assets/' + item.texture"
+                                         :alt="item.name"
+                                         @error="$event.target.style.display='none'">
+                                    <img v-else-if="item.type === 'consumable'"
+                                         class="item-icon-placeholder"
+                                         src="/game_assets/glyphs/food.webp" alt="">
+                                    <img v-else-if="item.type === 'accessory'"
+                                         class="item-icon-placeholder"
+                                         src="/game_assets/glyphs/accessories.webp" alt="">
+                                    <img v-else
+                                         class="item-icon-placeholder"
+                                         src="/game_assets/glyphs/materials.webp" alt="">
+                                </div>
                                 <div class="shop-item-info">
                                     <div class="shop-item-name" :class="'rarity-' + item.rarity">[[ item.name ]]</div>
                                     <div class="shop-item-meta" v-if="item.stats">[[ item.stats ]]</div>

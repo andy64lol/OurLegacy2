@@ -3322,6 +3322,7 @@ def game():
                     "type": item_data.get("type", "misc"),
                     "stats": _item_stat_summary(item_data),
                     "can_afford": player["gold"] >= price,
+                    "texture": item_data.get("texture", ""),
                 }
             )
 
@@ -3373,6 +3374,7 @@ def game():
                 "equip_block_reason": equip_block_reason,
                 "req_label": req_label,
                 "stats": _item_stat_summary(item_data),
+                "texture": item_data.get("texture", ""),
             }
         )
 
@@ -3389,6 +3391,7 @@ def game():
                     "weapon_type": item_data.get("weapon_type", "")
                     if slot == "weapon"
                     else "",
+                    "texture": item_data.get("texture", ""),
                 }
 
     completed = session.get("completed_missions", [])
@@ -9447,6 +9450,7 @@ def api_game_state_extended():
                 "type": item_data.get("type", "misc"),
                 "stats": _item_stat_summary(item_data),
                 "can_afford": player["gold"] >= price,
+                "texture": item_data.get("texture", ""),
             })
 
     # inventory items with full detail
@@ -9469,6 +9473,7 @@ def api_game_state_extended():
             "type": item_type,
             "equippable": item_type in EQUIPPABLE_TYPES,
             "stats": _item_stat_summary(item_data),
+            "texture": item_data.get("texture", ""),
         })
 
     # equipped details
@@ -9482,6 +9487,7 @@ def api_game_state_extended():
                     "rarity": item_data.get("rarity", "common"),
                     "stats": _item_stat_summary(item_data),
                     "description": item_data.get("description", ""),
+                    "texture": item_data.get("texture", ""),
                 }
 
     # missions

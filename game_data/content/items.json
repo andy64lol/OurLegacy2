@@ -12,7 +12,7 @@
     ],
     "min_value": 40,
     "max_value": 60,
-    "texture": "items/consumables/rpg_icons129.webp"
+    "texture": "items/consumables/health_potion.webp"
   },
   "Mana Potion": {
     "type": "consumable",
@@ -27,7 +27,7 @@
     ],
     "min_value": 24,
     "max_value": 36,
-    "texture": "items/consumables/rpg_icons130.webp"
+    "texture": "items/consumables/mana_potion.webp"
   },
   "Large Health Potion": {
     "type": "consumable",
@@ -41,7 +41,7 @@
       "consumable",
       "heal"
     ],
-    "texture": "items/consumables/rpg_icons131.webp"
+    "texture": "items/consumables/big_health_potion.webp"
   },
   "Frost Potion": {
     "type": "consumable",
@@ -57,7 +57,7 @@
       "defensive"
     ],
     "on_use_buff": "defense_boost",
-    "texture": "items/consumables/rpg_icons132.webp"
+    "texture": "items/consumables/mana_potion.webp"
   },
   "Iron Sword": {
     "type": "weapon",
@@ -80,7 +80,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons25.webp"
+    "texture": "items/swords/basic_iron_sword.webp"
   },
   "Steel Dagger": {
     "type": "weapon",
@@ -107,7 +107,7 @@
       "one-handed",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons26.webp"
+    "texture": "items/swords/a_proffesional_dagger.webp"
   },
   "Magic Staff": {
     "type": "weapon",
@@ -134,7 +134,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons69.webp"
+    "texture": "items/staffs/imperial_staff_with_blue_crystal.webp"
   },
   "Greatsword": {
     "type": "weapon",
@@ -162,7 +162,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/swords/rpg_icons27.webp"
+    "texture": "items/swords/basic_iron_greatsword.webp"
   },
   "Leather Armor": {
     "type": "armor",
@@ -183,7 +183,8 @@
     "tags": [
       "light",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Chain Mail": {
     "type": "armor",
@@ -205,7 +206,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Mystic Robes": {
     "type": "armor",
@@ -231,7 +233,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Ring of Power": {
     "type": "accessory",
@@ -251,7 +254,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons1.webp"
+    "texture": "items/rings_and_necklaces/enchanted_green_diamond_ring_golden.webp"
   },
   "Boots of Speed": {
     "type": "accessory",
@@ -267,7 +270,7 @@
       "boots",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons2.webp"
+    "texture": "items/rings_and_necklaces/silver_rune_spikes_ring.webp"
   },
   "Goblin Ear": {
     "type": "material",
@@ -276,7 +279,8 @@
     "rarity": "junk",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Orc Tooth": {
     "type": "material",
@@ -285,7 +289,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Bone Fragment": {
     "type": "material",
@@ -295,7 +300,8 @@
     "tags": [
       "material",
       "bone"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Wolf Fang": {
     "type": "material",
@@ -304,7 +310,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Dragon Scale": {
     "type": "material",
@@ -314,7 +321,8 @@
     "tags": [
       "material",
       "dragon"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Dragon Scale Armor": {
     "type": "armor",
@@ -335,7 +343,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Dragon Bone": {
     "type": "material",
@@ -346,7 +355,8 @@
       "material",
       "dragon",
       "bone"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Spectral Dragon Scale": {
     "type": "material",
@@ -356,7 +366,8 @@
     "tags": [
       "material",
       "dragon"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Ancient Dragon Bone": {
     "type": "material",
@@ -367,7 +378,8 @@
       "material",
       "dragon",
       "bone"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Serpent Tail": {
     "type": "material",
@@ -376,7 +388,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Phoenix Feather": {
     "type": "material",
@@ -385,12 +398,14 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Crystal Shard": {
     "description": "A shard of crystal, often used in magical crafting",
     "price": 10,
-    "rarity": "common"
+    "rarity": "common",
+    "texture": "missing.webp"
   },
   "Ancient Dragon Scale": {
     "type": "material",
@@ -400,7 +415,8 @@
     "tags": [
       "material",
       "dragon"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Dark Crystal": {
     "type": "material",
@@ -411,7 +427,8 @@
       "material",
       "dark",
       "crystal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Ice Crystal": {
     "type": "material",
@@ -422,7 +439,8 @@
       "material",
       "ice",
       "crystal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Fire Gem": {
     "type": "material",
@@ -433,7 +451,8 @@
       "material",
       "fire",
       "crystal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Troll Club": {
     "type": "weapon",
@@ -460,7 +479,7 @@
       "one-handed",
       "holy"
     ],
-    "texture": "items/tridents/rpg_icons117.webp"
+    "texture": "items/tridents/silver_trident.webp"
   },
   "Troll Hide": {
     "type": "material",
@@ -469,7 +488,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Rusty Dagger": {
     "type": "weapon",
@@ -492,7 +512,7 @@
       "one-handed",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons28.webp"
+    "texture": "items/swords/a_proffesional_dagger.webp"
   },
   "Wooden Wand": {
     "type": "weapon",
@@ -519,7 +539,7 @@
       "arcane",
       "one-handed"
     ],
-    "texture": "items/staffs/rpg_icons70.webp"
+    "texture": "items/staffs/wood_druid_staff.webp"
   },
   "Crystalline Wand": {
     "type": "weapon",
@@ -548,7 +568,7 @@
       "one-handed",
       "ice"
     ],
-    "texture": "items/staffs/rpg_icons71.webp"
+    "texture": "items/staffs/imperial_staff_with_blue_crystal.webp"
   },
   "Spellsword": {
     "type": "weapon",
@@ -574,7 +594,7 @@
       "one-handed",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons29.webp"
+    "texture": "items/swords/basic_iron_sword.webp"
   },
   "Ethereal Staff": {
     "type": "weapon",
@@ -601,7 +621,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons72.webp"
+    "texture": "items/staffs/imperial_staff_with_blue_crystal.webp"
   },
   "Rogue's Dagger": {
     "type": "weapon",
@@ -629,7 +649,7 @@
       "one-handed",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons30.webp"
+    "texture": "items/swords/a_ninja_shortsword_idk.webp"
   },
   "Ninja Kunai": {
     "type": "weapon",
@@ -656,7 +676,7 @@
       "finesse",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons141.webp"
+    "texture": "items/slingshots/totally_normal_slingshot.webp"
   },
   "Shadow Blade": {
     "type": "weapon",
@@ -681,7 +701,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons31.webp"
+    "texture": "items/swords/a_ninja_shortsword_idk.webp"
   },
   "Obsidian Edge": {
     "type": "weapon",
@@ -707,7 +727,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons32.webp"
+    "texture": "items/swords/abyssal_doube_ring_sword.webp"
   },
   "Iron Axe": {
     "type": "weapon",
@@ -734,7 +754,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/axes/rpg_icons89.webp"
+    "texture": "items/axes/iron_waraxe.webp"
   },
   "Chieftain's Axe": {
     "type": "weapon",
@@ -762,7 +782,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/axes/rpg_icons90.webp"
+    "texture": "items/axes/powerful_double_waraxe.webp"
   },
   "Warhammer": {
     "type": "weapon",
@@ -792,7 +812,7 @@
       "heavy",
       "holy"
     ],
-    "texture": "items/tridents/rpg_icons118.webp"
+    "texture": "items/tridents/greenish_metal_trident.webp"
   },
   "Dragonsoul Blade": {
     "type": "weapon",
@@ -820,7 +840,7 @@
       "one-handed",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons33.webp"
+    "texture": "items/swords/dragonsoul_green_blade.webp"
   },
   "Mourning Blade": {
     "type": "weapon",
@@ -844,7 +864,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons34.webp"
+    "texture": "items/swords/abyssal_doube_ring_sword.webp"
   },
   "Plate Armor": {
     "type": "armor",
@@ -867,7 +887,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Dragon Scale Robes": {
     "type": "armor",
@@ -893,7 +914,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Shadow Cloak": {
     "type": "armor",
@@ -917,7 +939,8 @@
       "light",
       "evasive",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Cloth Tunic": {
     "type": "armor",
@@ -943,7 +966,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Colourful Cloth Robe": {
     "type": "armor",
@@ -969,7 +993,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Enchanting Lute": {
     "type": "weapon",
@@ -997,7 +1022,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons35.webp"
+    "texture": "items/swords/basic_iron_sword.webp"
   },
   "Dragonbone Lute": {
     "type": "weapon",
@@ -1025,7 +1050,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons36.webp"
+    "texture": "items/swords/basic_bronze_sword.webp"
   },
   "Skyfall Lyre": {
     "type": "weapon",
@@ -1053,7 +1078,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons37.webp"
+    "texture": "items/swords/basic_green_sword.webp"
   },
   "Hämmelson's Legendary Flute": {
     "type": "weapon",
@@ -1082,7 +1107,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons38.webp"
+    "texture": "items/swords/basic_iron_greatsword.webp"
   },
   "War Drum of The god of Thunder Zâesltral": {
     "type": "weapon",
@@ -1113,7 +1138,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons39.webp"
+    "texture": "items/swords/dragonsoul_electro_blade.webp"
   },
   "Wooden Flute": {
     "type": "weapon",
@@ -1141,7 +1166,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons40.webp"
+    "texture": "items/swords/basic_amethyst_greatsword.webp"
   },
   "Silver Lyre": {
     "type": "weapon",
@@ -1169,7 +1194,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons41.webp"
+    "texture": "items/swords/basic_green_metal_greatsword.webp"
   },
   "Oak Harp": {
     "type": "weapon",
@@ -1197,7 +1222,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons42.webp"
+    "texture": "items/swords/enchanted_basic_iron_sword.webp"
   },
   "Rhythm Drum": {
     "type": "weapon",
@@ -1226,7 +1251,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons43.webp"
+    "texture": "items/swords/enchanted_iron_basic_greatsword.webp"
   },
   "Celestial Harp": {
     "type": "weapon",
@@ -1254,7 +1279,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons44.webp"
+    "texture": "items/swords/purified_sacred_sword.webp"
   },
   "Crystal Flute": {
     "type": "weapon",
@@ -1283,7 +1308,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons45.webp"
+    "texture": "items/swords/dragonscale_blue_sword.webp"
   },
   "Golden Lyre": {
     "type": "weapon",
@@ -1311,7 +1336,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons46.webp"
+    "texture": "items/swords/dragonscale_red_blade.webp"
   },
   "Warfare Drum": {
     "type": "weapon",
@@ -1339,7 +1364,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons47.webp"
+    "texture": "items/swords/dragonscale_sword_green.webp"
   },
   "Songsmith's Lyre": {
     "type": "weapon",
@@ -1367,7 +1392,7 @@
       "instrument",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons48.webp"
+    "texture": "items/swords/dragonsoul_fire_sword.webp"
   },
   "Silken Robes": {
     "type": "armor",
@@ -1393,7 +1418,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Bard's Tunic": {
     "type": "armor",
@@ -1418,7 +1444,8 @@
       "medium",
       "physical",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Harmonist's Vestments": {
     "type": "armor",
@@ -1444,7 +1471,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Melodist's Coat": {
     "type": "armor",
@@ -1468,7 +1496,8 @@
       "medium",
       "physical",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Virtuoso's Attire": {
     "type": "armor",
@@ -1493,7 +1522,8 @@
       "medium",
       "physical",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "The Poetry god Äepleollo's Robe": {
     "type": "armor",
@@ -1522,7 +1552,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Paladin's Shortsword": {
     "type": "weapon",
@@ -1547,7 +1578,7 @@
       "one-handed",
       "holy"
     ],
-    "texture": "items/swords/rpg_icons49.webp"
+    "texture": "items/swords/sacred_sword.webp"
   },
   "Druidic Staff": {
     "type": "weapon",
@@ -1574,7 +1605,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons73.webp"
+    "texture": "items/staffs/wood_druid_staff.webp"
   },
   "Crown of Wisdom": {
     "type": "accessory",
@@ -1593,7 +1624,7 @@
       "magical",
       "offensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons3.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Cloak of Shadows": {
     "type": "accessory",
@@ -1612,7 +1643,7 @@
       "defensive",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons4.webp"
+    "texture": "items/rings_and_necklaces/amethyst_necklace.webp"
   },
   "Amulet of Valor": {
     "type": "accessory",
@@ -1631,7 +1662,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons5.webp"
+    "texture": "items/rings_and_necklaces/cross_golden_necklace.webp"
   },
   "Ring of Mana": {
     "type": "accessory",
@@ -1648,7 +1679,7 @@
       "ring",
       "magical"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons6.webp"
+    "texture": "items/rings_and_necklaces/diamond_blue_ring_gold.webp"
   },
   "Ring of Precision": {
     "type": "accessory",
@@ -1667,7 +1698,7 @@
       "offensive",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons7.webp"
+    "texture": "items/rings_and_necklaces/silver_rune_ring.webp"
   },
   "Nature's Embrace": {
     "type": "weapon",
@@ -1695,7 +1726,7 @@
       "one-handed",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons50.webp"
+    "texture": "items/swords/dragonsoul_green_blade.webp"
   },
   "Gaea's Wrath": {
     "type": "weapon",
@@ -1723,7 +1754,7 @@
       "one-handed",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons51.webp"
+    "texture": "items/swords/dragonsoul_green_blade.webp"
   },
   "Sun-Blessed Mace": {
     "type": "weapon",
@@ -1752,7 +1783,7 @@
       "fire",
       "holy"
     ],
-    "texture": "items/tridents/rpg_icons119.webp"
+    "texture": "items/tridents/oxidiced_trident.webp"
   },
   "Aegis of the Eternal Light": {
     "type": "weapon",
@@ -1779,7 +1810,7 @@
       "one-handed",
       "holy"
     ],
-    "texture": "items/swords/rpg_icons52.webp"
+    "texture": "items/swords/purified_sacred_sword.webp"
   },
   "Scepter of Divine Grace": {
     "type": "weapon",
@@ -1806,7 +1837,7 @@
       "holy",
       "one-handed"
     ],
-    "texture": "items/staffs/rpg_icons74.webp"
+    "texture": "items/staffs/celestial_staff_golden.webp"
   },
   "Relic of the First Saint": {
     "type": "weapon",
@@ -1834,7 +1865,7 @@
       "one-handed",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons53.webp"
+    "texture": "items/swords/basic_bronze_sword.webp"
   },
   "Ironwood Barkskin": {
     "type": "armor",
@@ -1857,7 +1888,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Elder Grove Vestments": {
     "type": "armor",
@@ -1884,7 +1916,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Consecrated Plate": {
     "type": "armor",
@@ -1907,7 +1940,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Champion's Holy Bulwark": {
     "type": "armor",
@@ -1930,7 +1964,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Vestments of the Seraph": {
     "type": "armor",
@@ -1956,7 +1991,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "High Oracle's Regalia": {
     "type": "armor",
@@ -1983,7 +2019,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Gauntlets of Strength": {
     "type": "accessory",
@@ -2002,7 +2039,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons8.webp"
+    "texture": "items/rings_and_necklaces/diamond_blue_ring_gold.webp"
   },
   "Crown of the Dawn": {
     "type": "accessory",
@@ -2023,7 +2060,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons9.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Solar Talisman": {
     "type": "accessory",
@@ -2041,7 +2078,7 @@
       "magical",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons10.webp"
+    "texture": "items/rings_and_necklaces/amethyst_necklace.webp"
   },
   "Pendant of Fortitude": {
     "type": "accessory",
@@ -2058,7 +2095,7 @@
       "amulet",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons11.webp"
+    "texture": "items/rings_and_necklaces/ruby_necklace.webp"
   },
   "Boots of the Phoenix": {
     "type": "accessory",
@@ -2076,7 +2113,7 @@
       "defensive",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons12.webp"
+    "texture": "items/rings_and_necklaces/silver_rune_spikes_ring.webp"
   },
   "Assassin's Blade": {
     "type": "weapon",
@@ -2102,7 +2139,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons54.webp"
+    "texture": "items/swords/a_ninja_shortsword_idk.webp"
   },
   "Arcane Grimoire": {
     "type": "weapon",
@@ -2130,7 +2167,7 @@
       "one-handed",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons55.webp"
+    "texture": "items/swords/basic_green_sword.webp"
   },
   "Titan's Hammer": {
     "type": "weapon",
@@ -2158,7 +2195,7 @@
       "one-handed",
       "holy"
     ],
-    "texture": "items/tridents/rpg_icons120.webp"
+    "texture": "items/tridents/pirate_trident_green_var.webp"
   },
   "Venomstrike Dagger": {
     "type": "weapon",
@@ -2189,7 +2226,7 @@
       "poison",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons56.webp"
+    "texture": "items/swords/purple_dagger_boi.webp"
   },
   "Celestial Scepter": {
     "type": "weapon",
@@ -2217,7 +2254,7 @@
       "holy",
       "one-handed"
     ],
-    "texture": "items/staffs/rpg_icons75.webp"
+    "texture": "items/staffs/celestial_staff_golden.webp"
   },
   "Berserker's Axe": {
     "type": "weapon",
@@ -2245,7 +2282,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/axes/rpg_icons91.webp"
+    "texture": "items/axes/powerful_double_waraxe.webp"
   },
   "Nightshade Armor": {
     "type": "armor",
@@ -2269,7 +2306,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Archmage's Vestments": {
     "type": "armor",
@@ -2295,7 +2333,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Colossus Plate": {
     "type": "armor",
@@ -2320,7 +2359,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Ghostwalker Cloak": {
     "type": "armor",
@@ -2345,7 +2385,8 @@
       "light",
       "evasive",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Elemental Aegis": {
     "type": "armor",
@@ -2369,7 +2410,8 @@
       "medium",
       "physical",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Juggernaut's Bulwark": {
     "type": "armor",
@@ -2392,7 +2434,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Hunter's Bow": {
     "type": "weapon",
@@ -2419,7 +2462,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons142.webp"
+    "texture": "items/slingshots/totally_normal_slingshot.webp"
   },
   "Longbow": {
     "type": "weapon",
@@ -2446,7 +2489,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons143.webp"
+    "texture": "items/slingshots/magnetic_slingshot.webp"
   },
   "Composite Bow": {
     "type": "weapon",
@@ -2473,7 +2516,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons144.webp"
+    "texture": "items/slingshots/magnetic_slingshot.webp"
   },
   "Elven Bow": {
     "type": "weapon",
@@ -2500,7 +2543,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons145.webp"
+    "texture": "items/slingshots/enchanted_magnetic_slingshot.webp"
   },
   "Light Crossbow": {
     "type": "weapon",
@@ -2527,7 +2570,7 @@
       "holy",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons146.webp"
+    "texture": "items/slingshots/totally_normal_slingshot_2.webp"
   },
   "Heavy Crossbow": {
     "type": "weapon",
@@ -2554,7 +2597,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons147.webp"
+    "texture": "items/slingshots/enchanted_magnetic_slingshot.webp"
   },
   "Repeating Crossbow": {
     "type": "weapon",
@@ -2581,7 +2624,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons148.webp"
+    "texture": "items/slingshots/enchanted_magnetic_slingshot.webp"
   },
   "Hunting Spear": {
     "type": "weapon",
@@ -2600,7 +2643,7 @@
     "tags": [
       "physical"
     ],
-    "texture": "items/tridents/rpg_icons121.webp"
+    "texture": "items/tridents/silver_trident.webp"
   },
   "Warrior Spear": {
     "type": "weapon",
@@ -2619,7 +2662,7 @@
     "tags": [
       "physical"
     ],
-    "texture": "items/tridents/rpg_icons122.webp"
+    "texture": "items/tridents/greenish_metal_trident.webp"
   },
   "Tri-point Spear": {
     "type": "weapon",
@@ -2638,7 +2681,7 @@
     "tags": [
       "physical"
     ],
-    "texture": "items/tridents/rpg_icons123.webp"
+    "texture": "items/tridents/greenish_metal_trident.webp"
   },
   "Dragon Spear": {
     "type": "weapon",
@@ -2657,7 +2700,7 @@
     "tags": [
       "physical"
     ],
-    "texture": "items/tridents/rpg_icons124.webp"
+    "texture": "items/tridents/supreme_sea_trident.webp"
   },
   "Hunting Knife": {
     "type": "weapon",
@@ -2684,7 +2727,7 @@
       "one-handed",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons57.webp"
+    "texture": "items/swords/a_proffesional_dagger.webp"
   },
   "Steel Hunting Knife": {
     "type": "weapon",
@@ -2711,7 +2754,7 @@
       "one-handed",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons58.webp"
+    "texture": "items/swords/a_proffesional_dagger.webp"
   },
   "Assassin Hunting Knife": {
     "type": "weapon",
@@ -2739,7 +2782,7 @@
       "one-handed",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons59.webp"
+    "texture": "items/swords/a_ninja_shortsword_idk.webp"
   },
   "Master Hunter's Knife": {
     "type": "weapon",
@@ -2767,7 +2810,7 @@
       "one-handed",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons60.webp"
+    "texture": "items/swords/enchanted_proffesional_dagger.webp"
   },
   "Luck Charm": {
     "type": "accessory",
@@ -2777,7 +2820,7 @@
     "tags": [
       "accessory"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons13.webp"
+    "texture": "items/rings_and_necklaces/cross_golden_necklace.webp"
   },
   "Fortune Charm": {
     "type": "accessory",
@@ -2787,7 +2830,7 @@
     "tags": [
       "accessory"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons14.webp"
+    "texture": "items/rings_and_necklaces/cross_golden_necklace.webp"
   },
   "Blessing of the Wild": {
     "type": "accessory",
@@ -2801,7 +2844,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons15.webp"
+    "texture": "items/rings_and_necklaces/cross_golden_necklace.webp"
   },
   "Hunter's Totem": {
     "type": "accessory",
@@ -2815,7 +2858,7 @@
       "offensive",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons16.webp"
+    "texture": "items/rings_and_necklaces/cross_golden_necklace.webp"
   },
   "Predator's Eye": {
     "type": "accessory",
@@ -2829,7 +2872,7 @@
       "offensive",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons17.webp"
+    "texture": "items/rings_and_necklaces/enchanted_light_blue_ring.webp"
   },
   "Stalker's Badge": {
     "type": "accessory",
@@ -2842,7 +2885,7 @@
       "accessory",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons18.webp"
+    "texture": "items/rings_and_necklaces/cross_golden_necklace.webp"
   },
   "Nature's Blessing": {
     "type": "accessory",
@@ -2856,7 +2899,7 @@
       "magical",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons19.webp"
+    "texture": "items/rings_and_necklaces/cross_golden_necklace.webp"
   },
   "Sharpshooter's Ring": {
     "type": "accessory",
@@ -2870,7 +2913,7 @@
       "ring",
       "offensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons20.webp"
+    "texture": "items/rings_and_necklaces/simple_rune_ring.webp"
   },
   "Hydra Fang": {
     "type": "weapon",
@@ -2895,7 +2938,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons61.webp"
+    "texture": "items/swords/sea_sword.webp"
   },
   "Venom Sac": {
     "type": "material",
@@ -2904,7 +2947,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Swamp Scale": {
     "type": "material",
@@ -2913,7 +2957,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Swamp Scale Armor": {
     "type": "armor",
@@ -2934,7 +2979,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Poison Crystal": {
     "type": "material",
@@ -2944,7 +2990,8 @@
     "tags": [
       "material",
       "crystal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Necromancer's Robes": {
     "type": "armor",
@@ -2970,7 +3017,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Skull Staff": {
     "type": "weapon",
@@ -2997,7 +3045,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons76.webp"
+    "texture": "items/staffs/demonic_red_blood_staff.webp"
   },
   "Soul Orb": {
     "type": "offhand",
@@ -3009,7 +3057,8 @@
     "requirements": {
       "level": 5,
       "class": "Mage"
-    }
+    },
+    "texture": "missing.webp"
   },
   "Bone Crown": {
     "type": "accessory",
@@ -3027,7 +3076,7 @@
       "magical",
       "offensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons21.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Cursed Amulet": {
     "type": "accessory",
@@ -3046,7 +3095,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons22.webp"
+    "texture": "items/rings_and_necklaces/purp_cross_necklace.webp"
   },
   "Stone Shield": {
     "type": "offhand",
@@ -3056,7 +3105,8 @@
     "rarity": "uncommon",
     "requirements": {
       "level": 3
-    }
+    },
+    "texture": "missing.webp"
   },
   "Thunder Hammer": {
     "type": "weapon",
@@ -3085,7 +3135,7 @@
       "lightning",
       "holy"
     ],
-    "texture": "items/tridents/rpg_icons125.webp"
+    "texture": "items/tridents/proper_pirate_trident.webp"
   },
   "Storm Giant's Belt": {
     "type": "accessory",
@@ -3103,7 +3153,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons23.webp"
+    "texture": "items/rings_and_necklaces/silver_rune_ring.webp"
   },
   "Lightning Crystal": {
     "type": "material",
@@ -3113,7 +3163,8 @@
     "tags": [
       "material",
       "crystal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Thundercloud Cloak": {
     "type": "armor",
@@ -3136,7 +3187,8 @@
       "light",
       "evasive",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Giant's Gauntlets": {
     "type": "accessory",
@@ -3155,7 +3207,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons24.webp"
+    "texture": "items/rings_and_necklaces/diamond_blue_ring_gold.webp"
   },
   "Death Knight's Shield": {
     "type": "offhand",
@@ -3165,7 +3217,8 @@
     "rarity": "rare",
     "requirements": {
       "level": 6
-    }
+    },
+    "texture": "missing.webp"
   },
   "Crown of Malachar": {
     "type": "accessory",
@@ -3185,7 +3238,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons1.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Necrotic Blade": {
     "type": "weapon",
@@ -3212,7 +3265,7 @@
       "one-handed",
       "poison"
     ],
-    "texture": "items/swords/rpg_icons62.webp"
+    "texture": "items/swords/abyssal_doube_ring_sword.webp"
   },
   "Phylactery": {
     "type": "accessory",
@@ -3228,7 +3281,7 @@
       "accessory",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons2.webp"
+    "texture": "items/rings_and_necklaces/diamond_blue_ring_silver.webp"
   },
   "Soul Reaver": {
     "type": "weapon",
@@ -3254,7 +3307,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons63.webp"
+    "texture": "items/swords/weird_bugblade_blue.webp"
   },
   "Lich King's Robes": {
     "type": "armor",
@@ -3280,7 +3333,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Demon Prince's Crown": {
     "type": "accessory",
@@ -3297,7 +3351,7 @@
       "crown",
       "offensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons3.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Infernal Blade": {
     "type": "weapon",
@@ -3324,7 +3378,7 @@
       "one-handed",
       "fire"
     ],
-    "texture": "items/swords/rpg_icons64.webp"
+    "texture": "items/swords/dragonsoul_fire_sword.webp"
   },
   "Hellfire Shield": {
     "type": "offhand",
@@ -3335,7 +3389,8 @@
     "requirements": {
       "level": 7,
       "class": "Warrior"
-    }
+    },
+    "texture": "missing.webp"
   },
   "Demon Heart": {
     "type": "material",
@@ -3344,7 +3399,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Chaos Orb": {
     "type": "offhand",
@@ -3355,7 +3411,8 @@
     "requirements": {
       "level": 7,
       "class": "Mage"
-    }
+    },
+    "texture": "missing.webp"
   },
   "Azgorath's Cloak": {
     "type": "armor",
@@ -3378,7 +3435,8 @@
       "light",
       "evasive",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Soul Fragment": {
     "type": "material",
@@ -3387,7 +3445,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Zephyr's Scale": {
     "type": "material",
@@ -3396,7 +3455,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Wind Dragon's Heart": {
     "type": "material",
@@ -3406,7 +3466,8 @@
     "tags": [
       "material",
       "dragon"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Stormbreaker": {
     "type": "weapon",
@@ -3434,7 +3495,7 @@
       "one-handed",
       "lightning"
     ],
-    "texture": "items/swords/rpg_icons65.webp"
+    "texture": "items/swords/dragonsoul_electro_blade.webp"
   },
   "Sky Crown": {
     "type": "accessory",
@@ -3454,7 +3515,7 @@
       "defensive",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons4.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Dragon Soul Gem": {
     "type": "offhand",
@@ -3466,7 +3527,8 @@
     "requirements": {
       "level": 8,
       "class": "Mage"
-    }
+    },
+    "texture": "missing.webp"
   },
   "Eternal Feather": {
     "type": "material",
@@ -3475,7 +3537,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Wind Walkers": {
     "type": "accessory",
@@ -3491,7 +3554,7 @@
       "accessory",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons5.webp"
+    "texture": "items/rings_and_necklaces/silver_rune_spikes_ring.webp"
   },
   "Cloudstrider Boots": {
     "type": "accessory",
@@ -3507,7 +3570,7 @@
       "boots",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons6.webp"
+    "texture": "items/rings_and_necklaces/silver_rune_spikes_ring.webp"
   },
   "Obsidian Waraxe": {
     "type": "weapon",
@@ -3534,7 +3597,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/axes/rpg_icons92.webp"
+    "texture": "items/axes/abysssal_double_waraxe.webp"
   },
   "Sundered Earth Hammer": {
     "type": "weapon",
@@ -3562,7 +3625,7 @@
       "fire",
       "holy"
     ],
-    "texture": "items/tridents/rpg_icons126.webp"
+    "texture": "items/tridents/enchanted_silver_trident.webp"
   },
   "Colossus Slayer": {
     "type": "weapon",
@@ -3587,7 +3650,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons66.webp"
+    "texture": "items/swords/big_metal_blade_with_spikes.webp"
   },
   "Vahnir's Greatsword": {
     "type": "weapon",
@@ -3616,7 +3679,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/swords/rpg_icons67.webp"
+    "texture": "items/swords/basic_iron_greatsword.webp"
   },
   "Mage New Weapons lvl 4-7": "MAGE_WEAPONS_PLACEHOLDER",
   "Ebonwood Staff": {
@@ -3645,7 +3708,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons77.webp"
+    "texture": "items/staffs/wood_druid_staff.webp"
   },
   "Crystal Prism Staff": {
     "type": "weapon",
@@ -3674,7 +3737,7 @@
       "two-handed",
       "ice"
     ],
-    "texture": "items/staffs/rpg_icons78.webp"
+    "texture": "items/staffs/imperial_staff_with_blue_crystal.webp"
   },
   "Phoenixfire Wand": {
     "type": "weapon",
@@ -3704,7 +3767,7 @@
       "one-handed",
       "fire"
     ],
-    "texture": "items/staffs/rpg_icons79.webp"
+    "texture": "items/staffs/basic_staff.webp"
   },
   "Astral Beacon": {
     "type": "weapon",
@@ -3732,7 +3795,7 @@
       "one-handed",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons68.webp"
+    "texture": "items/swords/basic_iron_greatsword.webp"
   },
   "Howertz's Staff": {
     "type": "weapon",
@@ -3760,7 +3823,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons80.webp"
+    "texture": "items/staffs/basic_golden_staff.webp"
   },
   "Rogue New Weapons lvl 4-7": "ROGUE_WEAPONS_PLACEHOLDER",
   "Toxic Thorn": {
@@ -3788,7 +3851,7 @@
       "one-handed",
       "poison"
     ],
-    "texture": "items/swords/rpg_icons25.webp"
+    "texture": "items/swords/basic_amethyst_greatsword.webp"
   },
   "Whisperstep Daggers": {
     "type": "weapon",
@@ -3817,7 +3880,7 @@
       "one-handed",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons26.webp"
+    "texture": "items/swords/a_proffesional_dagger.webp"
   },
   "Midnight Cleaver": {
     "type": "weapon",
@@ -3844,7 +3907,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/axes/rpg_icons93.webp"
+    "texture": "items/axes/iron_waraxe.webp"
   },
   "Phantom Strike": {
     "type": "weapon",
@@ -3869,7 +3932,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons27.webp"
+    "texture": "items/swords/basic_green_metal_greatsword.webp"
   },
   "Infiltration Shadow": {
     "type": "weapon",
@@ -3896,7 +3959,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons28.webp"
+    "texture": "items/swords/abyssal_doube_ring_sword.webp"
   },
   "Hunter New Weapons lvl 4-7": "HUNTER_WEAPONS_PLACEHOLDER",
   "Thornshot Bow": {
@@ -3924,7 +3987,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons141.webp"
+    "texture": "items/slingshots/totally_normal_slingshot_2.webp"
   },
   "Ranger's Crossbow": {
     "type": "weapon",
@@ -3951,7 +4014,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons142.webp"
+    "texture": "items/slingshots/green_totally_normal_slingshot_2.webp"
   },
   "Venomspitter": {
     "type": "weapon",
@@ -3978,7 +4041,7 @@
       "one-handed",
       "poison"
     ],
-    "texture": "items/swords/rpg_icons29.webp"
+    "texture": "items/swords/purple_dagger_boi.webp"
   },
   "Stormcaller": {
     "type": "weapon",
@@ -4005,7 +4068,7 @@
       "one-handed",
       "lightning"
     ],
-    "texture": "items/swords/rpg_icons30.webp"
+    "texture": "items/swords/dragonsoul_electro_blade.webp"
   },
   "Phyla's Root Longbow": {
     "type": "weapon",
@@ -4033,7 +4096,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons143.webp"
+    "texture": "items/slingshots/magnetic_slingshot.webp"
   },
   "Demonforged Plate": {
     "type": "armor",
@@ -4056,7 +4119,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Titan's Wrath": {
     "type": "armor",
@@ -4080,7 +4144,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Starweave Robes": {
     "type": "armor",
@@ -4106,7 +4171,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Voidwalker's Mantle": {
     "type": "armor",
@@ -4130,7 +4196,8 @@
       "medium",
       "physical",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "New Rogue Armor": "ROGUE_ARMOR_PLACEHOLDER",
   "Shadeflow Armor": {
@@ -4155,7 +4222,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Death's Embrace": {
     "type": "armor",
@@ -4179,7 +4247,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Thornweave Tunic": {
     "type": "armor",
@@ -4205,7 +4274,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Windward Vest": {
     "type": "armor",
@@ -4229,7 +4299,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Elixir of Giant Strength": {
     "type": "consumable",
@@ -4246,7 +4317,7 @@
       "divine"
     ],
     "on_use_buff": "giant_strength",
-    "texture": "items/consumables/rpg_icons133.webp"
+    "texture": "items/consumables/health_potion.webp"
   },
   "Shadowstep Elixir": {
     "type": "consumable",
@@ -4262,7 +4333,7 @@
       "divine"
     ],
     "on_use_buff": "shadow_step",
-    "texture": "items/consumables/rpg_icons134.webp"
+    "texture": "items/consumables/health_potion.webp"
   },
   "Phoenix Tears": {
     "type": "consumable",
@@ -4278,7 +4349,7 @@
       "restore",
       "powerful"
     ],
-    "texture": "items/consumables/rpg_icons135.webp"
+    "texture": "items/consumables/coffee.webp"
   },
   "Dragon's Breath Potion": {
     "type": "consumable",
@@ -4292,7 +4363,7 @@
       "consumable",
       "healing"
     ],
-    "texture": "items/consumables/rpg_icons136.webp"
+    "texture": "items/consumables/health_potion.webp"
   },
   "New Materials": "MATERIALS_PLACEHOLDER",
   "Storm Elemental Core": {
@@ -4302,7 +4373,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Golem Core": {
     "type": "material",
@@ -4311,7 +4383,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Ancient Relic": {
     "type": "material",
@@ -4320,7 +4393,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Wind Elemental Essence": {
     "type": "material",
@@ -4329,7 +4403,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Demon Blood": {
     "type": "material",
@@ -4338,7 +4413,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Starlight Shard": {
     "type": "material",
@@ -4347,7 +4423,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "New Accessories": "ACCESSORIES_PLACEHOLDER",
   "Ring of the Void": {
@@ -4365,7 +4442,7 @@
       "ring",
       "magical"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons7.webp"
+    "texture": "items/rings_and_necklaces/silver_rune_ring.webp"
   },
   "Amulet of the Guardian": {
     "type": "accessory",
@@ -4382,7 +4459,7 @@
       "amulet",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons8.webp"
+    "texture": "items/rings_and_necklaces/diamond_neckace.webp"
   },
   "Bracers of Fury": {
     "type": "accessory",
@@ -4398,7 +4475,7 @@
       "accessory",
       "offensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons9.webp"
+    "texture": "items/rings_and_necklaces/diamond_blue_ring_gold.webp"
   },
   "Charm of the Forest": {
     "type": "accessory",
@@ -4413,7 +4490,7 @@
       "accessory",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons10.webp"
+    "texture": "items/rings_and_necklaces/cross_golden_necklace.webp"
   },
   "Seal of the Ancients": {
     "type": "accessory",
@@ -4432,7 +4509,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons11.webp"
+    "texture": "items/rings_and_necklaces/simple_rune_ring.webp"
   },
   "Wooden Shield": {
     "type": "offhand",
@@ -4442,7 +4519,8 @@
     "rarity": "common",
     "requirements": {
       "level": 1
-    }
+    },
+    "texture": "missing.webp"
   },
   "Troll King's Crown": {
     "type": "accessory",
@@ -4461,7 +4539,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons12.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Soul Gem": {
     "type": "offhand",
@@ -4472,7 +4550,8 @@
     "requirements": {
       "level": 5,
       "class": "Mage"
-    }
+    },
+    "texture": "missing.webp"
   },
   "Ice Queen's Crown": {
     "type": "accessory",
@@ -4488,7 +4567,7 @@
       "crown",
       "magical"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons13.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Crystal of Eternal Winter": {
     "type": "offhand",
@@ -4498,7 +4577,8 @@
     "rarity": "rare",
     "requirements": {
       "level": 6
-    }
+    },
+    "texture": "missing.webp"
   },
   "Orc War Banner": {
     "type": "accessory",
@@ -4515,7 +4595,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons14.webp"
+    "texture": "items/rings_and_necklaces/silver_rune_ring.webp"
   },
   "Bone Necklace": {
     "type": "accessory",
@@ -4532,7 +4612,7 @@
       "magical",
       "offensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons15.webp"
+    "texture": "items/rings_and_necklaces/purp_cross_necklace.webp"
   },
   "Eternal Essence": {
     "type": "material",
@@ -4541,7 +4621,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Void Heart": {
     "type": "material",
@@ -4551,7 +4632,8 @@
     "tags": [
       "material",
       "dark"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Boreas": {
     "type": "weapon",
@@ -4577,7 +4659,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons31.webp"
+    "texture": "items/swords/enchanted_basic_iron_sword.webp"
   },
   "Dark Lord's Cloak": {
     "type": "armor",
@@ -4602,7 +4684,8 @@
       "evasive",
       "physical",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Void Crystal": {
     "type": "material",
@@ -4613,7 +4696,8 @@
       "material",
       "dark",
       "crystal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Earth Crystal": {
     "type": "material",
@@ -4623,7 +4707,8 @@
     "tags": [
       "material",
       "crystal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Dragon Heart": {
     "type": "material",
@@ -4633,7 +4718,8 @@
     "tags": [
       "material",
       "dragon"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Buckler Shield": {
     "type": "offhand",
@@ -4644,7 +4730,8 @@
     "rarity": "uncommon",
     "requirements": {
       "level": 2
-    }
+    },
+    "texture": "missing.webp"
   },
   "Tome of Secrets": {
     "type": "offhand",
@@ -4655,7 +4742,8 @@
     "rarity": "rare",
     "requirements": {
       "level": 2
-    }
+    },
+    "texture": "missing.webp"
   },
   "Sorcerous Tome": {
     "type": "offhand",
@@ -4666,7 +4754,8 @@
     "rarity": "legendary",
     "requirements": {
       "level": 5
-    }
+    },
+    "texture": "missing.webp"
   },
   "Staff of Power": {
     "type": "weapon",
@@ -4693,7 +4782,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons81.webp"
+    "texture": "items/staffs/basic_dreamy_staff.webp"
   },
   "Dälokurg's Warhammer": {
     "type": "weapon",
@@ -4722,7 +4811,7 @@
       "heavy",
       "holy"
     ],
-    "texture": "items/tridents/rpg_icons127.webp"
+    "texture": "items/tridents/enchanted_pirate_trident.webp"
   },
   "Bandit Leader's Cloak": {
     "type": "armor",
@@ -4746,7 +4835,8 @@
       "light",
       "evasive",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Iron Ore": {
     "type": "material",
@@ -4756,7 +4846,8 @@
     "tags": [
       "material",
       "ore"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Coal": {
     "type": "material",
@@ -4766,7 +4857,8 @@
     "tags": [
       "material",
       "ore"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Steel Ingot": {
     "type": "material",
@@ -4775,7 +4867,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Gold Nugget": {
     "type": "material",
@@ -4784,7 +4877,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Herb": {
     "type": "material",
@@ -4793,7 +4887,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Mana Herb": {
     "type": "material",
@@ -4802,7 +4897,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Spring Water": {
     "type": "material",
@@ -4811,7 +4907,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Leather": {
     "type": "material",
@@ -4820,7 +4917,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Leather Strip": {
     "type": "material",
@@ -4829,7 +4927,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Hardwood": {
     "type": "material",
@@ -4838,7 +4937,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Stone Block": {
     "type": "material",
@@ -4847,7 +4947,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Shadow Essence": {
     "type": "material",
@@ -4857,7 +4958,8 @@
     "tags": [
       "material",
       "dark"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Fire Essence": {
     "type": "material",
@@ -4867,7 +4969,8 @@
     "tags": [
       "material",
       "fire"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Ice Essence": {
     "type": "material",
@@ -4877,7 +4980,8 @@
     "tags": [
       "material",
       "ice"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Sandworm Scale": {
     "type": "material",
@@ -4886,7 +4990,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Desert Crystal": {
     "type": "material",
@@ -4896,7 +5001,8 @@
     "tags": [
       "material",
       "crystal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Burrower's Fang": {
     "type": "material",
@@ -4905,7 +5011,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Ninja's Shuriken": {
     "type": "weapon",
@@ -4932,7 +5039,7 @@
       "finesse",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons144.webp"
+    "texture": "items/slingshots/redwood_slingshot.webp"
   },
   "Ninjato": {
     "type": "weapon",
@@ -4957,7 +5064,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons32.webp"
+    "texture": "items/swords/enchanted_iron_basic_greatsword.webp"
   },
   "Bandit's Chain": {
     "type": "accessory",
@@ -4972,7 +5079,7 @@
       "accessory",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons16.webp"
+    "texture": "items/rings_and_necklaces/silver_rune_spikes_ring.webp"
   },
   "Paladin's Sword": {
     "type": "weapon",
@@ -4997,7 +5104,7 @@
       "one-handed",
       "holy"
     ],
-    "texture": "items/swords/rpg_icons33.webp"
+    "texture": "items/swords/sacred_sword.webp"
   },
   "Holy Shield": {
     "type": "armor",
@@ -5020,7 +5127,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Sacred Armor": {
     "type": "armor",
@@ -5042,7 +5150,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Divine Hammer": {
     "type": "weapon",
@@ -5069,7 +5178,7 @@
       "one-handed",
       "holy"
     ],
-    "texture": "items/tridents/rpg_icons128.webp"
+    "texture": "items/tridents/corrupted_trident_pirate.webp"
   },
   "Divine Essence": {
     "type": "material",
@@ -5078,7 +5187,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Nature's Robe": {
     "type": "armor",
@@ -5104,7 +5214,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Druid's Spear": {
     "type": "weapon",
@@ -5125,7 +5236,7 @@
     "tags": [
       "physical"
     ],
-    "texture": "items/tridents/rpg_icons117.webp"
+    "texture": "items/tridents/silver_trident.webp"
   },
   "Beast Form Amulet": {
     "type": "accessory",
@@ -5144,7 +5255,7 @@
       "defensive",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons17.webp"
+    "texture": "items/rings_and_necklaces/powerful_diamond_necklace.webp"
   },
   "Herb Bundle": {
     "type": "material",
@@ -5153,7 +5264,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Nature Stone": {
     "type": "material",
@@ -5162,7 +5274,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Priest's Staff": {
     "type": "weapon",
@@ -5188,7 +5301,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons82.webp"
+    "texture": "items/staffs/wood_druid_staff.webp"
   },
   "Devout's Robe": {
     "type": "armor",
@@ -5214,7 +5327,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Holy Wand": {
     "type": "weapon",
@@ -5241,7 +5355,7 @@
       "one-handed",
       "holy"
     ],
-    "texture": "items/staffs/rpg_icons83.webp"
+    "texture": "items/staffs/celestial_staff_golden.webp"
   },
   "Sacred Water": {
     "type": "material",
@@ -5250,7 +5364,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Resurrection Scroll": {
     "type": "consumable",
@@ -5267,7 +5382,7 @@
     ],
     "min_value": 79999999,
     "max_value": 119999998,
-    "texture": "items/consumables/rpg_icons137.webp"
+    "texture": "items/consumables/blue_seeds_idk_or_blue_bag_of_leaves.webp"
   },
   "High Priest's Scepter": {
     "type": "weapon",
@@ -5294,7 +5409,7 @@
       "holy",
       "one-handed"
     ],
-    "texture": "items/staffs/rpg_icons84.webp"
+    "texture": "items/staffs/enchanted_normal_druid_staff.webp"
   },
   "Saintly Robes": {
     "type": "armor",
@@ -5320,7 +5435,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Guardian Hammer": {
     "type": "weapon",
@@ -5347,7 +5463,7 @@
       "one-handed",
       "holy"
     ],
-    "texture": "items/tridents/rpg_icons118.webp"
+    "texture": "items/tridents/supreme_sea_trident.webp"
   },
   "Elder Wood Armor": {
     "type": "armor",
@@ -5370,7 +5486,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Ancient Oak Staff": {
     "type": "weapon",
@@ -5397,7 +5514,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons85.webp"
+    "texture": "items/staffs/wood_druid_staff.webp"
   },
   "Holy Vestment": {
     "type": "armor",
@@ -5423,7 +5540,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Divine Focus": {
     "type": "material",
@@ -5432,7 +5550,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Goblin King's Dagger": {
     "type": "weapon",
@@ -5460,7 +5579,7 @@
       "one-handed",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons34.webp"
+    "texture": "items/swords/a_proffesional_dagger.webp"
   },
   "Stolen Gold Necklace": {
     "type": "accessory",
@@ -5478,7 +5597,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons18.webp"
+    "texture": "items/rings_and_necklaces/cross_golden_necklace.webp"
   },
   "Divine Sword": {
     "type": "weapon",
@@ -5506,7 +5625,7 @@
       "magical",
       "holy"
     ],
-    "texture": "items/swords/rpg_icons35.webp"
+    "texture": "items/swords/purified_sacred_sword.webp"
   },
   "Supreme Artifact": {
     "type": "accessory",
@@ -5526,7 +5645,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons19.webp"
+    "texture": "items/rings_and_necklaces/light_blue_ring.webp"
   },
   "Legendary Crown": {
     "type": "accessory",
@@ -5549,7 +5668,7 @@
       "defensive",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons20.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Crown of Greed": {
     "type": "accessory",
@@ -5566,7 +5685,7 @@
       "crown",
       "offensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons21.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Ember Core": {
     "type": "material",
@@ -5575,7 +5694,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Flame Lord's Crown": {
     "type": "accessory",
@@ -5592,7 +5712,7 @@
       "crown",
       "offensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons22.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Magma Stone": {
     "type": "material",
@@ -5601,7 +5721,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Ignaros's Heart": {
     "type": "material",
@@ -5610,7 +5731,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Glacial Shield": {
     "type": "offhand",
@@ -5620,7 +5742,8 @@
     "rarity": "legendary",
     "requirements": {
       "level": 7
-    }
+    },
+    "texture": "missing.webp"
   },
   "Thrym's Crown": {
     "type": "accessory",
@@ -5638,7 +5761,7 @@
       "magical",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons23.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Heart of Winter": {
     "type": "material",
@@ -5647,7 +5770,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Auriel's Wings": {
     "type": "accessory",
@@ -5663,7 +5787,7 @@
       "accessory",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons24.webp"
+    "texture": "items/rings_and_necklaces/dark_blue_ring.webp"
   },
   "Celestial Halo": {
     "type": "accessory",
@@ -5681,7 +5805,7 @@
       "magical",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons1.webp"
+    "texture": "items/rings_and_necklaces/purple_ring.webp"
   },
   "Holy Relic": {
     "type": "material",
@@ -5690,7 +5814,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Cosmic Core": {
     "type": "material",
@@ -5699,7 +5824,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Timeless Shard": {
     "type": "material",
@@ -5708,7 +5834,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Infinity Gem": {
     "type": "offhand",
@@ -5720,7 +5847,8 @@
     "requirements": {
       "level": 10,
       "class": "Mage"
-    }
+    },
+    "texture": "missing.webp"
   },
   "Birch Staff": {
     "type": "weapon",
@@ -5746,7 +5874,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons86.webp"
+    "texture": "items/staffs/powerful_druid_like_staff.webp"
   },
   "Bone Hatchet": {
     "type": "weapon",
@@ -5772,7 +5900,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/axes/rpg_icons94.webp"
+    "texture": "items/axes/double_waraxe.webp"
   },
   "Taiga Hunter's Bow": {
     "type": "weapon",
@@ -5798,7 +5926,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons145.webp"
+    "texture": "items/slingshots/totally_normal_slingshot.webp"
   },
   "Frost Blade": {
     "type": "weapon",
@@ -5824,7 +5952,7 @@
       "one-handed",
       "ice"
     ],
-    "texture": "items/swords/rpg_icons36.webp"
+    "texture": "items/swords/dragonscale_blue_sword.webp"
   },
   "Shaman's Totem Staff": {
     "type": "weapon",
@@ -5850,7 +5978,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons87.webp"
+    "texture": "items/staffs/hyper_powerful_druid_staff.webp"
   },
   "Vaelthari War Axe": {
     "type": "weapon",
@@ -5876,7 +6004,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/axes/rpg_icons95.webp"
+    "texture": "items/axes/bronze_double_waraxe.webp"
   },
   "Permafrost Spear": {
     "type": "weapon",
@@ -5898,7 +6026,7 @@
       "physical",
       "ice"
     ],
-    "texture": "items/tridents/rpg_icons119.webp"
+    "texture": "items/tridents/greenish_metal_trident.webp"
   },
   "Snowbinable Fang Sword": {
     "type": "weapon",
@@ -5925,7 +6053,7 @@
       "one-handed",
       "ice"
     ],
-    "texture": "items/swords/rpg_icons37.webp"
+    "texture": "items/swords/dragonscale_red_blade.webp"
   },
   "Vaelthari Wolf Fang": {
     "type": "material",
@@ -5934,7 +6062,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Bear Claw": {
     "type": "material",
@@ -5943,7 +6072,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Bear Hide": {
     "type": "material",
@@ -5952,7 +6082,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Lynx Pelt": {
     "type": "material",
@@ -5961,7 +6092,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Permafrost Shard": {
     "type": "material",
@@ -5971,7 +6103,8 @@
     "tags": [
       "material",
       "ice"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Taiga Herb": {
     "type": "consumable",
@@ -5986,7 +6119,7 @@
     ],
     "min_value": 28,
     "max_value": 42,
-    "texture": "items/consumables/rpg_icons138.webp"
+    "texture": "items/consumables/seeds_idk_or_bag_of_leaves.webp"
   },
   "Shaman's Bone Totem": {
     "type": "material",
@@ -5996,7 +6129,8 @@
     "tags": [
       "material",
       "bone"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Wolverine Hide": {
     "type": "material",
@@ -6005,7 +6139,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Snow Leopard Pelt": {
     "type": "material",
@@ -6014,7 +6149,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Permafrost Core": {
     "type": "material",
@@ -6024,7 +6160,8 @@
     "tags": [
       "material",
       "ice"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Spirit Essence": {
     "type": "material",
@@ -6033,7 +6170,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Snowbinable Heart": {
     "type": "material",
@@ -6042,7 +6180,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Kalidran Scimitar": {
     "type": "weapon",
@@ -6066,7 +6205,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons38.webp"
+    "texture": "items/swords/dragonscale_sword_green.webp"
   },
   "Yatagan": {
     "type": "weapon",
@@ -6090,7 +6229,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons39.webp"
+    "texture": "items/swords/dragonsoul_fire_sword.webp"
   },
   "Kalidran Bow": {
     "type": "weapon",
@@ -6116,7 +6255,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons146.webp"
+    "texture": "items/slingshots/purple_wood_slingshot.webp"
   },
   "Kalidran Lance": {
     "type": "weapon",
@@ -6136,7 +6275,7 @@
     "tags": [
       "physical"
     ],
-    "texture": "items/tridents/rpg_icons120.webp"
+    "texture": "items/tridents/oxidiced_trident.webp"
   },
   "Corsair Cutlass": {
     "type": "weapon",
@@ -6160,7 +6299,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons40.webp"
+    "texture": "items/swords/dragonsoul_electro_blade.webp"
   },
   "Desert Serpent Blade": {
     "type": "weapon",
@@ -6186,7 +6325,7 @@
       "one-handed",
       "poison"
     ],
-    "texture": "items/swords/rpg_icons41.webp"
+    "texture": "items/swords/dragonsoul_ice_sword.webp"
   },
   "Vizier Staff": {
     "type": "weapon",
@@ -6212,7 +6351,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons88.webp"
+    "texture": "items/staffs/powerful_basic_staff.webp"
   },
   "Janissary Carbine": {
     "type": "weapon",
@@ -6236,7 +6375,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons42.webp"
+    "texture": "items/swords/dragonsoul_green_blade.webp"
   },
   "Sultan's Blade": {
     "type": "weapon",
@@ -6261,7 +6400,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons43.webp"
+    "texture": "items/swords/sacred_sword.webp"
   },
   "Blade of Yildirim": {
     "type": "weapon",
@@ -6286,7 +6425,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons44.webp"
+    "texture": "items/swords/enchanted_sacred_sword.webp"
   },
   "Kalidran Chainmail": {
     "type": "armor",
@@ -6308,7 +6447,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Corsair Coat": {
     "type": "armor",
@@ -6330,7 +6470,8 @@
     "tags": [
       "medium",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Janissary Plate Armor": {
     "type": "armor",
@@ -6352,7 +6493,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Vizier's Silken Robes": {
     "type": "armor",
@@ -6377,7 +6519,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Sultan's Gilded Plate": {
     "type": "armor",
@@ -6400,7 +6543,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Sultan's Signet Ring": {
     "type": "accessory",
@@ -6419,7 +6563,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons2.webp"
+    "texture": "items/rings_and_necklaces/silver_rune_spikes_ring.webp"
   },
   "Corsair's Amulet": {
     "type": "accessory",
@@ -6437,7 +6581,7 @@
       "defensive",
       "mobile"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons3.webp"
+    "texture": "items/rings_and_necklaces/cross_sacred_necklace.webp"
   },
   "Janissary Medallion": {
     "type": "accessory",
@@ -6454,7 +6598,7 @@
       "offensive",
       "defensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons4.webp"
+    "texture": "items/rings_and_necklaces/amethyst_silver_ring.webp"
   },
   "Kalidran Turban of Wisdom": {
     "type": "accessory",
@@ -6471,7 +6615,7 @@
       "magical",
       "offensive"
     ],
-    "texture": "items/rings_and_necklaces/rpg_icons5.webp"
+    "texture": "items/rings_and_necklaces/diamond_ring_silver.webp"
   },
   "Kalidran Gold Coin": {
     "type": "material",
@@ -6480,7 +6624,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Spice Bundle": {
     "type": "material",
@@ -6490,7 +6635,8 @@
     "tags": [
       "material",
       "ice"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Janissary Badge": {
     "type": "material",
@@ -6499,7 +6645,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Desert Jewel": {
     "type": "material",
@@ -6508,7 +6655,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Corsair Flag": {
     "type": "material",
@@ -6517,7 +6665,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Slave Chain": {
     "type": "material",
@@ -6526,7 +6675,8 @@
     "rarity": "junk",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Lion's Mane Trophy": {
     "type": "material",
@@ -6535,7 +6685,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Desert Serpent Fang": {
     "type": "material",
@@ -6544,7 +6695,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Elephant Tusk": {
     "type": "material",
@@ -6553,7 +6705,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Sultan's Seal": {
     "type": "material",
@@ -6562,7 +6715,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Grand Vizier's Grimoire": {
     "type": "material",
@@ -6571,7 +6725,8 @@
     "rarity": "legendary",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Kalidran Silk": {
     "type": "material",
@@ -6580,7 +6735,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Talisman of Andy": {
     "type": "weapon",
@@ -6608,7 +6764,7 @@
       "one-handed",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons45.webp"
+    "texture": "items/swords/purified_sacred_sword.webp"
   },
   "Yixuan Silk": {
     "type": "material",
@@ -6617,7 +6773,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Bamboo Fiber": {
     "type": "material",
@@ -6626,7 +6783,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Jade Fragment": {
     "type": "material",
@@ -6635,7 +6793,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Eastern Spice Bundle": {
     "type": "material",
@@ -6645,7 +6804,8 @@
     "tags": [
       "material",
       "ice"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Barbarian Iron Chunk": {
     "type": "material",
@@ -6654,7 +6814,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Clan War-Paint Pigment": {
     "type": "material",
@@ -6663,7 +6824,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Lotus Root": {
     "type": "material",
@@ -6672,7 +6834,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Rice Bundle": {
     "type": "material",
@@ -6682,7 +6845,8 @@
     "tags": [
       "material",
       "ice"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Fermented Soybean Paste": {
     "type": "material",
@@ -6691,7 +6855,8 @@
     "rarity": "common",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Northern Fur Pelt": {
     "type": "material",
@@ -6700,7 +6865,8 @@
     "rarity": "uncommon",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Barbarian Totem Shard": {
     "type": "material",
@@ -6709,7 +6875,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Dao Blade": {
     "type": "weapon",
@@ -6733,7 +6900,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons46.webp"
+    "texture": "items/swords/purple_sacred_sword.webp"
   },
   "Jade Spear": {
     "type": "weapon",
@@ -6753,7 +6920,7 @@
     "tags": [
       "physical"
     ],
-    "texture": "items/tridents/rpg_icons121.webp"
+    "texture": "items/tridents/pirate_trident_green_var.webp"
   },
   "Bamboo Staff": {
     "type": "weapon",
@@ -6779,7 +6946,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons69.webp"
+    "texture": "items/staffs/amethyst_imperial_staff.webp"
   },
   "Serpent Fang Dagger": {
     "type": "weapon",
@@ -6808,7 +6975,7 @@
       "poison",
       "outlaw"
     ],
-    "texture": "items/swords/rpg_icons47.webp"
+    "texture": "items/swords/a_proffesional_dagger.webp"
   },
   "Silk-Wrapped Yari": {
     "type": "weapon",
@@ -6832,7 +6999,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons48.webp"
+    "texture": "items/swords/sea_sword.webp"
   },
   "Jade Dragon Sword": {
     "type": "weapon",
@@ -6859,7 +7026,7 @@
       "one-handed",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons49.webp"
+    "texture": "items/swords/sea_sword_2.webp"
   },
   "Clan Greataxe": {
     "type": "weapon",
@@ -6885,7 +7052,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/axes/rpg_icons96.webp"
+    "texture": "items/axes/green_waraxe.webp"
   },
   "Warbrand": {
     "type": "weapon",
@@ -6909,7 +7076,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons50.webp"
+    "texture": "items/swords/sea_sword_3.webp"
   },
   "Skull-Crusher Maul": {
     "type": "weapon",
@@ -6938,7 +7105,7 @@
       "heavy",
       "holy"
     ],
-    "texture": "items/tridents/rpg_icons122.webp"
+    "texture": "items/tridents/supreme_red_trident.webp"
   },
   "Iron Horde Axe": {
     "type": "weapon",
@@ -6965,7 +7132,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/axes/rpg_icons97.webp"
+    "texture": "items/axes/iron_waraxe.webp"
   },
   "Bear-Claw Gauntlet": {
     "type": "weapon",
@@ -6986,7 +7153,7 @@
     "tags": [
       "physical"
     ],
-    "texture": "items/tridents/rpg_icons123.webp"
+    "texture": "items/swords/enchanted_sea_sword.webp"
   },
   "Yixuan Silk Robe": {
     "type": "armor",
@@ -7012,7 +7179,8 @@
       "magical",
       "magic_resistant",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Lacquered Eastern Plate": {
     "type": "armor",
@@ -7034,7 +7202,8 @@
     "tags": [
       "heavy",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Barbarian War-Paint Leather": {
     "type": "armor",
@@ -7056,7 +7225,8 @@
     "tags": [
       "light",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Fur-Lined Clan Cloak": {
     "type": "armor",
@@ -7079,7 +7249,8 @@
       "light",
       "evasive",
       "physical"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Jade-Threaded Vest": {
     "type": "armor",
@@ -7102,7 +7273,8 @@
       "medium",
       "physical",
       "enchanted"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Jade Tea": {
     "type": "consumable",
@@ -7117,7 +7289,7 @@
     ],
     "min_value": 36,
     "max_value": 54,
-    "texture": "items/consumables/rpg_icons139.webp"
+    "texture": "items/consumables/coffee.webp"
   },
   "Eastern Herb Medicine": {
     "type": "consumable",
@@ -7132,7 +7304,7 @@
     ],
     "min_value": 60,
     "max_value": 90,
-    "texture": "items/consumables/rpg_icons140.webp"
+    "texture": "items/consumables/seeds_idk_or_bag_of_leaves.webp"
   },
   "Warrior's Brew": {
     "type": "consumable",
@@ -7148,7 +7320,7 @@
       "alchemical"
     ],
     "on_use_buff": "attack_boost",
-    "texture": "items/consumables/rpg_icons129.webp"
+    "texture": "items/consumables/health_potion.webp"
   },
   "Jade Lotus Draught": {
     "type": "consumable",
@@ -7164,7 +7336,7 @@
     ],
     "min_value": 120,
     "max_value": 180,
-    "texture": "items/consumables/rpg_icons130.webp"
+    "texture": "items/consumables/health_potion.webp"
   },
   "Pepper Tonic": {
     "type": "consumable",
@@ -7180,7 +7352,7 @@
       "alchemical"
     ],
     "on_use_buff": "speed_boost",
-    "texture": "items/consumables/rpg_icons131.webp"
+    "texture": "items/consumables/health_potion.webp"
   },
   "Kalovar Sabre": {
     "type": "weapon",
@@ -7204,7 +7376,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons51.webp"
+    "texture": "items/swords/abyssal_doube_ring_sword.webp"
   },
   "Corsair's Cutlass": {
     "type": "weapon",
@@ -7228,7 +7400,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons52.webp"
+    "texture": "items/swords/double_ring_metal_blade.webp"
   },
   "Kalovar War Lance": {
     "type": "weapon",
@@ -7248,7 +7420,7 @@
     "tags": [
       "physical"
     ],
-    "texture": "items/tridents/rpg_icons124.webp"
+    "texture": "items/tridents/proper_pirate_trident.webp"
   },
   "Steppe Recurve Bow": {
     "type": "weapon",
@@ -7274,7 +7446,7 @@
       "two-handed",
       "outlaw"
     ],
-    "texture": "items/slingshots/rpg_icons147.webp"
+    "texture": "items/slingshots/magnetic_slingshot.webp"
   },
   "Bear Warrior Axe": {
     "type": "weapon",
@@ -7300,7 +7472,7 @@
       "two-handed",
       "heavy"
     ],
-    "texture": "items/axes/rpg_icons98.webp"
+    "texture": "items/axes/rouge_waraxe.webp"
   },
   "Yixuan River Blade": {
     "type": "weapon",
@@ -7325,7 +7497,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons53.webp"
+    "texture": "items/swords/double_metal_ring_sword_enchanted.webp"
   },
   "Jade Court Rapier": {
     "type": "weapon",
@@ -7349,7 +7521,7 @@
       "slashing",
       "one-handed"
     ],
-    "texture": "items/swords/rpg_icons54.webp"
+    "texture": "items/swords/copper_double_ring_blade.webp"
   },
   "Constanplea Ghost Blade": {
     "type": "weapon",
@@ -7376,7 +7548,7 @@
       "one-handed",
       "magical"
     ],
-    "texture": "items/swords/rpg_icons55.webp"
+    "texture": "items/swords/big_metal_blade_with_spikes.webp"
   },
   "Kalovar Grand Vizier's Staff": {
     "type": "weapon",
@@ -7404,7 +7576,7 @@
       "arcane",
       "two-handed"
     ],
-    "texture": "items/staffs/rpg_icons70.webp"
+    "texture": "items/staffs/imperial_staff_with_blue_crystal.webp"
   },
   "Iron Horde Standard": {
     "type": "offhand",
@@ -7416,7 +7588,8 @@
     "rarity": "rare",
     "requirements": {
       "level": 8
-    }
+    },
+    "texture": "missing.webp"
   },
   "Varak Totem Shield": {
     "type": "offhand",
@@ -7427,7 +7600,8 @@
     "rarity": "rare",
     "requirements": {
       "level": 6
-    }
+    },
+    "texture": "missing.webp"
   },
   "Primordial Birthday Cake": {
     "type": "consumable",
@@ -7442,7 +7616,7 @@
     "tags": [
       "consumable"
     ],
-    "texture": "items/consumables/rpg_icons132.webp"
+    "texture": "items/consumables/mana_potion.webp"
   },
   "Primordial Essence": {
     "type": "consumable",
@@ -7455,7 +7629,7 @@
     "tags": [
       "consumable"
     ],
-    "texture": "items/consumables/rpg_icons133.webp"
+    "texture": "items/consumables/big_health_potion.webp"
   },
   "Grand Feast Platter": {
     "type": "consumable",
@@ -7472,7 +7646,7 @@
     "tags": [
       "consumable"
     ],
-    "texture": "items/consumables/rpg_icons134.webp"
+    "texture": "items/consumables/coffee.webp"
   },
   "Saintly Blessing": {
     "type": "consumable",
@@ -7485,7 +7659,7 @@
     "tags": [
       "consumable"
     ],
-    "texture": "items/consumables/rpg_icons135.webp"
+    "texture": "items/consumables/seeds_idk_or_bag_of_leaves.webp"
   },
   "Venom Sacs": {
     "type": "material",
@@ -7494,7 +7668,8 @@
     "rarity": "rare",
     "tags": [
       "material"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Battle Tonic": {
     "type": "consumable",
@@ -7510,7 +7685,7 @@
       "combat",
       "attack"
     ],
-    "texture": "items/consumables/rpg_icons136.webp"
+    "texture": "items/consumables/health_potion.webp"
   },
   "Iron Skin Draught": {
     "type": "consumable",
@@ -7526,7 +7701,7 @@
       "defense",
       "armor"
     ],
-    "texture": "items/consumables/rpg_icons137.webp"
+    "texture": "items/consumables/blue_seeds_idk_or_blue_bag_of_leaves.webp"
   },
   "Swiftness Elixir": {
     "type": "consumable",
@@ -7542,7 +7717,7 @@
       "speed",
       "evasion"
     ],
-    "texture": "items/consumables/rpg_icons138.webp"
+    "texture": "items/consumables/health_potion.webp"
   },
   "Empowerment Draught": {
     "type": "consumable",
@@ -7558,7 +7733,7 @@
       "magic",
       "powerful"
     ],
-    "texture": "items/consumables/rpg_icons139.webp"
+    "texture": "items/consumables/mana_potion.webp"
   },
   "Large Mana Potion": {
     "type": "consumable",
@@ -7572,7 +7747,7 @@
       "consumable",
       "mana"
     ],
-    "texture": "items/consumables/rpg_icons140.webp"
+    "texture": "items/consumables/big_health_potion.webp"
   },
   "Copper Ore": {
     "type": "material",
@@ -7582,7 +7757,8 @@
     "tags": [
       "material",
       "ore"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Silver Ore": {
     "type": "material",
@@ -7592,7 +7768,8 @@
     "tags": [
       "material",
       "ore"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Gold Ore": {
     "type": "material",
@@ -7602,7 +7779,8 @@
     "tags": [
       "material",
       "ore"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Darkstone": {
     "type": "material",
@@ -7613,7 +7791,8 @@
       "material",
       "ore",
       "dark"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Mithril Ore": {
     "type": "material",
@@ -7623,7 +7802,8 @@
     "tags": [
       "material",
       "ore"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Sunstone Crystal": {
     "type": "material",
@@ -7634,7 +7814,8 @@
       "material",
       "ore",
       "crystal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Adamantine Ore": {
     "type": "material",
@@ -7644,7 +7825,8 @@
     "tags": [
       "material",
       "ore"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Shadowite Crystal": {
     "type": "material",
@@ -7656,7 +7838,8 @@
       "ore",
       "crystal",
       "dark"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Wooden Pickaxe": {
     "type": "pickaxe",
@@ -7667,7 +7850,8 @@
       "tool",
       "pickaxe"
     ],
-    "pickaxe_tier": 1
+    "pickaxe_tier": 1,
+    "texture": "missing.webp"
   },
   "Iron Pickaxe": {
     "type": "pickaxe",
@@ -7678,7 +7862,8 @@
       "tool",
       "pickaxe"
     ],
-    "pickaxe_tier": 2
+    "pickaxe_tier": 2,
+    "texture": "missing.webp"
   },
   "Steel Pickaxe": {
     "type": "pickaxe",
@@ -7689,7 +7874,8 @@
       "tool",
       "pickaxe"
     ],
-    "pickaxe_tier": 3
+    "pickaxe_tier": 3,
+    "texture": "missing.webp"
   },
   "Mithril Pickaxe": {
     "type": "pickaxe",
@@ -7700,7 +7886,8 @@
       "tool",
       "pickaxe"
     ],
-    "pickaxe_tier": 4
+    "pickaxe_tier": 4,
+    "texture": "missing.webp"
   },
   "Copper Bar": {
     "type": "material",
@@ -7711,7 +7898,8 @@
       "material",
       "bar",
       "metal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Iron Bar": {
     "type": "material",
@@ -7722,7 +7910,8 @@
       "material",
       "bar",
       "metal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Silver Bar": {
     "type": "material",
@@ -7733,7 +7922,8 @@
       "material",
       "bar",
       "metal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Gold Bar": {
     "type": "material",
@@ -7744,7 +7934,8 @@
       "material",
       "bar",
       "metal"
-    ]
+    ],
+    "texture": "missing.webp"
   },
   "Mithril Bar": {
     "type": "material",
@@ -7755,6 +7946,7 @@
       "material",
       "bar",
       "metal"
-    ]
+    ],
+    "texture": "missing.webp"
   }
 }
