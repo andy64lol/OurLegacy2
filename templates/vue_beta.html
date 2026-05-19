@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
         html, body { height: 100%; margin: 0; }
-
         [v-cloak] { display: none !important; }
 
         .beta-badge {
@@ -84,12 +83,18 @@
             margin-bottom: 14px;
         }
 
-        .travel-btn-grid {
+        .travel-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 5px;
+            padding: 10px 14px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 6px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
+        .travel-card-name { font-size: 14px; color: var(--text-light); font-weight: bold; }
+        .travel-card-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 
         .events-list .log-entry {
             padding: 4px 0;
@@ -101,16 +106,23 @@
         .inv-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 7px 10px;
+            padding: 8px 10px;
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.06);
             border-radius: 4px;
             font-size: 13px;
+            gap: 8px;
         }
         .inv-row-name { flex: 1; color: var(--text-light); }
-        .inv-row-qty { color: var(--text-dim); margin: 0 10px; min-width: 30px; text-align: right; }
-        .inv-row-actions { display: flex; gap: 4px; }
+        .inv-row-meta { font-size: 11px; color: var(--text-dim); }
+        .inv-row-qty { color: var(--text-dim); min-width: 28px; text-align: right; }
+        .inv-row-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+        .rarity-common    { color: var(--text-light); }
+        .rarity-uncommon  { color: #4caf50; }
+        .rarity-rare      { color: #2196f3; }
+        .rarity-epic      { color: #9c27b0; }
+        .rarity-legendary { color: var(--gold); }
 
         .stat-grid-big {
             display: grid;
@@ -167,6 +179,194 @@
             color: #c9a0f0;
             margin-bottom: 10px;
             text-align: center;
+        }
+
+        .equip-slot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .equip-slot {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 5px;
+            padding: 8px 12px;
+        }
+        .equip-slot-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+        .equip-slot-item { font-size: 13px; color: var(--text-light); margin-top: 2px; }
+        .equip-slot-stats { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+        .equip-slot-empty { font-size: 13px; color: rgba(255,255,255,0.2); margin-top: 2px; font-style: italic; }
+
+        .shop-grid { display: flex; flex-direction: column; gap: 6px; }
+        .shop-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 4px;
+            padding: 9px 12px;
+            gap: 10px;
+        }
+        .shop-item-info { flex: 1; }
+        .shop-item-name { font-size: 13px; color: var(--text-light); }
+        .shop-item-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+        .shop-item-price { font-size: 14px; color: var(--gold); font-weight: bold; min-width: 70px; text-align: right; }
+
+        .mine-ore-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+        .mine-ore-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        .mine-ore-locked { opacity: 0.5; }
+
+        .recipe-grid { display: flex; flex-direction: column; gap: 8px; }
+        .recipe-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 5px;
+            padding: 10px 12px;
+        }
+        .recipe-name { font-size: 14px; color: var(--gold); font-weight: bold; }
+        .recipe-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0; }
+        .recipe-materials { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+        .dungeon-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 5px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+        }
+        .dungeon-name { font-size: 14px; color: var(--gold); font-weight: bold; }
+        .dungeon-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0 8px; }
+        .dungeon-complete-badge { color: #4caf50; font-size: 12px; }
+
+        .active-dungeon-panel {
+            background: rgba(30,10,60,0.3);
+            border: 1px solid rgba(120,60,200,0.4);
+            border-radius: 6px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .companion-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 5px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+        }
+        .companion-name { font-size: 14px; color: var(--gold); font-weight: bold; }
+        .companion-meta { font-size: 12px; color: var(--text-dim); margin: 2px 0; }
+
+        .mission-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 5px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+        }
+        .mission-name { font-size: 14px; color: var(--gold); font-weight: bold; }
+        .mission-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0; }
+        .mission-progress { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+        .challenge-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 5px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+        }
+        .challenge-name { font-size: 14px; color: var(--gold); font-weight: bold; }
+        .challenge-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0; }
+
+        .diary-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .attr-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
+        .attr-name { color: var(--text-dim); }
+        .attr-val { color: var(--text-light); font-weight: bold; min-width: 60px; text-align: right; }
+        .attr-spend-btn { margin-left: 10px; }
+
+        .event-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 5px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+        }
+        .event-name { font-size: 14px; color: var(--gold); font-weight: bold; }
+        .event-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0; }
+
+        .boss-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(80,10,10,0.18);
+            border: 1px solid rgba(200,60,60,0.25);
+            border-radius: 5px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+        }
+        .boss-name { font-size: 14px; color: var(--red); font-weight: bold; }
+        .boss-cooldown { font-size: 12px; color: var(--text-dim); }
+
+        .market-item-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 5px;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .market-item-name { font-size: 13px; color: var(--text-light); }
+        .market-item-seller { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+        .market-item-price { font-size: 14px; color: var(--gold); font-weight: bold; }
+
+        .tab-bar-wrap { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+        .tab-bar-wrap::-webkit-scrollbar { height: 3px; }
+        .tab-bar-wrap::-webkit-scrollbar-track { background: transparent; }
+        .tab-bar-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        .attr-pts-notice {
+            background: rgba(200,165,80,0.12);
+            border: 1px solid rgba(200,165,80,0.3);
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        .friends-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
         }
     </style>
     <script>
@@ -261,6 +461,11 @@
                             <div class="stat-mini"><span>DEF</span><strong>[[ player.defense ]]</strong></div>
                             <div class="stat-mini"><span>SPD</span><strong>[[ player.speed ]]</strong></div>
                         </div>
+
+                        <div v-if="gameTime || weatherDisplay" style="margin-top:8px;font-size:12px;color:var(--text-dim);">
+                            <span v-if="gameTime">[[ gameTimeIcon ]] [[ gameTime ]]</span>
+                            <span v-if="weatherDisplay" style="margin-left:8px;">[[ weatherDisplay ]]</span>
+                        </div>
                     </div>
                 </div>
 
@@ -268,6 +473,24 @@
                     <div class="panel-body" style="text-align:center;color:var(--text-dim);font-size:13px;">
                         No character loaded.<br>
                         <a href="/" style="color:var(--gold);">Go to main menu</a>
+                    </div>
+                </div>
+
+                <!-- companion HP bars in sidebar -->
+                <div class="panel sidebar-panel" v-if="activeCompanions && activeCompanions.length">
+                    <div class="panel-title">Party</div>
+                    <div class="panel-body">
+                        <div v-for="comp in activeCompanions" :key="comp.id" style="margin-bottom:8px;">
+                            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px;">
+                                <span :style="{ color: comp.fallen ? 'var(--red)' : 'var(--text-light)' }">
+                                    [[ comp.name ]]<span v-if="comp.fallen" style="font-size:10px;color:var(--red);"> [fallen]</span>
+                                </span>
+                                <span style="color:var(--text-dim);">[[ comp.hp ]]/[[ comp.max_hp ]]</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill bar-hp" :style="{ width: comp.hp_pct + '%', opacity: comp.fallen ? 0.3 : 1 }"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -281,37 +504,73 @@
         <div id="sidebar-resize-handle"></div>
 
         <div class="main-content">
-            <div style="padding: 0 0 12px 0; max-width: 900px; margin: 0 auto;">
+            <div style="padding: 0 0 12px 0; max-width: 960px; margin: 0 auto;">
 
-                <div class="tab-nav-wrap">
+                <!-- tab navigation -->
+                <div class="tab-nav-wrap tab-bar-wrap">
                     <div class="tab-nav">
-                        <button class="tab-btn" :class="{ active: activeTab === 'play' }"
-                                @click="switchTab('play')">Play</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'explore' }"
+                                @click="switchTab('explore')">Explore</button>
                         <button class="tab-btn vtab-battle" v-if="inBattle"
                                 :class="{ active: activeTab === 'battle' }"
                                 @click="switchTab('battle')">Battle!</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'equipment' }"
+                                @click="switchTab('equipment')">Equipment</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'inventory' }"
                                 @click="switchTab('inventory')">Inventory</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'character' }"
-                                @click="switchTab('character')">Character</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'travel' }"
                                 @click="switchTab('travel')">Travel</button>
+                        <button class="tab-btn" v-if="shopItems && shopItems.length"
+                                :class="{ active: activeTab === 'shop' }"
+                                @click="switchTab('shop')">Shop</button>
+                        <button class="tab-btn" v-if="mineData"
+                                :class="{ active: activeTab === 'mine' }"
+                                @click="switchTab('mine')">Mine</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'crafting' }"
+                                @click="switchTab('crafting')">Crafting</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'dungeons' }"
+                                @click="switchTab('dungeons')">Dungeons</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'market' }"
+                                @click="switchTab('market')">Market</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'party' }"
+                                @click="switchTab('party')">Party</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'quests' }"
+                                @click="switchTab('quests')">Quests</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'challenges' }"
+                                @click="switchTab('challenges')">Challenges</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'diary' }"
+                                @click="switchTab('diary')">Diary</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'character' }"
+                                @click="switchTab('character')">Character</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'events' }"
+                                @click="switchTab('events')">Events</button>
+                        <button class="tab-btn" v-if="onlineUsername"
+                                :class="{ active: activeTab === 'friends' }"
+                                @click="switchTab('friends')">Friends</button>
+                        <button class="tab-btn" v-if="onlineUsername"
+                                :class="{ active: activeTab === 'group' }"
+                                @click="switchTab('group')">Group</button>
                     </div>
                 </div>
 
-                <!-- play tab -->
-                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'play' }">
+                <!-- ═══ EXPLORE tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'explore' }">
 
                     <div v-if="area" class="area-header">
                         <div>
                             <div class="area-name-big">[[ area.name ]]</div>
-                            <div class="area-difficulty">Difficulty [[ area.difficulty ]]</div>
+                            <div class="area-difficulty">Difficulty [[ area.difficulty ]]
+                                <span v-if="weatherDisplay" style="margin-left:8px;">&bull; [[ weatherDisplay ]]
+                                    <span v-if="weatherBonusExp" style="color:var(--green-bright);">+[[ weatherBonusExp ]]% EXP</span>
+                                    <span v-if="weatherBonusGold" style="color:var(--gold);"> +[[ weatherBonusGold ]]% Gold</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
 
                     <div v-if="inBattle" class="panel" style="border-color:rgba(200,60,60,0.4);margin-bottom:12px;">
                         <div class="panel-body" style="color:var(--red);font-size:14px;">
-                            You are in battle! Switch to the <strong>Battle</strong> tab.
+                            You are in battle!
                             <button class="btn btn-danger" style="margin-left:10px;" @click="switchTab('battle')">Go to Battle</button>
                         </div>
                     </div>
@@ -320,18 +579,36 @@
                         <button class="btn btn-primary" @click="explore" :disabled="actionPending || !player">
                             [[ actionPending ? 'Working...' : 'Explore' ]]
                         </button>
-                        <button v-if="canRest" class="btn btn-secondary" @click="rest" :disabled="actionPending">
-                            Rest
-                            <span v-if="area && area.rest_cost" style="font-size:11px;margin-left:4px;">
-                                ([[ area.rest_cost ]]g)
-                            </span>
+                        <button v-if="area && area.can_rest" class="btn btn-secondary" @click="rest" :disabled="actionPending">
+                            Rest<span v-if="area && area.rest_cost" style="font-size:11px;margin-left:4px;">([[ area.rest_cost ]]g)</span>
                         </button>
-                        <button v-if="canMine" class="btn btn-secondary" @click="mine" :disabled="actionPending">
+                        <button v-if="mineData" class="btn btn-secondary" @click="mine" :disabled="actionPending">
                             Mine
                         </button>
                     </div>
 
-                    <div class="panel" v-if="recentMessages.length">
+                    <!-- boss challenges -->
+                    <div v-if="availableBosses && availableBosses.length" style="margin-bottom:12px;">
+                        <div class="panel">
+                            <div class="panel-title">Boss Challenges</div>
+                            <div class="panel-body">
+                                <div v-for="boss in availableBosses" :key="boss.key" class="boss-card">
+                                    <div>
+                                        <div class="boss-name">[[ boss.name ]]</div>
+                                        <div class="boss-cooldown" v-if="boss.on_cooldown">Cooldown: [[ boss.cooldown_str ]]</div>
+                                    </div>
+                                    <button class="btn btn-danger btn-small"
+                                            @click="challengeBoss(boss.key)"
+                                            :disabled="actionPending || inBattle || boss.on_cooldown">
+                                        Challenge
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- recent events -->
+                    <div class="panel" v-if="messages && messages.length">
                         <div class="panel-title">Recent Events</div>
                         <div class="panel-body events-list">
                             <div v-for="(msg, i) in recentMessages" :key="i"
@@ -352,7 +629,7 @@
                     </div>
                 </div>
 
-                <!-- battle tab -->
+                <!-- ═══ BATTLE tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'battle' }">
                     <div v-if="inBattle && battle" class="battle-panel-vue">
                         <div class="battle-enemy-header">
@@ -381,67 +658,545 @@
                             </div>
                         </div>
 
+                        <!-- battle companions -->
+                        <div v-if="battle.companions && battle.companions.length" style="margin-top:8px;">
+                            <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">PARTY</div>
+                            <div v-for="comp in battle.companions" :key="comp.name"
+                                 style="display:flex;justify-content:space-between;font-size:12px;padding:2px 0;color:var(--text-dim);">
+                                <span>[[ comp.name ]]</span>
+                                <span>[[ comp.hp ]]/[[ comp.max_hp ]] HP</span>
+                            </div>
+                        </div>
+
+                        <!-- spells if MP available -->
+                        <div v-if="battleSpells && battleSpells.length && player && player.mp > 0" style="margin-top:8px;">
+                            <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">SPELLS</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                                <button v-for="sp in battleSpells" :key="sp.id"
+                                        class="btn btn-small btn-secondary"
+                                        @click="battleSpell(sp.id)"
+                                        :disabled="actionPending || (player && player.mp < sp.mp_cost)"
+                                        :style="{ opacity: (player && player.mp < sp.mp_cost) ? 0.5 : 1 }">
+                                    [[ sp.name ]] ([[ sp.mp_cost ]] MP)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- battle inventory use -->
+                        <div v-if="battleConsumables && battleConsumables.length" style="margin-top:8px;">
+                            <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">USE ITEM</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                                <button v-for="item in battleConsumables" :key="item.name"
+                                        class="btn btn-xsmall btn-secondary"
+                                        @click="battleUseItem(item.name)"
+                                        :disabled="actionPending">
+                                    [[ item.name ]] x[[ item.count ]]
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="battle-actions">
-                            <button class="btn btn-danger btn-attack" @click="battleAttack" :disabled="actionPending">
-                                Attack
-                            </button>
-                            <button class="btn btn-secondary btn-defend" @click="battleDefend" :disabled="actionPending">
-                                Defend
-                            </button>
-                            <button class="btn btn-secondary" @click="battleFlee" :disabled="actionPending">
-                                Flee
-                            </button>
+                            <button class="btn btn-danger btn-attack" @click="battleAttack" :disabled="actionPending">Attack</button>
+                            <button class="btn btn-secondary btn-defend" @click="battleDefend" :disabled="actionPending">Defend</button>
+                            <button class="btn btn-secondary" @click="battleFlee" :disabled="actionPending">Flee</button>
                         </div>
                     </div>
                     <div v-else class="empty-state">No active battle.</div>
                 </div>
 
-                <!-- inventory tab -->
+                <!-- ═══ EQUIPMENT tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'equipment' }">
+                    <div v-if="player">
+                        <div class="action-row" style="margin-bottom:14px;">
+                            <button class="btn btn-secondary" @click="autoEquip" :disabled="actionPending">Auto-Equip Best</button>
+                            <button class="btn btn-secondary" @click="quickHeal" :disabled="actionPending">Quick Heal</button>
+                            <button class="btn btn-secondary" @click="sortInventory" :disabled="actionPending">Sort Inventory</button>
+                        </div>
+
+                        <div v-if="player.attr_points > 0" class="attr-pts-notice">
+                            You have [[ player.attr_points ]] unspent attribute point[[ player.attr_points !== 1 ? 's' : '' ]]!
+                            <button class="btn btn-xsmall btn-secondary" style="margin-left:10px;" @click="switchTab('character')">Spend</button>
+                        </div>
+
+                        <div class="panel" style="margin-bottom:12px;">
+                            <div class="panel-title">Equipped Gear</div>
+                            <div class="panel-body">
+                                <div class="equip-slot-grid">
+                                    <div v-for="slot in equipSlots" :key="slot" class="equip-slot">
+                                        <div class="equip-slot-label">[[ slot ]]</div>
+                                        <div v-if="equippedDetails[slot]">
+                                            <div class="equip-slot-item" :class="'rarity-' + equippedDetails[slot].rarity">
+                                                [[ equippedDetails[slot].name ]]
+                                            </div>
+                                            <div class="equip-slot-stats" v-if="equippedDetails[slot].stats">
+                                                [[ equippedDetails[slot].stats ]]
+                                            </div>
+                                            <button class="btn btn-xsmall btn-secondary" style="margin-top:4px;"
+                                                    @click="unequipSlot(slot)" :disabled="actionPending">
+                                                Remove
+                                            </button>
+                                        </div>
+                                        <div v-else class="equip-slot-empty">— empty —</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="panel-title">Combat Stats</div>
+                            <div class="panel-body">
+                                <div class="stat-grid-big">
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">HP</div>
+                                        <div class="stat-card-val">[[ player.hp ]]/[[ player.max_hp ]]</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">MP</div>
+                                        <div class="stat-card-val">[[ player.mp ]]/[[ player.max_mp ]]</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">Attack</div>
+                                        <div class="stat-card-val">[[ player.attack ]]</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">Defense</div>
+                                        <div class="stat-card-val">[[ player.defense ]]</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">Speed</div>
+                                        <div class="stat-card-val">[[ player.speed ]]</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-card-label">Gold</div>
+                                        <div class="stat-card-val">[[ player.gold ]]</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">No character data.</div>
+                </div>
+
+                <!-- ═══ INVENTORY tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'inventory' }">
-                    <div v-if="inventoryCounts.length" class="inv-grid">
-                        <div v-for="item in inventoryCounts" :key="item.name" class="inv-row">
-                            <span class="inv-row-name">[[ item.name ]]</span>
-                            <span class="inv-row-qty">x[[ item.qty ]]</span>
-                            <div class="inv-row-actions">
-                                <button class="btn btn-xsmall btn-secondary"
-                                        @click="useItem(item.name)"
-                                        :disabled="actionPending">Use</button>
-                                <button class="btn btn-xsmall btn-secondary"
-                                        @click="equipItem(item.name)"
-                                        :disabled="actionPending">Equip</button>
+                    <div v-if="inventoryItems && inventoryItems.length">
+                        <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);">
+                            [[ inventoryItems.length ]] unique item[[ inventoryItems.length !== 1 ? 's' : '' ]]
+                            <span v-if="inventory">&bull; [[ inventory.length ]] total</span>
+                        </div>
+                        <div class="inv-grid">
+                            <div v-for="item in inventoryItems" :key="item.name" class="inv-row">
+                                <div style="flex:1;min-width:0;">
+                                    <div class="inv-row-name" :class="'rarity-' + item.rarity">[[ item.name ]]</div>
+                                    <div class="inv-row-meta" v-if="item.stats">[[ item.stats ]]</div>
+                                    <div class="inv-row-meta" v-if="item.description">[[ item.description ]]</div>
+                                </div>
+                                <div class="inv-row-qty">x[[ item.count ]]</div>
+                                <div class="inv-row-actions">
+                                    <button v-if="item.equippable"
+                                            class="btn btn-xsmall btn-secondary"
+                                            @click="equipItem(item.name)"
+                                            :disabled="actionPending">Equip</button>
+                                    <button v-if="item.type === 'consumable'"
+                                            class="btn btn-xsmall btn-secondary"
+                                            @click="useItem(item.name)"
+                                            :disabled="actionPending">Use</button>
+                                    <button class="btn btn-xsmall btn-secondary"
+                                            @click="sellItem(item.name)"
+                                            :disabled="actionPending"
+                                            :title="'Sell for ' + item.sell_price + 'g'">
+                                        [[ item.sell_price ]]g
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div v-else class="empty-state">Your inventory is empty.</div>
                 </div>
 
-                <!-- character tab -->
+                <!-- ═══ TRAVEL tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'travel' }">
+                    <div v-if="inBattle" style="color:var(--red);font-size:13px;margin-bottom:12px;">
+                        You cannot travel while in battle.
+                    </div>
+                    <div v-if="connections && connections.length">
+                        <div class="panel-title" style="margin-bottom:10px;">Travel from [[ area && area.name ]]</div>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <div v-for="conn in connections" :key="conn.key" class="travel-card">
+                                <div>
+                                    <div class="travel-card-name">[[ conn.name ]]</div>
+                                    <div class="travel-card-meta">
+                                        <span v-if="conn.visited && conn.difficulty >= 0">Difficulty [[ conn.difficulty ]]</span>
+                                        <span v-if="!conn.visited" style="color:var(--text-dim);">Undiscovered</span>
+                                        <span v-if="conn.visited && conn.has_enemies" style="color:var(--red);margin-left:6px;">&bull; Enemies</span>
+                                        <span v-if="conn.visited && conn.has_shop" style="color:var(--gold);margin-left:6px;">&bull; Shop</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-secondary"
+                                        @click="travel(conn.key)"
+                                        :disabled="actionPending || inBattle">
+                                    Travel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">No connected areas.</div>
+                </div>
+
+                <!-- ═══ SHOP tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'shop' }">
+                    <div v-if="shopItems && shopItems.length">
+                        <div class="area-name-big" style="margin-bottom:12px;">[[ shopName || 'Shop' ]]</div>
+                        <div class="shop-grid">
+                            <div v-for="item in shopItems" :key="item.name" class="shop-item">
+                                <div class="shop-item-info">
+                                    <div class="shop-item-name" :class="'rarity-' + item.rarity">[[ item.name ]]</div>
+                                    <div class="shop-item-meta" v-if="item.stats">[[ item.stats ]]</div>
+                                    <div class="shop-item-meta" v-if="item.description">[[ item.description ]]</div>
+                                </div>
+                                <div class="shop-item-price">
+                                    [[ item.price ]]g
+                                    <span v-if="item.discounted" style="font-size:10px;color:var(--green-bright);display:block;text-align:right;">discounted</span>
+                                </div>
+                                <button class="btn btn-small btn-secondary"
+                                        @click="buyItem(item.name)"
+                                        :disabled="actionPending || !item.can_afford">
+                                    Buy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">No shop available in this area.</div>
+                </div>
+
+                <!-- ═══ MINE tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'mine' }">
+                    <div v-if="mineData">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                            <div>
+                                <span style="color:var(--gold);font-weight:bold;">Mining Level [[ mineData.mining_level ]]</span>
+                                <span v-if="mineData.best_pickaxe" style="font-size:12px;color:var(--text-dim);margin-left:10px;">
+                                    Best pickaxe: [[ mineData.best_pickaxe ]]
+                                </span>
+                                <span v-else style="font-size:12px;color:var(--red);margin-left:10px;">No pickaxe</span>
+                            </div>
+                            <button class="btn btn-secondary" @click="mine" :disabled="actionPending">Mine</button>
+                        </div>
+                        <div class="bar-group">
+                            <div class="bar-label">
+                                Mining XP <span class="bar-nums">[[ mineData.xp_progress ]]/[[ mineData.xp_needed ]]</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill bar-exp" :style="{ width: mineData.xp_pct + '%' }"></div>
+                            </div>
+                        </div>
+                        <div class="mine-ore-grid">
+                            <div v-for="ore in mineData.pool" :key="ore.name"
+                                 class="mine-ore-row"
+                                 :class="{ 'mine-ore-locked': !ore.accessible }">
+                                <div>
+                                    <span :class="'rarity-' + ore.rarity">[[ ore.name ]]</span>
+                                    <span style="font-size:11px;color:var(--text-dim);margin-left:8px;">[[ ore.price ]]g each</span>
+                                </div>
+                                <div>
+                                    <span v-if="!ore.accessible" style="font-size:11px;color:var(--red);">[[ ore.blocked_by ]]</span>
+                                    <span v-else style="font-size:11px;color:var(--green-bright);">accessible</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">No mine in this area.</div>
+                </div>
+
+                <!-- ═══ CRAFTING tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'crafting' }">
+                    <div v-if="craftingRecipes && craftingRecipes.length">
+                        <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);">
+                            [[ craftableCount ]] / [[ craftingRecipes.length ]] recipes craftable
+                        </div>
+                        <div class="recipe-grid">
+                            <div v-for="recipe in craftingRecipes" :key="recipe.id || recipe.name" class="recipe-card"
+                                 :style="{ opacity: recipe.can_craft ? 1 : 0.6 }">
+                                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                    <div>
+                                        <div class="recipe-name">[[ recipe.name ]]</div>
+                                        <div class="recipe-meta" v-if="recipe.description">[[ recipe.description ]]</div>
+                                        <div class="recipe-meta" v-if="recipe.category">Category: [[ recipe.category ]]</div>
+                                        <div class="recipe-materials">
+                                            Materials:
+                                            <span v-for="(qty, mat) in (recipe.materials || {})" :key="mat"
+                                                  :style="{ color: (recipe.have && recipe.have[mat] >= qty) ? 'var(--green-bright)' : 'var(--red)' }">
+                                                [[ mat ]] x[[ qty ]]
+                                                <span v-if="recipe.have">(have [[ recipe.have[mat] || 0 ]])</span>
+                                                &nbsp;
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-small btn-secondary"
+                                            @click="craftItem(recipe.id || recipe.key)"
+                                            :disabled="actionPending || !recipe.can_craft">
+                                        Craft
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">No crafting recipes known.</div>
+                </div>
+
+                <!-- ═══ DUNGEONS tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'dungeons' }">
+                    <!-- active dungeon -->
+                    <div v-if="activeDungeon && activeDungeon.dungeon" class="active-dungeon-panel">
+                        <div style="color:var(--gold);font-weight:bold;font-size:14px;margin-bottom:6px;">
+                            Active Dungeon: [[ activeDungeon.dungeon.name ]]
+                        </div>
+                        <div style="font-size:13px;color:var(--text-dim);">
+                            Room [[ activeDungeon.room_index + 1 ]] / [[ activeDungeon.rooms && activeDungeon.rooms.length ]]
+                        </div>
+                        <div style="margin-top:10px;display:flex;gap:8px;">
+                            <a href="/dungeon/room" class="btn btn-secondary">Continue</a>
+                            <button class="btn btn-danger btn-small" @click="abandonDungeon" :disabled="actionPending">Abandon</button>
+                        </div>
+                    </div>
+
+                    <!-- dungeon list -->
+                    <div v-if="dungeonList && dungeonList.length">
+                        <div v-for="dungeon in dungeonList" :key="dungeon.id" class="dungeon-card">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                <div>
+                                    <div class="dungeon-name">
+                                        [[ dungeon.name ]]
+                                        <span v-if="dungeon.completed" class="dungeon-complete-badge"> &#10003; done</span>
+                                    </div>
+                                    <div class="dungeon-meta" v-if="dungeon.description">[[ dungeon.description ]]</div>
+                                    <div class="dungeon-meta">
+                                        <span v-if="dungeon.difficulty">Difficulty [[ dungeon.difficulty.join && dungeon.difficulty.join('-') || dungeon.difficulty ]]</span>
+                                        <span v-if="dungeon.rooms"> &bull; [[ dungeon.rooms ]] rooms</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-small btn-secondary"
+                                        @click="enterDungeon(dungeon.id)"
+                                        :disabled="actionPending || (activeDungeon && !!activeDungeon.dungeon)">
+                                    Enter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else-if="!activeDungeon || !activeDungeon.dungeon" class="empty-state">No dungeons available in this area.</div>
+                </div>
+
+                <!-- ═══ MARKET tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'market' }">
+                    <div v-if="marketLoading" style="text-align:center;padding:24px 0;color:var(--text-dim);">Loading market…</div>
+                    <div v-else-if="marketCooldown" style="text-align:center;padding:24px 0;color:var(--text-dim);">[[ marketCooldown ]]</div>
+                    <div v-else-if="marketItems && marketItems.length">
+                        <div style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:13px;color:var(--text-dim);">[[ marketItems.length ]] listing[[ marketItems.length !== 1 ? 's' : '' ]]</span>
+                            <button class="btn btn-small btn-secondary" @click="loadMarket">Refresh</button>
+                        </div>
+                        <div v-for="item in marketItems" :key="item.id || item.name" class="market-item-card">
+                            <div style="flex:1;">
+                                <div class="market-item-name">[[ item.name ]]</div>
+                                <div class="market-item-seller" v-if="item.seller">Seller: [[ item.seller ]]</div>
+                                <div class="market-item-seller" v-if="item.stats">[[ item.stats ]]</div>
+                            </div>
+                            <div class="market-item-price">[[ item.price ]]g</div>
+                            <button class="btn btn-small btn-secondary"
+                                    @click="marketBuy(item.id || item.name, item.price)"
+                                    :disabled="actionPending || !(player && player.gold >= item.price)">
+                                Buy
+                            </button>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">
+                        No market listings available.
+                        <button class="btn btn-small btn-secondary" style="display:block;margin:10px auto;" @click="loadMarket">Load Market</button>
+                    </div>
+                </div>
+
+                <!-- ═══ PARTY tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'party' }">
+                    <!-- active companions -->
+                    <div v-if="activeCompanions && activeCompanions.length" style="margin-bottom:16px;">
+                        <div class="panel-title" style="margin-bottom:10px;">Your Party ([[ activeCompanions.length ]]/4)</div>
+                        <div v-for="comp in activeCompanions" :key="comp.id" class="companion-card">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                <div style="flex:1;">
+                                    <div class="companion-name">
+                                        [[ comp.name ]]
+                                        <span v-if="comp.fallen" style="color:var(--red);font-size:12px;"> [fallen]</span>
+                                    </div>
+                                    <div class="companion-meta">[[ comp.class ]] &bull; [[ comp.rank ]]</div>
+                                    <div class="companion-meta" v-if="comp.stat_summary">[[ comp.stat_summary ]]</div>
+                                    <div class="bar-group" style="margin-top:6px;">
+                                        <div class="bar-label">
+                                            HP <span class="bar-nums">[[ comp.hp ]]/[[ comp.max_hp ]]</span>
+                                        </div>
+                                        <div class="bar-track">
+                                            <div class="bar-fill bar-hp" :style="{ width: comp.hp_pct + '%' }"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-xsmall btn-secondary" style="margin-left:10px;"
+                                        @click="dismissCompanion(comp.id)"
+                                        :disabled="actionPending">
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else style="color:var(--text-dim);font-size:13px;margin-bottom:12px;">Your party is empty.</div>
+
+                    <!-- hire companions (tavern only) -->
+                    <div v-if="companionsAvailable && companionsAvailable.length">
+                        <div class="panel-title" style="margin-bottom:10px;">Available at Tavern</div>
+                        <div v-for="comp in companionsAvailable" :key="comp.id" class="companion-card">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                <div style="flex:1;">
+                                    <div class="companion-name">[[ comp.name ]]</div>
+                                    <div class="companion-meta">[[ comp.class ]] &bull; [[ comp.rank ]]</div>
+                                    <div class="companion-meta" v-if="comp.stat_summary">[[ comp.stat_summary ]]</div>
+                                    <div class="companion-meta">[[ comp.price ]]g to hire</div>
+                                </div>
+                                <button class="btn btn-small btn-secondary"
+                                        @click="hireCompanion(comp.id)"
+                                        :disabled="actionPending || comp.already_hired || !comp.can_afford">
+                                    [[ comp.already_hired ? 'Hired' : 'Hire' ]]
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else-if="!(activeCompanions && activeCompanions.length)" class="empty-state">
+                        Visit The Rusty Tankard to hire companions.
+                    </div>
+                </div>
+
+                <!-- ═══ QUESTS tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'quests' }">
+                    <div v-if="missions && missions.length">
+                        <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);">
+                            [[ completedMissionsCount ]] quest[[ completedMissionsCount !== 1 ? 's' : '' ]] completed
+                        </div>
+                        <div v-for="mission in missions" :key="mission.id" class="mission-card"
+                             :style="{ opacity: mission.eligible ? 1 : 0.6 }">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                <div style="flex:1;">
+                                    <div class="mission-name">[[ mission.name ]]</div>
+                                    <div class="mission-meta" v-if="mission.description">[[ mission.description ]]</div>
+                                    <div class="mission-meta">
+                                        EXP: [[ mission.exp_reward ]] &bull; Gold: [[ mission.gold_reward ]]
+                                        <span v-if="mission.item_rewards && mission.item_rewards.length"> &bull; Items: [[ mission.item_rewards.join(', ') ]]</span>
+                                    </div>
+                                    <div v-if="!mission.level_ok" style="color:var(--red);font-size:11px;">Requires level [[ mission.unlock_level ]]</div>
+                                    <div v-if="!mission.prereqs_met" style="color:var(--red);font-size:11px;">Prerequisites not met</div>
+                                    <!-- progress -->
+                                    <div v-if="mission.progress && mission.progress.length" class="mission-progress">
+                                        <div v-for="(prog, i) in mission.progress" :key="i"
+                                             :style="{ color: prog.done ? 'var(--green-bright)' : 'var(--text-dim)' }">
+                                            [[ prog.done ? '&#10003;' : '&#9675;' ]] [[ prog.label ]]
+                                        </div>
+                                    </div>
+                                    <div v-if="mission.status_msg && !mission.can_complete"
+                                         style="font-size:11px;color:var(--text-dim);margin-top:3px;">
+                                        [[ mission.status_msg ]]
+                                    </div>
+                                </div>
+                                <button class="btn btn-small btn-secondary"
+                                        @click="completeMission(mission.id)"
+                                        :disabled="actionPending || !mission.can_complete || !mission.eligible"
+                                        style="margin-left:10px;">
+                                    Complete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">No active quests.</div>
+                </div>
+
+                <!-- ═══ CHALLENGES tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'challenges' }">
+                    <div v-if="challenges && challenges.length">
+                        <div v-for="ch in challenges" :key="ch.id" class="challenge-card">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                <div style="flex:1;">
+                                    <div class="challenge-name">[[ ch.name ]]</div>
+                                    <div class="challenge-meta" v-if="ch.description">[[ ch.description ]]</div>
+                                    <div class="challenge-meta">
+                                        Progress: [[ ch.count || 0 ]]/[[ ch.target ]]
+                                        &bull; Reward: [[ ch.reward_exp ]] EXP, [[ ch.reward_gold ]]g
+                                    </div>
+                                    <div style="margin-top:5px;">
+                                        <div class="bar-track" style="height:4px;">
+                                            <div class="bar-fill bar-exp"
+                                                 :style="{ width: Math.min(100, Math.round(((ch.count || 0) / (ch.target || 1)) * 100)) + '%' }">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-if="ch.claimed" style="color:var(--green-bright);font-size:12px;margin-top:3px;">
+                                        &#10003; Claimed
+                                    </div>
+                                </div>
+                                <button class="btn btn-small btn-secondary"
+                                        @click="claimChallenge(ch.id)"
+                                        :disabled="actionPending || ch.claimed || (ch.count || 0) < ch.target"
+                                        style="margin-left:10px;">
+                                    Claim
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">No challenges available this week.</div>
+                </div>
+
+                <!-- ═══ DIARY tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'diary' }">
+                    <div v-if="diary && diary.length">
+                        <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);">[[ diary.length ]] entries</div>
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div v-for="(entry, i) in diary" :key="i" class="diary-entry">[[ entry ]]</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <div class="panel-title" style="margin-bottom:10px;">Recent Events</div>
+                        <div class="panel">
+                            <div class="panel-body events-list">
+                                <div v-for="(msg, i) in messages" :key="i"
+                                     class="log-entry"
+                                     :style="{ color: msg.color || 'var(--text-light)' }">
+                                    [[ msg.text ]]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ CHARACTER tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'character' }">
                     <div v-if="player">
                         <div class="panel" style="margin-bottom:12px;">
                             <div class="panel-title">[[ player.name ]]</div>
                             <div class="panel-body">
-                                <div style="font-size:14px;margin-bottom:4px;">
-                                    [[ player.char_class ]] &mdash; Rank [[ player.rank ]]
-                                </div>
-                                <div style="font-size:13px;color:var(--text-dim);">
-                                    [[ player.race ]] &bull; Level [[ player.level ]]
-                                </div>
+                                <div style="font-size:14px;margin-bottom:4px;">[[ player.char_class ]] &mdash; Rank [[ player.rank ]]</div>
+                                <div style="font-size:13px;color:var(--text-dim);">[[ player.race ]] &bull; Level [[ player.level ]]</div>
+                                <div v-if="player.title" style="font-size:13px;color:var(--gold);margin-top:2px;">[[ player.title ]]</div>
                             </div>
                         </div>
 
-                        <div class="stat-grid-big">
+                        <div class="stat-grid-big" style="margin-bottom:14px;">
                             <div class="stat-card">
                                 <div class="stat-card-label">HP</div>
-                                <div class="stat-card-val">[[ player.hp ]] / [[ player.max_hp ]]</div>
+                                <div class="stat-card-val">[[ player.hp ]]/[[ player.max_hp ]]</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-card-label">MP</div>
-                                <div class="stat-card-val">[[ player.mp ]] / [[ player.max_mp ]]</div>
+                                <div class="stat-card-val">[[ player.mp ]]/[[ player.max_mp ]]</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-card-label">EXP</div>
-                                <div class="stat-card-val">[[ player.experience ]] / [[ player.experience_to_next ]]</div>
+                                <div class="stat-card-val">[[ player.experience ]]/[[ player.experience_to_next ]]</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-card-label">Attack</div>
@@ -455,29 +1210,58 @@
                                 <div class="stat-card-label">Speed</div>
                                 <div class="stat-card-val">[[ player.speed ]]</div>
                             </div>
-                            <div class="stat-card">
-                                <div class="stat-card-label">Gold</div>
-                                <div class="stat-card-val">[[ player.gold ]]</div>
+                        </div>
+
+                        <!-- attribute points -->
+                        <div v-if="attrSummary && attrSummary.length" class="panel" style="margin-bottom:12px;">
+                            <div class="panel-title">
+                                Attributes
+                                <span v-if="player.attr_points > 0" style="color:var(--gold);font-size:12px;margin-left:8px;">
+                                    [[ player.attr_points ]] point[[ player.attr_points !== 1 ? 's' : '' ]] to spend
+                                </span>
                             </div>
-                            <div class="stat-card">
-                                <div class="stat-card-label">Level</div>
-                                <div class="stat-card-val">[[ player.level ]]</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-card-label">Rank</div>
-                                <div class="stat-card-val">[[ player.rank ]]</div>
+                            <div class="panel-body">
+                                <div v-for="attr in attrSummary" :key="attr.key" class="attr-row">
+                                    <div>
+                                        <div class="attr-name">[[ attr.label ]]</div>
+                                        <div style="font-size:11px;color:var(--text-dim);">[[ attr.description ]]</div>
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <span class="attr-val">[[ attr.value ]] <span style="font-size:11px;color:var(--text-dim);">/ [[ attr.max ]]</span></span>
+                                        <button v-if="player.attr_points > 0"
+                                                class="btn btn-xsmall btn-secondary attr-spend-btn"
+                                                @click="spendAttrPoint(attr.key)"
+                                                :disabled="actionPending || attr.value >= attr.max">
+                                            +1
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div v-if="player.equipment && Object.keys(player.equipment).length" style="margin-top:14px;">
-                            <div class="panel">
-                                <div class="panel-title">Equipment</div>
-                                <div class="panel-body">
-                                    <div v-for="(item, slot) in player.equipment" :key="slot"
-                                         style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;">
-                                        <span style="color:var(--text-dim);text-transform:capitalize;">[[ slot ]]</span>
-                                        <span style="color:var(--text-light);">[[ item ]]</span>
-                                    </div>
+                        <!-- kills / deaths / reputation -->
+                        <div class="panel">
+                            <div class="panel-title">Statistics</div>
+                            <div class="panel-body">
+                                <div class="attr-row">
+                                    <span class="attr-name">Total Kills</span>
+                                    <span class="attr-val">[[ player.total_kills || 0 ]]</span>
+                                </div>
+                                <div class="attr-row">
+                                    <span class="attr-name">Bosses Defeated</span>
+                                    <span class="attr-val">[[ player.total_bosses_defeated || 0 ]]</span>
+                                </div>
+                                <div class="attr-row">
+                                    <span class="attr-name">Deaths</span>
+                                    <span class="attr-val">[[ player.deaths || 0 ]]</span>
+                                </div>
+                                <div class="attr-row">
+                                    <span class="attr-name">Days Played</span>
+                                    <span class="attr-val">[[ player.days || 1 ]]</span>
+                                </div>
+                                <div class="attr-row">
+                                    <span class="attr-name">Reputation</span>
+                                    <span class="attr-val">[[ player.reputation || 0 ]]</span>
                                 </div>
                             </div>
                         </div>
@@ -485,23 +1269,96 @@
                     <div v-else class="empty-state">No character data.</div>
                 </div>
 
-                <!-- travel tab -->
-                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'travel' }">
-                    <div v-if="area && area.connections && area.connections.length">
-                        <div class="panel-title" style="margin-bottom:10px;">Travel from [[ area.name ]]</div>
-                        <div class="travel-btn-grid">
-                            <button v-for="conn in area.connections" :key="conn"
-                                    class="btn btn-secondary"
-                                    @click="travel(conn)"
-                                    :disabled="actionPending || inBattle">
-                                [[ conn.replace(/_/g, ' ') ]]
-                            </button>
+                <!-- ═══ EVENTS tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'events' }">
+                    <div v-if="eventsData">
+                        <div v-if="eventsData.active && eventsData.active.length">
+                            <div class="panel-title" style="margin-bottom:10px;">Active Events</div>
+                            <div v-for="ev in eventsData.active" :key="ev.id" class="event-card">
+                                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                    <div style="flex:1;">
+                                        <div class="event-name">[[ ev.name ]]</div>
+                                        <div class="event-meta" v-if="ev.description">[[ ev.description ]]</div>
+                                        <div class="event-meta">
+                                            Ends in [[ ev.days_remaining ]] day[[ ev.days_remaining !== 1 ? 's' : '' ]]
+                                            &bull; Reward: [[ ev.reward_type ]] [[ ev.reward_item || ev.reward_amount ]]
+                                        </div>
+                                        <div v-if="ev.required" class="event-meta">
+                                            Progress: [[ ev.progress ]]/[[ ev.required ]] boss kills
+                                        </div>
+                                        <div v-if="ev.is_claimed" style="color:var(--green-bright);font-size:12px;">&#10003; Claimed</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="eventsData.upcoming && eventsData.upcoming.length" style="margin-top:16px;">
+                            <div class="panel-title" style="margin-bottom:10px;">Upcoming Events</div>
+                            <div v-for="ev in eventsData.upcoming" :key="ev.id" class="event-card"
+                                 style="opacity:0.7;">
+                                <div class="event-name">[[ ev.name ]]</div>
+                                <div class="event-meta">Starts in [[ ev.days_until ]] day[[ ev.days_until !== 1 ? 's' : '' ]]</div>
+                                <div class="event-meta" v-if="ev.description">[[ ev.description ]]</div>
+                            </div>
+                        </div>
+                        <div v-if="(!eventsData.active || !eventsData.active.length) && (!eventsData.upcoming || !eventsData.upcoming.length)"
+                             class="empty-state">No events right now.</div>
+                    </div>
+                    <div v-else class="empty-state">No events data loaded.</div>
+                </div>
+
+                <!-- ═══ FRIENDS tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'friends' }">
+                    <div v-if="onlineUsername">
+                        <div class="panel" style="margin-bottom:12px;">
+                            <div class="panel-title">Friends</div>
+                            <div class="panel-body">
+                                <div v-if="friendsLoading" style="color:var(--text-dim);font-size:13px;">Loading…</div>
+                                <div v-else-if="friendsList && friendsList.length">
+                                    <div v-for="f in friendsList" :key="f.username" class="friends-list-item">
+                                        <span style="color:var(--text-light);">[[ f.username ]]</span>
+                                        <span style="color:var(--text-dim);font-size:12px;">[[ f.status || '' ]]</span>
+                                    </div>
+                                </div>
+                                <div v-else style="color:var(--text-dim);font-size:13px;">No friends added yet.</div>
+                            </div>
+                        </div>
+                        <div style="font-size:13px;color:var(--text-dim);">
+                            Full friends management: <a href="/friends" style="color:var(--gold);">Friends page</a>
                         </div>
                     </div>
-                    <div v-else class="empty-state">No connected areas.</div>
-                    <div v-if="inBattle" style="margin-top:10px;color:var(--red);font-size:13px;">
-                        You cannot travel while in battle.
+                    <div v-else class="empty-state">Sign in online to use the friends feature.</div>
+                </div>
+
+                <!-- ═══ GROUP tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'group' }">
+                    <div v-if="onlineUsername">
+                        <div class="panel" style="margin-bottom:12px;">
+                            <div class="panel-title">Your Group</div>
+                            <div class="panel-body">
+                                <div v-if="groupData">
+                                    <div style="font-size:14px;color:var(--gold);font-weight:bold;margin-bottom:4px;">
+                                        [[ groupData.name ]]
+                                    </div>
+                                    <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">
+                                        [[ groupData.member_count || 0 ]] member[[ groupData.member_count !== 1 ? 's' : '' ]]
+                                        &bull; Group Gold: [[ groupData.gold || 0 ]]g
+                                    </div>
+                                    <div v-if="groupData.members && groupData.members.length">
+                                        <div v-for="m in groupData.members" :key="m.username"
+                                             class="friends-list-item">
+                                            <span style="color:var(--text-light);">[[ m.username ]]</span>
+                                            <span style="font-size:12px;color:var(--text-dim);">Lv.[[ m.level || '?' ]]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-else style="color:var(--text-dim);font-size:13px;">You are not in a group.</div>
+                            </div>
+                        </div>
+                        <div style="font-size:13px;color:var(--text-dim);">
+                            Full group management: <a href="/groups" style="color:var(--gold);">Groups page</a>
+                        </div>
                     </div>
+                    <div v-else class="empty-state">Sign in online to join or create a group.</div>
                 </div>
 
             </div>

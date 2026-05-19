@@ -1,5 +1,5 @@
 // vue 3 beta — options api, custom delimiters [[ ]] to avoid jinja2 conflict
-// all data from /api/* endpoints, admin-only via /beta route guard
+// all data from /api/game/state/extended, admin-only via /beta route guard
 
 const { createApp } = Vue;
 
@@ -12,36 +12,82 @@ createApp({
         if (init.player) {
             const p = init.player;
             player = {
-                name:               p.name   || '?',
-                level:              p.level  || 1,
-                rank:               p.rank   || 'F',
-                hp:                 p.hp     || 0,
-                max_hp:             p.max_hp || 1,
-                mp:                 p.mp     || 0,
-                max_mp:             p.max_mp || 1,
-                experience:         p.experience        || 0,
-                experience_to_next: p.experience_to_next || 100,
-                attack:             p.attack   || 0,
-                defense:            p.defense  || 0,
-                speed:              p.speed    || 0,
-                gold:               p.gold     || 0,
-                race:               p.race     || '',
-                char_class:         p['class'] || p.char_class || '',
-                equipment:          p.equipment || {},
+                name:                p.name   || '?',
+                level:               p.level  || 1,
+                rank:                p.rank   || 'F',
+                hp:                  p.hp     || 0,
+                max_hp:              p.max_hp || 1,
+                mp:                  p.mp     || 0,
+                max_mp:              p.max_mp || 1,
+                experience:          p.experience         || 0,
+                experience_to_next:  p.experience_to_next || 100,
+                attack:              p.attack   || 0,
+                defense:             p.defense  || 0,
+                speed:               p.speed    || 0,
+                gold:                p.gold     || 0,
+                race:                p.race     || '',
+                char_class:          p['class'] || p.char_class || '',
+                equipment:           p.equipment || {},
+                attr_points:         p.attr_points || 0,
+                title:               p.title || '',
+                total_kills:         p.total_kills || 0,
+                total_bosses_defeated: p.total_bosses_defeated || 0,
+                deaths:              p.deaths || 0,
+                days:                p.days || 1,
+                reputation:          p.reputation || 0,
             };
         }
         return {
             player,
-            area:          null,
-            inventory:     [],
-            messages:      [],
-            inBattle:      false,
-            battle:        null,
-            activeTab:     'play',
-            actionPending: false,
-            toasts:        [],
-            lastMsgCount:  0,
-            pollTimer:     null,
+            area:                 null,
+            inventory:            [],
+            inventoryItems:       [],
+            equippedDetails:      {},
+            messages:             [],
+            diary:                [],
+            inBattle:             false,
+            battle:               null,
+            activeTab:            'explore',
+            actionPending:        false,
+            toasts:               [],
+            lastMsgCount:         0,
+            pollTimer:            null,
+
+            // extended state
+            connections:          [],
+            shopItems:            [],
+            shopName:             '',
+            mineData:             null,
+            craftingRecipes:      [],
+            dungeonList:          [],
+            activeDungeon:        {},
+            missions:             [],
+            completedMissionsCount: 0,
+            challenges:           [],
+            activeCompanions:     [],
+            companionsAvailable:  [],
+            eventsData:           null,
+            attrSummary:          [],
+            availableBosses:      [],
+            gameTime:             '',
+            gameTimeIcon:         '',
+            weatherDisplay:       '',
+            weatherBonusExp:      0,
+            weatherBonusGold:     0,
+            visitedAreas:         [],
+
+            // market
+            marketItems:          [],
+            marketLoading:        false,
+            marketCooldown:       null,
+
+            // friends / group
+            onlineUsername:       init.username || null,
+            friendsList:          [],
+            friendsLoading:       false,
+            groupData:            null,
+
+            equipSlots: ['weapon', 'offhand', 'helmet', 'chest', 'legs', 'accessory'],
         };
     },
 
@@ -58,85 +104,127 @@ createApp({
             if (!this.player) return 0;
             return Math.min(100, Math.round(this.player.experience / (this.player.experience_to_next || 100) * 100));
         },
-        canRest() { return this.area && this.area.can_rest && !this.inBattle; },
-        canMine() { return this.area && this.area.has_mine && !this.inBattle; },
-        inventoryCounts() {
-            const counts = {};
-            (this.inventory || []).forEach(item => { counts[item] = (counts[item] || 0) + 1; });
-            return Object.entries(counts)
-                .map(([name, qty]) => ({ name, qty }))
-                .sort((a, b) => a.name.localeCompare(b.name));
+        recentMessages() {
+            return [...this.messages].slice(-12).reverse();
         },
-        recentMessages() { return [...this.messages].reverse().slice(0, 12); },
+        craftableCount() {
+            return (this.craftingRecipes || []).filter(r => r.can_craft).length;
+        },
+        battleSpells() {
+            if (!this.battle || !this.battle.spells) return [];
+            return this.battle.spells || [];
+        },
+        battleConsumables() {
+            return (this.inventoryItems || []).filter(i => i.type === 'consumable').slice(0, 6);
+        },
     },
 
     methods: {
 
-        // fetch full game state from server
+        // fetch full extended game state from server
         async fetchState() {
             if (document.hidden) return;
             try {
-                const r = await fetch('/api/game/state', {
+                const r = await fetch('/api/game/state/extended', {
                     credentials: 'same-origin',
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 });
                 if (!r.ok) return;
                 const data = await r.json();
                 if (!data.ok) return;
-
-                if (data.player) {
-                    const p = data.player;
-                    this.player = {
-                        name:               p.name   || this.player?.name || '?',
-                        level:              p.level  || 1,
-                        rank:               p.rank   || 'F',
-                        hp:                 p.hp     || 0,
-                        max_hp:             p.max_hp || 1,
-                        mp:                 p.mp     || 0,
-                        max_mp:             p.max_mp || 1,
-                        experience:         p.experience         || 0,
-                        experience_to_next: p.experience_to_next || 100,
-                        attack:             p.attack   || 0,
-                        defense:            p.defense  || 0,
-                        speed:              p.speed    || 0,
-                        gold:               p.gold     || 0,
-                        race:               p.race     || '',
-                        char_class:         p.char_class || p['class'] || '',
-                        equipment:          p.equipment  || {},
-                    };
-                }
-
-                this.area      = data.area      || this.area;
-                this.inventory = data.inventory || [];
-                this.inBattle  = !!data.in_battle;
-                if (data.battle) this.battle = data.battle;
-                if (!data.in_battle) this.battle = null;
-
-                // show only new messages as toasts
-                const msgs = data.messages || [];
-                if (msgs.length > this.lastMsgCount) {
-                    msgs.slice(this.lastMsgCount).forEach((msg, i) => {
-                        setTimeout(() => this.showToast(msg.text, msg.color), i * 200);
-                    });
-                }
-                this.messages     = msgs;
-                this.lastMsgCount = msgs.length;
-
-                // auto-switch tabs on battle state change
-                if (data.in_battle && this.activeTab !== 'battle') this.activeTab = 'battle';
-                if (!data.in_battle && this.activeTab === 'battle') this.activeTab = 'play';
-
+                this._applyState(data);
             } catch (_) {}
         },
 
-        // restart poll timer — faster interval during battle
+        _applyState(data) {
+            if (data.player) {
+                const p = data.player;
+                this.player = {
+                    name:                p.name   || this.player?.name || '?',
+                    level:               p.level  || 1,
+                    rank:                p.rank   || 'F',
+                    hp:                  p.hp     || 0,
+                    max_hp:              p.max_hp || 1,
+                    mp:                  p.mp     || 0,
+                    max_mp:              p.max_mp || 1,
+                    experience:          p.experience         || 0,
+                    experience_to_next:  p.experience_to_next || 100,
+                    attack:              p.attack   || 0,
+                    defense:             p.defense  || 0,
+                    speed:               p.speed    || 0,
+                    gold:                p.gold     || 0,
+                    race:                p.race     || '',
+                    char_class:          p.char_class || p['class'] || '',
+                    equipment:           p.equipment || {},
+                    attr_points:         p.attr_points || 0,
+                    title:               p.title || '',
+                    total_kills:         p.total_kills || 0,
+                    total_bosses_defeated: p.total_bosses_defeated || 0,
+                    deaths:              p.deaths || 0,
+                    days:                p.days || 1,
+                    reputation:          p.reputation || 0,
+                };
+            }
+
+            this.area             = data.area        || this.area;
+            this.inventory        = data.inventory   || [];
+            this.inventoryItems   = data.inventory_items || [];
+            this.equippedDetails  = data.equipped_details || {};
+            this.inBattle         = !!data.in_battle;
+            if (data.battle) this.battle = data.battle;
+            if (!data.in_battle) this.battle = null;
+
+            // extended fields
+            this.connections         = data.connections          || [];
+            this.shopItems           = data.shop_items           || [];
+            this.shopName            = data.shop_name            || '';
+            this.mineData            = data.mine_data            || null;
+            this.craftingRecipes     = data.crafting_recipes     || [];
+            this.dungeonList         = data.dungeon_list         || [];
+            this.activeDungeon       = data.active_dungeon       || {};
+            this.missions            = data.missions             || [];
+            this.completedMissionsCount = data.completed_missions_count || 0;
+            this.challenges          = data.challenges           || [];
+            this.activeCompanions    = data.active_companions    || [];
+            this.companionsAvailable = data.companions_available || [];
+            this.eventsData          = data.events_data          || null;
+            this.diary               = data.diary                || [];
+            this.attrSummary         = data.attr_summary         || [];
+            this.availableBosses     = data.available_bosses     || [];
+            this.gameTime            = data.game_time            || '';
+            this.gameTimeIcon        = data.game_time_icon       || '';
+            this.weatherDisplay      = data.weather_display      || '';
+            this.weatherBonusExp     = data.weather_bonus_exp    || 0;
+            this.weatherBonusGold    = data.weather_bonus_gold   || 0;
+            this.visitedAreas        = data.visited_areas        || [];
+
+            // show new messages as toasts
+            const msgs = data.messages || [];
+            if (msgs.length > this.lastMsgCount) {
+                msgs.slice(this.lastMsgCount).forEach((msg, i) => {
+                    setTimeout(() => this.showToast(msg.text, msg.color), i * 200);
+                });
+            }
+            this.messages     = msgs;
+            this.lastMsgCount = msgs.length;
+
+            // auto-switch tabs on battle state change
+            if (data.in_battle && this.activeTab !== 'battle') this.activeTab = 'battle';
+            if (!data.in_battle && this.activeTab === 'battle') this.activeTab = 'explore';
+
+            // show/hide shop/mine tabs
+            if (!this.shopItems.length && this.activeTab === 'shop') this.activeTab = 'explore';
+            if (!this.mineData && this.activeTab === 'mine') this.activeTab = 'explore';
+        },
+
+        // restart poll timer — faster during battle
         resetPoll() {
             if (this.pollTimer) clearInterval(this.pollTimer);
-            const interval = this.inBattle ? 2000 : 5000;
+            const interval = this.inBattle ? 2000 : 7000;
             this.pollTimer = setInterval(() => this.fetchState(), interval);
         },
 
-        // generic action caller — fetches state after every action
+        // generic JSON action → refresh state on success
         async doAction(path, body = {}) {
             if (this.actionPending) return null;
             this.actionPending = true;
@@ -160,6 +248,9 @@ createApp({
                         setTimeout(() => this.showToast(msg.text, msg.color), i * 200);
                     });
                 }
+                if (data.message) {
+                    this.showToast(data.message, 'var(--green-bright)');
+                }
                 await this.fetchState();
                 this.resetPoll();
                 return data;
@@ -171,18 +262,134 @@ createApp({
             }
         },
 
-        explore()       { return this.doAction('/api/action/explore'); },
-        rest()          { return this.doAction('/api/action/rest'); },
-        mine()          { return this.doAction('/api/action/mine'); },
-        travel(key)     { return this.doAction('/api/action/travel', { area: key }); },
-        useItem(name)   { return this.doAction('/api/action/use_item', { item: name }); },
-        equipItem(name) { return this.doAction('/api/action/equip', { item: name }); },
+        // explore / rest / mine
+        explore()     { return this.doAction('/api/action/explore'); },
+        rest()        { return this.doAction('/api/action/rest'); },
+        mine()        { return this.doAction('/api/action/mine'); },
 
+        // travel
+        travel(key)   { return this.doAction('/api/action/travel', { area: key }); },
+
+        // inventory
+        useItem(name)   { return this.doAction('/api/action/use_item',  { item: name }); },
+        equipItem(name) { return this.doAction('/api/action/equip',     { item: name }); },
+        unequipSlot(slot) { return this.doAction('/api/action/unequip', { slot }); },
+        sellItem(name)  { return this.doAction('/api/action/sell',      { item: name }); },
+
+        // equipment tab
+        autoEquip()     { return this.doAction('/api/action/auto_equip'); },
+        quickHeal()     { return this.doAction('/api/action/quick_heal'); },
+        sortInventory() { return this.doAction('/api/action/sort_inventory'); },
+
+        // shop
+        buyItem(name)   { return this.doAction('/api/action/buy',  { item: name }); },
+
+        // crafting
+        craftItem(recipeId) { return this.doAction('/api/action/craft', { recipe_id: recipeId }); },
+
+        // companions
+        hireCompanion(id)    { return this.doAction('/api/action/hire_companion',    { companion_id: id }); },
+        dismissCompanion(id) { return this.doAction('/api/action/dismiss_companion', { companion_id: id }); },
+
+        // missions
+        completeMission(id) { return this.doAction('/api/action/complete_mission', { mission_id: id }); },
+
+        // challenges
+        claimChallenge(id)  { return this.doAction('/api/action/claim_challenge',  { challenge_id: id }); },
+
+        // bosses
+        challengeBoss(key)  { return this.doAction('/api/action/challenge_boss', { boss_key: key }); },
+
+        // dungeons
+        async enterDungeon(id) {
+            const res = await this.doAction('/api/action/dungeon/enter', { dungeon_id: id });
+            if (res && res.redirect) {
+                window.location.href = res.redirect;
+            }
+        },
+        abandonDungeon() { return this.doAction('/api/action/dungeon/abandon'); },
+
+        // battle
         battleAttack()  { return this.doAction('/api/battle/attack'); },
         battleDefend()  { return this.doAction('/api/battle/defend'); },
         battleFlee()    { return this.doAction('/api/battle/flee'); },
+        battleSpell(id) { return this.doAction('/api/battle/spell',    { spell_id: id }); },
+        battleUseItem(name) { return this.doAction('/api/battle/use_item', { item: name }); },
 
-        switchTab(tab)  { this.activeTab = tab; },
+        // attributes
+        spendAttrPoint(attr) { return this.doAction('/api/spend_attr_point', { attr, count: 1 }); },
+
+        // market
+        async loadMarket() {
+            this.marketLoading = true;
+            this.marketCooldown = null;
+            try {
+                const r = await fetch('/api/market_data', {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                const data = await r.json();
+                if (data.cooldown_msg) {
+                    this.marketCooldown = data.cooldown_msg;
+                    this.marketItems = [];
+                } else {
+                    this.marketItems = data.market_items || [];
+                }
+            } catch (e) {
+                this.marketCooldown = 'Could not load market.';
+            } finally {
+                this.marketLoading = false;
+            }
+        },
+
+        async marketBuy(id, price) {
+            const res = await this.doAction('/api/market/buy', { item_id: id, price });
+            if (res && res.ok) await this.loadMarket();
+        },
+
+        // friends — load on tab switch
+        async loadFriends() {
+            if (!this.onlineUsername) return;
+            this.friendsLoading = true;
+            try {
+                const r = await fetch('/api/friends/list', {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                if (r.ok) {
+                    const data = await r.json();
+                    this.friendsList = data.friends || [];
+                }
+            } catch (_) {}
+            this.friendsLoading = false;
+        },
+
+        async loadGroup() {
+            if (!this.onlineUsername) return;
+            try {
+                const r = await fetch('/api/groups/info', {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                if (r.ok) {
+                    const data = await r.json();
+                    if (data.ok) this.groupData = data.group || null;
+                }
+            } catch (_) {}
+        },
+
+        switchTab(tab) {
+            this.activeTab = tab;
+            if (tab === 'market' && !this.marketItems.length && !this.marketLoading) {
+                this.loadMarket();
+            }
+            if (tab === 'friends' && !this.friendsList.length) {
+                this.loadFriends();
+            }
+            if (tab === 'group' && !this.groupData) {
+                this.loadGroup();
+            }
+        },
 
         showToast(text, color) {
             const id = Date.now() + '_' + Math.random();
@@ -205,7 +412,6 @@ createApp({
         this.fetchState();
         this.resetPoll();
 
-        // pause polling when tab is hidden, resume and refresh immediately when visible
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 this.fetchState();

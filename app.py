@@ -9393,6 +9393,739 @@ def api_battle_use_item():
     )
 
 
+# ── Vue beta: extended game state ─────────────────────────────────────────────
+
+@app.route("/api/game/state/extended", methods=["GET"])
+@limiter.limit("60 per minute")
+def api_game_state_extended():
+    player, err = _api_resolve_player("game:read")
+    if err:
+        return err
+    area_key = session.get("current_area", "starting_village")
+    area = GAME_DATA["areas"].get(area_key, {})
+    area_name = area.get("name", area_key.replace("_", " ").title())
+    in_battle = bool(session.get("battle_enemy"))
+    visited_areas = session.get("visited_areas", [area_key])
+
+    # connections with visit detail
+    connections = []
+    for conn_key in area.get("connections", []):
+        conn_area = GAME_DATA["areas"].get(conn_key, {})
+        is_visited = conn_key in visited_areas
+        connections.append({
+            "key": conn_key,
+            "name": conn_area.get("name", conn_key.replace("_", " ").title()) if is_visited else "???",
+            "visited": is_visited,
+            "difficulty": conn_area.get("difficulty", 0) if is_visited else -1,
+            "has_enemies": bool(conn_area.get("possible_enemies")) if is_visited else None,
+            "has_shop": bool(conn_area.get("shops")) if is_visited else None,
+        })
+
+    # shop items
+    shop_discount = min(0.50, player.get("attr_gold_discount", 0.0))
+    shop_items: list[Any] = []
+    shop_name = ""
+    for shop_key in area.get("shops", []):
+        if shop_key == "pet_shop":
+            continue
+        shop_data = GAME_DATA["shops"].get(shop_key, {})
+        if not shop_name:
+            shop_name = shop_data.get("name", "Shop")
+        for item_name in shop_data.get("items", []):
+            item_data = GAME_DATA["items"].get(item_name, {})
+            if not isinstance(item_data, dict):
+                continue
+            base_price = item_data.get("price", item_data.get("value", 20))
+            price = max(1, int(base_price * (1.0 - shop_discount)))
+            shop_items.append({
+                "name": item_name,
+                "price": price,
+                "base_price": base_price,
+                "discounted": shop_discount > 0,
+                "rarity": item_data.get("rarity", "common"),
+                "description": item_data.get("description", ""),
+                "type": item_data.get("type", "misc"),
+                "stats": _item_stat_summary(item_data),
+                "can_afford": player["gold"] >= price,
+            })
+
+    # inventory items with full detail
+    inv_counts: dict[str, int] = {}
+    for item_name in player.get("inventory", []):
+        inv_counts[item_name] = inv_counts.get(item_name, 0) + 1
+    inventory_items: list[Any] = []
+    for item_name, count in inv_counts.items():
+        item_data = GAME_DATA["items"].get(item_name, {})
+        if not isinstance(item_data, dict):
+            item_data = {}
+        sell_price = max(1, int(item_data.get("price", item_data.get("value", 10)) * 0.5))
+        item_type = item_data.get("type", "")
+        inventory_items.append({
+            "name": item_name,
+            "count": count,
+            "rarity": item_data.get("rarity", "common"),
+            "description": item_data.get("description", ""),
+            "sell_price": sell_price,
+            "type": item_type,
+            "equippable": item_type in EQUIPPABLE_TYPES,
+            "stats": _item_stat_summary(item_data),
+        })
+
+    # equipped details
+    equipped_details: dict[str, Any] = {}
+    for slot, item_name in player.get("equipment", {}).items():
+        if item_name:
+            item_data = GAME_DATA["items"].get(item_name, {})
+            if isinstance(item_data, dict):
+                equipped_details[slot] = {
+                    "name": item_name,
+                    "rarity": item_data.get("rarity", "common"),
+                    "stats": _item_stat_summary(item_data),
+                    "description": item_data.get("description", ""),
+                }
+
+    # missions
+    completed_list = session.get("completed_missions", [])
+    completed_set = set(completed_list)
+    npc_unlocked = set(session.get("npc_unlocked_quests", []))
+    missions_out: list[Any] = []
+    for mid, mission in GAME_DATA["missions"].items():
+        if mid in completed_set:
+            continue
+        if mission.get("npc_triggered") and mid not in npc_unlocked:
+            continue
+        unlock_level = mission.get("unlock_level", 1)
+        prereqs = mission.get("prerequisites", [])
+        prereqs_met = all(p in completed_set for p in prereqs)
+        level_ok = player.get("level", 1) >= unlock_level
+        can_complete, status_msg = check_mission_completable(mid, player)
+        progress_items = get_mission_progress_display(mid, player)
+        reward = mission.get("reward", {})
+        missions_out.append({
+            "id": mid,
+            "name": mission.get("name", mid),
+            "description": mission.get("description", ""),
+            "type": mission.get("type", "kill"),
+            "exp_reward": reward.get("experience", mission.get("experience_reward", 0)),
+            "gold_reward": reward.get("gold", mission.get("gold_reward", 0)),
+            "item_rewards": reward.get("items", []),
+            "unlock_level": unlock_level,
+            "prereqs_met": prereqs_met,
+            "level_ok": level_ok,
+            "eligible": level_ok and prereqs_met,
+            "can_complete": can_complete,
+            "status_msg": status_msg,
+            "progress": progress_items,
+        })
+    missions_out.sort(key=lambda m: (not m["eligible"], m["unlock_level"]))
+    missions_out = missions_out[:20]
+
+    # challenges
+    challenges = build_challenges_display(player)
+
+    # companions
+    active_companions: list[Any] = []
+    for comp in player.get("companions", []):
+        if isinstance(comp, dict):
+            comp_id = comp.get("id")
+            comp_data = GAME_DATA["companions"].get(comp_id, {})
+            rank = comp_data.get("rank", "common")
+            max_hp = comp.get("max_hp", _COMPANION_RANK_HP.get(rank, 400))
+            cur_hp = comp.get("hp", max_hp)
+            hp_pct = int(cur_hp / max_hp * 100) if max_hp > 0 else 100
+            active_companions.append({
+                "id": comp_id,
+                "name": comp.get("name", comp_id or ""),
+                "class": comp_data.get("class", ""),
+                "rank": rank,
+                "description": comp_data.get("description", ""),
+                "stat_summary": _companion_stat_summary(comp_data),
+                "hp": cur_hp,
+                "max_hp": max_hp,
+                "hp_pct": hp_pct,
+                "fallen": comp.get("fallen", False),
+            })
+
+    companions_available: list[Any] = []
+    if area_key == "tavern":
+        hired_ids = {c.get("id") for c in player.get("companions", []) if isinstance(c, dict)}
+        for comp_id, comp_data in GAME_DATA["companions"].items():
+            companions_available.append({
+                "id": comp_id,
+                "name": comp_data.get("name", comp_id),
+                "class": comp_data.get("class", ""),
+                "rank": comp_data.get("rank", "common"),
+                "description": comp_data.get("description", ""),
+                "price": comp_data.get("price", 100),
+                "can_afford": player["gold"] >= comp_data.get("price", 100),
+                "already_hired": comp_id in hired_ids,
+                "stat_summary": _companion_stat_summary(comp_data),
+            })
+
+    # events
+    today_date = _dt.date.today()
+    raw_events = GAME_DATA.get("events", [])
+    claimed_evts = set(player.get("claimed_events", []))
+    boss_kills_count = player.get("total_bosses_defeated", 0)
+    active_evts: list[Any] = []
+    upcoming_evts: list[Any] = []
+    for ev in raw_events:
+        eid = ev.get("id", "")
+        if "date" in ev:
+            s_str = e_str = ev["date"]
+        elif "start" in ev and "end" in ev:
+            s_str, e_str = ev["start"], ev["end"]
+        else:
+            continue
+        try:
+            s_date = _dt.date.fromisoformat(s_str)
+            e_date = _dt.date.fromisoformat(e_str)
+        except ValueError:
+            continue
+        if today_date > e_date:
+            continue
+        is_active_ev = s_date <= today_date <= e_date
+        days_until_ev = (s_date - today_date).days
+        is_upcoming_ev = not is_active_ev and 0 < days_until_ev <= 14
+        condition = ev.get("condition", {})
+        ctype = condition.get("type", "none")
+        required = condition.get("count") if ctype == "boss_kills" else None
+        ev_progress = min(boss_kills_count, required) if required else None
+        is_eligible_ev = (boss_kills_count >= required) if required else True
+        ev_info: dict[str, Any] = {
+            "id": eid,
+            "name": ev.get("name", ""),
+            "description": ev.get("description", ""),
+            "start": s_str,
+            "end": e_str,
+            "reward_type": ev.get("reward_type", ""),
+            "reward_item": ev.get("reward_item", ""),
+            "reward_amount": ev.get("reward_amount", 0),
+            "condition_type": ctype,
+            "required": required,
+            "progress": ev_progress,
+            "is_eligible": is_eligible_ev,
+            "is_claimed": eid in claimed_evts,
+            "days_remaining": (e_date - today_date).days + 1 if is_active_ev else None,
+            "days_until": days_until_ev if is_upcoming_ev else None,
+        }
+        if is_active_ev:
+            active_evts.append(ev_info)
+        elif is_upcoming_ev:
+            upcoming_evts.append(ev_info)
+    events_data = {"active": active_evts, "upcoming": upcoming_evts}
+
+    # dungeons
+    dungeons_data_d: dict[str, Any] = GAME_DATA.get("dungeons", {})
+    completed_dungeons_set = set(player.get("completed_dungeons", []))
+    dungeon_list = get_available_dungeons(
+        dungeons_data_d, area_key, player.get("level", 1),
+        visited_areas=visited_areas,
+        areas_data=GAME_DATA.get("areas", {}),
+    )
+    for d in dungeon_list:
+        d["completed"] = d.get("id", "") in completed_dungeons_set
+    active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}
+
+    # attr summary
+    ensure_attributes(player)
+    attr_summary = get_attribute_summary(player)
+
+    # mine data
+    mine_data = None
+    mine_pool = area.get("mine_pool", [])
+    if mine_pool:
+        player_inv = player.get("inventory", [])
+        best_pickaxe_tier = max((_PICKAXE_TIERS.get(i, 0) for i in player_inv), default=0)
+        best_pickaxe_name = next(
+            (i for i in reversed(player_inv) if _PICKAXE_TIERS.get(i, 0) == best_pickaxe_tier),
+            None,
+        )
+        mining_lvl = _get_mining_level(player)
+        mining_xp_total = player.get("mining_xp", 0)
+        cur_lvl_xp = _mining_xp_for_level(mining_lvl)
+        next_lvl_xp = _mining_xp_for_level(mining_lvl + 1)
+        xp_span = max(1, next_lvl_xp - cur_lvl_xp)
+        xp_progress = mining_xp_total - cur_lvl_xp
+        xp_pct = min(100, int(xp_progress / xp_span * 100)) if mining_lvl < 25 else 100
+        mine_items_list: list[Any] = []
+        for ore_name, req in _ORE_REQUIREMENTS.items():
+            ore_item = GAME_DATA["items"].get(ore_name, {})
+            if not isinstance(ore_item, dict):
+                continue
+            accessible = (
+                best_pickaxe_tier >= req["pickaxe_tier"] and mining_lvl >= req["mining_level"]
+            )
+            if not accessible:
+                blocked_by = (
+                    f"Needs {_PICKAXE_TIER_NAMES.get(req['pickaxe_tier'], 'better pickaxe')}"
+                    if best_pickaxe_tier < req["pickaxe_tier"]
+                    else f"Mining Lv.{req['mining_level']}"
+                )
+            else:
+                blocked_by = None
+            mine_items_list.append({
+                "name": ore_name,
+                "rarity": ore_item.get("rarity", "common"),
+                "description": ore_item.get("description", ""),
+                "price": ore_item.get("price", 5),
+                "accessible": accessible,
+                "blocked_by": blocked_by,
+            })
+        if mine_items_list:
+            mine_data = {
+                "pool": mine_items_list,
+                "mining_level": mining_lvl,
+                "mining_xp": mining_xp_total,
+                "xp_progress": xp_progress,
+                "xp_needed": xp_span,
+                "xp_pct": xp_pct,
+                "has_pickaxe": best_pickaxe_tier > 0,
+                "best_pickaxe": best_pickaxe_name,
+                "best_tier": best_pickaxe_tier,
+            }
+
+    # crafting recipes
+    raw_recipes = get_recipes(GAME_DATA.get("crafting", {}))
+    crafting_recipes: list[Any] = []
+    for recipe in raw_recipes:
+        check = check_recipe_craftable(player, recipe)
+        crafting_recipes.append({**recipe, "can_craft": check["ok"], "missing": check.get("missing", [])})
+
+    # game time and weather
+    game_time = get_game_time()
+    game_time_icon = TIME_ICONS.get(game_time, "")
+    current_weather = get_real_weather(GAME_DATA["areas"].get(area_key, {}).get("name", ""))
+    weather_def = GAME_DATA["weather"].get(current_weather, {})
+    weather_display = current_weather.replace("_", " ").title()
+    weather_bonus_exp = int(weather_def.get("bonuses", {}).get("exp_bonus", 0) * 100)
+    weather_bonus_gold = int(weather_def.get("bonuses", {}).get("gold_bonus", 0) * 100)
+
+    # available bosses
+    available_bosses: list[Any] = []
+    now_ts = _time_module.time()
+    boss_cooldowns_map = player.get("boss_cooldowns", {})
+    for boss_key in area.get("possible_bosses", []):
+        boss_data = GAME_DATA["bosses"].get(boss_key, {})
+        if not boss_data:
+            continue
+        cooldown_until = boss_cooldowns_map.get(boss_key, 0)
+        on_cooldown = now_ts < cooldown_until
+        secs_left = max(0, int(cooldown_until - now_ts))
+        available_bosses.append({
+            "key": boss_key,
+            "name": boss_data.get("name", boss_key.replace("_", " ").title()),
+            "on_cooldown": on_cooldown,
+            "cooldown_str": f"{secs_left // 3600}h {(secs_left % 3600) // 60}m" if on_cooldown else "",
+        })
+
+    # land data (only at your_land)
+    land_data = _build_land_data(player) if area_key == "your_land" else None
+
+    # diary and messages
+    diary = list(reversed(session.get("diary", [])))[:50]
+    messages = (session.get("messages") or [])[-25:]
+
+    save_player(player)
+
+    state: dict[str, Any] = {
+        "ok": True,
+        "player": _api_player_summary(player),
+        "inventory": player.get("inventory", []),
+        "inventory_items": inventory_items,
+        "equipped_details": equipped_details,
+        "messages": messages,
+        "area": {
+            "key": area_key,
+            "name": area_name,
+            "description": area.get("description", ""),
+            "connections": area.get("connections", []),
+            "can_rest": area.get("can_rest", False),
+            "rest_cost": area.get("rest_cost", 0),
+            "has_shop": bool(shop_items),
+            "has_mine": bool(mine_data),
+            "difficulty": area.get("difficulty", 1),
+            "possible_enemies": area.get("possible_enemies", []),
+            "possible_bosses": area.get("possible_bosses", []),
+        },
+        "connections": connections,
+        "shop_items": shop_items,
+        "shop_name": shop_name,
+        "mine_data": mine_data,
+        "crafting_recipes": crafting_recipes,
+        "dungeon_list": dungeon_list,
+        "active_dungeon": active_dungeon,
+        "missions": missions_out,
+        "completed_missions_count": len(completed_list),
+        "challenges": challenges,
+        "active_companions": active_companions,
+        "companions_available": companions_available,
+        "events_data": events_data,
+        "diary": diary,
+        "attr_summary": attr_summary,
+        "available_bosses": available_bosses,
+        "game_time": game_time,
+        "game_time_icon": game_time_icon,
+        "weather_display": weather_display,
+        "weather_bonus_exp": weather_bonus_exp,
+        "weather_bonus_gold": weather_bonus_gold,
+        "in_battle": in_battle,
+        "land_data": land_data,
+        "visited_areas": visited_areas,
+    }
+    if in_battle:
+        state["battle"] = _api_battle_summary()
+    return jsonify(state)
+
+
+# ── Vue beta: action API wrappers ──────────────────────────────────────────────
+
+@app.route("/api/action/craft", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_action_craft():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    data = request.get_json(force=True, silent=True) or {}
+    recipe_id = data.get("recipe_id", "")
+    result = craft_item(player, recipe_id, GAME_DATA.get("crafting", {}))
+    color = "var(--green-bright)" if result["ok"] else "var(--red)"
+    add_message(result["message"], color)
+    save_player(player)
+    _autosave()
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": result["ok"], "message": result["message"], "messages": msgs,
+                    "player": _api_player_summary(player)})
+
+
+@app.route("/api/action/auto_equip", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_action_auto_equip():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    msgs_out = auto_equip_best(player)
+    for m in msgs_out:
+        add_message(m, "var(--green-bright)")
+    if not msgs_out:
+        add_message("Nothing better to equip.", "var(--text-dim)")
+    save_player(player)
+    _autosave()
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "messages": msgs, "player": _api_player_summary(player)})
+
+
+@app.route("/api/action/quick_heal", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_action_quick_heal():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    inventory = player.get("inventory", [])
+    heal_kw = ["health", "elixir", "tears", "tonic"]
+    potions = [i for i in inventory if any(x in i.lower() for x in heal_kw) and "mana" not in i.lower()]
+    if not potions:
+        return jsonify({"ok": False, "message": "You have no healing items.", "messages": []})
+    best = max(potions, key=lambda n: 2 if any(x in n.lower() for x in ("large", "greater", "elixir", "tears")) else 1)
+    lower = best.lower()
+    heal = dice.between(50, 100) if ("elixir" in lower or "tears" in lower) \
+        else dice.between(70, 130) if ("large" in lower or "greater" in lower) \
+        else dice.between(40, 70)
+    player["hp"] = min(player["max_hp"], player["hp"] + heal)
+    player["inventory"].remove(best)
+    add_message(f"Quick Heal: used {best}, recovered {heal} HP.", "var(--green-bright)")
+    save_player(player)
+    _autosave()
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "messages": msgs, "player": _api_player_summary(player)})
+
+
+@app.route("/api/action/sort_inventory", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_action_sort_inventory():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    items_data = GAME_DATA["items"]
+    type_order = {"weapon": 0, "armor": 1, "offhand": 2, "accessory": 3, "consumable": 4, "material": 6}
+    def sort_key(name):
+        d = items_data.get(name, {})
+        if not isinstance(d, dict):
+            return (99, name)
+        return (type_order.get(d.get("type", "misc"), 10), name.lower())
+    player["inventory"] = sorted(player.get("inventory", []), key=sort_key)
+    add_message("Inventory sorted by type.", "var(--text-dim)")
+    save_player(player)
+    _autosave()
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "messages": msgs, "inventory": player["inventory"]})
+
+
+@app.route("/api/action/hire_companion", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_action_hire_companion():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    if session.get("current_area") != "tavern":
+        return jsonify({"ok": False, "message": "You must be at The Rusty Tankard to hire companions."})
+    data = request.get_json(force=True, silent=True) or {}
+    comp_id = data.get("companion_id", "")
+    comp_data = GAME_DATA["companions"].get(comp_id)
+    if not comp_data:
+        return jsonify({"ok": False, "message": "Unknown companion."})
+    companions = player.setdefault("companions", [])
+    if len(companions) >= 4:
+        return jsonify({"ok": False, "message": "Your party is full (max 4 companions)."})
+    if any(c.get("id") == comp_id for c in companions if isinstance(c, dict)):
+        return jsonify({"ok": False, "message": f"{comp_data.get('name')} is already in your party."})
+    base_price = comp_data.get("price", 100)
+    discount = min(0.50, player.get("attr_gold_discount", 0.0))
+    price = max(1, int(base_price * (1.0 - discount)))
+    if player["gold"] < price:
+        return jsonify({"ok": False, "message": f"Need {price}g to hire {comp_data.get('name')}."})
+    player["gold"] -= price
+    for stat_key in ("attack_bonus", "defense_bonus", "speed_bonus"):
+        bonus = comp_data.get(stat_key, 0)
+        if bonus:
+            stat = stat_key.replace("_bonus", "")
+            player[stat] = player.get(stat, 0) + bonus
+    for stat_key in ("hp_bonus", "mp_bonus"):
+        bonus = comp_data.get(stat_key, 0)
+        if bonus:
+            stat = stat_key.replace("_bonus", "")
+            player[stat] = player.get(stat, 0) + bonus
+            player[f"max_{stat}"] = player.get(f"max_{stat}", 0) + bonus
+    rank = comp_data.get("rank", "common")
+    comp_max_hp = _COMPANION_RANK_HP.get(rank, 400)
+    companions.append({"id": comp_id, "name": comp_data.get("name", comp_id), "hp": comp_max_hp, "max_hp": comp_max_hp})
+    add_message(f"{comp_data.get('name')} joins your party!", "var(--gold)")
+    save_player(player)
+    _autosave()
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "messages": msgs, "player": _api_player_summary(player)})
+
+
+@app.route("/api/action/dismiss_companion", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_action_dismiss_companion():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    data = request.get_json(force=True, silent=True) or {}
+    comp_id = data.get("companion_id", "")
+    companions = player.get("companions", [])
+    to_remove = next((c for c in companions if isinstance(c, dict) and c.get("id") == comp_id), None)
+    if not to_remove:
+        return jsonify({"ok": False, "message": "Companion not found in your party."})
+    comp_data = GAME_DATA["companions"].get(comp_id, {})
+    for stat_key in ("attack_bonus", "defense_bonus", "speed_bonus"):
+        bonus = comp_data.get(stat_key, 0)
+        if bonus:
+            stat = stat_key.replace("_bonus", "")
+            player[stat] = max(0, player.get(stat, 0) - bonus)
+    for stat_key in ("hp_bonus", "mp_bonus"):
+        bonus = comp_data.get(stat_key, 0)
+        if bonus:
+            stat = stat_key.replace("_bonus", "")
+            player[stat] = max(1, player.get(stat, 0) - bonus)
+            player[f"max_{stat}"] = max(1, player.get(f"max_{stat}", 1) - bonus)
+    companions.remove(to_remove)
+    player["companions"] = companions
+    add_message(f"{comp_data.get('name', comp_id)} has left your party.", "var(--text-dim)")
+    save_player(player)
+    _autosave()
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "messages": msgs, "player": _api_player_summary(player)})
+
+
+@app.route("/api/action/complete_mission", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_action_complete_mission():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    data = request.get_json(force=True, silent=True) or {}
+    mission_id = data.get("mission_id", "")
+    completed = session.get("completed_missions", [])
+    if mission_id in completed:
+        return jsonify({"ok": False, "message": "That mission is already completed."})
+    can_complete, reason = check_mission_completable(mission_id, player)
+    if not can_complete:
+        return jsonify({"ok": False, "message": f"Cannot complete mission: {reason}"})
+    mission = GAME_DATA["missions"].get(mission_id, {})
+    if not completed:
+        trigger_cutscene("mission_accept_tutorial")
+    completed.append(mission_id)
+    session["completed_missions"] = completed
+    reward = mission.get("reward", {})
+    exp = reward.get("experience", mission.get("experience_reward", 0))
+    gold = reward.get("gold", mission.get("gold_reward", 0))
+    item_rewards = reward.get("items", [])
+    player["gold"] += gold
+    leveled = gain_experience(player, exp)
+    _group_contribute(exp, gold, f"completed quest: {mission.get('name', mission_id)}")
+    _record_activity("quests")
+    for item in item_rewards:
+        player["inventory"].append(item)
+    add_message(f"Quest Complete: {mission.get('name', mission_id)}", "var(--gold)")
+    add_message(f"Reward: +{exp} EXP, +{gold} gold.", "var(--text-light)")
+    if item_rewards:
+        add_message(f"Items received: {', '.join(item_rewards)}", "var(--gold-bright)")
+    if leveled:
+        add_message(f"Level Up! You are now level {player['level']}!", "var(--gold)")
+    update_weekly_challenge(player, "mission_count", 1)
+    quest_progress = session.get("quest_progress") or {}
+    quest_progress.pop(mission_id, None)
+    session["quest_progress"] = quest_progress
+    save_player(player)
+    _autosave()
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "messages": msgs, "player": _api_player_summary(player)})
+
+
+@app.route("/api/action/claim_challenge", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_action_claim_challenge():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    data = request.get_json(force=True, silent=True) or {}
+    ch_id = data.get("challenge_id", "")
+    ch_def = next((c for c in GAME_DATA["weekly_challenges"] if c.get("id") == ch_id), None)
+    if not ch_def:
+        return jsonify({"ok": False, "message": "Unknown challenge."})
+    ch_prog = player.setdefault("weekly_challenges_progress", {})
+    prog = ch_prog.get(ch_id, {})
+    if prog.get("claimed"):
+        return jsonify({"ok": False, "message": "Challenge already claimed."})
+    count = prog.get("count", 0)
+    target = ch_def.get("target", 0)
+    if count < target:
+        return jsonify({"ok": False, "message": f"Not yet completed ({count}/{target})."})
+    exp = ch_def.get("reward_exp", 0)
+    gold = ch_def.get("reward_gold", 0)
+    player["gold"] += gold
+    leveled = gain_experience(player, exp)
+    _group_contribute(exp, gold, f"completed challenge: {ch_def.get('name', ch_id)}")
+    _record_activity("challenges")
+    ch_prog[ch_id]["claimed"] = True
+    add_message(f"Challenge Complete: {ch_def.get('name', ch_id)}!", "var(--gold)")
+    add_message(f"Reward: +{exp} EXP, +{gold} gold.", "var(--text-light)")
+    if leveled:
+        add_message(f"Level Up! You are now level {player['level']}!", "var(--gold)")
+    save_player(player)
+    _autosave()
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "messages": msgs, "player": _api_player_summary(player)})
+
+
+@app.route("/api/action/challenge_boss", methods=["POST"])
+@limiter.limit("10 per minute")
+def api_action_challenge_boss():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    if session.get("battle_enemy"):
+        return jsonify({"ok": False, "message": "You are already in battle."}), 409
+    data = request.get_json(force=True, silent=True) or {}
+    boss_key = data.get("boss_key", "")
+    area_key = session.get("current_area", "starting_village")
+    area = GAME_DATA["areas"].get(area_key, {})
+    if boss_key not in area.get("possible_bosses", []):
+        return jsonify({"ok": False, "message": "That boss is not available here."})
+    boss_data = GAME_DATA["bosses"].get(boss_key, {})
+    if not boss_data:
+        return jsonify({"ok": False, "message": "Unknown boss."})
+    now_ts = _time_module.time()
+    boss_cooldowns_m = player.get("boss_cooldowns", {})
+    cooldown_until = boss_cooldowns_m.get(boss_key, 0)
+    if now_ts < cooldown_until:
+        remaining = int(cooldown_until - now_ts)
+        h = remaining // 3600
+        m = (remaining % 3600) // 60
+        return jsonify({"ok": False, "message": f"{boss_data.get('name')} is on cooldown: {h}h {m}m."})
+    boss_cooldowns_m[boss_key] = now_ts + BOSS_CHALLENGE_COOLDOWN
+    player["boss_cooldowns"] = boss_cooldowns_m
+    enemy = {
+        "key": boss_key,
+        "name": boss_data.get("name", boss_key.replace("_", " ").title()),
+        "hp": int(boss_data.get("hp", 200)),
+        "max_hp": int(boss_data.get("hp", 200)),
+        "attack": int(boss_data.get("attack", 20)),
+        "defense": int(boss_data.get("defense", 10)),
+        "speed": boss_data.get("speed", 12),
+        "exp_reward": int(boss_data.get("experience_reward", 200)),
+        "gold_reward": int(boss_data.get("gold_reward", 100)),
+        "loot_table": boss_data.get("unique_loot", []),
+        "is_boss": True,
+        "tags": boss_data.get("tags", ["humanoid"]),
+    }
+    dialogue = get_boss_dialogue(boss_key, "start")
+    session["battle_enemy"] = enemy
+    session["battle_log"] = [f"You challenge {enemy['name']}! (HP: {enemy['hp']})"]
+    if dialogue:
+        session["battle_log"].append(f'"{dialogue}"')
+    session["battle_player_effects"] = {}
+    session["battle_enemy_effects"] = {}
+    session["battle_companions"] = _build_battle_companions(player)
+    session.modified = True
+    save_player(player)
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "in_battle": True, "messages": msgs,
+                    "battle": _api_battle_summary(), "player": _api_player_summary(player)})
+
+
+@app.route("/api/action/dungeon/enter", methods=["POST"])
+@limiter.limit("10 per minute")
+def api_action_dungeon_enter():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    data = request.get_json(force=True, silent=True) or {}
+    dungeon_id = data.get("dungeon_id", "")
+    dungeons_data_d: dict[str, Any] = GAME_DATA.get("dungeons", {})
+    all_dungeons = dungeons_data_d.get("dungeons", [])
+    dungeon = next((d for d in all_dungeons if d.get("id") == dungeon_id), None)
+    if not dungeon:
+        return jsonify({"ok": False, "message": "Unknown dungeon."})
+    allowed_areas = dungeon.get("allowed_areas", [])
+    current_area_key = session.get("current_area", "starting_village")
+    visited = session.get("visited_areas", [])
+    if not any(a in visited for a in allowed_areas):
+        return jsonify({"ok": False, "message": "You haven't discovered this dungeon yet."})
+    if current_area_key not in allowed_areas:
+        area_info = GAME_DATA.get("areas", {}).get(allowed_areas[0], {})
+        area_nm = area_info.get("name") or allowed_areas[0].replace("_", " ").title()
+        return jsonify({"ok": False, "message": f"You must travel to {area_nm} to enter this dungeon."})
+    difficulty = dungeon.get("difficulty", [1, 3])
+    min_level = max(1, difficulty[0] * 2)
+    if player.get("level", 1) < min_level:
+        return jsonify({"ok": False, "message": f"You need level {min_level} to enter this dungeon."})
+    rooms = generate_dungeon_rooms(dungeon, dungeons_data_d)
+    session["active_dungeon"] = {
+        "dungeon": dungeon, "rooms": rooms, "room_index": 0,
+        "current_challenge": None, "challenge_answered": False,
+    }
+    session.modified = True
+    add_message(f"You enter {dungeon.get('name', 'the dungeon')}! Steel yourself.", "var(--gold)")
+    save_player(player)
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "redirect": "/dungeon/room", "messages": msgs})
+
+
+@app.route("/api/action/dungeon/abandon", methods=["POST"])
+@limiter.limit("10 per minute")
+def api_action_dungeon_abandon():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    session.pop("active_dungeon", None)
+    add_message("You retreat from the dungeon.", "var(--text-dim)")
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "messages": msgs})
+
+
 # ── Jinja2 filter: abbreviate large numbers ──────────────────────────────────
 
 @app.template_filter("fmt_num")
