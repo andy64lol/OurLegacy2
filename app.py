@@ -7962,6 +7962,8 @@ def wiki_page():
         return render_template("wiki_disabled.html"), 403
     raw_items = GAME_DATA.get("items", {})
     wiki_items = {k: v for k, v in raw_items.items() if isinstance(v, dict)}
+    raw_craft = GAME_DATA.get("crafting", {})
+    craft_recipes = {k: v for k, v in raw_craft.get("recipes", {}).items() if isinstance(v, dict)}
     return render_template(
         "wiki.html",
         enemies=GAME_DATA.get("enemies", {}),
@@ -7970,6 +7972,10 @@ def wiki_page():
         classes=GAME_DATA.get("classes", {}),
         races=GAME_DATA.get("races", {}),
         spells=GAME_DATA.get("spells", {}),
+        craft_recipes=craft_recipes,
+        areas=GAME_DATA.get("areas", {}),
+        missions=GAME_DATA.get("missions", {}),
+        companions=GAME_DATA.get("companions", {}),
     )
 
 

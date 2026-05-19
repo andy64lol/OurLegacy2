@@ -33,7 +33,6 @@
         a { color: var(--gold); text-decoration: none; }
         a:hover { text-decoration: underline; }
 
-        /* Header */
         .wiki-header {
             background: linear-gradient(180deg, #1a0d30, #0d0820);
             border-bottom: 2px solid var(--border);
@@ -71,7 +70,6 @@
         }
         .wiki-back:hover { background: rgba(200,160,80,0.22); }
 
-        /* Nav tabs */
         .wiki-nav {
             background: var(--bg2);
             border-bottom: 1px solid var(--border);
@@ -100,7 +98,6 @@
         .wiki-tab:hover { color: var(--text); }
         .wiki-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
 
-        /* Layout */
         .wiki-body {
             max-width: 1200px;
             margin: 0 auto;
@@ -130,7 +127,6 @@
         }
         .section-note strong { color: var(--gold-dim); }
 
-        /* Grid layouts */
         .card-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -141,8 +137,12 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 14px;
         }
+        .card-grid-3col {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
 
-        /* Card */
         .card {
             background: var(--panel);
             border: 1px solid var(--border);
@@ -193,7 +193,6 @@
         .card-body p { margin-bottom: 5px; }
         .card-body p:last-child { margin-bottom: 0; }
 
-        /* Stat row */
         .stat-row {
             display: flex;
             justify-content: space-between;
@@ -206,7 +205,6 @@
         .stat-label { color: var(--text-dim); }
         .stat-val { color: var(--text); font-weight: 600; }
 
-        /* Rarity badge */
         .rarity {
             display: inline-block;
             padding: 1px 7px;
@@ -223,7 +221,6 @@
         .rarity-legendary { background: rgba(200,140,40,0.15); color: var(--gold); border: 1px solid var(--gold-dim); }
         .rarity-boss { background: rgba(200,40,40,0.15); color: #e07070; border: 1px solid var(--red); }
 
-        /* Tag */
         .tag {
             display: inline-block;
             padding: 1px 6px;
@@ -235,18 +232,15 @@
             margin: 1px 2px;
         }
 
-        /* Items image grid */
         .items-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
             gap: 12px;
         }
 
-        /* Loot table */
         .loot-list { font-size: 11px; color: var(--text-dim); }
         .loot-list span { margin-right: 6px; }
 
-        /* Spells list */
         .spell-card {
             background: var(--panel);
             border: 1px solid var(--border);
@@ -263,11 +257,47 @@
             flex-shrink: 0;
         }
 
-        /* Responsive */
+        /* crafting recipe card */
+        .recipe-materials {
+            margin-top: 8px;
+            font-size: 11px;
+        }
+        .recipe-mat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .recipe-mat-row:last-child { border-bottom: none; }
+        .recipe-output {
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--green);
+        }
+
+        /* area connections pill row */
+        .conn-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+        .conn-pill {
+            font-size: 10px;
+            padding: 1px 7px;
+            background: rgba(80,120,200,0.12);
+            border: 1px solid rgba(80,120,200,0.3);
+            border-radius: 10px;
+            color: #80a0d8;
+        }
+
+        /* mission reward line */
+        .reward-row {
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--gold-dim);
+        }
+
         @media (max-width: 600px) {
             .wiki-body { padding: 16px 12px 40px; }
             .card-grid { grid-template-columns: 1fr 1fr; }
             .items-grid { grid-template-columns: 1fr 1fr; }
+            .card-grid-3col { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -288,23 +318,26 @@
     <button class="wiki-tab" onclick="showSection('classes')">Classes</button>
     <button class="wiki-tab" onclick="showSection('races')">Races</button>
     <button class="wiki-tab" onclick="showSection('spells')">Spells</button>
+    <button class="wiki-tab" onclick="showSection('crafting')">Crafting</button>
+    <button class="wiki-tab" onclick="showSection('areas')">Areas</button>
+    <button class="wiki-tab" onclick="showSection('missions')">Missions</button>
+    <button class="wiki-tab" onclick="showSection('companions')">Companions</button>
 </nav>
 
 <div class="wiki-body">
 
-    <!-- ENEMIES -->
+    <!-- enemies -->
     <section id="sec-enemies" class="section active">
         <div class="section-title">Enemies</div>
         <div class="section-note">
-            <strong>Note on textures:</strong> Enemy textures are not yet added to the game.
-            Glyphs shown below use the <code>fight</code> fallback icon. Custom per-enemy art is planned for a future update.
+            enemy textures are not yet added — glyphs use the fight fallback icon. custom art is planned.
         </div>
         <div class="card-grid">
             {% for key, e in enemies.items() %}
             <div class="card">
                 <div class="card-head">
                     <img class="card-thumb" src="/game_assets/glyphs/{{ key }}.webp" alt="{{ e.name }}"
-                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>No Texture</div>'">
+                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no texture</div>'">
                     <div>
                         <div class="card-name">{{ e.name }}</div>
                         <div class="card-sub">
@@ -320,7 +353,7 @@
                     <div class="stat-row"><span class="stat-label">EXP</span><span class="stat-val">{{ e.experience_reward }}</span></div>
                     <div class="stat-row"><span class="stat-label">Gold</span><span class="stat-val">{{ e.gold_reward }}g</span></div>
                     {% if e.get('loot_table') %}
-                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">Drops</div>
+                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">drops</div>
                     <div class="loot-list">
                         {% for item in e.loot_table %}<span>&#9654; {{ item }}</span>{% endfor %}
                     </div>
@@ -331,23 +364,22 @@
         </div>
     </section>
 
-    <!-- BOSSES -->
+    <!-- bosses -->
     <section id="sec-bosses" class="section">
         <div class="section-title">Bosses</div>
         <div class="section-note">
-            <strong>Note on textures:</strong> Boss textures are not yet added to the game.
-            Each boss will receive unique artwork in a future content update.
+            boss textures not yet added — each boss will receive unique artwork in a future update.
         </div>
         <div class="card-grid-wide">
             {% for key, b in bosses.items() %}
             <div class="card">
                 <div class="card-head">
                     <img class="card-thumb" src="/game_assets/glyphs/{{ key }}.webp" alt="{{ b.name }}"
-                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>No Texture</div>'">
+                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no texture</div>'">
                     <div>
                         <div class="card-name" style="color:var(--red);">{{ b.name }} &#9760;</div>
                         <div class="card-sub">
-                            <span class="rarity rarity-boss">Boss</span>
+                            <span class="rarity rarity-boss">boss</span>
                             {% for t in b.get('tags', []) %}<span class="tag">{{ t }}</span>{% endfor %}
                         </div>
                     </div>
@@ -363,10 +395,10 @@
                     <div class="stat-row"><span class="stat-label">EXP</span><span class="stat-val">{{ b.experience_reward }}</span></div>
                     <div class="stat-row"><span class="stat-label">Gold</span><span class="stat-val">{{ b.gold_reward }}g</span></div>
                     {% if b.get('phases') %}
-                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">Phases: {{ b.phases | length }}</div>
+                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">phases: {{ b.phases | length }}</div>
                     {% endif %}
                     {% if b.get('special_abilities') %}
-                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">Abilities</div>
+                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">abilities</div>
                     {% for ab in b.special_abilities %}
                     <div style="font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
                         <strong style="color:var(--text);">{{ ab.name }}</strong>
@@ -375,7 +407,7 @@
                     {% endfor %}
                     {% endif %}
                     {% if b.get('unique_loot') %}
-                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">Unique Loot</div>
+                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">unique loot</div>
                     <div class="loot-list">
                         {% for item in b.unique_loot %}<span>&#9654; {{ item }}</span>{% endfor %}
                     </div>
@@ -386,12 +418,11 @@
         </div>
     </section>
 
-    <!-- ITEMS -->
+    <!-- items -->
     <section id="sec-items" class="section">
         <div class="section-title">Items</div>
         <div class="section-note">
-            <strong>Note on textures:</strong> Some items do not yet have textures assigned. These are shown with a placeholder below.
-            Textures for remaining items are planned for a future update.
+            some items do not yet have textures — shown with placeholder. more textures planned.
         </div>
         <div class="items-grid">
             {% for name, item in items.items() %}
@@ -399,9 +430,9 @@
                 <div class="card-head">
                     {% if item.get('texture') %}
                     <img class="card-thumb" src="/game_assets/{{ item.texture }}" alt="{{ name }}"
-                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>No Texture</div>'">
+                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no texture</div>'">
                     {% else %}
-                    <div class="card-thumb-placeholder">No<br>Texture</div>
+                    <div class="card-thumb-placeholder">no<br>texture</div>
                     {% endif %}
                     <div>
                         <div class="card-name" style="font-size:12px;">{{ name }}</div>
@@ -414,12 +445,12 @@
                     {% if item.get('description') %}
                     <p style="margin-bottom:6px;">{{ item.description }}</p>
                     {% endif %}
-                    {% if item.get('type') %}<div class="stat-row"><span class="stat-label">Type</span><span class="stat-val">{{ item.type }}</span></div>{% endif %}
-                    {% if item.get('price') %}<div class="stat-row"><span class="stat-label">Price</span><span class="stat-val">{{ item.price }}g</span></div>{% endif %}
-                    {% if item.get('value') %}<div class="stat-row"><span class="stat-label">Value</span><span class="stat-val">{{ item.value }}</span></div>{% endif %}
-                    {% if item.get('attack') %}<div class="stat-row"><span class="stat-label">ATK</span><span class="stat-val">+{{ item.attack }}</span></div>{% endif %}
-                    {% if item.get('defense') %}<div class="stat-row"><span class="stat-label">DEF</span><span class="stat-val">+{{ item.defense }}</span></div>{% endif %}
-                    {% if item.get('speed') %}<div class="stat-row"><span class="stat-label">SPD</span><span class="stat-val">{{ item.speed }}</span></div>{% endif %}
+                    {% if item.get('type') %}<div class="stat-row"><span class="stat-label">type</span><span class="stat-val">{{ item.type }}</span></div>{% endif %}
+                    {% if item.get('price') %}<div class="stat-row"><span class="stat-label">price</span><span class="stat-val">{{ item.price }}g</span></div>{% endif %}
+                    {% if item.get('value') %}<div class="stat-row"><span class="stat-label">value</span><span class="stat-val">{{ item.value }}</span></div>{% endif %}
+                    {% if item.get('attack') %}<div class="stat-row"><span class="stat-label">atk</span><span class="stat-val">+{{ item.attack }}</span></div>{% endif %}
+                    {% if item.get('defense') %}<div class="stat-row"><span class="stat-label">def</span><span class="stat-val">+{{ item.defense }}</span></div>{% endif %}
+                    {% if item.get('speed') %}<div class="stat-row"><span class="stat-label">spd</span><span class="stat-val">{{ item.speed }}</span></div>{% endif %}
                     {% if item.get('tags') %}
                     <div style="margin-top:6px;">{% for t in item.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>
                     {% endif %}
@@ -429,7 +460,7 @@
         </div>
     </section>
 
-    <!-- CLASSES -->
+    <!-- classes -->
     <section id="sec-classes" class="section">
         <div class="section-title">Classes</div>
         <div class="card-grid">
@@ -438,7 +469,7 @@
             <div class="card">
                 <div class="card-head">
                     <img class="card-thumb" src="/game_assets/glyphs/{{ _cglyph.get(name, name.lower()) }}.webp" alt="{{ name }}"
-                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>No Texture</div>'">
+                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no texture</div>'">
                     <div>
                         <div class="card-name">{{ name }}</div>
                     </div>
@@ -454,10 +485,10 @@
                     {% endfor %}
                     {% endif %}
                     {% if cls.get('starting_gold') %}
-                    <div class="stat-row"><span class="stat-label">Start Gold</span><span class="stat-val">{{ cls.starting_gold }}g</span></div>
+                    <div class="stat-row"><span class="stat-label">start gold</span><span class="stat-val">{{ cls.starting_gold }}g</span></div>
                     {% endif %}
                     {% if cls.get('starting_items') %}
-                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">Starting Items</div>
+                    <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">starting items</div>
                     <div class="loot-list">
                         {% for item in cls.starting_items %}<span>&#9654; {{ item }}</span>{% endfor %}
                     </div>
@@ -468,18 +499,17 @@
         </div>
     </section>
 
-    <!-- RACES -->
+    <!-- races -->
     <section id="sec-races" class="section">
         <div class="section-title">Races</div>
         <div class="section-note">
-            <strong>Note on textures:</strong> Race portrait textures are not yet added.
-            Each race will receive unique artwork in a future update.
+            race portrait textures not yet added — each race will receive unique artwork in a future update.
         </div>
         <div class="card-grid">
             {% for name, race in races.items() %}
             <div class="card">
                 <div class="card-head">
-                    <div class="card-thumb-placeholder">No<br>Texture</div>
+                    <div class="card-thumb-placeholder">no<br>texture</div>
                     <div>
                         <div class="card-name">{{ name }}</div>
                     </div>
@@ -487,7 +517,7 @@
                 <div class="card-body">
                     {% if race.get('description') %}<p style="font-style:italic;margin-bottom:8px;">{{ race.description }}</p>{% endif %}
                     {% if race.get('stat_modifiers') %}
-                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Stat Modifiers</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">stat modifiers</div>
                     {% for stat, val in race.stat_modifiers.items() %}
                     <div class="stat-row">
                         <span class="stat-label">{{ stat.upper() }}</span>
@@ -502,7 +532,7 @@
         </div>
     </section>
 
-    <!-- SPELLS -->
+    <!-- spells -->
     <section id="sec-spells" class="section">
         <div class="section-title">Spells</div>
         <div style="display:flex;flex-direction:column;gap:10px;">
@@ -516,13 +546,188 @@
                     </div>
                     {% if spell.get('description') %}<div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:6px;">{{ spell.description }}</div>{% endif %}
                     <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;">
-                        <span style="color:var(--text-dim);">MP Cost: <strong style="color:var(--text);">{{ spell.mp_cost }}</strong></span>
-                        <span style="color:var(--text-dim);">Power: <strong style="color:var(--text);">{{ spell.power }}</strong></span>
+                        <span style="color:var(--text-dim);">mp cost: <strong style="color:var(--text);">{{ spell.mp_cost }}</strong></span>
+                        <span style="color:var(--text-dim);">power: <strong style="color:var(--text);">{{ spell.power }}</strong></span>
                     </div>
                     {% if spell.get('allowed_weapons') %}
                     <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">
-                        Usable with: {{ spell.allowed_weapons | join(', ') }}
+                        weapons: {% for w in spell.allowed_weapons %}<span class="tag">{{ w }}</span>{% endfor %}
                     </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- crafting -->
+    <section id="sec-crafting" class="section">
+        <div class="section-title">Crafting Recipes</div>
+        <div class="card-grid-3col">
+            {% for key, recipe in craft_recipes.items() %}
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-thumb-placeholder" style="font-size:16px;">&#9874;</div>
+                    <div>
+                        <div class="card-name">{{ recipe.name }}</div>
+                        <div class="card-sub">
+                            {% if recipe.get('category') %}<span class="tag">{{ recipe.category }}</span>{% endif %}
+                            {% if recipe.get('rarity') %}<span class="rarity rarity-{{ recipe.rarity }}">{{ recipe.rarity }}</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recipe.get('description') %}<p style="margin-bottom:6px;font-style:italic;">{{ recipe.description }}</p>{% endif %}
+                    {% if recipe.get('skill_requirement') %}
+                    <div class="stat-row"><span class="stat-label">skill req</span><span class="stat-val">{{ recipe.skill_requirement }}</span></div>
+                    {% endif %}
+                    {% if recipe.get('craft_time') %}
+                    <div class="stat-row"><span class="stat-label">craft time</span><span class="stat-val">{{ recipe.craft_time }}t</span></div>
+                    {% endif %}
+                    {% if recipe.get('materials') %}
+                    <div class="recipe-materials">
+                        <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px;">materials</div>
+                        {% for mat, qty in recipe.materials.items() %}
+                        <div class="recipe-mat-row">
+                            <span style="color:var(--text-dim);">{{ mat }}</span>
+                            <span style="color:var(--text);">×{{ qty }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if recipe.get('output') %}
+                    <div class="recipe-output">
+                        output:
+                        {% for out, qty in recipe.output.items() %}
+                        <strong>{{ out }}</strong>{% if qty > 1 %} ×{{ qty }}{% endif %}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- areas -->
+    <section id="sec-areas" class="section">
+        <div class="section-title">World Areas</div>
+        <div class="card-grid-wide">
+            {% for key, area in areas.items() %}
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-thumb-placeholder" style="font-size:16px;">&#9760;</div>
+                    <div>
+                        <div class="card-name">{{ area.name }}</div>
+                        <div class="card-sub">
+                            {% if area.get('difficulty') %}<span class="tag">diff {{ area.difficulty }}</span>{% endif %}
+                            {% if area.get('can_rest') %}<span class="tag">rest</span>{% endif %}
+                            {% if area.get('mine_pool') %}<span class="tag">mine</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if area.get('description') %}<p style="font-style:italic;margin-bottom:6px;">{{ area.description }}</p>{% endif %}
+                    {% if area.get('rest_cost') %}
+                    <div class="stat-row"><span class="stat-label">rest cost</span><span class="stat-val">{{ area.rest_cost }}g</span></div>
+                    {% endif %}
+                    {% if area.get('possible_enemies') %}
+                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">enemies</div>
+                    <div class="loot-list">{% for e in area.possible_enemies %}<span>{{ e }}</span>{% endfor %}</div>
+                    {% endif %}
+                    {% if area.get('possible_bosses') %}
+                    <div style="margin-top:4px;font-size:11px;color:var(--red);">bosses</div>
+                    <div class="loot-list">{% for b in area.possible_bosses %}<span>{{ b }}</span>{% endfor %}</div>
+                    {% endif %}
+                    {% if area.get('connections') %}
+                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">connects to</div>
+                    <div class="conn-pills">
+                        {% for conn in area.connections %}<span class="conn-pill">{{ conn.replace('_',' ') }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- missions -->
+    <section id="sec-missions" class="section">
+        <div class="section-title">Missions &amp; Quests</div>
+        <div class="card-grid-3col">
+            {% for key, mission in missions.items() %}
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-thumb-placeholder" style="font-size:16px;">&#9830;</div>
+                    <div>
+                        <div class="card-name">{{ mission.name }}</div>
+                        <div class="card-sub">
+                            {% if mission.get('type') %}<span class="tag">{{ mission.type }}</span>{% endif %}
+                            {% if mission.get('area') %}<span class="tag">{{ mission.area.replace('_',' ') }}</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if mission.get('description') %}<p style="font-style:italic;margin-bottom:6px;">{{ mission.description }}</p>{% endif %}
+                    {% if mission.get('target') %}
+                    <div class="stat-row">
+                        <span class="stat-label">target</span>
+                        <span class="stat-val">{{ mission.target }} &times;{{ mission.get('target_count', 1) }}</span>
+                    </div>
+                    {% endif %}
+                    {% if mission.get('unlock_level') %}
+                    <div class="stat-row"><span class="stat-label">unlock</span><span class="stat-val">lv {{ mission.unlock_level }}</span></div>
+                    {% endif %}
+                    {% if mission.get('reward') %}
+                    {% set r = mission.reward %}
+                    <div class="reward-row">
+                        reward:
+                        {% if r.get('experience') %} {{ r.experience }} exp{% endif %}
+                        {% if r.get('gold') %} &bull; {{ r.gold }}g{% endif %}
+                        {% if r.get('items') %} &bull; {{ r.items | join(', ') }}{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- companions -->
+    <section id="sec-companions" class="section">
+        <div class="section-title">Companions</div>
+        <div class="card-grid-3col">
+            {% for key, comp in companions.items() %}
+            {% set _cglyph = {'Warrior':'warrior','Mage':'mage','Rogue':'rouge','Hunter':'hunter','Bard':'bard','Paladin':'paladin','Druid':'druid','Priest':'priest'} %}
+            <div class="card">
+                <div class="card-head">
+                    <img class="card-thumb"
+                         src="/game_assets/glyphs/{{ _cglyph.get(comp.get('class',''), comp.get('class','').lower()) }}.webp"
+                         alt="{{ comp.name }}"
+                         onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no texture</div>'">
+                    <div>
+                        <div class="card-name">{{ comp.name }}</div>
+                        <div class="card-sub">
+                            {% if comp.get('class') %}<span class="tag">{{ comp['class'] }}</span>{% endif %}
+                            {% if comp.get('rank') %}<span class="rarity rarity-{{ comp.rank }}">{{ comp.rank }}</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if comp.get('description') %}<p style="font-style:italic;margin-bottom:6px;">{{ comp.description }}</p>{% endif %}
+                    {% if comp.get('price') %}<div class="stat-row"><span class="stat-label">price</span><span class="stat-val">{{ comp.price }}g</span></div>{% endif %}
+                    {% if comp.get('attack_bonus') %}<div class="stat-row"><span class="stat-label">atk bonus</span><span class="stat-val">+{{ comp.attack_bonus }}</span></div>{% endif %}
+                    {% if comp.get('defense_bonus') %}<div class="stat-row"><span class="stat-label">def bonus</span><span class="stat-val">+{{ comp.defense_bonus }}</span></div>{% endif %}
+                    {% if comp.get('mp_bonus') %}<div class="stat-row"><span class="stat-label">mp bonus</span><span class="stat-val">+{{ comp.mp_bonus }}</span></div>{% endif %}
+                    {% if comp.get('action_chance') %}<div class="stat-row"><span class="stat-label">action chance</span><span class="stat-val">{{ (comp.action_chance * 100) | int }}%</span></div>{% endif %}
+                    {% if comp.get('abilities') %}
+                    <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">abilities</div>
+                    {% for ab in comp.abilities %}
+                    <div style="font-size:11px;padding:2px 0;">
+                        <span class="tag">{{ ab.name }}</span>
+                        {% if ab.get('chance') %}<span style="color:var(--text-muted);">{{ ab.chance }}%</span>{% endif %}
+                    </div>
+                    {% endfor %}
                     {% endif %}
                 </div>
             </div>
