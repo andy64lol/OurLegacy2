@@ -298,7 +298,7 @@
                 </div>
 
                 <!-- play tab -->
-                <div class="tab-content vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'play' }">
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'play' }">
 
                     <div v-if="area" class="area-header">
                         <div>
@@ -351,7 +351,7 @@
                 </div>
 
                 <!-- battle tab -->
-                <div class="tab-content vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'battle' }">
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'battle' }">
                     <div v-if="inBattle && battle" class="battle-panel-vue">
                         <div class="battle-enemy-header">
                             <div>
@@ -395,7 +395,7 @@
                 </div>
 
                 <!-- inventory tab -->
-                <div class="tab-content vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'inventory' }">
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'inventory' }">
                     <div v-if="inventoryCounts.length" class="inv-grid">
                         <div v-for="item in inventoryCounts" :key="item.name" class="inv-row">
                             <span class="inv-row-name">[[ item.name ]]</span>
@@ -414,7 +414,7 @@
                 </div>
 
                 <!-- character tab -->
-                <div class="tab-content vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'character' }">
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'character' }">
                     <div v-if="player">
                         <div class="panel" style="margin-bottom:12px;">
                             <div class="panel-title">[[ player.name ]]</div>
@@ -484,7 +484,7 @@
                 </div>
 
                 <!-- travel tab -->
-                <div class="tab-content vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'travel' }">
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'travel' }">
                     <div v-if="area && area.connections && area.connections.length">
                         <div class="panel-title" style="margin-bottom:10px;">Travel from [[ area.name ]]</div>
                         <div class="travel-btn-grid">

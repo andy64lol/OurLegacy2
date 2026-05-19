@@ -684,7 +684,7 @@
                         reward:
                         {% if r.get('experience') %} {{ r.experience }} exp{% endif %}
                         {% if r.get('gold') %} &bull; {{ r.gold }}g{% endif %}
-                        {% if r.get('items') %} &bull; {{ r.items | join(', ') }}{% endif %}
+                        {% if r.get('items') %} &bull; {{ r['items'] | join(', ') }}{% endif %}
                     </div>
                     {% endif %}
                 </div>
