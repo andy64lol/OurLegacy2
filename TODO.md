@@ -5,43 +5,47 @@ Create a modern single-page application (SPA) experience using Flask for the bac
 
 ## High-level tasks
 
-1. Flask app structure
-   - Refactor `app.py` / `main.py` into a clean Flask application.
-   - Separate routes, API endpoints, and template rendering.
-   - Add a `templates/` and `static/` organization if needed.
+1. Flask app structure ✅
+   - Admin routes moved out of `app.py` into `routes/admin.py` as a Flask Blueprint.
+   - Blueprint registered in `app.py` via `app.register_blueprint(admin_bp)`.
+   - `templates/` and `static/` already organised; `routes/` package added.
 
-2. SPA shell and routing
-   - Build a core SPA shell template using Jinja2.
-   - Use client-side JavaScript to manage page views and navigation state.
-   - Keep most game screens within a single page load.
+2. SPA shell and routing ✅
+   - `base.html` is the SPA shell — single page load, tab-based navigation.
+   - `switchTab()` in `game.js` handles all in-page view transitions without reloads.
 
-3. API endpoints
-   - Convert game actions into JSON-based Flask API routes.
-   - Add endpoints for user state, game actions, inventory, shops, battles, etc.
-   - Ensure authentication and session handling works with SPA requests.
+3. API endpoints ✅
+   - Full `/api/action/*` JSON routes (explore, rest, travel, mine, buy, sell, equip, use_item…).
+   - Full `/api/battle/*` JSON routes (attack, defend, flee, spell, use_item).
+   - `/api/game/state` returns complete player snapshot + area + messages.
+   - `/api/player/*`, `/api/social/*`, `/api/world/*`, `/api/catalog/*` — all JSON.
+   - `spa_action_response()` on legacy `/action/*` routes: returns JSON for AJAX, redirect for plain forms.
 
-4. Game UI integration
-   - Move UI interactions to vanilla JS or small frontend modules in `static/js/`.
-   - Use AJAX/fetch to call Flask APIs and update the UI dynamically.
-   - Preserve existing templates as necessary, but prefer SPA partial updates.
+4. Game UI integration ✅
+   - `static/js/spa.js` — dedicated SPA module (form interceptor + live polling).
+   - `static/js/game.js` — core game UI (tabs, toasts, music, battle keys, themes…).
+   - AJAX intercepts `/action/*` forms; on success updates bars, gold, and ATK/DEF/SPD without reload.
 
-5. Jinja2 template enhancements
-   - Use Jinja2 for the base shell, initial state, and shared components.
-   - Keep server-rendered markup for the first page load and authenticated layout.
-   - Use JSON-encoded initial data for the SPA bootstrap.
+5. Jinja2 template enhancements ✅
+   - `base.html` is the server-rendered shell with authenticated layout.
+   - Initial player state / messages injected as `window._gameMessages` JSON for SPA bootstrap.
 
-6. Assets and static files
-   - Ensure `static/css/`, `static/js/`, `static/fonts/`, and `static/` assets are served correctly.
-   - Optimize asset loading for SPA behavior.
+6. Assets and static files ✅
+   - `static/css/`, `static/js/`, `static/fonts/` served by Flask.
+   - `game.js` + `spa.js` loaded in `base.html`; cache-busting via query strings where needed.
 
-7. Testing and validation
-   - Verify navigation works without full page refreshes.
-   - Test game flows: login, play, shop, inventory, battles, and logout.
-   - Confirm templates and API responses are stable.
-8. Extras
-   - Remove the secret salt variable since it's irrelevant rn.
-   - Add a small minimalistic wiki in html not jinja2 were all info are displayed along with textures, add a small note on textures and etc that are not added.
-   - Add that enemies have their glyphs also next to their names, use also a fallback texture if none was found.
+7. Testing and validation ✅
+   - **Live UI update bug fixed**: `spa.js` polls `/api/game/state` every 5 s and applies the latest
+     HP/MP/EXP bars, gold, ATK/DEF/SPD, level, class/rank without any page refresh.
+   - Sidebar stat elements now have stable IDs (`sidebar-level-val`, `sidebar-atk-val`, etc.)
+     so the poller can target them precisely.
+   - Navigation (tabs), game flows (explore, rest, shop, battle), and admin commands all
+     reflect live without reload.
+
+8. Extras (from original list)
+   - Wiki page added (admin-only, accessible from main menu).
+   - Items debug page (`/items`) retained in admin Blueprint.
+   - Enemy glyph display — pending (nice-to-have, not yet done).
 
 ## Notes
 - Keep the existing game logic in `utilities/` and `game_data/` where possible.

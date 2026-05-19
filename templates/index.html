@@ -764,10 +764,10 @@
                     src="/game_assets/glyphs/{{ _cglyph.get(player['class'], 'warrior') }}.webp"
                     alt="{{ player['class'] }}" title="{{ player['class'] }}">{{ player.name }}</div>
             <div class="panel-body">
-                <div class="char-class">{{ player['class'] }} &mdash; {{ player.rank }}</div>
-                <div class="char-level"><img class="type-glyph" src="/game_assets/glyphs/level.gif" alt="level"> Level
-                    {{ player.level }}</div>
-                <div style="font-size:12px;color:var(--text-dim);margin-top:2px;margin-bottom:4px;">{{
+                <div class="char-class" id="sidebar-class-rank">{{ player['class'] }} &mdash; {{ player.rank }}</div>
+                <div class="char-level" id="sidebar-level"><img class="type-glyph" src="/game_assets/glyphs/level.gif" alt="level"> Level
+                    <span id="sidebar-level-val">{{ player.level }}</span></div>
+                <div id="sidebar-race" style="font-size:12px;color:var(--text-dim);margin-top:2px;margin-bottom:4px;">{{
                     player.get('race', 'Unknown') }}</div>
 
                 <div class="bar-group">
@@ -800,9 +800,9 @@
                     <span class="gold-amount">{{ player.gold }}</span></div>
 
                 <div class="stat-mini-grid">
-                    <div class="stat-mini"><span>ATK</span><strong>{{ player.attack }}</strong></div>
-                    <div class="stat-mini"><span>DEF</span><strong>{{ player.defense }}</strong></div>
-                    <div class="stat-mini"><span>SPD</span><strong>{{ player.speed }}</strong></div>
+                    <div class="stat-mini"><span>ATK</span><strong id="sidebar-atk-val">{{ player.attack }}</strong></div>
+                    <div class="stat-mini"><span>DEF</span><strong id="sidebar-def-val">{{ player.defense }}</strong></div>
+                    <div class="stat-mini"><span>SPD</span><strong id="sidebar-spd-val">{{ player.speed }}</strong></div>
                 </div>
 
                 {% if player.pet %}
