@@ -5757,34 +5757,42 @@ body.page-fade-out {
 .creator {
     color: var(--gold);
 }
-html[data-bg="1"] body .main-content,
-html[data-bg="1"] body .welcome-screen {
+html[data-bg="1"] body .main-content {
     background-image: url('/game_assets/backgrounds/1.webp');
     background-size: cover;
     background-position: center top;
     background-attachment: local;
 }
+html[data-bg="1"] body .welcome-screen {
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/1.webp') center/cover no-repeat;
+}
 
-html[data-bg="2"] body .main-content,
-html[data-bg="2"] body .welcome-screen {
+html[data-bg="2"] body .main-content {
     background-image: url('/game_assets/backgrounds/2.webp');
     background-size: cover;
     background-position: center top;
     background-attachment: local;
 }
+html[data-bg="2"] body .welcome-screen {
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/2.webp') center/cover no-repeat;
+}
 
-html[data-bg="3"] body .main-content,
-html[data-bg="3"] body .welcome-screen {
+html[data-bg="3"] body .main-content {
     background-image: url('/game_assets/backgrounds/3.webp');
     background-size: cover;
     background-position: center top;
     background-attachment: local;
 }
+html[data-bg="3"] body .welcome-screen {
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/3.webp') center/cover no-repeat;
+}
 
-html[data-bg="4"] body .main-content,
-html[data-bg="4"] body .welcome-screen {
+html[data-bg="4"] body .main-content {
     background-image: url('/game_assets/backgrounds/4.webp');
     background-size: cover;
     background-position: center top;
     background-attachment: local;
+}
+html[data-bg="4"] body .welcome-screen {
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.75) 0%, rgba(var(--bg-tint-deep-rgb), 0.88) 100%), url('/game_assets/backgrounds/4.webp') center/cover no-repeat;
 }
