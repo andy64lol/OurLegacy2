@@ -17,6 +17,47 @@
         html, body { height: 100%; margin: 0; }
         [v-cloak] { display: none !important; }
 
+        /* ── Toast ─────────────────────────────────────── */
+        .vue-toast-wrap {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            pointer-events: none;
+            max-width: 360px;
+        }
+        .vue-toast {
+            background: rgba(8,5,2,0.97);
+            border: 1px solid rgba(200,165,90,0.45);
+            border-radius: 6px;
+            padding: 10px 16px;
+            font-size: 13px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            animation: vt-in 0.18s ease;
+        }
+        @keyframes vt-in {
+            from { opacity:0; transform: translateY(-10px) scale(0.97); }
+            to   { opacity:1; transform: translateY(0) scale(1); }
+        }
+
+        /* ── Tab panels ─────────────────────────────────── */
+        .vtab-panel { display: none; padding: 14px 2px; }
+        .vtab-panel.vtab-panel-active { display: block; }
+
+        .tab-btn.vtab-battle {
+            color: var(--red) !important;
+            animation: pulse-tab 1.2s ease infinite;
+        }
+        @keyframes pulse-tab {
+            0%,100% { opacity:1; }
+            50%      { opacity:0.5; }
+        }
+
+        /* ── Battle badge ────────────────────────────────── */
         .beta-badge {
             display: inline-block;
             background: linear-gradient(135deg, #7b35c8, #4a1880);
@@ -31,188 +72,35 @@
             margin-left: 6px;
             text-transform: uppercase;
         }
-
-        .vue-toast-wrap {
-            position: fixed;
-            top: 14px;
-            right: 14px;
-            z-index: 99999;
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            pointer-events: none;
-            max-width: 340px;
-        }
-        .vue-toast {
-            background: rgba(10,6,2,0.96);
-            border: 1px solid rgba(200,165,90,0.38);
-            border-radius: 5px;
-            padding: 9px 14px;
-            font-size: 13px;
-            backdrop-filter: blur(8px);
-            animation: vt-in 0.18s ease;
-        }
-        @keyframes vt-in {
-            from { opacity:0; transform: translateY(-8px); }
-            to   { opacity:1; transform: translateY(0); }
-        }
-
-        .vtab-panel { display: none; padding: 14px 2px; }
-        .vtab-panel.vtab-panel-active { display: block; }
-
-        .tab-btn.vtab-battle {
-            color: var(--red) !important;
-            animation: pulse-tab 1.2s ease infinite;
-        }
-        @keyframes pulse-tab {
-            0%,100% { opacity:1; }
-            50%      { opacity:0.5; }
-        }
-
-        .area-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        .area-name-big {
-            font-size: 18px;
-            color: var(--gold);
+        .boss-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(180,20,20,0.9), rgba(120,10,10,0.9));
+            color: #ffaaaa;
+            font-size: 9px;
             font-weight: bold;
-            font-family: 'Tiny5', monospace;
-        }
-        .area-difficulty { font-size: 12px; color: var(--text-dim); }
-
-        .action-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-
-        .travel-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 5px;
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        .travel-card-name { font-size: 14px; color: var(--text-light); font-weight: bold; }
-        .travel-card-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-
-        .events-list .log-entry {
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 13px;
-        }
-
-        .inv-grid { display: flex; flex-direction: column; gap: 4px; }
-        .inv-row {
-            display: flex;
-            align-items: center;
-            padding: 8px 10px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 4px;
-            font-size: 13px;
-            gap: 8px;
-        }
-        .inv-row-name { flex: 1; color: var(--text-light); }
-        .inv-row-meta { font-size: 11px; color: var(--text-dim); }
-        .inv-row-qty { color: var(--text-dim); min-width: 28px; text-align: right; }
-        .inv-row-actions { display: flex; gap: 4px; flex-shrink: 0; }
-
-        .item-icon-wrap {
-            width: 36px;
-            height: 36px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .item-icon {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            image-rendering: pixelated;
-        }
-        .item-icon-placeholder {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
-            image-rendering: pixelated;
-            opacity: 0.45;
-        }
-        .equip-slot-icon {
-            width: 28px;
-            height: 28px;
-            object-fit: contain;
-            image-rendering: pixelated;
-            margin-right: 4px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            border: 1px solid rgba(220,60,60,0.5);
+            letter-spacing: 1.5px;
             vertical-align: middle;
-        }
-        .shop-item-icon {
-            width: 36px;
-            height: 36px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 4px;
-            overflow: hidden;
+            margin-left: 6px;
+            text-transform: uppercase;
         }
 
-        .rarity-common    { color: var(--text-light); }
-        .rarity-uncommon  { color: #4caf50; }
-        .rarity-rare      { color: #2196f3; }
-        .rarity-epic      { color: #9c27b0; }
-        .rarity-legendary { color: var(--gold); }
-
-        .stat-grid-big {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .stat-card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
+        /* ── Autosave banner ─────────────────────────────── */
+        .beta-banner {
+            background: linear-gradient(135deg, rgba(10,50,25,0.55), rgba(5,30,15,0.55));
+            border: 1px solid rgba(60,180,90,0.3);
             border-radius: 5px;
-            padding: 10px 8px;
+            padding: 5px 10px;
+            font-size: 11px;
+            color: #80d8a0;
+            margin-bottom: 10px;
             text-align: center;
+            letter-spacing: 0.02em;
         }
-        .stat-card-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-card-val { font-size: 18px; color: var(--gold); font-weight: bold; margin-top: 3px; }
 
-        .battle-panel-vue {
-            background: rgba(80,10,10,0.18);
-            border: 1px solid rgba(200,60,60,0.3);
-            border-radius: 6px;
-            padding: 14px;
-        }
-        .battle-enemy-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .battle-enemy-name { font-size: 16px; color: var(--red); font-weight: bold; }
-        .battle-log-wrap { max-height: 180px; overflow-y: auto; margin: 10px 0; }
-        .battle-log-entry {
-            font-size: 12px;
-            padding: 2px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            color: var(--text-dim);
-        }
-        .battle-log-entry:last-child { color: var(--text-light); }
-        .battle-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-
-        .empty-state { color: var(--text-dim); font-size: 13px; text-align: center; padding: 24px 0; }
-
+        /* ── Sidebar back btn ────────────────────────────── */
         .sidebar-back-btn {
             display: block;
             margin: 10px 0 14px;
@@ -223,169 +111,372 @@
         }
         .sidebar-back-btn:hover { color: var(--gold); }
 
-        .beta-banner {
-            background: linear-gradient(135deg, rgba(80,20,130,0.4), rgba(40,10,80,0.4));
-            border: 1px solid rgba(160,80,255,0.35);
-            border-radius: 5px;
-            padding: 6px 10px;
-            font-size: 11px;
-            color: #c9a0f0;
-            margin-bottom: 10px;
-            text-align: center;
+        /* ── Area header ─────────────────────────────────── */
+        .area-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .area-name-big {
+            font-size: 18px;
+            color: var(--gold);
+            font-weight: bold;
+            font-family: 'Tiny5', monospace;
         }
+        .area-difficulty { font-size: 12px; color: var(--text-dim); }
 
-        .equip-slot-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        /* ── Action row ──────────────────────────────────── */
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
             gap: 8px;
-            margin-bottom: 12px;
-        }
-        .equip-slot {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 5px;
-            padding: 8px 12px;
-        }
-        .equip-slot-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
-        .equip-slot-item { font-size: 13px; color: var(--text-light); margin-top: 2px; }
-        .equip-slot-stats { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
-        .equip-slot-empty { font-size: 13px; color: rgba(255,255,255,0.2); margin-top: 2px; font-style: italic; }
-
-        .shop-grid { display: flex; flex-direction: column; gap: 6px; }
-        .shop-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 4px;
-            padding: 9px 12px;
-            gap: 10px;
-        }
-        .shop-item-info { flex: 1; }
-        .shop-item-name { font-size: 13px; color: var(--text-light); }
-        .shop-item-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
-        .shop-item-price { font-size: 14px; color: var(--gold); font-weight: bold; min-width: 70px; text-align: right; }
-
-        .mine-ore-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
-        .mine-ore-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 4px;
-            padding: 8px 12px;
-            font-size: 13px;
-        }
-        .mine-ore-locked { opacity: 0.5; }
-
-        .recipe-grid { display: flex; flex-direction: column; gap: 8px; }
-        .recipe-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 5px;
-            padding: 10px 12px;
-        }
-        .recipe-name { font-size: 14px; color: var(--gold); font-weight: bold; }
-        .recipe-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0; }
-        .recipe-materials { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
-
-        .dungeon-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 5px;
-            padding: 12px 14px;
-            margin-bottom: 8px;
-        }
-        .dungeon-name { font-size: 14px; color: var(--gold); font-weight: bold; }
-        .dungeon-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0 8px; }
-        .dungeon-complete-badge { color: #4caf50; font-size: 12px; }
-
-        .active-dungeon-panel {
-            background: rgba(30,10,60,0.3);
-            border: 1px solid rgba(120,60,200,0.4);
-            border-radius: 6px;
-            padding: 14px;
             margin-bottom: 14px;
         }
 
-        .companion-card {
+        /* ── Travel cards ────────────────────────────────── */
+        .travel-card {
             background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-left: 3px solid rgba(200,160,60,0.3);
             border-radius: 5px;
-            padding: 12px 14px;
-            margin-bottom: 8px;
+            padding: 11px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            transition: border-color 0.15s, background 0.15s;
         }
-        .companion-name { font-size: 14px; color: var(--gold); font-weight: bold; }
-        .companion-meta { font-size: 12px; color: var(--text-dim); margin: 2px 0; }
+        .travel-card:hover {
+            background: rgba(255,255,255,0.05);
+            border-left-color: rgba(200,160,60,0.7);
+        }
+        .travel-card-name { font-size: 14px; color: var(--text-light); font-weight: bold; }
+        .travel-card-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
 
+        /* ── Event log entries ───────────────────────────── */
+        .events-list .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
+
+        /* ── Inventory ───────────────────────────────────── */
+        .inv-grid { display: flex; flex-direction: column; gap: 4px; }
+        .inv-row {
+            display: flex;
+            align-items: center;
+            padding: 9px 10px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 5px;
+            font-size: 13px;
+            gap: 8px;
+            transition: background 0.12s;
+        }
+        .inv-row:hover { background: rgba(255,255,255,0.055); }
+        .inv-row-name { flex: 1; color: var(--text-light); }
+        .inv-row-meta { font-size: 11px; color: var(--text-dim); }
+        .inv-row-qty { color: var(--text-dim); min-width: 28px; text-align: right; }
+        .inv-row-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+        /* ── Item icons ──────────────────────────────────── */
+        .item-icon-wrap {
+            width: 36px; height: 36px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; overflow: hidden;
+        }
+        .item-icon { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
+        .item-icon-placeholder { width: 24px; height: 24px; object-fit: contain; image-rendering: pixelated; opacity: 0.45; }
+        .equip-slot-icon { width: 28px; height: 28px; object-fit: contain; image-rendering: pixelated; margin-right: 4px; vertical-align: middle; }
+        .shop-item-icon {
+            width: 36px; height: 36px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; overflow: hidden;
+        }
+
+        /* ── Rarity ──────────────────────────────────────── */
+        .rarity-common    { color: var(--text-light); }
+        .rarity-uncommon  { color: #56c264; }
+        .rarity-rare      { color: #4d9de0; }
+        .rarity-epic      { color: #c07cf0; }
+        .rarity-legendary { color: var(--gold); text-shadow: 0 0 8px rgba(200,160,40,0.35); }
+
+        /* ── Stat grid (Character tab) ───────────────────── */
+        .stat-grid-big {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 6px;
+            padding: 11px 8px;
+            text-align: center;
+            border-top: 2px solid rgba(255,255,255,0.12);
+        }
+        .stat-card-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .stat-card-val {
+            font-size: 17px;
+            color: var(--gold);
+            font-weight: bold;
+            margin-top: 4px;
+            line-height: 1.2;
+        }
+        .stat-card-val small { font-size: 11px; font-weight: normal; color: var(--text-dim); }
+        /* Color-coded stat cards */
+        .stat-card-hp  { border-top-color: rgba(220,60,60,0.65); }
+        .stat-card-hp  .stat-card-val { color: #f08080; }
+        .stat-card-mp  { border-top-color: rgba(60,120,220,0.65); }
+        .stat-card-mp  .stat-card-val { color: #80a8f0; }
+        .stat-card-exp { border-top-color: rgba(60,190,90,0.65); }
+        .stat-card-exp .stat-card-val { color: #80d890; }
+        .stat-card-atk { border-top-color: rgba(220,140,40,0.65); }
+        .stat-card-atk .stat-card-val { color: #e0a060; }
+        .stat-card-def { border-top-color: rgba(40,180,180,0.65); }
+        .stat-card-def .stat-card-val { color: #70c8c8; }
+        .stat-card-spd { border-top-color: rgba(200,200,50,0.65); }
+        .stat-card-spd .stat-card-val { color: #d8d870; }
+
+        /* ── Battle panel ─────────────────────────────────── */
+        .battle-panel-vue {
+            background: linear-gradient(145deg, rgba(90,8,8,0.28), rgba(40,4,4,0.22));
+            border: 1px solid rgba(200,55,55,0.42);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 0 28px rgba(200,30,30,0.07);
+        }
+        .battle-enemy-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .battle-enemy-name {
+            font-size: 18px;
+            color: #ff8080;
+            font-weight: bold;
+            font-family: 'Tiny5', monospace;
+            text-shadow: 0 0 12px rgba(200,40,40,0.4);
+        }
+        .battle-vs {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+        .battle-vs-enemy { flex: 1; }
+        .battle-vs-divider {
+            font-size: 18px;
+            color: rgba(255,255,255,0.2);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .battle-vs-player { flex: 1; text-align: right; }
+        .battle-vs-name { font-size: 13px; color: var(--text-dim); margin-bottom: 4px; }
+        .battle-hp-bar-wrap { position: relative; }
+        .battle-hp-pct {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 9px;
+            color: rgba(255,255,255,0.7);
+            font-weight: bold;
+        }
+        .battle-log-wrap {
+            max-height: 180px;
+            overflow-y: auto;
+            margin: 12px 0;
+            background: rgba(0,0,0,0.15);
+            border-radius: 5px;
+            padding: 6px 8px;
+        }
+        .battle-log-wrap::-webkit-scrollbar { width: 3px; }
+        .battle-log-wrap::-webkit-scrollbar-thumb { background: rgba(200,60,60,0.3); border-radius: 2px; }
+        .battle-log-entry {
+            font-size: 12px;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--text-dim);
+            line-height: 1.45;
+        }
+        .battle-log-entry:last-child {
+            color: var(--text-light);
+            border-bottom: none;
+        }
+        .battle-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(200,60,60,0.2);
+        }
+        .btn-attack {
+            background: linear-gradient(135deg, rgba(160,20,20,0.7), rgba(100,10,10,0.7)) !important;
+            border-color: rgba(200,60,60,0.6) !important;
+        }
+        .btn-attack:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(180,30,30,0.85), rgba(120,15,15,0.85)) !important;
+        }
+        .btn-defend {
+            background: linear-gradient(135deg, rgba(20,60,120,0.5), rgba(10,35,80,0.5)) !important;
+            border-color: rgba(60,120,200,0.5) !important;
+        }
+
+        /* ── Cards with accent borders ────────────────────── */
         .mission-card {
             background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-left: 3px solid rgba(200,160,50,0.45);
             border-radius: 5px;
             padding: 12px 14px;
             margin-bottom: 8px;
+            transition: border-left-color 0.15s;
         }
+        .mission-card:hover { border-left-color: rgba(200,160,50,0.8); }
         .mission-name { font-size: 14px; color: var(--gold); font-weight: bold; }
         .mission-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0; }
         .mission-progress { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
 
         .challenge-card {
             background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-left: 3px solid rgba(60,130,220,0.45);
+            border-radius: 5px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            transition: border-left-color 0.15s;
+        }
+        .challenge-card:hover { border-left-color: rgba(60,130,220,0.8); }
+        .challenge-name { font-size: 14px; color: #90b8f8; font-weight: bold; }
+        .challenge-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0; }
+
+        .companion-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-left: 3px solid rgba(60,180,90,0.4);
             border-radius: 5px;
             padding: 12px 14px;
             margin-bottom: 8px;
         }
-        .challenge-name { font-size: 14px; color: var(--gold); font-weight: bold; }
-        .challenge-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0; }
+        .companion-name { font-size: 14px; color: #80d898; font-weight: bold; }
+        .companion-meta { font-size: 12px; color: var(--text-dim); margin: 2px 0; }
 
-        .diary-entry {
-            padding: 5px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 13px;
-            color: var(--text-dim);
+        .dungeon-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-left: 3px solid rgba(140,60,200,0.45);
+            border-radius: 5px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            transition: border-left-color 0.15s;
         }
+        .dungeon-card:hover { border-left-color: rgba(160,80,220,0.8); }
+        .dungeon-name { font-size: 14px; color: #c090f8; font-weight: bold; }
+        .dungeon-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0 8px; }
+        .dungeon-complete-badge { color: #56c264; font-size: 12px; }
 
-        .attr-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 7px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 13px;
+        .active-dungeon-panel {
+            background: linear-gradient(135deg, rgba(35,10,65,0.4), rgba(20,5,40,0.35));
+            border: 1px solid rgba(140,70,210,0.45);
+            border-radius: 7px;
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 0 20px rgba(120,40,200,0.06);
         }
-        .attr-name { color: var(--text-dim); }
-        .attr-val { color: var(--text-light); font-weight: bold; min-width: 60px; text-align: right; }
-        .attr-spend-btn { margin-left: 10px; }
 
         .event-card {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
+            border-left: 3px solid rgba(200,130,40,0.45);
             border-radius: 5px;
             padding: 12px 14px;
             margin-bottom: 8px;
         }
-        .event-name { font-size: 14px; color: var(--gold); font-weight: bold; }
+        .event-name { font-size: 14px; color: #e0a860; font-weight: bold; }
         .event-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0; }
 
+        /* ── Boss cards ───────────────────────────────────── */
         .boss-card {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(80,10,10,0.18);
-            border: 1px solid rgba(200,60,60,0.25);
-            border-radius: 5px;
-            padding: 10px 14px;
+            background: linear-gradient(135deg, rgba(100,8,8,0.28), rgba(60,4,4,0.18));
+            border: 1px solid rgba(200,55,55,0.35);
+            border-left: 3px solid rgba(220,55,55,0.65);
+            border-radius: 6px;
+            padding: 12px 14px;
             margin-bottom: 8px;
+            transition: border-left-color 0.15s, background 0.15s;
         }
-        .boss-name { font-size: 14px; color: var(--red); font-weight: bold; }
+        .boss-card:hover { background: linear-gradient(135deg, rgba(120,10,10,0.35), rgba(80,5,5,0.25)); border-left-color: rgba(240,70,70,0.9); }
+        .boss-name { font-size: 14px; color: #ff8888; font-weight: bold; text-shadow: 0 0 8px rgba(220,40,40,0.3); }
         .boss-cooldown { font-size: 12px; color: var(--text-dim); }
 
+        /* ── Shop ─────────────────────────────────────────── */
+        .shop-grid { display: flex; flex-direction: column; gap: 6px; }
+        .shop-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 5px;
+            padding: 10px 12px;
+            gap: 10px;
+            transition: background 0.12s;
+        }
+        .shop-item:hover { background: rgba(255,255,255,0.055); }
+        .shop-item-info { flex: 1; }
+        .shop-item-name { font-size: 13px; color: var(--text-light); }
+        .shop-item-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+        .shop-item-price { font-size: 14px; color: var(--gold); font-weight: bold; min-width: 70px; text-align: right; }
+
+        /* ── Mine ─────────────────────────────────────────── */
+        .mine-ore-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+        .mine-ore-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        .mine-ore-locked { opacity: 0.45; }
+
+        /* ── Crafting ─────────────────────────────────────── */
+        .recipe-grid { display: flex; flex-direction: column; gap: 8px; }
+        .recipe-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-left: 3px solid rgba(180,140,50,0.3);
+            border-radius: 5px;
+            padding: 11px 12px;
+            transition: border-left-color 0.15s;
+        }
+        .recipe-card:hover { border-left-color: rgba(200,160,60,0.7); }
+        .recipe-name { font-size: 14px; color: var(--gold); font-weight: bold; }
+        .recipe-meta { font-size: 12px; color: var(--text-dim); margin: 3px 0; }
+        .recipe-materials { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+        /* ── Market ───────────────────────────────────────── */
         .market-item-card {
             background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.07);
             border-radius: 5px;
             padding: 10px 12px;
             margin-bottom: 6px;
@@ -393,16 +484,35 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
+            transition: background 0.12s;
         }
+        .market-item-card:hover { background: rgba(255,255,255,0.055); }
         .market-item-name { font-size: 13px; color: var(--text-light); }
         .market-item-seller { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
         .market-item-price { font-size: 14px; color: var(--gold); font-weight: bold; }
 
-        .tab-bar-wrap { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
-        .tab-bar-wrap::-webkit-scrollbar { height: 3px; }
-        .tab-bar-wrap::-webkit-scrollbar-track { background: transparent; }
-        .tab-bar-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        /* ── Diary ────────────────────────────────────────── */
+        .diary-entry {
+            padding: 5px 0 5px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-left: 2px solid rgba(255,255,255,0.06);
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
 
+        /* ── Character attributes ─────────────────────────── */
+        .attr-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
+        .attr-name { color: var(--text-dim); }
+        .attr-val { color: var(--text-light); font-weight: bold; min-width: 60px; text-align: right; }
+        .attr-spend-btn { margin-left: 10px; }
         .attr-pts-notice {
             background: rgba(200,165,80,0.12);
             border: 1px solid rgba(200,165,80,0.3);
@@ -413,14 +523,64 @@
             margin-bottom: 12px;
         }
 
+        /* ── Equipment slots ──────────────────────────────── */
+        .equip-slot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .equip-slot {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 5px;
+            padding: 9px 12px;
+            transition: border-color 0.15s;
+        }
+        .equip-slot.equip-slot-filled {
+            border-color: rgba(200,160,50,0.3);
+            background: rgba(200,160,50,0.05);
+        }
+        .equip-slot-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+        .equip-slot-item { font-size: 13px; color: var(--text-light); margin-top: 2px; }
+        .equip-slot-stats { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+        .equip-slot-empty { font-size: 13px; color: rgba(255,255,255,0.18); margin-top: 2px; font-style: italic; }
+
+        /* ── Tab bar ──────────────────────────────────────── */
+        .tab-bar-wrap { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+        .tab-bar-wrap::-webkit-scrollbar { height: 3px; }
+        .tab-bar-wrap::-webkit-scrollbar-track { background: transparent; }
+        .tab-bar-wrap::-webkit-scrollbar-thumb { background: rgba(200,160,60,0.25); border-radius: 2px; }
+
+        /* ── Friends ──────────────────────────────────────── */
         .friends-list-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 9px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             font-size: 13px;
         }
+
+        /* ── Empty state ──────────────────────────────────── */
+        .empty-state {
+            color: var(--text-dim);
+            font-size: 13px;
+            text-align: center;
+            padding: 28px 0;
+            font-style: italic;
+        }
+        .empty-state::before {
+            display: block;
+            font-size: 22px;
+            margin-bottom: 8px;
+            opacity: 0.4;
+            font-style: normal;
+            content: '—';
+        }
+
+        /* ── Progress bar thin variant (challenges) ─────── */
+        .bar-thin { height: 5px !important; }
     </style>
     <script>
         window._betaInit = {
@@ -817,19 +977,23 @@
 
                     <!-- boss challenges -->
                     <div v-if="availableBosses && availableBosses.length" class="panel" style="margin-bottom:14px;">
-                        <div class="panel-title">Boss Challenges</div>
-                        <div class="panel-body">
-                            <p class="panel-note">Challenge a boss directly. Each boss has an 8-hour cooldown after defeat.</p>
-                            <div style="display:flex;flex-wrap:wrap;gap:10px;">
-                                <div v-for="boss in availableBosses" :key="boss.key"
-                                     style="background:var(--panel-bg);border:1px solid var(--border);border-radius:6px;padding:12px;min-width:180px;">
-                                    <div style="font-size:15px;font-weight:600;color:var(--red);margin-bottom:6px;">[[ boss.name ]]</div>
-                                    <div v-if="boss.on_cooldown" style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">Cooldown: [[ boss.cooldown_str ]]</div>
-                                    <button v-if="boss.on_cooldown" class="btn btn-small btn-secondary" disabled>On Cooldown</button>
+                        <div class="panel-title" style="display:flex;align-items:center;gap:8px;">
+                            <span style="color:#ff8888;">☠</span> Boss Challenges
+                            <span style="font-size:11px;font-weight:400;color:var(--text-dim);margin-left:2px;">8-hour respawn after defeat</span>
+                        </div>
+                        <div class="panel-body" style="padding-top:6px;">
+                            <div style="display:flex;flex-direction:column;gap:8px;">
+                                <div v-for="boss in availableBosses" :key="boss.key" class="boss-card">
+                                    <div style="flex:1;">
+                                        <div class="boss-name">[[ boss.name ]]</div>
+                                        <div v-if="boss.on_cooldown" class="boss-cooldown" style="margin-top:3px;">&#128336; [[ boss.cooldown_str ]]</div>
+                                    </div>
+                                    <button v-if="boss.on_cooldown" class="btn btn-small btn-secondary" disabled style="opacity:0.45;">On Cooldown</button>
                                     <button v-else class="btn btn-small btn-danger"
                                             @click="challengeBoss(boss.key)"
-                                            :disabled="actionPending || inBattle">
-                                        Challenge!
+                                            :disabled="actionPending || inBattle"
+                                            style="background:linear-gradient(135deg,rgba(160,20,20,0.75),rgba(100,8,8,0.75));border-color:rgba(200,60,60,0.6);">
+                                        ⚔ Challenge!
                                     </button>
                                 </div>
                             </div>
@@ -856,73 +1020,101 @@
                 <!-- ═══ BATTLE tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'battle' }">
                     <div v-if="inBattle && battle" class="battle-panel-vue">
-                        <div class="battle-enemy-header">
-                            <div>
-                                <div class="battle-enemy-name">
+
+                        <!-- VS header -->
+                        <div class="battle-vs">
+                            <!-- enemy side -->
+                            <div class="battle-vs-enemy">
+                                <div class="battle-vs-name" style="color:var(--red);font-weight:bold;">
                                     [[ battle.enemy_name ]]
-                                    <span v-if="battle.is_boss" class="beta-badge">BOSS</span>
+                                    <span v-if="battle.is_boss" class="boss-badge">BOSS</span>
+                                </div>
+                                <div class="battle-hp-bar-wrap" style="margin-top:5px;">
+                                    <div class="bar-track" style="height:8px;">
+                                        <div class="bar-fill bar-hp"
+                                             :style="{ width: Math.min(100, Math.round(battle.enemy_hp / (battle.enemy_max_hp || 1) * 100)) + '%', transition:'width 0.4s ease' }">
+                                        </div>
+                                    </div>
+                                    <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">[[ battle.enemy_hp ]] / [[ battle.enemy_max_hp ]] HP</div>
+                                </div>
+                            </div>
+                            <div class="battle-vs-divider">⚔</div>
+                            <!-- player side -->
+                            <div class="battle-vs-player" v-if="player">
+                                <div class="battle-vs-name" style="color:var(--gold);font-weight:bold;">[[ player.name ]]</div>
+                                <div style="margin-top:5px;">
+                                    <div class="bar-track" style="height:8px;">
+                                        <div class="bar-fill bar-hp"
+                                             :style="{ width: hpPct + '%', transition:'width 0.4s ease' }">
+                                        </div>
+                                    </div>
+                                    <div style="font-size:11px;color:var(--text-dim);margin-top:2px;text-align:right;">[[ player.hp ]] / [[ player.max_hp ]] HP</div>
+                                    <div class="bar-track" style="height:5px;margin-top:4px;">
+                                        <div class="bar-fill bar-mp"
+                                             :style="{ width: mpPct + '%', transition:'width 0.4s ease' }">
+                                        </div>
+                                    </div>
+                                    <div style="font-size:10px;color:var(--text-dim);margin-top:1px;text-align:right;">[[ player.mp ]] / [[ player.max_mp ]] MP</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bar-group">
-                            <div class="bar-label">
-                                Enemy HP <span class="bar-nums">[[ battle.enemy_hp ]] / [[ battle.enemy_max_hp ]]</span>
-                            </div>
-                            <div class="bar-track">
-                                <div class="bar-fill bar-hp"
-                                     :style="{ width: Math.min(100, Math.round(battle.enemy_hp / (battle.enemy_max_hp || 1) * 100)) + '%' }">
-                                </div>
-                            </div>
-                        </div>
-
+                        <!-- battle log -->
                         <div class="battle-log-wrap" v-if="battle.log && battle.log.length">
                             <div v-for="(entry, i) in battle.log" :key="i" class="battle-log-entry"
                                  v-html="typeof entry === 'object' ? entry.text : entry">
                             </div>
                         </div>
 
-                        <!-- battle companions -->
+                        <!-- party companions in battle -->
                         <div v-if="battle.companions && battle.companions.length" style="margin-top:8px;">
-                            <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">PARTY</div>
-                            <div v-for="comp in battle.companions" :key="comp.name"
-                                 style="display:flex;justify-content:space-between;font-size:12px;padding:2px 0;color:var(--text-dim);">
-                                <span>[[ comp.name ]]</span>
-                                <span>[[ comp.hp ]]/[[ comp.max_hp ]] HP</span>
+                            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);margin-bottom:6px;">Party</div>
+                            <div v-for="comp in battle.companions" :key="comp.name" style="margin-bottom:6px;">
+                                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px;">
+                                    <span :style="{ color: comp.fallen ? 'var(--red)' : 'var(--text-light)' }">
+                                        [[ comp.name ]]<span v-if="comp.fallen" style="font-size:10px;color:var(--red);"> [fallen]</span>
+                                    </span>
+                                    <span style="color:var(--text-dim);">[[ comp.hp ]]/[[ comp.max_hp ]]</span>
+                                </div>
+                                <div class="bar-track" style="height:4px;">
+                                    <div class="bar-fill bar-hp" :style="{ width: comp.hp_pct + '%', opacity: comp.fallen ? 0.3 : 1 }"></div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- spells if MP available -->
-                        <div v-if="battleSpells && battleSpells.length && player && player.mp > 0" style="margin-top:8px;">
-                            <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">SPELLS</div>
+                        <!-- spells -->
+                        <div v-if="battleSpells && battleSpells.length && player && player.mp > 0" style="margin-top:10px;">
+                            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);margin-bottom:6px;">Spells</div>
                             <div style="display:flex;flex-wrap:wrap;gap:6px;">
                                 <button v-for="sp in battleSpells" :key="sp.id"
                                         class="btn btn-small btn-secondary"
                                         @click="battleSpell(sp.id)"
                                         :disabled="actionPending || (player && player.mp < sp.mp_cost)"
                                         :style="{ opacity: (player && player.mp < sp.mp_cost) ? 0.5 : 1 }">
-                                    [[ sp.name ]] ([[ sp.mp_cost ]] MP)
+                                    [[ sp.name ]] <span style="font-size:10px;opacity:0.7;">([[ sp.mp_cost ]] MP)</span>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- battle inventory use -->
-                        <div v-if="battleConsumables && battleConsumables.length" style="margin-top:8px;">
-                            <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">USE ITEM</div>
+                        <!-- consumables -->
+                        <div v-if="battleConsumables && battleConsumables.length" style="margin-top:10px;">
+                            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);margin-bottom:6px;">Use Item</div>
                             <div style="display:flex;flex-wrap:wrap;gap:6px;">
                                 <button v-for="item in battleConsumables" :key="item.name"
                                         class="btn btn-xsmall btn-secondary"
                                         @click="battleUseItem(item.name)"
                                         :disabled="actionPending">
-                                    [[ item.name ]] x[[ item.count ]]
+                                    [[ item.name ]] <span style="opacity:0.6;">x[[ item.count ]]</span>
                                 </button>
                             </div>
                         </div>
 
                         <div class="battle-actions">
-                            <button class="btn btn-danger btn-attack" @click="battleAttack" :disabled="actionPending">Attack</button>
-                            <button class="btn btn-secondary btn-defend" @click="battleDefend" :disabled="actionPending">Defend</button>
-                            <button class="btn btn-secondary" @click="battleFlee" :disabled="actionPending">Flee</button>
+                            <button class="btn btn-danger btn-attack" @click="battleAttack" :disabled="actionPending">
+                                ⚔ [[ actionPending ? '...' : 'Attack' ]]
+                            </button>
+                            <button class="btn btn-secondary btn-defend" @click="battleDefend" :disabled="actionPending">🛡 Defend</button>
+                            <button class="btn btn-secondary" @click="battleFlee" :disabled="actionPending">↩ Flee</button>
                         </div>
                     </div>
                     <div v-else class="empty-state">No active battle.</div>
@@ -1431,27 +1623,27 @@
                         </div>
 
                         <div class="stat-grid-big" style="margin-bottom:14px;">
-                            <div class="stat-card">
+                            <div class="stat-card stat-card-hp">
                                 <div class="stat-card-label">HP</div>
-                                <div class="stat-card-val">[[ player.hp ]]/[[ player.max_hp ]]</div>
+                                <div class="stat-card-val">[[ player.hp ]]<small>/[[ player.max_hp ]]</small></div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card stat-card-mp">
                                 <div class="stat-card-label">MP</div>
-                                <div class="stat-card-val">[[ player.mp ]]/[[ player.max_mp ]]</div>
+                                <div class="stat-card-val">[[ player.mp ]]<small>/[[ player.max_mp ]]</small></div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card stat-card-exp">
                                 <div class="stat-card-label">EXP</div>
-                                <div class="stat-card-val">[[ player.experience ]]/[[ player.experience_to_next ]]</div>
+                                <div class="stat-card-val">[[ player.experience ]]<small>/[[ player.experience_to_next ]]</small></div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card stat-card-atk">
                                 <div class="stat-card-label">Attack</div>
                                 <div class="stat-card-val">[[ player.attack ]]</div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card stat-card-def">
                                 <div class="stat-card-label">Defense</div>
                                 <div class="stat-card-val">[[ player.defense ]]</div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card stat-card-spd">
                                 <div class="stat-card-label">Speed</div>
                                 <div class="stat-card-val">[[ player.speed ]]</div>
                             </div>

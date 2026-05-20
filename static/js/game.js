@@ -896,6 +896,10 @@ async function logoutAndSave() {
     window.location.href = '/';
 }
 
+function exitToMenu() {
+    window.location.href = '/';
+}
+
 async function settingsDownloadCloud() {
     try {
         var res = await fetch('/api/online/cloud_download');
