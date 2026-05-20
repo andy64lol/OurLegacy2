@@ -545,10 +545,8 @@
         .equip-slot-empty { font-size: 13px; color: rgba(255,255,255,0.18); margin-top: 2px; font-style: italic; }
 
         /* ── Tab bar ──────────────────────────────────────── */
-        .tab-bar-wrap { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
-        .tab-bar-wrap::-webkit-scrollbar { height: 3px; }
-        .tab-bar-wrap::-webkit-scrollbar-track { background: transparent; }
-        .tab-bar-wrap::-webkit-scrollbar-thumb { background: rgba(200,160,60,0.25); border-radius: 2px; }
+        .tab-bar-wrap { overflow: hidden; position: relative; }
+        .tab-bar-wrap .tab-nav { flex-wrap: nowrap; }
 
         /* ── Friends ──────────────────────────────────────── */
         .friends-list-item {
@@ -575,6 +573,15 @@
             opacity: 0.4;
             font-style: normal;
             content: '—';
+        }
+
+        /* ── Map area cards ──────────────────────────────── */
+        .area-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 8px 12px;
+            min-width: 120px;
         }
 
         /* ── Progress bar thin variant (challenges) ─────── */
@@ -739,8 +746,8 @@
             v-for="t in toasts"
             :key="t.id"
             class="vue-toast"
-            :style="{ color: t.color || 'var(--text-light)' }">
-            [[ t.text ]]
+            :style="{ color: t.color || 'var(--text-light)' }"
+            v-html="t.text">
         </div>
     </div>
 
@@ -924,55 +931,76 @@
 
                 <!-- tab navigation -->
                 <div class="tab-nav-wrap tab-bar-wrap">
-                    <div class="tab-nav">
-                        <button class="tab-btn" :class="{ active: activeTab === 'explore' }"
+                    <div class="tab-nav" id="main-tabs">
+                        <button class="tab-btn" data-tab="explore"
+                                :class="{ active: activeTab === 'explore' }"
                                 @click="switchTab('explore')">Explore</button>
-                        <button class="tab-btn vtab-battle" v-if="inBattle"
+                        <button class="tab-btn vtab-battle" data-tab="battle" v-if="inBattle"
                                 :class="{ active: activeTab === 'battle' }"
-                                @click="switchTab('battle')">Battle!</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'equipment' }"
+                                @click="switchTab('battle')">⚔ Battle!</button>
+                        <button class="tab-btn" data-tab="map"
+                                :class="{ active: activeTab === 'map' }"
+                                @click="switchTab('map')">Map</button>
+                        <button class="tab-btn" data-tab="equipment"
+                                :class="{ active: activeTab === 'equipment' }"
                                 @click="switchTab('equipment')">Equipment</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'inventory' }"
+                        <button class="tab-btn" data-tab="inventory"
+                                :class="{ active: activeTab === 'inventory' }"
                                 @click="switchTab('inventory')">Inventory</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'travel' }"
+                        <button class="tab-btn" data-tab="travel"
+                                :class="{ active: activeTab === 'travel' }"
                                 @click="switchTab('travel')">Travel</button>
-                        <button class="tab-btn" v-if="shopItems && shopItems.length"
+                        <button class="tab-btn" data-tab="shop" v-if="shopItems && shopItems.length"
                                 :class="{ active: activeTab === 'shop' }"
                                 @click="switchTab('shop')">Shop</button>
-                        <button class="tab-btn" v-if="mineData"
+                        <button class="tab-btn" data-tab="mine" v-if="mineData"
                                 :class="{ active: activeTab === 'mine' }"
                                 @click="switchTab('mine')">Mine</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'crafting' }"
+                        <button class="tab-btn" data-tab="crafting"
+                                :class="{ active: activeTab === 'crafting' }"
                                 @click="switchTab('crafting')">Crafting</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'dungeons' }"
+                        <button class="tab-btn" data-tab="dungeons"
+                                :class="{ active: activeTab === 'dungeons' }"
                                 @click="switchTab('dungeons')">Dungeons</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'market' }"
+                        <button class="tab-btn" data-tab="market"
+                                :class="{ active: activeTab === 'market' }"
                                 @click="switchTab('market')">Market</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'party' }"
+                        <button class="tab-btn" data-tab="party"
+                                :class="{ active: activeTab === 'party' }"
                                 @click="switchTab('party')">Party</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'quests' }"
+                        <button class="tab-btn" data-tab="quests"
+                                :class="{ active: activeTab === 'quests' }"
                                 @click="switchTab('quests')">Quests</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'challenges' }"
+                        <button class="tab-btn" data-tab="challenges"
+                                :class="{ active: activeTab === 'challenges' }"
                                 @click="switchTab('challenges')">Challenges</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'diary' }"
+                        <button class="tab-btn" data-tab="diary"
+                                :class="{ active: activeTab === 'diary' }"
                                 @click="switchTab('diary')">Diary</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'character' }"
+                        <button class="tab-btn" data-tab="character"
+                                :class="{ active: activeTab === 'character' }"
                                 @click="switchTab('character')">Character</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'events' }"
+                        <button class="tab-btn" data-tab="events"
+                                :class="{ active: activeTab === 'events' }"
                                 @click="switchTab('events')">Events</button>
-                        <button class="tab-btn" v-if="onlineUsername"
+                        <button class="tab-btn" data-tab="friends" v-if="onlineUsername"
                                 :class="{ active: activeTab === 'friends' }"
                                 @click="switchTab('friends')">Friends</button>
-                        <button class="tab-btn" v-if="onlineUsername"
+                        <button class="tab-btn" data-tab="group" v-if="onlineUsername"
                                 :class="{ active: activeTab === 'group' }"
                                 @click="switchTab('group')">Group</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'land' }"
-                                @click="switchTab('land')">Land</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'leaderboard' }"
+                        <button class="tab-btn" data-tab="land"
+                                v-if="area && area.key === 'your_land'"
+                                :class="{ active: activeTab === 'land' }"
+                                @click="switchTab('land')">🏡 Land</button>
+                        <button class="tab-btn" data-tab="leaderboard"
+                                :class="{ active: activeTab === 'leaderboard' }"
                                 @click="switchTab('leaderboard')">Leaderboard</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'wiki' }"
+                        <button class="tab-btn" data-tab="wiki"
+                                :class="{ active: activeTab === 'wiki' }"
                                 @click="switchTab('wiki')">Wiki</button>
-                        <button class="tab-btn" onclick="openSettings ? openSettings() : document.getElementById('settings-modal').style.display='flex'"
+                        <button class="tab-btn" data-tab="_settings"
+                                @click="typeof openSettings === 'function' ? openSettings() : (document.getElementById('settings-modal').style.display='flex')"
                                 title="Settings">&#9881;</button>
                     </div>
                 </div>
@@ -986,6 +1014,76 @@
                     <div class="news-ticker-track">
                         <div class="news-ticker-inner" id="beta-ticker-inner">No announcements at this time.</div>
                     </div>
+                </div>
+
+                <!-- ═══ MAP tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'map' }">
+                    <div v-if="area">
+                        <div class="area-header" style="margin-bottom:14px;">
+                            <div>
+                                <div class="area-name-big">[[ area.name ]]</div>
+                                <div class="area-difficulty" v-if="area.difficulty">Danger Level [[ area.difficulty ]]</div>
+                            </div>
+                        </div>
+                        <!-- current area map -->
+                        <div v-if="area.map_image" class="panel" style="margin-bottom:14px;text-align:center;">
+                            <div class="panel-title">Area Map</div>
+                            <div class="panel-body" style="padding:10px;display:flex;justify-content:center;">
+                                <img :src="'/game_assets/maps/' + area.map_image"
+                                     :alt="'Map of ' + area.name"
+                                     style="max-width:100%;border-radius:4px;image-rendering:pixelated;"
+                                     @error="$event.target.style.display='none'">
+                            </div>
+                        </div>
+                        <!-- visited areas -->
+                        <div class="panel" style="margin-bottom:14px;">
+                            <div class="panel-title">Explored Areas <span style="font-weight:400;font-size:12px;color:var(--text-dim);">([[ visitedAreas.length ]] discovered)</span></div>
+                            <div class="panel-body">
+                                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                                    <div v-for="akey in visitedAreas" :key="akey"
+                                         class="area-card"
+                                         :style="{ borderColor: akey === area.key ? 'var(--gold)' : '' }">
+                                        <div style="font-size:12px;color:var(--text-light);font-weight:600;"
+                                             :style="{ color: akey === area.key ? 'var(--gold)' : 'var(--text-light)' }">
+                                            [[ akey === area.key ? '★ ' : '' ]][[ akey.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()) ]]
+                                        </div>
+                                        <div v-if="akey !== area.key" style="margin-top:4px;">
+                                            <button class="btn btn-xsmall btn-secondary"
+                                                    @click="travel(akey)"
+                                                    :disabled="actionPending">
+                                                Travel
+                                            </button>
+                                        </div>
+                                        <div v-else style="font-size:10px;color:var(--gold);margin-top:3px;">Current Location</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- connections from current area -->
+                        <div class="panel" v-if="connections && connections.length">
+                            <div class="panel-title">Nearby Areas</div>
+                            <div class="panel-body">
+                                <div style="display:flex;flex-direction:column;gap:6px;">
+                                    <div v-for="conn in connections" :key="conn.key" style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                                        <div>
+                                            <span style="font-size:13px;" :style="{ color: conn.visited ? 'var(--text-light)' : 'var(--text-dim)' }">
+                                                [[ conn.visited ? conn.name : '???' ]]
+                                            </span>
+                                            <span v-if="conn.visited && conn.difficulty" style="font-size:11px;color:var(--text-dim);margin-left:6px;">Lv.[[ conn.difficulty ]]</span>
+                                            <span v-if="conn.has_shop" style="font-size:10px;color:var(--gold);margin-left:6px;">🛒</span>
+                                            <span v-if="conn.has_enemies" style="font-size:10px;color:var(--red);margin-left:4px;">⚔</span>
+                                        </div>
+                                        <button class="btn btn-xsmall btn-secondary"
+                                                @click="travel(conn.key)"
+                                                :disabled="actionPending">
+                                            Go →
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">Map not available.</div>
                 </div>
 
                 <!-- ═══ EXPLORE tab ═══ -->
@@ -1951,17 +2049,28 @@
                 </div>
 
                 <!-- ═══ LAND / HOUSING ═══ -->
-                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'land' }" style="padding:0;">
-                    <div style="display:flex;gap:8px;padding:8px 0 6px;flex-wrap:wrap;">
-                        <a href="/land/map" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/map';return false;">Map</a>
-                        <a href="/land/shop" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/shop';return false;">Shop</a>
-                        <a href="/land/pets" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/pets';return false;">Pets</a>
-                        <a href="/land/map" style="font-size:12px;color:var(--text-dim);margin-left:auto;line-height:2.2;" target="_blank">Open in new tab ↗</a>
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'land' }">
+                    <div v-if="area && area.key === 'your_land'" style="padding:0;">
+                        <div style="display:flex;gap:8px;padding:8px 0 6px;flex-wrap:wrap;">
+                            <a href="/land/map" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/map';return false;">Map</a>
+                            <a href="/land/shop" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/shop';return false;">Shop</a>
+                            <a href="/land/pets" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/pets';return false;">Pets</a>
+                            <a href="/land/map" style="font-size:12px;color:var(--text-dim);margin-left:auto;line-height:2.2;" target="_blank">Open in new tab ↗</a>
+                        </div>
+                        <iframe id="beta-land-frame"
+                            :src="iframeLoaded.land ? '/land/map' : ''"
+                            style="width:100%;height:calc(100vh - 180px);border:none;border-radius:5px;background:var(--bg-main);"
+                            title="Land & Housing"></iframe>
                     </div>
-                    <iframe id="beta-land-frame"
-                        :src="iframeLoaded.land ? '/land/map' : ''"
-                        style="width:100%;height:calc(100vh - 180px);border:none;border-radius:5px;background:var(--bg-main);"
-                        title="Land & Housing"></iframe>
+                    <div v-else class="empty-state" style="padding:40px 0;">
+                        <div style="font-size:32px;margin-bottom:12px;">🏡</div>
+                        <div style="color:var(--text-dim);font-size:14px;margin-bottom:16px;">You need to travel to your land to manage housing.</div>
+                        <button class="btn btn-secondary btn-small"
+                                @click="travel('your_land')"
+                                :disabled="actionPending">
+                            Travel to Your Land
+                        </button>
+                    </div>
                 </div>
 
                 <!-- ═══ LEADERBOARD ═══ -->
@@ -2142,6 +2251,38 @@
     loadBetaAnnouncements();
     setInterval(loadBetaAnnouncements, 30000);
 })();
+</script>
+
+<script>
+/* ── Chat toggle ──────────────────────────────────────────────── */
+var _chatLoaded = false;
+function toggleChat() {
+    var panel = document.getElementById('chat-panel');
+    var btn   = document.getElementById('chat-toggle-btn');
+    var frame = document.getElementById('chat-widget-frame');
+    if (!panel) return;
+    var isOpen = panel.style.display === 'flex';
+    if (isOpen) {
+        panel.style.display = 'none';
+        if (btn) btn.classList.remove('chat-open');
+    } else {
+        panel.style.display = 'flex';
+        if (btn) btn.classList.add('chat-open');
+        if (frame && !_chatLoaded) {
+            frame.src = '/chat_widget';
+            _chatLoaded = true;
+        }
+        document.getElementById('chat-unread-badge') && (document.getElementById('chat-unread-badge').style.display = 'none');
+    }
+}
+window.toggleChat = toggleChat;
+
+/* ── Re-init tab overflow after Vue mounts (tabs are v-if rendered) */
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        if (typeof initTabOverflow === 'function') initTabOverflow();
+    }, 600);
+});
 </script>
 </body>
 </html>

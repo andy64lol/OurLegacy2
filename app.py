@@ -9778,6 +9778,7 @@ def api_game_state_extended():
             "difficulty": area.get("difficulty", 1),
             "possible_enemies": area.get("possible_enemies", []),
             "possible_bosses": area.get("possible_bosses", []),
+            "map_image": area.get("map_image", ""),
         },
         "connections": connections,
         "shop_items": shop_items,
