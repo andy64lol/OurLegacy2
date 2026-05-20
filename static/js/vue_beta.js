@@ -94,6 +94,18 @@ createApp({
             onlineCount:     0,
 
             iframeLoaded: { land: false, leaderboard: false, wiki: false },
+
+            // pagination
+            invPage:      1,
+            shopPage:     1,
+            marketPage:   1,
+            diaryPage:    1,
+            recipePage:   1,
+            INV_PAGE_SIZE:    15,
+            SHOP_PAGE_SIZE:   15,
+            MARKET_PAGE_SIZE: 20,
+            DIARY_PAGE_SIZE:  30,
+            RECIPE_PAGE_SIZE: 12,
         };
     },
 
@@ -124,11 +136,82 @@ createApp({
             return this.battle.spells || [];
         },
         battleConsumables() {
-            return (this.inventoryItems || []).filter(i => i.type === 'consumable').slice(0, 6);
+            return (this.inventoryItems || []).filter(i => i.type === 'consumable').slice(0, 8);
+        },
+        playerHpLow() {
+            return this.hpPct > 0 && this.hpPct <= 25;
+        },
+        enemyHpPct() {
+            if (!this.battle) return 0;
+            return Math.min(100, Math.round(this.battle.enemy_hp / (this.battle.enemy_max_hp || 1) * 100));
+        },
+
+        // ── pagination computed ──────────────────────────────
+        paginatedInventory() {
+            const start = (this.invPage - 1) * this.INV_PAGE_SIZE;
+            return (this.inventoryItems || []).slice(start, start + this.INV_PAGE_SIZE);
+        },
+        invTotalPages() {
+            return Math.max(1, Math.ceil((this.inventoryItems || []).length / this.INV_PAGE_SIZE));
+        },
+
+        paginatedShop() {
+            const start = (this.shopPage - 1) * this.SHOP_PAGE_SIZE;
+            return (this.shopItems || []).slice(start, start + this.SHOP_PAGE_SIZE);
+        },
+        shopTotalPages() {
+            return Math.max(1, Math.ceil((this.shopItems || []).length / this.SHOP_PAGE_SIZE));
+        },
+
+        paginatedMarket() {
+            const start = (this.marketPage - 1) * this.MARKET_PAGE_SIZE;
+            return (this.marketItems || []).slice(start, start + this.MARKET_PAGE_SIZE);
+        },
+        marketTotalPages() {
+            return Math.max(1, Math.ceil((this.marketItems || []).length / this.MARKET_PAGE_SIZE));
+        },
+
+        paginatedDiary() {
+            const start = (this.diaryPage - 1) * this.DIARY_PAGE_SIZE;
+            return (this.diary || []).slice(start, start + this.DIARY_PAGE_SIZE);
+        },
+        diaryTotalPages() {
+            return Math.max(1, Math.ceil((this.diary || []).length / this.DIARY_PAGE_SIZE));
+        },
+
+        paginatedRecipes() {
+            const start = (this.recipePage - 1) * this.RECIPE_PAGE_SIZE;
+            return (this.craftingRecipes || []).slice(start, start + this.RECIPE_PAGE_SIZE);
+        },
+        recipeTotalPages() {
+            return Math.max(1, Math.ceil((this.craftingRecipes || []).length / this.RECIPE_PAGE_SIZE));
         },
     },
 
+    watch: {
+        'battle.log'(newVal) {
+            if (!newVal || !newVal.length) return;
+            this.$nextTick(() => {
+                const el = document.querySelector('.battle-log-wrap');
+                if (el) el.scrollTop = el.scrollHeight;
+            });
+        },
+        inventoryItems() { this.invPage = 1; },
+        shopItems()       { this.shopPage = 1; },
+        marketItems()     { this.marketPage = 1; },
+        diary()           { this.diaryPage = 1; },
+        craftingRecipes() { this.recipePage = 1; },
+    },
+
     methods: {
+
+        // ── pagination helpers ────────────────────────────────
+        setPage(which, page) {
+            const totalKey = which + 'TotalPages';
+            const total = this[totalKey] || 1;
+            const pageKey = which + 'Page';
+            this[pageKey] = Math.max(1, Math.min(page, total));
+        },
 
         // fetch full extended game state from server
         async fetchState() {
@@ -462,6 +545,17 @@ createApp({
                 accessory_1: 'accessories', accessory_2: 'accessories', accessory_3: 'accessories',
             };
             return map[slot] || null;
+        },
+
+        spellTypeColor(sp) {
+            const map = {
+                fire: '#f07040', ice: '#70c0f0', lightning: '#f0e040',
+                holy: '#f8f0b0', dark: '#c080f8', nature: '#70d890',
+                arcane: '#b080f0', physical: '#d09060', wind: '#a0e8d0',
+                water: '#60a8f0', earth: '#c0a060',
+            };
+            const t = (sp.spell_type || sp.type || '').toLowerCase();
+            return map[t] || 'var(--mana-bright)';
         },
 
         async loadNearby() {
