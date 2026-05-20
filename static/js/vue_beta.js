@@ -140,7 +140,7 @@ createApp({
                 const data = await r.json();
                 if (!data.ok) return;
                 this._applyState(data);
-            } catch (_) {}
+            } catch (_) { /* network error ignored */ }
         },
 
         _applyState(data) {
@@ -367,7 +367,7 @@ createApp({
                     const data = await r.json();
                     this.friendsList = data.friends || [];
                 }
-            } catch (_) {}
+            } catch (_) { /* network error ignored */ }
             this.friendsLoading = false;
         },
 
@@ -382,7 +382,7 @@ createApp({
                     const data = await r.json();
                     if (data.ok) this.groupData = data.group || null;
                 }
-            } catch (_) {}
+            } catch (_) { /* network error ignored */ }
         },
 
         switchTab(tab) {
@@ -440,7 +440,7 @@ createApp({
                     const data = await r.json();
                     this.nearbyPlayers = (data.ok && data.players) ? data.players.slice(0, 5) : [];
                 }
-            } catch (_) {}
+            } catch (_) { /* network error ignored */ }
         },
     },
 

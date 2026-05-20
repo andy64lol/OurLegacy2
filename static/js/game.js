@@ -1322,7 +1322,7 @@ function _applySettingsObj(obj) {
     var keys = ['ol2_theme', 'ol2_bg', 'ol2_btn_style', 'ol2_ui_scale',
                 'ol2_music_volume', 'ol2_music_muted', 'ol2_bgm_track'];
     keys.forEach(function(k) {
-        if (obj[k] != null) localStorage.setItem(k, String(obj[k]));
+        if (obj[k] !== null && obj[k] !== undefined) localStorage.setItem(k, String(obj[k]));
     });
     if (obj.ol2_theme) _applyTheme(obj.ol2_theme);
     if (obj.ol2_bg) _applyBgClass(obj.ol2_bg);
@@ -1335,7 +1335,7 @@ function _applySettingsObj(obj) {
             if (label) label.textContent = Math.round(scale * 100) + '%';
         }
     }
-    if (obj.ol2_music_volume != null && _musicAudio) {
+    if (obj.ol2_music_volume !== null && obj.ol2_music_volume !== undefined && _musicAudio) {
         var vol = parseFloat(obj.ol2_music_volume);
         if (!isNaN(vol)) {
             _musicMuted = (vol === 0) || obj.ol2_music_muted === 'true';

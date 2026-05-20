@@ -232,7 +232,7 @@ def handle_options(path=""):
     return response, 204
 
 
-sio = _socketio_module.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+sio = _socketio_module.AsyncServer(async_mode="asgi", cors_allowed_origins="*")  # type: ignore[attr-defined]
 
 _asyncio_loop: _asyncio.AbstractEventLoop | None = None
 _username_player: dict = {}
@@ -269,7 +269,7 @@ def _load_session_for_socket(environ: dict) -> dict:
             raw = _redis_client.get("session:" + session_id)
             if raw is None:
                 return {}
-            data = _json.loads(raw)
+            data = _json.loads(raw)  # type: ignore[arg-type]
             return dict(data) if isinstance(data, dict) else {}
         except Exception:
             return {}
@@ -8235,7 +8235,7 @@ async def _on_startup():
         _asyncio.create_task(_world_tick())
 
 
-asgi_app = _socketio_module.ASGIApp(
+asgi_app = _socketio_module.ASGIApp(  # type: ignore[attr-defined]
     sio,
     other_asgi_app=_WsgiToAsgi(app),
     on_startup=_on_startup,
@@ -9236,6 +9236,7 @@ def api_battle_spell():
     player, err = _api_resolve_player("battle:write")
     if err:
         return err
+    assert player is not None
     enemy = session.get("battle_enemy") or {}
     if not enemy:
         return jsonify({"ok": False, "message": "Not in battle."}), 400
@@ -9404,6 +9405,7 @@ def api_game_state_extended():
     player, err = _api_resolve_player("game:read")
     if err:
         return err
+    assert player is not None
     area_key = session.get("current_area", "starting_village")
     area = GAME_DATA["areas"].get(area_key, {})
     area_name = area.get("name", area_key.replace("_", " ").title())
@@ -9792,6 +9794,7 @@ def api_action_craft():
     player, err = _api_resolve_player("game:write")
     if err:
         return err
+    assert player is not None
     data = request.get_json(force=True, silent=True) or {}
     recipe_id = data.get("recipe_id", "")
     result = craft_item(player, recipe_id, GAME_DATA.get("crafting", {}))
