@@ -1,24 +1,32 @@
 -- =============================================================
 -- Our Legacy 2 — Supabase / PostgreSQL Database Setup
--- MMO-style server-authoritative session persistence
+-- FULL SAFE VERSION (supports old databases too)
 -- =============================================================
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- ── User accounts ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_users (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    username      TEXT NOT NULL UNIQUE,
-    pw_hash       TEXT NOT NULL,
-    salt          TEXT NOT NULL,
-    email         TEXT UNIQUE,
+    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username       TEXT NOT NULL UNIQUE,
+    pw_hash        TEXT NOT NULL,
+    salt           TEXT NOT NULL,
+    email          TEXT UNIQUE,
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_users_username_idx ON ol2_users (username);
-CREATE INDEX IF NOT EXISTS ol2_users_email_idx    ON ol2_users (email);
+-- Migration safety
+ALTER TABLE ol2_users
+ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
 
--- ── LEGACY: Cloud save blobs (deprecated — use ol2_characters) ─
--- Kept for data-migration purposes only. Do not write new saves here.
+CREATE INDEX IF NOT EXISTS ol2_users_username_idx
+ON ol2_users (username);
+
+CREATE INDEX IF NOT EXISTS ol2_users_email_idx
+ON ol2_users (email);
+
+-- ── LEGACY: Cloud save blobs ──────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_saves (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id          UUID NOT NULL UNIQUE REFERENCES ol2_users (id) ON DELETE CASCADE,
@@ -30,7 +38,8 @@ CREATE TABLE IF NOT EXISTS ol2_saves (
     updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_saves_user_id_idx ON ol2_saves (user_id);
+CREATE INDEX IF NOT EXISTS ol2_saves_user_id_idx
+ON ol2_saves (user_id);
 
 -- ── Shared updated_at trigger ────────────────────────────────
 CREATE OR REPLACE FUNCTION ol2_set_updated_at()
@@ -45,13 +54,13 @@ END;
 $$;
 
 DROP TRIGGER IF EXISTS ol2_saves_updated_at ON ol2_saves;
-CREATE TRIGGER ol2_saves_updated_at
-    BEFORE UPDATE ON ol2_saves
-    FOR EACH ROW EXECUTE FUNCTION ol2_set_updated_at();
 
--- ── Characters (primary MMO session persistence) ────────────────
--- One row per account. Written on every significant game event.
--- Loaded automatically when the player logs in.
+CREATE TRIGGER ol2_saves_updated_at
+BEFORE UPDATE ON ol2_saves
+FOR EACH ROW
+EXECUTE FUNCTION ol2_set_updated_at();
+
+-- ── Characters ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_characters (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id          UUID NOT NULL UNIQUE REFERENCES ol2_users (id) ON DELETE CASCADE,
@@ -59,32 +68,67 @@ CREATE TABLE IF NOT EXISTS ol2_characters (
     level            INTEGER NOT NULL DEFAULT 1,
     character_class  TEXT NOT NULL DEFAULT '',
     current_area     TEXT NOT NULL DEFAULT 'starting_village',
-    -- fast-query stats (mirrors values inside game_state for leaderboard/display)
+
     hp               INTEGER NOT NULL DEFAULT 100,
     gold             INTEGER NOT NULL DEFAULT 0,
     experience       INTEGER NOT NULL DEFAULT 0,
-    -- full serialised game state (all session data)
+
     game_state       JSONB NOT NULL DEFAULT '{}',
-    -- session tracking
+
     is_online        BOOLEAN NOT NULL DEFAULT FALSE,
     last_login       TIMESTAMPTZ,
     last_logout      TIMESTAMPTZ,
     playtime_seconds BIGINT NOT NULL DEFAULT 0,
+
     updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_characters_user_id_idx  ON ol2_characters (user_id);
-CREATE INDEX IF NOT EXISTS ol2_characters_level_idx    ON ol2_characters (level DESC, player_name);
-CREATE INDEX IF NOT EXISTS ol2_characters_is_online_idx ON ol2_characters (is_online) WHERE is_online = TRUE;
+-- Migration safety
+ALTER TABLE ol2_characters
+ADD COLUMN IF NOT EXISTS hp INTEGER NOT NULL DEFAULT 100;
+
+ALTER TABLE ol2_characters
+ADD COLUMN IF NOT EXISTS gold INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE ol2_characters
+ADD COLUMN IF NOT EXISTS experience INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE ol2_characters
+ADD COLUMN IF NOT EXISTS game_state JSONB NOT NULL DEFAULT '{}';
+
+ALTER TABLE ol2_characters
+ADD COLUMN IF NOT EXISTS is_online BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE ol2_characters
+ADD COLUMN IF NOT EXISTS last_login TIMESTAMPTZ;
+
+ALTER TABLE ol2_characters
+ADD COLUMN IF NOT EXISTS last_logout TIMESTAMPTZ;
+
+ALTER TABLE ol2_characters
+ADD COLUMN IF NOT EXISTS playtime_seconds BIGINT NOT NULL DEFAULT 0;
+
+ALTER TABLE ol2_characters
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+CREATE INDEX IF NOT EXISTS ol2_characters_user_id_idx
+ON ol2_characters (user_id);
+
+CREATE INDEX IF NOT EXISTS ol2_characters_level_idx
+ON ol2_characters (level DESC, player_name);
+
+CREATE INDEX IF NOT EXISTS ol2_characters_is_online_idx
+ON ol2_characters (is_online)
+WHERE is_online = TRUE;
 
 DROP TRIGGER IF EXISTS ol2_characters_updated_at ON ol2_characters;
+
 CREATE TRIGGER ol2_characters_updated_at
-    BEFORE UPDATE ON ol2_characters
-    FOR EACH ROW EXECUTE FUNCTION ol2_set_updated_at();
+BEFORE UPDATE ON ol2_characters
+FOR EACH ROW
+EXECUTE FUNCTION ol2_set_updated_at();
 
 -- ── Active sessions ──────────────────────────────────────────
--- Lightweight table tracking every live session token.
--- Allows server-side forced logout, duplicate login detection, etc.
 CREATE TABLE IF NOT EXISTS ol2_sessions (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id       UUID NOT NULL REFERENCES ol2_users (id) ON DELETE CASCADE,
@@ -97,9 +141,15 @@ CREATE TABLE IF NOT EXISTS ol2_sessions (
     is_active     BOOLEAN NOT NULL DEFAULT TRUE
 );
 
-CREATE INDEX IF NOT EXISTS ol2_sessions_user_id_idx      ON ol2_sessions (user_id, is_active);
-CREATE INDEX IF NOT EXISTS ol2_sessions_token_idx        ON ol2_sessions (session_token) WHERE is_active = TRUE;
-CREATE INDEX IF NOT EXISTS ol2_sessions_last_seen_idx    ON ol2_sessions (last_seen_at DESC);
+CREATE INDEX IF NOT EXISTS ol2_sessions_user_id_idx
+ON ol2_sessions (user_id, is_active);
+
+CREATE INDEX IF NOT EXISTS ol2_sessions_token_idx
+ON ol2_sessions (session_token)
+WHERE is_active = TRUE;
+
+CREATE INDEX IF NOT EXISTS ol2_sessions_last_seen_idx
+ON ol2_sessions (last_seen_at DESC);
 
 -- ── Chat ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_chat (
@@ -109,7 +159,8 @@ CREATE TABLE IF NOT EXISTS ol2_chat (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_chat_created_at_idx ON ol2_chat (created_at DESC);
+CREATE INDEX IF NOT EXISTS ol2_chat_created_at_idx
+ON ol2_chat (created_at DESC);
 
 -- ── DMs ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_dms (
@@ -121,23 +172,30 @@ CREATE TABLE IF NOT EXISTS ol2_dms (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_dms_recipient_idx    ON ol2_dms (recipient, read);
-CREATE INDEX IF NOT EXISTS ol2_dms_conversation_idx ON ol2_dms (sender, recipient, created_at);
+CREATE INDEX IF NOT EXISTS ol2_dms_recipient_idx
+ON ol2_dms (recipient, read);
 
--- ── Friends ───────────────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS ol2_dms_conversation_idx
+ON ol2_dms (sender, recipient, created_at);
+
+-- ── Friends ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_friends (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     requester  TEXT NOT NULL,
     target     TEXT NOT NULL,
-    status     TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted')),
+    status     TEXT NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'accepted')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (requester, target)
 );
 
-CREATE INDEX IF NOT EXISTS ol2_friends_requester_idx ON ol2_friends (requester);
-CREATE INDEX IF NOT EXISTS ol2_friends_target_idx    ON ol2_friends (target);
+CREATE INDEX IF NOT EXISTS ol2_friends_requester_idx
+ON ol2_friends (requester);
 
--- ── Blocks ────────────────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS ol2_friends_target_idx
+ON ol2_friends (target);
+
+-- ── Blocks ───────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_blocks (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     blocker    TEXT NOT NULL,
@@ -146,9 +204,10 @@ CREATE TABLE IF NOT EXISTS ol2_blocks (
     UNIQUE (blocker, blocked)
 );
 
-CREATE INDEX IF NOT EXISTS ol2_blocks_blocker_idx ON ol2_blocks (blocker);
+CREATE INDEX IF NOT EXISTS ol2_blocks_blocker_idx
+ON ol2_blocks (blocker);
 
--- ── Groups ────────────────────────────────────────────────────
+-- ── Groups ───────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_groups (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        TEXT NOT NULL UNIQUE,
@@ -162,8 +221,11 @@ CREATE TABLE IF NOT EXISTS ol2_groups (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_groups_invite_code_idx ON ol2_groups (invite_code);
-CREATE INDEX IF NOT EXISTS ol2_groups_leader_idx       ON ol2_groups (leader);
+CREATE INDEX IF NOT EXISTS ol2_groups_invite_code_idx
+ON ol2_groups (invite_code);
+
+CREATE INDEX IF NOT EXISTS ol2_groups_leader_idx
+ON ol2_groups (leader);
 
 CREATE TABLE IF NOT EXISTS ol2_group_members (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -174,8 +236,11 @@ CREATE TABLE IF NOT EXISTS ol2_group_members (
     UNIQUE (group_id, username)
 );
 
-CREATE INDEX IF NOT EXISTS ol2_group_members_group_id_idx ON ol2_group_members (group_id);
-CREATE INDEX IF NOT EXISTS ol2_group_members_username_idx ON ol2_group_members (username);
+CREATE INDEX IF NOT EXISTS ol2_group_members_group_id_idx
+ON ol2_group_members (group_id);
+
+CREATE INDEX IF NOT EXISTS ol2_group_members_username_idx
+ON ol2_group_members (username);
 
 CREATE TABLE IF NOT EXISTS ol2_group_log (
     id           BIGSERIAL PRIMARY KEY,
@@ -187,16 +252,17 @@ CREATE TABLE IF NOT EXISTS ol2_group_log (
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_group_log_group_id_idx ON ol2_group_log (group_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS ol2_group_log_group_id_idx
+ON ol2_group_log (group_id, created_at DESC);
 
--- ── Tick lock ─────────────────────────────────────────────────
+-- ── Tick lock ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_tick_lock (
     lock_name  TEXT PRIMARY KEY,
     worker_id  TEXT NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL
 );
 
--- ── Email verifications ───────────────────────────────────────
+-- ── Email verification ───────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_email_verifications (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id    UUID NOT NULL REFERENCES ol2_users (id) ON DELETE CASCADE,
@@ -206,10 +272,13 @@ CREATE TABLE IF NOT EXISTS ol2_email_verifications (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_email_verifications_token_idx   ON ol2_email_verifications (token);
-CREATE INDEX IF NOT EXISTS ol2_email_verifications_user_id_idx ON ol2_email_verifications (user_id);
+CREATE INDEX IF NOT EXISTS ol2_email_verifications_token_idx
+ON ol2_email_verifications (token);
 
--- ── Password resets ───────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS ol2_email_verifications_user_id_idx
+ON ol2_email_verifications (user_id);
+
+-- ── Password resets ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_password_resets (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id    UUID NOT NULL REFERENCES ol2_users (id) ON DELETE CASCADE,
@@ -218,9 +287,10 @@ CREATE TABLE IF NOT EXISTS ol2_password_resets (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_password_resets_token_idx ON ol2_password_resets (token);
+CREATE INDEX IF NOT EXISTS ol2_password_resets_token_idx
+ON ol2_password_resets (token);
 
--- ── Admin system ──────────────────────────────────────────────
+-- ── Admin ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ol2_admin_config (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL DEFAULT ''
@@ -231,8 +301,8 @@ VALUES ('owner', 'theprimordialone')
 ON CONFLICT (key) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS ol2_admin_mods (
-    username  TEXT PRIMARY KEY,
-    added_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    username TEXT PRIMARY KEY,
+    added_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 INSERT INTO ol2_admin_mods (username)
@@ -240,10 +310,10 @@ VALUES ('andy64lol')
 ON CONFLICT (username) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS ol2_admin_bans (
-    username   TEXT PRIMARY KEY,
-    reason     TEXT NOT NULL DEFAULT 'No reason given',
-    banned_by  TEXT NOT NULL DEFAULT '',
-    banned_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    username  TEXT PRIMARY KEY,
+    reason    TEXT NOT NULL DEFAULT 'No reason given',
+    banned_by TEXT NOT NULL DEFAULT '',
+    banned_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS ol2_admin_mutes (
@@ -261,49 +331,48 @@ CREATE TABLE IF NOT EXISTS ol2_admin_warns (
     warned_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ol2_admin_warns_username_idx ON ol2_admin_warns (username);
+CREATE INDEX IF NOT EXISTS ol2_admin_warns_username_idx
+ON ol2_admin_warns (username);
 
--- ── Row Level Security ────────────────────────────────────────
-ALTER TABLE ol2_users              ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_saves              ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_characters         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_sessions           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_chat               ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_dms                ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_friends            ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_blocks             ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_groups             ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_group_members      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_group_log          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_tick_lock          ENABLE ROW LEVEL SECURITY;
+-- ── Row Level Security ───────────────────────────────────────
+ALTER TABLE ol2_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_saves ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_characters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_chat ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_dms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_friends ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_blocks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_group_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_group_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_tick_lock ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ol2_email_verifications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_password_resets    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_admin_config       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_admin_mods         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_admin_bans         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_admin_mutes        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ol2_admin_warns        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_password_resets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_admin_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_admin_mods ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_admin_bans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_admin_mutes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ol2_admin_warns ENABLE ROW LEVEL SECURITY;
 
--- deny anon everywhere (service_role key bypasses RLS)
 DO $$
 DECLARE t TEXT;
 BEGIN
-  FOR t IN
-    SELECT tablename FROM pg_tables WHERE schemaname = 'public'
-  LOOP
-    EXECUTE format('DROP POLICY IF EXISTS "%s: deny anon" ON %I', t, t);
-    EXECUTE format('CREATE POLICY "%s: deny anon" ON %I FOR ALL TO anon USING (false)', t, t);
-  END LOOP;
-END $$;
+    FOR t IN
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'public'
+    LOOP
+        EXECUTE format(
+            'DROP POLICY IF EXISTS "%s: deny anon" ON %I',
+            t,
+            t
+        );
 
--- ── Migration helpers (run once on existing databases) ────────
--- Add new columns to ol2_characters if upgrading from older schema:
--- ALTER TABLE ol2_characters ADD COLUMN IF NOT EXISTS hp INTEGER NOT NULL DEFAULT 100;
--- ALTER TABLE ol2_characters ADD COLUMN IF NOT EXISTS gold INTEGER NOT NULL DEFAULT 0;
--- ALTER TABLE ol2_characters ADD COLUMN IF NOT EXISTS experience INTEGER NOT NULL DEFAULT 0;
--- ALTER TABLE ol2_characters ADD COLUMN IF NOT EXISTS is_online BOOLEAN NOT NULL DEFAULT FALSE;
--- ALTER TABLE ol2_characters ADD COLUMN IF NOT EXISTS last_login TIMESTAMPTZ;
--- ALTER TABLE ol2_characters ADD COLUMN IF NOT EXISTS last_logout TIMESTAMPTZ;
--- ALTER TABLE ol2_characters ADD COLUMN IF NOT EXISTS playtime_seconds BIGINT NOT NULL DEFAULT 0;
--- Add email_verified to ol2_users if upgrading:
--- ALTER TABLE ol2_users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
+        EXECUTE format(
+            'CREATE POLICY "%s: deny anon" ON %I FOR ALL TO anon USING (false)',
+            t,
+            t
+        );
+    END LOOP;
+END $$;
