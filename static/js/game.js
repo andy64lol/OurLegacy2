@@ -198,10 +198,20 @@ function initPageTransitions() {
         });
     });
     document.querySelectorAll('form[method="post"],form[method="POST"]').forEach(function (form) {
+        var action = form.getAttribute('action') || '';
+        if (action.match(/^\/action\//)) return;
         form.addEventListener('submit', function () {
             document.body.classList.add('page-fade-out');
         });
     });
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            document.body.classList.remove('page-fade-out');
+        }
+    });
+    setTimeout(function () {
+        document.body.classList.remove('page-fade-out');
+    }, 600);
 }
 
 var _marketLoaded = false;
@@ -600,6 +610,9 @@ function _applyBgClass(val) {
     document.body.classList.remove('ol2-bg-1','ol2-bg-2','ol2-bg-3','ol2-bg-4');
     if (val && val !== 'none') {
         document.body.classList.add('ol2-bg-' + val);
+        document.documentElement.setAttribute('data-bg', val);
+    } else {
+        document.documentElement.removeAttribute('data-bg');
     }
 }
 

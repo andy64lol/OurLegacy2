@@ -568,3 +568,20 @@ def api_admin_tp():
         return jsonify(
             {"ok": True, "message": f"Teleport queued for {target} → {area_name}. Takes effect on their next page load."}
         )
+
+
+@admin_bp.route("/api/admin/announce", methods=["POST"])
+def api_admin_announce():
+    h = _h()
+    caller = session.get("online_username", "")
+    if not h._is_owner(caller):
+        return jsonify({"ok": False, "message": "Forbidden."}), 403
+    body = request.get_json(force=True, silent=True) or {}
+    message = (body.get("message") or "").strip()
+    if not message:
+        return jsonify({"ok": False, "message": "Message cannot be empty."})
+    ts = int(time.time())
+    h._server_announcements.append((ts, message))
+    if len(h._server_announcements) > 50:
+        h._server_announcements[:] = h._server_announcements[-50:]
+    return jsonify({"ok": True, "message": f"Announcement broadcast: \"{message}\""})

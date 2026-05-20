@@ -304,6 +304,8 @@ const ALL_COMMANDS = [
     { name: "set stat <name> <n>",     desc: "Set a stat: hp max_hp mp max_mp attack defense speed gold", ownerOnly: true },
     { name: "set mining <n>",          desc: "Set your mining level (1–25)", ownerOnly: true },
     { name: "remove item <name> [n]",  desc: "Remove item(s) from inventory", ownerOnly: true },
+    { name: "── BROADCAST ──",         desc: "", header: true },
+    { name: "announce <message>",      desc: "Broadcast a server announcement to all online players", ownerOnly: true },
     { name: "── CONSOLE ──",           desc: "", header: true },
     { name: "refresh",                 desc: "Refresh sidebar data", ownerOnly: false },
     { name: "clear",                   desc: "Clear the console output", ownerOnly: false },
@@ -715,6 +717,14 @@ async function runCommand() {
                     print('Usage: remove item <name> [qty]', 'warn');
                 }
                 await refreshData();
+                break;
+            }
+            case 'announce': {
+                if (!IS_OWNER) { permErr(); break; }
+                const msg = parts.slice(1).join(' ').trim();
+                if (!msg) { print('Usage: announce <message>', 'warn'); break; }
+                const r = await api('POST', '/api/admin/announce', { message: msg });
+                print(r.message, r.ok ? 'ok' : 'err');
                 break;
             }
             default:

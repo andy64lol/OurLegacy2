@@ -9,6 +9,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="/static/css/style.css">
     {% block extra_head %}{% endblock %}
+    <script>
+    (function(){
+        try {
+            var bg = localStorage.getItem('ol2_bg');
+            if (bg && bg !== 'none') document.documentElement.setAttribute('data-bg', bg);
+            var theme = localStorage.getItem('ol2_theme');
+            if (theme && theme !== 'default') document.documentElement.setAttribute('data-theme', theme);
+        } catch(e) {}
+    })();
+    </script>
 </head>
 <body>
 
