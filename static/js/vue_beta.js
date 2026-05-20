@@ -409,38 +409,15 @@ createApp({
             }
         },
 
-        async cloudSave() {
+        async autoSaveHeartbeat() {
+            if (!this.onlineUsername) return;
             try {
-                const r = await fetch('/api/online/cloud_save', { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                const data = await r.json();
-                this.showToast(data.message || (data.ok ? 'Cloud saved!' : 'Save failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
-            } catch (_) { this.showToast('Save failed.', 'var(--red)'); }
-        },
-
-        async cloudLoad() {
-            try {
-                const r = await fetch('/api/online/cloud_load', { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                const data = await r.json();
-                this.showToast(data.message || (data.ok ? 'Cloud loaded!' : 'Load failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
-                if (data.ok) this.fetchState();
-            } catch (_) { this.showToast('Load failed.', 'var(--red)'); }
-        },
-
-        async localSave() {
-            try {
-                const r = await fetch('/api/save', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                const data = await r.json();
-                this.showToast(data.ok ? 'Saved to browser!' : (data.message || 'Save failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
-            } catch (_) { this.showToast('Save failed.', 'var(--red)'); }
-        },
-
-        async localLoad() {
-            try {
-                const r = await fetch('/api/load', { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                const data = await r.json();
-                this.showToast(data.message || (data.ok ? 'Loaded from browser!' : 'Load failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
-                if (data.ok) this.fetchState();
-            } catch (_) { this.showToast('Load failed.', 'var(--red)'); }
+                await fetch('/api/online/autosave', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+            } catch (_) { /* silent */ }
         },
 
         async marketReset() {
@@ -505,6 +482,7 @@ createApp({
         if (this.onlineUsername) {
             this.loadNearby();
             setInterval(() => this.loadNearby(), 20000);
+            setInterval(() => this.autoSaveHeartbeat(), 30000);
         }
 
         document.addEventListener('visibilitychange', () => {

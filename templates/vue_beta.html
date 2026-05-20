@@ -495,9 +495,9 @@
             }
             setTimeout(hideLoader, 6000);
             window.addEventListener('load', function() {
-                fetch('/api/online/cloud_save', { method: 'POST' })
-                    .then(hideLoader)
-                    .catch(hideLoader);
+                fetch('/api/online/autosave', { method: 'POST', credentials: 'same-origin' })
+                    .catch(function() {})
+                    .finally(hideLoader);
             });
         })();
     </script>
@@ -529,8 +529,8 @@
                          alt="Our Legacy 2" class="sidebar-banner">
                 </div>
 
-                <div class="beta-banner">
-                    Vue 3 Beta &mdash; admin preview
+                <div class="beta-banner" style="background:linear-gradient(135deg,rgba(10,60,30,0.45),rgba(5,30,15,0.45));border-color:rgba(60,200,100,0.3);color:#90dfa0;">
+                    &#9679; Progress auto-saves
                 </div>
 
                 <div v-if="player && hpPct <= 25"
@@ -676,14 +676,9 @@
                     <img src="/game_assets/glyphs/chat.webp" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
                     [[ onlineUsername ]]
                 </div>
-                <div v-if="player" style="display:flex;flex-direction:column;gap:4px;padding:0 4px;">
-                    <div v-if="onlineUsername" style="display:flex;gap:4px;">
-                        <button @click="cloudSave" class="btn btn-secondary btn-xsmall" style="flex:1;font-size:10px;" title="Cloud Save">&#9729; Save</button>
-                        <button @click="cloudLoad" class="btn btn-secondary btn-xsmall" style="flex:1;font-size:10px;" title="Cloud Load">&#9729; Load</button>
-                    </div>
-                    <div style="display:flex;gap:4px;">
-                        <button @click="localSave" class="btn btn-secondary btn-xsmall" style="flex:1;font-size:10px;" title="Save to browser">&#128190; Save</button>
-                        <button @click="localLoad" class="btn btn-secondary btn-xsmall" style="flex:1;font-size:10px;" title="Load from browser">&#128190; Load</button>
+                <div v-if="player" style="padding:0 4px;">
+                    <div style="font-size:10px;color:#90dfa0;text-align:center;padding:3px 0;opacity:0.8;">
+                        &#9632; Progress saved automatically
                     </div>
                 </div>
             </div>
@@ -847,9 +842,8 @@
                         <div class="panel-body" style="padding-bottom:10px;">
                             <div v-for="(msg, i) in recentMessages.slice(0,5)" :key="i"
                                  class="log-entry"
-                                 style="font-size:13px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);"
-                                 :style="{ color: msg.color || 'var(--text-light)' }">
-                                [[ msg.text ]]
+                                 :style="{ color: msg.color || 'var(--text-light)', fontSize:'13px', padding:'3px 0', borderBottom:'1px solid rgba(255,255,255,0.05)' }"
+                                 v-html="msg.text">
                             </div>
                             <div style="margin-top:8px;">
                                 <button class="btn btn-xsmall btn-secondary" @click="switchTab('diary')">Full Diary &rarr;</button>
@@ -883,8 +877,8 @@
                         </div>
 
                         <div class="battle-log-wrap" v-if="battle.log && battle.log.length">
-                            <div v-for="(entry, i) in battle.log" :key="i" class="battle-log-entry">
-                                [[ entry ]]
+                            <div v-for="(entry, i) in battle.log" :key="i" class="battle-log-entry"
+                                 v-html="typeof entry === 'object' ? entry.text : entry">
                             </div>
                         </div>
 
@@ -1403,7 +1397,10 @@
                         <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);">[[ diary.length ]] entries</div>
                         <div class="panel">
                             <div class="panel-body">
-                                <div v-for="(entry, i) in diary" :key="i" class="diary-entry">[[ entry ]]</div>
+                                <div v-for="(entry, i) in diary" :key="i" class="diary-entry"
+                                     :style="{ color: (typeof entry === 'object' ? entry.color : null) || 'var(--text-dim)' }"
+                                     v-html="typeof entry === 'object' ? entry.text : entry">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1413,8 +1410,8 @@
                             <div class="panel-body events-list">
                                 <div v-for="(msg, i) in messages" :key="i"
                                      class="log-entry"
-                                     :style="{ color: msg.color || 'var(--text-light)' }">
-                                    [[ msg.text ]]
+                                     :style="{ color: msg.color || 'var(--text-light)' }"
+                                     v-html="msg.text">
                                 </div>
                             </div>
                         </div>
