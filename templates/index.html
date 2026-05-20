@@ -882,14 +882,12 @@
         </div>
 
         <div class="sidebar-save-section">
-            {% if not online_user %}
-            <input type="file" id="load-file-input" accept=".olsave" style="display:none;">
-            <button class="btn btn-secondary btn-small" onclick="triggerLoadFile()">Load Game</button>
-            {% else %}
+            {% if online_user %}
             <div
                 style="font-size:11px;color:var(--mana-bright);text-align:center;padding:3px 0;opacity:0.85;display:flex;align-items:center;justify-content:center;gap:4px;">
                 <img src="/game_assets/glyphs/chat.webp" alt="chat"
                     style="width:22px;height:22px;image-rendering:pixelated;"> {{ online_user }}</div>
+            <div style="font-size:11px;color:var(--green-bright);text-align:center;padding:2px 0;opacity:0.7;">&#9679; Progress saved automatically</div>
             {% if user_has_email is defined and not user_has_email %}
             <button onclick="openEmailSetupModal()" title="{% if user_email_pending %}Verify your email address{% else %}Add an email address for password recovery{% endif %}"
                 style="width:100%;background:rgba(180,100,20,0.25);border:1px solid rgba(220,150,40,0.6);border-radius:6px;color:#e8a020;font-size:11px;padding:4px 8px;cursor:pointer;margin-top:3px;display:flex;align-items:center;justify-content:center;gap:4px;">
@@ -902,12 +900,11 @@
         <div class="sidebar-nav">
             {% if online_user %}
             <button class="btn btn-danger btn-small" onclick="logoutAndSave()">
-                Save to Exit
+                Exit to Menu
             </button>
-            <div id="cloud-save-status" style="font-size:11px;text-align:center;min-height:14px;margin-top:2px;"></div>
             {% else %}
             <button class="btn btn-danger btn-small" onclick="saveAndQuit()">
-                Save to Exit
+                Exit to Menu
             </button>
             {% endif %}
             <button class="btn btn-secondary btn-small" onclick="openSettings()" style="margin-top:4px;"><img
@@ -3435,16 +3432,10 @@
 
         {% if online_user %}
         <div style="margin-top:8px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:10px;">Save Slots</div>
-            <div id="saves-slot-list" style="display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto;margin-bottom:8px;">
-                <div style="color:var(--text-dim);font-size:12px;text-align:center;padding:8px 0;">Loading saves…</div>
-            </div>
-        </div>
-
-        <div style="margin-top:8px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Account</div>
-            <button class="btn btn-secondary btn-small" onclick="closeSettings();onlineLogout();"
-                style="width:100%;opacity:0.7;font-size:12px;">Log Out (without saving)</button>
+            <div style="font-size:12px;color:var(--green-bright);margin-bottom:8px;text-align:center;opacity:0.85;">&#9679; Progress saved automatically</div>
+            <button class="btn btn-secondary btn-small" onclick="closeSettings();logoutAndSave();"
+                style="width:100%;opacity:0.7;font-size:12px;">Save &amp; Log Out</button>
         </div>
         {% endif %}
 
@@ -3618,28 +3609,13 @@
         el.textContent = msg;
         el.style.color = ok ? 'var(--green-bright)' : 'var(--red)';
     }
-    async function autoPlayAfterLogin() {
-        setOnlineStatus('Checking for saved game...', true);
-        try {
-            var metaRes = await fetch('/api/online/cloud_meta');
-            var metaJson = await metaRes.json();
-            if (metaJson.ok && metaJson.meta) {
-                setOnlineStatus('Save found! Loading your adventure...', true);
-                var loadRes = await fetch('/api/online/cloud_load', {method: 'POST'});
-                var loadJson = await loadRes.json();
-                if (loadJson.ok) {
-                    window.location.href = '/game';
-                } else {
-                    setOnlineStatus('Could not load save: ' + (loadJson.message || 'Unknown error.'), false);
-                    setLoginBtnsDisabled(false);
-                }
-            } else {
-                setOnlineStatus('No save found. Starting new journey...', true);
-                setTimeout(function () {window.location.href = '/create';}, 700);
-            }
-        } catch (e) {
-            setOnlineStatus('Network error: ' + e.message, false);
-            setLoginBtnsDisabled(false);
+    function autoPlayAfterLogin(loginJson) {
+        if (loginJson && loginJson.character_loaded) {
+            setOnlineStatus('Character loaded! Entering game...', true);
+            setTimeout(function () { window.location.href = '/game'; }, 500);
+        } else {
+            setOnlineStatus('No character found. Starting new journey...', true);
+            setTimeout(function () { window.location.href = '/create'; }, 700);
         }
     }
     function setLoginBtnsDisabled(disabled) {
@@ -3663,7 +3639,7 @@
             var json = await res.json();
             if (json.ok) {
                 setOnlineStatus('Signed in! Loading...', true);
-                await autoPlayAfterLogin();
+                autoPlayAfterLogin(json);
             } else {
                 setOnlineStatus(json.message || 'Login failed.', false);
                 setLoginBtnsDisabled(false);
@@ -3700,7 +3676,7 @@
                 });
                 var loginJson = await loginRes.json();
                 if (loginJson.ok) {
-                    await autoPlayAfterLogin();
+                    autoPlayAfterLogin(loginJson);
                 } else {
                     setOnlineStatus('Account created! Please sign in.', true);
                     setTimeout(function () {switchOnlineTab('login');}, 1200);
@@ -4542,14 +4518,10 @@
 
     setInterval(checkSession, SESSION_CHECK_INTERVAL);
 
-    // autosave every 5 minutes
+    // session heartbeat every 5 minutes
     setInterval(async function() {
         try {
-            var r = await fetch('/api/online/autosave', { method: 'POST' });
-            var d = await r.json();
-            if (d && d.ok && typeof showToast === 'function') {
-                showToast('Progress autosaved', 'var(--green-bright)', 2500);
-            }
+            await fetch('/api/online/autosave', { method: 'POST' });
         } catch(e) {}
     }, 300000);
 })();

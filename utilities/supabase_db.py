@@ -501,20 +501,24 @@ def character_autosave(user_id: str, game_state: Dict[str, Any]) -> Dict[str, An
         "user_id": user_id,
         "player_name": player.get("name", ""),
         "level": player.get("level", 1),
-        "character_class": player.get("class", ""),
+        "character_class": player.get("class", player.get("character_class", "")),
         "current_area": game_state.get("current_area", "starting_village"),
+        # fast-query stat columns (mirrors game_state for leaderboard/display)
+        "hp": player.get("hp", 100),
+        "gold": player.get("gold", 0),
+        "experience": player.get("experience", 0),
         "game_state": _json.dumps(game_state),
     }
 
     def _do():
         client = _get_client()
         client.table("ol2_characters").upsert(row, on_conflict="user_id").execute()
-        return {"ok": True, "message": "Character auto-saved."}
+        return {"ok": True, "message": "Character saved."}
 
     try:
         return _run(_do)
     except Exception as e:
-        return {"ok": False, "message": f"Character autosave failed: {e}"}
+        return {"ok": False, "message": f"Character save failed: {e}"}
 
 def character_autoload(user_id: str) -> Dict[str, Any]:
     import json as _json
@@ -1432,3 +1436,123 @@ def admin_clear_warns(username: str) -> bool:
         return _run(_do)
     except Exception:
         return False
+
+
+# ── MMO Session tracking ──────────────────────────────────────
+
+def session_start(user_id: str, session_token: str,
+                  ip_address: Optional[str] = None,
+                  user_agent: Optional[str] = None) -> None:
+    """Record a new session and mark the character as online."""
+    def _do():
+        client = _get_client()
+        # close any stale active sessions for this user
+        client.table("ol2_sessions").update({
+            "is_active": False,
+            "ended_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }).eq("user_id", user_id).eq("is_active", True).execute()
+        # open new session
+        client.table("ol2_sessions").insert({
+            "user_id": user_id,
+            "session_token": session_token,
+            "ip_address": ip_address or "",
+            "user_agent": (user_agent or "")[:500],
+            "is_active": True,
+        }).execute()
+        # mark character online and update last_login
+        client.table("ol2_characters").update({
+            "is_online": True,
+            "last_login": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }).eq("user_id", user_id).execute()
+
+    try:
+        _run(_do)
+    except Exception:
+        pass
+
+
+def session_end(user_id: str, session_token: str) -> None:
+    """Close session record and mark character offline, updating playtime."""
+    def _do():
+        client = _get_client()
+        now = datetime.datetime.now(datetime.timezone.utc)
+        now_iso = now.isoformat()
+
+        # find open session to calculate playtime
+        sess_res = (
+            client.table("ol2_sessions")
+            .select("id, started_at")
+            .eq("user_id", user_id)
+            .eq("session_token", session_token)
+            .eq("is_active", True)
+            .execute()
+        )
+        played_secs = 0
+        if sess_res.data:
+            row = sess_res.data[0]
+            try:
+                started = datetime.datetime.fromisoformat(
+                    row["started_at"].replace("Z", "+00:00")  # type: ignore[misc]
+                )
+                played_secs = max(0, int((now - started).total_seconds()))
+            except Exception:
+                pass
+            client.table("ol2_sessions").update({
+                "is_active": False,
+                "ended_at": now_iso,
+            }).eq("id", row["id"]).execute()  # type: ignore[misc]
+
+        # update character: offline + last_logout + accumulated playtime
+        char_res = (
+            client.table("ol2_characters")
+            .select("playtime_seconds")
+            .eq("user_id", user_id)
+            .execute()
+        )
+        existing_pt = 0
+        if char_res.data:
+            existing_pt = char_res.data[0].get("playtime_seconds") or 0  # type: ignore[misc]
+        client.table("ol2_characters").update({
+            "is_online": False,
+            "last_logout": now_iso,
+            "playtime_seconds": existing_pt + played_secs,
+        }).eq("user_id", user_id).execute()
+
+    try:
+        _run(_do)
+    except Exception:
+        pass
+
+
+def session_heartbeat(user_id: str, session_token: str) -> None:
+    """Update last_seen_at for an active session (called on autosave heartbeat)."""
+    def _do():
+        client = _get_client()
+        client.table("ol2_sessions").update({
+            "last_seen_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }).eq("user_id", user_id).eq("session_token", session_token).eq("is_active", True).execute()
+
+    try:
+        _run(_do)
+    except Exception:
+        pass
+
+
+def get_online_players() -> List[Dict[str, Any]]:
+    """Return a lightweight list of currently-online characters."""
+    def _do():
+        client = _get_client()
+        result = (
+            client.table("ol2_characters")
+            .select("player_name, level, character_class, current_area, last_login")
+            .eq("is_online", True)
+            .order("last_login", desc=True)
+            .limit(100)
+            .execute()
+        )
+        return result.data or []
+
+    try:
+        return _run(_do)  # type: ignore[misc]
+    except Exception:
+        return []

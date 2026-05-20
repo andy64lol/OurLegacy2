@@ -889,27 +889,11 @@ function dismissCutscene(cutsceneId) {
 }
 
 async function logoutAndSave() {
-    var statusEl = document.getElementById('cloud-save-status');
-    if (statusEl) { statusEl.textContent = 'Saving to cloud...'; statusEl.style.color = 'var(--text-dim)'; }
-    showToast('Saving to cloud...', 'var(--text-dim)', 2000);
-    var saveOk = false;
+    showToast('Saving & exiting...', 'var(--text-dim)', 1500);
     try {
-        var saveRes = await fetch('/api/online/cloud_save', { method: 'POST' });
-        var saveJson = await saveRes.json();
-        if (saveJson.ok) {
-            saveOk = true;
-            if (statusEl) { statusEl.textContent = 'Saved! Returning to menu...'; statusEl.style.color = 'var(--green-bright)'; }
-        } else {
-            if (statusEl) { statusEl.textContent = 'Save failed: ' + saveJson.message; statusEl.style.color = 'var(--red)'; }
-            showToast('Cloud save failed: ' + saveJson.message, 'var(--red)', 3500);
-        }
-    } catch(e) {
-        if (statusEl) { statusEl.textContent = 'Save error.'; statusEl.style.color = 'var(--red)'; }
-        showToast('Save error: ' + e.message, 'var(--red)', 3500);
-    }
-    var delay = saveOk ? 1200 : 3500;
-    if (saveOk) showToast('Saved! Returning to menu...', 'var(--green-bright)', 2000);
-    setTimeout(function() { window.location.href = '/'; }, delay);
+        await fetch('/api/online/logout', { method: 'POST' });
+    } catch(e) {}
+    window.location.href = '/';
 }
 
 async function settingsDownloadCloud() {

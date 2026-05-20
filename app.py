@@ -126,6 +126,10 @@ from utilities.supabase_db import (
     admin_list_mutes,
     admin_warn,
     admin_clear_warns,
+    session_start,
+    session_end,
+    session_heartbeat,
+    get_online_players,
 )
 from utilities.email_sender import (
     send_email as _send_email,
@@ -1458,9 +1462,6 @@ def _apply_game_state(data: dict[str, Any]) -> None:
     session["messages"] = data.get("messages", [])
     session["diary"] = data.get("diary", [])
     session["npc_unlocked_quests"] = data.get("npc_unlocked_quests", [])
-    raw_slots = data.get("_save_slots")
-    if isinstance(raw_slots, list):
-        session["_save_slots"] = raw_slots
     raw_settings = data.get("game_settings")
     if isinstance(raw_settings, dict) and raw_settings:
         session["game_settings"] = raw_settings
@@ -1532,25 +1533,15 @@ def _autosave() -> None:
     if not state:
         return
 
-    _update_save_slot(1, "Auto Save", state)
-
     user_id = session.get("online_user_id")
     if user_id:
         username = session.get("online_username")
         if username:
             _username_player[username] = state.get("player", {})
-        state["_save_slots"] = session.get("_save_slots", [None] * 5)
         try:
             character_autosave(user_id, state)
         except Exception:
             pass
-
-    now = _time_module.time()
-    last_log = session.get("_last_autosave_diary_log", 0)
-    if now - last_log >= _AUTOSAVE_DIARY_INTERVAL:
-        _diary_append("Progress autosaved.", color="var(--muted)")
-        session["_last_autosave_diary_log"] = now
-        session.modified = True
 
 
 def _set_activity(player: dict | None, status: str) -> None:
@@ -7237,19 +7228,44 @@ def api_online_login():
         session["online_user_id"] = user_id
         session["session_token"] = session_token
         session.modified = True
-        return jsonify(
-            {"ok": True, "message": result["message"], "username": actual_username}
-        )
+        # MMO session tracking
+        try:
+            session_start(
+                user_id,
+                session_token,
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get("User-Agent", ""),
+            )
+        except Exception:
+            pass
+        # restore character from DB on every login
+        char = character_autoload(user_id)
+        character_loaded = False
+        if char["ok"] and char.get("data"):
+            _apply_game_state(char["data"])
+            character_loaded = True
+        return jsonify({
+            "ok": True,
+            "message": result["message"],
+            "username": actual_username,
+            "character_loaded": character_loaded,
+        })
     return jsonify({"ok": False, "message": result["message"]}), 401
 
 
 @app.route("/api/online/logout", methods=["POST"])
 def api_online_logout():
     user_id = session.get("online_user_id")
-    if user_id and _active_sessions.get(user_id) == session.get("session_token"):
+    tok = session.get("session_token")
+    if user_id and _active_sessions.get(user_id) == tok:
         _active_sessions.pop(user_id, None)
         _session_last_activity.pop(user_id, None)
     _autosave()
+    if user_id and tok:
+        try:
+            session_end(user_id, tok)
+        except Exception:
+            pass
     game_keys = [
         "player",
         "current_area",
@@ -7288,6 +7304,13 @@ def api_online_autosave():
     if not _is_session_valid():
         return jsonify({"ok": False}), 401
     _autosave()
+    user_id = session.get("online_user_id")
+    tok = session.get("session_token")
+    if user_id and tok:
+        try:
+            session_heartbeat(user_id, tok)
+        except Exception:
+            pass
     return jsonify({"ok": True})
 
 
