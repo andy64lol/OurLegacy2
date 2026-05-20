@@ -533,6 +533,11 @@
                     Vue 3 Beta &mdash; admin preview
                 </div>
 
+                <div v-if="player && hpPct <= 25"
+                     style="background:rgba(200,40,40,0.18);border:1px solid rgba(200,40,40,0.4);border-radius:5px;padding:5px 10px;font-size:12px;color:var(--red);text-align:center;margin-bottom:6px;animation:pulse-tab 1.5s ease infinite;">
+                    &#9888; Low HP &mdash; Rest or use a potion!
+                </div>
+
                 <div class="panel sidebar-panel" v-if="player">
                     <div class="panel-title">
                         <img class="class-glyph"
@@ -626,12 +631,15 @@
                 </div>
 
                 <!-- Navigate panel -->
-                <div class="panel sidebar-panel" style="margin-top:0;">
+                <div class="panel sidebar-panel" style="margin-top:0;" v-if="player">
                     <div class="panel-title">Navigate</div>
                     <div class="panel-body" style="display:flex;flex-direction:column;gap:6px;">
                         <button @click="switchTab('dungeons')" class="btn btn-secondary btn-small" style="text-align:center;">Dungeons</button>
                         <button @click="switchTab('crafting')" class="btn btn-secondary btn-small" style="text-align:center;">Crafting</button>
                         <button @click="switchTab('market')" class="btn btn-secondary btn-small" style="text-align:center;">Elite Market</button>
+                        <button @click="switchTab('land')" class="btn btn-secondary btn-small" style="text-align:center;">Land &amp; Housing</button>
+                        <button @click="switchTab('leaderboard')" class="btn btn-secondary btn-small" style="text-align:center;">Leaderboard</button>
+                        <button @click="switchTab('wiki')" class="btn btn-secondary btn-small" style="text-align:center;">Wiki</button>
                     </div>
                 </div>
 
@@ -664,9 +672,19 @@
 
             <div class="sidebar-save-section">
                 <div v-if="onlineUsername"
-                    style="font-size:11px;color:var(--mana-bright);text-align:center;padding:3px 0;opacity:0.85;display:flex;align-items:center;justify-content:center;gap:4px;">
+                    style="font-size:11px;color:var(--mana-bright);text-align:center;padding:3px 0 6px;opacity:0.85;display:flex;align-items:center;justify-content:center;gap:4px;">
                     <img src="/game_assets/glyphs/chat.webp" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
                     [[ onlineUsername ]]
+                </div>
+                <div v-if="player" style="display:flex;flex-direction:column;gap:4px;padding:0 4px;">
+                    <div v-if="onlineUsername" style="display:flex;gap:4px;">
+                        <button @click="cloudSave" class="btn btn-secondary btn-xsmall" style="flex:1;font-size:10px;" title="Cloud Save">&#9729; Save</button>
+                        <button @click="cloudLoad" class="btn btn-secondary btn-xsmall" style="flex:1;font-size:10px;" title="Cloud Load">&#9729; Load</button>
+                    </div>
+                    <div style="display:flex;gap:4px;">
+                        <button @click="localSave" class="btn btn-secondary btn-xsmall" style="flex:1;font-size:10px;" title="Save to browser">&#128190; Save</button>
+                        <button @click="localLoad" class="btn btn-secondary btn-xsmall" style="flex:1;font-size:10px;" title="Load from browser">&#128190; Load</button>
+                    </div>
                 </div>
             </div>
 
@@ -728,6 +746,12 @@
                         <button class="tab-btn" v-if="onlineUsername"
                                 :class="{ active: activeTab === 'group' }"
                                 @click="switchTab('group')">Group</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'land' }"
+                                @click="switchTab('land')">Land</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'leaderboard' }"
+                                @click="switchTab('leaderboard')">Leaderboard</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'wiki' }"
+                                @click="switchTab('wiki')">Wiki</button>
                     </div>
                 </div>
 
@@ -1233,6 +1257,10 @@
                         No market listings available.
                         <button class="btn btn-small btn-secondary" style="display:block;margin:10px auto;" @click="loadMarket">Load Market</button>
                     </div>
+                    <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:8px;align-items:center;">
+                        <span style="font-size:11px;color:var(--text-dim);">Admin:</span>
+                        <button class="btn btn-xsmall btn-secondary" @click="marketReset" :disabled="actionPending">Reset Market</button>
+                    </div>
                 </div>
 
                 <!-- ═══ PARTY tab ═══ -->
@@ -1579,6 +1607,44 @@
                         </div>
                     </div>
                     <div v-else class="empty-state">Sign in online to join or create a group.</div>
+                </div>
+
+                <!-- ═══ LAND / HOUSING ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'land' }" style="padding:0;">
+                    <div style="display:flex;gap:8px;padding:8px 0 6px;flex-wrap:wrap;">
+                        <a href="/land/map" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/map';return false;">Map</a>
+                        <a href="/land/shop" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/shop';return false;">Shop</a>
+                        <a href="/land/pets" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/pets';return false;">Pets</a>
+                        <a href="/land/map" style="font-size:12px;color:var(--text-dim);margin-left:auto;line-height:2.2;" target="_blank">Open in new tab ↗</a>
+                    </div>
+                    <iframe id="beta-land-frame"
+                        :src="iframeLoaded.land ? '/land/map' : ''"
+                        style="width:100%;height:calc(100vh - 180px);border:none;border-radius:5px;background:var(--bg-main);"
+                        title="Land & Housing"></iframe>
+                </div>
+
+                <!-- ═══ LEADERBOARD ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'leaderboard' }" style="padding:0;">
+                    <div style="padding:8px 0 6px;display:flex;align-items:center;justify-content:space-between;">
+                        <span style="font-size:13px;color:var(--text-dim);">Global Rankings</span>
+                        <a href="/leaderboard" style="font-size:12px;color:var(--text-dim);" target="_blank">Open in new tab ↗</a>
+                    </div>
+                    <iframe id="beta-leaderboard-frame"
+                        :src="iframeLoaded.leaderboard ? '/leaderboard' : ''"
+                        style="width:100%;height:calc(100vh - 180px);border:none;border-radius:5px;background:var(--bg-main);"
+                        title="Leaderboard"></iframe>
+                </div>
+
+                <!-- ═══ WIKI ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'wiki' }" style="padding:0;">
+                    <div style="padding:8px 0 6px;display:flex;align-items:center;justify-content:space-between;">
+                        <span style="font-size:13px;color:var(--text-dim);">Item &amp; Game Wiki</span>
+                        <a href="/wiki" style="font-size:12px;color:var(--text-dim);" target="_blank">Open in new tab ↗</a>
+                    </div>
+                    <iframe id="beta-wiki-frame"
+                        :src="iframeLoaded.wiki ? '/wiki' : ''"
+                        style="width:100%;height:calc(100vh - 180px);border:none;border-radius:5px;background:var(--bg-main);"
+                        title="Wiki"></iframe>
                 </div>
 
             </div>

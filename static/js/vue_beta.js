@@ -92,6 +92,8 @@ createApp({
             worldEvents:     [],
             nearbyPlayers:   [],
             onlineCount:     0,
+
+            iframeLoaded: { land: false, leaderboard: false, wiki: false },
         };
     },
 
@@ -396,6 +398,59 @@ createApp({
             if (tab === 'group' && !this.groupData) {
                 this.loadGroup();
             }
+            if (tab === 'land' && !this.iframeLoaded.land) {
+                this.iframeLoaded.land = true;
+            }
+            if (tab === 'leaderboard' && !this.iframeLoaded.leaderboard) {
+                this.iframeLoaded.leaderboard = true;
+            }
+            if (tab === 'wiki' && !this.iframeLoaded.wiki) {
+                this.iframeLoaded.wiki = true;
+            }
+        },
+
+        async cloudSave() {
+            try {
+                const r = await fetch('/api/online/cloud_save', { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await r.json();
+                this.showToast(data.message || (data.ok ? 'Cloud saved!' : 'Save failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
+            } catch (_) { this.showToast('Save failed.', 'var(--red)'); }
+        },
+
+        async cloudLoad() {
+            try {
+                const r = await fetch('/api/online/cloud_load', { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await r.json();
+                this.showToast(data.message || (data.ok ? 'Cloud loaded!' : 'Load failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
+                if (data.ok) this.fetchState();
+            } catch (_) { this.showToast('Load failed.', 'var(--red)'); }
+        },
+
+        async localSave() {
+            try {
+                const r = await fetch('/api/save', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await r.json();
+                this.showToast(data.ok ? 'Saved to browser!' : (data.message || 'Save failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
+            } catch (_) { this.showToast('Save failed.', 'var(--red)'); }
+        },
+
+        async localLoad() {
+            try {
+                const r = await fetch('/api/load', { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await r.json();
+                this.showToast(data.message || (data.ok ? 'Loaded from browser!' : 'Load failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
+                if (data.ok) this.fetchState();
+            } catch (_) { this.showToast('Load failed.', 'var(--red)'); }
+        },
+
+        async marketReset() {
+            try {
+                const r = await fetch('/action/market/reset', { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await r.json().catch(() => ({}));
+                this.showToast(data.message || 'Market reset!', 'var(--gold)');
+                this.marketItems = [];
+                this.loadMarket();
+            } catch (_) { this.showToast('Reset failed.', 'var(--red)'); }
         },
 
         showToast(text, color) {

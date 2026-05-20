@@ -2426,6 +2426,19 @@ body.ol2-bg-4 .main-content {
     z-index: 1;
 }
 
+body[class*='ol2-bg-'] .main-content::before,
+html[data-bg="1"] body .main-content::before,
+html[data-bg="2"] body .main-content::before,
+html[data-bg="3"] body .main-content::before,
+html[data-bg="4"] body .main-content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(var(--bg-tint-rgb), 0.72) 0%, rgba(var(--bg-tint-deep-rgb), 0.82) 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
 
 #toast-container {
     position: fixed;
