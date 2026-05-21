@@ -336,7 +336,20 @@ createApp({
             this.companionsAvailable = data.companions_available || [];
             this.eventsData          = data.events_data          || null;
             this.diary               = data.diary                || [];
-            this.attrSummary         = data.attr_summary         || [];
+            // transform attr_summary: API returns {attributes:{str:{name,description,value},...}, unspent_points:N}
+            const rawAttr = data.attr_summary;
+            if (rawAttr && rawAttr.attributes) {
+                this.attrSummary = Object.entries(rawAttr.attributes).map(([key, v]) => ({
+                    key,
+                    label: v.name,
+                    description: v.description,
+                    value: v.value,
+                    max: 20,
+                }));
+                if (this.player) this.player.attr_points = rawAttr.unspent_points || 0;
+            } else {
+                this.attrSummary = rawAttr || [];
+            }
             this.availableBosses     = data.available_bosses     || [];
             this.gameTime            = data.game_time            || '';
             this.gameTimeIcon        = data.game_time_icon       || '';
@@ -373,7 +386,7 @@ createApp({
             this.pollTimer = setInterval(() => this.fetchState(), interval);
         },
 
-        // generic JSON action → refresh state on success
+        // generic JSON action → refresh state on success (always syncs state, even on failure)
         async doAction(path, body = {}) {
             if (this.actionPending) return null;
             this.actionPending = true;
@@ -390,6 +403,8 @@ createApp({
                 const data = await r.json();
                 if (!data.ok) {
                     this.showToast(data.message || 'Action failed.', 'var(--red)');
+                    await this.fetchState();
+                    this.resetPoll();
                     return data;
                 }
                 if (data.messages) {

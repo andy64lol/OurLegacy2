@@ -961,15 +961,20 @@
                                 @click="switchTab('battle')">
                             <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="battle"> Battle!
                         </button>
-                        <button class="tab-btn" data-tab="map"
-                                :class="{ active: activeTab === 'map' }"
-                                @click="switchTab('map')">Map</button>
+                        <button class="tab-btn" data-tab="character"
+                                :class="{ active: activeTab === 'character' }"
+                                @click="switchTab('character')">
+                            Character<span v-if="player && player.attr_points > 0" style="margin-left:4px;color:var(--gold);font-size:10px;font-weight:700;">&#9650;</span>
+                        </button>
                         <button class="tab-btn" data-tab="equipment"
                                 :class="{ active: activeTab === 'equipment' }"
                                 @click="switchTab('equipment')">Equipment</button>
                         <button class="tab-btn" data-tab="inventory"
                                 :class="{ active: activeTab === 'inventory' }"
                                 @click="switchTab('inventory')">Inventory</button>
+                        <button class="tab-btn" data-tab="map"
+                                :class="{ active: activeTab === 'map' }"
+                                @click="switchTab('map')">Map</button>
                         <button class="tab-btn" data-tab="travel"
                                 :class="{ active: activeTab === 'travel' }"
                                 @click="switchTab('travel')">Travel</button>
@@ -1000,9 +1005,6 @@
                         <button class="tab-btn" data-tab="diary"
                                 :class="{ active: activeTab === 'diary' }"
                                 @click="switchTab('diary')">Diary</button>
-                        <button class="tab-btn" data-tab="character"
-                                :class="{ active: activeTab === 'character' }"
-                                @click="switchTab('character')">Character</button>
                         <button class="tab-btn" data-tab="events"
                                 :class="{ active: activeTab === 'events' }"
                                 @click="switchTab('events')">Events</button>
@@ -1382,100 +1384,108 @@
                 <!-- ═══ EQUIPMENT tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'equipment' }">
                     <div v-if="player">
-                        <div class="action-row" style="margin-bottom:14px;">
-                            <button class="btn btn-secondary" @click="autoEquip" :disabled="actionPending">Auto-Equip Best</button>
-                            <button class="btn btn-secondary" @click="quickHeal" :disabled="actionPending">Quick Heal</button>
-                            <button class="btn btn-secondary" @click="sortInventory" :disabled="actionPending">Sort Inventory</button>
-                        </div>
-
                         <div v-if="player.attr_points > 0" class="attr-pts-notice">
                             You have [[ player.attr_points ]] unspent attribute point[[ player.attr_points !== 1 ? 's' : '' ]]!
                             <button class="btn btn-xsmall btn-secondary" style="margin-left:10px;" @click="switchTab('character')">Spend</button>
                         </div>
 
-                        <div class="panel" style="margin-bottom:12px;">
-                            <div class="panel-title">Equipped Gear</div>
+                        <div class="panel" style="margin-bottom:14px;">
+                            <div class="panel-title">Equipment</div>
                             <div class="panel-body">
-                                <div class="equip-slot-grid">
-                                    <div v-for="slot in equipSlots" :key="slot" class="equip-slot">
+                                <div class="equip-grid">
+                                    <div v-for="slot in equipSlots" :key="slot" class="equip-slot-card">
                                         <div class="equip-slot-label">
                                             <img v-if="slotGlyph(slot)" class="type-glyph"
                                                  :src="'/game_assets/glyphs/' + slotGlyph(slot) + '.webp'"
-                                                 :alt="slot"
-                                                 style="vertical-align:middle;margin-right:3px;">
-                                            [[ slot.replace(/_/g, ' ') ]]
+                                                 :alt="slot">
+                                            [[ slot.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) ]]
                                         </div>
-                                        <div v-if="equippedDetails[slot]">
+                                        <template v-if="equippedDetails[slot]">
                                             <div class="equip-slot-item" :class="'rarity-' + equippedDetails[slot].rarity">
                                                 [[ equippedDetails[slot].name ]]
+                                            </div>
+                                            <div v-if="equippedDetails[slot].weapon_type"
+                                                 style="font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">
+                                                [[ equippedDetails[slot].weapon_type.replace(/_/g,' ') ]]
                                             </div>
                                             <div class="equip-slot-stats" v-if="equippedDetails[slot].stats">
                                                 [[ equippedDetails[slot].stats ]]
                                             </div>
-                                            <button class="btn btn-xsmall btn-secondary" style="margin-top:4px;"
+                                            <div class="equip-slot-desc" v-if="equippedDetails[slot].description">
+                                                [[ equippedDetails[slot].description.slice(0,60) ]]
+                                            </div>
+                                            <button class="btn btn-xsmall btn-danger" style="margin-top:6px;"
                                                     @click="unequipSlot(slot)" :disabled="actionPending">
-                                                Remove
+                                                Unequip
                                             </button>
-                                        </div>
-                                        <div v-else class="equip-slot-empty">— empty —</div>
+                                        </template>
+                                        <div v-else class="equip-slot-empty">— Empty —</div>
                                     </div>
+                                </div>
+
+                                <button class="btn btn-primary" style="width:100%;margin-top:12px;"
+                                        @click="autoEquip" :disabled="actionPending">
+                                    Auto-Equip Best Items
+                                </button>
+
+                                <div class="stat-mini-grid" style="margin-top:16px;">
+                                    <div class="stat-mini"><span>Max HP</span><strong>[[ fmtNum(player.max_hp) ]]</strong></div>
+                                    <div class="stat-mini"><span>Max MP</span><strong>[[ fmtNum(player.max_mp) ]]</strong></div>
+                                    <div class="stat-mini"><span>Attack</span><strong>[[ fmtNum(player.attack) ]]</strong></div>
+                                    <div class="stat-mini"><span>Defense</span><strong>[[ fmtNum(player.defense) ]]</strong></div>
+                                    <div class="stat-mini"><span>Speed</span><strong>[[ fmtNum(player.speed) ]]</strong></div>
+                                    <div class="stat-mini"><span>Level</span><strong>[[ player.level ]]</strong></div>
+                                    <div class="stat-mini" v-if="player.attr_spell_power"><span>Spell Power</span><strong>+[[ player.attr_spell_power ]]</strong></div>
+                                    <div class="stat-mini" v-if="player.dodge_chance"><span>Dodge</span><strong>[[ Math.round(player.dodge_chance * 100) ]]%</strong></div>
+                                    <div class="stat-mini" v-if="player.attr_crit_chance"><span>Crit Chance</span><strong>+[[ player.attr_crit_chance ]]%</strong></div>
+                                    <div class="stat-mini" v-if="player.attr_gold_discount"><span>Shop Discount</span><strong>[[ Math.round(player.attr_gold_discount * 100) ]]%</strong></div>
+                                    <div class="stat-mini" v-if="player.attr_discovery"><span>Item Discovery</span><strong>+[[ Math.round(player.attr_discovery * 100) ]]%</strong></div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- equippable items from inventory -->
-                        <div class="panel" style="margin-bottom:12px;" v-if="inventoryItems && inventoryItems.filter(i => i.equippable).length">
-                            <div class="panel-title">Equippable Items in Inventory</div>
-                            <div class="panel-body">
-                                <div v-for="item in inventoryItems.filter(i => i.equippable)" :key="item.name"
-                                     style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                                    <img class="type-glyph"
-                                         :src="'/game_assets/glyphs/' + typeGlyph(item.type) + '.webp'"
-                                         :alt="item.type"
-                                         style="width:22px;height:22px;opacity:0.8;flex-shrink:0;">
-                                    <div style="flex:1;min-width:0;">
-                                        <div :class="'rarity-' + item.rarity" style="font-size:13px;font-weight:600;">[[ item.name ]]</div>
-                                        <div v-if="item.req_label" style="font-size:10px;color:var(--text-dim);">[[ item.req_label ]]</div>
-                                        <div v-if="item.stats" style="font-size:11px;color:var(--text-dim);">[[ item.stats ]]</div>
-                                    </div>
-                                    <div style="display:flex;gap:6px;flex-shrink:0;">
-                                        <button v-if="item.can_equip"
-                                                class="btn btn-xsmall btn-secondary"
-                                                @click="equipItem(item.name)"
-                                                :disabled="actionPending">Equip</button>
-                                        <span v-else style="font-size:10px;color:var(--red);" :title="item.equip_block_reason">&#128683; [[ item.equip_block_reason ]]</span>
-                                    </div>
-                                </div>
+                        <div class="panel" v-if="inventoryItems && inventoryItems.filter(i => i.equippable).length">
+                            <div class="panel-title">
+                                Inventory
+                                <span class="panel-subtitle">([[ inventoryItems.length ]] items &mdash; [[ fmtNum(player.gold) ]]g)</span>
                             </div>
-                        </div>
-
-                        <div class="panel">
-                            <div class="panel-title">Combat Stats</div>
+                            <div style="display:flex;gap:8px;padding:8px 12px 0;flex-wrap:wrap;">
+                                <button class="btn btn-small btn-primary" @click="quickHeal" :disabled="actionPending"
+                                        title="Use your best available healing item">Quick Heal</button>
+                                <button class="btn btn-small btn-secondary" @click="sortInventory" :disabled="actionPending"
+                                        title="Sort inventory by item type then name">Sort Items</button>
+                            </div>
                             <div class="panel-body">
-                                <div class="stat-grid-big">
-                                    <div class="stat-card">
-                                        <div class="stat-card-label">HP</div>
-                                        <div class="stat-card-val">[[ fmtNum(player.hp) ]]/[[ fmtNum(player.max_hp) ]]</div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-card-label">MP</div>
-                                        <div class="stat-card-val">[[ fmtNum(player.mp) ]]/[[ fmtNum(player.max_mp) ]]</div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-card-label">Attack</div>
-                                        <div class="stat-card-val">[[ fmtNum(player.attack) ]]</div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-card-label">Defense</div>
-                                        <div class="stat-card-val">[[ fmtNum(player.defense) ]]</div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-card-label">Speed</div>
-                                        <div class="stat-card-val">[[ fmtNum(player.speed) ]]</div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-card-label">Gold</div>
-                                        <div class="stat-card-val">[[ fmtNum(player.gold) ]]</div>
+                                <div class="inv-grid pageable-list">
+                                    <div v-for="item in inventoryItems.filter(i => i.equippable)" :key="item.name"
+                                         class="inv-card" :class="['rarity-border-' + item.rarity, item.equippable && !item.can_equip ? 'cannot-equip' : '']">
+                                        <div class="inv-card-name">
+                                            <img class="type-glyph"
+                                                 :src="'/game_assets/glyphs/' + typeGlyph(item.type) + '.webp'"
+                                                 :alt="item.type"
+                                                 :title="item.type">
+                                            <span :class="'rarity-' + item.rarity">[[ item.name ]]</span>
+                                            <span v-if="item.count > 1" class="inv-qty">x[[ item.count ]]</span>
+                                            <span v-if="item.req_label" class="item-req-badge">[[ item.req_label ]]</span>
+                                        </div>
+                                        <div class="inv-card-stats" v-if="item.stats">[[ item.stats ]]</div>
+                                        <div class="inv-card-desc">[[ (item.description || '').slice(0, 65) ]]</div>
+                                        <div v-if="item.can_equip" class="item-can-use">Can equip ([[ item.type ]])</div>
+                                        <div v-else class="item-req-block">[[ item.equip_block_reason ]]</div>
+                                        <div class="inv-card-actions">
+                                            <button v-if="item.can_equip"
+                                                    class="btn btn-xsmall btn-primary"
+                                                    @click="equipItem(item.name)"
+                                                    :disabled="actionPending">Equip</button>
+                                            <button class="btn btn-xsmall btn-secondary"
+                                                    @click="sellItem(item.name)"
+                                                    :disabled="actionPending"
+                                                    :title="'Sell for ' + (item.sell_price || 0) + 'g'">
+                                                <img class="type-glyph" src="/game_assets/glyphs/gold.webp" alt="gold"
+                                                     style="vertical-align:middle;margin-right:2px;">[[ item.sell_price || 0 ]]g
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1496,18 +1506,11 @@
                         </div>
                         <div class="inv-grid">
                             <div v-for="item in paginatedInventory" :key="item.name" class="inv-row">
-                                <!-- item texture thumbnail (real art) or fallback type glyph -->
-                                <div style="flex-shrink:0;width:32px;height:32px;position:relative;">
-                                    <img v-if="item.texture"
-                                         :src="'/game_assets/' + item.texture"
-                                         :alt="item.name"
-                                         style="width:32px;height:32px;image-rendering:pixelated;object-fit:contain;border-radius:3px;background:rgba(0,0,0,0.25);"
-                                         @error="$event.target.style.display='none'">
-                                    <img v-else
-                                         class="type-glyph"
+                                <div style="flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
+                                    <img class="type-glyph"
                                          :src="'/game_assets/glyphs/' + typeGlyph(item.type) + '.webp'"
                                          :alt="item.type"
-                                         style="width:28px;height:28px;opacity:0.7;margin:2px;">
+                                         style="width:28px;height:28px;opacity:0.7;">
                                 </div>
                                 <div style="flex:1;min-width:0;">
                                     <div class="inv-row-name" :class="'rarity-' + item.rarity">[[ item.name ]]</div>
@@ -1550,31 +1553,60 @@
 
                 <!-- ═══ TRAVEL tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'travel' }">
-                    <div v-if="inBattle" style="color:var(--red);font-size:13px;margin-bottom:12px;">
-                        You cannot travel while in battle.
-                    </div>
-                    <div v-if="connections && connections.length">
-                        <div class="panel-title" style="margin-bottom:10px;">Travel from [[ area && area.name ]]</div>
-                        <div style="display:flex;flex-direction:column;gap:8px;">
-                            <div v-for="conn in connections" :key="conn.key" class="travel-card">
-                                <div>
-                                    <div class="travel-card-name">[[ conn.name ]]</div>
-                                    <div class="travel-card-meta">
-                                        <span v-if="conn.visited && conn.difficulty >= 0">Difficulty [[ conn.difficulty ]]</span>
-                                        <span v-if="!conn.visited" style="color:var(--text-dim);">Undiscovered</span>
-                                        <span v-if="conn.visited && conn.has_enemies" style="color:var(--red);margin-left:6px;">&bull; Enemies</span>
-                                        <span v-if="conn.visited && conn.has_shop" style="color:var(--gold);margin-left:6px;">&bull; Shop</span>
+                    <div class="panel">
+                        <div class="panel-title">Travel</div>
+                        <div class="panel-body">
+                            <div v-if="inBattle" style="color:var(--red);font-size:13px;margin-bottom:10px;">
+                                You cannot travel while in battle.
+                            </div>
+                            <div v-if="connections && connections.length">
+                                <p class="panel-note">Destinations reachable from [[ area && area.name ]].</p>
+                                <div class="connection-list">
+                                    <div v-for="conn in connections" :key="conn.key"
+                                         class="connection-card"
+                                         :class="conn.visited ? 'visited' : 'fow-unknown'">
+                                        <div class="conn-info">
+                                            <div class="conn-name">
+                                                <template v-if="conn.visited">
+                                                    [[ conn.name ]]
+                                                    <span class="visited-badge">Visited</span>
+                                                </template>
+                                                <template v-else>
+                                                    <span style="color:var(--text-dim);font-style:italic;letter-spacing:0.08em;">??? &mdash; Unexplored</span>
+                                                </template>
+                                            </div>
+                                            <div style="display:flex;gap:10px;align-items:center;margin-top:3px;">
+                                                <template v-if="conn.visited">
+                                                    <div class="conn-danger" :class="conn.has_enemies ? 'danger' : 'safe'">
+                                                        [[ conn.has_enemies ? 'Dangerous' : 'Peaceful' ]]
+                                                    </div>
+                                                    <div v-if="conn.difficulty > 0" style="font-size:12px;color:var(--text-dim);">
+                                                        Difficulty:
+                                                        <span :style="{ color: conn.difficulty <= 2 ? 'var(--green-bright)' : conn.difficulty <= 3 ? 'var(--gold)' : 'var(--red)' }">
+                                                            <img v-for="n in conn.difficulty" :key="'d' + n"
+                                                                 class="diff-glyph" src="/game_assets/glyphs/fight.webp" alt="*">
+                                                            <span v-for="n in (5 - conn.difficulty)" :key="'e' + n"
+                                                                  class="diff-empty">-</span>
+                                                        </span>
+                                                    </div>
+                                                </template>
+                                                <template v-else>
+                                                    <div style="font-size:12px;color:var(--text-dim);font-style:italic;">Venture forth to reveal this area</div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-small"
+                                                :class="conn.visited ? 'btn-secondary' : 'btn-primary'"
+                                                @click="travel(conn.key)"
+                                                :disabled="actionPending || inBattle">
+                                            [[ conn.visited ? 'Travel' : 'Explore' ]]
+                                        </button>
                                     </div>
                                 </div>
-                                <button class="btn btn-secondary"
-                                        @click="travel(conn.key)"
-                                        :disabled="actionPending || inBattle">
-                                    Travel
-                                </button>
                             </div>
+                            <p v-else class="empty-notice">No paths lead onward from here.</p>
                         </div>
                     </div>
-                    <div v-else class="empty-state">No connected areas.</div>
                 </div>
 
                 <!-- ═══ SHOP tab ═══ -->
