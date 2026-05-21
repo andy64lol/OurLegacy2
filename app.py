@@ -8237,6 +8237,7 @@ def vue_beta():
         "vue_beta.html",
         player=player,
         online_username=caller,
+        is_admin=True,
     )
 
 from asgiref.sync import sync_to_async as _sync_to_async
