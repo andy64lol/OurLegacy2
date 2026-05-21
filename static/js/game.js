@@ -943,6 +943,8 @@ function initTabOverflow() {
     var nav = document.getElementById('main-tabs');
     var wrap = nav && nav.closest('.tab-nav-wrap');
     if (!nav || !wrap) return;
+    if (nav.dataset.overflowInit) return;
+    nav.dataset.overflowInit = '1';
 
     var moreBtn = document.createElement('button');
     moreBtn.className = 'tab-btn tab-more-btn';
@@ -1032,11 +1034,16 @@ function initTabOverflow() {
         ? new window.ResizeObserver(function() { updateOverflow(); })
         : null;
     if (resizeObs) resizeObs.observe(nav);
-    else window.addEventListener('resize', updateOverflow);
+    window.addEventListener('resize', updateOverflow);
 
     document.addEventListener('tabChanged', function() {
         updateOverflow();
     });
+
+    var mutObs = window.MutationObserver
+        ? new window.MutationObserver(function() { setTimeout(updateOverflow, 50); })
+        : null;
+    if (mutObs) mutObs.observe(nav, { childList: true, subtree: false, attributes: false });
 }
 
 function initSidebarToggle() {

@@ -546,8 +546,8 @@
         .equip-slot-empty { font-size: 13px; color: rgba(255,255,255,0.18); margin-top: 2px; font-style: italic; }
 
         /* ── Tab bar ──────────────────────────────────────── */
-        .tab-bar-wrap { overflow: hidden; position: relative; }
-        .tab-bar-wrap .tab-nav { flex-wrap: nowrap; }
+        .tab-bar-wrap { overflow: visible; position: relative; }
+        .tab-bar-wrap .tab-nav { flex-wrap: nowrap; overflow: hidden; }
 
         /* ── Friends ──────────────────────────────────────── */
         .friends-list-item {
@@ -2431,11 +2431,6 @@ function toggleChat() {
 }
 window.toggleChat = toggleChat;
 
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-        if (typeof initTabOverflow === 'function') initTabOverflow();
-    }, 600);
-});
 </script>
 </body>
 </html>
