@@ -2409,7 +2409,6 @@
 </script>
 
 <script>
-/* ── Chat toggle ──────────────────────────────────────────────── */
 var _chatLoaded = false;
 function toggleChat() {
     var panel = document.getElementById('chat-panel');
@@ -2432,7 +2431,6 @@ function toggleChat() {
 }
 window.toggleChat = toggleChat;
 
-/* ── Re-init tab overflow after Vue mounts (tabs are v-if rendered) */
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         if (typeof initTabOverflow === 'function') initTabOverflow();
