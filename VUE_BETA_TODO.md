@@ -1,183 +1,175 @@
-# Vue Beta vs Jinja2 — Feature Comparison & TODO
-
-> **Status key:** ✅ Done · 🔧 Partial · ❌ Missing · ⚠️ Broken
-
----
-
-## Core UI Shell
-
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Sidebar with player stats | ✅ | ✅ | ✅ Done | HP/MP/EXP/Gold bars |
-| Sidebar HP/MP/EXP bars animate | ✅ | ✅ | ✅ Done | |
-| Low-HP pulse on bars | ✅ | ✅ | ✅ Done | |
-| Day/night glyph in sidebar | ✅ | ✅ | ✅ Done | |
-| Weather bonus display | ✅ | ✅ | ✅ Done | |
-| Companion HP bars in sidebar | ✅ | ✅ | ✅ Done | |
-| Sidebar collapsible (toggle btn) | ✅ | ✅ | ✅ Done | game.js `initSidebarToggle` |
-| News ticker | ✅ | ✅ | ✅ Done | Loads `/api/announcements` |
-| Tab bar with overflow "..." dropdown | ✅ | 🔧 | ✅ Fixed | Added `id="main-tabs"` + `data-tab` attrs |
-| Toast notifications (HTML-formatted) | ✅ | ⚠️ | ✅ Fixed | Was text-only; now `v-html` |
-| Settings modal (audio/bg/theme/fullscreen) | ✅ | ✅ | ✅ Done | Modal present, `openSettings()` wired |
-| Background music | ✅ | ✅ | ✅ Done | `<audio id="bg-music">` present |
-| Floating chat button | ✅ | ⚠️ | ✅ Fixed | `toggleChat()` was undefined; now defined |
-| Global chat panel (iframe) | ✅ | ⚠️ | ✅ Fixed | Now loads `/chat_widget` on open |
-| Resize handle for sidebar | ✅ | ✅ | ✅ Done | `#sidebar-resize-handle` present |
+# Vue Beta UI — Session-Based Plan
+> Last updated: 2026-05-21  
+> Save strategy: **100% session-based** — Flask session auto-saves after every action.  
+> No save slots, no file downloads, no cloud-slot UI.
 
 ---
 
-## Map & Navigation
-
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Area map image (per-zone) | ✅ | ⚠️ | ✅ Fixed | `map_image` now returned from API |
-| Dedicated Map tab | ✅ | ❌ | ✅ Fixed | New Map tab with area image + explored areas |
-| Visited areas list on map | ✅ | ❌ | ✅ Fixed | Shows all explored zones with quick-travel |
-| Connections/nearby areas | ✅ | ✅ | ✅ Done | In Travel tab and now also in Map tab |
-| Travel between areas | ✅ | ✅ | ✅ Done | |
-| Fog of war (unvisited = ???) | ✅ | ✅ | ✅ Done | |
+## How Saving Works
+- Every action (explore, battle, buy, craft, travel…) calls `save_player()` + `_autosave()` on the server.
+- Logged-in users also get a 30-second JS heartbeat to `/api/online/autosave`.
+- **"Save & Exit"** button in sidebar: fires `/api/online/autosave` then redirects to `/`.
+- There is NO file download, NO slot selection, NO cloud-save UI in the Vue beta.
 
 ---
 
-## Explore & Combat
+## Pagination — All Lists
 
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Explore action | ✅ | ✅ | ✅ Done | |
-| Rest at inn / on land | ✅ | ✅ | ✅ Done | |
-| Boss challenges | ✅ | ✅ | ✅ Done | Cooldown timers shown |
-| Nearby player sightings | ✅ | ✅ | ✅ Done | Online only |
-| Battle tab (auto-switch on battle) | ✅ | ✅ | ✅ Done | |
-| Enemy glyph/image in battle | ✅ | ✅ | ✅ Done | |
-| Enemy HP bar + % | ✅ | ✅ | ✅ Done | |
-| Round counter + boss badge | ✅ | ✅ | ✅ Done | |
-| Spell type color buttons | ✅ | ✅ | ✅ Done | |
-| Battle log auto-scroll | ✅ | ✅ | ✅ Done | Vue watcher |
-| Use consumable in battle | ✅ | ✅ | ✅ Done | |
-| Companion display in battle | ✅ | ✅ | ✅ Done | |
-| Critical HP warning banner | ✅ | ✅ | ✅ Done | |
+| List | Page size | Status |
+|------|-----------|--------|
+| Inventory | 15/pg | ✅ |
+| Shop | 15/pg | ✅ |
+| Elite Market | 20/pg | ✅ |
+| Diary / Log | 30/pg | ✅ |
+| Crafting recipes | 12/pg | ✅ |
+| Quests / Missions | 10/pg | ✅ |
+| Challenges | 10/pg | ✅ |
+| Companions available | 8/pg | ✅ |
+| Friends list | 20/pg | ✅ |
+| Boss challenges | 8/pg | ✅ |
 
 ---
 
-## Inventory, Equipment & Items
+## Feature Comparison Matrix
 
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Inventory list with rarity colors | ✅ | ✅ | ✅ Done | |
-| Inventory pagination | ❌ | ✅ | ✅ Done | Vue has 15 items/page |
-| Item type glyphs | ✅ | ✅ | ✅ Done | |
-| Equip/Use/Sell buttons | ✅ | ✅ | ✅ Done | |
-| Equipment slot grid | ✅ | ✅ | ✅ Done | |
-| Auto-equip button | ✅ | ✅ | ✅ Done | |
-| Quick heal button | ✅ | ✅ | ✅ Done | |
-| Sort inventory button | ✅ | ✅ | ✅ Done | |
-| Equipped item details | ✅ | ✅ | ✅ Done | |
+### Core Gameplay
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Explore / Venture Forth | ✅ | ✅ |
+| Battle tab (full) | ✅ | ✅ |
+| Enemy glyph in battle | ✅ | ✅ |
+| Round counter | ✅ | ✅ |
+| Spell type colors | ✅ | ✅ |
+| Low-HP pulse | ✅ | ✅ |
+| Travel tab | ✅ | ✅ |
+| Rest at Inn | ✅ | ✅ |
+| Quick Heal button | ✅ | ✅ |
+| Auto-equip button | ✅ | ✅ |
+| Sort inventory | ✅ | ✅ |
+| Attribute point spending | ✅ | ✅ |
+
+### Sidebar
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| HP / MP / EXP bars | ✅ | ✅ |
+| Gold & stats | ✅ | ✅ |
+| Location panel | ✅ | ✅ |
+| Party HP bars | ✅ | ✅ |
+| Online count | ✅ | ✅ |
+| World Events feed | ✅ | ✅ |
+| **Save & Exit** (session) | ✅ | ✅ |
+| Navigate shortcuts | ✅ | ✅ |
+| Online username badge | ✅ | ✅ |
+
+### Inventory
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Item list with pagination | ✅ | ✅ |
+| Item texture thumbnails | ✅ | ✅ |
+| Rarity colors | ✅ | ✅ |
+| Equip / Use / Sell buttons | ✅ | ✅ |
+| Stats / description | ✅ | ✅ |
+
+### Shop
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Buy items | ✅ | ✅ |
+| Pagination 15/pg | ✅ | ✅ |
+| Shop name | ✅ | ✅ |
+
+### Elite Market
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Browse & buy | ✅ | ✅ |
+| Pagination 20/pg | ✅ | ✅ |
+| Reset cooldown | ✅ | ✅ |
+
+### Crafting
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Recipe list | ✅ | ✅ |
+| Can-craft highlight | ✅ | ✅ |
+| Craft button | ✅ | ✅ |
+| Pagination 12/pg | ✅ | ✅ |
+
+### Party / Companions
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Active party display | ✅ | ✅ |
+| Hire at tavern | ✅ | ✅ |
+| Companion pagination 8/pg | ✅ | ✅ |
+| Fallen indicator | ✅ | ✅ |
+
+### Quests & Challenges
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Quest list + progress | ✅ | ✅ |
+| Complete button | ✅ | ✅ |
+| Quest pagination 10/pg | ✅ | ✅ |
+| Challenge list | ✅ | ✅ |
+| Claim button | ✅ | ✅ |
+| Challenge pagination 10/pg | ✅ | ✅ |
+
+### Boss Challenges
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Boss list | ✅ | ✅ |
+| Cooldown display | ✅ | ✅ |
+| Challenge button | ✅ | ✅ |
+| Pagination 8/pg | ✅ | ✅ |
+
+### Social
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Friends list + pagination | ✅ | ✅ |
+| Group display | ✅ | ✅ |
+| Nearby sightings | ✅ | ✅ |
+
+### Map & Travel
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Area map image | ✅ | ✅ |
+| Visited areas grid | ✅ | ✅ |
+| Quick-travel buttons | ✅ | ✅ |
+| Nearby areas with badges | ✅ | ✅ |
+
+### Housing / Land
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Tab only on your_land | ✅ | ✅ |
+| Land iframe (map/shop/pets) | ✅ | ✅ |
+| Travel button when elsewhere | ✅ | ✅ |
+
+### Diary / Log
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Colored HTML entries | ✅ | ✅ |
+| Pagination 30/pg | ✅ | ✅ |
+
+### World Events
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Events in Explore tab | ✅ | ✅ |
+| Events in sidebar | ✅ | ✅ |
+| Online count | ✅ | ✅ |
+
+### Mine / Dungeons / Leaderboard / Wiki
+| Feature | Jinja2 | Vue Beta |
+|---------|--------|----------|
+| Mine action | ✅ | ✅ |
+| Dungeon list + enter/abandon | ✅ | ✅ |
+| Leaderboard iframe | ✅ | ✅ |
+| Wiki iframe | ✅ | ✅ |
 
 ---
 
-## Economy
+## Remaining Gaps (nice-to-have)
 
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Shop with rarity colors | ✅ | ✅ | ✅ Done | |
-| Shop pagination | ❌ | ✅ | ✅ Done | Vue has 15 items/page |
-| "Can't afford" indicator | ✅ | ✅ | ✅ Done | |
-| Sale/discount badge | ✅ | ✅ | ✅ Done | |
-| Market (player-to-player) | ✅ | ✅ | ✅ Done | |
-| Market pagination | ❌ | ✅ | ✅ Done | Vue has 20 items/page |
-| Market refresh button | ✅ | ✅ | ✅ Done | |
-| Market admin reset | ✅ | ✅ | ✅ Done | |
-
----
-
-## Crafting & Mining
-
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Recipe list with materials | ✅ | ✅ | ✅ Done | |
-| Recipe pagination | ❌ | ✅ | ✅ Done | Vue has 12 recipes/page |
-| Recipe rarity colors | ✅ | ✅ | ✅ Done | |
-| "Missing" label when can't craft | ✅ | ✅ | ✅ Done | |
-| Mine tab (conditional) | ✅ | ✅ | ✅ Done | |
-
----
-
-## Housing / Land
-
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Land tab only shows in Your Land area | ✅ | ❌ | ✅ Fixed | Now uses `area.key === 'your_land'` |
-| Land map iframe | ✅ | ✅ | ✅ Done | |
-| Land shop iframe | ✅ | ✅ | ✅ Done | |
-| Land pets iframe | ✅ | ✅ | ✅ Done | |
-| "Travel to Your Land" prompt when not there | ✅ | ❌ | ✅ Fixed | Shows travel button when not in land |
-| Housing build/remove controls | ✅ | 🔧 | ❌ TODO | Currently iframe only; no native Vue UI |
-
----
-
-## Social
-
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Friends list | ✅ | ✅ | ✅ Done | |
-| Group info | ✅ | ✅ | ✅ Done | |
-| Online player count | ✅ | 🔧 | ❌ TODO | `onlineCount` in data but not displayed in sidebar |
-| World events feed | ✅ | 🔧 | ❌ TODO | `worldEvents` stored but no tab for it |
-
----
-
-## Quests, Challenges & Progression
-
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Missions/Quests tab | ✅ | ✅ | ✅ Done | |
-| Weekly challenges | ✅ | ✅ | ✅ Done | Progress bars |
-| Events (active/upcoming) | ✅ | ✅ | ✅ Done | |
-| Diary/journal with pagination | ✅ | ✅ | ✅ Done | 30 entries/page |
-| Character stats & attributes | ✅ | ✅ | ✅ Done | Spend attribute points |
-| Companion hire/dismiss | ✅ | ✅ | ✅ Done | |
-| Dungeons | ✅ | ✅ | ✅ Done | |
-| Party tab | ✅ | ✅ | ✅ Done | |
-
----
-
-## Save System
-
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Auto-save heartbeat | ✅ | ✅ | ✅ Done | |
-| Save slot UI (cloud slots 1–5) | ✅ | ❌ | ❌ TODO | Not implemented in Vue beta |
-| Download save file (.json) | ✅ | ❌ | ❌ TODO | `game.js` has this; not wired in Vue |
-| Upload/restore save file | ✅ | ❌ | ❌ TODO | |
-| Save & exit to main menu | ✅ | ❌ | ❌ TODO | Only "Exit to Menu" link, no server save |
-
----
-
-## Leaderboard & Wiki
-
-| Feature | Jinja2 | Vue Beta | Status | Notes |
-|---|---|---|---|---|
-| Leaderboard (iframe) | ✅ | ✅ | ✅ Done | |
-| Wiki (iframe) | ✅ | ✅ | ✅ Done | |
-
----
-
-## Remaining TODOs (Prioritized)
-
-### 🔴 High Priority
-- [ ] **Save slots UI** — Surface the cloud save system (slots 1–5, download, upload) in the Vue beta sidebar or a dedicated Settings sub-panel
-- [ ] **Online player count** — Show `onlineCount` in sidebar status row
-- [ ] **World events feed** — Display `worldEvents` (e.g. in Explore or Events tab)
-- [ ] **Save & exit button** — Add server-side save + menu redirect in sidebar
-
-### 🟡 Medium Priority
-- [ ] **Native housing controls** — Replace pure iframe with native Vue build/manage UI using `/api/player/land`
-- [ ] **Party tab content** — Currently a stub; wire to group combat API
-- [ ] **Paginate diary newest-page-last option** — Let user toggle sort order
-- [ ] **More glyph coverage** — Tab buttons for Quests, Crafting, Diary, Events could use glyphs from `/game_assets/glyphs/`
-
-### 🟢 Low Priority / Polish
-- [ ] **Keyboard shortcuts** — E=explore, B=battle, I=inventory etc.
-- [ ] **Mobile optimisation** — Sidebar auto-collapse on small screens (partially done via `initSidebarToggle`)
-- [ ] **Dungeon room transitions** — Currently redirects to full page; could be inline modal
-- [ ] **Item texture preview** — Items have `texture` field from API; show small thumb in inventory rows
+| Item | Priority |
+|------|----------|
+| Trade UI inline (currently links to /trade) | Medium |
+| NPC dialogue modals | Low |
+| Equipment tab item textures | Low |
+| Dungeon floor mini-map | Low |
+| Weather bonus visual in Explore | Low |
+| Tab glyph pixel icons | Low |

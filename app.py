@@ -9804,6 +9804,8 @@ def api_game_state_extended():
         "in_battle": in_battle,
         "land_data": land_data,
         "visited_areas": visited_areas,
+        "world_events": list(reversed(_world_events[-8:])) if _world_events else [],
+        "online_count": len(_active_sessions),
     }
     if in_battle:
         state["battle"] = _api_battle_summary()

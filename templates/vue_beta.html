@@ -902,6 +902,26 @@
 
             </div>
 
+            <!-- world events mini-feed -->
+            <div class="panel sidebar-panel" v-if="worldEvents && worldEvents.length" style="margin-top:0;">
+                <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+                    <span>🌍 World Events</span>
+                    <span v-if="onlineCount > 0" style="font-size:10px;color:var(--green-bright);font-weight:400;">
+                        ● [[ onlineCount ]] online
+                    </span>
+                </div>
+                <div class="panel-body" style="padding:4px 10px 8px;max-height:120px;overflow-y:auto;">
+                    <div v-for="(ev, i) in worldEvents" :key="i"
+                         style="font-size:11px;color:var(--text-dim);padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04);line-height:1.4;">
+                        <span style="color:rgba(255,255,255,0.3);margin-right:4px;">[[ fmtTime(ev.t) ]]</span>[[ ev.msg ]]
+                    </div>
+                </div>
+            </div>
+            <!-- online count standalone (when no events yet) -->
+            <div v-else-if="onlineCount > 0" style="padding:4px 12px 0;font-size:11px;color:var(--green-bright);text-align:center;">
+                ● [[ onlineCount ]] player[[ onlineCount !== 1 ? 's' : '' ]] online
+            </div>
+
             <div class="sidebar-save-section">
                 <div v-if="onlineUsername"
                     style="font-size:11px;color:var(--mana-bright);text-align:center;padding:3px 0 6px;opacity:0.85;display:flex;align-items:center;justify-content:center;gap:4px;">
@@ -916,7 +936,12 @@
             </div>
 
             <div class="sidebar-nav">
-                <a href="/" class="btn btn-danger btn-small" style="display:block;text-align:center;">Exit to Menu</a>
+                <button v-if="player" class="btn btn-danger btn-small"
+                        style="display:block;width:100%;text-align:center;margin-bottom:4px;"
+                        @click="saveAndExit">
+                    💾 Save &amp; Exit
+                </button>
+                <a v-else href="/" class="btn btn-danger btn-small" style="display:block;text-align:center;">Exit to Menu</a>
                 <a href="/game" class="btn btn-secondary btn-small" style="display:block;text-align:center;margin-top:4px;">
                     <img class="type-glyph" src="/game_assets/glyphs/settings.webp" alt="settings"> Main Game
                 </a>
@@ -1145,10 +1170,11 @@
                         <div class="panel-title" style="display:flex;align-items:center;gap:8px;">
                             <span style="color:#ff8888;">☠</span> Boss Challenges
                             <span style="font-size:11px;font-weight:400;color:var(--text-dim);margin-left:2px;">8-hour respawn after defeat</span>
+                            <span v-if="bossTotalPages > 1" style="font-size:11px;color:var(--text-dim);margin-left:auto;">[[ bossPage ]]/[[ bossTotalPages ]]</span>
                         </div>
                         <div class="panel-body" style="padding-top:6px;">
                             <div style="display:flex;flex-direction:column;gap:8px;">
-                                <div v-for="boss in availableBosses" :key="boss.key" class="boss-card">
+                                <div v-for="boss in paginatedBosses" :key="boss.key" class="boss-card">
                                     <div style="flex:1;">
                                         <div class="boss-name">[[ boss.name ]]</div>
                                         <div v-if="boss.on_cooldown" class="boss-cooldown" style="margin-top:3px;">&#128336; [[ boss.cooldown_str ]]</div>
@@ -1161,6 +1187,25 @@
                                         ⚔ Challenge!
                                     </button>
                                 </div>
+                            </div>
+                            <div class="pagination-controls" v-if="bossTotalPages > 1" style="margin-top:10px;">
+                                <button class="btn btn-xsmall btn-secondary" @click="setPage('boss', bossPage - 1)" :disabled="bossPage <= 1">&larr; Prev</button>
+                                <span class="pagination-label">[[ bossPage ]] / [[ bossTotalPages ]]</span>
+                                <button class="btn btn-xsmall btn-secondary" @click="setPage('boss', bossPage + 1)" :disabled="bossPage >= bossTotalPages">Next &rarr;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- world events feed -->
+                    <div class="panel" v-if="worldEvents && worldEvents.length" style="margin-bottom:14px;">
+                        <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+                            <span>🌍 World Events</span>
+                            <span v-if="onlineCount > 0" style="font-size:11px;color:var(--green-bright);font-weight:400;">● [[ onlineCount ]] online</span>
+                        </div>
+                        <div class="panel-body" style="padding-bottom:10px;">
+                            <div v-for="(ev, i) in worldEvents" :key="i"
+                                 style="font-size:12px;color:var(--text-dim);padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);line-height:1.4;">
+                                <span style="color:rgba(255,255,255,0.35);margin-right:5px;">[[ fmtTime(ev.t) ]]</span>[[ ev.msg ]]
                             </div>
                         </div>
                     </div>
@@ -1418,10 +1463,19 @@
                         </div>
                         <div class="inv-grid">
                             <div v-for="item in paginatedInventory" :key="item.name" class="inv-row">
-                                <img class="type-glyph"
-                                     :src="'/game_assets/glyphs/' + typeGlyph(item.type) + '.webp'"
-                                     :alt="item.type"
-                                     style="flex-shrink:0;width:20px;height:20px;opacity:0.7;">
+                                <!-- item texture thumbnail (real art) or fallback type glyph -->
+                                <div style="flex-shrink:0;width:32px;height:32px;position:relative;">
+                                    <img v-if="item.texture"
+                                         :src="'/game_assets/' + item.texture"
+                                         :alt="item.name"
+                                         style="width:32px;height:32px;image-rendering:pixelated;object-fit:contain;border-radius:3px;background:rgba(0,0,0,0.25);"
+                                         @error="$event.target.style.display='none'">
+                                    <img v-else
+                                         class="type-glyph"
+                                         :src="'/game_assets/glyphs/' + typeGlyph(item.type) + '.webp'"
+                                         :alt="item.type"
+                                         style="width:28px;height:28px;opacity:0.7;margin:2px;">
+                                </div>
                                 <div style="flex:1;min-width:0;">
                                     <div class="inv-row-name" :class="'rarity-' + item.rarity">[[ item.name ]]</div>
                                     <div class="inv-row-meta" v-if="item.stats">[[ item.stats ]]</div>
@@ -1726,8 +1780,11 @@
 
                     <!-- hire companions (tavern only) -->
                     <div v-if="companionsAvailable && companionsAvailable.length">
-                        <div class="panel-title" style="margin-bottom:10px;">Available at Tavern</div>
-                        <div v-for="comp in companionsAvailable" :key="comp.id" class="companion-card">
+                        <div class="panel-title" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+                            <span>Available at Tavern</span>
+                            <span v-if="companionTotalPages > 1" style="font-size:11px;color:var(--text-dim);">Page [[ companionPage ]]/[[ companionTotalPages ]]</span>
+                        </div>
+                        <div v-for="comp in paginatedCompanionsAvailable" :key="comp.id" class="companion-card">
                             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                                 <div style="flex:1;">
                                     <div class="companion-name">[[ comp.name ]]</div>
@@ -1742,6 +1799,11 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="pagination-controls" v-if="companionTotalPages > 1" style="margin-top:8px;">
+                            <button class="btn btn-xsmall btn-secondary" @click="setPage('companion', companionPage - 1)" :disabled="companionPage <= 1">&larr; Prev</button>
+                            <span class="pagination-label">[[ companionPage ]] / [[ companionTotalPages ]]</span>
+                            <button class="btn btn-xsmall btn-secondary" @click="setPage('companion', companionPage + 1)" :disabled="companionPage >= companionTotalPages">Next &rarr;</button>
+                        </div>
                     </div>
                     <div v-else-if="!(activeCompanions && activeCompanions.length)" class="empty-state">
                         Visit The Rusty Tankard to hire companions.
@@ -1751,10 +1813,11 @@
                 <!-- ═══ QUESTS tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'quests' }">
                     <div v-if="missions && missions.length">
-                        <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);">
-                            [[ completedMissionsCount ]] quest[[ completedMissionsCount !== 1 ? 's' : '' ]] completed
+                        <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);display:flex;align-items:center;justify-content:space-between;">
+                            <span>[[ completedMissionsCount ]] quest[[ completedMissionsCount !== 1 ? 's' : '' ]] completed</span>
+                            <span v-if="questTotalPages > 1">Page [[ questPage ]]/[[ questTotalPages ]]</span>
                         </div>
-                        <div v-for="mission in missions" :key="mission.id" class="mission-card"
+                        <div v-for="mission in paginatedQuests" :key="mission.id" class="mission-card"
                              :style="{ opacity: mission.eligible ? 1 : 0.6 }">
                             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                                 <div style="flex:1;">
@@ -1786,6 +1849,11 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="pagination-controls" v-if="questTotalPages > 1" style="margin-top:10px;">
+                            <button class="btn btn-xsmall btn-secondary" @click="setPage('quest', questPage - 1)" :disabled="questPage <= 1">&larr; Prev</button>
+                            <span class="pagination-label">[[ questPage ]] / [[ questTotalPages ]]</span>
+                            <button class="btn btn-xsmall btn-secondary" @click="setPage('quest', questPage + 1)" :disabled="questPage >= questTotalPages">Next &rarr;</button>
+                        </div>
                     </div>
                     <div v-else class="empty-state">No active quests.</div>
                 </div>
@@ -1793,7 +1861,11 @@
                 <!-- ═══ CHALLENGES tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'challenges' }">
                     <div v-if="challenges && challenges.length">
-                        <div v-for="ch in challenges" :key="ch.id" class="challenge-card">
+                        <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);display:flex;align-items:center;justify-content:space-between;">
+                            <span>[[ challenges.length ]] challenge[[ challenges.length !== 1 ? 's' : '' ]]</span>
+                            <span v-if="challengeTotalPages > 1">Page [[ challengePage ]]/[[ challengeTotalPages ]]</span>
+                        </div>
+                        <div v-for="ch in paginatedChallenges" :key="ch.id" class="challenge-card">
                             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                                 <div style="flex:1;">
                                     <div class="challenge-name">[[ ch.name ]]</div>
@@ -1820,6 +1892,11 @@
                                     Claim
                                 </button>
                             </div>
+                        </div>
+                        <div class="pagination-controls" v-if="challengeTotalPages > 1" style="margin-top:10px;">
+                            <button class="btn btn-xsmall btn-secondary" @click="setPage('challenge', challengePage - 1)" :disabled="challengePage <= 1">&larr; Prev</button>
+                            <span class="pagination-label">[[ challengePage ]] / [[ challengeTotalPages ]]</span>
+                            <button class="btn btn-xsmall btn-secondary" @click="setPage('challenge', challengePage + 1)" :disabled="challengePage >= challengeTotalPages">Next &rarr;</button>
                         </div>
                     </div>
                     <div v-else class="empty-state">No challenges available this week.</div>
@@ -1997,13 +2074,21 @@
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'friends' }">
                     <div v-if="onlineUsername">
                         <div class="panel" style="margin-bottom:12px;">
-                            <div class="panel-title">Friends</div>
+                            <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+                                <span>Friends</span>
+                                <span v-if="friendTotalPages > 1" style="font-size:11px;color:var(--text-dim);">Page [[ friendPage ]]/[[ friendTotalPages ]]</span>
+                            </div>
                             <div class="panel-body">
                                 <div v-if="friendsLoading" style="color:var(--text-dim);font-size:13px;">Loading…</div>
                                 <div v-else-if="friendsList && friendsList.length">
-                                    <div v-for="f in friendsList" :key="f.username" class="friends-list-item">
+                                    <div v-for="f in paginatedFriends" :key="f.username" class="friends-list-item">
                                         <span style="color:var(--text-light);">[[ f.username ]]</span>
                                         <span style="color:var(--text-dim);font-size:12px;">[[ f.status || '' ]]</span>
+                                    </div>
+                                    <div class="pagination-controls" v-if="friendTotalPages > 1" style="margin-top:8px;">
+                                        <button class="btn btn-xsmall btn-secondary" @click="setPage('friend', friendPage - 1)" :disabled="friendPage <= 1">&larr; Prev</button>
+                                        <span class="pagination-label">[[ friendPage ]] / [[ friendTotalPages ]]</span>
+                                        <button class="btn btn-xsmall btn-secondary" @click="setPage('friend', friendPage + 1)" :disabled="friendPage >= friendTotalPages">Next &rarr;</button>
                                     </div>
                                 </div>
                                 <div v-else style="color:var(--text-dim);font-size:13px;">No friends added yet.</div>

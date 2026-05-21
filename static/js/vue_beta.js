@@ -95,17 +95,29 @@ createApp({
 
             iframeLoaded: { land: false, leaderboard: false, wiki: false },
 
-            // pagination
-            invPage:      1,
-            shopPage:     1,
-            marketPage:   1,
-            diaryPage:    1,
-            recipePage:   1,
-            INV_PAGE_SIZE:    15,
-            SHOP_PAGE_SIZE:   15,
-            MARKET_PAGE_SIZE: 20,
-            DIARY_PAGE_SIZE:  30,
-            RECIPE_PAGE_SIZE: 12,
+            // pagination — page state
+            invPage:        1,
+            shopPage:       1,
+            marketPage:     1,
+            diaryPage:      1,
+            recipePage:     1,
+            questPage:      1,
+            challengePage:  1,
+            companionPage:  1,
+            friendPage:     1,
+            bossPage:       1,
+
+            // pagination — page sizes
+            INV_PAGE_SIZE:        15,
+            SHOP_PAGE_SIZE:       15,
+            MARKET_PAGE_SIZE:     20,
+            DIARY_PAGE_SIZE:      30,
+            RECIPE_PAGE_SIZE:     12,
+            QUEST_PAGE_SIZE:      10,
+            CHALLENGE_PAGE_SIZE:  10,
+            COMPANION_PAGE_SIZE:  8,
+            FRIEND_PAGE_SIZE:     20,
+            BOSS_PAGE_SIZE:       8,
         };
     },
 
@@ -148,43 +160,83 @@ createApp({
 
         // ── pagination computed ──────────────────────────────
         paginatedInventory() {
-            const start = (this.invPage - 1) * this.INV_PAGE_SIZE;
-            return (this.inventoryItems || []).slice(start, start + this.INV_PAGE_SIZE);
+            const s = (this.invPage - 1) * this.INV_PAGE_SIZE;
+            return (this.inventoryItems || []).slice(s, s + this.INV_PAGE_SIZE);
         },
         invTotalPages() {
             return Math.max(1, Math.ceil((this.inventoryItems || []).length / this.INV_PAGE_SIZE));
         },
 
         paginatedShop() {
-            const start = (this.shopPage - 1) * this.SHOP_PAGE_SIZE;
-            return (this.shopItems || []).slice(start, start + this.SHOP_PAGE_SIZE);
+            const s = (this.shopPage - 1) * this.SHOP_PAGE_SIZE;
+            return (this.shopItems || []).slice(s, s + this.SHOP_PAGE_SIZE);
         },
         shopTotalPages() {
             return Math.max(1, Math.ceil((this.shopItems || []).length / this.SHOP_PAGE_SIZE));
         },
 
         paginatedMarket() {
-            const start = (this.marketPage - 1) * this.MARKET_PAGE_SIZE;
-            return (this.marketItems || []).slice(start, start + this.MARKET_PAGE_SIZE);
+            const s = (this.marketPage - 1) * this.MARKET_PAGE_SIZE;
+            return (this.marketItems || []).slice(s, s + this.MARKET_PAGE_SIZE);
         },
         marketTotalPages() {
             return Math.max(1, Math.ceil((this.marketItems || []).length / this.MARKET_PAGE_SIZE));
         },
 
         paginatedDiary() {
-            const start = (this.diaryPage - 1) * this.DIARY_PAGE_SIZE;
-            return (this.diary || []).slice(start, start + this.DIARY_PAGE_SIZE);
+            const s = (this.diaryPage - 1) * this.DIARY_PAGE_SIZE;
+            return (this.diary || []).slice(s, s + this.DIARY_PAGE_SIZE);
         },
         diaryTotalPages() {
             return Math.max(1, Math.ceil((this.diary || []).length / this.DIARY_PAGE_SIZE));
         },
 
         paginatedRecipes() {
-            const start = (this.recipePage - 1) * this.RECIPE_PAGE_SIZE;
-            return (this.craftingRecipes || []).slice(start, start + this.RECIPE_PAGE_SIZE);
+            const s = (this.recipePage - 1) * this.RECIPE_PAGE_SIZE;
+            return (this.craftingRecipes || []).slice(s, s + this.RECIPE_PAGE_SIZE);
         },
         recipeTotalPages() {
             return Math.max(1, Math.ceil((this.craftingRecipes || []).length / this.RECIPE_PAGE_SIZE));
+        },
+
+        paginatedQuests() {
+            const s = (this.questPage - 1) * this.QUEST_PAGE_SIZE;
+            return (this.missions || []).slice(s, s + this.QUEST_PAGE_SIZE);
+        },
+        questTotalPages() {
+            return Math.max(1, Math.ceil((this.missions || []).length / this.QUEST_PAGE_SIZE));
+        },
+
+        paginatedChallenges() {
+            const s = (this.challengePage - 1) * this.CHALLENGE_PAGE_SIZE;
+            return (this.challenges || []).slice(s, s + this.CHALLENGE_PAGE_SIZE);
+        },
+        challengeTotalPages() {
+            return Math.max(1, Math.ceil((this.challenges || []).length / this.CHALLENGE_PAGE_SIZE));
+        },
+
+        paginatedCompanionsAvailable() {
+            const s = (this.companionPage - 1) * this.COMPANION_PAGE_SIZE;
+            return (this.companionsAvailable || []).slice(s, s + this.COMPANION_PAGE_SIZE);
+        },
+        companionTotalPages() {
+            return Math.max(1, Math.ceil((this.companionsAvailable || []).length / this.COMPANION_PAGE_SIZE));
+        },
+
+        paginatedFriends() {
+            const s = (this.friendPage - 1) * this.FRIEND_PAGE_SIZE;
+            return (this.friendsList || []).slice(s, s + this.FRIEND_PAGE_SIZE);
+        },
+        friendTotalPages() {
+            return Math.max(1, Math.ceil((this.friendsList || []).length / this.FRIEND_PAGE_SIZE));
+        },
+
+        paginatedBosses() {
+            const s = (this.bossPage - 1) * this.BOSS_PAGE_SIZE;
+            return (this.availableBosses || []).slice(s, s + this.BOSS_PAGE_SIZE);
+        },
+        bossTotalPages() {
+            return Math.max(1, Math.ceil((this.availableBosses || []).length / this.BOSS_PAGE_SIZE));
         },
     },
 
@@ -196,21 +248,24 @@ createApp({
                 if (el) el.scrollTop = el.scrollHeight;
             });
         },
-        inventoryItems() { this.invPage = 1; },
-        shopItems()       { this.shopPage = 1; },
-        marketItems()     { this.marketPage = 1; },
-        diary()           { this.diaryPage = 1; },
-        craftingRecipes() { this.recipePage = 1; },
+        inventoryItems()      { this.invPage = 1; },
+        shopItems()           { this.shopPage = 1; },
+        marketItems()         { this.marketPage = 1; },
+        diary()               { this.diaryPage = 1; },
+        craftingRecipes()     { this.recipePage = 1; },
+        missions()            { this.questPage = 1; },
+        challenges()          { this.challengePage = 1; },
+        companionsAvailable() { this.companionPage = 1; },
+        friendsList()         { this.friendPage = 1; },
+        availableBosses()     { this.bossPage = 1; },
     },
 
     methods: {
 
-        // ── pagination helpers ────────────────────────────────
+        // ── pagination helper ─────────────────────────────────
         setPage(which, page) {
-            const totalKey = which + 'TotalPages';
-            const total = this[totalKey] || 1;
-            const pageKey = which + 'Page';
-            this[pageKey] = Math.max(1, Math.min(page, total));
+            const total = this[which + 'TotalPages'] || 1;
+            this[which + 'Page'] = Math.max(1, Math.min(page, total));
         },
 
         // fetch full extended game state from server
@@ -289,6 +344,8 @@ createApp({
             this.weatherBonusExp     = data.weather_bonus_exp    || 0;
             this.weatherBonusGold    = data.weather_bonus_gold   || 0;
             this.visitedAreas        = data.visited_areas        || [];
+            this.worldEvents         = data.world_events         || [];
+            this.onlineCount         = data.online_count         || 0;
 
             // show new messages as toasts
             const msgs = data.messages || [];
@@ -304,7 +361,7 @@ createApp({
             if (data.in_battle && this.activeTab !== 'battle') this.activeTab = 'battle';
             if (!data.in_battle && this.activeTab === 'battle') this.activeTab = 'explore';
 
-            // show/hide shop/mine tabs
+            // hide shop/mine tabs if no content
             if (!this.shopItems.length && this.activeTab === 'shop') this.activeTab = 'explore';
             if (!this.mineData && this.activeTab === 'mine') this.activeTab = 'explore';
         },
@@ -363,10 +420,10 @@ createApp({
         travel(key)   { return this.doAction('/api/action/travel', { area: key }); },
 
         // inventory
-        useItem(name)   { return this.doAction('/api/action/use_item',  { item: name }); },
-        equipItem(name) { return this.doAction('/api/action/equip',     { item: name }); },
-        unequipSlot(slot) { return this.doAction('/api/action/unequip', { slot }); },
-        sellItem(name)  { return this.doAction('/api/action/sell',      { item: name }); },
+        useItem(name)     { return this.doAction('/api/action/use_item',  { item: name }); },
+        equipItem(name)   { return this.doAction('/api/action/equip',     { item: name }); },
+        unequipSlot(slot) { return this.doAction('/api/action/unequip',   { slot }); },
+        sellItem(name)    { return this.doAction('/api/action/sell',      { item: name }); },
 
         // equipment tab
         autoEquip()     { return this.doAction('/api/action/auto_equip'); },
@@ -395,21 +452,32 @@ createApp({
         // dungeons
         async enterDungeon(id) {
             const res = await this.doAction('/api/action/dungeon/enter', { dungeon_id: id });
-            if (res && res.redirect) {
-                window.location.href = res.redirect;
-            }
+            if (res && res.redirect) window.location.href = res.redirect;
         },
         abandonDungeon() { return this.doAction('/api/action/dungeon/abandon'); },
 
         // battle
-        battleAttack()  { return this.doAction('/api/battle/attack'); },
-        battleDefend()  { return this.doAction('/api/battle/defend'); },
-        battleFlee()    { return this.doAction('/api/battle/flee'); },
-        battleSpell(id) { return this.doAction('/api/battle/spell',    { spell_id: id }); },
+        battleAttack()      { return this.doAction('/api/battle/attack'); },
+        battleDefend()      { return this.doAction('/api/battle/defend'); },
+        battleFlee()        { return this.doAction('/api/battle/flee'); },
+        battleSpell(id)     { return this.doAction('/api/battle/spell',    { spell_id: id }); },
         battleUseItem(name) { return this.doAction('/api/battle/use_item', { item: name }); },
 
         // attributes
         spendAttrPoint(attr) { return this.doAction('/api/spend_attr_point', { attr, count: 1 }); },
+
+        // session save & exit (no file download — pure session)
+        async saveAndExit() {
+            this.showToast('Saving…', 'var(--text-dim)');
+            try {
+                await fetch('/api/online/autosave', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+            } catch (_) { /* best-effort */ }
+            window.location.href = '/';
+        },
 
         // market
         async loadMarket() {
@@ -439,7 +507,17 @@ createApp({
             if (res && res.ok) await this.loadMarket();
         },
 
-        // friends — load on tab switch
+        async marketReset() {
+            try {
+                const r = await fetch('/action/market/reset', { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await r.json().catch(() => ({}));
+                this.showToast(data.message || 'Market reset!', 'var(--gold)');
+                this.marketItems = [];
+                this.loadMarket();
+            } catch (_) { this.showToast('Reset failed.', 'var(--red)'); }
+        },
+
+        // friends
         async loadFriends() {
             if (!this.onlineUsername) return;
             this.friendsLoading = true;
@@ -503,16 +581,6 @@ createApp({
             } catch (_) { /* silent */ }
         },
 
-        async marketReset() {
-            try {
-                const r = await fetch('/action/market/reset', { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                const data = await r.json().catch(() => ({}));
-                this.showToast(data.message || 'Market reset!', 'var(--gold)');
-                this.marketItems = [];
-                this.loadMarket();
-            } catch (_) { this.showToast('Reset failed.', 'var(--red)'); }
-        },
-
         showToast(text, color) {
             const id = Date.now() + '_' + Math.random();
             this.toasts.push({ id, text, color: color || 'var(--text-light)' });
@@ -549,9 +617,9 @@ createApp({
 
         spellTypeColor(sp) {
             const map = {
-                fire: '#f07040', ice: '#70c0f0', lightning: '#f0e040',
-                holy: '#f8f0b0', dark: '#c080f8', nature: '#70d890',
-                arcane: '#b080f0', physical: '#d09060', wind: '#a0e8d0',
+                fire: '#e05030', ice: '#60c0f0', lightning: '#f0d020',
+                dark: '#a040d0', holy: '#f0e880', poison: '#60d060',
+                arcane: '#8080f0', wind: '#a0e0c0', nature: '#70c040',
                 water: '#60a8f0', earth: '#c0a060',
             };
             const t = (sp.spell_type || sp.type || '').toLowerCase();
@@ -568,16 +636,35 @@ createApp({
                 }
             } catch (_) { /* network error ignored */ }
         },
+
+        // world events mini-feed
+        async loadWorldEvents() {
+            try {
+                const r = await fetch('/api/world/events', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (r.ok) {
+                    const data = await r.json();
+                    if (data.ok) this.worldEvents = (data.recent_world_log || []).slice(0, 10);
+                }
+            } catch (_) { /* network error ignored */ }
+        },
+
+        fmtTime(ts) {
+            if (!ts) return '';
+            const d = new Date(ts * 1000);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        },
     },
 
     mounted() {
         this.fetchState();
         this.resetPoll();
+        this.loadWorldEvents();
         if (this.onlineUsername) {
             this.loadNearby();
             setInterval(() => this.loadNearby(), 20000);
             setInterval(() => this.autoSaveHeartbeat(), 30000);
         }
+        setInterval(() => this.loadWorldEvents(), 60000);
 
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
