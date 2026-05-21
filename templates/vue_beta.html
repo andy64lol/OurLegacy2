@@ -44,7 +44,8 @@
 
         /* ── Tab panels ─────────────────────────────────── */
         .vtab-panel { display: none; padding: 14px 2px; }
-        .vtab-panel.vtab-panel-active { display: block; }
+        .vtab-panel.vtab-panel-active { display: block; animation: vtabFadeIn 0.18s ease forwards; }
+        @keyframes vtabFadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         .tab-btn.vtab-battle {
             color: var(--red) !important;
@@ -790,7 +791,7 @@
                         <div class="bar-group">
                             <div class="bar-label">
                                 <img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP
-                                <span class="bar-nums">[[ player.hp ]] / [[ player.max_hp ]]</span>
+                                <span class="bar-nums">[[ fmtNum(player.hp) ]] / [[ fmtNum(player.max_hp) ]]</span>
                             </div>
                             <div class="bar-track">
                                 <div class="bar-fill bar-hp" :class="{ 'bar-hp-low': playerHpLow }" :style="{ width: hpPct + '%' }"></div>
@@ -800,7 +801,7 @@
                         <div class="bar-group">
                             <div class="bar-label">
                                 <img class="type-glyph" src="/game_assets/glyphs/mana.webp" alt="mp"> MP
-                                <span class="bar-nums">[[ player.mp ]] / [[ player.max_mp ]]</span>
+                                <span class="bar-nums">[[ fmtNum(player.mp) ]] / [[ fmtNum(player.max_mp) ]]</span>
                             </div>
                             <div class="bar-track">
                                 <div class="bar-fill bar-mp" :style="{ width: mpPct + '%' }"></div>
@@ -810,7 +811,7 @@
                         <div class="bar-group">
                             <div class="bar-label">
                                 <img class="type-glyph" src="/game_assets/glyphs/exp.webp" alt="exp"> EXP
-                                <span class="bar-nums">[[ player.experience ]] / [[ player.experience_to_next ]]</span>
+                                <span class="bar-nums">[[ fmtNum(player.experience) ]] / [[ fmtNum(player.experience_to_next) ]]</span>
                             </div>
                             <div class="bar-track">
                                 <div class="bar-fill bar-exp" :style="{ width: expPct + '%' }"></div>
@@ -819,13 +820,13 @@
 
                         <div class="gold-display">
                             <img class="type-glyph" src="/game_assets/glyphs/gold.webp" alt="gold">
-                            Gold: <span class="gold-amount">[[ player.gold ]]</span>
+                            Gold: <span class="gold-amount">[[ fmtNum(player.gold) ]]</span>
                         </div>
 
                         <div class="stat-mini-grid">
-                            <div class="stat-mini"><span>ATK</span><strong>[[ player.attack ]]</strong></div>
-                            <div class="stat-mini"><span>DEF</span><strong>[[ player.defense ]]</strong></div>
-                            <div class="stat-mini"><span>SPD</span><strong>[[ player.speed ]]</strong></div>
+                            <div class="stat-mini"><span>ATK</span><strong>[[ fmtNum(player.attack) ]]</strong></div>
+                            <div class="stat-mini"><span>DEF</span><strong>[[ fmtNum(player.defense) ]]</strong></div>
+                            <div class="stat-mini"><span>SPD</span><strong>[[ fmtNum(player.speed) ]]</strong></div>
                         </div>
 
                         <div class="sidebar-status-row" v-if="gameTime || weatherDisplay">
@@ -891,7 +892,7 @@
                                 <span :style="{ color: comp.fallen ? 'var(--red)' : 'var(--text-light)' }">
                                     [[ comp.name ]]<span v-if="comp.fallen" style="font-size:10px;color:var(--red);"> [fallen]</span>
                                 </span>
-                                <span style="color:var(--text-dim);">[[ comp.hp ]]/[[ comp.max_hp ]]</span>
+                                <span style="color:var(--text-dim);">[[ fmtNum(comp.hp) ]]/[[ fmtNum(comp.max_hp) ]]</span>
                             </div>
                             <div class="bar-track">
                                 <div class="bar-fill bar-hp" :style="{ width: comp.hp_pct + '%', opacity: comp.fallen ? 0.3 : 1 }"></div>
@@ -905,7 +906,7 @@
             <!-- world events mini-feed -->
             <div class="panel sidebar-panel" v-if="worldEvents && worldEvents.length" style="margin-top:0;">
                 <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
-                    <span>🌍 World Events</span>
+                    <span><img class="type-glyph" src="/game_assets/glyphs/online.webp" alt="world" style="vertical-align:middle;margin-right:4px;">World Events</span>
                     <span v-if="onlineCount > 0" style="font-size:10px;color:var(--green-bright);font-weight:400;">
                         ● [[ onlineCount ]] online
                     </span>
@@ -928,18 +929,13 @@
                     <img src="/game_assets/glyphs/chat.webp" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
                     [[ onlineUsername ]]
                 </div>
-                <div v-if="player" style="padding:0 4px;">
-                    <div style="font-size:10px;color:#90dfa0;text-align:center;padding:3px 0;opacity:0.8;">
-                        &#9632; Progress saved automatically
-                    </div>
-                </div>
             </div>
 
             <div class="sidebar-nav">
                 <button v-if="player" class="btn btn-danger btn-small"
                         style="display:block;width:100%;text-align:center;margin-bottom:4px;"
                         @click="saveAndExit">
-                    💾 Save &amp; Exit
+                    Save &amp; Exit
                 </button>
                 <a v-else href="/" class="btn btn-danger btn-small" style="display:block;text-align:center;">Exit to Menu</a>
                 <a href="/game" class="btn btn-secondary btn-small" style="display:block;text-align:center;margin-top:4px;">
@@ -962,7 +958,9 @@
                                 @click="switchTab('explore')">Explore</button>
                         <button class="tab-btn vtab-battle" data-tab="battle" v-if="inBattle"
                                 :class="{ active: activeTab === 'battle' }"
-                                @click="switchTab('battle')">⚔ Battle!</button>
+                                @click="switchTab('battle')">
+                            <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="battle"> Battle!
+                        </button>
                         <button class="tab-btn" data-tab="map"
                                 :class="{ active: activeTab === 'map' }"
                                 @click="switchTab('map')">Map</button>
@@ -1017,7 +1015,7 @@
                         <button class="tab-btn" data-tab="land"
                                 v-if="area && area.key === 'your_land'"
                                 :class="{ active: activeTab === 'land' }"
-                                @click="switchTab('land')">🏡 Land</button>
+                                @click="switchTab('land')">Land</button>
                         <button class="tab-btn" data-tab="leaderboard"
                                 :class="{ active: activeTab === 'leaderboard' }"
                                 @click="switchTab('leaderboard')">Leaderboard</button>
@@ -1095,8 +1093,12 @@
                                                 [[ conn.visited ? conn.name : '???' ]]
                                             </span>
                                             <span v-if="conn.visited && conn.difficulty" style="font-size:11px;color:var(--text-dim);margin-left:6px;">Lv.[[ conn.difficulty ]]</span>
-                                            <span v-if="conn.has_shop" style="font-size:10px;color:var(--gold);margin-left:6px;">🛒</span>
-                                            <span v-if="conn.has_enemies" style="font-size:10px;color:var(--red);margin-left:4px;">⚔</span>
+                                            <span v-if="conn.has_shop" style="font-size:10px;color:var(--gold);margin-left:6px;">
+                                                <img class="type-glyph" src="/game_assets/glyphs/gold.webp" alt="shop" style="width:12px;height:12px;vertical-align:middle;">
+                                            </span>
+                                            <span v-if="conn.has_enemies" style="font-size:10px;color:var(--red);margin-left:4px;">
+                                                <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="enemies" style="width:12px;height:12px;vertical-align:middle;">
+                                            </span>
                                         </div>
                                         <button class="btn btn-xsmall btn-secondary"
                                                 @click="travel(conn.key)"
@@ -1177,7 +1179,7 @@
                                 <div v-for="boss in paginatedBosses" :key="boss.key" class="boss-card">
                                     <div style="flex:1;">
                                         <div class="boss-name">[[ boss.name ]]</div>
-                                        <div v-if="boss.on_cooldown" class="boss-cooldown" style="margin-top:3px;">&#128336; [[ boss.cooldown_str ]]</div>
+                                        <div v-if="boss.on_cooldown" class="boss-cooldown" style="margin-top:3px;"><img class="type-glyph" src="/game_assets/glyphs/time_day.webp" alt="cd" style="width:12px;height:12px;vertical-align:middle;margin-right:3px;">[[ boss.cooldown_str ]]</div>
                                     </div>
                                     <button v-if="boss.on_cooldown" class="btn btn-small btn-secondary" disabled style="opacity:0.45;">On Cooldown</button>
                                     <button v-else class="btn btn-small btn-danger"
@@ -1199,7 +1201,7 @@
                     <!-- world events feed -->
                     <div class="panel" v-if="worldEvents && worldEvents.length" style="margin-bottom:14px;">
                         <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
-                            <span>🌍 World Events</span>
+                            <span><img class="type-glyph" src="/game_assets/glyphs/online.webp" alt="world" style="vertical-align:middle;margin-right:4px;">World Events</span>
                             <span v-if="onlineCount > 0" style="font-size:11px;color:var(--green-bright);font-weight:400;">● [[ onlineCount ]] online</span>
                         </div>
                         <div class="panel-body" style="padding-bottom:10px;">
@@ -1263,7 +1265,7 @@
                                         </div>
                                     </div>
                                     <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">
-                                        [[ battle.enemy_hp ]] / [[ battle.enemy_max_hp ]] HP
+                                        [[ fmtNum(battle.enemy_hp) ]] / [[ fmtNum(battle.enemy_max_hp) ]] HP
                                         <span style="float:right;">[[ enemyHpPct ]]%</span>
                                     </div>
                                 </div>
@@ -1307,7 +1309,10 @@
 
                         <!-- party companions in battle -->
                         <div v-if="battle.companions && battle.companions.length" style="margin-top:10px;">
-                            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);margin-bottom:6px;">&#128101; Party</div>
+                            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);margin-bottom:6px;">
+                                <img class="type-glyph" src="/game_assets/glyphs/online.webp" alt="party" style="vertical-align:middle;margin-right:3px;">
+                                Party
+                            </div>
                             <div v-for="comp in battle.companions" :key="comp.name" style="margin-bottom:8px;">
                                 <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
                                     <span :style="{ color: comp.fallen ? 'var(--red)' : 'var(--text-light)' }">
@@ -1315,7 +1320,7 @@
                                         <span v-if="comp.fallen" style="font-size:10px;color:var(--red);"> [fallen]</span>
                                         <span v-else-if="comp.class" style="font-size:10px;color:var(--text-dim);"> ([[ comp.class ]])</span>
                                     </span>
-                                    <span style="color:var(--text-dim);">[[ comp.hp ]]/[[ comp.max_hp ]] HP</span>
+                                    <span style="color:var(--text-dim);">[[ fmtNum(comp.hp) ]]/[[ fmtNum(comp.max_hp) ]] HP</span>
                                 </div>
                                 <div class="bar-track" style="height:4px;">
                                     <div class="bar-fill bar-hp" :style="{ width: comp.hp_pct + '%', opacity: comp.fallen ? 0.3 : 1 }"></div>
@@ -1345,7 +1350,7 @@
 
                         <!-- consumables -->
                         <div v-if="battleConsumables && battleConsumables.length" style="margin-top:10px;">
-                            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);margin-bottom:6px;">&#127820; Use Item</div>
+                            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);margin-bottom:6px;"><img class="type-glyph" src="/game_assets/glyphs/food.webp" alt="use" style="width:12px;height:12px;vertical-align:middle;margin-right:3px;">Use Item</div>
                             <div style="display:flex;flex-wrap:wrap;gap:6px;">
                                 <button v-for="item in battleConsumables" :key="item.name"
                                         class="btn btn-xsmall btn-secondary"
@@ -1359,10 +1364,12 @@
 
                         <div class="battle-actions">
                             <button class="btn btn-danger btn-attack" @click="battleAttack" :disabled="actionPending" style="flex:1;min-width:90px;">
-                                ⚔ [[ actionPending ? '…' : 'Attack' ]]
+                                <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="atk" style="vertical-align:middle;margin-right:3px;">
+                                [[ actionPending ? '…' : 'Attack' ]]
                             </button>
                             <button class="btn btn-secondary btn-defend" @click="battleDefend" :disabled="actionPending" style="flex:1;min-width:90px;">
-                                🛡 Defend
+                                <img class="type-glyph" src="/game_assets/glyphs/armor.webp" alt="def" style="vertical-align:middle;margin-right:3px;">
+                                Defend
                             </button>
                             <button class="btn btn-secondary" @click="battleFlee" :disabled="actionPending" style="min-width:80px;">
                                 ↩ Flee
@@ -1416,33 +1423,59 @@
                             </div>
                         </div>
 
+                        <!-- equippable items from inventory -->
+                        <div class="panel" style="margin-bottom:12px;" v-if="inventoryItems && inventoryItems.filter(i => i.equippable).length">
+                            <div class="panel-title">Equippable Items in Inventory</div>
+                            <div class="panel-body">
+                                <div v-for="item in inventoryItems.filter(i => i.equippable)" :key="item.name"
+                                     style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                                    <img class="type-glyph"
+                                         :src="'/game_assets/glyphs/' + typeGlyph(item.type) + '.webp'"
+                                         :alt="item.type"
+                                         style="width:22px;height:22px;opacity:0.8;flex-shrink:0;">
+                                    <div style="flex:1;min-width:0;">
+                                        <div :class="'rarity-' + item.rarity" style="font-size:13px;font-weight:600;">[[ item.name ]]</div>
+                                        <div v-if="item.req_label" style="font-size:10px;color:var(--text-dim);">[[ item.req_label ]]</div>
+                                        <div v-if="item.stats" style="font-size:11px;color:var(--text-dim);">[[ item.stats ]]</div>
+                                    </div>
+                                    <div style="display:flex;gap:6px;flex-shrink:0;">
+                                        <button v-if="item.can_equip"
+                                                class="btn btn-xsmall btn-secondary"
+                                                @click="equipItem(item.name)"
+                                                :disabled="actionPending">Equip</button>
+                                        <span v-else style="font-size:10px;color:var(--red);" :title="item.equip_block_reason">&#128683; [[ item.equip_block_reason ]]</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="panel">
                             <div class="panel-title">Combat Stats</div>
                             <div class="panel-body">
                                 <div class="stat-grid-big">
                                     <div class="stat-card">
                                         <div class="stat-card-label">HP</div>
-                                        <div class="stat-card-val">[[ player.hp ]]/[[ player.max_hp ]]</div>
+                                        <div class="stat-card-val">[[ fmtNum(player.hp) ]]/[[ fmtNum(player.max_hp) ]]</div>
                                     </div>
                                     <div class="stat-card">
                                         <div class="stat-card-label">MP</div>
-                                        <div class="stat-card-val">[[ player.mp ]]/[[ player.max_mp ]]</div>
+                                        <div class="stat-card-val">[[ fmtNum(player.mp) ]]/[[ fmtNum(player.max_mp) ]]</div>
                                     </div>
                                     <div class="stat-card">
                                         <div class="stat-card-label">Attack</div>
-                                        <div class="stat-card-val">[[ player.attack ]]</div>
+                                        <div class="stat-card-val">[[ fmtNum(player.attack) ]]</div>
                                     </div>
                                     <div class="stat-card">
                                         <div class="stat-card-label">Defense</div>
-                                        <div class="stat-card-val">[[ player.defense ]]</div>
+                                        <div class="stat-card-val">[[ fmtNum(player.defense) ]]</div>
                                     </div>
                                     <div class="stat-card">
                                         <div class="stat-card-label">Speed</div>
-                                        <div class="stat-card-val">[[ player.speed ]]</div>
+                                        <div class="stat-card-val">[[ fmtNum(player.speed) ]]</div>
                                     </div>
                                     <div class="stat-card">
                                         <div class="stat-card-label">Gold</div>
-                                        <div class="stat-card-val">[[ player.gold ]]</div>
+                                        <div class="stat-card-val">[[ fmtNum(player.gold) ]]</div>
                                     </div>
                                 </div>
                             </div>
@@ -1478,15 +1511,20 @@
                                 </div>
                                 <div style="flex:1;min-width:0;">
                                     <div class="inv-row-name" :class="'rarity-' + item.rarity">[[ item.name ]]</div>
+                                    <div class="inv-row-meta" v-if="item.req_label" style="color:var(--text-dim);font-size:10px;">[[ item.req_label ]]</div>
                                     <div class="inv-row-meta" v-if="item.stats">[[ item.stats ]]</div>
                                     <div class="inv-row-meta" v-if="item.description">[[ item.description ]]</div>
                                 </div>
                                 <div class="inv-row-qty">×[[ item.count ]]</div>
                                 <div class="inv-row-actions">
-                                    <button v-if="item.equippable"
+                                    <button v-if="item.equippable && item.can_equip"
                                             class="btn btn-xsmall btn-secondary"
                                             @click="equipItem(item.name)"
                                             :disabled="actionPending">Equip</button>
+                                    <span v-if="item.equippable && !item.can_equip"
+                                          class="inv-row-meta"
+                                          style="font-size:10px;color:var(--red);white-space:nowrap;"
+                                          :title="item.equip_block_reason">&#128683; [[ item.equip_block_reason ]]</span>
                                     <button v-if="item.type === 'consumable'"
                                             class="btn btn-xsmall btn-secondary"
                                             @click="useItem(item.name)"
@@ -1495,7 +1533,7 @@
                                             @click="sellItem(item.name)"
                                             :disabled="actionPending"
                                             :title="'Sell for ' + (item.sell_price || 0) + 'g'">
-                                        💰 [[ item.sell_price || 0 ]]g
+                                        <img class="type-glyph" src="/game_assets/glyphs/gold.webp" alt="gold" style="vertical-align:middle;margin-right:2px;">[[ item.sell_price || 0 ]]g
                                     </button>
                                 </div>
                             </div>
@@ -2148,7 +2186,7 @@
                             title="Land & Housing"></iframe>
                     </div>
                     <div v-else class="empty-state" style="padding:40px 0;">
-                        <div style="font-size:32px;margin-bottom:12px;">🏡</div>
+                        <div style="font-size:32px;margin-bottom:12px;">&#127968;</div>
                         <div style="color:var(--text-dim);font-size:14px;margin-bottom:16px;">You need to travel to your land to manage housing.</div>
                         <button class="btn btn-secondary btn-small"
                                 @click="travel('your_land')"

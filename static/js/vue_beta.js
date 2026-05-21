@@ -460,7 +460,7 @@ createApp({
         battleAttack()      { return this.doAction('/api/battle/attack'); },
         battleDefend()      { return this.doAction('/api/battle/defend'); },
         battleFlee()        { return this.doAction('/api/battle/flee'); },
-        battleSpell(id)     { return this.doAction('/api/battle/spell',    { spell_id: id }); },
+        battleSpell(id)     { return this.doAction('/api/battle/spell',    { spell: id }); },
         battleUseItem(name) { return this.doAction('/api/battle/use_item', { item: name }); },
 
         // attributes
@@ -613,6 +613,14 @@ createApp({
                 accessory_1: 'accessories', accessory_2: 'accessories', accessory_3: 'accessories',
             };
             return map[slot] || null;
+        },
+
+        fmtNum(n) {
+            if (n === null || n === undefined || isNaN(n)) return '0';
+            const v = Number(n);
+            if (v >= 1_000_000) return (v / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (v >= 10_000)    return (v / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+            return String(Math.round(v));
         },
 
         spellTypeColor(sp) {

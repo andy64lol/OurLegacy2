@@ -8453,14 +8453,47 @@ def _api_player_summary(player):
 
 def _api_battle_summary():
     enemy = session.get("battle_enemy") or {}
+    player = get_player() or {}
+    weapon = player.get("equipment", {}).get("weapon")
+    items_data = GAME_DATA["items"]
+    spells_data = GAME_DATA["spells"]
+    raw_spells = get_available_spells(weapon, items_data, spells_data) if weapon else []
+    spells_out = []
+    for s in raw_spells:
+        spells_out.append({
+            "id":         s["name"],
+            "name":       s["name"],
+            "mp_cost":    s.get("mp_cost", 10),
+            "damage_min": s.get("damage_min", s.get("power", 0)),
+            "damage_max": s.get("damage_max", s.get("power", 0) * 2),
+            "spell_type": s.get("element", s.get("spell_type", s.get("type", "arcane"))),
+            "type":       s.get("element", s.get("spell_type", s.get("type", "arcane"))),
+        })
+    battle_companions = session.get("battle_companions", [])
+    companions_out = []
+    for c in battle_companions:
+        hp = c.get("hp", 0)
+        max_hp = max(1, c.get("max_hp", 1))
+        companions_out.append({
+            "name":    c.get("name", "?"),
+            "class":   c.get("class", ""),
+            "hp":      hp,
+            "max_hp":  max_hp,
+            "hp_pct":  min(100, round(hp / max_hp * 100)),
+            "fallen":  hp <= 0,
+        })
     return {
-        "enemy_name": enemy.get("name"),
-        "enemy_hp": enemy.get("hp"),
-        "enemy_max_hp": enemy.get("max_hp"),
-        "enemy_attack": enemy.get("attack"),
+        "enemy_name":    enemy.get("name"),
+        "enemy_key":     enemy.get("key"),
+        "enemy_hp":      enemy.get("hp", 0),
+        "enemy_max_hp":  enemy.get("max_hp", 1),
+        "enemy_attack":  enemy.get("attack"),
         "enemy_defense": enemy.get("defense"),
-        "is_boss": enemy.get("is_boss", False),
-        "log": (session.get("battle_log") or [])[-10:],
+        "enemy_type":    enemy.get("type", ""),
+        "is_boss":       enemy.get("is_boss", False),
+        "log":           (session.get("battle_log") or [])[-10:],
+        "spells":        spells_out,
+        "companions":    companions_out,
     }
 
 
@@ -8505,7 +8538,7 @@ def _api_battle_outcome(player, enemy, log):
         session.pop("battle_enemy_effects", None)
         session.pop("battle_companions", None)
         session["battle_log"] = log
-        session["battle_enemy"] = None
+        session.pop("battle_enemy", None)
         save_player(player)
         _autosave()
         return jsonify(
@@ -8530,7 +8563,7 @@ def _api_battle_outcome(player, enemy, log):
         session.pop("battle_enemy_effects", None)
         session.pop("battle_companions", None)
         session["battle_log"] = log
-        session["battle_enemy"] = None
+        session.pop("battle_enemy", None)
         save_player(player)
         _autosave()
         return jsonify(
