@@ -86,6 +86,8 @@ createApp({
 
             nearbyPlayers: [],
             onlineCount:   0,
+
+            spellPage: 0,
         };
     },
 
@@ -98,6 +100,17 @@ createApp({
         craftableCount() { return (this.craftingRecipes || []).filter(r => r.can_craft).length; },
         battleSpells() { return (this.battle && this.battle.spells) ? this.battle.spells : []; },
         battleConsumables() { return (this.inventoryItems || []).filter(i => i.type === 'consumable').slice(0, 6); },
+        spellPageCount() { return Math.max(1, Math.ceil(this.battleSpells.length / 4)); },
+        spellPagedSpells() {
+            const page = Math.min(this.spellPage, this.spellPageCount - 1);
+            return this.battleSpells.slice(page * 4, page * 4 + 4);
+        },
+    },
+
+    watch: {
+        inBattle(val) {
+            if (!val) this.spellPage = 0;
+        },
     },
 
     methods: {
@@ -313,6 +326,17 @@ createApp({
         glyphFor(charClass) {
             const map = { Warrior:'warrior', Mage:'mage', Rogue:'rouge', Rouge:'rouge', Archer:'hunter', Hunter:'hunter', Paladin:'paladin', Cleric:'priest', Priest:'priest', Necromancer:'mage', Druid:'druid', Ranger:'hunter', Monk:'warrior', Bard:'bard', Summoner:'mage' };
             return map[charClass] || 'warrior';
+        },
+        enemyGlyph(key) {
+            if (!key) return 'orc';
+            const k = key.toLowerCase();
+            if (k.includes('goblin')) return 'goblin';
+            if (k.includes('orc') || k.includes('troll') || k.includes('golem') || k.includes('bear') || k.includes('wolverine') || k.includes('leopard') || k.includes('lynx') || k.includes('viper') || k.includes('wolf')) return 'orc';
+            if (k.includes('skeleton')) return 'skeleton';
+            if (k.includes('thief') || k.includes('bandit')) return 'thief';
+            if (k.includes('mage') || k.includes('shaman') || k.includes('elemental') || k.includes('wraith') || k.includes('spirit') || k.includes('dark_')) return 'mage';
+            if (k.includes('knight') || k.includes('warrior') || k.includes('shadow')) return 'warrior';
+            return 'orc';
         },
         typeGlyph(type) {
             const map = { weapon:'weapon', armor:'armor', offhand:'offhand', accessory:'accessories', consumable:'food', material:'materials', pickaxe:'pickaxe', spell:'spell', book:'book' };
