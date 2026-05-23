@@ -210,7 +210,6 @@ createApp({
                 { key: 'land',        label: 'Land',        show: !!(this.area && this.area.key === 'your_land') },
                 { key: 'leaderboard', label: 'Leaderboard', show: true },
                 { key: 'wiki',        label: 'Wiki',        show: true },
-                { key: 'admin',       label: 'Admin',       show: this.isAdmin },
             ].filter(t => t.show);
         },
         craftableCount() {
@@ -1132,6 +1131,8 @@ createApp({
         fmtNum(n) {
             if (n === null || n === undefined || isNaN(n)) return "0";
             const v = Number(n);
+            if (v >= 1e15) return v.toExponential(1);
+            if (v >= 1_000_000_000) return (v / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
             if (v >= 1_000_000) return (v / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
             if (v >= 1_000) return (v / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
             return String(Math.round(v));

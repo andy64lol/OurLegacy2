@@ -547,9 +547,11 @@
         .equip-slot-empty { font-size: 13px; color: rgba(255,255,255,0.18); margin-top: 2px; font-style: italic; }
 
         /* ── Tab bar ──────────────────────────────────────── */
-        .tab-bar-wrap { overflow: visible; position: relative; display: flex; align-items: flex-end; gap: 0; }
-        .tab-bar-scroll { flex: 1; min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.12) transparent; }
-        .tab-bar-wrap .tab-nav { flex-wrap: nowrap; overflow: visible; min-width: max-content; }
+        .tab-bar-wrap { display: flex; flex-direction: row; align-items: flex-end; overflow: visible; gap: 0; }
+        .tab-bar-wrap .tab-nav { flex: 1; min-width: 0; overflow-x: auto; overflow-y: visible; scrollbar-width: none; flex-wrap: nowrap; }
+        .tab-bar-wrap .tab-nav::-webkit-scrollbar { display: none; }
+        .vtab-more-wrap { flex-shrink: 0; position: relative; align-self: flex-end; }
+        .vtab-more-wrap .tab-more-btn { display: block !important; }
 
         /* ── Friends ──────────────────────────────────────── */
         .friends-list-item {
@@ -957,7 +959,6 @@
 
                 <!-- tab navigation -->
                 <div class="tab-nav-wrap tab-bar-wrap">
-                    <div class="tab-bar-scroll">
                     <div class="tab-nav">
                         <button class="tab-btn" :class="{ active: activeTab === 'explore' }" @click="switchTab('explore')">Explore</button>
                         <button class="tab-btn vtab-battle" v-if="inBattle" :class="{ active: activeTab === 'battle' }" @click="switchTab('battle')">
@@ -985,13 +986,11 @@
                         <button class="tab-btn" v-if="area && area.key === 'your_land'" :class="{ active: activeTab === 'land' }" @click="switchTab('land')">Land</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'leaderboard' }" @click="switchTab('leaderboard')">Leaderboard</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'wiki' }" @click="switchTab('wiki')">Wiki</button>
-                        <button class="tab-btn" v-if="isAdmin" :class="{ active: activeTab === 'admin' }" style="color:var(--red);" @click="switchTab('admin')">Admin</button>
                         <button class="tab-btn" @click="typeof openSettings === 'function' ? openSettings() : (document.getElementById('settings-modal').style.display='flex')" title="Settings">Settings</button>
                     </div>
-                    </div>
                     <!-- Vue-native tab overflow dropdown -->
-                    <div style="position:relative;flex-shrink:0;align-self:flex-end;" @click.stop>
-                        <button class="tab-btn tab-more-btn" style="display:block;" @click.stop="tabDropdownOpen = !tabDropdownOpen" title="All tabs">&bull;&bull;&bull;</button>
+                    <div class="vtab-more-wrap" @click.stop>
+                        <button class="tab-btn tab-more-btn" @click.stop="tabDropdownOpen = !tabDropdownOpen" title="All tabs">&bull;&bull;&bull;</button>
                         <div v-if="tabDropdownOpen" class="tab-overflow-dropdown open">
                             <button v-for="tab in allTabOptions" :key="tab.key" class="tab-overflow-item" :class="{ active: activeTab === tab.key }" @click="switchTab(tab.key); tabDropdownOpen = false">[[ tab.label ]]</button>
                         </div>
@@ -2472,6 +2471,10 @@
             <span v-if="chatUnread > 0" class="vue-chat-unread">[[ chatUnread > 9 ? '9+' : chatUnread ]]</span>
         </button>
     </template>
+    <!-- Admin FAB — fixed above chat, admin-only -->
+    <a v-if="isAdmin" href="/admin" class="vue-chat-fab" title="Admin Console" style="bottom:80px;text-decoration:none;">
+        <img src="/game_assets/glyphs/terminal.webp" alt="admin" style="width:22px;height:22px;image-rendering:pixelated;">
+    </a>
 </div>
 
 <script src="/static/js/game.js"></script>
