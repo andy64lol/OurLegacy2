@@ -88,6 +88,8 @@ createApp({
             onlineCount:   0,
 
             spellPage: 0,
+            _initialLoad: true,
+            tabDropdownOpen: false,
         };
     },
 
@@ -104,6 +106,28 @@ createApp({
         spellPagedSpells() {
             const page = Math.min(this.spellPage, this.spellPageCount - 1);
             return this.battleSpells.slice(page * 4, page * 4 + 4);
+        },
+        allTabOptions() {
+            return [
+                { key: 'explore',    label: 'Explore',     show: true },
+                { key: 'battle',     label: 'Battle!',     show: this.inBattle },
+                { key: 'equipment',  label: 'Equipment',   show: true },
+                { key: 'inventory',  label: 'Inventory',   show: true },
+                { key: 'travel',     label: 'Travel',      show: true },
+                { key: 'shop',       label: 'Shop',        show: !!(this.shopItems && this.shopItems.length) },
+                { key: 'mine',       label: 'Mine',        show: !!this.mineData },
+                { key: 'crafting',   label: 'Crafting',    show: true },
+                { key: 'dungeons',   label: 'Dungeons',    show: true },
+                { key: 'market',     label: 'Market',      show: true },
+                { key: 'party',      label: 'Party',       show: true },
+                { key: 'quests',     label: 'Quests',      show: true },
+                { key: 'challenges', label: 'Challenges',  show: true },
+                { key: 'diary',      label: 'Diary',       show: true },
+                { key: 'character',  label: 'Character',   show: true },
+                { key: 'events',     label: 'Events',      show: true },
+                { key: 'friends',    label: 'Friends',     show: !!this.onlineUsername },
+                { key: 'group',      label: 'Group',       show: !!this.onlineUsername },
+            ].filter(t => t.show);
         },
     },
 
@@ -189,7 +213,9 @@ createApp({
             this.visitedAreas        = data.visited_areas        || [];
 
             const msgs = data.messages || [];
-            if (msgs.length > this.lastMsgCount) {
+            if (this._initialLoad) {
+                this._initialLoad = false;
+            } else if (msgs.length > this.lastMsgCount) {
                 msgs.slice(this.lastMsgCount).forEach((msg, i) => {
                     setTimeout(() => this.showToast(msg.text, msg.color), i * 200);
                 });
@@ -359,6 +385,7 @@ createApp({
             if (!document.hidden) { this.fetchState(); this.resetPoll(); }
             else { if (this.pollTimer) clearInterval(this.pollTimer); }
         });
+        document.addEventListener('click', () => { this.tabDropdownOpen = false; });
     },
 
     beforeUnmount() {

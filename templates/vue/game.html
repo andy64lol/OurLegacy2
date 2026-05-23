@@ -223,8 +223,9 @@ window._betaInit = {
 
         <div class="main-content">
             <div style="padding:0 0 12px 0;max-width:960px;margin:0 auto;">
-                <div class="tab-nav-wrap tab-bar-wrap">
-                    <div class="tab-nav">
+                <div style="display:flex;align-items:flex-end;gap:0;position:relative;margin-bottom:18px;">
+                    <div class="tab-bar-wrap" style="flex:1;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.15) transparent;">
+                    <div class="tab-nav" style="">
                         <button class="tab-btn" :class="{ active: activeTab === 'explore' }" @click="switchTab('explore')">Explore</button>
                         <button class="tab-btn vtab-battle" v-if="inBattle" :class="{ active: activeTab === 'battle' }" @click="switchTab('battle')">Battle!</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'equipment' }" @click="switchTab('equipment')">Equipment</button>
@@ -243,6 +244,14 @@ window._betaInit = {
                         <button class="tab-btn" :class="{ active: activeTab === 'events' }" @click="switchTab('events')">Events</button>
                         <button class="tab-btn" v-if="onlineUsername" :class="{ active: activeTab === 'friends' }" @click="switchTab('friends')">Friends</button>
                         <button class="tab-btn" v-if="onlineUsername" :class="{ active: activeTab === 'group' }" @click="switchTab('group')">Group</button>
+                    </div>
+                    </div>
+                    <!-- Vue-native tab overflow dropdown -->
+                    <div style="position:relative;flex-shrink:0;align-self:flex-end;" @click.stop>
+                        <button class="tab-btn tab-more-btn" style="display:block;padding:9px 14px 11px;background:var(--slate-mid);border-color:var(--border);border-bottom:none;" @click.stop="tabDropdownOpen = !tabDropdownOpen" title="All tabs">&bull;&bull;&bull;</button>
+                        <div v-show="tabDropdownOpen" class="tab-overflow-dropdown" :class="{ open: tabDropdownOpen }" style="display:flex;right:0;left:auto;">
+                            <button v-for="tab in allTabOptions" :key="tab.key" class="tab-overflow-item" :class="{ active: activeTab === tab.key }" @click="switchTab(tab.key); tabDropdownOpen = false">[[ tab.label ]]</button>
+                        </div>
                     </div>
                 </div>
 
