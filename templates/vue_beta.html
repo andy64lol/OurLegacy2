@@ -547,8 +547,9 @@
         .equip-slot-empty { font-size: 13px; color: rgba(255,255,255,0.18); margin-top: 2px; font-style: italic; }
 
         /* ── Tab bar ──────────────────────────────────────── */
-        .tab-bar-wrap { overflow: visible; position: relative; }
-        .tab-bar-wrap .tab-nav { flex-wrap: nowrap; overflow: hidden; }
+        .tab-bar-wrap { overflow: visible; position: relative; display: flex; align-items: flex-end; gap: 0; }
+        .tab-bar-scroll { flex: 1; min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.12) transparent; }
+        .tab-bar-wrap .tab-nav { flex-wrap: nowrap; overflow: visible; min-width: max-content; }
 
         /* ── Friends ──────────────────────────────────────── */
         .friends-list-item {
@@ -956,85 +957,44 @@
 
                 <!-- tab navigation -->
                 <div class="tab-nav-wrap tab-bar-wrap">
-                    <div class="tab-nav" id="main-tabs">
-                        <button class="tab-btn" data-tab="explore"
-                                :class="{ active: activeTab === 'explore' }"
-                                @click="switchTab('explore')">Explore</button>
-                        <button class="tab-btn vtab-battle" data-tab="battle" v-if="inBattle"
-                                :class="{ active: activeTab === 'battle' }"
-                                @click="switchTab('battle')">
+                    <div class="tab-bar-scroll">
+                    <div class="tab-nav">
+                        <button class="tab-btn" :class="{ active: activeTab === 'explore' }" @click="switchTab('explore')">Explore</button>
+                        <button class="tab-btn vtab-battle" v-if="inBattle" :class="{ active: activeTab === 'battle' }" @click="switchTab('battle')">
                             <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="battle"> Battle!
                         </button>
-                        <button class="tab-btn" data-tab="character"
-                                :class="{ active: activeTab === 'character' }"
-                                @click="switchTab('character')">
+                        <button class="tab-btn" :class="{ active: activeTab === 'character' }" @click="switchTab('character')">
                             Character<span v-if="player && player.attr_points > 0" style="margin-left:4px;color:var(--gold);font-size:10px;font-weight:700;">&#9650;</span>
                         </button>
-                        <button class="tab-btn" data-tab="equipment"
-                                :class="{ active: activeTab === 'equipment' }"
-                                @click="switchTab('equipment')">Equipment</button>
-                        <button class="tab-btn" data-tab="inventory"
-                                :class="{ active: activeTab === 'inventory' }"
-                                @click="switchTab('inventory')">Inventory</button>
-                        <button class="tab-btn" data-tab="map"
-                                :class="{ active: activeTab === 'map' }"
-                                @click="switchTab('map')">Map</button>
-                        <button class="tab-btn" data-tab="travel"
-                                :class="{ active: activeTab === 'travel' }"
-                                @click="switchTab('travel')">Travel</button>
-                        <button class="tab-btn" data-tab="shop" v-if="shopItems && shopItems.length"
-                                :class="{ active: activeTab === 'shop' }"
-                                @click="switchTab('shop')">Shop</button>
-                        <button class="tab-btn" data-tab="mine" v-if="mineData"
-                                :class="{ active: activeTab === 'mine' }"
-                                @click="switchTab('mine')">Mine</button>
-                        <button class="tab-btn" data-tab="crafting"
-                                :class="{ active: activeTab === 'crafting' }"
-                                @click="switchTab('crafting')">Crafting</button>
-                        <button class="tab-btn" data-tab="dungeons"
-                                :class="{ active: activeTab === 'dungeons' }"
-                                @click="switchTab('dungeons')">Dungeons</button>
-                        <button class="tab-btn" data-tab="market"
-                                :class="{ active: activeTab === 'market' }"
-                                @click="switchTab('market')">Market</button>
-                        <button class="tab-btn" data-tab="party"
-                                :class="{ active: activeTab === 'party' }"
-                                @click="switchTab('party')">Party</button>
-                        <button class="tab-btn" data-tab="quests"
-                                :class="{ active: activeTab === 'quests' }"
-                                @click="switchTab('quests')">Quests</button>
-                        <button class="tab-btn" data-tab="challenges"
-                                :class="{ active: activeTab === 'challenges' }"
-                                @click="switchTab('challenges')">Challenges</button>
-                        <button class="tab-btn" data-tab="diary"
-                                :class="{ active: activeTab === 'diary' }"
-                                @click="switchTab('diary')">Diary</button>
-                        <button class="tab-btn" data-tab="events"
-                                :class="{ active: activeTab === 'events' }"
-                                @click="switchTab('events')">Events</button>
-                        <button class="tab-btn" data-tab="friends" v-if="onlineUsername"
-                                :class="{ active: activeTab === 'friends' }"
-                                @click="switchTab('friends')">Friends</button>
-                        <button class="tab-btn" data-tab="group" v-if="onlineUsername"
-                                :class="{ active: activeTab === 'group' }"
-                                @click="switchTab('group')">Group</button>
-                        <button class="tab-btn" data-tab="land"
-                                v-if="area && area.key === 'your_land'"
-                                :class="{ active: activeTab === 'land' }"
-                                @click="switchTab('land')">Land</button>
-                        <button class="tab-btn" data-tab="leaderboard"
-                                :class="{ active: activeTab === 'leaderboard' }"
-                                @click="switchTab('leaderboard')">Leaderboard</button>
-                        <button class="tab-btn" data-tab="wiki"
-                                :class="{ active: activeTab === 'wiki' }"
-                                @click="switchTab('wiki')">Wiki</button>
-                        <button class="tab-btn" data-tab="admin" v-if="isAdmin"
-                                :class="{ active: activeTab === 'admin' }"
-                                style="color:var(--red);"
-                                @click="switchTab('admin')">&#9881; Admin</button>
-                        <button class="tab-btn" data-tab="_settings"
-                                @click="typeof openSettings === 'function' ? openSettings() : (document.getElementById('settings-modal').style.display='flex')"
-                                title="Settings">&#9881;</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'equipment' }" @click="switchTab('equipment')">Equipment</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'inventory' }" @click="switchTab('inventory')">Inventory</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'map' }" @click="switchTab('map')">Map</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'travel' }" @click="switchTab('travel')">Travel</button>
+                        <button class="tab-btn" v-if="shopItems && shopItems.length" :class="{ active: activeTab === 'shop' }" @click="switchTab('shop')">Shop</button>
+                        <button class="tab-btn" v-if="mineData" :class="{ active: activeTab === 'mine' }" @click="switchTab('mine')">Mine</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'crafting' }" @click="switchTab('crafting')">Crafting</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'dungeons' }" @click="switchTab('dungeons')">Dungeons</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'market' }" @click="switchTab('market')">Market</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'party' }" @click="switchTab('party')">Party</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'quests' }" @click="switchTab('quests')">Quests</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'challenges' }" @click="switchTab('challenges')">Challenges</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'diary' }" @click="switchTab('diary')">Diary</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'events' }" @click="switchTab('events')">Events</button>
+                        <button class="tab-btn" v-if="onlineUsername" :class="{ active: activeTab === 'friends' }" @click="switchTab('friends')">Friends</button>
+                        <button class="tab-btn" v-if="onlineUsername" :class="{ active: activeTab === 'group' }" @click="switchTab('group')">Group</button>
+                        <button class="tab-btn" v-if="area && area.key === 'your_land'" :class="{ active: activeTab === 'land' }" @click="switchTab('land')">Land</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'leaderboard' }" @click="switchTab('leaderboard')">Leaderboard</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'wiki' }" @click="switchTab('wiki')">Wiki</button>
+                        <button class="tab-btn" v-if="isAdmin" :class="{ active: activeTab === 'admin' }" style="color:var(--red);" @click="switchTab('admin')">Admin</button>
+                        <button class="tab-btn" @click="typeof openSettings === 'function' ? openSettings() : (document.getElementById('settings-modal').style.display='flex')" title="Settings">Settings</button>
+                    </div>
+                    </div>
+                    <!-- Vue-native tab overflow dropdown -->
+                    <div style="position:relative;flex-shrink:0;align-self:flex-end;" @click.stop>
+                        <button class="tab-btn tab-more-btn" style="display:block;" @click.stop="tabDropdownOpen = !tabDropdownOpen" title="All tabs">&bull;&bull;&bull;</button>
+                        <div v-if="tabDropdownOpen" class="tab-overflow-dropdown open">
+                            <button v-for="tab in allTabOptions" :key="tab.key" class="tab-overflow-item" :class="{ active: activeTab === tab.key }" @click="switchTab(tab.key); tabDropdownOpen = false">[[ tab.label ]]</button>
+                        </div>
                     </div>
                 </div>
 
@@ -2448,6 +2408,15 @@
                         </div>
                     </div>
 
+                    <!-- Link to full Jinja2 admin terminal -->
+                    <div class="panel" style="margin-bottom:10px;">
+                        <div class="panel-title">Admin Console</div>
+                        <div class="panel-body">
+                            <a href="/admin" class="btn btn-small btn-secondary" style="display:inline-block;text-decoration:none;">Open Full Admin Terminal</a>
+                            <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">Full terminal with all admin commands, live server stats, and moderation tools.</div>
+                        </div>
+                    </div>
+
                     <!-- Ban/Kick online users -->
                     <div class="panel">
                         <div class="panel-title">Moderation</div>
@@ -2577,10 +2546,10 @@
 
 {% if online_username %}
 <style>
-    .vue-chat-fab { position:fixed;bottom:20px;right:20px;z-index:8000;width:50px;height:50px;background:var(--wood-dark);border:2px solid var(--wood-bright);color:var(--gold);font-size:18px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;font-family:'Tiny5',monospace;transition:background 0.18s,transform 0.18s;border-radius:50%; }
+    .vue-chat-fab { position:fixed;bottom:20px;left:20px;z-index:8000;width:50px;height:50px;background:var(--wood-dark);border:2px solid var(--wood-bright);color:var(--gold);font-size:18px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;font-family:'Tiny5',monospace;transition:background 0.18s,transform 0.18s;border-radius:50%; }
     .vue-chat-fab:hover { background:var(--wood-mid);transform:scale(1.08); }
     .vue-chat-fab.active { background:var(--wood-bright);box-shadow:0 0 0 3px rgba(200,150,60,0.35),0 4px 16px rgba(0,0,0,0.55); }
-    .vue-chat-panel { position:fixed;bottom:80px;right:20px;z-index:8100;width:min(420px,96vw);height:min(520px,80vh);background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.6);display:flex;flex-direction:column;overflow:hidden;border-radius:6px; }
+    .vue-chat-panel { position:fixed;bottom:80px;left:20px;z-index:8100;width:min(420px,96vw);height:min(520px,80vh);background:var(--bg-panel);border:2px solid var(--border);box-shadow:4px 4px 0 rgba(0,0,0,0.6);display:flex;flex-direction:column;overflow:hidden;border-radius:6px; }
     .vue-chat-header { display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--wood-dark);border-bottom:1px solid var(--border);flex-shrink:0; }
     .vue-chat-msgs { flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:4px; }
     .vue-chat-msg { font-size:12px;color:var(--text-light);line-height:1.4;word-break:break-word; }

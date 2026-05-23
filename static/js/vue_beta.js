@@ -53,6 +53,8 @@ createApp({
             actionPending: false,
             toasts: [],
             lastMsgCount: 0,
+            _initialLoad: true,
+            tabDropdownOpen: false,
             pollTimer: null,
 
             // extended state
@@ -183,6 +185,33 @@ createApp({
         },
         recentMessages() {
             return [...this.messages].slice(-12).reverse();
+        },
+        allTabOptions() {
+            return [
+                { key: 'explore',     label: 'Explore',     show: true },
+                { key: 'battle',      label: 'Battle!',     show: this.inBattle },
+                { key: 'character',   label: 'Character',   show: true },
+                { key: 'equipment',   label: 'Equipment',   show: true },
+                { key: 'inventory',   label: 'Inventory',   show: true },
+                { key: 'map',         label: 'Map',         show: true },
+                { key: 'travel',      label: 'Travel',      show: true },
+                { key: 'shop',        label: 'Shop',        show: !!(this.shopItems && this.shopItems.length) },
+                { key: 'mine',        label: 'Mine',        show: !!this.mineData },
+                { key: 'crafting',    label: 'Crafting',    show: true },
+                { key: 'dungeons',    label: 'Dungeons',    show: true },
+                { key: 'market',      label: 'Market',      show: true },
+                { key: 'party',       label: 'Party',       show: true },
+                { key: 'quests',      label: 'Quests',      show: true },
+                { key: 'challenges',  label: 'Challenges',  show: true },
+                { key: 'diary',       label: 'Diary',       show: true },
+                { key: 'events',      label: 'Events',      show: true },
+                { key: 'friends',     label: 'Friends',     show: !!this.onlineUsername },
+                { key: 'group',       label: 'Group',       show: !!this.onlineUsername },
+                { key: 'land',        label: 'Land',        show: !!(this.area && this.area.key === 'your_land') },
+                { key: 'leaderboard', label: 'Leaderboard', show: true },
+                { key: 'wiki',        label: 'Wiki',        show: true },
+                { key: 'admin',       label: 'Admin',       show: this.isAdmin },
+            ].filter(t => t.show);
         },
         craftableCount() {
             return (this.craftingRecipes || []).filter((r) => r.can_craft).length;
@@ -437,9 +466,11 @@ createApp({
             this.worldEvents = data.world_events || [];
             this.onlineCount = data.online_count || 0;
 
-            // show new messages as toasts
+            // show new messages as toasts (skip on first load to avoid flooding)
             const msgs = data.messages || [];
-            if (msgs.length > this.lastMsgCount) {
+            if (this._initialLoad) {
+                this._initialLoad = false;
+            } else if (msgs.length > this.lastMsgCount) {
                 msgs.slice(this.lastMsgCount).forEach((msg, i) => {
                     setTimeout(() => this.showToast(msg.text, msg.color), i * 200);
                 });
@@ -480,11 +511,6 @@ createApp({
                     await this.fetchState();
                     this.resetPoll();
                     return data;
-                }
-                if (data.messages) {
-                    data.messages.forEach((msg, i) => {
-                        setTimeout(() => this.showToast(msg.text, msg.color), i * 200);
-                    });
                 }
                 if (data.message) {
                     this.showToast(data.message, "var(--green-bright)");
@@ -1169,6 +1195,7 @@ createApp({
         }
         setInterval(() => this.loadWorldEvents(), 60000);
 
+        document.addEventListener("click", () => { this.tabDropdownOpen = false; });
         document.addEventListener("visibilitychange", () => {
             if (!document.hidden) {
                 this.fetchState();
