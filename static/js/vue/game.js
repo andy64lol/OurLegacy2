@@ -87,9 +87,16 @@ createApp({
             nearbyPlayers: [],
             onlineCount:   0,
 
+            worldEvents:   [],
+            areasData:     init.areas_data   || {},
+            visitedAreasInit: init.visited_areas || [],
+
             spellPage: 0,
+            bossPage:  1,
             _initialLoad: true,
             tabDropdownOpen: false,
+
+            _mapInitDone: false,
         };
     },
 
@@ -107,20 +114,25 @@ createApp({
             const page = Math.min(this.spellPage, this.spellPageCount - 1);
             return this.battleSpells.slice(page * 4, page * 4 + 4);
         },
+        readyChallengesCount() { return (this.challenges || []).filter(c => c.ready).length; },
+        activeEventsCount()    { return (this.eventsData && this.eventsData.active) ? this.eventsData.active.length : 0; },
+        bossTotalPages()       { return Math.max(1, Math.ceil((this.availableBosses || []).length / 3)); },
+        paginatedBosses()      { const p = Math.min(this.bossPage, this.bossTotalPages) - 1; return (this.availableBosses || []).slice(p * 3, p * 3 + 3); },
         allTabOptions() {
             return [
                 { key: 'explore',    label: 'Explore',     show: true },
                 { key: 'battle',     label: 'Battle!',     show: this.inBattle },
                 { key: 'equipment',  label: 'Equipment',   show: true },
                 { key: 'inventory',  label: 'Inventory',   show: true },
+                { key: 'map',        label: 'Map',         show: true },
                 { key: 'travel',     label: 'Travel',      show: true },
                 { key: 'shop',       label: 'Shop',        show: !!(this.shopItems && this.shopItems.length) },
-                { key: 'mine',       label: 'Mine',        show: !!this.mineData },
+                { key: 'mine',       label: 'Mines',       show: !!this.mineData },
                 { key: 'crafting',   label: 'Crafting',    show: true },
                 { key: 'dungeons',   label: 'Dungeons',    show: true },
                 { key: 'market',     label: 'Market',      show: true },
                 { key: 'party',      label: 'Party',       show: true },
-                { key: 'quests',     label: 'Quests',      show: true },
+                { key: 'quests',     label: 'Quests (' + this.completedMissionsCount + ')', show: true },
                 { key: 'challenges', label: 'Challenges',  show: true },
                 { key: 'diary',      label: 'Diary',       show: true },
                 { key: 'character',  label: 'Character',   show: true },
@@ -211,6 +223,8 @@ createApp({
             this.weatherBonusExp     = data.weather_bonus_exp    || 0;
             this.weatherBonusGold    = data.weather_bonus_gold   || 0;
             this.visitedAreas        = data.visited_areas        || [];
+            this.worldEvents         = data.world_events          || [];
+            if (typeof data.online_count === 'number') this.onlineCount = data.online_count;
 
             const msgs = data.messages || [];
             if (this._initialLoad) {
@@ -341,6 +355,125 @@ createApp({
             if (tab === 'market'  && !this.marketItems.length && !this.marketLoading) this.loadMarket();
             if (tab === 'friends' && !this.friendsList.length)                        this.loadFriends();
             if (tab === 'group'   && !this.groupData)                                 this.loadGroup();
+            if (tab === 'map') this.$nextTick(() => this.initWorldMapCanvas());
+        },
+
+        setPage(type, page) {
+            if (type === 'boss') this.bossPage = Math.max(1, Math.min(this.bossTotalPages, page));
+        },
+
+        fmtTime(ts) {
+            if (!ts) return '';
+            try { return new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; }
+        },
+
+        /* ── World Map Canvas (BFS layout, fog of war, pan/zoom) ── */
+        initWorldMapCanvas() {
+            const canvas = document.getElementById('vue-world-map-canvas');
+            if (!canvas) return;
+            if (this._mapInitDone) { this._drawWorldMap(); return; }
+            this._mapInitDone = true;
+
+            const ctx  = canvas.getContext('2d');
+            const NODE_R = 18, H_GAP = 130, V_GAP = 90;
+            const areasData = this.areasData;
+            const visited   = new Set(this.visitedAreas.length ? this.visitedAreas : this.visitedAreasInit);
+            const current   = (this.area && this.area.key) || '';
+            const nodes = {};
+
+            /* BFS layout */
+            const levels = {}, vis = {}, queue = ['starting_village'], levelMap = { starting_village: 0 };
+            vis['starting_village'] = true;
+            while (queue.length) {
+                const cur = queue.shift();
+                const lv  = levelMap[cur];
+                if (!levels[lv]) levels[lv] = [];
+                levels[lv].push(cur);
+                ((areasData[cur] || {}).connections || []).forEach(nb => {
+                    if (!vis[nb] && areasData[nb]) { vis[nb] = true; levelMap[nb] = lv + 1; queue.push(nb); }
+                });
+            }
+            Object.keys(levels).forEach(lv => {
+                const row = levels[lv], totalW = (row.length - 1) * H_GAP;
+                row.forEach((key, i) => { nodes[key] = { x: i * H_GAP - totalW / 2, y: +lv * V_GAP }; });
+            });
+
+            const maxLevel = Object.keys(nodes).reduce((a, k) => Math.max(a, nodes[k].y), 0);
+            const maxX     = Object.keys(nodes).reduce((a, k) => Math.max(a, Math.abs(nodes[k].x)), 0);
+            const W = Math.max(600, maxX * 2 + 200);
+            const H = Math.min(480, Math.max(300, maxLevel + 100));
+            canvas.width  = W;
+            canvas.height = H;
+            canvas.style.height = H + 'px';
+
+            let pan = { x: W / 2, y: 40 }, scale = 1, dragging = false, lastMouse = { x: 0, y: 0 };
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.translate(pan.x, pan.y);
+                ctx.scale(scale, scale);
+
+                Object.keys(areasData).forEach(key => {
+                    if (!nodes[key]) return;
+                    ((areasData[key] || {}).connections || []).forEach(nb => {
+                        if (!nodes[nb]) return;
+                        ctx.beginPath();
+                        ctx.moveTo(nodes[key].x, nodes[key].y);
+                        ctx.lineTo(nodes[nb].x, nodes[nb].y);
+                        ctx.strokeStyle = (visited.has(key) || visited.has(nb)) ? 'rgba(200,168,75,0.22)' : 'rgba(255,255,255,0.06)';
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke();
+                    });
+                });
+
+                Object.keys(nodes).forEach(key => {
+                    const n = nodes[key];
+                    const isCurrent = key === current;
+                    const isVisited = visited.has(key);
+                    ctx.beginPath();
+                    ctx.arc(n.x, n.y, NODE_R, 0, Math.PI * 2);
+                    if (isCurrent) {
+                        const grd = ctx.createRadialGradient(n.x, n.y, 2, n.x, n.y, NODE_R);
+                        grd.addColorStop(0, '#ffe76a'); grd.addColorStop(1, '#c8a84b');
+                        ctx.fillStyle = grd; ctx.shadowColor = '#ffdb4a'; ctx.shadowBlur = 14;
+                    } else if (isVisited) {
+                        ctx.fillStyle = 'rgba(80,160,100,0.55)'; ctx.shadowBlur = 0;
+                    } else {
+                        ctx.fillStyle = 'rgba(40,40,60,0.8)'; ctx.shadowBlur = 0;
+                    }
+                    ctx.fill(); ctx.shadowBlur = 0;
+                    ctx.strokeStyle = isCurrent ? '#ffe76a' : isVisited ? 'rgba(120,200,140,0.6)' : 'rgba(100,100,140,0.4)';
+                    ctx.lineWidth = isCurrent ? 2.5 : 1.5; ctx.stroke();
+
+                    const area   = areasData[key] || {};
+                    const label  = isVisited ? (area.name || key.replace(/_/g,' ')) : '???';
+                    ctx.font     = isCurrent ? 'bold 9px sans-serif' : '8.5px sans-serif';
+                    ctx.fillStyle= isCurrent ? '#ffe76a' : isVisited ? '#b8d8b8' : '#555577';
+                    ctx.textAlign= 'center';
+                    const words = label.split(' '), lines = [];
+                    let cur2 = '';
+                    words.forEach(w => {
+                        const test = cur2 ? cur2 + ' ' + w : w;
+                        if (ctx.measureText(test).width > NODE_R * 2.6) { if (cur2) lines.push(cur2); cur2 = w; } else { cur2 = test; }
+                    });
+                    if (cur2) lines.push(cur2);
+                    const startY = n.y + NODE_R + 12;
+                    lines.forEach((ln, li) => { ctx.fillText(ln, n.x, startY + li * 9); });
+                });
+                ctx.restore();
+            }
+
+            canvas.addEventListener('mousedown', e => { dragging = true; lastMouse = { x: e.clientX, y: e.clientY }; canvas.style.cursor = 'grabbing'; });
+            window.addEventListener('mouseup',   () => { dragging = false; canvas.style.cursor = 'grab'; });
+            window.addEventListener('mousemove', e => { if (!dragging) return; pan.x += e.clientX - lastMouse.x; pan.y += e.clientY - lastMouse.y; lastMouse = { x: e.clientX, y: e.clientY }; draw(); });
+            canvas.addEventListener('wheel', e => { e.preventDefault(); scale = Math.min(3, Math.max(0.3, scale * (e.deltaY < 0 ? 1.1 : 0.9))); draw(); }, { passive: false });
+            canvas.addEventListener('touchstart', e => { if (e.touches.length === 1) { dragging = true; lastMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } }, { passive: true });
+            canvas.addEventListener('touchmove',  e => { if (!dragging || e.touches.length !== 1) return; pan.x += e.touches[0].clientX - lastMouse.x; pan.y += e.touches[0].clientY - lastMouse.y; lastMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY }; draw(); }, { passive: true });
+            canvas.addEventListener('touchend',   () => { dragging = false; });
+
+            this._drawWorldMap = draw;
+            draw();
         },
 
         showToast(text, color) {

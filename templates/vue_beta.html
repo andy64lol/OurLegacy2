@@ -12,6 +12,8 @@
         player: {{ (player | tojson) if player else 'null' }},
         username: {{ online_username | tojson }},
         is_admin: {{ is_admin | tojson }},
+        areas_data: {{ areas_data | tojson }},
+        visited_areas: {{ visited_areas | tojson }},
     };
     </script>
     <style>
@@ -972,15 +974,23 @@
                         <button class="tab-btn" :class="{ active: activeTab === 'map' }" @click="switchTab('map')">Map</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'travel' }" @click="switchTab('travel')">Travel</button>
                         <button class="tab-btn" v-if="shopItems && shopItems.length" :class="{ active: activeTab === 'shop' }" @click="switchTab('shop')">Shop</button>
-                        <button class="tab-btn" v-if="mineData" :class="{ active: activeTab === 'mine' }" @click="switchTab('mine')">Mine</button>
+                        <button class="tab-btn" v-if="mineData" :class="{ active: activeTab === 'mine' }" @click="switchTab('mine')">Mines</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'crafting' }" @click="switchTab('crafting')">Crafting</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'dungeons' }" @click="switchTab('dungeons')">Dungeons</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'dungeons' }" @click="switchTab('dungeons')">
+                            Dungeons<span v-if="activeDungeon && activeDungeon.id" class="tab-badge" style="background:var(--gold);">!</span>
+                        </button>
                         <button class="tab-btn" :class="{ active: activeTab === 'market' }" @click="switchTab('market')">Market</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'party' }" @click="switchTab('party')">Party</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'quests' }" @click="switchTab('quests')">Quests</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'challenges' }" @click="switchTab('challenges')">Challenges</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'party' }" @click="switchTab('party')">
+                            Party<span v-if="activeCompanions && activeCompanions.length" class="tab-badge">[[ activeCompanions.length ]]</span>
+                        </button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'quests' }" @click="switchTab('quests')">Quests ([[ completedMissionsCount ]])</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'challenges' }" @click="switchTab('challenges')">
+                            Challenges<span v-if="readyChallengesCount > 0" class="tab-badge" style="background:var(--gold);">[[ readyChallengesCount ]]</span>
+                        </button>
                         <button class="tab-btn" :class="{ active: activeTab === 'diary' }" @click="switchTab('diary')">Diary</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'events' }" @click="switchTab('events')">Events</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'events' }" @click="switchTab('events')">
+                            Events<span v-if="activeEventsCount > 0" class="tab-badge" style="background:var(--gold);">[[ activeEventsCount ]]</span>
+                        </button>
                         <button class="tab-btn" v-if="onlineUsername" :class="{ active: activeTab === 'friends' }" @click="switchTab('friends')">Friends</button>
                         <button class="tab-btn" v-if="onlineUsername" :class="{ active: activeTab === 'group' }" @click="switchTab('group')">Group</button>
                         <button class="tab-btn" v-if="area && area.key === 'your_land'" :class="{ active: activeTab === 'land' }" @click="switchTab('land')">Land</button>
@@ -1010,6 +1020,19 @@
 
                 <!-- ═══ MAP tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'map' }">
+                    <!-- BFS world map canvas (matches index.html map tab) -->
+                    <div class="panel" style="margin-bottom:14px;">
+                        <div class="panel-title">World Map</div>
+                        <div class="panel-body" style="padding:8px 0 0;">
+                            <p style="font-size:12px;color:var(--text-dim);margin:0 14px 10px;">
+                                Fog of war hides unexplored areas. Current location is highlighted in gold.
+                                Drag to pan &bull; scroll to zoom.
+                            </p>
+                            <canvas id="vue-world-map-canvas"
+                                    style="display:block;width:100%;border-radius:8px;background:rgba(0,0,0,0.35);cursor:grab;touch-action:none;">
+                            </canvas>
+                        </div>
+                    </div>
                     <div v-if="area">
                         <div class="area-header" style="margin-bottom:14px;">
                             <div>

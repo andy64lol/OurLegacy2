@@ -8233,11 +8233,14 @@ def vue_beta():
     if not _is_admin_user(caller):
         return redirect(url_for("index"))
     player = get_player()
+    visited = session.get("visited_areas", [])
     return render_template(
         "vue_beta.html",
         player=player,
         online_username=caller,
         is_admin=True,
+        areas_data=GAME_DATA.get("areas", {}),
+        visited_areas=visited,
     )
 
 from asgiref.sync import sync_to_async as _sync_to_async
