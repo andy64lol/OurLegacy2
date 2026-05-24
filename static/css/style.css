@@ -285,6 +285,7 @@ html {
     height: 100%;
     background: var(--bg-main);
     overflow-x: hidden;
+    overscroll-behavior: none;
 }
 
 body {
@@ -2248,6 +2249,7 @@ body.ol2-bg-4 .welcome-screen {
     overflow-y: auto;
     overflow-x: hidden;
     min-height: 0;
+    overscroll-behavior: contain;
 }
 
 
@@ -2390,6 +2392,7 @@ body.ol2-bg-4 .welcome-screen {
 .main-content {
     padding: 18px;
     overflow-y: auto;
+    overscroll-behavior: contain;
     position: relative;
 }
 
