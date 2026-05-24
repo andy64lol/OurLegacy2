@@ -73,7 +73,7 @@ createApp({
                 const data = await res.json();
                 this.collectMsg = data.message || (data.ok ? 'Gold collected!' : 'Failed');
                 this.collectOk  = !!data.ok;
-                if (data.ok && data.new_treasury != null && this.group) {
+                if (data.ok && data.new_treasury !== null && data.new_treasury !== undefined && this.group) {
                     this.group.treasury = data.new_treasury;
                 }
             } catch (e) {
@@ -89,21 +89,21 @@ createApp({
                     body: JSON.stringify({ username }),
                 });
                 if (this.group) this.group.members = this.group.members.filter(m => m.username !== username);
-            } catch (e) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
         async leaveGroup() {
             if (!confirm('Leave the group? You can rejoin with the invite code.')) return;
             try {
                 await fetch('/api/groups/leave', { method: 'POST' });
                 window.location.reload();
-            } catch (e) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
         async disbandGroup() {
             if (!confirm('Disband the group? This cannot be undone.')) return;
             try {
                 await fetch('/api/groups/disband', { method: 'POST' });
                 window.location.reload();
-            } catch (e) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
         copyCode() {
             if (!this.group) return;

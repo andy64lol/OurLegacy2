@@ -225,7 +225,7 @@ createApp({
                 if (this.messages.length > 200) this.messages.shift();
                 this.scrollBottom();
                 if (!msg.is_system) {
-                    try { window.parent.postMessage({ type: 'chat_unread' }, '*'); } catch (e) {}
+                    try { window.parent.postMessage({ type: 'chat_unread' }, '*'); } catch (_e) { /* cross-origin post ignored */ }
                 }
             });
 

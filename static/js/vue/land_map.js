@@ -59,7 +59,7 @@
         loadedImgs[f] = img;
     });
 
-    let placingKey = null, placingName = null, hoverTile = null;
+    let placingKey = null, _placingName = null, hoverTile = null;
     const placed = window._placedBuildings || [];
 
     function getTiles(key) { return BUILDING_TILES[key] || [3, 3]; }
@@ -169,7 +169,7 @@
 
     window.LandEditor = {
         startPlacing(key, name) {
-            placingKey = key; placingName = name; hoverTile = null;
+            placingKey = key; _placingName = name; hoverTile = null;
             document.getElementById('land-place-mode-bar').style.display = 'flex';
             document.getElementById('land-placing-name').textContent = name;
             canvas.style.cursor = 'crosshair';
@@ -177,7 +177,7 @@
             draw();
         },
         cancel() {
-            placingKey = null; placingName = null; hoverTile = null;
+            placingKey = null; _placingName = null; hoverTile = null;
             document.getElementById('land-place-mode-bar').style.display = 'none';
             canvas.style.cursor = '';
             draw();
@@ -188,6 +188,6 @@
     const autoKey   = urlParams.get('place_key');
     const autoName  = urlParams.get('place_name');
     if (autoKey && autoName) {
-        setTimeout(() => LandEditor.startPlacing(autoKey, decodeURIComponent(autoName)), 200);
+        setTimeout(() => window.LandEditor.startPlacing(autoKey, decodeURIComponent(autoName)), 200);
     }
 })();

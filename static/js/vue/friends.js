@@ -78,7 +78,7 @@ createApp({
                     this.friends.push({ username: from, online: false });
                     this.toast(from + ' is now your friend!');
                 }
-            } catch (e) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
         async removeFriend(username) {
             if (!confirm('Remove ' + username + ' from friends?')) return;
@@ -90,7 +90,7 @@ createApp({
                 });
                 this.friends = this.friends.filter(f => f.username !== username);
                 if (this.activeFriend === username) this.activeFriend = null;
-            } catch (e) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
         async blockUser(username) {
             if (!confirm('Block ' + username + '?')) return;
@@ -103,7 +103,7 @@ createApp({
                 this.friends = this.friends.filter(f => f.username !== username);
                 this.blocked.push(username);
                 if (this.activeFriend === username) this.activeFriend = null;
-            } catch (e) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
         async unblockUser(username) {
             try {
@@ -113,7 +113,7 @@ createApp({
                     body: JSON.stringify({ username }),
                 });
                 this.blocked = this.blocked.filter(u => u !== username);
-            } catch (e) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
         openTrade() {
             this.showTrade   = true;
@@ -130,7 +130,7 @@ createApp({
                 const res  = await fetch('/api/player/inventory');
                 const data = await res.json();
                 this.myInventory = data.inventory || [];
-            } catch (_) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
         sendTradeInvite() {
             if (this.socket) this.socket.emit('trade_invite', { to: this.activeFriend });

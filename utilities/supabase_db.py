@@ -1515,7 +1515,7 @@ def session_end(user_id: str, session_token: str) -> None:
         client.table("ol2_characters").update({
             "is_online": False,
             "last_logout": now_iso,
-            "playtime_seconds": existing_pt + played_secs,
+            "playtime_seconds": int(existing_pt) + played_secs,  # type: ignore[arg-type]
         }).eq("user_id", user_id).execute()
 
     try:

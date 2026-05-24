@@ -97,7 +97,7 @@ createApp({
                 const res  = await fetch('/api/online/saves');
                 const data = await res.json();
                 this.cloudSaves = data.saves || [];
-            } catch (_) {} finally {
+            } catch (_) { /* network/parse error ignored */ } finally {
                 this.savesLoading = false;
             }
         },

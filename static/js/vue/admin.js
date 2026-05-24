@@ -431,7 +431,7 @@ createApp({
                     bans:         d.bans  || [],
                     mutes:        d.mutes || [],
                 };
-            } catch (_) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
     },
     mounted() {

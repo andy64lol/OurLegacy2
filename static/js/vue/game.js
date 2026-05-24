@@ -161,7 +161,7 @@ createApp({
                 const data = await r.json();
                 if (!data.ok) return;
                 this._applyState(data);
-            } catch (_) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
 
         _applyState(data) {
@@ -330,7 +330,7 @@ createApp({
             try {
                 const r = await fetch('/api/friends/list', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 if (r.ok) { const data = await r.json(); this.friendsList = data.friends || []; }
-            } catch (_) {}
+            } catch (_) { /* network/parse error ignored */ }
             this.friendsLoading = false;
         },
 
@@ -339,7 +339,7 @@ createApp({
             try {
                 const r = await fetch('/api/groups/info', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 if (r.ok) { const data = await r.json(); if (data.ok) this.groupData = data.group || null; }
-            } catch (_) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
 
         async loadNearby() {
@@ -347,7 +347,7 @@ createApp({
             try {
                 const r = await fetch('/api/area_activity', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 if (r.ok) { const data = await r.json(); this.nearbyPlayers = (data.ok && data.players) ? data.players.slice(0, 5) : []; }
-            } catch (_) {}
+            } catch (_) { /* network/parse error ignored */ }
         },
 
         switchTab(tab) {
