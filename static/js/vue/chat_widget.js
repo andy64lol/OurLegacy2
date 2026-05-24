@@ -54,7 +54,7 @@ function renderMsg(text) {
 function formatTime(created_at) {
     if (!created_at) return '';
     try {
-        const d = new Date(created_at);
+        const d = typeof created_at === 'number' ? new Date(created_at * 1000) : new Date(created_at);
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch (e) { return ''; }
 }

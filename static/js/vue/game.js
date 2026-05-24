@@ -93,6 +93,7 @@ createApp({
 
             spellPage: 0,
             bossPage:  1,
+            invPage:   1,
             _initialLoad: true,
             tabDropdownOpen: false,
 
@@ -118,12 +119,13 @@ createApp({
         activeEventsCount()    { return (this.eventsData && this.eventsData.active) ? this.eventsData.active.length : 0; },
         bossTotalPages()       { return Math.max(1, Math.ceil((this.availableBosses || []).length / 3)); },
         paginatedBosses()      { const p = Math.min(this.bossPage, this.bossTotalPages) - 1; return (this.availableBosses || []).slice(p * 3, p * 3 + 3); },
+        invPageCount()         { return Math.max(1, Math.ceil((this.inventoryItems || []).length / 15)); },
+        pagedInventory()       { const p = Math.min(this.invPage, this.invPageCount) - 1; return (this.inventoryItems || []).slice(p * 15, p * 15 + 15); },
         allTabOptions() {
             return [
                 { key: 'explore',    label: 'Explore',     show: true },
                 { key: 'battle',     label: 'Battle!',     show: this.inBattle },
                 { key: 'equipment',  label: 'Equipment',   show: true },
-                { key: 'inventory',  label: 'Inventory',   show: true },
                 { key: 'map',        label: 'Map',         show: true },
                 { key: 'travel',     label: 'Travel',      show: true },
                 { key: 'shop',       label: 'Shop',        show: !!(this.shopItems && this.shopItems.length) },
@@ -261,7 +263,6 @@ createApp({
                 });
                 const data = await r.json();
                 if (!data.ok) { this.showToast(data.message || 'Action failed.', 'var(--red)'); return data; }
-                if (data.messages) data.messages.forEach((msg, i) => { setTimeout(() => this.showToast(msg.text, msg.color), i * 200); });
                 if (data.message) this.showToast(data.message, 'var(--green-bright)');
                 await this.fetchState();
                 this.resetPoll();
@@ -534,6 +535,16 @@ createApp({
             if (k.includes('mage') || k.includes('shaman') || k.includes('elemental') || k.includes('wraith') || k.includes('spirit') || k.includes('dark_')) return 'mage';
             if (k.includes('knight') || k.includes('warrior') || k.includes('shadow')) return 'warrior';
             return 'orc';
+        },
+        renderGlyph(text) {
+            if (!text) return '';
+            const escaped = String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            return escaped.replace(/:([a-z0-9_]+):/g, (_, name) => {
+                return `<img src="/game_assets/glyphs/${name}.webp" alt="" style="width:16px;height:16px;image-rendering:pixelated;vertical-align:middle;margin:0 1px;" onerror="this.style.display='none'">`;
+            });
         },
         typeGlyph(type) {
             const map = { weapon:'weapon', armor:'armor', offhand:'offhand', accessory:'accessories', consumable:'food', material:'materials', pickaxe:'pickaxe', spell:'spell', book:'book' };

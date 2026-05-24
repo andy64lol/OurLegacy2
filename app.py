@@ -7424,7 +7424,7 @@ def api_cloud_save():
     }
     result = cloud_save(user_id, save_data)
     if result.get("ok"):
-        add_message("Game saved to cloud.", color="var(--accent)")
+        pass  # no toast for cloud save
     return jsonify(result), 200 if result["ok"] else 500
 
 
@@ -9459,6 +9459,17 @@ def api_battle_use_item():
 
 # ── Vue beta: extended game state ─────────────────────────────────────────────
 
+def _json_safe(obj):
+    """Recursively convert sets to lists for JSON serialization."""
+    if isinstance(obj, set):
+        return sorted(obj, key=str)
+    if isinstance(obj, dict):
+        return {k: _json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_json_safe(i) for i in obj]
+    return obj
+
+
 @app.route("/api/game/state/extended", methods=["GET"])
 @limiter.limit("60 per minute")
 def api_game_state_extended():
@@ -9470,7 +9481,7 @@ def api_game_state_extended():
     area = GAME_DATA["areas"].get(area_key, {})
     area_name = area.get("name", area_key.replace("_", " ").title())
     in_battle = bool(session.get("battle_enemy"))
-    visited_areas = session.get("visited_areas", [area_key])
+    visited_areas = list(session.get("visited_areas", [area_key]) or [area_key])
 
     # connections with visit detail
     connections = []
@@ -9872,7 +9883,7 @@ def api_game_state_extended():
     }
     if in_battle:
         state["battle"] = _api_battle_summary()
-    return jsonify(state)
+    return jsonify(_json_safe(state))
 
 
 # ── Vue beta: action API wrappers ──────────────────────────────────────────────
