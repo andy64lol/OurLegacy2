@@ -311,7 +311,45 @@ createApp({
                 const r = await fetch('/api/market_data', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 const data = await r.json();
                 if (data.cooldown_msg) { this.marketCooldown = data.cooldown_msg; this.marketItems = []; }
-                else { this.marketItems = data.market_items || []; }
+                else {
+                    const plLevel = (this.player && this.player.level) || data.player_level || 1;
+                    const plGold  = (this.player && this.player.gold)  || data.player_gold  || 0;
+                    const plClass = ((this.player && this.player.class) || data.player_class || '').toLowerCase();
+                    const STAT_KEYS = [
+                        ['attack_bonus','ATK'],['defense_bonus','DEF'],['hp_bonus','HP'],
+                        ['mp_bonus','MP'],['speed_bonus','SPD'],['evasion_bonus','EVA'],
+                        ['critical_chance','CRIT'],['magic_bonus','MAG'],
+                    ];
+                    this.marketItems = (data.market_items || []).map(item => {
+                        const price = item.marketPrice || item.price || 0;
+                        const req = item.requirements || {};
+                        const reqLevel = req.level || 0;
+                        const reqClass = (req['class'] || '').toLowerCase();
+                        const meetsLevel = plLevel >= reqLevel;
+                        const meetsClass = !reqClass || plClass === reqClass;
+                        const sp = [];
+                        for (const [k, lbl] of STAT_KEYS) {
+                            if (item[k] != null && item[k] !== 0) {
+                                sp.push(k === 'critical_chance'
+                                    ? `+${Math.round(item[k] * 100)}% ${lbl}`
+                                    : `+${item[k]} ${lbl}`);
+                            }
+                        }
+                        if (item.speed_penalty) sp.push(`-${item.speed_penalty} SPD`);
+                        return {
+                            ...item,
+                            price,
+                            can_afford: !!item.birthday_special || plGold >= price,
+                            can_use: meetsLevel && meetsClass,
+                            meets_level: meetsLevel,
+                            meets_class: meetsClass,
+                            req_level: reqLevel,
+                            req_class: req['class'] || '',
+                            has_req: !!(reqLevel || reqClass),
+                            stats_str: sp.join('  '),
+                        };
+                    });
+                }
             } catch (e) {
                 this.marketCooldown = 'Could not load market.';
             } finally {

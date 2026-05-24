@@ -483,7 +483,7 @@
             padding: 10px 12px;
             margin-bottom: 6px;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
             gap: 10px;
             transition: background 0.12s;
@@ -1715,21 +1715,43 @@
                             </span>
                             <button class="btn btn-small btn-secondary" @click="loadMarket">Refresh</button>
                         </div>
-                        <div v-for="item in paginatedMarket" :key="item.id || item.name" class="market-item-card">
-                            <div style="flex:1;">
-                                <div class="market-item-name" :class="'rarity-' + (item.rarity || 'common')">[[ item.name ]]</div>
-                                <div class="market-item-seller" v-if="item.seller">Seller: [[ item.seller ]]</div>
-                                <div class="market-item-seller" v-if="item.stats">[[ item.stats ]]</div>
+                        <div v-for="item in paginatedMarket" :key="item.id || item.name" class="market-item-card"
+                             :style="item.has_req && !item.can_use ? 'border-color:rgba(200,80,80,0.4);' : ''">
+                            <div style="flex:1;min-width:0;">
+                                <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">
+                                    <span class="market-item-name" :class="'rarity-' + (item.rarity || 'common')">[[ item.name ]]</span>
+                                    <span v-if="item.rarity" style="font-size:11px;color:var(--text-dim);">[[ item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1) ]]</span>
+                                    <span v-if="item.type" style="font-size:11px;color:var(--text-dim);">([[ item.type ]])</span>
+                                </div>
+                                <div v-if="item.description" style="font-size:11px;color:var(--text-dim);margin-top:3px;">[[ item.description ]]</div>
+                                <div v-if="item.stats_str" style="font-size:12px;color:var(--green-bright);margin-top:3px;">[[ item.stats_str ]]</div>
+                                <div v-if="item.has_req" style="margin-top:5px;font-size:11px;">
+                                    <span style="color:var(--text-dim);">Requires: </span>
+                                    <span :style="item.can_use ? 'color:var(--green-bright)' : 'color:var(--red)'">
+                                        <span v-if="item.req_level">Level [[ item.req_level ]]+</span>
+                                        <span v-if="item.req_level && item.req_class"> &bull; </span>
+                                        <span v-if="item.req_class">[[ item.req_class ]]</span>
+                                    </span>
+                                    <span v-if="!item.can_use" style="color:var(--red);margin-left:4px;">
+                                        &#9888;
+                                        <span v-if="!item.meets_level">need level [[ item.req_level ]]</span>
+                                        <span v-if="!item.meets_level && !item.meets_class"> &bull; </span>
+                                        <span v-if="!item.meets_class">wrong class</span>
+                                    </span>
+                                    <span v-else style="color:var(--green-bright);margin-left:4px;">&#10003; you can use this</span>
+                                </div>
+                                <div v-if="item.seller" class="market-item-seller">Seller: [[ item.seller ]]</div>
                             </div>
-                            <div>
-                                <div class="market-item-price">[[ item.price ]]g</div>
-                                <div v-if="player && player.gold < item.price" style="font-size:10px;color:var(--red);text-align:right;">can't afford</div>
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+                                <div class="market-item-price">[[ item.birthday_special ? 'FREE' : item.price + 'g' ]]</div>
+                                <div v-if="!item.can_afford && !item.birthday_special" style="font-size:10px;color:var(--red);text-align:right;">not enough gold</div>
+                                <button class="btn btn-small"
+                                        :class="item.can_use ? 'btn-primary' : 'btn-secondary'"
+                                        @click="marketBuy(item.id || item.name, item.price)"
+                                        :disabled="actionPending || (!item.birthday_special && !item.can_afford)">
+                                    [[ item.birthday_special ? 'Claim Free' : 'Buy' ]]
+                                </button>
                             </div>
-                            <button class="btn btn-small btn-secondary"
-                                    @click="marketBuy(item.id || item.name, item.price)"
-                                    :disabled="actionPending || !(player && player.gold >= item.price)">
-                                Buy
-                            </button>
                         </div>
                         <div class="pagination-controls" v-if="marketTotalPages > 1">
                             <button class="btn btn-xsmall btn-secondary" @click="setPage('market', marketPage - 1)" :disabled="marketPage <= 1">&larr; Prev</button>
