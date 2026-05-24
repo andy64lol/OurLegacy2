@@ -97,6 +97,10 @@ createApp({
             dmInput: "",
             dmPolling: null,
 
+            // leaderboard
+            leaderboardData: null,
+            leaderboardLoading: false,
+
             // group
             groupData: null,
             groupLoading: false,
@@ -825,6 +829,22 @@ createApp({
         },
 
         // ── group ─────────────────────────────────────────────
+        async loadLeaderboard() {
+            this.leaderboardLoading = true;
+            try {
+                const r = await fetch("/api/leaderboard", {
+                    credentials: "same-origin",
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                });
+                const data = await r.json();
+                this.leaderboardData = data.ok ? { players: data.players || [], groups: data.groups || [] } : { players: [], groups: [] };
+            } catch (e) {
+                this.leaderboardData = { players: [], groups: [], error: true };
+            } finally {
+                this.leaderboardLoading = false;
+            }
+        },
+
         async loadGroup() {
             if (!this.onlineUsername) return;
             this.groupLoading = true;
@@ -1120,7 +1140,7 @@ createApp({
             if (tab === "friends" && !this.friendsList.length) this.loadFriends();
             if (tab === "group" && !this.groupData && !this.groupLoading) this.loadGroup();
             if (tab === "land" && !this.iframeLoaded.land) this.iframeLoaded.land = true;
-            if (tab === "leaderboard" && !this.iframeLoaded.leaderboard) this.iframeLoaded.leaderboard = true;
+            if (tab === "leaderboard" && !this.leaderboardData && !this.leaderboardLoading) this.loadLeaderboard();
             if (tab === "wiki" && !this.iframeLoaded.wiki) this.iframeLoaded.wiki = true;
             if (tab === "map") this.$nextTick(() => this.initWorldMapCanvas());
         },

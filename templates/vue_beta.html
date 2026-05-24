@@ -493,6 +493,23 @@
         .market-item-seller { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
         .market-item-price { font-size: 14px; color: var(--gold); font-weight: bold; }
 
+        /* ── Leaderboard ──────────────────────────────────── */
+        .lb-section-title { font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);padding-bottom:7px;margin-bottom:8px;border-bottom:1px solid rgba(230,180,60,0.25); }
+        .lb-card { display:flex;align-items:center;gap:9px;background:rgba(255,255,255,0.03);border:1px solid rgba(180,130,255,0.15);border-radius:7px;padding:9px 11px;margin-bottom:6px;transition:border-color 0.15s; }
+        .lb-card:hover { border-color:rgba(180,130,255,0.35); }
+        .lb-card.lb-rank-1 { border-color:rgba(230,180,60,0.5);background:rgba(230,180,60,0.05); }
+        .lb-card.lb-rank-2 { border-color:rgba(200,200,200,0.4); }
+        .lb-card.lb-rank-3 { border-color:rgba(180,100,40,0.4); }
+        .lb-rank-badge { font-size:13px;font-weight:700;width:26px;text-align:center;flex-shrink:0; }
+        .lb-rank-1 .lb-rank-badge { color:var(--gold); }
+        .lb-rank-2 .lb-rank-badge { color:#c0c0c0; }
+        .lb-rank-3 .lb-rank-badge { color:#cd7f32; }
+        .lb-rank-other { color:var(--text-dim);font-size:12px; }
+        .lb-avatar { width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,rgba(80,50,150,0.7),rgba(40,20,80,0.7));border:1px solid rgba(180,130,255,0.35);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0; }
+        .lb-info { flex:1;min-width:0; }
+        .lb-name { font-size:13px;font-weight:700;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .lb-sub { font-size:11px;color:var(--text-dim);margin-top:1px; }
+
         /* ── Diary ────────────────────────────────────────── */
         .diary-entry {
             padding: 5px 0 5px 8px;
@@ -2303,15 +2320,57 @@
                 </div>
 
                 <!-- ═══ LEADERBOARD ═══ -->
-                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'leaderboard' }" style="padding:0;">
-                    <div style="padding:8px 0 6px;display:flex;align-items:center;justify-content:space-between;">
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'leaderboard' }">
+                    <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
                         <span style="font-size:13px;color:var(--text-dim);">Global Rankings</span>
-                        <a href="/leaderboard" style="font-size:12px;color:var(--text-dim);" target="_blank">Open in new tab ↗</a>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <button class="btn btn-xsmall btn-secondary" @click="loadLeaderboard" :disabled="leaderboardLoading">&#8635; Refresh</button>
+                            <a href="/leaderboard" style="font-size:12px;color:var(--text-dim);" target="_blank">↗</a>
+                        </div>
                     </div>
-                    <iframe id="beta-leaderboard-frame"
-                        :src="iframeLoaded.leaderboard ? '/leaderboard' : ''"
-                        style="width:100%;height:calc(100vh - 180px);border:none;border-radius:5px;background:var(--bg-main);"
-                        title="Leaderboard"></iframe>
+                    <div v-if="leaderboardLoading" style="text-align:center;padding:30px 0;color:var(--text-dim);">Loading…</div>
+                    <div v-else-if="!leaderboardData" style="text-align:center;padding:30px 0;color:var(--text-dim);">
+                        <button class="btn btn-small btn-secondary" @click="loadLeaderboard">Load Leaderboard</button>
+                    </div>
+                    <div v-else-if="leaderboardData.error" style="text-align:center;padding:20px 0;color:var(--red);">Failed to load. <button class="btn btn-xsmall btn-secondary" @click="loadLeaderboard" style="margin-left:8px;">Retry</button></div>
+                    <div v-else style="display:flex;gap:14px;flex-wrap:wrap;">
+                        <!-- groups -->
+                        <div style="flex:1;min-width:200px;">
+                            <div class="lb-section-title">Top Groups</div>
+                            <div v-if="!leaderboardData.groups.length" style="font-size:13px;color:var(--text-dim);padding:16px 0;text-align:center;">No groups yet.</div>
+                            <div v-for="g in leaderboardData.groups" :key="g.rank"
+                                 class="lb-card" :class="g.rank <= 3 ? 'lb-rank-' + g.rank : ''">
+                                <div class="lb-rank-badge" :class="g.rank <= 3 ? 'lb-rank-' + g.rank : 'lb-rank-other'">#[[ g.rank ]]</div>
+                                <div class="lb-avatar">[[ g.name ? g.name[0].toUpperCase() : '?' ]]</div>
+                                <div class="lb-info">
+                                    <div class="lb-name">[[ g.name ]]</div>
+                                    <div class="lb-sub">Led by [[ g.leader ]] &bull; [[ g.xp_to_next > 0 ? Math.min(100, Math.round(g.xp / g.xp_to_next * 100)) : 0 ]]% to Lv [[ g.level + 1 ]]</div>
+                                </div>
+                                <div style="text-align:right;flex-shrink:0;">
+                                    <div style="font-size:15px;font-weight:700;color:var(--exp-purple);">[[ g.level ]]</div>
+                                    <div style="font-size:10px;color:var(--text-dim);">Group Lv</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- players -->
+                        <div style="flex:1;min-width:200px;">
+                            <div class="lb-section-title">Top Adventurers</div>
+                            <div v-if="!leaderboardData.players.length" style="font-size:13px;color:var(--text-dim);padding:16px 0;text-align:center;">No players found.</div>
+                            <div v-for="p in leaderboardData.players" :key="p.rank"
+                                 class="lb-card" :class="p.rank <= 3 ? 'lb-rank-' + p.rank : ''">
+                                <div class="lb-rank-badge" :class="p.rank <= 3 ? 'lb-rank-' + p.rank : 'lb-rank-other'">#[[ p.rank ]]</div>
+                                <div class="lb-avatar">[[ p.player_name ? p.player_name[0].toUpperCase() : '?' ]]</div>
+                                <div class="lb-info">
+                                    <div class="lb-name">[[ p.player_name ]]</div>
+                                    <div class="lb-sub">[[ p.character_class ]] &bull; [[ p.player_rank || 'Adventurer' ]]</div>
+                                </div>
+                                <div style="text-align:right;flex-shrink:0;">
+                                    <div style="font-size:15px;font-weight:700;color:var(--exp-purple);">[[ p.level ]]</div>
+                                    <div style="font-size:10px;color:var(--text-dim);">Level</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ═══ WIKI ═══ -->
