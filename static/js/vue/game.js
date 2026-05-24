@@ -278,7 +278,10 @@ createApp({
         explore()             { return this.doAction('/api/action/explore'); },
         rest()                { return this.doAction('/api/action/rest'); },
         mine()                { return this.doAction('/api/action/mine'); },
-        travel(key)           { return this.doAction('/api/action/travel', { area: key }); },
+        async travel(key) {
+            const data = await this.doAction('/api/action/travel', { area: key });
+            if (data && data.ok) this.activeTab = 'explore';
+        },
         useItem(name)         { return this.doAction('/api/action/use_item',  { item: name }); },
         equipItem(name)       { return this.doAction('/api/action/equip',     { item: name }); },
         unequipSlot(slot)     { return this.doAction('/api/action/unequip',   { slot }); },
