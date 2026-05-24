@@ -2374,15 +2374,11 @@
                 </div>
 
                 <!-- ═══ WIKI ═══ -->
-                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'wiki' }" style="padding:0;">
-                    <div style="padding:8px 0 6px;display:flex;align-items:center;justify-content:space-between;">
-                        <span style="font-size:13px;color:var(--text-dim);">Item &amp; Game Wiki</span>
-                        <a href="/wiki" style="font-size:12px;color:var(--text-dim);" target="_blank">Open in new tab ↗</a>
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'wiki' }">
+                    <div style="text-align:center;padding:30px 0;">
+                        <div style="font-size:14px;color:var(--text-dim);margin-bottom:16px;">Item &amp; Game Wiki</div>
+                        <a href="/wiki" class="btn btn-secondary" style="font-size:14px;padding:10px 24px;">Open Wiki ↗</a>
                     </div>
-                    <iframe id="beta-wiki-frame"
-                        :src="iframeLoaded.wiki ? '/wiki' : ''"
-                        style="width:100%;height:calc(100vh - 180px);border:none;border-radius:5px;background:var(--bg-main);"
-                        title="Wiki"></iframe>
                 </div>
 
                 <!-- ═══ ADMIN tab ═══ -->
