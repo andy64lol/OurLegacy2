@@ -11,6 +11,12 @@ createApp({
         };
     },
     methods: {
+        rankIcon(r) {
+            if (r === 1) return '#1';
+            if (r === 2) return '#2';
+            if (r === 3) return '#3';
+            return '#' + r;
+        },
         rankClass(r) {
             if (r <= 3) return 'rank-' + r;
             return '';
