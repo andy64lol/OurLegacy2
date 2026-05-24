@@ -141,6 +141,10 @@ createApp({
             nearbyPlayers: [],
             onlineCount: 0,
 
+            areasData: init.areas_data || {},
+            visitedAreasInit: init.visited_areas || [],
+            _mapInitDone: false,
+
             iframeLoaded: { land: false, leaderboard: false, wiki: false },
 
             invPage: 1,
@@ -1082,6 +1086,120 @@ createApp({
             if (tab === "land" && !this.iframeLoaded.land) this.iframeLoaded.land = true;
             if (tab === "leaderboard" && !this.iframeLoaded.leaderboard) this.iframeLoaded.leaderboard = true;
             if (tab === "wiki" && !this.iframeLoaded.wiki) this.iframeLoaded.wiki = true;
+            if (tab === "map") this.$nextTick(() => this.initWorldMapCanvas());
+        },
+
+        // ── World Map Canvas (BFS layout, fog of war, pan/zoom) ──
+        initWorldMapCanvas() {
+            const canvas = document.getElementById("vue-world-map-canvas");
+            if (!canvas) return;
+            if (this._mapInitDone) { if (this._drawWorldMap) this._drawWorldMap(); return; }
+            this._mapInitDone = true;
+
+            const ctx = canvas.getContext("2d");
+            const NODE_R = 18, H_GAP = 130, V_GAP = 90;
+            const areasData = this.areasData;
+            const visited = new Set(this.visitedAreas.length ? this.visitedAreas : this.visitedAreasInit);
+            const current = (this.area && this.area.key) || "";
+            const nodes = {};
+
+            const areaKeys = Object.keys(areasData);
+            if (!areaKeys.length) return;
+            const startKey = areaKeys.includes("starting_village") ? "starting_village" : areaKeys[0];
+
+            const levels = {}, vis = {}, queue = [startKey], levelMap = {};
+            levelMap[startKey] = 0;
+            vis[startKey] = true;
+            while (queue.length) {
+                const cur = queue.shift();
+                const lv = levelMap[cur];
+                if (!levels[lv]) levels[lv] = [];
+                levels[lv].push(cur);
+                ((areasData[cur] || {}).connections || []).forEach(nb => {
+                    if (!vis[nb] && areasData[nb]) { vis[nb] = true; levelMap[nb] = lv + 1; queue.push(nb); }
+                });
+            }
+            Object.keys(levels).forEach(lv => {
+                const row = levels[lv], totalW = (row.length - 1) * H_GAP;
+                row.forEach((key, i) => { nodes[key] = { x: i * H_GAP - totalW / 2, y: +lv * V_GAP }; });
+            });
+
+            const maxLevel = Object.keys(nodes).reduce((a, k) => Math.max(a, nodes[k].y), 0);
+            const maxX = Object.keys(nodes).reduce((a, k) => Math.max(a, Math.abs(nodes[k].x)), 0);
+            const W = Math.max(600, maxX * 2 + 200);
+            const H = Math.min(480, Math.max(300, maxLevel + 100));
+            canvas.width = W;
+            canvas.height = H;
+            canvas.style.height = H + "px";
+
+            let pan = { x: W / 2, y: 40 }, scale = 1, dragging = false, lastMouse = { x: 0, y: 0 };
+
+            const draw = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.translate(pan.x, pan.y);
+                ctx.scale(scale, scale);
+
+                Object.keys(areasData).forEach(key => {
+                    if (!nodes[key]) return;
+                    ((areasData[key] || {}).connections || []).forEach(nb => {
+                        if (!nodes[nb]) return;
+                        ctx.beginPath();
+                        ctx.moveTo(nodes[key].x, nodes[key].y);
+                        ctx.lineTo(nodes[nb].x, nodes[nb].y);
+                        ctx.strokeStyle = (visited.has(key) || visited.has(nb)) ? "rgba(200,168,75,0.22)" : "rgba(255,255,255,0.06)";
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke();
+                    });
+                });
+
+                Object.keys(nodes).forEach(key => {
+                    const n = nodes[key];
+                    const isCurrent = key === current;
+                    const isVisited = visited.has(key);
+                    ctx.beginPath();
+                    ctx.arc(n.x, n.y, NODE_R, 0, Math.PI * 2);
+                    if (isCurrent) {
+                        const grd = ctx.createRadialGradient(n.x, n.y, 2, n.x, n.y, NODE_R);
+                        grd.addColorStop(0, "#ffe76a"); grd.addColorStop(1, "#c8a84b");
+                        ctx.fillStyle = grd; ctx.shadowColor = "#ffdb4a"; ctx.shadowBlur = 14;
+                    } else if (isVisited) {
+                        ctx.fillStyle = "rgba(80,160,100,0.55)"; ctx.shadowBlur = 0;
+                    } else {
+                        ctx.fillStyle = "rgba(40,40,60,0.8)"; ctx.shadowBlur = 0;
+                    }
+                    ctx.fill(); ctx.shadowBlur = 0;
+                    ctx.strokeStyle = isCurrent ? "#ffe76a" : isVisited ? "rgba(120,200,140,0.6)" : "rgba(100,100,140,0.4)";
+                    ctx.lineWidth = isCurrent ? 2.5 : 1.5; ctx.stroke();
+
+                    const areaInfo = areasData[key] || {};
+                    const label = isVisited ? (areaInfo.name || key.replace(/_/g, " ")) : "???";
+                    ctx.font = isCurrent ? "bold 9px sans-serif" : "8.5px sans-serif";
+                    ctx.fillStyle = isCurrent ? "#ffe76a" : isVisited ? "#b8d8b8" : "#555577";
+                    ctx.textAlign = "center";
+                    const words = label.split(" "), lines = [];
+                    let cur2 = "";
+                    words.forEach(w => {
+                        const test = cur2 ? cur2 + " " + w : w;
+                        if (ctx.measureText(test).width > NODE_R * 2.6) { if (cur2) lines.push(cur2); cur2 = w; } else { cur2 = test; }
+                    });
+                    if (cur2) lines.push(cur2);
+                    const startY = n.y + NODE_R + 12;
+                    lines.forEach((ln, li) => { ctx.fillText(ln, n.x, startY + li * 9); });
+                });
+                ctx.restore();
+            };
+
+            canvas.addEventListener("mousedown", e => { dragging = true; lastMouse = { x: e.clientX, y: e.clientY }; canvas.style.cursor = "grabbing"; });
+            window.addEventListener("mouseup", () => { dragging = false; canvas.style.cursor = "grab"; });
+            window.addEventListener("mousemove", e => { if (!dragging) return; pan.x += e.clientX - lastMouse.x; pan.y += e.clientY - lastMouse.y; lastMouse = { x: e.clientX, y: e.clientY }; draw(); });
+            canvas.addEventListener("wheel", e => { e.preventDefault(); scale = Math.min(3, Math.max(0.3, scale * (e.deltaY < 0 ? 1.1 : 0.9))); draw(); }, { passive: false });
+            canvas.addEventListener("touchstart", e => { if (e.touches.length === 1) { dragging = true; lastMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } }, { passive: true });
+            canvas.addEventListener("touchmove", e => { if (!dragging || e.touches.length !== 1) return; pan.x += e.touches[0].clientX - lastMouse.x; pan.y += e.touches[0].clientY - lastMouse.y; lastMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY }; draw(); }, { passive: true });
+            canvas.addEventListener("touchend", () => { dragging = false; });
+
+            this._drawWorldMap = draw;
+            draw();
         },
 
         async autoSaveHeartbeat() {

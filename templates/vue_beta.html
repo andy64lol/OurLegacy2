@@ -1033,76 +1033,6 @@
                             </canvas>
                         </div>
                     </div>
-                    <div v-if="area">
-                        <div class="area-header" style="margin-bottom:14px;">
-                            <div>
-                                <div class="area-name-big">[[ area.name ]]</div>
-                                <div class="area-difficulty" v-if="area.difficulty">Danger Level [[ area.difficulty ]]</div>
-                            </div>
-                        </div>
-                        <!-- current area map -->
-                        <div v-if="area.map_image" class="panel" style="margin-bottom:14px;text-align:center;">
-                            <div class="panel-title">Area Map</div>
-                            <div class="panel-body" style="padding:10px;display:flex;justify-content:center;">
-                                <img :src="'/game_assets/maps/' + area.map_image"
-                                     :alt="'Map of ' + area.name"
-                                     style="max-width:100%;border-radius:4px;image-rendering:pixelated;"
-                                     @error="$event.target.style.display='none'">
-                            </div>
-                        </div>
-                        <!-- visited areas -->
-                        <div class="panel" style="margin-bottom:14px;">
-                            <div class="panel-title">Explored Areas <span style="font-weight:400;font-size:12px;color:var(--text-dim);">([[ visitedAreas.length ]] discovered)</span></div>
-                            <div class="panel-body">
-                                <div style="display:flex;flex-wrap:wrap;gap:8px;">
-                                    <div v-for="akey in visitedAreas" :key="akey"
-                                         class="area-card"
-                                         :style="{ borderColor: akey === area.key ? 'var(--gold)' : '' }">
-                                        <div style="font-size:12px;color:var(--text-light);font-weight:600;"
-                                             :style="{ color: akey === area.key ? 'var(--gold)' : 'var(--text-light)' }">
-                                            [[ akey === area.key ? '★ ' : '' ]][[ akey.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()) ]]
-                                        </div>
-                                        <div v-if="akey !== area.key" style="margin-top:4px;">
-                                            <button class="btn btn-xsmall btn-secondary"
-                                                    @click="travel(akey)"
-                                                    :disabled="actionPending">
-                                                Travel
-                                            </button>
-                                        </div>
-                                        <div v-else style="font-size:10px;color:var(--gold);margin-top:3px;">Current Location</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- connections from current area -->
-                        <div class="panel" v-if="connections && connections.length">
-                            <div class="panel-title">Nearby Areas</div>
-                            <div class="panel-body">
-                                <div style="display:flex;flex-direction:column;gap:6px;">
-                                    <div v-for="conn in connections" :key="conn.key" style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                                        <div>
-                                            <span style="font-size:13px;" :style="{ color: conn.visited ? 'var(--text-light)' : 'var(--text-dim)' }">
-                                                [[ conn.visited ? conn.name : '???' ]]
-                                            </span>
-                                            <span v-if="conn.visited && conn.difficulty" style="font-size:11px;color:var(--text-dim);margin-left:6px;">Lv.[[ conn.difficulty ]]</span>
-                                            <span v-if="conn.has_shop" style="font-size:10px;color:var(--gold);margin-left:6px;">
-                                                <img class="type-glyph" src="/game_assets/glyphs/gold.webp" alt="shop" style="width:12px;height:12px;vertical-align:middle;">
-                                            </span>
-                                            <span v-if="conn.has_enemies" style="font-size:10px;color:var(--red);margin-left:4px;">
-                                                <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="enemies" style="width:12px;height:12px;vertical-align:middle;">
-                                            </span>
-                                        </div>
-                                        <button class="btn btn-xsmall btn-secondary"
-                                                @click="travel(conn.key)"
-                                                :disabled="actionPending">
-                                            Go →
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-else class="empty-state">Map not available.</div>
                 </div>
 
                 <!-- ═══ EXPLORE tab ═══ -->
@@ -2489,7 +2419,7 @@
             </div>
         </div>
         <!-- Chat FAB -->
-        <button class="vue-chat-fab" :class="{ active: chatOpen }" @click="toggleChat()" title="Global Chat" style="position:relative;">
+        <button class="vue-chat-fab" :class="{ active: chatOpen }" @click="toggleChat()" title="Global Chat">
             <img src="/game_assets/glyphs/chat.webp" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
             <span v-if="chatUnread > 0" class="vue-chat-unread">[[ chatUnread > 9 ? '9+' : chatUnread ]]</span>
         </button>
