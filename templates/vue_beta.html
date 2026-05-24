@@ -1667,9 +1667,10 @@
 
                     <!-- dungeon list -->
                     <div v-if="dungeonList && dungeonList.length">
-                        <div v-for="dungeon in dungeonList" :key="dungeon.id" class="dungeon-card">
+                        <div v-for="dungeon in dungeonList" :key="dungeon.id" class="dungeon-card"
+                             :style="{ opacity: dungeon.available ? 1 : 0.6 }">
                             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                                <div>
+                                <div style="flex:1;min-width:0;">
                                     <div class="dungeon-name">
                                         [[ dungeon.name ]]
                                         <span v-if="dungeon.completed" class="dungeon-complete-badge"> &#10003; done</span>
@@ -1678,11 +1679,22 @@
                                     <div class="dungeon-meta">
                                         <span v-if="dungeon.difficulty">Difficulty [[ dungeon.difficulty.join && dungeon.difficulty.join('-') || dungeon.difficulty ]]</span>
                                         <span v-if="dungeon.rooms"> &bull; [[ dungeon.rooms ]] rooms</span>
+                                        <span v-if="dungeon.min_level"> &bull; Lv.[[ dungeon.min_level ]]+ required</span>
+                                    </div>
+                                    <div v-if="!dungeon.discovered" style="font-size:11px;color:var(--text-dim);margin-top:2px;">
+                                        &#x1F50D; Travel to [[ dungeon.hint_area_name ]] to discover this dungeon.
+                                    </div>
+                                    <div v-else-if="!dungeon.in_area" style="font-size:11px;color:var(--gold);margin-top:2px;">
+                                        &#x1F4CD; Travel to [[ dungeon.hint_area_name ]] to enter.
+                                    </div>
+                                    <div v-else-if="player && player.level < dungeon.min_level" style="font-size:11px;color:var(--red);margin-top:2px;">
+                                        &#x26A0; Level [[ dungeon.min_level ]] required.
                                     </div>
                                 </div>
                                 <button class="btn btn-small btn-secondary"
+                                        style="margin-left:10px;flex-shrink:0;"
                                         @click="enterDungeon(dungeon.id)"
-                                        :disabled="actionPending || (activeDungeon && !!activeDungeon.dungeon)">
+                                        :disabled="actionPending || !dungeon.available || (activeDungeon && !!activeDungeon.dungeon)">
                                     Enter
                                 </button>
                             </div>
