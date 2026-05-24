@@ -2211,7 +2211,7 @@
                                 <div class="panel-body">
                                     <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">
                                         [[ groupData.member_count || 0 ]] member[[ groupData.member_count !== 1 ? 's' : '' ]]
-                                        &bull; Group Gold: <span style="color:var(--gold);">[[ fmtNum(groupData.gold || 0) ]]g</span>
+                                        &bull; Group Gold: <span style="color:var(--gold);">[[ fmtNum(groupData.gold_pool || 0) ]]g</span>
                                     </div>
                                     <div v-if="groupData.description" style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">[[ groupData.description ]]</div>
                                     <div v-if="groupData.invite_code" style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">
