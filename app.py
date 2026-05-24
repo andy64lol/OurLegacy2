@@ -9526,6 +9526,29 @@ def api_game_state_extended():
             item_data = {}
         sell_price = max(1, int(item_data.get("price", item_data.get("value", 10)) * 0.5))
         item_type = item_data.get("type", "")
+        is_equippable = item_type in EQUIPPABLE_TYPES
+        req = item_data.get("requirements", {})
+        level_req = req.get("level", 1)
+        class_req = req.get("class", None)
+        player_level = player.get("level", 1)
+        player_class = player.get("class", "")
+        can_equip = True
+        equip_block_reason = None
+        if is_equippable:
+            if player_level < level_req:
+                can_equip = False
+                equip_block_reason = f"Requires Level {level_req}"
+            elif class_req and player_class != class_req:
+                can_equip = False
+                equip_block_reason = f"{class_req} only"
+        req_label = None
+        if level_req > 1 or class_req:
+            parts = []
+            if level_req > 1:
+                parts.append(f"Lv.{level_req}")
+            if class_req:
+                parts.append(class_req)
+            req_label = " · ".join(parts)
         inventory_items.append({
             "name": item_name,
             "count": count,
@@ -9533,7 +9556,10 @@ def api_game_state_extended():
             "description": item_data.get("description", ""),
             "sell_price": sell_price,
             "type": item_type,
-            "equippable": item_type in EQUIPPABLE_TYPES,
+            "equippable": is_equippable,
+            "can_equip": can_equip,
+            "equip_block_reason": equip_block_reason,
+            "req_label": req_label,
             "stats": _item_stat_summary(item_data),
             "texture": item_data.get("texture", ""),
         })
