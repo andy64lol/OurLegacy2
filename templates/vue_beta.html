@@ -45,6 +45,31 @@
             to   { opacity:1; transform: translateY(0) scale(1); }
         }
 
+        /* ── Layout: lock to viewport so main-content scrolls ── */
+        #vue-beta-app .game-layout {
+            height: calc(100vh / var(--ui-scale, 1));
+            min-height: unset;
+        }
+
+        /* ── Tab bar: horizontal scroll, sticky, hidden scrollbar ── */
+        .tab-bar-wrap {
+            position: sticky;
+            top: 0;
+            z-index: 210;
+            background: var(--bg-panel-dark);
+            margin-left: -18px;
+            margin-right: -18px;
+            padding: 0 18px;
+        }
+        .tab-bar-wrap .tab-nav {
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .tab-bar-wrap .tab-nav::-webkit-scrollbar { display: none; }
+        .tab-bar-wrap .vtab-more-wrap { display: none; }
+
         /* ── Tab panels ─────────────────────────────────── */
         .vtab-panel { display: none; padding: 14px 2px; }
         .vtab-panel.vtab-panel-active { display: block; animation: vtabFadeIn 0.18s ease forwards; }
@@ -2297,17 +2322,102 @@
 
                 <!-- ═══ LAND / HOUSING ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'land' }">
-                    <div v-if="area && area.key === 'your_land'" style="padding:0;">
-                        <div style="display:flex;gap:8px;padding:8px 0 6px;flex-wrap:wrap;">
-                            <a href="/land/map" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/map';return false;">Map</a>
-                            <a href="/land/shop" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/shop';return false;">Shop</a>
-                            <a href="/land/pets" target="_self" class="btn btn-secondary btn-small" onclick="document.getElementById('beta-land-frame').src='/land/pets';return false;">Pets</a>
-                            <a href="/land/map" style="font-size:12px;color:var(--text-dim);margin-left:auto;line-height:2.2;" target="_blank">Open in new tab ↗</a>
+                    <div v-if="area && area.key === 'your_land'">
+
+                        <!-- Quick nav links (full-page navigation) -->
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+                            <a href="/land/map" class="btn btn-secondary btn-small">&#127760; Map</a>
+                            <a href="/land/shop" class="btn btn-secondary btn-small">&#127873; Shop</a>
+                            <a href="/land/pets" class="btn btn-secondary btn-small">&#128062; Pets</a>
+                            <span style="font-size:11px;color:var(--text-dim);margin-left:auto;align-self:center;">Navigates to full land page</span>
                         </div>
-                        <iframe id="beta-land-frame"
-                            :src="iframeLoaded.land ? '/land/map' : ''"
-                            style="width:100%;height:calc(100vh - 180px);border:none;border-radius:5px;background:var(--bg-main);"
-                            title="Land & Housing"></iframe>
+
+                        <!-- Loading state -->
+                        <div v-if="landLoading" style="text-align:center;padding:30px 0;color:var(--text-dim);font-size:13px;">Loading land data…</div>
+
+                        <!-- Land data loaded -->
+                        <template v-else-if="landData">
+                            <!-- Land status summary -->
+                            <div class="panel" style="margin-bottom:10px;">
+                                <div class="panel-title">&#127968; Your Land</div>
+                                <div class="panel-body">
+                                    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                                        <div v-if="landData.land_level != null" style="font-size:12px;color:var(--text-dim);">
+                                            Land Lv <span style="color:var(--gold);font-weight:700;">[[ landData.land_level ]]</span>
+                                        </div>
+                                        <div v-if="landData.housing_slots != null" style="font-size:12px;color:var(--text-dim);">
+                                            Plots <span style="color:var(--text-light);">[[ landData.placed_count || 0 ]] / [[ landData.housing_slots ]]</span>
+                                        </div>
+                                        <div v-if="landData.farm_slots != null" style="font-size:12px;color:var(--text-dim);">
+                                            Farm Slots <span style="color:var(--text-light);">[[ landData.farm_slots ]]</span>
+                                        </div>
+                                        <div v-if="landData.pet_slots != null" style="font-size:12px;color:var(--text-dim);">
+                                            Pet Slots <span style="color:var(--text-light);">[[ landData.active_pets ? landData.active_pets.length : 0 ]] / [[ landData.pet_slots ]]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Crops / Farm -->
+                            <div v-if="landData.farm_plots && landData.farm_plots.length" class="panel" style="margin-bottom:10px;">
+                                <div class="panel-title">&#127807; Farm</div>
+                                <div class="panel-body">
+                                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                                        <div v-for="(plot, idx) in landData.farm_plots" :key="idx"
+                                             style="background:var(--bg-main);border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:12px;min-width:90px;">
+                                            <div v-if="plot.crop" style="color:var(--text-light);">[[ plot.crop ]]</div>
+                                            <div v-if="plot.crop && plot.ready" style="color:var(--green-bright);font-size:11px;">Ready to harvest!</div>
+                                            <div v-else-if="plot.crop" style="color:var(--text-dim);font-size:11px;">Growing…</div>
+                                            <div v-else style="color:var(--text-dim);font-size:11px;">Empty</div>
+                                            <button v-if="plot.crop && plot.ready"
+                                                    class="btn btn-xsmall btn-secondary" style="margin-top:4px;color:var(--green-bright);"
+                                                    @click="doAction('/api/action/land/harvest', { plot_index: idx })"
+                                                    :disabled="actionPending">
+                                                Harvest
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pets -->
+                            <div v-if="landData.active_pets && landData.active_pets.length" class="panel" style="margin-bottom:10px;">
+                                <div class="panel-title">&#128062; Active Pets</div>
+                                <div class="panel-body">
+                                    <div v-for="pet in landData.active_pets" :key="pet.name"
+                                         style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);">
+                                        <span style="font-size:18px;">&#128062;</span>
+                                        <div style="flex:1;">
+                                            <div style="font-size:13px;color:var(--text-light);font-weight:600;">[[ pet.name ]]</div>
+                                            <div style="font-size:11px;color:var(--text-dim);">[[ pet.type || '' ]] Lv [[ pet.level || 1 ]]</div>
+                                        </div>
+                                        <button class="btn btn-xsmall btn-secondary"
+                                                @click="doAction('/api/action/land/train', { pet_name: pet.name })"
+                                                :disabled="actionPending">
+                                            Train
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rest action -->
+                            <div class="panel" style="margin-bottom:10px;">
+                                <div class="panel-title">&#128716; Actions</div>
+                                <div class="panel-body" style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <button class="btn btn-secondary btn-small"
+                                            @click="doAction('/api/action/land/rest', {})"
+                                            :disabled="actionPending">
+                                        &#128716; Rest (Restore HP/MP)
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Load error / not yet loaded -->
+                        <div v-else style="text-align:center;padding:20px 0;color:var(--text-dim);font-size:13px;">
+                            <button class="btn btn-small btn-secondary" @click="loadLandData()">Load Land Data</button>
+                        </div>
+
                     </div>
                     <div v-else class="empty-state" style="padding:40px 0;">
                         <div style="font-size:32px;margin-bottom:12px;">&#127968;</div>

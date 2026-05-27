@@ -149,7 +149,11 @@ createApp({
             visitedAreasInit: init.visited_areas || [],
             _mapInitDone: false,
 
-            iframeLoaded: { land: false, leaderboard: false, wiki: false },
+            iframeLoaded: { leaderboard: false, wiki: false },
+
+            // land / housing
+            landData: null,
+            landLoading: false,
 
             invPage: 1,
             shopPage: 1,
@@ -321,6 +325,12 @@ createApp({
 
         totalDmUnread() {
             return (this.friendsList || []).reduce((a, f) => a + (f.unread || 0), 0);
+        },
+        readyChallengesCount() {
+            return (this.challenges || []).filter(ch => !ch.claimed && (ch.count || 0) >= (ch.target || 1)).length;
+        },
+        activeEventsCount() {
+            return (this.eventsData && this.eventsData.active) ? this.eventsData.active.length : 0;
         },
     },
 
@@ -1139,10 +1149,31 @@ createApp({
             if (tab === "market" && !this.marketItems.length && !this.marketLoading) this.loadMarket();
             if (tab === "friends" && !this.friendsList.length) this.loadFriends();
             if (tab === "group" && !this.groupData && !this.groupLoading) this.loadGroup();
-            if (tab === "land" && !this.iframeLoaded.land) this.iframeLoaded.land = true;
+            if (tab === "land" && !this.landData && !this.landLoading) this.loadLandData();
             if (tab === "leaderboard" && !this.leaderboardData && !this.leaderboardLoading) this.loadLeaderboard();
-            if (tab === "wiki" && !this.iframeLoaded.wiki) this.iframeLoaded.wiki = true;
             if (tab === "map") this.$nextTick(() => this.initWorldMapCanvas());
+            this.$nextTick(() => {
+                const tabNav = document.querySelector(".tab-bar-wrap .tab-nav");
+                const activeBtn = tabNav && tabNav.querySelector(".tab-btn.active");
+                if (activeBtn) activeBtn.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+            });
+        },
+
+        // ── land data ─────────────────────────────────────────
+        async loadLandData() {
+            if (this.landLoading) return;
+            this.landLoading = true;
+            try {
+                const r = await fetch("/api/land_data", {
+                    credentials: "same-origin",
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                });
+                if (r.ok) {
+                    const data = await r.json();
+                    this.landData = data;
+                }
+            } catch (_) {}
+            this.landLoading = false;
         },
 
         // ── World Map Canvas (BFS layout, fog of war, pan/zoom) ──
