@@ -1157,6 +1157,17 @@ window._betaInit = {
                                 </div>
                             </div>
 
+                            <!-- UI Scale -->
+                            <div>
+                                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">UI Scale</div>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <input type="range" min="50" max="150" :value="settingsUIScale"
+                                           @input="vSetUIScale($event.target.value)"
+                                           class="music-slider" style="flex:1;min-width:100px;accent-color:var(--gold);">
+                                    <span style="font-size:12px;color:var(--text-dim);width:36px;text-align:right;">[[ settingsUIScale ]]%</span>
+                                </div>
+                            </div>
+
                             <!-- Display -->
                             <div>
                                 <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Display</div>
@@ -1193,6 +1204,24 @@ window._betaInit = {
                                             @click="vApplyTheme(th.key)">
                                         [[ th.label ]]
                                     </button>
+                                </div>
+                            </div>
+
+                            <!-- Account (online only) -->
+                            <div v-if="onlineUsername" style="padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);">
+                                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Account</div>
+                                <div style="font-size:12px;color:var(--green-bright);margin-bottom:10px;text-align:center;opacity:0.85;">&#9679; Progress saved automatically</div>
+                                <button class="btn btn-secondary btn-small" style="width:100%;opacity:0.75;font-size:12px;"
+                                        @click="vLogoutAndSave()">Save &amp; Log Out</button>
+                            </div>
+
+                            <!-- Credits -->
+                            <div style="padding-top:14px;border-top:1px solid rgba(255,255,255,0.07);">
+                                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Credits</div>
+                                <div style="font-size:12px;color:var(--text-dim);line-height:1.9;">
+                                    <div>Game created by <span style="color:var(--gold);">andy64lol</span>, <span style="color:var(--gold);">Jerry (Jeroyix)</span>, <span style="color:var(--gold);">Yui (YuiDesu)</span> &amp; <span style="color:var(--gold);">DigABow</span></div>
+                                    <div>Main tileset textures by <a href="https://limezu.itch.io/" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(200,160,60,0.4);">LimeZu</a></div>
+                                    <div>Winter &amp; desert tiles by <a href="https://gherwit.itch.io/" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(200,160,60,0.4);">Gherwit</a></div>
                                 </div>
                             </div>
 

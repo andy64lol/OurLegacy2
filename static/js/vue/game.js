@@ -99,6 +99,7 @@ createApp({
             settingsVolume:       (() => { const v = parseFloat(localStorage.getItem('ol2_music_volume')); return isNaN(v) ? 30 : Math.round(v * 100); })(),
             settingsBgmTrack:     localStorage.getItem('ol2_bgm_track') || '1',
             settingsBtnStyle:     localStorage.getItem('ol2_btn_style') || 'classic',
+            settingsUIScale:      (() => { const s = parseFloat(localStorage.getItem('ol2_ui_scale')); return isNaN(s) ? 100 : Math.round(s * 100); })(),
 
             equipSlots: ['weapon', 'armor', 'offhand', 'accessory_1', 'accessory_2', 'accessory_3'],
 
@@ -748,6 +749,15 @@ createApp({
         settingsBtnStyleLabel() {
             const m = { classic: 'Classic', 'classic-slight': 'Slight Rounded', 'classic-rounded': 'Rounded', png: 'PNG' };
             return m[this.settingsBtnStyle] || 'Classic';
+        },
+        vSetUIScale(val) {
+            this.settingsUIScale = parseInt(val);
+            if (typeof window.settingsSetUIScale === 'function') window.settingsSetUIScale(val / 100);
+        },
+        async vLogoutAndSave() {
+            this.showToast('Saving & exiting...', 'var(--text-dim)', 1500);
+            try { await fetch('/api/online/logout', { method: 'POST' }); } catch(_) {}
+            window.location.href = '/';
         },
 
         renderGlyph(text) {
