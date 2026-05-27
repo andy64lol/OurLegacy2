@@ -1138,6 +1138,10 @@ window._betaInit = {
                     <span style="display:flex;align-items:center;gap:5px;">
                         <img src="/game_assets/glyphs/chat.webp" alt="">
                         Global Chat
+                        <span v-if="unreadChatCount > 0"
+                              style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.7;min-width:16px;text-align:center;">
+                            [[ unreadChatCount ]]
+                        </span>
                     </span>
                     <span v-if="onlineUsername" style="font-size:9px;color:rgba(255,255,255,0.28);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">[[ onlineUsername ]]</span>
                 </div>
@@ -1145,7 +1149,14 @@ window._betaInit = {
                     <div ref="chatMsgArea" class="rp-chat-msgs">
                         <div v-if="chatLoading" style="color:var(--text-dim);font-size:11px;text-align:center;padding:10px;">Loading...</div>
                         <div v-else-if="!chatMessages.length" style="color:var(--text-dim);font-size:11px;text-align:center;padding:10px;">No messages yet</div>
-                        <div v-for="msg in chatMessages" :key="msg.id || msg.created_at" style="margin-bottom:2px;">
+                        <div v-for="msg in chatMessages" :key="msg.id || msg.created_at"
+                             :style="{
+                                 marginBottom: '2px',
+                                 padding: '2px 4px',
+                                 borderRadius: '3px',
+                                 background: isUnreadMsg(msg) ? 'rgba(200,165,80,0.07)' : 'transparent',
+                                 borderLeft: isUnreadMsg(msg) ? '2px solid rgba(200,165,80,0.35)' : '2px solid transparent'
+                             }">
                             <div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;">
                                 <span style="font-size:10px;color:rgba(255,255,255,0.28);flex-shrink:0;">[[ chatFmtTime(msg.created_at) ]]</span>
                                 <span style="font-size:11px;color:var(--gold);font-weight:bold;word-break:break-all;">[[ msg.username ]]</span>

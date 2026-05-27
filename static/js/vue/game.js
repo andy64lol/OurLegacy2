@@ -91,6 +91,7 @@ createApp({
             chatInput:            '',
             chatSending:          false,
             chatPollTimer:        null,
+            readMsgIds:           (() => { try { return JSON.parse(localStorage.getItem('ol2_chat_read') || '[]'); } catch(_) { return []; } })(),
 
             equipSlots: ['weapon', 'armor', 'offhand', 'accessory_1', 'accessory_2', 'accessory_3'],
 
@@ -148,6 +149,13 @@ createApp({
             return counts;
         },
         isOnYourLand() { return this.area && this.area.key === 'your_land'; },
+        unreadChatCount() {
+            if (!this.chatMessages.length) return 0;
+            return this.chatMessages.slice(-9).filter(m => {
+                const id = String(m.id || m.created_at || '');
+                return id && !this.readMsgIds.includes(id);
+            }).length;
+        },
         allTabOptions() {
             return [
                 { key: 'explore',    label: 'Explore',     show: true },
@@ -496,6 +504,7 @@ createApp({
                     const prevLen = this.chatMessages.length;
                     this.chatMessages = data.messages || [];
                     if (this.chatMessages.length !== prevLen) this.$nextTick(() => this.scrollChatBottom());
+                    if (!document.hidden) this.$nextTick(() => this.markChatRead());
                 }
             } catch (_) {}
             this.chatLoading = false;
@@ -507,7 +516,7 @@ createApp({
                 this.loadChatMessages();
             }
             if (!this.chatPollTimer) {
-                this.chatPollTimer = setInterval(() => { if (this.activeTab === 'chat') this.loadChatMessages(); }, 5000);
+                this.chatPollTimer = setInterval(() => this.loadChatMessages(), 5000);
             }
         },
 
@@ -526,6 +535,7 @@ createApp({
                 if (data.ok) {
                     this.chatInput = '';
                     await this.loadChatMessages();
+                    this.markChatRead();
                 } else {
                     this.showToast(data.message || 'Could not send message.', 'var(--red)');
                 }
@@ -544,6 +554,18 @@ createApp({
         scrollChatBottom() {
             const el = this.$refs.chatMsgArea;
             if (el) el.scrollTop = el.scrollHeight;
+        },
+
+        isUnreadMsg(msg) {
+            const id = String(msg.id || msg.created_at || '');
+            return id && !this.readMsgIds.includes(id);
+        },
+
+        markChatRead() {
+            const last9 = this.chatMessages.slice(-9);
+            const ids = last9.map(m => String(m.id || m.created_at || '')).filter(Boolean);
+            this.readMsgIds = ids;
+            try { localStorage.setItem('ol2_chat_read', JSON.stringify(ids)); } catch (_) {}
         },
 
         setPage(type, page) {
