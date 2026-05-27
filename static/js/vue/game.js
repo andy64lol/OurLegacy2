@@ -169,7 +169,6 @@ createApp({
                 { key: 'friends',    label: 'Friends',     show: !!this.onlineUsername },
                 { key: 'group',      label: 'Group',       show: !!this.onlineUsername },
                 { key: 'land',       label: 'Your Land',   show: this.isOnYourLand },
-                { key: 'chat',       label: 'Chat',        show: !!this.onlineUsername },
             ].filter(t => t.show);
         },
     },
@@ -428,7 +427,6 @@ createApp({
             if (tab === 'group'   && !this.groupData)                                 this.loadGroup();
             if (tab === 'map') this.$nextTick(() => this.initWorldMapCanvas());
             if (tab === 'land'  && !this.landData && !this.landLoading)  this.loadLandData();
-            if (tab === 'chat') { this.startChatPoll(); this.$nextTick(() => this.scrollChatBottom()); }
         },
 
         async loadLandData() {
@@ -713,6 +711,7 @@ createApp({
         if (this.onlineUsername) {
             this.loadNearby();
             setInterval(() => this.loadNearby(), 20000);
+            this.startChatPoll();
         }
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) { this.fetchState(); this.resetPoll(); }
