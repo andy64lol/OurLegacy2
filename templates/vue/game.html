@@ -1109,6 +1109,97 @@ window._betaInit = {
                     </template>
                 </div>
 
+                <!-- ═══ SETTINGS TAB ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'settings' }">
+                    <div class="panel" style="margin-bottom:14px;">
+                        <div class="panel-title">Settings</div>
+                        <div class="panel-body" style="display:flex;flex-direction:column;gap:16px;">
+
+                            <!-- Audio -->
+                            <div>
+                                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Audio</div>
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+                                    <span style="font-size:13px;color:var(--text-light);width:80px;">Music</span>
+                                    <button class="btn btn-secondary btn-xsmall" @click="vToggleMusic()">
+                                        [[ settingsMuted ? 'Off' : 'On' ]]
+                                    </button>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+                                    <span style="font-size:13px;color:var(--text-light);width:80px;">Volume</span>
+                                    <input type="range" min="0" max="100" :value="settingsVolume"
+                                           @input="vSetVolume($event.target.value)"
+                                           class="music-slider" style="flex:1;min-width:100px;">
+                                    <span style="font-size:12px;color:var(--text-dim);width:36px;text-align:right;">[[ settingsVolume ]]%</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                    <span style="font-size:13px;color:var(--text-light);width:80px;">BGM Track</span>
+                                    <div style="display:flex;gap:5px;">
+                                        <button v-for="t in ['1','2','3']" :key="t"
+                                                class="btn btn-xsmall"
+                                                :class="settingsBgmTrack === t ? 'btn-primary' : 'btn-secondary'"
+                                                @click="vChangeBGM(t)">
+                                            [[ t ]]
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Background -->
+                            <div>
+                                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Background</div>
+                                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <button v-for="bg in ['1','2','3','4','none']" :key="bg"
+                                            class="btn btn-xsmall"
+                                            :class="settingsBg === bg ? 'btn-primary' : 'btn-secondary'"
+                                            @click="vApplyBg(bg)">
+                                        [[ bg === 'none' ? 'None' : 'BG ' + bg ]]
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Display -->
+                            <div>
+                                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Display</div>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span style="font-size:13px;color:var(--text-light);width:80px;">Fullscreen</span>
+                                    <button class="btn btn-secondary btn-xsmall" @click="vToggleFullscreen()">Toggle</button>
+                                </div>
+                            </div>
+
+                            <!-- Interface -->
+                            <div>
+                                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Interface</div>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <span style="font-size:13px;color:var(--text-light);width:80px;">Buttons</span>
+                                    <button class="btn btn-secondary btn-xsmall" @click="vToggleBtnStyle()">
+                                        [[ settingsBtnStyleLabel() ]]
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Theme -->
+                            <div>
+                                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px;">Theme &amp; Colours</div>
+                                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <button v-for="th in [
+                                        { key: 'default',   label: 'Default'   },
+                                        { key: 'forest',    label: 'Forest'    },
+                                        { key: 'crimson',   label: 'Crimson'   },
+                                        { key: 'midnight',  label: 'Midnight'  },
+                                        { key: 'amethyst',  label: 'Amethyst'  },
+                                    ]" :key="th.key"
+                                            class="btn btn-xsmall"
+                                            :class="settingsTheme === th.key ? 'btn-primary' : 'btn-secondary'"
+                                            @click="vApplyTheme(th.key)">
+                                        [[ th.label ]]
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 

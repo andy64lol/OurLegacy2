@@ -93,6 +93,13 @@ createApp({
             chatPollTimer:        null,
             readMsgIds:           (() => { try { return JSON.parse(localStorage.getItem('ol2_chat_read') || '[]'); } catch(_) { return []; } })(),
 
+            settingsTheme:        localStorage.getItem('ol2_theme') || 'default',
+            settingsBg:           localStorage.getItem('ol2_bg') || '1',
+            settingsMuted:        localStorage.getItem('ol2_music_muted') === 'true',
+            settingsVolume:       (() => { const v = parseFloat(localStorage.getItem('ol2_music_volume')); return isNaN(v) ? 30 : Math.round(v * 100); })(),
+            settingsBgmTrack:     localStorage.getItem('ol2_bgm_track') || '1',
+            settingsBtnStyle:     localStorage.getItem('ol2_btn_style') || 'classic',
+
             equipSlots: ['weapon', 'armor', 'offhand', 'accessory_1', 'accessory_2', 'accessory_3'],
 
             nearbyPlayers: [],
@@ -177,6 +184,7 @@ createApp({
                 { key: 'friends',    label: 'Friends',     show: !!this.onlineUsername },
                 { key: 'group',      label: 'Group',       show: !!this.onlineUsername },
                 { key: 'land',       label: 'Your Land',   show: this.isOnYourLand },
+                { key: 'settings',   label: 'Settings',    show: true },
             ].filter(t => t.show);
         },
     },
@@ -707,6 +715,41 @@ createApp({
             if (k.includes('knight') || k.includes('warrior') || k.includes('shadow')) return 'warrior';
             return 'orc';
         },
+        vApplyTheme(theme) {
+            this.settingsTheme = theme;
+            if (typeof window.applyTheme === 'function') window.applyTheme(theme);
+        },
+        vApplyBg(bg) {
+            this.settingsBg = bg;
+            if (typeof window.applyBackground === 'function') window.applyBackground(bg);
+        },
+        vToggleMusic() {
+            if (typeof window.settingsToggleMusic === 'function') window.settingsToggleMusic();
+            this.settingsMuted = localStorage.getItem('ol2_music_muted') === 'true';
+            const v = parseFloat(localStorage.getItem('ol2_music_volume'));
+            this.settingsVolume = isNaN(v) ? 30 : Math.round(v * 100);
+        },
+        vSetVolume(val) {
+            this.settingsVolume = parseInt(val);
+            if (typeof window.settingsSetVolume === 'function') window.settingsSetVolume(val);
+            this.settingsMuted = localStorage.getItem('ol2_music_muted') === 'true';
+        },
+        vChangeBGM(track) {
+            this.settingsBgmTrack = track;
+            if (typeof window.settingsChangeBGM === 'function') window.settingsChangeBGM(track);
+        },
+        vToggleFullscreen() {
+            if (typeof window.settingsToggleFullscreen === 'function') window.settingsToggleFullscreen();
+        },
+        vToggleBtnStyle() {
+            if (typeof window.settingsToggleButtonStyle === 'function') window.settingsToggleButtonStyle();
+            this.settingsBtnStyle = localStorage.getItem('ol2_btn_style') || 'classic';
+        },
+        settingsBtnStyleLabel() {
+            const m = { classic: 'Classic', 'classic-slight': 'Slight Rounded', 'classic-rounded': 'Rounded', png: 'PNG' };
+            return m[this.settingsBtnStyle] || 'Classic';
+        },
+
         renderGlyph(text) {
             if (!text) return '';
             const escaped = String(text)
