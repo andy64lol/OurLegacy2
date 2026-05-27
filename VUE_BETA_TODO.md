@@ -69,11 +69,13 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | Gold display | ✅ | ✅ | |
 | Game time (day/night icon) | ✅ | ✅ | |
 | Weather display | ✅ | ✅ | |
-| **Weather bonus breakdown** (`+X% EXP / +Y% gold`) | ✅ | ❌ | `weatherBonusExp/Gold` in data; not shown in sidebar |
+| Weather bonus breakdown (`+X% EXP / +Y% gold`) | ✅ | ✅ | `vue_beta.html:897` — shown when either bonus > 0 |
 | Location name + description | ✅ | ✅ | |
 | Rest available notice (inn/land) | ✅ | ✅ | |
 | **Land comfort points in sidebar** | ✅ | ❌ | Jinja2 shows `land_data.comfort_points` in location panel |
-| Party HP bars (companions) | ✅ | ✅ | |
+| **Pet name in sidebar** | ✅ | ❌ | Jinja2 `index.html:815` — `Pet: {{ player.pet }}`; Vue location panel omits it |
+| Low-HP warning pulse (sidebar) | ❌ | 🆕 ✅ | Vue-only — pulse box when HP ≤ 25% |
+| Active companions HP bars (sidebar) | ❌ | 🆕 ✅ | Vue-only — party panel in sidebar |
 | Online count badge | ✅ | ✅ | |
 | Online username badge | ✅ | ✅ | |
 | **Email setup prompt** (no-email users) | ✅ | ❌ | `user_has_email` flag shown in Jinja2 sidebar |
@@ -124,15 +126,17 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | Core stats grid (HP/MP/ATK/DEF/SPD/Gold/EXP) | ✅ | ✅ | |
 | Attributes (STR/DEX/INT/…) with modifier brackets | ✅ | ✅ | |
 | Attribute point spending (1 / All) | ✅ | ✅ | |
-| Spell Power bonus modifier | ✅ | ✅ | |
-| Dodge Chance bonus modifier | ✅ | ✅ | |
-| Crit Chance bonus modifier | ✅ | ✅ | |
-| Shop Discount bonus modifier | ✅ | ✅ | |
-| Item Discovery bonus modifier | ✅ | ✅ | |
-| **EXP Bonus modifier** (`attr_exp_bonus`) | ✅ | ❌ | In Jinja2 bonus modifiers section; `player` data has it but Vue template never renders it |
-| Player rank / title display | ✅ | ⚠️ | Sidebar shows rank; character tab stat grid omits title |
-| Total kills / boss kills / deaths | ✅ | ⚠️ | Vue sidebar shows some; character tab omits summary counts |
-| Adventurer days counter | ✅ | ⚠️ | In Jinja2 character sheet; Vue omits it |
+| Player rank / class / title display | ✅ | ✅ | Vue `vue_beta.html:2013-2015` shows class, rank, title |
+| Total kills / boss kills / deaths | ✅ | ✅ | Vue Statistics panel: `total_kills`, `total_bosses_defeated`, `deaths` |
+| Adventurer days counter | ✅ | ✅ | Vue Statistics panel: `player.days` |
+| Reputation display | ❌ | ✅ | Vue Statistics panel: `player.reputation` |
+| **"Bonus Modifiers" named section** | ✅ | ❌ | Jinja2 `index.html:2621` has a dedicated "Bonus Modifiers" panel in the character tab; Vue has no equivalent section — individual modifiers are only in the Equipment tab stat-mini-grid |
+| Spell Power modifier (visible) | ✅ | ⚠️ | Equipment tab stat-mini only; not in character tab |
+| Dodge Chance modifier (visible) | ✅ | ⚠️ | Equipment tab stat-mini only; not in character tab |
+| Crit Chance modifier (visible) | ✅ | ⚠️ | Equipment tab stat-mini only; not in character tab |
+| Shop Discount modifier (visible) | ✅ | ⚠️ | Equipment tab stat-mini only; not in character tab |
+| Item Discovery modifier (visible) | ✅ | ⚠️ | Equipment tab stat-mini only; not in character tab |
+| **EXP Bonus modifier** (`attr_exp_bonus`) | ✅ | ❌ | Absent from both tabs in Vue; `player` data has it (BUG-V01 fixed) but template never renders it |
 
 ---
 
@@ -220,9 +224,9 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | Challenge button | ✅ | ✅ | |
 | Dungeon difficulty / rewards | ✅ | ✅ | |
 | Active dungeon panel | ✅ | ✅ | |
-| Room progress bar | ✅ | ✅ | |
-| Continue → link | ✅ | ✅ | |
-| Abandon (with confirm) | ✅ | ✅ | |
+| **Room progress bar** | ✅ | ❌ | Jinja2 `index.html:1675` shows `bar-fill bar-exp` width-based bar; Vue only shows "Room X / Y" text |
+| Continue → link style | ✅ | ⚠️ | Jinja2: `btn-primary btn-wood` with arrow; Vue: `btn-secondary` without arrow |
+| Abandon (with confirm dialog) | ✅ | ⚠️ | Jinja2 uses `gameConfirm()` dialog; Vue sends immediately on click |
 
 ---
 
@@ -355,12 +359,15 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | Feature | Jinja2 | Vue Beta | Notes |
 |---------|--------|----------|-------|
 | Group info display | ✅ | ✅ | |
+| Group XP / level bar | ✅ | ❌ | Jinja2 shows XP progress bar + level badge; Vue shows only member count + gold |
 | Create group | ✅ | ✅ | |
 | Join group by invite code | ✅ | ✅ | |
-| Leave group | ✅ | ✅ | |
+| Leave / disband group | ✅ | ✅ | |
 | Kick member (leader only) | ✅ | ✅ | |
 | Collect group gold | ✅ | ✅ | |
-| Group XP / level bar | ✅ | ✅ | |
+| **Real-time group chat** (Socket.IO) | ✅ | ❌ | Jinja2 connects own Socket.IO instance for `group_chat_message` events; Vue has no group chat at all |
+| **Group sub-tab nav** (Info / Members / Chat / Settings) | ✅ | ❌ | Jinja2 has 4 sub-tabs inside the group panel; Vue is a single flat layout |
+| **Group level-up banner** (Socket.IO) | ✅ | ❌ | Jinja2 handles `group_level_up` event with an animated overlay banner; Vue has no listener |
 
 ---
 
@@ -410,39 +417,48 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 
 ## Remaining Gaps — Prioritised
 
+> Last updated: 2026-05-27 (3-pass comparison of all templates complete)
+
 ### Priority: High (affects common gameplay)
 | Gap | Where | What to do |
 |-----|--------|-----------|
-| **Boss phase indicator** | Battle tab | Add `battle.boss_phase` block: pip bar, index/total, ATK multiplier, phase description. Check `/api/game/state/extended` for `boss_phase` key. |
-| **Boss dialogue banner** | Battle tab | Add `battle.boss_dialogue` banner below round badge (only when `battle.is_boss`). |
-| **Player status effects** | Battle tab | Add `battle.player_effects` tag cloud (effect name + turns left). |
-| **Weather bonus breakdown** | Sidebar | `weatherBonusExp` and `weatherBonusGold` already in `data()`; add a row in the sidebar status panel when either > 0. |
-| **`attr_exp_bonus` modifier** | Character + Equipment tabs | Add to bonus modifiers stat-mini-grid; also add `attr_exp_bonus: 0` to player init in `data()`. |
+| **Boss phase indicator** | Battle tab | Add `battle.boss_phase` block: pip bar, index/total, ATK multiplier, phase description |
+| **Boss dialogue banner** | Battle tab | Add `battle.boss_dialogue` banner below round badge (only when `battle.is_boss`) |
+| **Player status effects** | Battle tab | Add `battle.player_effects` tag cloud (effect name + turns left) |
+| **`attr_exp_bonus` modifier** | Character + Equipment tabs | Add to bonus modifiers stat-mini-grid; `player` field already polled since BUG-V01 fix |
+| **Room progress bar in dungeons** | Dungeons tab | Add `<div class="bar-track"><div class="bar-fill bar-exp" :style="{width: dungeonProgressPct+'%'}"></div></div>` |
+| **Group real-time chat** | Group tab | Add Socket.IO listener for `group_chat_message`; render message list + send input in group panel |
 
 ### Priority: Medium (improves completeness)
 | Gap | Where | What to do |
 |-----|--------|-----------|
-| **`boss_kills` event progress bar** | Events tab | Add `v-if="ev.condition_type === 'boss_kills'"` progress bar block to event cards. |
-| **Land comfort points** | Sidebar + Land tab | Expose `comfort_points` from `/api/land_data` response; show in sidebar location panel and land tab header. |
-| **Land training options** | Land tab | Fetch training options from land data; show stat-select + Train button per option. |
-| **Land storage panel** | Land tab | Show stored items list + store/retrieve actions via `/api/action/land/store` and `/api/action/land/retrieve`. |
-| **Land farm planting** | Land tab | For empty farm slots, show crop selector + Plant button via `/api/action/land/plant`. |
-| **Your Land explore minimap** | Explore tab | Canvas render of placed buildings on `your_land` (same logic as Jinja2 lines 1052-1135 of index.html). |
-| **STR → mine success hint** | Mine tab | Add `STR [[ player.attributes?.str || 0 ]] → +[[ ((player.attributes?.str||0)*0.5).toFixed(1) ]]% success` below Mine button. |
-| **Equip-button title tooltip** | Inventory tab | Add `:title="item.equip_block_reason"` to disabled Equip button. |
+| **"Bonus Modifiers" section in character tab** | Character tab | Add a "Bonus Modifiers" named panel mirroring the one in `index.html:2621`; Spell Power, Dodge, Crit, Shop Discount, Item Discovery, EXP Bonus — all conditionally rendered |
+| **Pet name in sidebar** | Sidebar | Add `<div v-if="player.pet">[[ player.pet.replace(/_/g,' ') ]]</div>` to sidebar player panel |
+| **`boss_kills` event progress bar** | Events tab | Add `v-if="ev.condition_type === 'boss_kills'"` progress bar block to event cards |
+| **Land comfort points** | Sidebar + Land tab | Expose `comfort_points` from `/api/land_data` response; show in sidebar location panel and land tab header |
+| **Land training options** | Land tab | Fetch training options from land data; show stat-select + Train button per option |
+| **Land storage panel** | Land tab | Show stored items list + store/retrieve actions via `/api/action/land/store` and `/api/action/land/retrieve` |
+| **Land farm planting** | Land tab | For empty farm slots, show crop selector + Plant button via `/api/action/land/plant` |
+| **Your Land explore minimap** | Explore tab | Canvas render of placed buildings on `your_land` (same logic as Jinja2 `index.html:1052-1135`) |
+| **STR → mine success hint** | Mine tab | Add `STR [[ player.attributes?.str\|\|0 ]] → +[[ ((player.attributes?.str\|\|0)*0.5).toFixed(1) ]]% success` below Mine button |
+| **Equip-button title tooltip** | Inventory tab | Add `:title="item.equip_block_reason"` to disabled Equip button |
+| **Group XP / level bar** | Group tab | Show group level badge + XP progress bar from `groupData` |
+| **Group sub-tab navigation** | Group tab | Add Info / Members / Chat sub-tabs within the group panel |
+| **Group level-up banner** | Group tab | Handle `group_level_up` Socket.IO event; show animated overlay banner |
+| **Rest button gold-check disabled** | Explore tab | Add `:disabled="actionPending \|\| (area.rest_cost > 0 && player.gold < area.rest_cost)"` with tooltip |
+| **Dungeon abandon confirm dialog** | Dungeons tab | Wrap `abandonDungeon` with a `window.confirm()` or `gameConfirm()` call |
 
 ### Priority: Low (polish / edge cases)
 | Gap | Where | What to do |
 |-----|--------|-----------|
-| **Email setup prompt** | Sidebar | Requires `user_has_email` passed from server to `_betaInit`; show warning button. |
-| **Change Character button** | Sidebar | Link to `openCustomizeModal()` (existing JS function); needs 10k gold check. |
-| **Player title in character tab** | Character tab | `player.title` is in data; add a row to character stat grid. |
-| **Adventurer days / total kills / deaths** | Character tab | In data; add compact summary row to character sheet. |
-| **Land crafting recipes** | Land tab | Inline land crafting panel via `/api/action/land/craft`. |
-| **Land building buy/place/remove** | Land tab | Full builder — complex; link to `/land/map` is fine for now. |
-| **Pet purchasing** | Land tab | Link to `/land/pets` for now. |
-| **Global DM unread badge in sidebar** | Sidebar | `totalDmUnread` computed already exists; show a small badge in sidebar nav. |
-| **Boss abilities panel** | Battle tab | Low traffic feature; add collapsible list of boss special moves if `battle.boss_abilities` exists. |
-| **Tab glyph pixel icons** | Tab bar | Decorative only. |
-| **Trade UI inline** | Any | Currently links to `/trade`; complex to inline. |
-| **NPC dialogue modals** | Explore tab | Low priority. |
+| **Email setup prompt** | Sidebar | Requires `user_has_email` passed from server to `_betaInit`; show warning button |
+| **Change Character button** | Sidebar | Link to `openCustomizeModal()` (existing JS function); needs 10k gold check |
+| **Land crafting recipes** | Land tab | Inline land crafting panel via `/api/action/land/craft` |
+| **Land building buy/place/remove** | Land tab | Full builder — complex; link to `/land/map` is fine for now |
+| **Pet purchasing** | Land tab | Link to `/land/pets` for now |
+| **Global DM unread badge in sidebar** | Sidebar | `totalDmUnread` computed already exists; show a small badge in sidebar nav |
+| **Boss abilities panel** | Battle tab | Low traffic feature; add collapsible list of boss special moves if `battle.boss_abilities` exists |
+| **Dungeon Continue button style** | Dungeons tab | Change `btn-secondary` → `btn-primary btn-wood`; add `→` arrow to match Jinja2 |
+| **Tab glyph pixel icons** | Tab bar | Decorative only |
+| **Trade UI inline** | Any | Currently links to `/trade`; complex to inline |
+| **NPC dialogue modals** | Explore tab | Low priority |

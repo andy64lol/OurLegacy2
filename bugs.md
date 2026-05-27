@@ -152,6 +152,105 @@ in a battle see the non-battle UI briefly on page load until the first poll reso
 
 ---
 
+### BUG-V11 — Pet name missing from Vue sidebar `TODO`
+**File:** `templates/vue_beta.html` — sidebar player panel  
+**Severity:** Low — players with active pets can't see pet name at a glance  
+**Description:**  
+`templates/index.html:815-817` shows `Pet: {{ player.pet.replace('_',' ').title() }}` in the
+sidebar if `player.pet` is set. Vue's sidebar player panel has no equivalent. The `player` object
+already contains the `pet` field from the state poll.  
+**Fix needed:** Add `<div v-if="player.pet" style="font-size:11px;color:var(--text-dim);margin-top:2px;">Pet: [[ player.pet.replace(/_/g,' ') ]]</div>` inside the sidebar player panel.
+
+---
+
+### BUG-V12 — Dungeon room progress bar missing in Vue `TODO`
+**File:** `templates/vue_beta.html` — dungeons tab active dungeon panel  
+**Severity:** Medium — players can't see how far through a dungeon they are  
+**Description:**  
+`templates/index.html:1675-1676` renders a `bar-fill bar-exp` progress bar sized proportionally to
+`room_index / rooms.length`. The Vue active dungeon panel (vue_beta.html ~line 1704) only shows
+the text "Room X / Y" with no visual bar. The `activeDungeon.room_index` and
+`activeDungeon.rooms.length` are already available in Vue state.  
+**Fix needed:** Add progress bar below room text:
+```html
+<div class="bar-track" style="width:160px;margin-top:6px;">
+  <div class="bar-fill bar-exp"
+       :style="{ width: Math.round(((activeDungeon.room_index+1) / (activeDungeon.rooms?.length||1))*100)+'%' }">
+  </div>
+</div>
+```
+
+---
+
+### BUG-V13 — Group tab missing real-time chat, sub-tabs, and level-up banner `TODO`
+**File:** `templates/vue_beta.html` + `static/js/vue_beta.js` — group tab  
+**Severity:** Medium — major group feature gap vs Jinja2  
+**Description:**  
+The Jinja2 group tab (`templates/index.html:2915-3190`) has three features entirely absent from
+the Vue beta:
+
+1. **Real-time group chat** — Jinja2 spawns its own `io()` Socket.IO client and listens on
+   `group_chat_message` + `group_chat_error` events. It renders a scrolling message list and a
+   send-message input box in a dedicated "Group Chat" sub-panel.
+2. **Sub-tab navigation** — Jinja2 has an Info / Members / Chat / Settings tab bar within the
+   group panel (`.ag-tab-btn` elements). Vue renders everything as a single flat panel.
+3. **Group level-up banner** — Jinja2 handles a `group_level_up` Socket.IO event and shows an
+   animated fixed overlay banner with the new level + bonus XP/Gold.
+
+The Vue group tab only shows: group name, invite code, member list (with kick), collect gold,
+leave group, and create/join flows.  
+**Fix needed (incremental):**
+- Add Socket.IO connection to group namespace in `vue_beta.js` `mounted()` (same as existing `sio` connection for global chat)
+- Listen for `group_chat_message` → push to `groupMessages` array
+- Render message list + input in group panel template
+- Handle `group_level_up` → show toast notification (or banner)
+
+---
+
+### BUG-V14 — "Bonus Modifiers" section absent from character tab `TODO`
+**File:** `templates/vue_beta.html` — character tab  
+**Severity:** Low — players must navigate to Equipment tab to see Spell Power, Dodge, etc.  
+**Description:**  
+`templates/index.html:2621-2651` has a dedicated "Bonus Modifiers" named panel in the character
+tab showing: Spell Power, Dodge Chance, Shop Discount, Item Discovery, EXP Bonus — all
+conditionally rendered only if non-zero. Vue's character tab (vue_beta.html ~line 2010-2115)
+has no equivalent section. These bonuses are only visible in the Vue Equipment tab stat-mini-grid
+(vue_beta.html:1401-1405 shows Spell Power, Dodge, Crit, Shop Discount, Item Discovery, but NOT
+`attr_exp_bonus`). Players who want to check their bonuses must know to look in Equipment, not
+Character.  
+**Fix needed:** Add a "Bonus Modifiers" panel to the character tab, mirroring `index.html:2621-2651`.
+Also add `attr_exp_bonus` to the equipment stat-mini-grid (it's the one bonus still missing from
+both tabs in Vue despite BUG-V01 fix — see BUG-S02).
+
+---
+
+### BUG-V15 — Group XP / level bar missing from group panel `TODO`
+**File:** `templates/vue_beta.html` — group tab  
+**Severity:** Low — players can't track group progression  
+**Description:**  
+The Jinja2 group tab shows a group level badge, XP progress bar, and XP-to-next label. Vue shows
+only `member_count` and `gold_pool` — no level or XP at all. The `/api/groups/my` endpoint likely
+returns `level`, `xp`, and `xp_to_next` in the group object (used by the Jinja2 version).  
+**Fix needed:** Add group level badge + XP bar to the Vue group panel using `groupData.level`,
+`groupData.xp`, and `groupData.xp_to_next`.
+
+---
+
+### BUG-V16 — Dungeon abandon has no confirmation dialog `TODO`
+**File:** `templates/vue_beta.html` — dungeons tab  
+**Severity:** Low — misclick can silently wipe all dungeon progress  
+**Description:**  
+Jinja2 uses `gameConfirm('Abandon this dungeon run? All progress will be lost.', ...)` before
+submitting the abandon form. Vue's `@click="abandonDungeon"` fires the API call immediately
+with no confirmation.  
+**Fix needed:** Wrap `abandonDungeon` with a confirmation check:
+```js
+if (!confirm('Abandon this dungeon run? All progress will be lost.')) return;
+```
+Or use the existing `gameConfirm()` if it's available in the Vue context.
+
+---
+
 ## Jinja2 (`/`) Bugs
 
 ---
