@@ -10679,6 +10679,7 @@ def api_land_data():
     player, err = _api_resolve_player("game:read")
     if err:
         return err
+    assert player is not None
     land = _build_land_data(player)
     return jsonify({"ok": True, "land_data": _json_safe(land)})
 

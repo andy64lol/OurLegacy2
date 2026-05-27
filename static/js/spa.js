@@ -99,7 +99,7 @@
     function spaUpdateMessages(messages, onlyNew) {
         if (!messages || !messages.length) return;
 
-        var toShow = onlyNew ? messages.slice(_lastMsgCount) : messages.slice(_lastMsgCount);
+        var toShow = onlyNew ? messages.slice(_lastMsgCount) : messages;
         _lastMsgCount = messages.length;
 
         var queued = 0;

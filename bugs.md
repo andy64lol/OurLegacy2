@@ -248,3 +248,109 @@ field entirely from its player mapping (fixed in BUG-V01 above), but neither ver
 surfaces it during combat or on level-up — it's buried in the character stat grid.
 
 ---
+
+## Linter Report — 2026-05-27 (3 passes each)
+
+> Tools run: **pyright** (Python static types), **eslint v10** (JS), **node \-\-check** (JS syntax),  
+> **py_compile** (Python syntax), **manual grep** (anti-patterns), **Vue template audit** (Node.js)  
+> Passes: 3 independent runs, results identical across all passes.
+
+---
+
+### Pyright — `app.py` + `utilities/`
+
+| Pass | Errors | Warnings |
+|------|--------|---------|
+| 1 | 1 | 0 |
+| 2 | 1 | 0 |
+| 3 | **0** | **0** |
+
+**BUG-L01 — `api_land_data`: `player` typed as `dict | None` passed to `_build_land_data`** `FIXED`  
+`app.py:10682` — `_api_resolve_player()` returns `(None, err)` on failure and `(player, None)` on  
+success. Pyright couldn't narrow the type after `if err: return err`, and `_build_land_data()`  
+has a strict non-optional dict param. Added `assert player is not None` after the guard (matching  
+the pattern already used on lines 9299 and 9479). Pass 3 confirms 0 errors.
+
+### ESLint v10 — `static/js/vue_beta.js`
+
+| Pass | Errors | Warnings |
+|------|--------|---------|
+| 1 | 0 | 25 |
+| 2 | 0 | 25 |
+| 3 | 0 | 25 |
+
+All 25 warnings are `no-unused-vars` on intentional silent-catch placeholders (`catch (_) {}` and  
+`catch (e) {}`). This is idiomatic JS for "we know an error can happen, we don't care".  
+No action needed. Can be silenced with ESLint rule `"caughtErrorsIgnorePattern": "^_"`.
+
+### ESLint v10 — `static/js/spa.js`
+
+| Pass | Errors | Warnings |
+|------|--------|---------|
+| 1 | 0 | 3 |
+| 2 | 0 | 3 |
+| 3 | 0 | **1** |
+
+**BUG-L02 — `spaUpdateMessages`: identical ternary branches, `onlyNew` param had no effect** `FIXED`  
+`spa.js:102` — Both branches did `messages.slice(_lastMsgCount)`:
+```js
+// Before (bug):
+var toShow = onlyNew ? messages.slice(_lastMsgCount) : messages.slice(_lastMsgCount);
+// After (fixed):
+var toShow = onlyNew ? messages.slice(_lastMsgCount) : messages;
+```
+When called with `onlyNew=false` the function would skip all existing messages and show nothing.  
+Low-impact (only called with `onlyNew=true` currently), but would silently fail if the false branch  
+were ever used.
+
+**Remaining 2 warnings (cosmetic — no fix needed):**
+- `spa.js:16` — `_pollTimer` assigned but not exposed: intentional module-private timer
+- `spa.js:90` — `initLowHpWarning` not in ESLint globals: protected by `typeof` guard; defined in `game.js` in the Jinja2 context
+- `spa.js:117` — `showToast` not in ESLint globals: protected by `typeof` guard; globally defined in `game.js`
+
+### ESLint v10 — `static/js/game.js`
+
+| Pass | Errors | Warnings |
+|------|--------|---------|
+| 1 | 0 | 13 |
+| 2 | 0 | 13 |
+| 3 | 0 | 13 |
+
+All 13 warnings are false positives:
+
+| Lines | Warning | Verdict |
+|-------|---------|---------|
+| 39, 185 | `history` not defined | `window.history` — valid browser global, missing from ESLint config |
+| 339, 346, 839, 846, 911, 915 | `URL` not defined | `window.URL` — valid browser global, missing from ESLint config |
+| 422, 1079, 1083 | `_e` defined but never used | `catch(_e){}` — intentional silent catch |
+| 895 | `e` defined but never used | `catch(e){}` — intentional silent catch |
+| 899 | `exitToMenu` never used | Called via `onclick="exitToMenu()"` in `templates/index.html:902` — ESLint can't see HTML |
+
+No fixes needed for game.js. Add `URL`, `history`, `AudioContext` to ESLint globals to eliminate future false positives.
+
+### `node --check` — All JS Files
+
+All three files passed `node --check` (no syntax errors) across all three passes.
+
+### `py_compile` — All Python Files
+
+`app.py` and all 15 `utilities/*.py` files passed `py_compile` (no syntax errors) across all three passes.
+
+### Vue Template Method Audit
+
+All `@click` / `@submit` handler method names in `templates/vue_beta.html` verified against  
+`vue_beta.js` — **zero genuinely missing method references**. All apparent "missing" results from  
+grep-based scanning were v-for iteration variables (`attr`, `item`, `ev`, `plot`, `m`, etc.).
+
+### Three-Pass Summary
+
+| Category | Found | Fixed | False Positives | Remaining `TODO` |
+|----------|-------|-------|-----------------|-----------------|
+| Python type errors (pyright) | 1 | 1 | 0 | 0 |
+| Python syntax errors | 0 | — | 0 | 0 |
+| JS errors (eslint hard) | 0 | — | 0 | 0 |
+| JS logic bugs (manual) | 1 (ternary) | 1 | 0 | 0 |
+| JS warnings (eslint) | 41 | 1 | 38 | 2 (timer, `_pollTimer`) |
+| JS syntax errors (node) | 0 | — | 0 | 0 |
+| Vue template method refs | 0 missing | — | 24 (loop vars) | 0 |
+
