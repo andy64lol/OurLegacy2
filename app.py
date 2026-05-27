@@ -10671,6 +10671,286 @@ def api_catalog_farming():
     return jsonify({"ok": True, "farming": farming})
 
 
+# ── Vue API: Land data & land actions ─────────────────────────────────────────
+
+@app.route("/api/land_data")
+@limiter.limit("60 per minute")
+def api_land_data():
+    player, err = _api_resolve_player("game:read")
+    if err:
+        return err
+    land = _build_land_data(player)
+    return jsonify({"ok": True, "land_data": _json_safe(land)})
+
+
+@app.route("/api/action/land/rest", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_land_rest():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    building_slots = player.get("building_slots", {})
+    has_house = any(k.startswith("house") and v for k, v in building_slots.items())
+    if not has_house:
+        return jsonify({"ok": False, "message": "You need a house on your land to rest here."})
+    hp, max_hp = player.get("hp", 1), player.get("max_hp", 100)
+    mp, max_mp = player.get("mp", 0), player.get("max_mp", 50)
+    if hp >= max_hp and mp >= max_mp:
+        return jsonify({"ok": False, "message": "You are already at full health and mana."})
+    comfort = player.get("comfort_points", 0)
+    hp_restore = max(10, comfort * 2)
+    mp_restore = max(5, comfort)
+    old_hp, old_mp = hp, mp
+    player["hp"] = min(max_hp, hp + hp_restore)
+    player["mp"] = min(max_mp, mp + mp_restore)
+    gained_hp = player["hp"] - old_hp
+    gained_mp = player["mp"] - old_mp
+    add_message(f"You rest at home and recover +{gained_hp} HP, +{gained_mp} MP.", "var(--green-bright)")
+    save_player(player)
+    _autosave()
+    return jsonify({"ok": True, "message": f"Rested: +{gained_hp} HP, +{gained_mp} MP."})
+
+
+@app.route("/api/action/land/plant", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_land_plant():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    body = request.get_json(silent=True) or {}
+    slot_id = str(body.get("slot_id", ""))
+    crop_key = str(body.get("crop_key", ""))
+    building_slots = player.get("building_slots", {})
+    has_garden = any(k.startswith("garden") and v for k, v in building_slots.items())
+    if not has_garden:
+        return jsonify({"ok": False, "message": "You need to build a Garden on your land before you can farm!"})
+    crops_db = GAME_DATA["farming"].get("crops", {})
+    crop_def = crops_db.get(crop_key)
+    if not crop_def:
+        return jsonify({"ok": False, "message": "Unknown crop."})
+    crops = player.get("crops", {})
+    if crops.get(slot_id, {}).get("crop_key"):
+        return jsonify({"ok": False, "message": f"Slot {slot_id} is already occupied."})
+    crops[slot_id] = {"crop_key": crop_key, "growth_time": crop_def.get("growth_time", 5), "turns": 0, "ready": False}
+    player["crops"] = crops
+    add_message(f"You plant {crop_def.get('name', crop_key)} in {slot_id}. Ready in {crop_def.get('growth_time', 5)} turns.", "var(--green-bright)")
+    save_player(player)
+    _autosave()
+    return jsonify({"ok": True, "message": f"Planted {crop_def.get('name', crop_key)}."})
+
+
+@app.route("/api/action/land/harvest", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_land_harvest():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    body = request.get_json(silent=True) or {}
+    slot_id = str(body.get("slot_id", ""))
+    crops = player.get("crops", {})
+    crop_info = crops.get(slot_id)
+    if not crop_info or not crop_info.get("crop_key"):
+        return jsonify({"ok": False, "message": "Nothing planted in that slot."})
+    if not crop_info.get("ready", False):
+        turns_left = crop_info.get("growth_time", 5) - crop_info.get("turns", 0)
+        return jsonify({"ok": False, "message": f"Crop is not ready yet. About {turns_left} turns remaining."})
+    crops_db = GAME_DATA["farming"].get("crops", {})
+    crop_def = crops_db.get(crop_info["crop_key"], {})
+    amount = crop_def.get("harvest_amount", 3)
+    sell_each = crop_def.get("sell_price", 15)
+    gold_earned = amount * sell_each
+    building_slots = player.get("building_slots", {})
+    has_farming = any(k.startswith("farming") and v for k, v in building_slots.items())
+    farming_bonus_msg = ""
+    if has_farming:
+        bonus = int(gold_earned * 0.5)
+        gold_earned += bonus
+        farming_bonus_msg = f" (+{bonus}g farming bonus)"
+    player["gold"] += gold_earned
+    crops[slot_id] = {}
+    player["crops"] = crops
+    add_message(f"You harvest {amount}x {crop_def.get('name', crop_info['crop_key'])} and earn {gold_earned} gold!{farming_bonus_msg}", "var(--gold)")
+    save_player(player)
+    _autosave()
+    return jsonify({"ok": True, "message": f"Harvested for {gold_earned}g."})
+
+
+@app.route("/api/action/land/train", methods=["POST"])
+@limiter.limit("20 per minute")
+def api_land_train():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    building_slots = player.get("building_slots", {})
+    has_training_place = any(k.startswith("training_place") and v for k, v in building_slots.items())
+    if not has_training_place:
+        return jsonify({"ok": False, "message": "You need to build a Training Place on your land first!"})
+    body = request.get_json(silent=True) or {}
+    training_key = str(body.get("training_key", ""))
+    option = TRAINING_OPTIONS.get(training_key)
+    if not option:
+        return jsonify({"ok": False, "message": "Unknown training option."})
+    cost = option["cost"]
+    if player["gold"] < cost:
+        return jsonify({"ok": False, "message": f"Not enough gold. Training costs {cost} gold."})
+    player["gold"] -= cost
+    stat = str(option["stat"])
+    gain = option["gain"]
+    player[stat] = player.get(stat, 0) + gain
+    if stat == "max_hp":
+        player["hp"] = min(player["hp"] + gain, player["max_hp"])
+    elif stat == "max_mp":
+        player["mp"] = min(player["mp"] + gain, player["max_mp"])
+    add_message(f"{option['label']} complete! +{gain} {stat.replace('max_', '').upper()} (cost: {cost}g)", "var(--green-bright)")
+    save_player(player)
+    _autosave()
+    return jsonify({"ok": True, "message": f"{option['label']} complete! +{gain} {stat.replace('max_', '').upper()}"})
+
+
+@app.route("/api/action/land/store", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_land_store():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    building_slots = player.get("building_slots", {})
+    has_storage = any(k.startswith("storage") and v for k, v in building_slots.items())
+    if not has_storage:
+        return jsonify({"ok": False, "message": "You need a storage building on your land first."})
+    body = request.get_json(silent=True) or {}
+    item_name = str(body.get("item_name", ""))
+    inventory = player.get("inventory", [])
+    if item_name not in inventory:
+        return jsonify({"ok": False, "message": f"{item_name} is not in your inventory."})
+    storage_count = sum(1 for k, v in building_slots.items() if k.startswith("storage") and v)
+    capacity = storage_count * 10
+    stored = player.get("stored_items", [])
+    if len(stored) >= capacity:
+        return jsonify({"ok": False, "message": f"Storage is full ({capacity} items max)."})
+    inventory.remove(item_name)
+    player["inventory"] = inventory
+    stored.append(item_name)
+    player["stored_items"] = stored
+    save_player(player)
+    return jsonify({"ok": True, "message": f"Stored {item_name}."})
+
+
+@app.route("/api/action/land/retrieve", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_land_retrieve():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    body = request.get_json(silent=True) or {}
+    item_name = str(body.get("item_name", ""))
+    stored = player.get("stored_items", [])
+    if item_name not in stored:
+        return jsonify({"ok": False, "message": f"{item_name} is not in your storage."})
+    stored.remove(item_name)
+    player["stored_items"] = stored
+    player.setdefault("inventory", []).append(item_name)
+    save_player(player)
+    return jsonify({"ok": True, "message": f"Retrieved {item_name}."})
+
+
+@app.route("/api/action/land/craft", methods=["POST"])
+@limiter.limit("20 per minute")
+def api_land_craft():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    building_slots = player.get("building_slots", {})
+    has_crafting = any(k.startswith("crafting") and v for k, v in building_slots.items())
+    if not has_crafting:
+        return jsonify({"ok": False, "message": "You need a crafting building (like the Dwarven Forge) on your land first."})
+    body = request.get_json(silent=True) or {}
+    recipe_key = str(body.get("recipe_key", ""))
+    recipe = GAME_DATA.get("crafting", {}).get("recipes", {}).get(recipe_key)
+    if not recipe:
+        return jsonify({"ok": False, "message": "Unknown recipe."})
+    inventory = player.get("inventory", [])
+    inv_counts: dict[str, int] = {}
+    for item in inventory:
+        inv_counts[item] = inv_counts.get(item, 0) + 1
+    materials = recipe.get("materials", {})
+    for mat, qty in materials.items():
+        if inv_counts.get(mat, 0) < qty:
+            return jsonify({"ok": False, "message": f"Not enough materials: need {qty}x {mat}."})
+    for mat, qty in materials.items():
+        for _ in range(qty):
+            inventory.remove(mat)
+    output = recipe.get("output", {})
+    for out_item, out_qty in output.items():
+        for _ in range(out_qty):
+            inventory.append(out_item)
+    player["inventory"] = inventory
+    out_str = ", ".join(f"{q}x {n}" for n, q in output.items())
+    add_message(f"You craft {out_str}!", "var(--green-bright)")
+    save_player(player)
+    _autosave()
+    return jsonify({"ok": True, "message": f"Crafted {out_str}!"})
+
+
+@app.route("/api/action/land/buy_pet", methods=["POST"])
+@limiter.limit("20 per minute")
+def api_land_buy_pet():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    body = request.get_json(silent=True) or {}
+    pet_key = str(body.get("pet_key", ""))
+    pet_data = GAME_DATA["pets"].get(pet_key)
+    if not pet_data:
+        return jsonify({"ok": False, "message": "Unknown pet."})
+    price = pet_data.get("price", 500)
+    if player["gold"] < price:
+        return jsonify({"ok": False, "message": f"Not enough gold. {pet_data.get('name', pet_key)} costs {price} gold."})
+    if player.get("pet"):
+        old_pet = GAME_DATA["pets"].get(player["pet"], {})
+        old_price = old_pet.get("price", 500)
+        refund = old_price // 2
+        player["gold"] += refund
+        old_boosts = old_pet.get("boosts", {})
+        for stat, val in old_boosts.items():
+            player[stat] = max(0, player.get(stat, 0) - val)
+        add_message(f"Your old companion is released (+{refund}g refund).", "var(--text-dim)")
+    player["gold"] -= price
+    player["pet"] = pet_key
+    new_boosts = pet_data.get("boosts", {})
+    for stat, val in new_boosts.items():
+        player[stat] = player.get(stat, 0) + val
+    add_message(f"You adopt {pet_data.get('name', pet_key)}! Stat bonuses applied.", "var(--gold)")
+    save_player(player)
+    _autosave()
+    return jsonify({"ok": True, "message": f"You adopt {pet_data.get('name', pet_key)}!"})
+
+
+@app.route("/api/action/land/buy_housing", methods=["POST"])
+@limiter.limit("20 per minute")
+def api_land_buy_housing():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    body = request.get_json(silent=True) or {}
+    h_key = str(body.get("housing_key", ""))
+    h_data = GAME_DATA["housing"].get(h_key)
+    if not h_data:
+        return jsonify({"ok": False, "message": "That structure does not exist."})
+    base_price = h_data.get("price", 100)
+    discount = min(0.50, player.get("attr_gold_discount", 0.0))
+    price = max(1, int(base_price * (1.0 - discount)))
+    if player["gold"] < price:
+        return jsonify({"ok": False, "message": f"Not enough gold. {h_data.get('name', h_key)} costs {price} gold."})
+    player["gold"] -= price
+    owned = player.get("housing_owned", [])
+    owned.append(h_key)
+    player["housing_owned"] = owned
+    add_message(f"You purchase {h_data.get('name', h_key)} for {price} gold.", "var(--gold)")
+    save_player(player)
+    _autosave()
+    return jsonify({"ok": True, "message": f"Purchased {h_data.get('name', h_key)}!"})
+
+
 # ── Server startup ────────────────────────────────────────────────────────────
 
 port = int(os.environ.get("PORT", 5000))

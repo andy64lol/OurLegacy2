@@ -82,6 +82,16 @@ createApp({
             friendsLoading:       false,
             groupData:            null,
 
+            landData:             null,
+            landLoading:          false,
+            landPlantSelections:  {},
+
+            chatMessages:         [],
+            chatLoading:          false,
+            chatInput:            '',
+            chatSending:          false,
+            chatPollTimer:        null,
+
             equipSlots: ['weapon', 'armor', 'offhand', 'accessory_1', 'accessory_2', 'accessory_3'],
 
             nearbyPlayers: [],
@@ -121,6 +131,23 @@ createApp({
         paginatedBosses()      { const p = Math.min(this.bossPage, this.bossTotalPages) - 1; return (this.availableBosses || []).slice(p * 3, p * 3 + 3); },
         invPageCount()         { return Math.max(1, Math.ceil((this.inventoryItems || []).length / 15)); },
         pagedInventory()       { const p = Math.min(this.invPage, this.invPageCount) - 1; return (this.inventoryItems || []).slice(p * 15, p * 15 + 15); },
+        landCraftCategories() {
+            if (!this.landData || !this.landData.crafting_recipes) return [];
+            const cats = [];
+            for (const r of this.landData.crafting_recipes) {
+                if (!cats.includes(r.category)) cats.push(r.category);
+            }
+            return cats;
+        },
+        storedItemCounts() {
+            if (!this.landData || !this.landData.stored_items) return {};
+            const counts = {};
+            for (const item of this.landData.stored_items) {
+                counts[item] = (counts[item] || 0) + 1;
+            }
+            return counts;
+        },
+        isOnYourLand() { return this.area && this.area.key === 'your_land'; },
         allTabOptions() {
             return [
                 { key: 'explore',    label: 'Explore',     show: true },
@@ -141,6 +168,8 @@ createApp({
                 { key: 'events',     label: 'Events',      show: true },
                 { key: 'friends',    label: 'Friends',     show: !!this.onlineUsername },
                 { key: 'group',      label: 'Group',       show: !!this.onlineUsername },
+                { key: 'land',       label: 'Your Land',   show: this.isOnYourLand },
+                { key: 'chat',       label: 'Chat',        show: !!this.onlineUsername },
             ].filter(t => t.show);
         },
     },
@@ -398,6 +427,125 @@ createApp({
             if (tab === 'friends' && !this.friendsList.length)                        this.loadFriends();
             if (tab === 'group'   && !this.groupData)                                 this.loadGroup();
             if (tab === 'map') this.$nextTick(() => this.initWorldMapCanvas());
+            if (tab === 'land'  && !this.landData && !this.landLoading)  this.loadLandData();
+            if (tab === 'chat') { this.startChatPoll(); this.$nextTick(() => this.scrollChatBottom()); }
+        },
+
+        async loadLandData() {
+            if (this.landLoading) return;
+            this.landLoading = true;
+            try {
+                const r = await fetch('/api/land_data', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!r.ok) return;
+                const data = await r.json();
+                if (data.ok) {
+                    this.landData = data.land_data;
+                    const sels = {};
+                    const crops = data.land_data.farming_crops || {};
+                    const firstCrop = Object.keys(crops)[0] || '';
+                    for (const slot of (data.land_data.farm_crops || [])) {
+                        if (!slot.crop_key) sels[slot.slot_id] = firstCrop;
+                    }
+                    this.landPlantSelections = sels;
+                }
+            } catch (_) {}
+            this.landLoading = false;
+        },
+
+        async landAction(path, body) {
+            if (this.actionPending) return null;
+            this.actionPending = true;
+            try {
+                const r = await fetch(path, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify(body || {}),
+                });
+                const data = await r.json();
+                if (!data.ok) { this.showToast(data.message || 'Action failed.', 'var(--red)'); }
+                else {
+                    if (data.message) this.showToast(data.message, 'var(--green-bright)');
+                    await this.fetchState();
+                    await this.loadLandData();
+                    this.resetPoll();
+                }
+                return data;
+            } catch (e) {
+                this.showToast('Request failed: ' + e.message, 'var(--red)');
+                return null;
+            } finally {
+                this.actionPending = false;
+            }
+        },
+
+        landRest()                    { return this.landAction('/api/action/land/rest'); },
+        landTrain(key)                { return this.landAction('/api/action/land/train',   { training_key: key }); },
+        landPlant(slotId, cropKey)    { return this.landAction('/api/action/land/plant',   { slot_id: slotId, crop_key: cropKey }); },
+        landHarvest(slotId)           { return this.landAction('/api/action/land/harvest', { slot_id: slotId }); },
+        landCraft(recipeKey)          { return this.landAction('/api/action/land/craft',   { recipe_key: recipeKey }); },
+        landStore(itemName)           { return this.landAction('/api/action/land/store',   { item_name: itemName }); },
+        landRetrieve(itemName)        { return this.landAction('/api/action/land/retrieve',{ item_name: itemName }); },
+        landBuyPet(petKey)            { return this.landAction('/api/action/land/buy_pet', { pet_key: petKey }); },
+        landBuyHousing(housingKey)    { return this.landAction('/api/action/land/buy_housing', { housing_key: housingKey }); },
+
+        async loadChatMessages() {
+            try {
+                const r = await fetch('/api/social/chat?limit=50', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!r.ok) return;
+                const data = await r.json();
+                if (data.ok) {
+                    const prevLen = this.chatMessages.length;
+                    this.chatMessages = data.messages || [];
+                    if (this.chatMessages.length !== prevLen) this.$nextTick(() => this.scrollChatBottom());
+                }
+            } catch (_) {}
+            this.chatLoading = false;
+        },
+
+        startChatPoll() {
+            if (!this.chatMessages.length) {
+                this.chatLoading = true;
+                this.loadChatMessages();
+            }
+            if (!this.chatPollTimer) {
+                this.chatPollTimer = setInterval(() => { if (this.activeTab === 'chat') this.loadChatMessages(); }, 5000);
+            }
+        },
+
+        async sendChat() {
+            const msg = (this.chatInput || '').trim();
+            if (!msg || this.chatSending) return;
+            this.chatSending = true;
+            try {
+                const r = await fetch('/api/social/chat', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ message: msg }),
+                });
+                const data = await r.json();
+                if (data.ok) {
+                    this.chatInput = '';
+                    await this.loadChatMessages();
+                } else {
+                    this.showToast(data.message || 'Could not send message.', 'var(--red)');
+                }
+            } catch (e) {
+                this.showToast('Chat error: ' + e.message, 'var(--red)');
+            } finally {
+                this.chatSending = false;
+            }
+        },
+
+        chatFmtTime(ts) {
+            if (!ts) return '';
+            try { return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; }
+        },
+
+        scrollChatBottom() {
+            const el = this.$refs.chatMsgArea;
+            if (el) el.scrollTop = el.scrollHeight;
         },
 
         setPage(type, page) {
