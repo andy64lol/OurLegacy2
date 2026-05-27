@@ -2371,7 +2371,7 @@
                                             <div v-else style="color:var(--text-dim);font-size:11px;">Empty</div>
                                             <button v-if="plot.crop && plot.ready"
                                                     class="btn btn-xsmall btn-secondary" style="margin-top:4px;color:var(--green-bright);"
-                                                    @click="doAction('/api/action/land/harvest', { plot_index: idx })"
+                                                    @click="doAction('/api/action/land/harvest', { slot_id: plot.slot_id })"
                                                     :disabled="actionPending">
                                                 Harvest
                                             </button>
@@ -2391,11 +2391,6 @@
                                             <div style="font-size:13px;color:var(--text-light);font-weight:600;">[[ pet.name ]]</div>
                                             <div style="font-size:11px;color:var(--text-dim);">[[ pet.type || '' ]] Lv [[ pet.level || 1 ]]</div>
                                         </div>
-                                        <button class="btn btn-xsmall btn-secondary"
-                                                @click="doAction('/api/action/land/train', { pet_name: pet.name })"
-                                                :disabled="actionPending">
-                                            Train
-                                        </button>
                                     </div>
                                 </div>
                             </div>
