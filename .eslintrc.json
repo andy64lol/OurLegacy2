@@ -24,7 +24,8 @@
     "semi": ["warn", "always"],
     "no-undef": "warn",
     "eqeqeq": ["warn", "always"],
-    "no-var": "off"
+    "no-var": "off",
+    "no-empty": ["error", { "allowEmptyCatch": true }]
   },
   "ignorePatterns": [
     "node_modules/",

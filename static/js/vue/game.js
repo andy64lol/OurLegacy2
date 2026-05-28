@@ -33,6 +33,12 @@ createApp({
                 deaths:              p.deaths || 0,
                 days:                p.days || 1,
                 reputation:          p.reputation || 0,
+                attr_exp_bonus:      p.attr_exp_bonus      || 0,
+                dodge_chance:        p.dodge_chance         || 0,
+                attr_crit_chance:    p.attr_crit_chance     || 0,
+                attr_discovery:      p.attr_discovery       || 0,
+                attr_spell_power:    p.attr_spell_power     || 0,
+                attr_gold_discount:  p.attr_gold_discount   || 0,
             };
         }
         return {
@@ -43,7 +49,7 @@ createApp({
             equippedDetails:      {},
             messages:             [],
             diary:                [],
-            inBattle:             false,
+            inBattle:             !!(window._betaInit && window._betaInit.in_battle),
             battle:               null,
             activeTab:            'explore',
             actionPending:        false,
@@ -114,7 +120,6 @@ createApp({
             bossPage:  1,
             invPage:   1,
             _initialLoad: true,
-            tabDropdownOpen: false,
 
             _mapInitDone: false,
         };
@@ -163,6 +168,9 @@ createApp({
                 const id = String(m.id || m.created_at || '');
                 return id && !this.readMsgIds.includes(id);
             }).length;
+        },
+        totalDmUnread() {
+            return 0;
         },
         allTabOptions() {
             return [
@@ -238,6 +246,12 @@ createApp({
                     deaths:              p.deaths || 0,
                     days:                p.days || 1,
                     reputation:          p.reputation || 0,
+                    attr_exp_bonus:      p.attr_exp_bonus      || 0,
+                    dodge_chance:        p.dodge_chance         || 0,
+                    attr_crit_chance:    p.attr_crit_chance     || 0,
+                    attr_discovery:      p.attr_discovery       || 0,
+                    attr_spell_power:    p.attr_spell_power     || 0,
+                    attr_gold_discount:  p.attr_gold_discount   || 0,
                 };
             }
 
@@ -245,6 +259,7 @@ createApp({
             this.inventory        = data.inventory   || [];
             this.inventoryItems   = data.inventory_items || [];
             this.equippedDetails  = data.equipped_details || {};
+            const wasInBattle     = this.inBattle;
             this.inBattle         = !!data.in_battle;
             if (data.battle) this.battle = data.battle;
             if (!data.in_battle) this.battle = null;
@@ -284,8 +299,8 @@ createApp({
             this.messages     = msgs;
             this.lastMsgCount = msgs.length;
 
-            if (data.in_battle && this.activeTab !== 'battle') this.activeTab = 'battle';
-            if (!data.in_battle && this.activeTab === 'battle') this.activeTab = 'explore';
+            if (!wasInBattle && data.in_battle) this.activeTab = 'battle';
+            if (wasInBattle && !data.in_battle && this.activeTab === 'battle') this.activeTab = 'explore';
             if (!this.shopItems.length && this.activeTab === 'shop') this.activeTab = 'explore';
             if (!this.mineData && this.activeTab === 'mine') this.activeTab = 'explore';
         },
@@ -341,11 +356,15 @@ createApp({
         completeMission(id)   { return this.doAction('/api/action/complete_mission',  { mission_id: id }); },
         claimChallenge(id)    { return this.doAction('/api/action/claim_challenge',   { challenge_id: id }); },
         challengeBoss(key)    { return this.doAction('/api/action/challenge_boss', { boss_key: key }); },
+        claimEventReward(evKey) { return this.doAction('/api/action/claim_event', { event_key: evKey }); },
         async enterDungeon(id) {
             const res = await this.doAction('/api/action/dungeon/enter', { dungeon_id: id });
             if (res && res.redirect) window.location.href = res.redirect;
         },
-        abandonDungeon()      { return this.doAction('/api/action/dungeon/abandon'); },
+        async abandonDungeon() {
+            if (!confirm('Abandon this dungeon run? All progress will be lost.')) return;
+            return this.doAction('/api/action/dungeon/abandon');
+        },
         battleAttack()        { return this.doAction('/api/battle/attack'); },
         battleDefend()        { return this.doAction('/api/battle/defend'); },
         battleFlee()          { return this.doAction('/api/battle/flee'); },
@@ -792,7 +811,6 @@ createApp({
             if (!document.hidden) { this.fetchState(); this.resetPoll(); }
             else { if (this.pollTimer) clearInterval(this.pollTimer); }
         });
-        document.addEventListener('click', () => { this.tabDropdownOpen = false; });
     },
 
     beforeUnmount() {

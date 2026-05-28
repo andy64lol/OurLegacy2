@@ -5,6 +5,9 @@
 window._betaInit = {
     player: {{ (player | tojson) if player else 'null' }},
     username: {{ online_username | tojson }},
+    in_battle: {{ 'true' if in_battle else 'false' }},
+    areas_data: {{ (areas_data | tojson) if areas_data else '{}' }},
+    visited_areas: {{ (visited_areas | tojson) if visited_areas else '[]' }},
 };
 </script>
 <style>
@@ -182,6 +185,9 @@ window._betaInit = {
                             <div class="stat-mini"><span>DEF</span><strong>[[ player.defense ]]</strong></div>
                             <div class="stat-mini"><span>SPD</span><strong>[[ player.speed ]]</strong></div>
                         </div>
+                        <div v-if="player.pet" style="font-size:11px;color:var(--text-dim);margin-top:4px;">
+                            Pet: [[ player.pet.replace(/_/g,' ') ]]
+                        </div>
                         <div class="sidebar-status-row" v-if="gameTime || weatherDisplay">
                             <div class="sidebar-status-item" v-if="gameTime">
                                 <span class="sidebar-status-key">Time</span>
@@ -238,6 +244,9 @@ window._betaInit = {
                 <div v-if="onlineUsername" style="font-size:11px;color:var(--mana-bright);text-align:center;padding:3px 0;opacity:0.85;display:flex;align-items:center;justify-content:center;gap:4px;">
                     <img src="/game_assets/glyphs/chat.webp" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;"> [[ onlineUsername ]]
                 </div>
+                <div v-if="totalDmUnread > 0" style="font-size:11px;color:var(--gold);text-align:center;padding:2px 0;cursor:pointer;" @click="switchTab('friends')">
+                    [[ totalDmUnread ]] unread DM[[ totalDmUnread !== 1 ? 's' : '' ]] &rarr;
+                </div>
             </div>
             <div class="sidebar-nav">
                 <a href="/" class="btn btn-danger btn-small" style="display:block;text-align:center;">Exit to Menu</a>
@@ -258,13 +267,6 @@ window._betaInit = {
                             [[ tab.label ]]
                         </button>
                     </div>
-                    </div>
-                    <!-- Vue-native tab overflow dropdown -->
-                    <div style="position:relative;flex-shrink:0;align-self:flex-end;" @click.stop>
-                        <button class="tab-btn tab-more-btn" style="display:block;padding:9px 14px 11px;background:var(--slate-mid);border-color:var(--border);border-bottom:none;" @click.stop="tabDropdownOpen = !tabDropdownOpen" title="All tabs">&bull;&bull;&bull;</button>
-                        <div v-show="tabDropdownOpen" class="tab-overflow-dropdown" :class="{ open: tabDropdownOpen }" style="display:flex;right:0;left:auto;">
-                            <button v-for="tab in allTabOptions" :key="tab.key" class="tab-overflow-item" :class="{ active: activeTab === tab.key }" @click="switchTab(tab.key); tabDropdownOpen = false">[[ tab.label ]]</button>
-                        </div>
                     </div>
                 </div>
 
@@ -590,6 +592,9 @@ window._betaInit = {
                     <div v-if="activeDungeon && activeDungeon.dungeon" class="active-dungeon-panel">
                         <div style="color:var(--gold);font-weight:bold;font-size:14px;margin-bottom:6px;">Active Dungeon: [[ activeDungeon.dungeon.name ]]</div>
                         <div style="font-size:13px;color:var(--text-dim);">Room [[ activeDungeon.room_index + 1 ]] / [[ activeDungeon.rooms && activeDungeon.rooms.length ]]</div>
+                        <div class="bar-track" style="width:160px;margin-top:6px;">
+                            <div class="bar-fill bar-exp" :style="{ width: Math.round(((activeDungeon.room_index + 1) / ((activeDungeon.rooms && activeDungeon.rooms.length) || 1)) * 100) + '%' }"></div>
+                        </div>
                         <div style="margin-top:10px;display:flex;gap:8px;">
                             <a href="/dungeon/room" class="btn btn-secondary">Continue</a>
                             <button class="btn btn-danger btn-small" @click="abandonDungeon" :disabled="actionPending">Abandon</button>
@@ -796,7 +801,7 @@ window._betaInit = {
                                 </div>
                             </div>
                         </div>
-                        <div class="panel">
+                        <div class="panel" style="margin-bottom:12px;">
                             <div class="panel-title">Adventure Stats</div>
                             <div class="panel-body">
                                 <div class="attr-row"><span class="attr-name">Total Kills</span><span class="attr-val">[[ player.total_kills ]]</span></div>
@@ -804,6 +809,17 @@ window._betaInit = {
                                 <div class="attr-row"><span class="attr-name">Deaths</span><span class="attr-val">[[ player.deaths ]]</span></div>
                                 <div class="attr-row"><span class="attr-name">Days Played</span><span class="attr-val">[[ player.days ]]</span></div>
                                 <div class="attr-row"><span class="attr-name">Reputation</span><span class="attr-val">[[ player.reputation ]]</span></div>
+                            </div>
+                        </div>
+                        <div v-if="player.attr_spell_power || player.dodge_chance || player.attr_crit_chance || player.attr_gold_discount || player.attr_discovery || player.attr_exp_bonus" class="panel">
+                            <div class="panel-title">Bonus Modifiers</div>
+                            <div class="panel-body">
+                                <div v-if="player.attr_spell_power" class="attr-row"><span class="attr-name">Spell Power</span><span class="attr-val">+[[ player.attr_spell_power ]]</span></div>
+                                <div v-if="player.dodge_chance" class="attr-row"><span class="attr-name">Dodge Chance</span><span class="attr-val">[[ Math.round(player.dodge_chance * 100) ]]%</span></div>
+                                <div v-if="player.attr_crit_chance" class="attr-row"><span class="attr-name">Crit Chance</span><span class="attr-val">[[ Math.round(player.attr_crit_chance * 100) ]]%</span></div>
+                                <div v-if="player.attr_gold_discount" class="attr-row"><span class="attr-name">Shop Discount</span><span class="attr-val">[[ Math.round(player.attr_gold_discount * 100) ]]%</span></div>
+                                <div v-if="player.attr_discovery" class="attr-row"><span class="attr-name">Item Discovery</span><span class="attr-val">[[ Math.round(player.attr_discovery * 100) ]]%</span></div>
+                                <div v-if="player.attr_exp_bonus" class="attr-row"><span class="attr-name">EXP Bonus</span><span class="attr-val">+[[ Math.round(player.attr_exp_bonus * 100) ]]%</span></div>
                             </div>
                         </div>
                     </div>
@@ -818,9 +834,15 @@ window._betaInit = {
                             <div class="panel-body">
                                 <div v-if="eventsData.active && eventsData.active.length">
                                     <div v-for="ev in eventsData.active" :key="ev.key" class="event-card">
-                                        <div class="event-name">[[ ev.name ]]</div>
-                                        <div class="event-meta" v-if="ev.description">[[ ev.description ]]</div>
-                                        <div class="event-meta" v-if="ev.bonus">[[ ev.bonus ]]</div>
+                                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                                            <div style="flex:1;">
+                                                <div class="event-name">[[ ev.name ]]</div>
+                                                <div class="event-meta" v-if="ev.description">[[ ev.description ]]</div>
+                                                <div class="event-meta" v-if="ev.bonus">[[ ev.bonus ]]</div>
+                                                <div v-if="ev.claimed" style="font-size:12px;color:var(--green-bright);margin-top:3px;">[Claimed]</div>
+                                            </div>
+                                            <button v-if="ev.can_claim && !ev.claimed" class="btn btn-small btn-primary" @click="claimEventReward(ev.key)" :disabled="actionPending" style="flex-shrink:0;">Claim</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div v-else style="color:var(--text-dim);font-size:13px;">No active world events right now.</div>
@@ -855,6 +877,10 @@ window._betaInit = {
                             <div class="panel-body">
                                 <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">[[ groupData.description ]]</div>
                                 <div style="font-size:12px;color:var(--gold);">Level [[ groupData.level ]] Group &bull; Led by [[ groupData.leader ]]</div>
+                                <div v-if="groupData.xp !== undefined" style="margin-top:6px;margin-bottom:8px;">
+                                    <div style="font-size:12px;color:var(--text-dim);margin-bottom:3px;">Group XP: [[ groupData.xp ]] / [[ groupData.xp_to_next || '?' ]]</div>
+                                    <div class="bar-track"><div class="bar-fill bar-exp" :style="{ width: groupData.xp_to_next ? Math.min(100, Math.round(groupData.xp / groupData.xp_to_next * 100)) + '%' : '0%' }"></div></div>
+                                </div>
                                 <div v-for="m in groupData.members" :key="m.username" style="font-size:13px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
                                     <span v-if="m.username === groupData.leader" style="color:var(--gold)">[Leader] </span><span v-else style="color:var(--text-dim)">-- </span>[[ m.username ]]
                                 </div>

@@ -8234,13 +8234,15 @@ def vue_beta():
         return redirect(url_for("index"))
     player = get_player()
     visited = session.get("visited_areas", [])
+    in_battle = bool(session.get("battle_enemy"))
     return render_template(
-        "vue_beta.html",
+        "vue/game.html",
         player=player,
         online_username=caller,
         is_admin=True,
         areas_data=GAME_DATA.get("areas", {}),
         visited_areas=visited,
+        in_battle=in_battle,
     )
 
 from asgiref.sync import sync_to_async as _sync_to_async

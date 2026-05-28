@@ -178,7 +178,7 @@
                     spaUpdatePlayerStats(data.player);
                 }
                 if (data.tab && typeof switchTab === 'function') {
-                    switchTab(data.tab);
+                    try { switchTab(data.tab); } catch (_) {}
                 }
             })
             .catch(function () {
@@ -203,6 +203,10 @@
             }
             if (data.messages && data.messages.length) {
                 spaUpdateMessages(data.messages, true);
+            }
+            if (typeof data.online_count === 'number') {
+                var ocEl = document.getElementById('sidebar-online-count');
+                if (ocEl) ocEl.textContent = data.online_count;
             }
         })
         .catch(function () { /* silent — network hiccup, retry next tick */ });

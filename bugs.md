@@ -97,7 +97,7 @@ code that could confuse future developers.
 
 ---
 
-### BUG-V07 — `spa.js` form-intercept loads in Vue beta (harmless but wasteful) `TODO`
+### BUG-V07 — `spa.js` form-intercept loads in Vue beta (harmless but wasteful) `FIXED`
 **File:** `templates/vue_beta.html` — script includes  
 **Severity:** Low — extra script loaded, form-interceptor runs but never triggers  
 **Description:**  
@@ -129,7 +129,7 @@ the existing call with the `doAction()` helper.
 
 ---
 
-### BUG-V09 — Events tab has no Claim Reward button `TODO`
+### BUG-V09 — Events tab has no Claim Reward button `FIXED`
 **File:** `templates/vue_beta.html` — events tab  
 **Severity:** Medium — players cannot claim event rewards from the Vue beta UI  
 **Description:**  
@@ -141,7 +141,7 @@ calling `/api/action/claim_event` (or equivalent endpoint).
 
 ---
 
-### BUG-V10 — `inBattle` flag not in `data()` initial player; relies solely on first poll `TODO`
+### BUG-V10 — `inBattle` flag not in `data()` initial player; relies solely on first poll `FIXED`
 **File:** `static/js/vue_beta.js` — `data()`  
 **Severity:** Low — on first load, battle tab badge is always hidden until first poll (~0.5 s)  
 **Description:**  
@@ -152,7 +152,7 @@ in a battle see the non-battle UI briefly on page load until the first poll reso
 
 ---
 
-### BUG-V11 — Pet name missing from Vue sidebar `TODO`
+### BUG-V11 — Pet name missing from Vue sidebar `FIXED`
 **File:** `templates/vue_beta.html` — sidebar player panel  
 **Severity:** Low — players with active pets can't see pet name at a glance  
 **Description:**  
@@ -163,7 +163,7 @@ already contains the `pet` field from the state poll.
 
 ---
 
-### BUG-V12 — Dungeon room progress bar missing in Vue `TODO`
+### BUG-V12 — Dungeon room progress bar missing in Vue `FIXED`
 **File:** `templates/vue_beta.html` — dungeons tab active dungeon panel  
 **Severity:** Medium — players can't see how far through a dungeon they are  
 **Description:**  
@@ -207,7 +207,7 @@ leave group, and create/join flows.
 
 ---
 
-### BUG-V14 — "Bonus Modifiers" section absent from character tab `TODO`
+### BUG-V14 — "Bonus Modifiers" section absent from character tab `FIXED`
 **File:** `templates/vue_beta.html` — character tab  
 **Severity:** Low — players must navigate to Equipment tab to see Spell Power, Dodge, etc.  
 **Description:**  
@@ -224,7 +224,7 @@ both tabs in Vue despite BUG-V01 fix — see BUG-S02).
 
 ---
 
-### BUG-V15 — Group XP / level bar missing from group panel `TODO`
+### BUG-V15 — Group XP / level bar missing from group panel `FIXED`
 **File:** `templates/vue_beta.html` — group tab  
 **Severity:** Low — players can't track group progression  
 **Description:**  
@@ -236,7 +236,7 @@ returns `level`, `xp`, and `xp_to_next` in the group object (used by the Jinja2 
 
 ---
 
-### BUG-V16 — Dungeon abandon has no confirmation dialog `TODO`
+### BUG-V16 — Dungeon abandon has no confirmation dialog `FIXED`
 **File:** `templates/vue_beta.html` — dungeons tab  
 **Severity:** Low — misclick can silently wipe all dungeon progress  
 **Description:**  
@@ -282,7 +282,7 @@ never appears unless the page is refreshed.
 
 ---
 
-### BUG-J03 — `spa.js` calls `switchTab(data.tab)` using Jinja2 global — fails silently on errors `TODO`
+### BUG-J03 — `spa.js` calls `switchTab(data.tab)` using Jinja2 global — fails silently on errors `FIXED`
 **File:** `static/js/spa.js`, `static/js/game.js`  
 **Severity:** Low — cosmetic; wrong tab shown after some actions  
 **Description:**  
@@ -295,7 +295,7 @@ approach that verifies the target tab element exists first.
 
 ---
 
-### BUG-J04 — Online player count in sidebar never updates without a full page reload `TODO`
+### BUG-J04 — Online player count in sidebar never updates without a full page reload `FIXED`
 **File:** `templates/base.html` / `templates/index.html` — sidebar online count  
 **Severity:** Low — cosmetic staleness  
 **Description:**  
@@ -325,7 +325,7 @@ directly.
 
 ---
 
-### BUG-S01 — No global unread DM badge in sidebar `TODO`
+### BUG-S01 — No global unread DM badge in sidebar `FIXED`
 **File:** `templates/vue_beta.html`, `templates/base.html`  
 **Severity:** Low — DMs can go unnoticed  
 **Description:**  
@@ -337,7 +337,7 @@ player is on another tab. The Jinja2 version has no DM feature at all.
 
 ---
 
-### BUG-S02 — `attr_exp_bonus` not shown anywhere in the UI `TODO`
+### BUG-S02 — `attr_exp_bonus` not shown anywhere in the UI `FIXED`
 **File:** `templates/vue_beta.html`, `templates/index.html`  
 **Severity:** Low — players can't see their EXP bonus from equipment  
 **Description:**  
