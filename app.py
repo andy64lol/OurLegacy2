@@ -8235,6 +8235,8 @@ def vue_beta():
     player = get_player()
     visited = session.get("visited_areas", [])
     in_battle = bool(session.get("battle_enemy"))
+    _gid = session.get("online_user_id")
+    _uhe = bool(get_user_email(_gid)) if _gid else True
     return render_template(
         "vue/game.html",
         player=player,
@@ -8243,6 +8245,9 @@ def vue_beta():
         areas_data=GAME_DATA.get("areas", {}),
         visited_areas=visited,
         in_battle=in_battle,
+        user_has_email=_uhe,
+        races=list(GAME_DATA.get("races", {}).keys()),
+        classes=list(GAME_DATA.get("classes", {}).keys()),
     )
 
 from asgiref.sync import sync_to_async as _sync_to_async

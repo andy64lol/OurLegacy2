@@ -130,6 +130,17 @@ createApp({
             groupSubTab:       'info',
             groupLevelUpBanner: null,
             groupLevelUpTimer:  null,
+
+            userHasEmail:        init.user_has_email !== false,
+
+            customizeModalOpen:  false,
+            customizeName:       '',
+            customizeGender:     '',
+            customizeRace:       '',
+            customizeClass:      '',
+            customizeRaces:      init.races   || [],
+            customizeClasses:    init.classes || [],
+            customizeSubmitting: false,
         };
     },
 
@@ -209,6 +220,16 @@ createApp({
     watch: {
         inBattle(val) {
             if (!val) this.spellPage = 0;
+        },
+        activeTab(newTab) {
+            if (newTab === 'explore' && this.area && this.area.key === 'your_land' && this.landData) {
+                this.$nextTick(() => this.drawLandMinimap());
+            }
+        },
+        landData(newData) {
+            if (newData && this.activeTab === 'explore' && this.area && this.area.key === 'your_land') {
+                this.$nextTick(() => this.drawLandMinimap());
+            }
         },
     },
 
@@ -834,6 +855,118 @@ createApp({
         scrollGroupChatBottom() {
             const el = document.getElementById('group-chat-log');
             if (el) el.scrollTop = el.scrollHeight;
+        },
+
+        openCustomizeModal() {
+            this.customizeName    = '';
+            this.customizeGender  = '';
+            this.customizeRace    = '';
+            this.customizeClass   = '';
+            this.customizeModalOpen = true;
+        },
+        closeCustomizeModal() { this.customizeModalOpen = false; },
+        async submitCustomize() {
+            if (this.customizeSubmitting) return;
+            this.customizeSubmitting = true;
+            try {
+                const body = {};
+                if (this.customizeName.trim())  body.name   = this.customizeName.trim();
+                if (this.customizeGender)        body.gender = this.customizeGender;
+                if (this.customizeRace)          body.race   = this.customizeRace;
+                if (this.customizeClass)         body['class'] = this.customizeClass;
+                const r = await fetch('/action/customize_character', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify(body),
+                });
+                const data = await r.json();
+                if (data.ok) {
+                    this.showToast(data.message || 'Character updated!', 'var(--green-bright)');
+                    this.customizeModalOpen = false;
+                    this.fetchState();
+                } else {
+                    this.showToast(data.message || 'Could not update character.', 'var(--red)');
+                }
+            } catch (_) { this.showToast('Network error.', 'var(--red)'); }
+            finally { this.customizeSubmitting = false; }
+        },
+
+        drawLandMinimap() {
+            const canvas = document.getElementById('land-mini-canvas');
+            if (!canvas || !this.landData || !this.landData.placed_buildings_map) return;
+            const ctx    = canvas.getContext('2d');
+            canvas.width = 960; canvas.height = 800;
+            const TILE   = 16;
+            const BTILES = {
+                'small_tent':[3,3],'large_tent':[4,4],'small_hut':[3,4],
+                'stone_wall_medium_house':[4,5],'large_stone_house':[6,8],
+                'elven_treehouse':[3,4],'large_house_with_tower':[5,7],
+                'stone_castle_with_golden_dragon_statues_and_marbled_floors':[9,12],
+                'makeshift_campfire':[2,2],'stone_bench':[3,2],'tribal_statue':[2,3],
+                'garden_with_fountain':[4,4],'dragon_statue':[2,3],'grand_stone_tower':[2,4],
+                'dragon_nest':[4,4],'wooden_fence_border':[5,2],
+                'golden_gates_with_marble_walls':[4,3],'small_garden':[3,3],
+                'enchanted_garden':[5,4],'small_farm':[4,3],'large_farm':[7,5],
+                'storage_shed':[3,4],'basic_training_dummy':[3,4],
+                'advanced_gymnasium':[6,8],'dwarven_forge':[3,4],
+            };
+            const BIMG = {
+                'small_tent':'simple_tent.png','large_tent':'simple_tent.png',
+                'small_hut':'simple_house.png','stone_wall_medium_house':'simple_house.png',
+                'large_stone_house':'simple_house.png','elven_treehouse':'simple_house.png',
+                'large_house_with_tower':'simple_house.png',
+                'stone_castle_with_golden_dragon_statues_and_marbled_floors':'simple_house.png',
+                'makeshift_campfire':'campfire.png',
+                'dwarven_forge':'simple_workshop.png','advanced_gymnasium':'simple_workshop.png',
+                'basic_training_dummy':'simple_workshop.png',
+            };
+            const BCOLORS = {
+                'house':'rgba(139,105,20,0.88)','decoration':'rgba(107,75,138,0.88)',
+                'fencing':'rgba(90,74,58,0.88)','garden':'rgba(45,106,45,0.88)',
+                'farming':'rgba(74,122,45,0.88)','training_place':'rgba(138,45,45,0.88)',
+                'storage':'rgba(58,90,122,0.88)','crafting':'rgba(122,74,45,0.88)',
+            };
+            const IMG_FILE_MAP = {
+                'simple_tent.png':'simple_tent_3_3_ratio_16px_each_tiles.png',
+                'simple_house.png':'simple_house_3_4_ratio_16px_each_tiles.png',
+                'campfire.png':'campfire_3_3_ratio_16px_each_tiles.png',
+                'simple_workshop.png':'simple_workshop_3_4_ratio_16px_each_tiles.png',
+            };
+            const placed     = this.landData.placed_buildings_map || [];
+            const loadedImgs = {};
+            let pending      = 4;
+            let mapReady     = false;
+            const drawAll = () => {
+                ctx.drawImage(mapImg, 0, 0, 960, 800);
+                placed.forEach(b => {
+                    if (b.x < 0 || b.y < 0) return;
+                    const tiles = BTILES[b.key] || [3, 3];
+                    const px = b.x * TILE, py = b.y * TILE, pw = tiles[0] * TILE, ph = tiles[1] * TILE;
+                    const imgFile = BIMG[b.key];
+                    if (imgFile && loadedImgs[imgFile] && loadedImgs[imgFile].naturalWidth > 0) {
+                        ctx.drawImage(loadedImgs[imgFile], px, py, pw, ph);
+                    } else {
+                        ctx.fillStyle = BCOLORS[b.type] || 'rgba(180,180,180,0.85)';
+                        ctx.fillRect(px, py, pw, ph);
+                    }
+                    ctx.strokeStyle = 'rgba(255,220,60,0.9)';
+                    ctx.lineWidth   = 2;
+                    ctx.strokeRect(px, py, pw, ph);
+                });
+            };
+            const check = () => { if (pending <= 0 && mapReady) drawAll(); };
+            ['simple_tent.png','simple_house.png','campfire.png','simple_workshop.png'].forEach(f => {
+                const img = new Image();
+                img.onload = img.onerror = () => { pending--; check(); };
+                img.src = '/game_assets/maps/your_land_buildings/' + IMG_FILE_MAP[f];
+                loadedImgs[f] = img;
+            });
+            const mapImg = new Image();
+            mapImg.onload  = () => { mapReady = true; check(); };
+            mapImg.onerror = () => { mapReady = true; check(); };
+            mapImg.src = '/game_assets/maps/your_land.png';
+            if (mapImg.complete && mapImg.naturalWidth > 0) { mapReady = true; check(); }
         },
     },
 

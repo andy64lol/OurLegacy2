@@ -7,6 +7,15 @@
 
 ## Changelog — Fixes Applied
 
+### Session 2026-05-28 (part 4 — final remaining items)
+| Fix | Files Changed | Status |
+|-----|--------------|--------|
+| **Your Land minimap canvas** — Explore tab now shows a `<canvas id="land-mini-canvas">` when the current area is `your_land`. `drawLandMinimap()` draws the base map PNG and overlays placed buildings (sprite images or colored rectangles). Triggered via `watch` on `activeTab` and `landData`. | `templates/vue/game.html`, `static/js/vue/game.js` | ✅ Done |
+| **Email setup prompt** — `/beta` route now computes `user_has_email` and passes it via `_betaInit`. `userHasEmail` data prop added to Vue. When false, a warning sidebar panel appears with a link to `/settings`. | `app.py`, `templates/vue/game.html`, `static/js/vue/game.js` | ✅ Done |
+| **Change Character button** — "Change Character" button added to sidebar Navigate panel. Clicking opens a modal with name/gender/race/class selectors (costs 10,000g); calls `/action/customize_character` JSON endpoint, shows result toast, refreshes state. Races and classes passed via `_betaInit`. | `app.py`, `templates/vue/game.html`, `static/js/vue/game.js` | ✅ Done |
+| **Land crafting recipes confirmed** — Verified `landCraftCategories` computed + `landCraft()` method + Land tab craft panel already fully implemented. Tracker updated to reflect this. | — | ✅ Confirmed present |
+| **BUG-J05 marked WONTFIX** — `spa.js` document-level `submit` listener already intercepts all `/action/*` form submissions. New-tab fallback to HTML redirect is the correct/intended behavior. No code change needed. | — | WONTFIX |
+
 ### Session 2026-05-28 (part 3 — medium & low priority)
 | Fix | Files Changed | Status |
 |-----|--------------|--------|
@@ -123,9 +132,9 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | Online count badge | ✅ | ✅ | |
 | Online username badge | ✅ | ✅ | |
 | **Global DM unread badge** | ❌ | ✅ Fixed | Added via BUG-S01 fix; shows unread count, links to Friends tab |
-| **Email setup prompt** (no-email users) | ✅ | ❌ | `user_has_email` flag shown in Jinja2 sidebar |
+| **Email setup prompt** (no-email users) | ✅ | ✅ Fixed | Sidebar panel warns + links to `/settings`; `user_has_email` passed via `_betaInit` |
 | Navigate shortcuts | ✅ | ✅ | |
-| Change Character button (10k gold) | ✅ | ❌ | `openCustomizeModal()` in Jinja2 |
+| Change Character button (10k gold) | ✅ | ✅ Fixed | Sidebar button + modal (name/gender/race/class); calls `/action/customize_character` |
 | Save & Exit button | ✅ | ✅ | |
 | World Events feed | ✅ | ✅ | |
 
@@ -377,12 +386,12 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | Rest action | ✅ | ✅ Fixed | Via `/api/action/land/rest` |
 | Comfort points display | ✅ | ❌ | Jinja2 shows `comfort_points` prominently |
 | **Training options** (stat boosts) | ✅ | ❌ | Jinja2 shows STR/DEX/INT/etc. training per land level |
-| **Land crafting recipes** | ✅ | ❌ | Separate recipe list for land crafting |
-| **Storage** (store/retrieve items) | ✅ | ❌ | `land_data.stored_items` / storage capacity panel |
-| **Building management** (buy/place/remove) | ✅ | ❌ | Full grid builder in Jinja2 land map page |
-| **Farm planting** (choose crop) | ✅ | ❌ | Crop selection per empty plot slot |
-| **Pet purchasing** | ✅ | ❌ | Buy pets from land shop |
-| Land map canvas minimap | ✅ | ❌ | Canvas showing placed buildings |
+| **Land crafting recipes** | ✅ | ✅ Already present | `landCraftCategories` computed + `landCraft()` method; category panels in Land tab |
+| **Storage** (store/retrieve items) | ✅ | ✅ Already present | `land_data.stored_items` / storage capacity panel |
+| **Building management** (buy/place/remove) | ✅ | ❌ | Full grid builder in Jinja2 land map page (WONTFIX inline) |
+| **Farm planting** (choose crop) | ✅ | ✅ Already present | Crop selection per empty plot slot |
+| **Pet purchasing** | ✅ | ❌ | Buy pets from land shop (WONTFIX inline — links to `/land/pets`) |
+| Land map canvas minimap | ✅ | ✅ Fixed | Canvas on Explore tab when area is `your_land`; `drawLandMinimap()` draws base map + buildings |
 | Nav links to full land pages | ❌ | ✅ | Vue shows "Open Map / Shop / Pets" links |
 
 ---
@@ -483,7 +492,7 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | **Land training options** | Land tab | ✅ Already present |
 | **Land storage panel** | Land tab | ✅ Already present |
 | **Land farm planting** | Land tab | ✅ Already present |
-| **Your Land explore minimap** | Explore tab | ❌ Remaining (canvas heavy) |
+| **Your Land explore minimap** | Explore tab | ✅ Fixed — canvas + `drawLandMinimap()` |
 | **Group sub-tab navigation** | Group tab | ✅ Fixed |
 | **Group level-up banner** | Group tab | ✅ Fixed |
 | **BUG-J01 — pageable-list re-init** | Jinja2 `spa.js` | ✅ Fixed |
@@ -492,18 +501,18 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 ### Priority: Low (polish / edge cases)
 | Gap | Where | Status |
 |-----|--------|--------|
-| **Email setup prompt** | Sidebar | ❌ Remaining |
-| **Change Character button** | Sidebar | ❌ Remaining |
+| **Email setup prompt** | Sidebar | ✅ Fixed — warning panel + link to `/settings` |
+| **Change Character button** | Sidebar | ✅ Fixed — sidebar button + modal (name/gender/race/class) |
 | **STR → mine success hint** | Mine tab | ✅ Fixed |
 | **Equip-button title tooltip** | Inventory tab | ✅ Fixed |
 | **Rest button gold-check disabled** | Explore tab | ✅ Fixed |
-| **Land crafting recipes** | Land tab | ❌ Remaining |
+| **Land crafting recipes** | Land tab | ✅ Already present — confirmed implemented |
 | **Land building buy/place/remove** | Land tab | ❌ Link to `/land/map` (WONTFIX inline) |
 | **Pet purchasing** | Land tab | ❌ Link to `/land/pets` (WONTFIX inline) |
 | **Boss abilities panel** | Battle tab | ✅ Fixed |
 | **Dungeon Continue button style** | Dungeons tab | ✅ Fixed |
 | **BUG-V08 — `marketReset` legacy route** | `game.js` | WONTFIX (not in Vue; route still works) |
-| **BUG-J05 — missing XHR header on forms** | Jinja2 templates | ❌ Remaining |
+| **BUG-J05 — missing XHR header on forms** | Jinja2 templates | WONTFIX — `spa.js` document-level `submit` listener already covers all `/action/*` forms; new-tab fallback to HTML redirect is correct behavior |
 | **Tab glyph pixel icons** | Tab bar | ❌ Decorative only |
 | **Trade UI inline** | Any | ❌ Complex; links to `/trade` |
 | **NPC dialogue modals** | Explore tab | ❌ Low priority |

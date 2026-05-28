@@ -308,7 +308,7 @@ update the DOM element with id `sidebar-online-count` (or equivalent).
 
 ---
 
-### BUG-J05 — Missing `X-Requested-With` header on some Jinja2 `/action/*` forms `TODO`
+### BUG-J05 — Missing `X-Requested-With` header on some Jinja2 `/action/*` forms `WONTFIX`
 **File:** Various `templates/*.html` — action forms  
 **Severity:** Low — affects SPA JSON fallback  
 **Description:**  
