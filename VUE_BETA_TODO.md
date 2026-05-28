@@ -7,7 +7,15 @@
 
 ## Changelog — Fixes Applied
 
-### Session 2026-05-28
+### Session 2026-05-28 (part 2 — high-priority features)
+| Fix | Files Changed | Status |
+|-----|--------------|--------|
+| **Boss dialogue banner** — When fighting a boss, a styled italic banner showing the boss's opening dialogue now appears between the arena and the battle log. Pulls `battle.boss_dialogue` from `_api_battle_summary()`. | `app.py`, `templates/vue/game.html` | ✅ Done |
+| **Boss phase indicator** — Shows a pip bar (one dot per phase, red = current), phase index/total, ATK multiplier, and phase description below the dialogue banner when `battle.boss_phase_info` is non-null. Computed live from enemy HP% on every state poll. | `app.py`, `templates/vue/game.html` | ✅ Done |
+| **Player status effects** — Shows a horizontal pill tag cloud (effect name + turns remaining) between the phase indicator and the battle log. Pulls `battle.player_effects` from `_api_battle_summary()`. | `app.py`, `templates/vue/game.html` | ✅ Done |
+| **Group real-time chat** — `connectGroupSocket()` opens a Socket.IO connection on mount; listens for `group_chat_message` (appends to `groupChatMessages`, auto-scrolls) and `group_level_up` (shows gold toast). Rendered as a scrollable chat log + send input below the group panel. | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Done |
+
+### Session 2026-05-28 (part 1 — bug sweep)
 | Fix | Files Changed | Status |
 |-----|--------------|--------|
 | **Route `/beta` → partitioned structure** — `/beta` now renders `templates/vue/game.html` + `static/js/vue/game.js` instead of the monolithic `vue_beta.html`. `in_battle` context variable added to the route. | `app.py`, `templates/vue/game.html`, `templates/vue/base.html` | ✅ Done |
@@ -121,9 +129,9 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | Consumable use buttons | ✅ | ✅ | |
 | Party HP bars (companions) | ✅ | ✅ | |
 | Attack / Defend / Flee buttons | ✅ | ✅ | |
-| **Boss dialogue banner** | ✅ | ❌ | `battle.boss_dialogue` — flavor text from boss on phase change |
-| **Boss phase indicator** | ✅ | ❌ | `battle.boss_phase` — pip bar, phase index/total, ATK×multiplier |
-| **Player status effects** (buffs/debuffs) | ✅ | ❌ | `battle.player_effects` dict — shows active effect name + turns remaining |
+| **Boss dialogue banner** | ✅ | ✅ Fixed | Added 2026-05-28 — italic banner below arena |
+| **Boss phase indicator** | ✅ | ✅ Fixed | Added 2026-05-28 — pip bar + phase index/total + ATK multiplier |
+| **Player status effects** (buffs/debuffs) | ✅ | ✅ Fixed | Added 2026-05-28 — pill tag cloud with turns remaining |
 | Boss abilities panel | ✅ | ❌ | Listed boss special moves in Jinja2 battle tab |
 
 ---
@@ -386,7 +394,7 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | Leave / disband group | ✅ | ✅ | |
 | Kick member (leader only) | ✅ | ✅ | |
 | Collect group gold | ✅ | ✅ | |
-| **Real-time group chat** (Socket.IO) | ✅ | ❌ | Jinja2 connects own Socket.IO instance for `group_chat_message` events |
+| **Real-time group chat** (Socket.IO) | ✅ | ✅ Fixed | Added 2026-05-28 — Socket.IO chat log + send input + `group_level_up` toast |
 | **Group sub-tab nav** (Info / Members / Chat / Settings) | ✅ | ❌ | Jinja2 has 4 sub-tabs inside the group panel; Vue is a single flat layout |
 | **Group level-up banner** (Socket.IO) | ✅ | ❌ | Jinja2 handles `group_level_up` event with an animated overlay banner |
 
@@ -442,12 +450,14 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 > Last updated: 2026-05-28
 
 ### Priority: High (affects common gameplay)
-| Gap | Where | What to do |
-|-----|--------|-----------|
-| **Boss phase indicator** | Battle tab | Add `battle.boss_phase` block: pip bar, index/total, ATK multiplier, phase description |
-| **Boss dialogue banner** | Battle tab | Add `battle.boss_dialogue` banner below round badge (only when `battle.is_boss`) |
-| **Player status effects** | Battle tab | Add `battle.player_effects` tag cloud (effect name + turns left) |
-| **Group real-time chat** | Group tab | Add Socket.IO listener for `group_chat_message`; render message list + send input in group panel |
+> All high-priority items resolved as of 2026-05-28.
+
+| Gap | Where | Status |
+|-----|--------|--------|
+| **Boss phase indicator** | Battle tab | ✅ Fixed — pip bar + phase index/total + ATK multiplier + description block |
+| **Boss dialogue banner** | Battle tab | ✅ Fixed — italic banner shown when `battle.boss_dialogue` is non-null |
+| **Player status effects** | Battle tab | ✅ Fixed — pill tag cloud with effect name + turns remaining |
+| **Group real-time chat** | Group tab | ✅ Fixed — Socket.IO `group_chat_message` listener + scrollable chat log + send input; `group_level_up` shows toast |
 
 ### Priority: Medium (improves completeness)
 | Gap | Where | What to do |

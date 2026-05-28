@@ -122,6 +122,11 @@ createApp({
             _initialLoad: true,
 
             _mapInitDone: false,
+
+            groupChatMessages: [],
+            groupChatInput:    '',
+            groupChatSending:  false,
+            groupSocket:       null,
         };
     },
 
@@ -797,6 +802,33 @@ createApp({
             const map = { weapon:'weapon', armor:'armor', offhand:'offhand', accessory_1:'accessories', accessory_2:'accessories', accessory_3:'accessories' };
             return map[slot] || null;
         },
+
+        connectGroupSocket() {
+            if (this.groupSocket || typeof io === 'undefined') return;
+            const sio = io({ transports: ['websocket', 'polling'] });
+            sio.on('group_chat_message', (data) => {
+                this.groupChatMessages.push(data);
+                if (this.groupChatMessages.length > 100) this.groupChatMessages.shift();
+                this.$nextTick(() => this.scrollGroupChatBottom());
+            });
+            sio.on('group_level_up', (data) => {
+                const lvl = (data && data.new_level) ? data.new_level : '?';
+                this.showToast(`Group leveled up to Level ${lvl}!`, 'var(--gold)', 4000);
+            });
+            this.groupSocket = sio;
+        },
+        sendGroupChat() {
+            const msg = (this.groupChatInput || '').trim();
+            if (!msg || !this.groupSocket || this.groupChatSending) return;
+            this.groupChatSending = true;
+            this.groupSocket.emit('group_chat_send', { message: msg });
+            this.groupChatInput = '';
+            this.groupChatSending = false;
+        },
+        scrollGroupChatBottom() {
+            const el = document.getElementById('group-chat-log');
+            if (el) el.scrollTop = el.scrollHeight;
+        },
     },
 
     mounted() {
@@ -806,6 +838,7 @@ createApp({
             this.loadNearby();
             setInterval(() => this.loadNearby(), 20000);
             this.startChatPoll();
+            this.connectGroupSocket();
         }
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) { this.fetchState(); this.resetPoll(); }
@@ -815,6 +848,7 @@ createApp({
 
     beforeUnmount() {
         if (this.pollTimer) clearInterval(this.pollTimer);
+        if (this.groupSocket) { this.groupSocket.disconnect(); }
     },
 
 }).mount('#vue-beta-app');

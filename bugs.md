@@ -182,7 +182,7 @@ the text "Room X / Y" with no visual bar. The `activeDungeon.room_index` and
 
 ---
 
-### BUG-V13 — Group tab missing real-time chat, sub-tabs, and level-up banner `TODO`
+### BUG-V13 — Group tab missing real-time chat, sub-tabs, and level-up banner `IN PROGRESS`
 **File:** `templates/vue_beta.html` + `static/js/vue_beta.js` — group tab  
 **Severity:** Medium — major group feature gap vs Jinja2  
 **Description:**  

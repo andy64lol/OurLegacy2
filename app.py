@@ -8488,6 +8488,27 @@ def _api_battle_summary():
             "hp_pct":  min(100, round(hp / max_hp * 100)),
             "fallen":  hp <= 0,
         })
+    boss_dialogue   = None
+    boss_phase_info = None
+    if enemy.get("is_boss"):
+        boss_key  = enemy.get("key", "")
+        boss_dialogue = get_boss_dialogue(boss_key, "start")
+        boss_data = GAME_DATA.get("bosses", {}).get(boss_key, {})
+        phases    = boss_data.get("phases", [])
+        if phases:
+            hp_pct = enemy.get("hp", 1) / max(1, enemy.get("max_hp", 1))
+            phase_idx, phase_data = get_boss_phase(phases, hp_pct)
+            boss_phase_info = {
+                "index":            phase_idx + 1,
+                "total":            len(phases),
+                "description":      phase_data.get("description", ""),
+                "attack_multiplier": phase_data.get("attack_multiplier", 1.0),
+            }
+    player_effects_raw = session.get("battle_player_effects") or {}
+    player_effects_out: dict[str, int] = {}
+    for eff_name, eff_data in player_effects_raw.items():
+        turns = eff_data.get("turns", 1) if isinstance(eff_data, dict) else 1
+        player_effects_out[eff_name] = turns
     return {
         "enemy_name":    enemy.get("name"),
         "enemy_key":     enemy.get("key"),
@@ -8500,6 +8521,9 @@ def _api_battle_summary():
         "log":           (session.get("battle_log") or [])[-10:],
         "spells":        spells_out,
         "companions":    companions_out,
+        "boss_dialogue":   boss_dialogue,
+        "boss_phase_info": boss_phase_info,
+        "player_effects":  player_effects_out,
     }
 
 
