@@ -127,6 +127,9 @@ createApp({
             groupChatInput:    '',
             groupChatSending:  false,
             groupSocket:       null,
+            groupSubTab:       'info',
+            groupLevelUpBanner: null,
+            groupLevelUpTimer:  null,
         };
     },
 
@@ -814,6 +817,9 @@ createApp({
             sio.on('group_level_up', (data) => {
                 const lvl = (data && data.new_level) ? data.new_level : '?';
                 this.showToast(`Group leveled up to Level ${lvl}!`, 'var(--gold)', 4000);
+                this.groupLevelUpBanner = `Your group has reached Level ${lvl}!`;
+                if (this.groupLevelUpTimer) clearTimeout(this.groupLevelUpTimer);
+                this.groupLevelUpTimer = setTimeout(() => { this.groupLevelUpBanner = null; }, 5000);
             });
             this.groupSocket = sio;
         },
@@ -849,6 +855,7 @@ createApp({
     beforeUnmount() {
         if (this.pollTimer) clearInterval(this.pollTimer);
         if (this.groupSocket) { this.groupSocket.disconnect(); }
+        if (this.groupLevelUpTimer) clearTimeout(this.groupLevelUpTimer);
     },
 
 }).mount('#vue-beta-app');

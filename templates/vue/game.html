@@ -140,6 +140,17 @@ window._betaInit = {
     .land-slot-grid { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px; }
     .land-slot-card { background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:8px;font-size:12px; }
     .land-slot-filled { border-color:rgba(80,200,80,0.25);background:rgba(50,120,50,0.1); }
+    /* Group level-up overlay */
+    .group-levelup-enter-active,.group-levelup-leave-active{transition:opacity 0.4s,transform 0.4s;}
+    .group-levelup-enter-from,.group-levelup-leave-to{opacity:0;transform:translateX(-50%) translateY(-18px);}
+    /* Group sub-tab nav */
+    .group-subtab-nav{display:flex;gap:3px;margin-bottom:12px;}
+    .group-subtab-nav .btn{font-size:12px;padding:4px 10px;}
+    /* Boss abilities */
+    .boss-ability-card{background:rgba(255,255,255,0.03);border:1px solid rgba(200,50,50,0.25);border-radius:4px;padding:7px 10px;margin-bottom:5px;}
+    .boss-ability-name{font-size:12px;font-weight:600;color:var(--red,#e05050);}
+    .boss-ability-desc{font-size:11px;color:var(--text-dim);margin-top:2px;}
+    .boss-ability-cd{font-size:11px;color:var(--gold);margin-top:2px;}
 </style>
 {% endblock %}
 {% block content %}
@@ -149,6 +160,14 @@ window._betaInit = {
             [[ t.text ]]
         </div>
     </div>
+
+    <!-- Group level-up animated overlay banner -->
+    <transition name="group-levelup">
+        <div v-if="groupLevelUpBanner" style="position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:9998;background:linear-gradient(135deg,#3d1a00,#7a4200);border:2px solid var(--gold);border-radius:8px;padding:14px 28px;text-align:center;box-shadow:0 4px 22px rgba(0,0,0,0.75);pointer-events:none;min-width:260px;">
+            <div style="font-size:17px;font-weight:bold;color:var(--gold);letter-spacing:0.04em;text-shadow:0 0 10px rgba(255,200,0,0.5);">GROUP LEVEL UP!</div>
+            <div style="font-size:13px;color:var(--text-light);margin-top:4px;">[[ groupLevelUpBanner ]]</div>
+        </div>
+    </transition>
 
     <div class="game-layout">
         <aside class="sidebar" id="main-sidebar">
@@ -213,6 +232,9 @@ window._betaInit = {
                         <div v-if="area.can_rest" class="rest-notice">
                             <span v-if="area.rest_cost > 0">Inn available ([[ area.rest_cost ]] gold)</span>
                             <span v-else>Rest freely on your land</span>
+                        </div>
+                        <div v-if="area.key === 'your_land' && landData && landData.comfort_points !== undefined" style="font-size:12px;color:var(--gold);margin-top:5px;">
+                            Comfort: <strong>[[ landData.comfort_points ]]</strong> pts
                         </div>
                     </div>
                 </div>
@@ -283,7 +305,9 @@ window._betaInit = {
                             </div>
                             <div v-else class="action-row" style="margin-top:10px;">
                                 <button class="btn btn-primary btn-wood" @click="explore" :disabled="actionPending || !player">[[ actionPending ? 'Working...' : 'Venture Forth' ]]</button>
-                                <button v-if="area && area.can_rest" class="btn btn-secondary" @click="rest" :disabled="actionPending">
+                                <button v-if="area && area.can_rest" class="btn btn-secondary" @click="rest"
+                                    :disabled="actionPending || (area.rest_cost > 0 && player && player.gold < area.rest_cost)"
+                                    :title="area.rest_cost > 0 && player && player.gold < area.rest_cost ? 'Need ' + area.rest_cost + 'g to rest here (you have ' + player.gold + 'g)' : ''">
                                     <span v-if="area && area.rest_cost > 0">Rest at Inn ([[ area.rest_cost ]] gold)</span>
                                     <span v-else>Rest on Your Land</span>
                                 </button>
@@ -420,6 +444,21 @@ window._betaInit = {
                                 </div>
                             </div>
 
+                            <!-- Boss abilities collapsible panel -->
+                            <details v-if="battle.is_boss && battle.boss_abilities && battle.boss_abilities.length" style="margin:8px 0;">
+                                <summary style="font-size:12px;color:var(--text-dim);cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:5px;">
+                                    <span style="font-size:10px;">&#9654;</span> Boss Abilities ([[ battle.boss_abilities.length ]])
+                                </summary>
+                                <div style="margin-top:6px;">
+                                    <div v-for="ab in battle.boss_abilities" :key="ab.name" class="boss-ability-card">
+                                        <div class="boss-ability-name">[[ ab.name ]]</div>
+                                        <div class="boss-ability-desc" v-if="ab.description">[[ ab.description ]]</div>
+                                        <div class="boss-ability-cd" v-if="ab.cooldown_left > 0">Cooldown: [[ ab.cooldown_left ]] turn[[ ab.cooldown_left !== 1 ? 's' : '' ]]</div>
+                                        <div v-else style="font-size:11px;color:var(--green-bright);margin-top:2px;">Ready</div>
+                                    </div>
+                                </div>
+                            </details>
+
                             <!-- Battle log -->
                             <div class="battle-log-panel" v-if="battle.log && battle.log.length">
                                 <div class="battle-log">
@@ -526,7 +565,7 @@ window._betaInit = {
                                             </div>
                                             <div class="inv-row-qty">x[[ item.count ]]</div>
                                             <div class="inv-row-actions">
-                                                <button v-if="item.equippable" class="btn btn-xsmall btn-secondary" @click="equipItem(item.name)" :disabled="actionPending">Equip</button>
+                                                <button v-if="item.equippable" class="btn btn-xsmall btn-secondary" @click="equipItem(item.name)" :disabled="actionPending" :title="item.equip_block_reason || ''">Equip</button>
                                                 <button v-if="item.type === 'consumable'" class="btn btn-xsmall btn-secondary" @click="useItem(item.name)" :disabled="actionPending">Use</button>
                                                 <button class="btn btn-xsmall btn-secondary" @click="sellItem(item.name)" :disabled="actionPending" :title="'Sell for ' + item.sell_price + 'g'">[[ item.sell_price ]]g</button>
                                             </div>
@@ -587,7 +626,12 @@ window._betaInit = {
                     <div v-if="mineData">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                             <span style="color:var(--gold);font-weight:bold;">Mining Level [[ mineData.mining_level ]]</span>
-                            <button class="btn btn-secondary" @click="mine" :disabled="actionPending">Mine</button>
+                            <div style="text-align:right;">
+                                <button class="btn btn-secondary" @click="mine" :disabled="actionPending">Mine</button>
+                                <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">
+                                    STR [[ player && player.attributes && player.attributes.str || 0 ]] &rarr; +[[ ((player && player.attributes && player.attributes.str || 0) * 0.5).toFixed(1) ]]% success
+                                </div>
+                            </div>
                         </div>
                         <div class="bar-group">
                             <div class="bar-label">Mining XP <span class="bar-nums">[[ mineData.xp_progress ]]/[[ mineData.xp_needed ]]</span></div>
@@ -633,7 +677,7 @@ window._betaInit = {
                             <div class="bar-fill bar-exp" :style="{ width: Math.round(((activeDungeon.room_index + 1) / ((activeDungeon.rooms && activeDungeon.rooms.length) || 1)) * 100) + '%' }"></div>
                         </div>
                         <div style="margin-top:10px;display:flex;gap:8px;">
-                            <a href="/dungeon/room" class="btn btn-secondary">Continue</a>
+                            <a href="/dungeon/room" class="btn btn-primary btn-wood">Continue &rarr;</a>
                             <button class="btn btn-danger btn-small" @click="abandonDungeon" :disabled="actionPending">Abandon</button>
                         </div>
                     </div>
@@ -876,6 +920,13 @@ window._betaInit = {
                                                 <div class="event-name">[[ ev.name ]]</div>
                                                 <div class="event-meta" v-if="ev.description">[[ ev.description ]]</div>
                                                 <div class="event-meta" v-if="ev.bonus">[[ ev.bonus ]]</div>
+                                                <!-- boss_kills progress bar -->
+                                                <div v-if="ev.condition_type === 'boss_kills' && ev.progress !== null && ev.progress !== undefined && ev.required" style="margin-top:6px;">
+                                                    <div style="font-size:11px;color:var(--text-dim);margin-bottom:3px;">Boss Kills: [[ ev.progress ]] / [[ ev.required ]]</div>
+                                                    <div class="bar-track" style="height:5px;">
+                                                        <div class="bar-fill bar-exp" :style="{ width: Math.min(100, Math.round(ev.progress / ev.required * 100)) + '%' }"></div>
+                                                    </div>
+                                                </div>
                                                 <div v-if="ev.claimed" style="font-size:12px;color:var(--green-bright);margin-top:3px;">[Claimed]</div>
                                             </div>
                                             <button v-if="ev.can_claim && !ev.claimed" class="btn btn-small btn-primary" @click="claimEventReward(ev.key)" :disabled="actionPending" style="flex-shrink:0;">Claim</button>
@@ -909,44 +960,67 @@ window._betaInit = {
                 <!-- ═══ GROUP ═══ -->
                 <div class="vtab-panel" v-if="onlineUsername" :class="{ 'vtab-panel-active': activeTab === 'group' }">
                     <div v-if="groupData">
-                        <div class="panel">
+                        <!-- Sub-tab navigation -->
+                        <div class="group-subtab-nav">
+                            <button @click="groupSubTab = 'info'"
+                                class="btn" :class="groupSubTab === 'info' ? 'btn-primary' : 'btn-secondary'">Info</button>
+                            <button @click="groupSubTab = 'members'"
+                                class="btn" :class="groupSubTab === 'members' ? 'btn-primary' : 'btn-secondary'">Members ([[ (groupData.members || []).length ]])</button>
+                            <button @click="groupSubTab = 'chat'; $nextTick(scrollGroupChatBottom)"
+                                class="btn" :class="groupSubTab === 'chat' ? 'btn-primary' : 'btn-secondary'">Chat</button>
+                        </div>
+
+                        <!-- Info sub-tab -->
+                        <div v-if="groupSubTab === 'info'" class="panel">
                             <div class="panel-title">[[ groupData.name ]]</div>
                             <div class="panel-body">
                                 <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">[[ groupData.description ]]</div>
                                 <div style="font-size:12px;color:var(--gold);">Level [[ groupData.level ]] Group &bull; Led by [[ groupData.leader ]]</div>
-                                <div v-if="groupData.xp !== undefined" style="margin-top:6px;margin-bottom:8px;">
+                                <div v-if="groupData.xp !== undefined" style="margin-top:8px;">
                                     <div style="font-size:12px;color:var(--text-dim);margin-bottom:3px;">Group XP: [[ groupData.xp ]] / [[ groupData.xp_to_next || '?' ]]</div>
                                     <div class="bar-track"><div class="bar-fill bar-exp" :style="{ width: groupData.xp_to_next ? Math.min(100, Math.round(groupData.xp / groupData.xp_to_next * 100)) + '%' : '0%' }"></div></div>
                                 </div>
-                                <div v-for="m in groupData.members" :key="m.username" style="font-size:13px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                                    <span v-if="m.username === groupData.leader" style="color:var(--gold)">[Leader] </span><span v-else style="color:var(--text-dim)">-- </span>[[ m.username ]]
-                                </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Group Chat -->
-                    <div v-if="groupData" class="panel" style="margin-top:14px;">
-                        <div class="panel-title">Group Chat</div>
-                        <div class="panel-body">
-                            <div id="group-chat-log" style="height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding:4px 0;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);">
-                                <div v-if="!groupChatMessages.length" style="color:var(--text-dim);font-size:12px;font-style:italic;margin:auto;">No messages yet.</div>
-                                <div v-for="(msg, i) in groupChatMessages" :key="i" style="font-size:12px;line-height:1.5;padding:2px 0;">
-                                    <span style="color:var(--gold);font-weight:600;">[[ msg.username ]]:</span>
-                                    <span style="color:var(--text-light);margin-left:5px;">[[ msg.message ]]</span>
+
+                        <!-- Members sub-tab -->
+                        <div v-if="groupSubTab === 'members'" class="panel">
+                            <div class="panel-title">Members</div>
+                            <div class="panel-body">
+                                <div v-for="m in groupData.members" :key="m.username" style="font-size:13px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:6px;">
+                                    <span v-if="m.username === groupData.leader" style="color:var(--gold);font-size:11px;">[Leader]</span>
+                                    <span v-else style="color:var(--text-dim);font-size:11px;">[Member]</span>
+                                    <span>[[ m.username ]]</span>
+                                    <span v-if="m.online !== undefined" style="margin-left:auto;font-size:11px;" :style="{ color: m.online ? 'var(--green-bright)' : 'var(--text-dim)' }">[[ m.online ? 'online' : 'offline' ]]</span>
                                 </div>
+                                <div v-if="!groupData.members || !groupData.members.length" style="color:var(--text-dim);font-size:13px;">No members found.</div>
                             </div>
-                            <div style="display:flex;gap:8px;">
-                                <input type="text" v-model="groupChatInput" placeholder="Message your group..." maxlength="200"
-                                    style="flex:1;background:var(--bg-input,#1a1a24);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:6px 9px;font-size:13px;color:var(--text-light);outline:none;"
-                                    @keydown.enter.prevent="sendGroupChat" :disabled="groupChatSending || !groupSocket">
-                                <button class="btn btn-small btn-secondary" @click="sendGroupChat"
-                                    :disabled="groupChatSending || !groupChatInput.trim() || !groupSocket">Send</button>
+                        </div>
+
+                        <!-- Chat sub-tab -->
+                        <div v-if="groupSubTab === 'chat'" class="panel">
+                            <div class="panel-title">Group Chat</div>
+                            <div class="panel-body">
+                                <div id="group-chat-log" style="height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding:4px 0;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);">
+                                    <div v-if="!groupChatMessages.length" style="color:var(--text-dim);font-size:12px;font-style:italic;margin:auto;">No messages yet.</div>
+                                    <div v-for="(msg, i) in groupChatMessages" :key="i" style="font-size:12px;line-height:1.5;padding:2px 0;">
+                                        <span style="color:var(--gold);font-weight:600;">[[ msg.username ]]:</span>
+                                        <span style="color:var(--text-light);margin-left:5px;">[[ msg.message ]]</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex;gap:8px;">
+                                    <input type="text" v-model="groupChatInput" placeholder="Message your group..." maxlength="200"
+                                        style="flex:1;background:var(--bg-input,#1a1a24);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:6px 9px;font-size:13px;color:var(--text-light);outline:none;"
+                                        @keydown.enter.prevent="sendGroupChat" :disabled="groupChatSending || !groupSocket">
+                                    <button class="btn btn-small btn-secondary" @click="sendGroupChat"
+                                        :disabled="groupChatSending || !groupChatInput.trim() || !groupSocket">Send</button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div v-else class="empty-state">Not in a group. <a href="/groups" style="color:var(--gold);">Create or Join</a></div>
-                    <div style="margin-top:14px;"><a href="/groups" class="btn btn-secondary btn-small">Go to Group Page →</a></div>
+                    <div style="margin-top:14px;"><a href="/groups" class="btn btn-secondary btn-small">Go to Group Page &rarr;</a></div>
                 </div>
 
                 <!-- ═══ YOUR LAND ═══ -->

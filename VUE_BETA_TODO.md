@@ -7,6 +7,22 @@
 
 ## Changelog — Fixes Applied
 
+### Session 2026-05-28 (part 3 — medium & low priority)
+| Fix | Files Changed | Status |
+|-----|--------------|--------|
+| **`boss_kills` event progress bar** — Event cards now show a 5px progress bar + "Boss Kills: X / Y" counter for `boss_kills` condition events. Uses `ev.progress` and `ev.required` from the events API. | `templates/vue/game.html` | ✅ Done |
+| **Land comfort points in sidebar** — When the player is on `your_land`, the Location panel in the sidebar now shows the current comfort point total beneath the rest notice. | `templates/vue/game.html` | ✅ Done |
+| **Group sub-tab navigation** — Group tab now has Info / Members / Chat sub-tabs. Info shows group name, description, level and XP bar. Members lists all members with online status. Chat holds the scrollable chat log. `groupSubTab` data prop tracks active sub-tab. | `templates/vue/game.html`, `static/js/vue/game.js` | ✅ Done |
+| **Group level-up animated banner** — `group_level_up` Socket.IO event now triggers a full-screen fixed overlay banner (slide-down fade-in, 5 s auto-dismiss) in addition to the existing toast. CSS Vue `<transition name="group-levelup">` handles animation. | `templates/vue/game.html`, `static/js/vue/game.js` | ✅ Done |
+| **Boss abilities collapsible panel** — Battle tab now shows a `<details>` element listing each boss special move (name, description, cooldown left / "Ready") when `battle.boss_abilities` is non-empty. `_api_battle_summary()` now returns `boss_abilities`. | `app.py`, `templates/vue/game.html` | ✅ Done |
+| **STR → mine success hint** — Mine button now shows a small "STR X → +Y% success" hint below it, computed from `player.attributes.str`. | `templates/vue/game.html` | ✅ Done |
+| **Equip-button title tooltip** — Disabled Equip button in inventory now carries `:title="item.equip_block_reason"` so hovering reveals why equipping is blocked. | `templates/vue/game.html` | ✅ Done |
+| **Rest button gold-check disabled** — Rest button is now `:disabled` when `area.rest_cost > 0 && player.gold < area.rest_cost`, with a tooltip showing the gold shortfall. | `templates/vue/game.html` | ✅ Done |
+| **Dungeon Continue button style** — Changed from `btn-secondary` to `btn-primary btn-wood` with `→` arrow to match Jinja2. | `templates/vue/game.html` | ✅ Done |
+| **BUG-J01 — pageable-list re-init** — `initPagination()` exported as `window.initPagination` from `game.js`. Called in `spa.js` form interceptor after each successful SPA response. | `static/js/game.js`, `static/js/spa.js` | ✅ Done |
+| **BUG-J02 — boss dialogue via state poll** — `spaPoll()` now reads `data.battle.boss_dialogue` and updates `.boss-dialogue-text` and shows `.boss-dialogue-banner` in the Jinja2 battle page on every poll tick. | `static/js/spa.js` | ✅ Done |
+| **BUG-V13 — Group sub-tabs + level-up banner** — Completes the remaining BUG-V13 items (sub-tab nav + animated level-up banner). Chat was done in part 2. | `templates/vue/game.html`, `static/js/vue/game.js` | ✅ Done |
+
 ### Session 2026-05-28 (part 2 — high-priority features)
 | Fix | Files Changed | Status |
 |-----|--------------|--------|
@@ -460,37 +476,37 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | **Group real-time chat** | Group tab | ✅ Fixed — Socket.IO `group_chat_message` listener + scrollable chat log + send input; `group_level_up` shows toast |
 
 ### Priority: Medium (improves completeness)
-| Gap | Where | What to do |
-|-----|--------|-----------|
-| **`boss_kills` event progress bar** | Events tab | Add `v-if="ev.condition_type === 'boss_kills'"` progress bar block to event cards |
-| **Land comfort points** | Sidebar + Land tab | Expose `comfort_points` from `/api/land_data` response; show in sidebar location panel and land tab header |
-| **Land training options** | Land tab | Fetch training options from land data; show stat-select + Train button per option |
-| **Land storage panel** | Land tab | Show stored items list + store/retrieve actions via `/api/action/land/store` and `/api/action/land/retrieve` |
-| **Land farm planting** | Land tab | For empty farm slots, show crop selector + Plant button via `/api/action/land/plant` |
-| **Your Land explore minimap** | Explore tab | Canvas render of placed buildings on `your_land` (same logic as Jinja2 `index.html:1052-1135`) |
-| **Group sub-tab navigation** | Group tab | Add Info / Members / Chat sub-tabs within the group panel |
-| **Group level-up banner** | Group tab | Handle `group_level_up` Socket.IO event; show animated overlay banner |
-| **BUG-J01 — pageable-list re-init** | Jinja2 `spa.js` | Re-run pageable-list initialiser after every SPA DOM injection, or use event delegation |
-| **BUG-J02 — boss dialogue via state poll** | Jinja2 `app.py` + `spa.js` | Include `boss_dialogue` in `/api/game/state` JSON; update via `spaUpdatePlayerStats` |
+| Gap | Where | Status |
+|-----|--------|--------|
+| **`boss_kills` event progress bar** | Events tab | ✅ Fixed |
+| **Land comfort points (sidebar)** | Sidebar Location panel | ✅ Fixed |
+| **Land training options** | Land tab | ✅ Already present |
+| **Land storage panel** | Land tab | ✅ Already present |
+| **Land farm planting** | Land tab | ✅ Already present |
+| **Your Land explore minimap** | Explore tab | ❌ Remaining (canvas heavy) |
+| **Group sub-tab navigation** | Group tab | ✅ Fixed |
+| **Group level-up banner** | Group tab | ✅ Fixed |
+| **BUG-J01 — pageable-list re-init** | Jinja2 `spa.js` | ✅ Fixed |
+| **BUG-J02 — boss dialogue via state poll** | Jinja2 `spa.js` | ✅ Fixed |
 
 ### Priority: Low (polish / edge cases)
-| Gap | Where | What to do |
-|-----|--------|-----------|
-| **Email setup prompt** | Sidebar | Requires `user_has_email` passed from server to `_betaInit`; show warning button |
-| **Change Character button** | Sidebar | Link to `openCustomizeModal()` (existing JS function); needs 10k gold check |
-| **STR → mine success hint** | Mine tab | Add `STR [[ player.attributes?.str\|\|0 ]] → +[[ ((player.attributes?.str\|\|0)*0.5).toFixed(1) ]]% success` below Mine button |
-| **Equip-button title tooltip** | Inventory tab | Add `:title="item.equip_block_reason"` to disabled Equip button |
-| **Rest button gold-check disabled** | Explore tab | Add `:disabled` + `:title` when `area.rest_cost > 0 && player.gold < area.rest_cost` |
-| **Land crafting recipes** | Land tab | Inline land crafting panel via `/api/action/land/craft` |
-| **Land building buy/place/remove** | Land tab | Full builder — complex; link to `/land/map` is fine for now |
-| **Pet purchasing** | Land tab | Link to `/land/pets` for now |
-| **Boss abilities panel** | Battle tab | Low traffic feature; add collapsible list of boss special moves if `battle.boss_abilities` exists |
-| **Dungeon Continue button style** | Dungeons tab | Change `btn-secondary` → `btn-primary btn-wood`; add `→` arrow to match Jinja2 |
-| **BUG-V08 — `marketReset` legacy route** | `game.js` | Wrap `fetch("/action/market/reset")` with `doAction()` or add `/api/action/market/reset` |
-| **BUG-J05 — missing XHR header on forms** | Jinja2 templates | Add `X-Requested-With` header to forms that may be submitted outside SPA context |
-| **Tab glyph pixel icons** | Tab bar | Decorative only |
-| **Trade UI inline** | Any | Currently links to `/trade`; complex to inline |
-| **NPC dialogue modals** | Explore tab | Low priority |
+| Gap | Where | Status |
+|-----|--------|--------|
+| **Email setup prompt** | Sidebar | ❌ Remaining |
+| **Change Character button** | Sidebar | ❌ Remaining |
+| **STR → mine success hint** | Mine tab | ✅ Fixed |
+| **Equip-button title tooltip** | Inventory tab | ✅ Fixed |
+| **Rest button gold-check disabled** | Explore tab | ✅ Fixed |
+| **Land crafting recipes** | Land tab | ❌ Remaining |
+| **Land building buy/place/remove** | Land tab | ❌ Link to `/land/map` (WONTFIX inline) |
+| **Pet purchasing** | Land tab | ❌ Link to `/land/pets` (WONTFIX inline) |
+| **Boss abilities panel** | Battle tab | ✅ Fixed |
+| **Dungeon Continue button style** | Dungeons tab | ✅ Fixed |
+| **BUG-V08 — `marketReset` legacy route** | `game.js` | WONTFIX (not in Vue; route still works) |
+| **BUG-J05 — missing XHR header on forms** | Jinja2 templates | ❌ Remaining |
+| **Tab glyph pixel icons** | Tab bar | ❌ Decorative only |
+| **Trade UI inline** | Any | ❌ Complex; links to `/trade` |
+| **NPC dialogue modals** | Explore tab | ❌ Low priority |
 
 ---
 

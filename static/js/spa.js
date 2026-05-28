@@ -180,6 +180,9 @@
                 if (data.tab && typeof switchTab === 'function') {
                     try { switchTab(data.tab); } catch (_) {}
                 }
+                if (typeof window.initPagination === 'function') {
+                    try { window.initPagination(); } catch (_) {}
+                }
             })
             .catch(function () {
                 if (btn) btn.disabled = false;
@@ -207,6 +210,12 @@
             if (typeof data.online_count === 'number') {
                 var ocEl = document.getElementById('sidebar-online-count');
                 if (ocEl) ocEl.textContent = data.online_count;
+            }
+            if (data.battle && data.battle.boss_dialogue) {
+                var bdEl = document.querySelector('.boss-dialogue-text');
+                if (bdEl) bdEl.textContent = '\u201c' + data.battle.boss_dialogue + '\u201d';
+                var bdBanner = document.querySelector('.boss-dialogue-banner');
+                if (bdBanner) bdBanner.style.display = '';
             }
         })
         .catch(function () { /* silent — network hiccup, retry next tick */ });

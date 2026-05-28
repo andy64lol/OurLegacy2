@@ -526,6 +526,8 @@ function initPagination() {
     });
 }
 
+window.initPagination = initPagination;
+
 function initButtonStyle() {
     var style = localStorage.getItem('ol2_btn_style') || 'classic';
     _applyButtonStyle(style);

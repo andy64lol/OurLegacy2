@@ -113,7 +113,7 @@ apply to Vue beta's DOM but load nonetheless.
 
 ---
 
-### BUG-V08 — `marketReset()` calls old Jinja2 `/action/market/reset` route `TODO`
+### BUG-V08 — `marketReset()` calls old Jinja2 `/action/market/reset` route `WONTFIX`
 **File:** `static/js/vue_beta.js` — `marketReset()`  
 **Severity:** Low — works because the old route checks for XHR header and returns JSON, but  
 it bypasses the standard `doAction()` wrapper (no `actionPending` lock, no unified error toast)  
@@ -182,7 +182,7 @@ the text "Room X / Y" with no visual bar. The `activeDungeon.room_index` and
 
 ---
 
-### BUG-V13 — Group tab missing real-time chat, sub-tabs, and level-up banner `IN PROGRESS`
+### BUG-V13 — Group tab missing real-time chat, sub-tabs, and level-up banner `FIXED`
 **File:** `templates/vue_beta.html` + `static/js/vue_beta.js` — group tab  
 **Severity:** Medium — major group feature gap vs Jinja2  
 **Description:**  
@@ -255,7 +255,7 @@ Or use the existing `gameConfirm()` if it's available in the Vue context.
 
 ---
 
-### BUG-J01 — `pageable-list` pagination loses state after SPA AJAX DOM injection `TODO`
+### BUG-J01 — `pageable-list` pagination loses state after SPA AJAX DOM injection `FIXED`
 **File:** `static/js/game.js` + `static/js/spa.js`  
 **Severity:** Medium — page 2+ of a list becomes inaccessible after any action  
 **Description:**  
@@ -269,7 +269,7 @@ event delegation rather than direct `addEventListener` on each list.
 
 ---
 
-### BUG-J02 — Boss dialogue is a static template variable; never updates on SPA actions `TODO`
+### BUG-J02 — Boss dialogue is a static template variable; never updates on SPA actions `FIXED`
 **File:** `templates/index.html` + `app.py` — boss dialogue banner  
 **Severity:** Low — boss dialogue shows only at page load, not after each attack/defend  
 **Description:**  

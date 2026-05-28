@@ -8504,6 +8504,16 @@ def _api_battle_summary():
                 "description":      phase_data.get("description", ""),
                 "attack_multiplier": phase_data.get("attack_multiplier", 1.0),
             }
+        boss_abilities_out = []
+        for ab in boss_data.get("special_abilities", []):
+            cooldowns = enemy.get("_ability_cooldowns", {})
+            boss_abilities_out.append({
+                "name":         ab["name"],
+                "description":  ab.get("description", ""),
+                "cooldown_left": cooldowns.get(ab["name"], 0),
+            })
+    else:
+        boss_abilities_out = []
     player_effects_raw = session.get("battle_player_effects") or {}
     player_effects_out: dict[str, int] = {}
     for eff_name, eff_data in player_effects_raw.items():
@@ -8523,6 +8533,7 @@ def _api_battle_summary():
         "companions":    companions_out,
         "boss_dialogue":   boss_dialogue,
         "boss_phase_info": boss_phase_info,
+        "boss_abilities":  boss_abilities_out,
         "player_effects":  player_effects_out,
     }
 
