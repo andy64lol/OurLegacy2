@@ -600,9 +600,72 @@ To enable a Vue page, the corresponding route needs to render `vue/<template_nam
 
 ---
 
+---
+
+## Sixth-Pass Bug Fixes — battle, events, market, friends (Bugs #50–#54)
+
+### Bug #50 — `battleSpell()` sends wrong JSON field name; spells never cast in Vue battle
+
+**File:** `static/js/vue/game.js` (line 403)
+**Severity:** Critical — casting any spell in the Vue battle UI silently fails; the server always ignores the request
+
+**Root cause:** `battleSpell(id)` called `this.doAction('/api/battle/spell', { spell_id: id })`. The `/api/battle/spell` route reads `data.get("spell", "")` — it expects a key named `"spell"`, not `"spell_id"`. The value `id` is correct (it is the spell name, since `_api_battle_summary()` sets `spell.id = s["name"]`), but the key mismatch means the server always receives an empty string and rejects the cast.
+
+**Fix:** Changed `{ spell_id: id }` → `{ spell: id }` to match the server's expected field name.
+
+---
+
+### Bug #51 — `claimEventReward()` calls non-existent `/api/action/claim_event` route
+
+**File:** `static/js/vue/game.js` (line 388) + `app.py`
+**Severity:** High — the Claim button on active world events always returns 404; players cannot claim event rewards in the Vue UI
+
+**Root cause:** `claimEventReward(evKey)` POSTs to `/api/action/claim_event`, but this route did not exist anywhere in `app.py`. In the Jinja2 version, event rewards are auto-claimed by `check_and_award_events(player)` when the `/game` page loads — there is no manual claim button. The Vue re-implementation added a manual claim flow without a corresponding backend route.
+
+**Fix:** Created `/api/action/claim_event` in `app.py`. The route validates the event ID, checks date range, verifies eligibility conditions (boss kills, etc.), prevents double-claiming, grants the item or gold reward, records the claim, saves the player, and returns `{ ok, message, messages, player }`.
+
+---
+
+### Bug #52 — `loadFriends()` calls `/api/friends/list` — route does not exist (correct route is `/api/friends`)
+
+**File:** `static/js/vue/game.js` (line 466)
+**Severity:** High — the Friends tab in the Vue game always fails to load; the friends list is never displayed
+
+**Root cause:** `loadFriends()` fetches `/api/friends/list`, but the actual route in `app.py` is `GET /api/friends`. No `/api/friends/list` route exists. The response from `/api/friends` returns `{ friends: [...] }` which exactly matches what the Vue code parses (`data.friends || []`); only the URL path was wrong.
+
+**Fix:** Changed `fetch('/api/friends/list', ...)` → `fetch('/api/friends', ...)`.
+
+---
+
+### Bug #53 — `marketBuy()` calls non-existent `/api/market/buy`; old route uses form encoding
+
+**File:** `static/js/vue/game.js` (line 458) + `app.py`
+**Severity:** High — buying items from the Elite Market in the Vue UI always fails with 404
+
+**Root cause:** `marketBuy(id, price)` POSTs JSON `{ item_id: id, price }` to `/api/market/buy`, but this route did not exist. The only existing market buy route was `POST /action/market/buy`, which uses HTML form encoding (`request.form.get("item_name")`) and redirects to `/game?tab=market` — incompatible with the Vue JSON API pattern.
+
+**Fix:** Created `POST /api/market/buy` in `app.py`. The route accepts JSON `{ item_id, price }`, validates player gold, deducts cost, adds item to inventory, saves the player, and returns `{ ok, message, messages, player }`.
+
+---
+
+### Bug #54 — Events section in `vue/game.html` uses three wrong field names from state
+
+**File:** `templates/vue/game.html` (events tab, lines 933–952)
+**Severity:** High — claim button never appears for eligible events; claimed indicator never renders; Vue `key` warnings in console
+
+**Root cause:** The `eventsData.active` items returned by `/api/game/state/extended` use these fields: `id`, `is_eligible`, `is_claimed`. The template used three incorrect names:
+- `:key="ev.key"` → `ev.key` is always `undefined` (Vue emits duplicate-key warnings)
+- `v-if="ev.claimed"` → should be `ev.is_claimed`
+- `v-if="ev.can_claim && !ev.claimed"` → `ev.can_claim` does not exist; should be `ev.is_eligible && !ev.is_claimed`
+- `@click="claimEventReward(ev.key)"` → passed `undefined` to the claim function
+
+**Fix:** Updated the events `v-for` block to use `:key="ev.id"`, `ev.is_claimed`, `ev.is_eligible && !ev.is_claimed`, and `claimEventReward(ev.id)`.
+
+---
+
 ## Final Audit Summary
 
-All templates in `templates/vue/` have been audited across five passes. Total bugs found and fixed: **49**.
+All templates in `templates/vue/` have been audited across six passes. Total bugs found and fixed: **54**.
 
 | Pass | Scope | Bugs Fixed |
 |------|-------|-----------|
@@ -611,3 +674,23 @@ All templates in `templates/vue/` have been audited across five passes. Total bu
 | 3rd | chat, dungeon_room, admin | #26–#29 |
 | 4th | friends, wiki | #30–#42 |
 | 5th | base.html widgets, chat.html, index.html, groups.js | #43–#49 |
+| 6th | battle/spell cast, events claim, market buy, friends list, event field names | #50–#54 |
+
+### Sixth-Pass Clean Table
+
+| File | Status |
+|------|--------|
+| `static/js/vue/game.js` — `battleSpell()` | **FIXED** Bug #50: `spell_id` → `spell` |
+| `app.py` — `/api/action/claim_event` | **FIXED** Bug #51: route created |
+| `static/js/vue/game.js` — `loadFriends()` | **FIXED** Bug #52: `/api/friends/list` → `/api/friends` |
+| `app.py` — `/api/market/buy` | **FIXED** Bug #53: JSON route created |
+| `templates/vue/game.html` — events tab | **FIXED** Bug #54: `ev.key/claimed/can_claim` → `ev.id/is_claimed/is_eligible` |
+| All land action routes (`/api/action/land/*`) | **CLEAN** — all 9 routes exist, field names match |
+| All battle routes (`/api/battle/*`) | **CLEAN** — attack, defend, flee, spell, use_item all exist, fields correct after #50 |
+| `/api/action/dungeon/enter`, `/api/action/dungeon/abandon` | **CLEAN** |
+| `/api/action/auto_equip`, `/api/action/quick_heal`, `/api/action/sort_inventory` | **CLEAN** |
+| `/api/action/complete_mission` (expects `mission_id`) | **CLEAN** — matches `{ mission_id: id }` |
+| `/api/action/claim_challenge` (expects `challenge_id`) | **CLEAN** — matches `{ challenge_id: id }` |
+| `/api/social/chat` GET + POST | **CLEAN** |
+| `/api/land_data`, `/api/area_activity`, `/api/market_data` | **CLEAN** |
+| `/api/online/logout` | **CLEAN** |

@@ -7128,6 +7128,31 @@ def market_buy():
     return redirect(url_for("game") + "?tab=market")
 
 
+@app.route("/api/market/buy", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_market_buy():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    data = request.get_json(force=True, silent=True) or {}
+    item_name = str(data.get("item_id", "")).strip()
+    item_price = int(data.get("price", 0))
+    if not item_name:
+        return jsonify({"ok": False, "message": "No item specified."})
+    if item_price <= 0:
+        item_data = GAME_DATA["items"].get(item_name, {})
+        item_price = item_data.get("price", item_data.get("value", 0)) if isinstance(item_data, dict) else 0
+    if player["gold"] < item_price:
+        return jsonify({"ok": False, "message": f"Not enough gold. Need {item_price}g."})
+    player["gold"] -= item_price
+    player.setdefault("inventory", []).append(item_name)
+    add_message(f"Purchased {item_name} from the Elite Market for {item_price} gold!", "var(--gold)")
+    save_player(player)
+    _autosave()
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "message": f"Purchased {item_name}!", "messages": msgs, "player": _api_player_summary(player)})
+
+
 @app.route("/api/server_save", methods=["POST"])
 def api_server_save():
     player = get_player()
@@ -10169,6 +10194,56 @@ def api_action_claim_challenge():
     _autosave()
     msgs = (session.get("messages") or [])[-10:]
     return jsonify({"ok": True, "messages": msgs, "player": _api_player_summary(player)})
+
+
+@app.route("/api/action/claim_event", methods=["POST"])
+@limiter.limit("20 per minute")
+def api_action_claim_event():
+    player, err = _api_resolve_player("game:write")
+    if err:
+        return err
+    data = request.get_json(force=True, silent=True) or {}
+    event_id = str(data.get("event_key", "")).strip()
+    if not event_id:
+        return jsonify({"ok": False, "message": "No event specified."})
+    events = GAME_DATA.get("events", [])
+    ev = next((e for e in events if e.get("id") == event_id), None)
+    if not ev:
+        return jsonify({"ok": False, "message": "Unknown event."})
+    today_str = _dt.date.today().isoformat()
+    if "date" in ev:
+        if today_str != ev["date"]:
+            return jsonify({"ok": False, "message": "Event is not active today."})
+    elif "start" in ev and "end" in ev:
+        if not (ev["start"] <= today_str <= ev["end"]):
+            return jsonify({"ok": False, "message": "Event is not currently active."})
+    else:
+        return jsonify({"ok": False, "message": "Event has no valid date."})
+    claimed = player.setdefault("claimed_events", [])
+    if event_id in claimed:
+        return jsonify({"ok": False, "message": "You have already claimed this event reward."})
+    condition = ev.get("condition", {})
+    ctype = condition.get("type", "none")
+    if ctype == "boss_kills":
+        required = condition.get("count", 1)
+        if player.get("total_bosses_defeated", 0) < required:
+            return jsonify({"ok": False, "message": f"Requirement not met: {player.get('total_bosses_defeated', 0)}/{required} boss kills."})
+    rtype = ev.get("reward_type", "")
+    msg = ev.get("reward_message", f"You received a reward from the event '{ev.get('name', '')}'!")
+    if rtype == "item":
+        item_name = ev.get("reward_item", "")
+        if item_name:
+            player.setdefault("inventory", []).append(item_name)
+    elif rtype == "gold":
+        amount = int(ev.get("reward_amount", 0))
+        player["gold"] = player.get("gold", 0) + amount
+    claimed.append(event_id)
+    add_message(f"[EVENT] {ev.get('name', 'Event')}: {msg}", "var(--gold)")
+    _set_activity(player, "claiming a rare event reward")
+    save_player(player)
+    _autosave()
+    msgs = (session.get("messages") or [])[-10:]
+    return jsonify({"ok": True, "message": msg, "messages": msgs, "player": _api_player_summary(player)})
 
 
 @app.route("/api/action/challenge_boss", methods=["POST"])

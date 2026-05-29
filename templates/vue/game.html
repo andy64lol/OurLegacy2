@@ -930,12 +930,11 @@ window._betaInit = {
                             <div class="panel-title">Active Events</div>
                             <div class="panel-body">
                                 <div v-if="eventsData.active && eventsData.active.length">
-                                    <div v-for="ev in eventsData.active" :key="ev.key" class="event-card">
+                                    <div v-for="ev in eventsData.active" :key="ev.id" class="event-card">
                                         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
                                             <div style="flex:1;">
                                                 <div class="event-name">[[ ev.name ]]</div>
                                                 <div class="event-meta" v-if="ev.description">[[ ev.description ]]</div>
-                                                <div class="event-meta" v-if="ev.bonus">[[ ev.bonus ]]</div>
                                                 <!-- boss_kills progress bar -->
                                                 <div v-if="ev.condition_type === 'boss_kills' && ev.progress !== null && ev.progress !== undefined && ev.required" style="margin-top:6px;">
                                                     <div style="font-size:11px;color:var(--text-dim);margin-bottom:3px;">Boss Kills: [[ ev.progress ]] / [[ ev.required ]]</div>
@@ -943,9 +942,9 @@ window._betaInit = {
                                                         <div class="bar-fill bar-exp" :style="{ width: Math.min(100, Math.round(ev.progress / ev.required * 100)) + '%' }"></div>
                                                     </div>
                                                 </div>
-                                                <div v-if="ev.claimed" style="font-size:12px;color:var(--green-bright);margin-top:3px;">[Claimed]</div>
+                                                <div v-if="ev.is_claimed" style="font-size:12px;color:var(--green-bright);margin-top:3px;">[Claimed]</div>
                                             </div>
-                                            <button v-if="ev.can_claim && !ev.claimed" class="btn btn-small btn-primary" @click="claimEventReward(ev.key)" :disabled="actionPending" style="flex-shrink:0;">Claim</button>
+                                            <button v-if="ev.is_eligible && !ev.is_claimed" class="btn btn-small btn-primary" @click="claimEventReward(ev.id)" :disabled="actionPending" style="flex-shrink:0;">Claim</button>
                                         </div>
                                     </div>
                                 </div>

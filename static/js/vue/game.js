@@ -397,7 +397,7 @@ createApp({
         battleAttack()        { return this.doAction('/api/battle/attack'); },
         battleDefend()        { return this.doAction('/api/battle/defend'); },
         battleFlee()          { return this.doAction('/api/battle/flee'); },
-        battleSpell(id)       { return this.doAction('/api/battle/spell',    { spell_id: id }); },
+        battleSpell(id)       { return this.doAction('/api/battle/spell',    { spell: id }); },
         battleUseItem(name)   { return this.doAction('/api/battle/use_item', { item: name }); },
         spendAttrPoint(attr)  { return this.doAction('/api/spend_attr_point', { attr, count: 1 }); },
 
@@ -463,7 +463,7 @@ createApp({
             if (!this.onlineUsername) return;
             this.friendsLoading = true;
             try {
-                const r = await fetch('/api/friends/list', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const r = await fetch('/api/friends', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 if (r.ok) { const data = await r.json(); this.friendsList = data.friends || []; }
             } catch (_) { /* network/parse error ignored */ }
             this.friendsLoading = false;
