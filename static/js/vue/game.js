@@ -411,7 +411,7 @@ createApp({
                 else {
                     const plLevel = (this.player && this.player.level) || data.player_level || 1;
                     const plGold  = (this.player && this.player.gold)  || data.player_gold  || 0;
-                    const plClass = ((this.player && this.player.class) || data.player_class || '').toLowerCase();
+                    const plClass = ((this.player && this.player.char_class) || data.player_class || '').toLowerCase();
                     const STAT_KEYS = [
                         ['attack_bonus','ATK'],['defense_bonus','DEF'],['hp_bonus','HP'],
                         ['mp_bonus','MP'],['speed_bonus','SPD'],['evasion_bonus','EVA'],
@@ -472,7 +472,7 @@ createApp({
         async loadGroup() {
             if (!this.onlineUsername) return;
             try {
-                const r = await fetch('/api/groups/info', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const r = await fetch('/api/groups/my', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 if (r.ok) { const data = await r.json(); if (data.ok) this.groupData = data.group || null; }
             } catch (_) { /* network/parse error ignored */ }
         },

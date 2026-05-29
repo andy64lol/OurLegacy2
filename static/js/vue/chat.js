@@ -72,10 +72,19 @@ createApp({
             socket:          null,
         };
     },
+    computed: {
+        isModOrOwner() { return this.isMod || this.isOwner; },
+    },
     methods: {
         renderMsgHtml: renderMsg,
         escHtml,
         formatTime,
+        msgClass(msg) {
+            if (msg.is_system || msg.username === 'SYSTEM') return 'msg-system';
+            if (msg.is_emote) return 'msg-emote';
+            if (msg.username === this.myUsername) return 'msg-self';
+            return 'msg-other';
+        },
         isOwnerUser(username) {
             return this.ownerName && (username || '').toLowerCase() === this.ownerName;
         },

@@ -172,6 +172,138 @@ The land map uses no Vue reactivity (no `v-*` directives, no `createApp`) — it
 
 ---
 
+---
+
+## Second-Pass Bugs (game.js, chat.html, chat.js)
+
+| # | File | Bug | Status |
+|---|------|-----|--------|
+| 12 | `static/js/vue/game.js` | `loadGroup()` fetches `/api/groups/info` — endpoint does not exist; correct route is `/api/groups/my` | **FIXED** |
+| 13 | `static/js/vue/game.js` | `loadMarket()` reads `this.player.class` — player object stores class as `char_class`; filter always falls back to `data.player_class` | **FIXED** |
+| 14 | `templates/vue/chat.html` | `v-for="u in onlineUsers"` uses `u.username`, `u.is_owner`, `u.is_admin` — `online_users` socket event sends plain username strings, not objects | **FIXED** |
+| 15 | `templates/vue/chat.html` | `v-if="isModOrOwner"` — `isModOrOwner` never defined in `chat.js`; `isMod` and `isOwner` exist as separate data properties | **FIXED** |
+| 16 | `templates/vue/chat.html` | `msg.type !== 'system'` / `msg.type !== 'emote'` — server sends `msg.is_system` (bool) and `msg.is_emote` (bool), not a `type` string | **FIXED** |
+| 17 | `templates/vue/chat.html` | `msg.is_owner` / `msg.is_admin` on message object — messages only carry `is_mod`; owner/admin status must be derived from `ownerName`/`modList` via `isOwnerUser()` / `isModUser()` | **FIXED** |
+| 18 | `templates/vue/chat.html` | `msg.ts` used as timestamp display — server sends `msg.created_at`; `msg.ts` is only used in group chat payloads | **FIXED** |
+| 19 | `templates/vue/chat.html` | `renderMsg(msg.text)` — method is named `renderMsgHtml` in `chat.js`; message text field is `msg.message` not `msg.text` | **FIXED** |
+| 20 | `templates/vue/chat.html` | `v-for="g in glyphs"` and `@click="insertGlyph(g)"` — glyph picker data is `pickerGlyphs` (array of `{key, file}` objects); iterating `glyphs` renders nothing; `insertGlyph(g)` would pass an object instead of the key string | **FIXED** |
+| 21 | `static/js/vue/chat.js` | `msgClass(msg)` method called from template but not defined in `chat.js` — causes Vue warning and no message styling | **FIXED** |
+| 22 | `static/js/vue/chat.js` | `isModOrOwner` computed property missing — added as `isMod \|\| isOwner` | **FIXED** |
+
+---
+
+### `chat.html` / `vue/chat.html` + `chat.js`
+
+**Architecture change:** Jinja2 uses Vanilla JS + Socket.IO with direct DOM manipulation. Vue uses a reactive `createApp` mounting to `#vue-chat-app`, with all state in `data()`.
+
+#### Online User List (Bug #14)
+
+`app.py` emits `online_users` as a sorted array of **plain username strings**:
+```python
+await sio.emit("online_users", sorted(set(_chat_online.values())))
+```
+
+The Vue template treated each element as an object with `.username`, `.is_owner`, `.is_admin` properties. Fixed to use the string directly (`u` instead of `u.username`) and call `isOwnerUser(u)` / `isModUser(u)` for badge logic.
+
+#### Mod/Owner Guard (Bug #15, 22)
+
+Template used `v-if="isModOrOwner"` which was never defined. Added `isModOrOwner` computed to `chat.js` (`isMod || isOwner`) and changed template to `isMod || isOwner` directly.
+
+#### Message Type Flag (Bug #16)
+
+Server sets `is_system: True` / `is_emote: True` as boolean fields. Template incorrectly tested `msg.type === 'system'`. Fixed to `!msg.is_system && !msg.is_emote && msg.username !== 'SYSTEM'`.
+
+#### Message Owner/Admin Badges (Bug #17)
+
+Individual message payloads contain `is_mod` (for the sender's mod status) but not `is_owner` or `is_admin`. Template used `msg.is_owner` / `msg.is_admin`. Fixed to call `isOwnerUser(msg.username)` / `isModUser(msg.username)` which check against `ownerName` and `modList`.
+
+#### Timestamp Field (Bug #18)
+
+Global chat messages carry `created_at` (ISO string). Group chat carries `ts` (Unix int). Template used `msg.ts` for global chat — always undefined. Fixed to `formatTime(msg.created_at)`.
+
+#### renderMsg / msg.text (Bug #19)
+
+- Method exposed as `renderMsgHtml` in `chat.js`, not `renderMsg`
+- Message text field is `msg.message`, not `msg.text` (which is a game diary field, not a chat field)
+
+Fixed template to `renderMsgHtml(msg.message)`.
+
+#### Glyph Picker (Bug #20)
+
+`pickerGlyphs` is the correct data property (array of `{key, file}` objects). Template used `glyphs` (undefined). Additionally, `insertGlyph(g)` would pass the whole object; fixed to `insertGlyph(g.key)`. The img src also fixed from `g + '.webp'` to `g.file` (the file name already includes `.webp`).
+
+#### Missing msgClass Method (Bug #21)
+
+Template calls `:class="msgClass(msg)"` on every message to apply `msg-self`, `msg-system`, `msg-emote`, or `msg-other` CSS classes. Method was absent from `chat.js`. Added:
+```javascript
+msgClass(msg) {
+    if (msg.is_system || msg.username === 'SYSTEM') return 'msg-system';
+    if (msg.is_emote) return 'msg-emote';
+    if (msg.username === this.myUsername) return 'msg-self';
+    return 'msg-other';
+},
+```
+
+---
+
+### `game.html` (Vue-only, no Jinja2 equivalent)
+
+`game.html` exists only in `templates/vue/` and serves as the Vue beta game hub. It mounts to `#vue-beta-app` with `game.js`.
+
+#### Wrong Group Info Endpoint (Bug #12)
+
+`game.js` `loadGroup()` fetched `/api/groups/info` — this route does not exist in `app.py`. The correct endpoint is `/api/groups/my` (`GET`, returns `{ok, group}`).
+
+#### Player Class Field (Bug #13)
+
+`loadMarket()` filtered elite market items by player class using `this.player.class`. The player object stored in Vue data uses `char_class` (the DB column name), not `class`. Fixed to `this.player.char_class`.
+
+---
+
+### `play.html` / `vue/play.html`
+
+**No functional bugs.** Vue version extends `vue/base.html` instead of `base.html`; page body is identical. No Vue reactivity is used on this page.
+
+---
+
+### `index.html` / `vue/index.html` + `index.js`
+
+**No functional bugs found.** The Vue version adds:
+- Inline login/register modal (Jinja2 links to `/login`, `/register` separately)
+- Inline character creation modal (`/api/create_character` POST)
+- Cloud save browser tab
+- Toast notification system
+
+All API endpoints match `app.py` routes.
+
+---
+
+### `wiki.html` / `vue/wiki.html`
+
+**No functional bugs found.** Differences are cosmetic:
+- Vue adds a search bar that filters entries client-side
+- Jinja2 links to individual wiki entry pages; Vue renders expanded content inline via `v-show`
+
+---
+
+### `create.html` / `vue/create.html`
+
+**No functional bugs found.** The Vue version uses the same `/api/create_character` endpoint as `index.js`. Differences are cosmetic (styling, class selection UI).
+
+---
+
+### `admin.html` / `vue/admin.html`
+
+**No functional bugs found.** Both versions use the same admin action endpoints. Vue adds reactive search/filter on the player list.
+
+---
+
+### `reset_password.html` / `vue/reset_password.html`
+
+**No functional bugs found.** Both use the same `/api/reset_password` flow.
+
+---
+
 ## Routes Serving Vue Templates
 
 At the time of this audit, **no routes in `app.py` serve the Vue templates** — all `render_template(...)` calls reference the original Jinja2 templates. The Vue templates exist in `templates/vue/` as prepared replacements but are not yet wired up to any route.

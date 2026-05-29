@@ -55,17 +55,17 @@
     </div>
 
     <div class="chat-online-bar">
-        <span v-for="u in onlineUsers" :key="u.username"
+        <span v-for="u in onlineUsers" :key="u"
               class="online-pill"
-              :class="{ 'is-self': u.username === myUsername }">
+              :class="{ 'is-self': u === myUsername }">
             <span class="online-dot"></span>
-            <img v-if="u.is_owner" src="/game_assets/glyphs/crown.webp" alt="owner" style="width:10px;height:10px;image-rendering:pixelated;">
-            <img v-else-if="u.is_admin" src="/game_assets/glyphs/shield.webp" alt="admin" style="width:10px;height:10px;image-rendering:pixelated;">
-            [[ u.username ]]
+            <img v-if="isOwnerUser(u)" src="/game_assets/glyphs/crown.webp" alt="owner" style="width:10px;height:10px;image-rendering:pixelated;">
+            <img v-else-if="isModUser(u)" src="/game_assets/glyphs/shield.webp" alt="admin" style="width:10px;height:10px;image-rendering:pixelated;">
+            [[ u ]]
         </span>
     </div>
 
-    <div v-if="isModOrOwner" class="mod-hint-bar">
+    <div v-if="isMod || isOwner" class="mod-hint-bar">
         Mod commands: /kick &lt;user&gt; &nbsp;/mute &lt;user&gt; &nbsp;/unmute &lt;user&gt; &nbsp;/ban &lt;user&gt; &nbsp;/clear &nbsp;/announce &lt;msg&gt;
     </div>
 
@@ -73,21 +73,21 @@
         <div v-for="(msg, i) in messages" :key="i"
              class="chat-msg"
              :class="msgClass(msg)">
-            <div v-if="msg.type !== 'system' && msg.type !== 'emote'" class="chat-meta">
+            <div v-if="!msg.is_system && !msg.is_emote && msg.username !== 'SYSTEM'" class="chat-meta">
                 <span class="chat-name"
-                      :class="{ 'is-owner': msg.is_owner, 'is-admin': msg.is_admin }">
+                      :class="{ 'is-owner': isOwnerUser(msg.username), 'is-admin': isModUser(msg.username) }">
                     [[ msg.username ]]
                 </span>
-                <span v-if="msg.ts"> &bull; [[ msg.ts ]]</span>
+                <span v-if="msg.created_at"> &bull; [[ formatTime(msg.created_at) ]]</span>
             </div>
-            <div class="chat-bubble" v-html="renderMsg(msg.text)"></div>
+            <div class="chat-bubble" v-html="renderMsgHtml(msg.message)"></div>
         </div>
     </div>
 
     <div class="chat-input-area">
         <div v-if="showGlyphPicker" class="glyph-picker">
-            <div v-for="g in glyphs" :key="g" class="glyph-opt" @click="insertGlyph(g)">
-                <img :src="'/game_assets/glyphs/' + g + '.webp'" :alt="g">
+            <div v-for="g in pickerGlyphs" :key="g.key" class="glyph-opt" @click="insertGlyph(g.key)">
+                <img :src="'/game_assets/glyphs/' + g.file" :alt="g.key">
             </div>
         </div>
         <div v-if="cooldownSecs > 0" class="chat-cooldown">
