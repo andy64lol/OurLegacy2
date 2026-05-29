@@ -295,6 +295,83 @@ createApp({
     computed: {
         sectionLabel() { return SECTION_LABELS[this.section] || this.section; },
         currentEntries() { return this.wikiData[this.section] || []; },
+        entryStats() {
+            const e = this.detailEntry;
+            if (!e) return {};
+            switch (this.section) {
+                case 'enemies':
+                case 'bosses': {
+                    const s = {};
+                    if (e.hp        !== undefined) s['HP']          = e.hp;
+                    if (e.attack    !== undefined) s['Attack']      = e.attack;
+                    if (e.defense   !== undefined) s['Defense']     = e.defense;
+                    if (e.speed     !== undefined) s['Speed']       = e.speed;
+                    if (e.experience_reward)       s['EXP Reward']  = e.experience_reward;
+                    if (e.gold_reward)             s['Gold Reward'] = e.gold_reward + 'g';
+                    return s;
+                }
+                case 'items': {
+                    const s = {};
+                    if (e.type)      s['Type']          = e.type;
+                    if (e.rarity)    s['Rarity']        = e.rarity;
+                    if (e.price)     s['Price']         = e.price + 'g';
+                    if (e.attack)    s['Attack Bonus']  = '+' + e.attack;
+                    if (e.defense)   s['Defense Bonus'] = '+' + e.defense;
+                    if (e.speed)     s['Speed']         = e.speed;
+                    if (e.hp_restore) s['HP Restore']   = e.hp_restore;
+                    if (e.mp_restore) s['MP Restore']   = e.mp_restore;
+                    return s;
+                }
+                case 'classes': {
+                    const s = {};
+                    if (e.base_stats) Object.entries(e.base_stats).forEach(([k, v]) => { s[k.toUpperCase()] = v; });
+                    if (e.starting_gold) s['Starting Gold'] = e.starting_gold + 'g';
+                    return s;
+                }
+                case 'races': {
+                    const s = {};
+                    if (e.stat_modifiers) Object.entries(e.stat_modifiers).forEach(([k, v]) => { s[k.toUpperCase()] = (v > 0 ? '+' : '') + v; });
+                    return s;
+                }
+                case 'spells': {
+                    const s = {};
+                    if (e.mp_cost !== undefined) s['MP Cost'] = e.mp_cost;
+                    if (e.power   !== undefined) s['Power']   = e.power;
+                    if (e.type)                  s['Type']    = e.type;
+                    return s;
+                }
+                case 'craft_recipes': {
+                    const s = {};
+                    if (e.category)          s['Category']  = e.category;
+                    if (e.rarity)            s['Rarity']    = e.rarity;
+                    if (e.skill_requirement) s['Skill Req'] = e.skill_requirement;
+                    if (e.craft_time)        s['Craft Time'] = e.craft_time + 't';
+                    return s;
+                }
+                case 'areas': {
+                    const s = {};
+                    if (e.difficulty) s['Difficulty'] = e.difficulty;
+                    if (e.rest_cost)  s['Rest Cost']  = e.rest_cost + 'g';
+                    if (e.can_rest)   s['Can Rest']   = 'Yes';
+                    return s;
+                }
+                case 'missions': {
+                    const s = {};
+                    if (e.type)   s['Type']   = e.type;
+                    if (e.area)   s['Area']   = (e.area || '').replace(/_/g, ' ');
+                    if (e.target) s['Target'] = e.target + ' x' + (e.target_count || 1);
+                    return s;
+                }
+                case 'companions': {
+                    const s = {};
+                    if (e.price) s['Price'] = e.price + 'g';
+                    if (e.base_stats) Object.entries(e.base_stats).forEach(([k, v]) => { s[k.toUpperCase()] = v; });
+                    return s;
+                }
+                default:
+                    return {};
+            }
+        },
         searchResults() {
             const q = this.searchQ.toLowerCase().trim();
             if (!q || q.length < 2) return [];

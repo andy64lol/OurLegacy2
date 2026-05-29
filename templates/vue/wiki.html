@@ -98,10 +98,10 @@ window._wikiData = {
 
             <div class="wiki-nav-cat">Characters</div>
             <div class="wiki-nav-item" :class="{ active: section === 'classes' }" @click="setSection('classes')">
-                Classes <span class="wiki-nav-count">[[ classCount ]]</span>
+                Classes <span class="wiki-nav-count">[[ wikiData.classes.length ]]</span>
             </div>
             <div class="wiki-nav-item" :class="{ active: section === 'races' }" @click="setSection('races')">
-                Races <span class="wiki-nav-count">[[ raceCount ]]</span>
+                Races <span class="wiki-nav-count">[[ wikiData.races.length ]]</span>
             </div>
             <div class="wiki-nav-item" :class="{ active: section === 'spells' }" @click="setSection('spells')">
                 Spells <span class="wiki-nav-count">[[ wikiData.spells.length ]]</span>

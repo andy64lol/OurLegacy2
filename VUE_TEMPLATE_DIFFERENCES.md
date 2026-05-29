@@ -21,6 +21,24 @@ This document records differences between the original Jinja2 templates (`templa
 | 9 | `templates/vue/groups.html` | Activity entries rendered as `entry.text \|\| entry` → entries have `username`, `action`, `xp_awarded`, `gold_awarded` fields | **FIXED** |
 | 10 | `static/js/vue/land_shop.js` | Posts JSON to form-data route `/action/land/buy_housing` → must use `/api/action/land/buy_housing` | **FIXED** |
 | 11 | `static/js/vue/land_pets.js` | Posts JSON to form-data route `/action/land/buy_pet` → must use `/api/action/land/buy_pet` | **FIXED** |
+| 12 | `static/js/vue/game.js` | `loadGroup()` calls `/api/groups/info` — route doesn't exist; correct is `/api/groups/my` | **FIXED** |
+| 13 | `static/js/vue/game.js` | Market filter uses `this.player.class` — player object uses `char_class` | **FIXED** |
+| 14 | `templates/vue/chat.html` | `u.username`, `u.is_owner`, `u.is_admin` — `onlineUsers` are plain strings, not objects | **FIXED** |
+| 15 | `templates/vue/chat.html` | `v-if="isModOrOwner"` — computed property not defined in `chat.js` | **FIXED** |
+| 16 | `templates/vue/chat.html` | `msg.type !== 'system'` / `msg.type !== 'emote'` — messages use `msg.is_system` / `msg.is_emote` booleans | **FIXED** |
+| 17 | `templates/vue/chat.html` | `msg.is_owner`, `msg.is_admin` — these fields don't exist on message objects | **FIXED** |
+| 18 | `templates/vue/chat.html` | `msg.ts` — timestamp field is `msg.created_at` | **FIXED** |
+| 19 | `templates/vue/chat.html` | `renderMsg(msg.text)` — method is `renderMsgHtml`, field is `msg.message` | **FIXED** |
+| 20 | `templates/vue/chat.html` | `v-for="g in glyphs"` → `pickerGlyphs`; `insertGlyph(g)` → `insertGlyph(g.key)`; `g + '.webp'` → `g.file` | **FIXED** |
+| 21 | `static/js/vue/chat.js` | `msgClass(msg)` method missing — template calls it on every message bubble | **FIXED** |
+| 22 | `static/js/vue/chat.js` | `isModOrOwner` computed property missing — template uses it to gate mod actions | **FIXED** |
+| 23 | `templates/vue/dungeon_room.html` | Fallback `player.character_class` doesn't exist — correct field is `player.char_class` | **FIXED** |
+| 24 | `templates/vue/admin.html` | Command reference shows `broadcast` — correct command name is `announce` | **FIXED** |
+| 25 | `templates/vue/admin.html` | `stats.ban_count` / `stats.mute_count` don't exist — data uses `stats.bans.length` / `stats.mutes.length` | **FIXED** |
+| 26 | `templates/vue/admin.html` | `stats.banned` / `stats.muted` don't exist — data uses `stats.bans` / `stats.mutes` | **FIXED** |
+| 27 | `templates/vue/wiki.html` | `classCount` / `raceCount` not defined anywhere — should use `wikiData.classes.length` / `wikiData.races.length` | **FIXED** |
+| 28 | `templates/vue/wiki.html` + `static/js/vue/wiki.js` | `entryStats` computed property missing — detail view stats table was always empty | **FIXED** |
+| 29 | `templates/vue/chat_widget.html` | HTML body has same bugs as `chat.html` (wrong field names, renderMsg, glyphs) — but this is dead code since `chat_widget.js` uses an inline `template:` option that overrides the DOM | **DOCUMENTED (dead code, no fix needed)** |
 
 ---
 
@@ -120,7 +138,7 @@ The collect gold API (`/api/groups/collect_gold`) returns `{ ok, message, gold, 
 
 **Architecture change:** Jinja2 uses a server-rendered room description with form-based action buttons. Vue is fully reactive — room state is managed via Socket.IO events.
 
-**No functional bugs found.** Differences:
+**1 bug fixed (Bug #23).** Differences:
 - Vue shows a live party member panel (HP bars, status) not present in Jinja2
 - Vue animates combat log entries as they arrive
 - Vue has an inline minimap showing explored rooms (Jinja2 has none)
@@ -280,7 +298,7 @@ All API endpoints match `app.py` routes.
 
 ### `wiki.html` / `vue/wiki.html`
 
-**No functional bugs found.** Differences are cosmetic:
+**3 bugs fixed (Bugs #27, #28).** Differences:
 - Vue adds a search bar that filters entries client-side
 - Jinja2 links to individual wiki entry pages; Vue renders expanded content inline via `v-show`
 
@@ -294,13 +312,100 @@ All API endpoints match `app.py` routes.
 
 ### `admin.html` / `vue/admin.html`
 
-**No functional bugs found.** Both versions use the same admin action endpoints. Vue adds reactive search/filter on the player list.
+**4 bugs fixed (Bugs #24–#26).** Both versions use the same admin action endpoints. Vue adds reactive search/filter on the player list.
 
 ---
 
 ### `reset_password.html` / `vue/reset_password.html`
 
 **No functional bugs found.** Both use the same `/api/reset_password` flow.
+
+---
+
+## Third-Pass Bugs (dungeon_room, admin, wiki, chat_widget)
+
+### `dungeon_room.html` / `vue/dungeon_room.html`
+
+#### Wrong Player Class Fallback Field (Bug #23)
+
+Line 33 in the Vue sidebar:
+```html
+[[ player['class'] || player.character_class ]]
+```
+`player.character_class` does not exist on the player data object. The correct fallback field is `player.char_class` (the DB column name used throughout the codebase). Fixed to:
+```html
+[[ player['class'] || player.char_class ]]
+```
+
+---
+
+### `admin.html` / `vue/admin.html` + `admin.js`
+
+#### Wrong Command Name in Sidebar Reference (Bug #24)
+
+The command reference sidebar listed `broadcast <msg>` with `@click="prefill('broadcast ')"`. The `broadcast` case does not exist in `admin.js`'s `runCommand` switch — the correct command is `announce`. Fixed to `@click="prefill('announce ')"` / `announce <msg>`.
+
+#### Stats Sidebar Uses Non-Existent `ban_count` / `mute_count` (Bug #25)
+
+`admin.js` `refreshData()` populates `stats.bans` and `stats.mutes` as arrays. The template displayed:
+```html
+[[ stats.ban_count || 0 ]]
+[[ stats.mute_count || 0 ]]
+```
+Neither property exists — these always rendered as `0`. Fixed to:
+```html
+[[ stats.bans.length || 0 ]]
+[[ stats.mutes.length || 0 ]]
+```
+
+#### Banned/Muted Lists Use Non-Existent `stats.banned` / `stats.muted` (Bug #26)
+
+The banned and muted player pill lists used `stats.banned` and `stats.muted`, which don't exist in the Vue data object (data uses `stats.bans` and `stats.mutes`). Both the `v-if` guards and `v-for` iterators were affected, meaning the lists would never render. Fixed:
+```html
+<!-- before -->
+<div v-if="stats.banned && stats.banned.length" ...>
+    <span v-for="u in stats.banned" ...>
+<div v-if="stats.muted && stats.muted.length" ...>
+    <span v-for="u in stats.muted" ...>
+
+<!-- after -->
+<div v-if="stats.bans && stats.bans.length" ...>
+    <span v-for="u in stats.bans" ...>
+<div v-if="stats.mutes && stats.mutes.length" ...>
+    <span v-for="u in stats.mutes" ...>
+```
+
+---
+
+### `wiki.html` / `vue/wiki.html` + `wiki.js`
+
+#### `classCount` / `raceCount` Not Defined (Bug #27)
+
+The sidebar nav used `[[ classCount ]]` and `[[ raceCount ]]` for the Classes and Races count badges. Neither is defined as a computed property or data field in `wiki.js`. These badges always rendered empty. Fixed directly in the template to use the already-available `wikiData` object:
+```html
+[[ wikiData.classes.length ]]
+[[ wikiData.races.length ]]
+```
+
+#### `entryStats` Computed Property Missing from wiki.js (Bug #28)
+
+The detail view stats table iterated over `entryStats`:
+```html
+<tr v-for="(val, key) in entryStats" :key="key">
+```
+`entryStats` was not defined anywhere in `wiki.js` — when any wiki entry was clicked, the stats section would always be empty. Added a full `entryStats` computed property to `wiki.js` that extracts the appropriate key/value stats for each section type (`enemies`, `bosses`, `items`, `classes`, `races`, `spells`, `craft_recipes`, `areas`, `missions`, `companions`), matching the logic already present in the `buildDetail()` helper functions.
+
+---
+
+### `chat_widget.html` / `vue/chat_widget.html` + `chat_widget.js`
+
+#### HTML Body is Dead Code — JS Uses Inline Template (Bug #29, documented only)
+
+`templates/vue/chat_widget.html` contains a hand-written Vue template body (lines 55–113) with the same field-name bugs as `chat.html` (pre-fix): `u.username` for online users (strings), `renderMsg(msg.text)` instead of `renderMsgHtml(msg.message)`, `v-for="g in glyphs"` instead of `pickerGlyphs`, `msg.type !== 'system'` instead of `msg.is_system`, `msg.ts` instead of `msg.created_at`, and `isModOrOwner` (undefined).
+
+**However**, `chat_widget.js` creates its Vue app with an explicit `template: \`...\`` string option. When a Vue app is given a `template:` option, it overrides the DOM entirely — the HTML in the `#chat-widget-vue` div is replaced at mount time and never rendered. The `chat_widget.js` inline template is correct and uses all the right field names.
+
+No code fix is needed. The HTML file body should be kept in sync with the JS template for readability, but it does not affect runtime behaviour.
 
 ---
 

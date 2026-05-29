@@ -86,21 +86,21 @@ window._init = {
             <div class="adm-card">
                 <div class="adm-card-title">Server Stats</div>
                 <div class="adm-stat-row"><span>Online</span><span class="adm-stat-val">[[ stats.online_count || 0 ]]</span></div>
-                <div class="adm-stat-row"><span>Bans</span><span class="adm-stat-val">[[ stats.ban_count || 0 ]]</span></div>
-                <div class="adm-stat-row"><span>Mutes</span><span class="adm-stat-val">[[ stats.mute_count || 0 ]]</span></div>
+                <div class="adm-stat-row"><span>Bans</span><span class="adm-stat-val">[[ stats.bans.length || 0 ]]</span></div>
+                <div class="adm-stat-row"><span>Mutes</span><span class="adm-stat-val">[[ stats.mutes.length || 0 ]]</span></div>
             </div>
 
-            <div v-if="stats.banned && stats.banned.length" class="adm-card">
+            <div v-if="stats.bans && stats.bans.length" class="adm-card">
                 <div class="adm-card-title">Banned Players</div>
                 <div class="adm-pill-list">
-                    <span v-for="u in stats.banned" :key="u" class="adm-pill">[[ u ]]</span>
+                    <span v-for="u in stats.bans" :key="u" class="adm-pill">[[ u ]]</span>
                 </div>
             </div>
 
-            <div v-if="stats.muted && stats.muted.length" class="adm-card">
+            <div v-if="stats.mutes && stats.mutes.length" class="adm-card">
                 <div class="adm-card-title">Muted Players</div>
                 <div class="adm-pill-list">
-                    <span v-for="u in stats.muted" :key="u" class="adm-pill muted">[[ u ]]</span>
+                    <span v-for="u in stats.mutes" :key="u" class="adm-pill muted">[[ u ]]</span>
                 </div>
             </div>
 
@@ -114,7 +114,7 @@ window._init = {
                     <div class="adm-cmd-row" @click="prefill('mute ')"><code>mute &lt;user&gt;</code></div>
                     <div class="adm-cmd-row" @click="prefill('unmute ')"><code>unmute &lt;user&gt;</code></div>
                     <div class="adm-cmd-row" @click="prefill('kick ')"><code>kick &lt;user&gt;</code></div>
-                    <div class="adm-cmd-row" @click="prefill('broadcast ')"><code>broadcast &lt;msg&gt;</code></div>
+                    <div class="adm-cmd-row" @click="prefill('announce ')"><code>announce &lt;msg&gt;</code></div>
                     <div v-if="is_owner" class="adm-cmd-row" @click="prefill('stats')"><code>stats</code> — server stats</div>
                     <div v-if="is_owner" class="adm-cmd-row" @click="prefill('clear_chat')"><code>clear_chat</code></div>
                     <div v-if="is_owner" class="adm-cmd-row" @click="prefill('give_gold ')"><code>give_gold &lt;user&gt; &lt;n&gt;</code></div>
