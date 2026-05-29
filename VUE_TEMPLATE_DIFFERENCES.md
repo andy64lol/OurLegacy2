@@ -491,3 +491,123 @@ The Jinja2 version has an explicit Accept/Decline panel for incoming trade invit
 At the time of this audit, **no routes in `app.py` serve the Vue templates** — all `render_template(...)` calls reference the original Jinja2 templates. The Vue templates exist in `templates/vue/` as prepared replacements but are not yet wired up to any route.
 
 To enable a Vue page, the corresponding route needs to render `vue/<template_name>.html` instead of `<template_name>.html`.
+
+---
+
+## Fifth-Pass Bug Fixes — `vue/base.html` Widget Functions (Bugs #43–#45)
+
+### Bug #43 — `groups-widget-fab` button missing from `vue/base.html`
+
+**File:** `templates/vue/base.html`
+**Severity:** High — users on Vue pages have no way to open the groups overlay
+
+**Root cause:** `base.html` renders a floating action button (`id="groups-widget-fab"`) inside `#chat-widget` that calls `openGroupsOverlay()`. This button was never ported to `vue/base.html`. The `#groups-overlay` panel exists in `vue/base.html` but with no trigger to show it.
+
+**Fix:** Added the `groups-widget-fab` `<button>` element inside `#chat-widget` in `vue/base.html`, as a sibling of `#chat-toggle-btn`, matching the HTML structure from `base.html` (including `#groups-badge` span).
+
+---
+
+### Bug #44 — `toggleChat()` undefined on all Vue pages — chat widget broken
+
+**File:** `templates/vue/base.html`
+**Severity:** Critical — clicking the chat FAB or the chat close button throws `ReferenceError: toggleChat is not a function`
+
+**Root cause:** `toggleChat()` is defined as `window.toggleChat` in an inline `<script>` block in `base.html` (line 644). It was never ported to `vue/base.html`. The function is called by `onclick="toggleChat()"` on both `#chat-toggle-btn` and the chat panel's close button — meaning the chat widget is completely non-functional on all Vue pages.
+
+**Fix:** Added an IIFE `<script>` block in `vue/base.html` (inside the `{% if online_username %}` block) that declares `chatOpen`, `unreadCount`, and defines `window.toggleChat`. Uses the correct badge element ID (`chat-unread-badge`) that is present in `vue/base.html`, rather than `chat-badge` used in `base.html`.
+
+---
+
+### Bug #45 — `openGroupsOverlay()` / `closeGroupsOverlay()` undefined on all Vue pages
+
+**File:** `templates/vue/base.html`
+**Severity:** High — clicking the groups overlay backdrop or close button throws `ReferenceError: closeGroupsOverlay is not a function`
+
+**Root cause:** Both `window.openGroupsOverlay` and `window.closeGroupsOverlay` are defined only in the inline script of `base.html` (lines 690, 701). They were never ported to `vue/base.html`. `closeGroupsOverlay()` is called in the backdrop `onclick` and the overlay close `<button>` — both broken. `openGroupsOverlay()` was also missing (and needed for Bug #43's fix).
+
+**Fix:** Added `window.openGroupsOverlay` and `window.closeGroupsOverlay` to the same IIFE `<script>` block added for Bug #44. Also added a `message` event listener for `chat_unread` postMessage events (from the chat iframe) that increments the unread badge — this listener was also present in `base.html` but missing from `vue/base.html`.
+
+---
+
+## Fifth-Pass Clean Templates (No Bugs Found)
+
+| Template / File | Result |
+|-----------------|--------|
+| `defeat.html` / `vue/defeat.html` | **CLEAN** — Identical structure; Vue uses `[[ ]]` delimiters and `window._init` |
+| `victory.html` / `vue/victory.html` | **CLEAN** — Identical structure; Vue uses `[[ ]]` delimiters and `window._init` |
+| `dungeon_room.html` / `vue/dungeon_room.html` | **Already fixed** — bugs documented in 4th pass |
+| `reset_password.html` / `vue/reset_password.html` + `reset_password.js` | **CLEAN** |
+| `play.html` / `vue/play.html` | **CLEAN** — Static page, no template variables differ |
+| `create.html` / `vue/create.html` + `create.js` | **CLEAN** |
+| `leaderboard.html` / `vue/leaderboard.html` + `leaderboard.js` | **CLEAN** |
+| `land_map.html` / `vue/land_map.html` | **CLEAN** |
+| `items.html` / `vue/items.html` | **CLEAN** |
+| `verify_email.html` / `vue/verify_email.html` | **IDENTICAL** |
+| `wiki_disabled.html` / `vue/wiki_disabled.html` | **IDENTICAL** |
+| `sacred_text_gone.html` / `vue/sacred_text_gone.html` | **IDENTICAL** |
+| `index.js` | **CLEAN** — reads `window._init` correctly |
+| `leaderboard.js` | **CLEAN** |
+| `reset_password.js` | **CLEAN** |
+| `chat_widget.js` | **CLEAN** — JS overrides inner HTML; no functional mismatch |
+| `create.js` | **CLEAN** |
+| `vue/game.js` | **CLEAN** — reads `window._betaInit`, all field names correct including `char_class` fallback |
+
+---
+
+## Fifth-Pass Bug Fixes — chat.html, index.html, groups.js (Bugs #46–#49)
+
+### Bug #46 — `cooldownSecs` undefined in `vue/chat.html` — chat cooldown never displays
+
+**File:** `templates/vue/chat.html` (line 93)
+**Severity:** Medium — chat rate-limit countdown bar never appears; users see no feedback when told to wait
+
+**Root cause:** The template uses `v-if="cooldownSecs > 0"` and `[[ cooldownSecs ]]`, but `cooldownSecs` is not a property in the `vue/chat.js` data object. The JS defines `cooldownDisplay` (a pre-formatted string such as `"Next message in 5s"`) and updates it in `startCooldownDisplay()`. `undefined > 0` is always false, so the cooldown bar never renders.
+
+**Fix:** Changed `v-if="cooldownSecs > 0"` → `v-if="cooldownDisplay"` and `[[ cooldownSecs ]]s` → `[[ cooldownDisplay ]]` (the string already contains the full human-readable message).
+
+---
+
+### Bug #47 — `vue/index.html` missing CSS to hide `#groups-widget-fab` on the index/landing page
+
+**File:** `templates/vue/index.html`
+**Severity:** Low — groups FAB button incorrectly appears on the character selection / landing page (it should only appear within the full game UI)
+
+**Root cause:** Jinja2 `index.html` hides `#groups-widget-fab { display: none !important; }` via inline CSS. After Bug #45 was fixed and the FAB was added to `vue/base.html`, `vue/index.html` needed the same hide rule — without it the groups button floats over the landing page for logged-in users.
+
+**Fix:** Added `#groups-widget-fab { display: none !important; }` to the `<style>` block in `vue/index.html`.
+
+---
+
+### Bug #48 — `vue/index.html` missing conditional CSS to hide chat widget on the welcome/new-player screen
+
+**File:** `templates/vue/index.html`
+**Severity:** Low — chat widget appears during the new-player welcome flow when it should be hidden
+
+**Root cause:** Jinja2 `index.html` conditionally hides `#chat-widget` and `#chat-toggle-btn` when `show_welcome` is true. `vue/index.html` has no equivalent conditional hide rule.
+
+**Fix:** Added `{% if show_welcome %}#chat-widget, #chat-toggle-btn { display: none !important; }{% endif %}` to the `<style>` block in `vue/index.html`.
+
+---
+
+### Bug #49 — `vue/groups.js` calls non-existent `/api/groups/disband` endpoint
+
+**File:** `static/js/vue/groups.js`
+**Severity:** High — group leaders clicking "Disband Group" receive a 404 error; the group is never disbanded
+
+**Root cause:** The Vue groups rewrite added a `disbandGroup()` method that POSTs to `/api/groups/disband`. This route does not exist anywhere in `app.py`. The Jinja2 `groups.html` never had a separate disband endpoint — the leader's "Disband / Leave" button calls the same `leaveGroup()` function, which hits `/api/groups/leave`. The server's `leave` handler removes the group when the caller is the leader.
+
+**Fix:** Changed `fetch('/api/groups/disband', ...)` → `fetch('/api/groups/leave', ...)` in `disbandGroup()` to match the actual server endpoint that handles both leader disbanding and member leaving.
+
+---
+
+## Final Audit Summary
+
+All templates in `templates/vue/` have been audited across five passes. Total bugs found and fixed: **49**.
+
+| Pass | Scope | Bugs Fixed |
+|------|-------|-----------|
+| 1st | groups, land_shop, land_pets | #1–#14 |
+| 2nd | game.js (socket events, field names) | #15–#25 |
+| 3rd | chat, dungeon_room, admin | #26–#29 |
+| 4th | friends, wiki | #30–#42 |
+| 5th | base.html widgets, chat.html, index.html, groups.js | #43–#49 |

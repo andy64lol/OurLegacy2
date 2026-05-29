@@ -90,8 +90,8 @@
                 <img :src="'/game_assets/glyphs/' + g.file" :alt="g.key">
             </div>
         </div>
-        <div v-if="cooldownSecs > 0" class="chat-cooldown">
-            Please wait [[ cooldownSecs ]]s before sending again
+        <div v-if="cooldownDisplay" class="chat-cooldown">
+            [[ cooldownDisplay ]]
         </div>
         <div class="chat-input-row">
             <button class="glyph-btn" @click="showGlyphPicker = !showGlyphPicker" title="Glyphs">+</button>

@@ -312,6 +312,10 @@
             <img src="/game_assets/glyphs/chat.webp" alt="chat" style="width:22px;height:22px;image-rendering:pixelated;">
             <span id="chat-unread-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;width:16px;height:16px;font-size:10px;line-height:16px;text-align:center;font-weight:700;border-radius:50%;"></span>
         </button>
+        <button class="widget-fab" id="groups-widget-fab" onclick="openGroupsOverlay()" title="Adventure Group" style="pointer-events:all;">
+            <img src="/game_assets/glyphs/fight.webp" alt="group" style="width:22px;height:22px;image-rendering:pixelated;">
+            <span id="groups-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--bg-main);width:14px;height:14px;font-size:9px;line-height:14px;text-align:center;font-weight:700;border-radius:50%;"></span>
+        </button>
     </div>
     <div id="terminal-overlay">
         <div id="term-hdr">
@@ -329,6 +333,60 @@
     <button id="terminal-fab" onclick="toggleTerminal()" title="Owner Terminal" style="pointer-events:all;">
         <img src="/game_assets/glyphs/terminal.webp" alt="terminal" style="width:22px;height:22px;image-rendering:pixelated;">
     </button>
+    <script>
+    (function() {
+        var chatOpen = false;
+        var unreadCount = 0;
+
+        window.toggleChat = function() {
+            chatOpen = !chatOpen;
+            var panel = document.getElementById('chat-panel');
+            if (chatOpen) {
+                panel.style.display = 'flex';
+                panel.style.pointerEvents = 'auto';
+            } else {
+                panel.style.display = 'none';
+                panel.style.pointerEvents = 'none';
+            }
+            var fab = document.getElementById('chat-toggle-btn');
+            if (fab) fab.classList.toggle('chat-open', chatOpen);
+            if (chatOpen) {
+                unreadCount = 0;
+                var badge = document.getElementById('chat-unread-badge');
+                if (badge) { badge.style.display = 'none'; badge.textContent = ''; }
+                var frame = document.getElementById('chat-widget-frame');
+                if (frame && !frame.getAttribute('src')) { frame.src = '/chat'; }
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        };
+
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'chat_unread' && !chatOpen) {
+                unreadCount++;
+                var badge = document.getElementById('chat-unread-badge');
+                if (badge) { badge.style.display = 'flex'; badge.textContent = unreadCount > 9 ? '9+' : String(unreadCount); }
+            }
+        });
+
+        window.openGroupsOverlay = function() {
+            var overlay = document.getElementById('groups-overlay');
+            var frame = document.getElementById('groups-overlay-frame');
+            if (!overlay || !frame) return;
+            if (!frame.src || frame.src === window.location.href) { frame.src = '/groups'; }
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeGroupsOverlay = function() {
+            var overlay = document.getElementById('groups-overlay');
+            if (!overlay) return;
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        };
+    })();
+    </script>
     <script>
     (function() {
         var termOpen = false;

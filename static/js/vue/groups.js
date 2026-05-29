@@ -102,7 +102,7 @@ createApp({
         async disbandGroup() {
             if (!confirm('Disband the group? This cannot be undone.')) return;
             try {
-                await fetch('/api/groups/disband', { method: 'POST' });
+                await fetch('/api/groups/leave', { method: 'POST' });
                 window.location.reload();
             } catch (_) { /* network/parse error ignored */ }
         },
