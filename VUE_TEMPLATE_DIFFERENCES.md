@@ -161,7 +161,7 @@ The collect gold API (`/api/groups/collect_gold`) returns `{ ok, message, gold, 
 
 **Architecture change:** Jinja2 server-renders the friends list. Vue fetches from `/api/friends` on mount and maintains real-time status via Socket.IO.
 
-**No functional bugs found.** Differences:
+**13 bugs found and fixed (Bugs #30–#42) — see Fourth-Pass section below.** Differences:
 - Complete visual redesign: Jinja2 uses a custom purple-dark theme; Vue uses the standard game CSS variables
 - Vue adds unread DM badges per friend
 - Vue adds an inline DM panel (chat drawer); Jinja2 links to a separate DM page
@@ -406,6 +406,83 @@ The detail view stats table iterated over `entryStats`:
 **However**, `chat_widget.js` creates its Vue app with an explicit `template: \`...\`` string option. When a Vue app is given a `template:` option, it overrides the DOM entirely — the HTML in the `#chat-widget-vue` div is replaced at mount time and never rendered. The `chat_widget.js` inline template is correct and uses all the right field names.
 
 No code fix is needed. The HTML file body should be kept in sync with the JS template for readability, but it does not affect runtime behaviour.
+
+---
+
+---
+
+## Fourth-Pass Bugs (friends, leaderboard, land_map, verify_email, sacred_text_gone, wiki_disabled, create)
+
+| # | File | Bug | Status |
+|---|------|-----|--------|
+| 30 | `static/js/vue/friends.js` | `addFriend()` sends `{ username }` but server `/api/friends/request` expects `{ target }` — friend requests always fail silently | **FIXED** |
+| 31 | `static/js/vue/friends.js` + `templates/vue/friends.html` | `respondRequest(from, action)` sends `{ from_user, action: 'accept'/'decline' }` but server `/api/friends/respond` expects `{ id, accept: boolean }` — accept/decline never works | **FIXED** |
+| 32 | `static/js/vue/friends.js` | `removeFriend()` sends `{ username }` but server `/api/friends/remove` expects `{ target }` — unfriend always fails silently | **FIXED** |
+| 33 | `static/js/vue/friends.js` | `blockUser()` calls `/api/friends/block` (doesn't exist); correct endpoint is `/api/block` with body `{ target, action: 'block' }` | **FIXED** |
+| 34 | `static/js/vue/friends.js` | `unblockUser()` calls `/api/friends/unblock` (doesn't exist); correct endpoint is `/api/block` with body `{ target, action: 'unblock' }` | **FIXED** |
+| 35 | `static/js/vue/friends.js` | `sendTradeInvite()` emits `'trade_invite'` but server handler is `@sio.on("trade_request")` — trade invitations are never received by the server | **FIXED** |
+| 36 | `static/js/vue/friends.js` + `templates/vue/friends.html` | On receiving `'trade_invite'`, sets `tradeState = 'active'` without emitting `'trade_accept'` — server requires explicit acceptance; added `'received'` state with Accept/Decline UI | **FIXED** |
+| 37 | `static/js/vue/friends.js` | `selectFriend()` emits `'load_dm'` via socket — no `@sio.on("load_dm")` handler exists; DMs are REST-only (`/api/dm/<other>`) — DM history never loaded | **FIXED** |
+| 38 | `static/js/vue/friends.js` | `sendDm()` emits `'send_dm'` via socket with `{ to, message }` — no `@sio.on("send_dm")` handler; correct is REST `POST /api/dm/send` with `{ recipient, message }` — DMs were never sent | **FIXED** |
+| 39 | `static/js/vue/friends.js` | Listened for `'dm_received'` socket event — server emits `'dm_message'` with payload `{ sender, recipient, message, ... }` (not `{ from, message }`) — incoming DMs never appeared | **FIXED** |
+| 40 | `static/js/vue/friends.js` | Listened for `'trade_complete'` — server never emits this; server uses `'trade_update'` for all state changes including completion — trade completion UI never triggered | **FIXED** |
+| 41 | `static/js/vue/friends.js` | Listened for `'social_update'` — server never emits this; server emits `'friend_request'` and `'friend_accepted'` — real-time friend list updates never worked | **FIXED** |
+| 42 | `static/js/vue/friends.js` | No handler for `'trade_cancelled'` socket event — server emits this on cancel/decline with a message; without a handler the trade panel stays open forever | **FIXED** |
+
+### Pages with No New Bugs
+
+| Template | Result |
+|----------|--------|
+| `leaderboard.html` / `vue/leaderboard.html` + `leaderboard.js` | **CLEAN** — Both fetch `/api/leaderboard`; Vue adds reactive loading/error states |
+| `land_map.html` / `vue/land_map.html` | **CLEAN** — Both embed identical canvas JS inline using `{{ land_data.placed_buildings_map \| tojson }}` |
+| `verify_email.html` / `vue/verify_email.html` | **IDENTICAL** — Pure Jinja2 template variables, no Vue reactivity, identical markup |
+| `sacred_text_gone.html` / `vue/sacred_text_gone.html` | **IDENTICAL** — Static error page, no template variables |
+| `wiki_disabled.html` / `vue/wiki_disabled.html` | **IDENTICAL** — Static page, no template variables |
+| `create.js` | **CLEAN** — Minimal 21-line Vue app; reads `classData` and `error` from `window._init` correctly |
+
+---
+
+### `friends.html` / `vue/friends.html` + `friends.js` (Fourth-Pass Detail)
+
+The Vue friends page is a complete rewrite from the Jinja2 version. It uses:
+- Socket.IO for real-time events
+- Fetch API for friend management and DMs
+- An inline DM drawer instead of a separate page
+- An inline trade panel instead of a pop-up modal
+
+Multiple socket event names and REST API field names were wrong — see bugs #30–#42 above.
+
+#### REST API Field Mismatches
+
+| Method | JS sent | Server expects | Bug # |
+|--------|---------|---------------|-------|
+| `addFriend()` | `{ username: name }` | `{ target }` | #30 |
+| `respondRequest()` | `{ from_user, action: string }` | `{ id, accept: boolean }` | #31 |
+| `removeFriend()` | `{ username }` | `{ target }` | #32 |
+| `blockUser()` | `POST /api/friends/block` `{ username }` | `POST /api/block` `{ target, action: 'block' }` | #33 |
+| `unblockUser()` | `POST /api/friends/unblock` `{ username }` | `POST /api/block` `{ target, action: 'unblock' }` | #34 |
+
+#### Socket Event Mismatches
+
+| JS emitted / listened | Actual server event | Bug # |
+|-----------------------|--------------------|-------|
+| emit `'trade_invite'` | `@sio.on("trade_request")` | #35 |
+| emit `'load_dm'` | No handler (REST: `GET /api/dm/<other>`) | #37 |
+| emit `'send_dm'` `{ to, message }` | No handler (REST: `POST /api/dm/send` `{ recipient, message }`) | #38 |
+| listen `'dm_received'` | Server emits `'dm_message'` `{ sender, recipient, message }` | #39 |
+| listen `'trade_complete'` | Server emits `'trade_update'` with `status` field | #40 |
+| listen `'social_update'` | Server emits `'friend_request'` / `'friend_accepted'` | #41 |
+| (missing) | Server emits `'trade_cancelled'` | #42 |
+
+#### Trade Flow Fix (Bug #36)
+
+The Jinja2 version has an explicit Accept/Decline panel for incoming trade invitations. The Vue version incorrectly skipped this step, jumping directly to `tradeState = 'active'` when `'trade_invite'` was received — but the server requires `trade_accept` to be emitted before the trade activates. Fixed by:
+
+1. Adding `tradeState = 'received'` as a new state
+2. Adding `acceptTrade()` method that emits `'trade_accept'` with the `trade_id` from the invite
+3. Adding `declineTrade()` method that emits `'trade_decline'`
+4. Adding the `'received'` state panel to the template with Accept / Decline buttons
+5. Storing `pendingTradeId` from the `'trade_invite'` socket payload
 
 ---
 

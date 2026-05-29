@@ -85,6 +85,13 @@ window._init = {
                 <p style="color:var(--text-dim);margin-bottom:16px;">Waiting for [[ activeFriend ]] to accept...</p>
                 <button class="btn btn-secondary" @click="cancelTrade">Cancel</button>
             </div>
+            <div v-else-if="tradeState === 'received'" style="text-align:center;padding:20px;">
+                <p style="color:var(--text-dim);margin-bottom:16px;">[[ activeFriend ]] wants to trade with you!</p>
+                <div style="display:flex;gap:10px;justify-content:center;">
+                    <button class="btn btn-primary" @click="acceptTrade">Accept</button>
+                    <button class="btn btn-danger" @click="declineTrade">Decline</button>
+                </div>
+            </div>
             <div v-else-if="tradeState === 'active'">
                 <div class="trade-cols">
                     <div>
@@ -145,8 +152,8 @@ window._init = {
                 <div v-for="req in requests" :key="req.from_user" class="req-item">
                     <span style="font-size:12px;font-weight:700;flex:1;">[[ req.from_user ]]</span>
                     <div class="req-actions">
-                        <button class="btn btn-small btn-primary" @click="respondRequest(req.from_user, 'accept')">Accept</button>
-                        <button class="btn btn-small btn-danger" @click="respondRequest(req.from_user, 'decline')">Decline</button>
+                        <button class="btn btn-small btn-primary" @click="respondRequest(req.id, req.from_user, true)">Accept</button>
+                        <button class="btn btn-small btn-danger" @click="respondRequest(req.id, req.from_user, false)">Decline</button>
                     </div>
                 </div>
             </div>
