@@ -57,7 +57,7 @@ createApp({
                 const res  = await fetch('/api/groups/join', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: this.joinCode }),
+                    body: JSON.stringify({ invite_code: this.joinCode }),
                 });
                 const data = await res.json();
                 this.joinMsg = data.message || (data.ok ? 'Joined!' : 'Failed');
@@ -69,12 +69,13 @@ createApp({
         },
         async collectGold() {
             try {
-                const res  = await fetch('/api/groups/collect', { method: 'POST' });
+                const res  = await fetch('/api/groups/collect_gold', { method: 'POST' });
                 const data = await res.json();
                 this.collectMsg = data.message || (data.ok ? 'Gold collected!' : 'Failed');
                 this.collectOk  = !!data.ok;
-                if (data.ok && data.new_treasury !== null && data.new_treasury !== undefined && this.group) {
-                    this.group.treasury = data.new_treasury;
+                if (data.ok && this.group) {
+                    const share = data.gold || 0;
+                    this.group.gold_pool = Math.max(0, (this.group.gold_pool || 0) - share);
                 }
             } catch (e) {
                 this.collectMsg = 'Network error'; this.collectOk = false;
@@ -86,7 +87,7 @@ createApp({
                 await fetch('/api/groups/kick', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username }),
+                    body: JSON.stringify({ target: username }),
                 });
                 if (this.group) this.group.members = this.group.members.filter(m => m.username !== username);
             } catch (_) { /* network/parse error ignored */ }
@@ -115,7 +116,7 @@ createApp({
         sendChat() {
             const text = this.chatText.trim();
             if (!text || !this.socket) return;
-            this.socket.emit('group_chat', { message: text });
+            this.socket.emit('group_chat_send', { message: text });
             this.chatText = '';
         },
         scrollChat() {

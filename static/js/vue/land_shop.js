@@ -15,10 +15,10 @@ createApp({
             if (this.actionPending) return;
             this.actionPending = true;
             try {
-                const res = await fetch('/action/land/buy_housing', {
+                const res = await fetch('/api/action/land/buy_housing', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                    body: JSON.stringify({ housing_key: housingKey, return_to: 'land_shop' }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ housing_key: housingKey }),
                 });
                 const data = await res.json();
                 if (data.ok !== false) {

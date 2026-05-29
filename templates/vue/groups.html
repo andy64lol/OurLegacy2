@@ -109,7 +109,7 @@ window._init = {
                 <div class="panel-title">Treasury</div>
                 <div class="panel-body">
                     <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:10px;">
-                        [[ group.treasury ]]g
+                        [[ group.gold_pool ]]g
                     </div>
                     <button class="btn btn-primary btn-small" @click="collectGold">Collect My Share</button>
                     <div v-if="collectMsg" style="font-size:11px;margin-top:6px;"
@@ -125,7 +125,7 @@ window._init = {
                             [[ m.username === group.leader ? '&#9813;' : '&mdash;' ]]
                         </div>
                         <div class="member-name">[[ m.username ]]</div>
-                        <span class="member-contrib">+[[ m.contribution || 0 ]] XP</span>
+                        <span class="member-contrib">+[[ m.contribution_xp || 0 ]] XP</span>
                         <button v-if="isLeader && m.username !== myUsername"
                                 class="btn btn-xsmall btn-danger" @click="kickMember(m.username)">Kick</button>
                     </div>
@@ -158,11 +158,14 @@ window._init = {
             </div>
             <div class="panel-body" style="flex:1;display:flex;flex-direction:column;">
                 <div v-if="activeTab === 'activity'" class="activity-log">
-                    <div v-if="!group.activity || !group.activity.length" style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 0;">
+                    <div v-if="!group.log || !group.log.length" style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px 0;">
                         No activity yet.
                     </div>
-                    <div v-for="(entry, i) in (group.activity || [])" :key="i" class="activity-entry">
-                        [[ entry.text || entry ]]
+                    <div v-for="(entry, i) in (group.log || [])" :key="i" class="activity-entry">
+                        <span style="color:var(--gold);font-weight:700;">[[ entry.username ]]</span>
+                        <span> [[ entry.action ]]</span>
+                        <span v-if="entry.xp_awarded" style="color:var(--exp-purple);font-size:10px;"> +[[ entry.xp_awarded ]] XP</span>
+                        <span v-if="entry.gold_awarded" style="color:var(--gold);font-size:10px;"> +[[ entry.gold_awarded ]]g</span>
                     </div>
                 </div>
                 <div v-if="activeTab === 'chat'" class="group-chat-area" style="flex:1;">

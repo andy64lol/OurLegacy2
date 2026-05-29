@@ -15,10 +15,10 @@ createApp({
             if (this.actionPending) return;
             this.actionPending = true;
             try {
-                const res = await fetch('/action/land/buy_pet', {
+                const res = await fetch('/api/action/land/buy_pet', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                    body: JSON.stringify({ pet_key: petKey, return_to: 'land_pets' }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pet_key: petKey }),
                 });
                 const data = await res.json();
                 if (data.ok !== false) {
