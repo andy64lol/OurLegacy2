@@ -86,6 +86,14 @@ createApp({
             onlineUsername:       init.username || null,
             friendsList:          [],
             friendsLoading:       false,
+            pendingRequests:      { incoming: [], outgoing: [] },
+            friendAddTarget:      '',
+            friendAddLoading:     false,
+            dmTarget:             null,
+            dmMessages:           [],
+            dmInput:              '',
+            dmLoading:            false,
+            dmSending:            false,
             groupData:            null,
 
             landData:             null,
@@ -189,7 +197,7 @@ createApp({
             }).length;
         },
         totalDmUnread() {
-            return 0;
+            return (this.friendsList || []).reduce((a, f) => a + (f.unread || 0), 0);
         },
         allTabOptions() {
             return [
@@ -224,6 +232,9 @@ createApp({
         activeTab(newTab) {
             if (newTab === 'explore' && this.area && this.area.key === 'your_land' && this.landData) {
                 this.$nextTick(() => this.drawLandMinimap());
+            }
+            if (newTab === 'map') {
+                this.$nextTick(() => this.initWorldMapCanvas());
             }
         },
         landData(newData) {
@@ -368,7 +379,7 @@ createApp({
         rest()                { return this.doAction('/api/action/rest'); },
         mine()                { return this.doAction('/api/action/mine'); },
         async travel(key) {
-            const data = await this.doAction('/api/action/travel', { area: key });
+            const data = await this.doAction('/api/action/travel', { dest: key });
             if (data && data.ok) this.activeTab = 'explore';
         },
         useItem(name)         { return this.doAction('/api/action/use_item',  { item: name }); },
@@ -464,9 +475,105 @@ createApp({
             this.friendsLoading = true;
             try {
                 const r = await fetch('/api/friends', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                if (r.ok) { const data = await r.json(); this.friendsList = data.friends || []; }
+                if (r.ok) {
+                    const data = await r.json();
+                    this.friendsList = data.friends || [];
+                    this.pendingRequests = { incoming: data.incoming || [], outgoing: data.outgoing || [] };
+                }
             } catch (_) { /* network/parse error ignored */ }
             this.friendsLoading = false;
+        },
+
+        async addFriend() {
+            const target = (this.friendAddTarget || '').trim().toLowerCase();
+            if (!target || this.friendAddLoading) return;
+            this.friendAddLoading = true;
+            try {
+                const r = await fetch('/api/friends/request', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ target }),
+                });
+                const data = await r.json();
+                this.showToast(data.message || (data.ok ? 'Request sent!' : 'Failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
+                if (data.ok) { this.friendAddTarget = ''; await this.loadFriends(); }
+            } catch (_) { this.showToast('Network error.', 'var(--red)'); }
+            this.friendAddLoading = false;
+        },
+
+        async respondFriendRequest(id, accept) {
+            try {
+                const r = await fetch('/api/friends/respond', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ id, accept }),
+                });
+                const data = await r.json();
+                this.showToast(data.message || (data.ok ? 'Done!' : 'Failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
+                if (data.ok) await this.loadFriends();
+            } catch (_) { this.showToast('Network error.', 'var(--red)'); }
+        },
+
+        async removeFriend(username) {
+            if (!confirm(`Remove ${username} from friends?`)) return;
+            try {
+                const r = await fetch('/api/friends/remove', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ target: username }),
+                });
+                const data = await r.json();
+                this.showToast(data.message || (data.ok ? 'Removed.' : 'Failed.'), data.ok ? 'var(--text-dim)' : 'var(--red)');
+                if (data.ok) { if (this.dmTarget === username) this.dmTarget = null; await this.loadFriends(); }
+            } catch (_) { this.showToast('Network error.', 'var(--red)'); }
+        },
+
+        async openDm(username) {
+            this.dmTarget = username;
+            this.dmMessages = [];
+            this.dmLoading = true;
+            try {
+                const r = await fetch(`/api/dm/${encodeURIComponent(username)}`, {
+                    credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                const data = await r.json();
+                if (data.ok) this.dmMessages = data.messages || [];
+            } catch (_) {}
+            this.dmLoading = false;
+            this.$nextTick(() => { const el = document.getElementById('dm-msg-area'); if (el) el.scrollTop = el.scrollHeight; });
+            // Mark unread cleared on this friend
+            const f = this.friendsList.find(x => x.username === username);
+            if (f) f.unread = 0;
+        },
+
+        closeDm() { this.dmTarget = null; this.dmMessages = []; this.dmInput = ''; },
+
+        async sendDm() {
+            const msg = (this.dmInput || '').trim();
+            if (!msg || !this.dmTarget || this.dmSending) return;
+            this.dmSending = true;
+            const prev = this.dmInput;
+            this.dmInput = '';
+            try {
+                const r = await fetch('/api/dm/send', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ recipient: this.dmTarget, message: msg }),
+                });
+                const data = await r.json();
+                if (data.ok) {
+                    await this.openDm(this.dmTarget);
+                } else {
+                    this.showToast(data.message || 'Could not send.', 'var(--red)');
+                    this.dmInput = prev;
+                }
+            } catch (_) { this.dmInput = prev; }
+            this.dmSending = false;
+        },
+
+        fmtDmTime(ts) {
+            if (!ts) return '';
+            try { return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (_) { return ''; }
         },
 
         async loadGroup() {
@@ -835,12 +942,32 @@ createApp({
                 if (this.groupChatMessages.length > 100) this.groupChatMessages.shift();
                 this.$nextTick(() => this.scrollGroupChatBottom());
             });
+            sio.on('group_chat_error', (data) => {
+                this.showToast((data && data.message) || 'Chat error.', 'var(--red)');
+            });
             sio.on('group_level_up', (data) => {
                 const lvl = (data && data.new_level) ? data.new_level : '?';
-                this.showToast(`Group leveled up to Level ${lvl}!`, 'var(--gold)', 4000);
+                this.showToast(`Group leveled up to Level ${lvl}!`, 'var(--gold)');
                 this.groupLevelUpBanner = `Your group has reached Level ${lvl}!`;
                 if (this.groupLevelUpTimer) clearTimeout(this.groupLevelUpTimer);
                 this.groupLevelUpTimer = setTimeout(() => { this.groupLevelUpBanner = null; }, 5000);
+            });
+            sio.on('friend_request', (data) => {
+                this.showToast(`Friend request from ${data.from}!`, 'var(--gold)');
+                this.loadFriends();
+            });
+            sio.on('friend_accepted', (data) => {
+                this.showToast(`${data.from} accepted your friend request!`, 'var(--green-bright)');
+                this.loadFriends();
+            });
+            sio.on('dm_message', (data) => {
+                if (this.dmTarget && data.sender === this.dmTarget) {
+                    this.dmMessages.push(data);
+                    this.$nextTick(() => { const el = document.getElementById('dm-msg-area'); if (el) el.scrollTop = el.scrollHeight; });
+                } else {
+                    this.showToast(`DM from ${data.sender}: ${(data.message || '').slice(0, 60)}`, 'var(--mana-bright)');
+                    this.loadFriends();
+                }
             });
             this.groupSocket = sio;
         },
