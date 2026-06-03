@@ -91,10 +91,10 @@ createApp({
             // friends / DM
             onlineUsername: init.username || null,
             friendsList: [],
-            friendRequests: [],
+            pendingRequests: { incoming: [], outgoing: [] },
             friendsLoading: false,
-            addFriendInput: "",
-            addFriendPending: false,
+            friendAddTarget: "",
+            friendAddLoading: false,
             dmTarget: null,
             dmMessages: [],
             dmInput: "",
@@ -111,6 +111,29 @@ createApp({
             newGroupDesc: "",
             groupInviteCode: "",
             groupActionMsg: "",
+            groupChatMessages: [],
+            groupChatInput: "",
+            groupChatSending: false,
+            groupSocket: null,
+            groupSubTab: "info",
+            groupLevelUpBanner: null,
+            groupLevelUpTimer: null,
+
+            // customize character modal
+            customizeModalOpen: false,
+            customizeName: "",
+            customizeGender: "",
+            customizeRace: "",
+            customizeClass: "",
+            customizeRaces: init.races || [],
+            customizeClasses: init.classes || [],
+            customizeSubmitting: false,
+
+            // spell pagination
+            spellPage: 0,
+
+            // email warning
+            userHasEmail: init.user_has_email !== false,
 
             // chat
             chatOpen: false,
@@ -325,6 +348,14 @@ createApp({
             return Math.max(1, Math.ceil((this.availableBosses || []).length / this.BOSS_PAGE_SIZE));
         },
 
+        spellPageCount() {
+            return Math.max(1, Math.ceil((this.battleSpells || []).length / 4));
+        },
+        spellPagedSpells() {
+            const s = this.spellPage * 4;
+            return (this.battleSpells || []).slice(s, s + 4);
+        },
+
         totalDmUnread() {
             return (this.friendsList || []).reduce((a, f) => a + (f.unread || 0), 0);
         },
@@ -354,6 +385,7 @@ createApp({
         companionsAvailable() { this.companionPage = 1; },
         friendsList() { this.friendPage = 1; },
         availableBosses() { this.bossPage = 1; },
+        inBattle(val) { if (!val) this.spellPage = 0; },
         dmMessages(newVal) {
             if (this.chatAutoScroll) {
                 this.$nextTick(() => {
@@ -729,16 +761,16 @@ createApp({
                 if (r.ok) {
                     const data = await r.json();
                     this.friendsList = data.friends || [];
-                    this.friendRequests = data.requests || [];
+                    this.pendingRequests = { incoming: data.incoming || [], outgoing: data.outgoing || [] };
                 }
             } catch (_) {}
             this.friendsLoading = false;
         },
 
-        async sendFriendRequest() {
-            const target = (this.addFriendInput || "").trim().toLowerCase();
-            if (!target) return;
-            this.addFriendPending = true;
+        async addFriend() {
+            const target = (this.friendAddTarget || "").trim().toLowerCase();
+            if (!target || this.friendAddLoading) return;
+            this.friendAddLoading = true;
             try {
                 const r = await fetch("/api/friends/request", {
                     method: "POST",
@@ -749,13 +781,13 @@ createApp({
                 const data = await r.json();
                 this.showToast(data.message || (data.ok ? "Request sent!" : "Failed."), data.ok ? "var(--green-bright)" : "var(--red)");
                 if (data.ok) {
-                    this.addFriendInput = "";
+                    this.friendAddTarget = "";
                     await this.loadFriends();
                 }
             } catch (_) {
                 this.showToast("Request failed.", "var(--red)");
             } finally {
-                this.addFriendPending = false;
+                this.friendAddLoading = false;
             }
         },
 
@@ -1356,6 +1388,105 @@ createApp({
             return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         },
 
+        fmtDmTime(ts) {
+            if (!ts) return "";
+            const d = new Date(typeof ts === "number" ? ts * 1000 : ts);
+            const now = new Date();
+            if (d.toDateString() === now.toDateString()) {
+                return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            }
+            return d.toLocaleDateString([], { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        },
+
+        connectGroupSocket() {
+            if (this.groupSocket || typeof io === "undefined") return;
+            const sio = io({ transports: ["websocket", "polling"] });
+            sio.on("group_chat_message", (data) => {
+                this.groupChatMessages.push(data);
+                if (this.groupChatMessages.length > 100) this.groupChatMessages.shift();
+                this.$nextTick(() => this.scrollGroupChatBottom());
+            });
+            sio.on("group_chat_error", (data) => {
+                this.showToast((data && data.message) || "Chat error.", "var(--red)");
+            });
+            sio.on("group_level_up", (data) => {
+                const lvl = (data && data.new_level) ? data.new_level : "?";
+                this.showToast(`Group leveled up to Level ${lvl}!`, "var(--gold)");
+                this.groupLevelUpBanner = `Your group has reached Level ${lvl}!`;
+                if (this.groupLevelUpTimer) clearTimeout(this.groupLevelUpTimer);
+                this.groupLevelUpTimer = setTimeout(() => { this.groupLevelUpBanner = null; }, 5000);
+            });
+            sio.on("friend_request", (data) => {
+                this.showToast(`Friend request from ${data.from}!`, "var(--gold)");
+                this.loadFriends();
+            });
+            sio.on("friend_accepted", (data) => {
+                this.showToast(`${data.from} accepted your friend request!`, "var(--green-bright)");
+                this.loadFriends();
+            });
+            sio.on("dm_message", (data) => {
+                if (this.dmTarget && data.sender === this.dmTarget) {
+                    this.dmMessages.push(data);
+                    this.$nextTick(() => { const el = document.getElementById("dm-messages-wrap"); if (el) el.scrollTop = el.scrollHeight; });
+                } else {
+                    this.showToast(`DM from ${data.sender}: ${(data.message || "").slice(0, 60)}`, "var(--mana-bright)");
+                    this.loadFriends();
+                }
+            });
+            this.groupSocket = sio;
+        },
+
+        sendGroupChat() {
+            const msg = (this.groupChatInput || "").trim();
+            if (!msg || !this.groupSocket || this.groupChatSending) return;
+            this.groupChatSending = true;
+            this.groupSocket.emit("group_chat_send", { message: msg });
+            this.groupChatInput = "";
+            this.groupChatSending = false;
+        },
+
+        scrollGroupChatBottom() {
+            const el = document.getElementById("group-chat-log");
+            if (el) el.scrollTop = el.scrollHeight;
+        },
+
+        openCustomizeModal() {
+            this.customizeName = "";
+            this.customizeGender = "";
+            this.customizeRace = "";
+            this.customizeClass = "";
+            this.customizeModalOpen = true;
+        },
+
+        closeCustomizeModal() { this.customizeModalOpen = false; },
+
+        async submitCustomize() {
+            if (this.customizeSubmitting) return;
+            this.customizeSubmitting = true;
+            try {
+                const body = {};
+                if (this.customizeName.trim())  body.name   = this.customizeName.trim();
+                if (this.customizeGender)        body.gender = this.customizeGender;
+                if (this.customizeRace)          body.race   = this.customizeRace;
+                if (this.customizeClass)         body["class"] = this.customizeClass;
+                const r = await fetch("/action/customize_character", {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+                    body: JSON.stringify(body),
+                });
+                const data = await r.json();
+                if (data.ok) {
+                    this.showToast(data.message || "Character updated!", "var(--green-bright)");
+                    this.customizeModalOpen = false;
+                    this.fetchState();
+                } else {
+                    this.showToast(data.message || "Could not update character.", "var(--red)");
+                }
+            } catch (_) { this.showToast("Network error.", "var(--red)"); }
+            finally { this.customizeSubmitting = false; }
+        },
+
         spellTypeColor(sp) {
             const map = {
                 fire: "#e05030", ice: "#60c0f0", lightning: "#f0d020",
@@ -1405,6 +1536,7 @@ createApp({
             setInterval(() => this.autoSaveHeartbeat(), 30000);
             // start background chat polling for unread badge
             this.chatPolling = setInterval(() => this.pollChat(), 15000);
+            this.connectGroupSocket();
         }
         setInterval(() => this.loadWorldEvents(), 60000);
 
@@ -1422,6 +1554,8 @@ createApp({
         if (this.pollTimer) clearInterval(this.pollTimer);
         if (this.dmPolling) clearInterval(this.dmPolling);
         if (this.chatPolling) clearInterval(this.chatPolling);
+        if (this.groupSocket) { this.groupSocket.disconnect(); this.groupSocket = null; }
+        if (this.groupLevelUpTimer) clearTimeout(this.groupLevelUpTimer);
     },
 
 }).mount("#vue-beta-app");

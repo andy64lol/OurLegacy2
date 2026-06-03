@@ -7,12 +7,30 @@
 
 ## Changelog — Fixes Applied
 
-### Session 2026-06-03 — Full vue_beta.html vs vue/game.html comparison + travel bug fix
+### Session 2026-06-03 (part 2 — full gap sweep)
+| Fix | Files Changed | Status |
+|-----|--------------|--------|
+| **BUG-B02: `in_battle` not in `_betaInit`** — Added `in_battle` (and `user_has_email`, `races`, `classes`) to the `window._betaInit` block in `vue_beta.html`. All four now use Jinja2 `is defined` fallbacks for safe defaults if the route doesn't pass them. | `templates/vue_beta.html` | ✅ Fixed |
+| **Boss dialogue banner** — Added `battle.boss_dialogue` italic banner between the arena and the battle log in the battle tab. | `templates/vue_beta.html` | ✅ Fixed |
+| **Boss phase indicator** — Added pip bar (one dot per phase, red = current), phase index/total, ATK multiplier, and phase description below the dialogue banner when `battle.boss_phase_info` is non-null. | `templates/vue_beta.html` | ✅ Fixed |
+| **Player status effects pill cloud** — Added `battle.player_effects` horizontal pill tag cloud (effect name + turns remaining) between the phase indicator and the battle log. | `templates/vue_beta.html` | ✅ Fixed |
+| **Boss abilities collapsible panel** — Added `<details>` element listing each boss special move (name, description, cooldown left / "Ready") when `battle.boss_abilities` is non-empty. | `templates/vue_beta.html` | ✅ Fixed |
+| **Spell pagination in battle** — Added `spellPage` data prop, `spellPageCount` + `spellPagedSpells` computed props; spell list in battle tab now shows 4 spells/page with Prev/Next buttons. | `templates/vue_beta.html`, `static/js/vue_beta.js` | ✅ Fixed |
+| **Group real-time chat** — Added `connectGroupSocket()` (Socket.IO listener for `group_chat_message` + `group_level_up`), `sendGroupChat()`, `scrollGroupChatBottom()`; `groupChatMessages`, `groupChatInput`, `groupChatSending`, `groupChatSocket` data props; chat log + send input in Group tab Chat sub-tab. | `templates/vue_beta.html`, `static/js/vue_beta.js` | ✅ Fixed |
+| **Group sub-tab navigation** — Group tab replaced with Info / Members / Chat sub-tabs matching `vue/game.html`. `groupSubTab` data prop tracks active sub-tab. | `templates/vue_beta.html`, `static/js/vue_beta.js` | ✅ Fixed |
+| **Group level-up animated banner** — `group_level_up` Socket.IO event triggers a full-screen fixed overlay banner with 5 s auto-dismiss. `groupLevelUpBanner` + `groupLevelUpTimer` data props; `<transition name="group-levelup">` handles animation. | `templates/vue_beta.html`, `static/js/vue_beta.js` | ✅ Fixed |
+| **Sidebar: pet name display** — Added active pet name display to the sidebar player panel when `player.pet` is set. | `templates/vue_beta.html` | ✅ Fixed |
+| **Sidebar: no-email warning panel** — Added warning panel below the sidebar player panel when `!userHasEmail`, with a link to `/settings`. `userHasEmail` data prop added; seeded from `_betaInit.user_has_email`. | `templates/vue_beta.html`, `static/js/vue_beta.js` | ✅ Fixed |
+| **Sidebar: Change Character button** — Added "Change Character" button to the sidebar Navigate panel; opens a full-featured modal (name/gender/race/class, costs 10,000g). `openCustomizeModal`, `closeCustomizeModal`, `submitCustomize` methods added; `customizeModal*` + `customizeName/Gender/Race/Class/Races/Classes/Submitting` data props added. | `templates/vue_beta.html`, `static/js/vue_beta.js` | ✅ Fixed |
+| **Sidebar: land comfort points** — Added `landData.comfort_points` display to the Location sidebar panel when the player is on `your_land`. | `templates/vue_beta.html` | ✅ Fixed |
+| **Friends: separate incoming/outgoing requests** — `pendingRequests: {incoming, outgoing}` replaces `friendRequests`; `friendAddTarget` replaces `addFriendInput`; `friendAddLoading` replaces `addFriendPending`; `addFriend()` replaces `sendFriendRequest()`. Friends tab now renders incoming (Accept/Decline) and outgoing (cancel icon, pending label) separately. | `templates/vue_beta.html`, `static/js/vue_beta.js` | ✅ Fixed |
+| **Dungeon Continue button style** — Changed dungeon Continue button from `btn-secondary` to `btn-primary btn-wood` with `→` arrow to match `vue/game.html`. | `templates/vue_beta.html` | ✅ Fixed |
+| **`beforeUnmount` cleanup** — Added `groupSocket.disconnect()` and `groupLevelUpTimer` clearTimeout to `beforeUnmount()` to prevent memory leaks. | `static/js/vue_beta.js` | ✅ Fixed |
+
+### Session 2026-06-03 (part 1 — travel bug + gap survey)
 | Fix | Files Changed | Status |
 |-----|--------------|--------|
 | **BUG-B01: Travel sends wrong key** — `travel()` in `vue_beta.js` sent `{ area: key }` but `/api/action/travel` reads `data.get("dest", "")`. Travel always returned "Destination required" silently. Fixed to `{ dest: key }`. | `static/js/vue_beta.js` | ✅ Fixed |
-
-**New gaps found (vue_beta.html vs vue/game.html) — see Remaining Gaps section below for full priority list.**
 
 ---
 
@@ -488,43 +506,43 @@ Legend: ✅ Present & matching · ⚠️ Partial / differs · ❌ Missing · �
 | Gap | Where | Status |
 |-----|--------|--------|
 | **BUG-B01: Travel sends wrong key** | `vue_beta.js` | ✅ Fixed 2026-06-03 — `{ area: key }` → `{ dest: key }` |
-| **BUG-B02: `in_battle` not in `_betaInit`** | `vue_beta.html` | ❌ `window._betaInit.in_battle` is referenced in `vue_beta.js` line 54 (`inBattle: !!(window._betaInit && window._betaInit.in_battle)`) but `vue_beta.html` never sets `in_battle` in the `_betaInit` block. Battle tab badge and auto-switch are always wrong on first paint. |
-| **Boss dialogue banner** | Battle tab | ❌ Missing in vue_beta — battle tab has no `battle.boss_dialogue` banner. Present in vue/game.html. |
-| **Boss phase indicator** | Battle tab | ❌ Missing in vue_beta — no pip bar, phase index/total, or ATK multiplier. Present in vue/game.html. |
-| **Player status effects pill cloud** | Battle tab | ❌ Missing in vue_beta — no `battle.player_effects` pill tags. Present in vue/game.html. |
-| **Boss abilities panel** | Battle tab | ❌ Missing in vue_beta — no `<details>` with boss special moves. Present in vue/game.html. |
-| **Group real-time chat** | Group tab | ❌ Missing in vue_beta — no Socket.IO `group_chat_message` listener, no chat log, no send input. Present in vue/game.html. |
-| **Group sub-tab navigation** | Group tab | ❌ Missing in vue_beta — flat single layout. vue/game.html has Info / Members / Chat sub-tabs. |
-| **Group level-up animated banner** | Group tab | ❌ Missing in vue_beta — no `<transition name="group-levelup">` overlay. Present in vue/game.html. |
+| **BUG-B02: `in_battle` not in `_betaInit`** | `vue_beta.html` | ✅ Fixed 2026-06-03 — `in_battle`, `user_has_email`, `races`, `classes` all added to `_betaInit` block with Jinja2 `is defined` fallbacks. |
+| **Boss dialogue banner** | Battle tab | ✅ Fixed 2026-06-03 — `battle.boss_dialogue` italic banner added above the battle log. |
+| **Boss phase indicator** | Battle tab | ✅ Fixed 2026-06-03 — pip bar, phase index/total, ATK multiplier added below dialogue banner. |
+| **Player status effects pill cloud** | Battle tab | ✅ Fixed 2026-06-03 — `battle.player_effects` pill tags added. |
+| **Boss abilities panel** | Battle tab | ✅ Fixed 2026-06-03 — `<details>` collapsible panel with boss special moves added. |
+| **Group real-time chat** | Group tab | ✅ Fixed 2026-06-03 — `connectGroupSocket()` + Socket.IO listeners + chat log + send input added. |
+| **Group sub-tab navigation** | Group tab | ✅ Fixed 2026-06-03 — Info / Members / Chat sub-tabs added matching `vue/game.html`. |
+| **Group level-up animated banner** | Group tab | ✅ Fixed 2026-06-03 — full-screen overlay banner with 5 s auto-dismiss + `<transition name="group-levelup">` added. |
 
 ### Priority: Medium (missing features)
 
 | Gap | Where | Status |
 |-----|--------|--------|
-| **`_betaInit` missing `user_has_email`** | `vue_beta.html` head | ❌ `vue/game.html` passes `user_has_email` in `_betaInit`; vue_beta.html does not. The no-email sidebar warning panel can never appear. |
-| **`_betaInit` missing `races` + `classes`** | `vue_beta.html` head | ❌ `vue/game.html` passes `races` and `classes`; vue_beta.html does not. Change Character modal (if added) can't populate selectors. |
-| **Sidebar: pet name display** | Sidebar player panel | ❌ vue/game.html shows `player.pet` in the sidebar player panel. vue_beta.html omits it. |
-| **Sidebar: no-email warning panel** | Sidebar | ❌ vue/game.html shows a warning panel + link to `/settings` when `!userHasEmail`. Not present in vue_beta. |
-| **Sidebar: Change Character button** | Sidebar Navigate panel | ❌ vue/game.html has "Change Character" in the Navigate panel (opens a modal for name/gender/race/class, costs 10,000g). vue_beta Navigate panel has "Land & Housing" / "Leaderboard" / "Wiki" instead but no Change Character button. |
-| **Sidebar: land comfort points** | Sidebar Location panel | ❌ vue/game.html shows `landData.comfort_points` in the Location sidebar panel when on `your_land`. vue_beta location panel has no comfort display. |
-| **Spell pagination in battle** | Battle tab | ❌ vue/game.html paginates spells 4 per page with Prev/Next buttons (`spellPage`, `spellPageCount`, `spellPagedSpells`). vue_beta shows all spells at once — can overflow badly for high-level characters. |
-| **Right panel (4th column)** | Layout | ❌ vue/game.html has a 4th sticky right panel column (`#vue-beta-app .game-layout: 280px 5px 1fr 260px`) with a recent-events log and inline global chat. vue_beta.html has no right panel — chat is the floating FAB only. |
-| **Friends: separate incoming/outgoing requests** | Friends tab | ❌ vue/game.html has distinct "Pending Requests" (incoming, with Accept/Decline) and "Sent Requests" (outgoing, shown as "pending…"). vue_beta lumps them together as a single list with ✓/✗ buttons. |
+| **`_betaInit` missing `user_has_email`** | `vue_beta.html` head | ✅ Fixed 2026-06-03 |
+| **`_betaInit` missing `races` + `classes`** | `vue_beta.html` head | ✅ Fixed 2026-06-03 |
+| **Sidebar: pet name display** | Sidebar player panel | ✅ Fixed 2026-06-03 — `player.pet` shown in sidebar when active. |
+| **Sidebar: no-email warning panel** | Sidebar | ✅ Fixed 2026-06-03 — warning panel + `/settings` link added when `!userHasEmail`. |
+| **Sidebar: Change Character button** | Sidebar Navigate panel | ✅ Fixed 2026-06-03 — button added; opens customize modal (name/gender/race/class, costs 10,000g). |
+| **Sidebar: land comfort points** | Sidebar Location panel | ✅ Fixed 2026-06-03 — `landData.comfort_points` shown in Location panel on `your_land`. |
+| **Spell pagination in battle** | Battle tab | ✅ Fixed 2026-06-03 — 4 spells/page with Prev/Next; `spellPage`, `spellPageCount`, `spellPagedSpells` added. |
+| **Right panel (4th column)** | Layout | ❌ vue/game.html has a 4th sticky right panel column with a recent-events log and inline global chat. vue_beta.html has no right panel — chat is the floating FAB only. Complex layout change; deferred. |
+| **Friends: separate incoming/outgoing requests** | Friends tab | ✅ Fixed 2026-06-03 — `pendingRequests.incoming` (Accept/Decline) and `pendingRequests.outgoing` rendered separately; old `friendRequests` prop removed. |
 | **`boss_kills` event progress bar** | Events tab | ✅ Fixed in vue/game.html — not verified present in vue_beta |
 
 ### Priority: Low (polish / edge cases)
 
 | Gap | Where | Status |
 |-----|--------|--------|
-| **Email setup prompt** | Sidebar | ✅ Fixed in vue/game.html (2026-05-28) — not present in vue_beta |
-| **Change Character button + modal** | Sidebar | ✅ Fixed in vue/game.html (2026-05-28) — not present in vue_beta |
+| **Email setup prompt** | Sidebar | ✅ Fixed in both (2026-06-03) |
+| **Change Character button + modal** | Sidebar | ✅ Fixed in both (2026-06-03) |
 | **STR → mine success hint** | Mine tab | ✅ Fixed in vue/game.html — not verified in vue_beta |
 | **Equip-button title tooltip** | Inventory tab | ✅ Fixed in vue/game.html — not verified in vue_beta |
 | **Rest button gold-check disabled** | Explore tab | ✅ Fixed in vue/game.html — not verified in vue_beta |
 | **Land crafting recipes** | Land tab | ✅ Already present in both |
 | **Land building buy/place/remove** | Land tab | ❌ Link to `/land/map` (WONTFIX inline) |
 | **Pet purchasing** | Land tab | ❌ Link to `/land/pets` (WONTFIX inline) |
-| **Dungeon Continue button style** | Dungeons tab | ❌ vue_beta uses `btn-secondary`; vue/game.html uses `btn-primary btn-wood` with `→` arrow |
+| **Dungeon Continue button style** | Dungeons tab | ✅ Fixed 2026-06-03 — changed to `btn-primary btn-wood` with `→` arrow. |
 | **BUG-V08 — `marketReset` legacy route** | `game.js` | WONTFIX (not in Vue; route still works) |
 | **BUG-J05 — missing XHR header on forms** | Jinja2 templates | WONTFIX — `spa.js` document-level `submit` listener already covers all `/action/*` forms |
 | **Tab glyph pixel icons** | Tab bar | ❌ Decorative only |
