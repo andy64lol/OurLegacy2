@@ -101,6 +101,30 @@
 
 ---
 
+### Session 2026-06-04 (large batch)
+| Fix | Files Changed | Status |
+|-----|--------------|--------|
+| **Remove false data from Vue create page** — Added real race, gender, background selectors (pulling from GAME_DATA). Fixed class stat display to use `base_stats.hp/mp/attack/defense/speed` instead of `base_hp` etc. Added `/beta/create` route (GET) that serves `vue/create.html` with full GAME_DATA. | `templates/vue/create.html`, `static/js/vue/create.js`, `app.py` | ✅ Fixed |
+| **Auto-install dependencies** — `main.py` now tries to import flask/flask_socketio/gunicorn/uvicorn/supabase; if any ImportError is caught, pip-installs from requirements.txt before launching gunicorn. | `main.py` | ✅ Fixed |
+| **Remove "The Origin of Eldenmoor"** — Removed this placeholder item from the general store item list in `game_data/world/shops.json`. | `game_data/world/shops.json` | ✅ Fixed |
+| **Pagination — Crafting** — `craftingPage` data prop + `craftingPageCount`/`pagedCrafting` computed; Prev/Next bar rendered in Crafting tab. | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Fixed |
+| **Pagination — Dungeons** — `dungeonPage` data prop + `dungeonPageCount`/`pagedDungeons` computed; Prev/Next bar rendered in Dungeons tab. | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Fixed |
+| **Pagination — Market** — `marketPage` data prop + `marketPageCount`/`pagedMarket` computed; Prev/Next bar rendered in Market tab. | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Fixed |
+| **Pagination — Quests** — `questPage` data prop + `questPageCount`/`pagedQuests` computed; Prev/Next bar rendered in Quests tab. | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Fixed |
+| **Pagination — Challenges** — `challengePage` data prop + `challengePageCount`/`pagedChallenges` computed; Prev/Next bar rendered in Challenges tab. | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Fixed |
+| **Pagination — Diary** — `diaryPage` data prop + `diaryPageCount`/`pagedDiary` computed; Prev/Next bar rendered in Diary tab. | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Fixed |
+| **Pagination — Friends** — `friendsPage` data prop + `friendsPageCount`/`pagedFriends` computed; Prev/Next bar rendered in Friends tab. | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Fixed |
+| **Diary [object Object] fix** — Diary entries are `{text, color}` objects. Changed diary render to `renderGlyph(entry.text)` with `:style="{color: entry.color}"`. Also hardened `renderGlyph()` to gracefully stringify any object passed to it. | `templates/vue/game.html`, `static/js/vue/game.js` | ✅ Fixed |
+| **Large numbers / scientific notation** — Added `fmtNum()` method that abbreviates numbers (K/M/B/T/Qa/Qi). Applied to character tab stats (HP, MP, EXP, ATK, DEF, SPD, kills, bosses, deaths, reputation) and sidebar bars. | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Fixed |
+| **Background zoom fix** — Added CSS override in game.html style block: `background-attachment: scroll !important` on all `html[data-bg] body .main-content` selectors. Prevents background from zooming in on longer pages. | `templates/vue/game.html` | ✅ Fixed |
+| **Darkened overlay fills full page** — Added `min-height: 100% !important` to the `::before` overlay pseudo-element on `.main-content` so the gradient overlay always covers the full scrollable height. | `templates/vue/game.html` | ✅ Fixed |
+| **DM as floating modal** — Removed inline DM panel from Friends tab. Added `dmModalOpen` data prop. `openDm()` now sets `dmModalOpen = true`; `closeDm()` clears it. DM is rendered as a `position:fixed` overlay modal (backdrop-click to close, full message log + send row). | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Fixed |
+| **Announcement ticker visible in Vue beta** — Added `announcements: []` data prop + `loadAnnouncements()` method (fetches `/api/announcements` on `mounted()`). Ticker rendered above tab bar using `.vue-ticker` CSS class. | `static/js/vue/game.js`, `templates/vue/game.html` | ✅ Fixed |
+| **Glyph support — battle log** — Battle log entries now use `v-html="renderGlyph(entry)"` instead of plain `[[ entry ]]`. | `templates/vue/game.html` | ✅ Fixed |
+| **Glyph support — DM messages** — DM message text in the new floating modal uses `v-html="renderGlyph(m.message)"`. | `templates/vue/game.html` | ✅ Fixed |
+
+---
+
 ## Pagination — All Lists
 
 | List | Page size | Status |
@@ -115,6 +139,7 @@
 | Companions available | 8/pg | ✅ |
 | Friends list | 20/pg | ✅ |
 | Boss challenges | 8/pg | ✅ |
+| Dungeons | 8/pg | ✅ |
 
 ---
 

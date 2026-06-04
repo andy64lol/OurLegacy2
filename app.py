@@ -2820,6 +2820,18 @@ def play():
     return render_template("play.html")
 
 
+@app.route("/beta/create", methods=["GET"])
+def beta_create():
+    """Vue beta character creation page."""
+    create_error = session.pop("create_error", None)
+    session.modified = True
+    return render_template(
+        "vue/create.html",
+        data=GAME_DATA,
+        error=create_error,
+    )
+
+
 @app.route("/create", methods=["GET", "POST"])
 def create():
     if request.method == "GET":

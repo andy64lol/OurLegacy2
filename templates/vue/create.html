@@ -4,6 +4,7 @@
 <script>
 window._init = {
     classData: {{ data.classes | tojson }},
+    raceData:  {{ data.races  | tojson if data.races  is defined else '{}' }},
     error: {{ error | tojson if error else 'null' }},
 };
 </script>
@@ -21,6 +22,7 @@ window._init = {
     <form method="post" action="/create" class="create-form">
         <div class="create-layout">
             <div class="create-left">
+                <!-- Identity panel -->
                 <div class="panel">
                     <div class="panel-title">Identity</div>
                     <div class="panel-body">
@@ -29,6 +31,47 @@ window._init = {
                                placeholder="Enter your name..." maxlength="24"
                                autocomplete="off" required>
 
+                        <label class="field-label" style="margin-top:16px;">Gender</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                            <label v-for="g in ['male','female','nonbinary']" :key="g"
+                                   style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;">
+                                <input type="radio" name="gender" :value="g"
+                                       v-model="selectedGender" style="accent-color:var(--gold);">
+                                [[ g.charAt(0).toUpperCase() + g.slice(1) ]]
+                            </label>
+                        </div>
+                        <div style="font-size:11px;color:var(--text-dim);margin-top:3px;" v-if="selectedGender">
+                            <span v-if="selectedGender==='male'">+4 ATK &bull; +3 MP &bull; +15 HP</span>
+                            <span v-if="selectedGender==='female'">+3 SPD &bull; +25 Gold &bull; +5 MP</span>
+                            <span v-if="selectedGender==='nonbinary'">+2 ATK &bull; +2 SPD &bull; +10 HP</span>
+                        </div>
+
+                        <label class="field-label" style="margin-top:16px;">Race</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <label v-for="(raceInfo, raceName) in raceData" :key="raceName"
+                                   style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;"
+                                   :title="raceInfo.description || raceName">
+                                <input type="radio" name="race" :value="raceName"
+                                       v-model="selectedRace" style="accent-color:var(--gold);">
+                                [[ raceName ]]
+                            </label>
+                        </div>
+                        <div v-if="currentRace && currentRace.description" style="font-size:11px;color:var(--text-dim);margin-top:4px;">[[ currentRace.description ]]</div>
+
+                        <label class="field-label" style="margin-top:16px;">Background</label>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            <label v-for="(bgInfo, bgKey) in backgrounds" :key="bgKey"
+                                   style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:4px;border:1px solid transparent;"
+                                   :style="selectedBackground === bgKey ? 'border-color:rgba(200,165,60,0.4);background:rgba(200,165,60,0.07);' : ''">
+                                <input type="radio" name="background" :value="bgKey"
+                                       v-model="selectedBackground" style="accent-color:var(--gold);margin-top:2px;">
+                                <div>
+                                    <div style="font-size:13px;color:var(--text-light);font-weight:bold;">[[ bgInfo.label ]]</div>
+                                    <div style="font-size:11px;color:var(--text-dim);">[[ bgInfo.bonus ]]</div>
+                                </div>
+                            </label>
+                        </div>
+
                         <label class="field-label" style="margin-top:16px;">Choose Your Class</label>
                         <div class="class-grid">
                             <label v-for="(clsData, clsName) in classData" :key="clsName" class="class-card">
@@ -36,7 +79,7 @@ window._init = {
                                        v-model="selectedClass">
                                 <div class="class-card-inner">
                                     <div class="class-name">[[ clsName ]]</div>
-                                    <div class="class-desc-short">[[ clsData.description ? clsData.description.slice(0, 40) + '...' : '' ]]</div>
+                                    <div class="class-desc-short">[[ clsData.description ? clsData.description.slice(0, 40) + '…' : '' ]]</div>
                                 </div>
                             </label>
                         </div>
@@ -51,6 +94,7 @@ window._init = {
                 </a>
             </div>
 
+            <!-- Right: class preview -->
             <div class="create-right">
                 <div class="panel" v-if="currentClass">
                     <div class="panel-title">[[ selectedClass ]]</div>
@@ -58,18 +102,29 @@ window._init = {
                         <p class="class-full-desc">[[ currentClass.description ]]</p>
 
                         <div class="stats-grid">
-                            <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val">[[ currentClass.base_hp ]]</span></div>
-                            <div class="stat-row"><span class="stat-name">MP</span><span class="stat-val">[[ currentClass.base_mp ]]</span></div>
-                            <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val">[[ currentClass.base_attack ]]</span></div>
-                            <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val">[[ currentClass.base_defense ]]</span></div>
-                            <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val">[[ currentClass.base_speed ]]</span></div>
-                            <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val">[[ currentClass.starting_gold ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">HP</span><span class="stat-val">[[ (currentClass.base_stats||{}).hp || '-' ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">MP</span><span class="stat-val">[[ (currentClass.base_stats||{}).mp || '-' ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">Attack</span><span class="stat-val">[[ (currentClass.base_stats||{}).attack || '-' ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">Defense</span><span class="stat-val">[[ (currentClass.base_stats||{}).defense || '-' ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">Speed</span><span class="stat-val">[[ (currentClass.base_stats||{}).speed || '-' ]]</span></div>
+                            <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val">[[ currentClass.starting_gold || '-' ]]</span></div>
                         </div>
 
                         <div class="stat-label" style="margin-top:12px;">Starting Equipment</div>
                         <ul class="item-list">
                             <li v-for="item in (currentClass.starting_items || [])" :key="item">[[ item ]]</li>
                         </ul>
+
+                        <div v-if="currentClass.level_up_bonuses" style="margin-top:12px;">
+                            <div class="stat-label">Level-Up Bonuses</div>
+                            <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">
+                                <span v-if="currentClass.level_up_bonuses.hp">+[[ currentClass.level_up_bonuses.hp ]] HP &nbsp;</span>
+                                <span v-if="currentClass.level_up_bonuses.mp">+[[ currentClass.level_up_bonuses.mp ]] MP &nbsp;</span>
+                                <span v-if="currentClass.level_up_bonuses.attack">+[[ currentClass.level_up_bonuses.attack ]] ATK &nbsp;</span>
+                                <span v-if="currentClass.level_up_bonuses.defense">+[[ currentClass.level_up_bonuses.defense ]] DEF &nbsp;</span>
+                                <span v-if="currentClass.level_up_bonuses.speed">+[[ currentClass.level_up_bonuses.speed ]] SPD &nbsp;</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

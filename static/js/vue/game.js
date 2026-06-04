@@ -149,6 +149,17 @@ createApp({
             customizeRaces:      init.races   || [],
             customizeClasses:    init.classes || [],
             customizeSubmitting: false,
+
+            craftingPage:   1,
+            dungeonPage:    1,
+            marketPage:     1,
+            questPage:      1,
+            challengePage:  1,
+            diaryPage:      1,
+            friendsPage:    1,
+
+            announcements:  [],
+            dmModalOpen:    false,
         };
     },
 
@@ -189,6 +200,21 @@ createApp({
             return counts;
         },
         isOnYourLand() { return this.area && this.area.key === 'your_land'; },
+
+        craftingPageCount()  { return Math.max(1, Math.ceil((this.craftingRecipes||[]).length / 12)); },
+        pagedCrafting()      { const p = Math.min(this.craftingPage, this.craftingPageCount) - 1; return (this.craftingRecipes||[]).slice(p*12, p*12+12); },
+        dungeonPageCount()   { return Math.max(1, Math.ceil((this.dungeonList||[]).length / 8)); },
+        pagedDungeons()      { const p = Math.min(this.dungeonPage, this.dungeonPageCount) - 1; return (this.dungeonList||[]).slice(p*8, p*8+8); },
+        marketPageCount()    { return Math.max(1, Math.ceil((this.marketItems||[]).length / 20)); },
+        pagedMarket()        { const p = Math.min(this.marketPage, this.marketPageCount) - 1; return (this.marketItems||[]).slice(p*20, p*20+20); },
+        questPageCount()     { return Math.max(1, Math.ceil((this.missions||[]).length / 10)); },
+        pagedQuests()        { const p = Math.min(this.questPage, this.questPageCount) - 1; return (this.missions||[]).slice(p*10, p*10+10); },
+        challengePageCount() { return Math.max(1, Math.ceil((this.challenges||[]).length / 10)); },
+        pagedChallenges()    { const p = Math.min(this.challengePage, this.challengePageCount) - 1; return (this.challenges||[]).slice(p*10, p*10+10); },
+        diaryPageCount()     { return Math.max(1, Math.ceil((this.diary||[]).length / 30)); },
+        pagedDiary()         { const p = Math.min(this.diaryPage, this.diaryPageCount) - 1; return (this.diary||[]).slice(p*30, p*30+30); },
+        friendsPageCount()   { return Math.max(1, Math.ceil((this.friendsList||[]).length / 20)); },
+        pagedFriends()       { const p = Math.min(this.friendsPage, this.friendsPageCount) - 1; return (this.friendsList||[]).slice(p*20, p*20+20); },
         unreadChatCount() {
             if (!this.chatMessages.length) return 0;
             return this.chatMessages.slice(-9).filter(m => {
@@ -530,6 +556,7 @@ createApp({
 
         async openDm(username) {
             this.dmTarget = username;
+            this.dmModalOpen = true;
             this.dmMessages = [];
             this.dmLoading = true;
             try {
@@ -546,7 +573,7 @@ createApp({
             if (f) f.unread = 0;
         },
 
-        closeDm() { this.dmTarget = null; this.dmMessages = []; this.dmInput = ''; },
+        closeDm() { this.dmTarget = null; this.dmMessages = []; this.dmInput = ''; this.dmModalOpen = false; },
 
         async sendDm() {
             const msg = (this.dmInput || '').trim();
@@ -915,8 +942,22 @@ createApp({
             window.location.href = '/';
         },
 
+        fmtNum(n) {
+            if (typeof n !== 'number') { n = Number(n); }
+            if (isNaN(n) || !isFinite(n)) return '?';
+            const abs = Math.abs(n);
+            if (abs >= 1e18) return (n / 1e18).toFixed(1) + 'Qi';
+            if (abs >= 1e15) return (n / 1e15).toFixed(1) + 'Qa';
+            if (abs >= 1e12) return (n / 1e12).toFixed(1) + 'T';
+            if (abs >= 1e9)  return (n / 1e9 ).toFixed(1) + 'B';
+            if (abs >= 1e6)  return (n / 1e6 ).toFixed(1) + 'M';
+            if (abs >= 1e3)  return (n / 1e3 ).toFixed(1) + 'K';
+            return Math.round(n).toLocaleString();
+        },
+
         renderGlyph(text) {
-            if (!text) return '';
+            if (text === null || text === undefined) return '';
+            if (typeof text === 'object' && text !== null) text = text.text || text.message || JSON.stringify(text);
             const escaped = String(text)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -924,6 +965,14 @@ createApp({
             return escaped.replace(/:([a-z0-9_]+):/g, (_, name) => {
                 return `<img src="/game_assets/glyphs/${name}.webp" alt="" style="width:16px;height:16px;image-rendering:pixelated;vertical-align:middle;margin:0 1px;" onerror="this.style.display='none'">`;
             });
+        },
+
+        async loadAnnouncements() {
+            try {
+                const r = await fetch('/api/announcements', { credentials: 'same-origin' });
+                const data = await r.json();
+                this.announcements = data.announcements || [];
+            } catch(_) {}
         },
         typeGlyph(type) {
             const map = { weapon:'weapon', armor:'armor', offhand:'offhand', accessory:'accessories', consumable:'food', material:'materials', pickaxe:'pickaxe', spell:'spell', book:'book' };
@@ -1100,6 +1149,7 @@ createApp({
     mounted() {
         this.fetchState();
         this.resetPoll();
+        this.loadAnnouncements();
         if (this.onlineUsername) {
             this.loadNearby();
             setInterval(() => this.loadNearby(), 20000);
