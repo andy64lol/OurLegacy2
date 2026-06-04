@@ -1043,10 +1043,16 @@ createApp({
         closeCustomizeModal() { this.customizeModalOpen = false; },
         async submitCustomize() {
             if (this.customizeSubmitting) return;
+            const hasNameChange = this.customizeName.trim() && !this.onlineUsername;
+            const hasOtherChange = this.customizeGender || this.customizeRace || this.customizeClass;
+            if (!hasNameChange && !hasOtherChange) {
+                this.showToast('Choose at least one change before saving.', 'var(--red)');
+                return;
+            }
             this.customizeSubmitting = true;
             try {
                 const body = {};
-                if (this.customizeName.trim())  body.name   = this.customizeName.trim();
+                if (hasNameChange)              body.name   = this.customizeName.trim();
                 if (this.customizeGender)        body.gender = this.customizeGender;
                 if (this.customizeRace)          body.race   = this.customizeRace;
                 if (this.customizeClass)         body['class'] = this.customizeClass;

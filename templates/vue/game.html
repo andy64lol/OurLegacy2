@@ -282,7 +282,7 @@ window._betaInit = {
                         <button @click="switchTab('dungeons')" class="btn btn-secondary btn-small" style="text-align:center;">Dungeons</button>
                         <button @click="switchTab('crafting')" class="btn btn-secondary btn-small" style="text-align:center;">Crafting</button>
                         <button @click="switchTab('market')" class="btn btn-secondary btn-small" style="text-align:center;">Elite Market</button>
-                        <button @click="openCustomizeModal" class="btn btn-secondary btn-small" style="text-align:center;" :title="player && player.gold &lt; 10000 ? 'Costs 10,000 gold' : 'Customize name, race, or class (10,000g)'">Change Character</button>
+                        <button @click="openCustomizeModal" class="btn btn-secondary btn-small" style="text-align:center;" :disabled="player && player.gold < 10000" :title="player ? (player.gold < 10000 ? 'Need 10,000 gold' : 'Customize name, race, or class (10,000g)') : 'Customize name, race, or class (10,000g)'">Change Character</button>
                     </div>
                 </div>
 
@@ -1647,6 +1647,9 @@ window._betaInit = {
                     <label style="font-size:12px;color:var(--text-dim);">New Name</label>
                     <input type="text" v-model="customizeName" maxlength="20" placeholder="Leave blank to keep current"
                         style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:7px 9px;font-size:13px;color:var(--text-light);outline:none;box-sizing:border-box;margin-top:3px;">
+                </div>
+                <div v-else style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:6px;color:var(--text-light);font-size:12px;">
+                    Name changes are disabled for cloud save accounts.
                 </div>
                 <div>
                     <label style="font-size:12px;color:var(--text-dim);">Gender</label>

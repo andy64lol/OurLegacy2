@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "lint": "eslint --no-eslintrc -c .eslintrc.json static/js/**/*.js"
+  },
   "devDependencies": {
     "eslint": "^8.57.1"
   }

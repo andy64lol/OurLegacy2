@@ -16,7 +16,11 @@
     "fmtNum": "readonly",
     "initLowHpWarning": "readonly",
     "showToast": "readonly",
-    "switchTab": "readonly"
+    "switchTab": "readonly",
+    "history": "readonly",
+    "URL": "readonly",
+    "window": "readonly",
+    "AudioContext": "readonly"
   },
   "rules": {
     "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
