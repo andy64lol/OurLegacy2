@@ -282,7 +282,7 @@ window._betaInit = {
                         <button @click="switchTab('dungeons')" class="btn btn-secondary btn-small" style="text-align:center;">Dungeons</button>
                         <button @click="switchTab('crafting')" class="btn btn-secondary btn-small" style="text-align:center;">Crafting</button>
                         <button @click="switchTab('market')" class="btn btn-secondary btn-small" style="text-align:center;">Elite Market</button>
-                        <button @click="openCustomizeModal" class="btn btn-secondary btn-small" style="text-align:center;" :title="player && player.gold < 10000 ? 'Costs 10,000 gold' : 'Change your character\'s name, gender, race, or class (10,000g)'">Change Character</button>
+                        <button @click="openCustomizeModal" class="btn btn-secondary btn-small" style="text-align:center;" :title="player && player.gold &lt; 10000 ? 'Costs 10,000 gold' : 'Customize name, race, or class (10,000g)'">Change Character</button>
                     </div>
                 </div>
 
@@ -363,8 +363,8 @@ window._betaInit = {
                             <div v-else class="action-row" style="margin-top:10px;">
                                 <button class="btn btn-primary btn-wood" @click="explore" :disabled="actionPending || !player">[[ actionPending ? 'Working...' : 'Venture Forth' ]]</button>
                                 <button v-if="area && area.can_rest" class="btn btn-secondary" @click="rest"
-                                    :disabled="actionPending || (area.rest_cost > 0 && player && player.gold < area.rest_cost)"
-                                    :title="area.rest_cost > 0 && player && player.gold < area.rest_cost ? 'Need ' + area.rest_cost + 'g to rest here (you have ' + player.gold + 'g)' : ''">
+                                    :disabled="actionPending || (area.rest_cost > 0 && player && player.gold &lt; area.rest_cost)"
+                                    :title="area.rest_cost > 0 && player && player.gold &lt; area.rest_cost ? 'Need ' + area.rest_cost + 'g to rest here (you have ' + player.gold + 'g)' : ''">
                                     <span v-if="area && area.rest_cost > 0">Rest at Inn ([[ area.rest_cost ]] gold)</span>
                                     <span v-else>Rest on Your Land</span>
                                 </button>
@@ -538,7 +538,7 @@ window._betaInit = {
                                     </div>
                                 </div>
                                 <div class="battle-spell-grid">
-                                    <button v-for="sp in spellPagedSpells" :key="sp.id" class="btn btn-small btn-secondary battle-spell-btn" @click="battleSpell(sp.id)" :disabled="actionPending || (player && player.mp < sp.mp_cost)" :class="{ 'spell-unavailable': player && player.mp < sp.mp_cost }">
+                                    <button v-for="sp in spellPagedSpells" :key="sp.id" class="btn btn-small btn-secondary battle-spell-btn" @click="battleSpell(sp.id)" :disabled="actionPending || (player && player.mp &lt; sp.mp_cost)" :class="{ 'spell-unavailable': player && player.mp &lt; sp.mp_cost }">
                                         <img class="type-glyph" src="/game_assets/glyphs/spell.webp" alt="" style="width:14px;height:14px;opacity:0.7;vertical-align:middle;margin-right:3px;">
                                         [[ sp.name ]] <span style="font-size:10px;color:var(--mana-bright);margin-left:3px;">[[ sp.mp_cost ]]MP</span>
                                     </button>
@@ -778,7 +778,7 @@ window._betaInit = {
                                     <div v-else-if="!dungeon.in_area" style="font-size:11px;color:var(--gold);margin-top:2px;">
                                         Travel to [[ dungeon.hint_area_name ]] to enter.
                                     </div>
-                                    <div v-else-if="player && player.level < dungeon.min_level" style="font-size:11px;color:var(--red);margin-top:2px;">
+                                    <div v-else-if="player && player.level &lt; dungeon.min_level" style="font-size:11px;color:var(--red);margin-top:2px;">
                                         Level [[ dungeon.min_level ]] required.
                                     </div>
                                 </div>
@@ -787,9 +787,8 @@ window._betaInit = {
                                         :disabled="actionPending || !dungeon.available || (activeDungeon && !!activeDungeon.dungeon)">Enter</button>
                             </div>
                         </div>
-                    </div>
                         <div v-if="dungeonPageCount > 1" class="pagination-bar">
-                            <button class="btn btn-xsmall btn-secondary" :disabled="dungeonPage <= 1" @click="dungeonPage = Math.max(1, dungeonPage - 1)">&larr;</button>
+                            <button class="btn btn-xsmall btn-secondary" :disabled="dungeonPage &lt;= 1" @click="dungeonPage = Math.max(1, dungeonPage - 1)">&larr;</button>
                             <span>Page [[ dungeonPage ]] / [[ dungeonPageCount ]]</span>
                             <button class="btn btn-xsmall btn-secondary" :disabled="dungeonPage >= dungeonPageCount" @click="dungeonPage = Math.min(dungeonPageCount, dungeonPage + 1)">&rarr;</button>
                         </div>
@@ -844,9 +843,8 @@ window._betaInit = {
                                 </button>
                             </div>
                         </div>
-                    </div>
                         <div v-if="marketPageCount > 1" class="pagination-bar">
-                            <button class="btn btn-xsmall btn-secondary" :disabled="marketPage <= 1" @click="marketPage = Math.max(1, marketPage - 1)">&larr;</button>
+                            <button class="btn btn-xsmall btn-secondary" :disabled="marketPage &lt;= 1" @click="marketPage = Math.max(1, marketPage - 1)">&larr;</button>
                             <span>Page [[ marketPage ]] / [[ marketPageCount ]]</span>
                             <button class="btn btn-xsmall btn-secondary" :disabled="marketPage >= marketPageCount" @click="marketPage = Math.min(marketPageCount, marketPage + 1)">&rarr;</button>
                         </div>
@@ -907,9 +905,8 @@ window._betaInit = {
                                 <button class="btn btn-small btn-secondary" @click="completeMission(mission.id)" :disabled="actionPending || !mission.can_complete || !mission.eligible" style="margin-left:10px;">Complete</button>
                             </div>
                         </div>
-                    </div>
                         <div v-if="questPageCount > 1" class="pagination-bar">
-                            <button class="btn btn-xsmall btn-secondary" :disabled="questPage <= 1" @click="questPage = Math.max(1, questPage - 1)">&larr;</button>
+                            <button class="btn btn-xsmall btn-secondary" :disabled="questPage &lt;= 1" @click="questPage = Math.max(1, questPage - 1)">&larr;</button>
                             <span>Page [[ questPage ]] / [[ questPageCount ]]</span>
                             <button class="btn btn-xsmall btn-secondary" :disabled="questPage >= questPageCount" @click="questPage = Math.min(questPageCount, questPage + 1)">&rarr;</button>
                         </div>
@@ -929,12 +926,11 @@ window._betaInit = {
                                     <div style="margin-top:5px;"><div class="bar-track" style="height:4px;"><div class="bar-fill bar-exp" :style="{ width: Math.min(100, Math.round(((ch.count || 0) / (ch.target || 1)) * 100)) + '%' }"></div></div></div>
                                     <div v-if="ch.claimed" style="color:var(--green-bright);font-size:12px;margin-top:3px;">[Claimed]</div>
                                 </div>
-                                <button class="btn btn-small btn-secondary" @click="claimChallenge(ch.id)" :disabled="actionPending || ch.claimed || (ch.count || 0) < ch.target" style="margin-left:10px;">Claim</button>
+                                <button class="btn btn-small btn-secondary" @click="claimChallenge(ch.id)" :disabled="actionPending || ch.claimed || (ch.count || 0) &lt; ch.target" style="margin-left:10px;">Claim</button>
                             </div>
                         </div>
-                    </div>
                         <div v-if="challengePageCount > 1" class="pagination-bar">
-                            <button class="btn btn-xsmall btn-secondary" :disabled="challengePage <= 1" @click="challengePage = Math.max(1, challengePage - 1)">&larr;</button>
+                            <button class="btn btn-xsmall btn-secondary" :disabled="challengePage &lt;= 1" @click="challengePage = Math.max(1, challengePage - 1)">&larr;</button>
                             <span>Page [[ challengePage ]] / [[ challengePageCount ]]</span>
                             <button class="btn btn-xsmall btn-secondary" :disabled="challengePage >= challengePageCount" @click="challengePage = Math.min(challengePageCount, challengePage + 1)">&rarr;</button>
                         </div>
@@ -1265,7 +1261,7 @@ window._betaInit = {
                                             <div style="font-size:12px;color:var(--green-bright);margin-bottom:2px;">+[[ opt.gain ]] [[ opt.stat.replace('max_','').toUpperCase() ]]</div>
                                             <div style="font-size:12px;color:var(--gold);margin-bottom:8px;">[[ opt.cost ]]g</div>
                                             <button class="btn btn-xsmall btn-primary"
-                                                :disabled="actionPending || player.gold < opt.cost"
+                                                :disabled="actionPending || player.gold &lt; opt.cost"
                                                 @click="landTrain(tk)">Train</button>
                                         </div>
                                     </div>
