@@ -2,13 +2,13 @@
 {% block title %}Friends &amp; Social — Our Legacy 2{% endblock %}
 {% block extra_head %}
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-<script>
-window._init = {
-    online_username: {{ online_username | tojson }},
-    friends:  {{ friends  | tojson }},
-    requests: {{ requests | tojson }},
-    blocked:  {{ blocked  | tojson }},
-};
+    <script>
+    window._init = {
+        online_username: {% if online_username is defined %}{{ online_username | tojson }}{% else %}null{% endif %},
+        friends:  {% if friends is defined %}{{ friends | tojson }}{% else %}[]{% endif %},
+        requests: {% if requests is defined %}{{ requests | tojson }}{% else %}[]{% endif %},
+        blocked:  {% if blocked is defined %}{{ blocked | tojson }}{% else %}[]{% endif %},
+    };
 </script>
 <style>
     [v-cloak] { display: none !important; }
