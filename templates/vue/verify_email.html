@@ -1,6 +1,13 @@
 {% extends "vue/base.html" %}
 {% block title %}Email Verification — Our Legacy 2{% endblock %}
 {% block extra_head %}
+<script>
+window._init = {
+    has_token:      {{ 'true' if token else 'false' }},
+    result_ok:      {{ 'true' if result and result.ok else 'false' }},
+    result_message: {{ (result.message | tojson) if result and result.message else '""' }},
+};
+</script>
 <style>
     body { margin: 0; }
     .ve-page {
@@ -42,14 +49,15 @@
 </style>
 {% endblock %}
 {% block content %}
+<div id="vue-ve-app" v-cloak>
 <div class="ve-page">
     <img src="/game_assets/game_title_main_menu.webp" alt="Our Legacy 2" class="ve-logo">
 
     <div class="ve-card">
         <div class="ve-eyebrow">Email Verification</div>
 
-        {% if not token %}
-        <div class="ve-state-box ve-state-err">
+        <!-- No token provided -->
+        <div v-if="!hasToken" class="ve-state-box ve-state-err">
             <img src="/game_assets/glyphs/settings.webp" alt="" class="ve-state-icon" style="opacity:0.5;">
             <div class="ve-state-title" style="color:var(--red);">No Token Found</div>
             <div class="ve-state-body">
@@ -58,8 +66,8 @@
             </div>
         </div>
 
-        {% elif result and result.ok %}
-        <div class="ve-state-box ve-state-ok">
+        <!-- Token present and verification succeeded -->
+        <div v-else-if="resultOk" class="ve-state-box ve-state-ok">
             <img src="/game_assets/glyphs/sparkles.webp" alt="" class="ve-state-icon">
             <div class="ve-state-title" style="color:var(--green-bright);">Email Verified!</div>
             <div class="ve-state-body">
@@ -69,19 +77,22 @@
             <a href="/" class="ve-btn">Return to Game</a>
         </div>
 
-        {% else %}
-        <div class="ve-state-box ve-state-err">
+        <!-- Token present but verification failed -->
+        <div v-else class="ve-state-box ve-state-err">
             <img src="/game_assets/glyphs/fight.webp" alt="" class="ve-state-icon" style="opacity:0.55;">
             <div class="ve-state-title" style="color:var(--red);">Verification Failed</div>
             <div class="ve-state-body">
-                {{ result.message if result else "The link may be invalid or expired." }}<br><br>
+                [[ resultMessage || 'The link may be invalid or expired.' ]]<br><br>
                 Return to the game and request a new verification email from your account settings.
             </div>
         </div>
-        {% endif %}
 
         <div class="ve-divider"></div>
         <a href="/" class="ve-back">&#8592; Return to game</a>
     </div>
 </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/vue/verify_email.js"></script>
 {% endblock %}

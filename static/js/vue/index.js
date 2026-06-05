@@ -153,7 +153,10 @@ createApp({
         },
     },
     mounted() {
-        if (_idx.show_welcome) this.showOnlineModal = true;
+        if (_idx.show_welcome) {
+            this.showOnlineModal = true;
+            document.body.classList.add('index-hide-chat');
+        }
         if (_idx.show_create)  this.showCreateModal = true;
     },
 }).mount('#vue-index-app');

@@ -20,7 +20,8 @@ window._init = {
 <style>
     [v-cloak] { display: none !important; }
     #groups-widget-fab { display: none !important; }
-    {% if show_welcome %}#chat-widget, #chat-toggle-btn { display: none !important; }{% endif %}
+    .index-hide-chat #chat-widget,
+    .index-hide-chat #chat-toggle-btn { display: none !important; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .modal-box { background: var(--bg-panel); border: 2px solid var(--border); border-radius: 12px; padding: 0; width: min(480px, 96vw); max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
     .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--wood-dark); border-bottom: 1px solid var(--border); flex-shrink: 0; }
