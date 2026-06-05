@@ -1,4 +1,39 @@
 (function() {
+    'use strict';
+
+    /* ── seed data ── */
+    const _d        = (window._init && window._init.land_data) || {};
+    const placed    = (_d.placed_buildings_map) || [];
+
+    /* ── Vue panel app (Owned Structures + Placed Structures) ── */
+    const housingByType = _d.housing_by_type || {};
+    const ownedBuildings = [];
+    for (const typeKey in housingByType) {
+        for (const h of housingByType[typeKey]) {
+            if (h.owned) ownedBuildings.push(h);
+        }
+    }
+
+    if (typeof Vue !== 'undefined') {
+        Vue.createApp({
+            delimiters: ['[[', ']]'],
+            data() {
+                return {
+                    ownedBuildings: ownedBuildings,
+                    placedBuildings: placed,
+                };
+            },
+            methods: {
+                startPlacing(key, name) {
+                    if (window.LandEditor) {
+                        window.LandEditor.startPlacing(key, name);
+                    }
+                },
+            },
+        }).mount('#land-map-vue-app');
+    }
+
+    /* ── Canvas map editor ── */
     const canvas = document.getElementById('land-map-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -52,7 +87,7 @@
         'campfire.png':        'campfire_3_3_ratio_16px_each_tiles.png',
         'simple_workshop.png': 'simple_workshop_3_4_ratio_16px_each_tiles.png',
     };
-    ['simple_tent.png','simple_house.png','campfire.png','simple_workshop.png'].forEach(f => {
+    ['simple_tent.png', 'simple_house.png', 'campfire.png', 'simple_workshop.png'].forEach(function(f) {
         const img = new Image();
         img.src = '/game_assets/maps/your_land_buildings/' + IMG_FILE_MAP[f];
         img.onload = draw;
@@ -60,7 +95,6 @@
     });
 
     let placingKey = null, _placingName = null, hoverTile = null;
-    const placed = window._placedBuildings || [];
 
     function getTiles(key) { return BUILDING_TILES[key] || [3, 3]; }
 
@@ -90,28 +124,28 @@
         ctx.strokeStyle = 'rgba(255,255,255,0.08)';
         ctx.lineWidth = 0.5;
         for (let x = 0; x <= COLS; x++) {
-            ctx.beginPath(); ctx.moveTo(x*TILE, 0); ctx.lineTo(x*TILE, canvas.height); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x * TILE, 0); ctx.lineTo(x * TILE, canvas.height); ctx.stroke();
         }
         for (let y = 0; y <= ROWS; y++) {
-            ctx.beginPath(); ctx.moveTo(0, y*TILE); ctx.lineTo(canvas.width, y*TILE); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, y * TILE); ctx.lineTo(canvas.width, y * TILE); ctx.stroke();
         }
 
         ctx.fillStyle = 'rgba(180,0,0,0.20)';
         ctx.fillRect(0, 0, canvas.width, BLOCKED * TILE);
         ctx.strokeStyle = 'rgba(220,60,60,0.75)';
         ctx.lineWidth = 1.5;
-        ctx.setLineDash([6,4]);
+        ctx.setLineDash([6, 4]);
         ctx.beginPath();
-        ctx.moveTo(0, BLOCKED*TILE); ctx.lineTo(canvas.width, BLOCKED*TILE); ctx.stroke();
+        ctx.moveTo(0, BLOCKED * TILE); ctx.lineTo(canvas.width, BLOCKED * TILE); ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle = 'rgba(220,100,100,0.9)';
         ctx.font = 'bold 9px monospace';
-        ctx.fillText('NO BUILD ZONE', 6, BLOCKED*TILE - 5);
+        ctx.fillText('NO BUILD ZONE', 6, BLOCKED * TILE - 5);
 
-        placed.forEach(b => {
+        placed.forEach(function(b) {
             if (b.x < 0 || b.y < 0) return;
             const [tw, th] = getTiles(b.key);
-            const px = b.x*TILE, py = b.y*TILE, pw = tw*TILE, ph = th*TILE;
+            const px = b.x * TILE, py = b.y * TILE, pw = tw * TILE, ph = th * TILE;
             const imgFile = BUILDING_IMG_FILE[b.key];
             if (imgFile && loadedImgs[imgFile] && loadedImgs[imgFile].complete && loadedImgs[imgFile].naturalWidth > 0) {
                 ctx.drawImage(loadedImgs[imgFile], px, py, pw, ph);
@@ -132,20 +166,23 @@
 
         if (placingKey && hoverTile) {
             const [tw, th] = getTiles(placingKey);
-            const {tx, ty} = hoverTile;
+            const { tx, ty } = hoverTile;
             const valid = isValidPlacement(tx, ty, tw, th);
             ctx.fillStyle = valid ? 'rgba(80,200,80,0.32)' : 'rgba(200,60,60,0.32)';
-            ctx.fillRect(tx*TILE, ty*TILE, tw*TILE, th*TILE);
+            ctx.fillRect(tx * TILE, ty * TILE, tw * TILE, th * TILE);
             ctx.strokeStyle = valid ? 'rgba(100,255,100,0.9)' : 'rgba(255,80,80,0.9)';
             ctx.lineWidth = 1.5;
-            ctx.strokeRect(tx*TILE, ty*TILE, tw*TILE, th*TILE);
+            ctx.strokeRect(tx * TILE, ty * TILE, tw * TILE, th * TILE);
         }
     }
 
     function getTile(e) {
         const r  = canvas.getBoundingClientRect();
         const sx = canvas.width / r.width, sy = canvas.height / r.height;
-        return { tx: Math.floor((e.clientX - r.left)*sx / TILE), ty: Math.floor((e.clientY - r.top)*sy / TILE) };
+        return {
+            tx: Math.floor((e.clientX - r.left) * sx / TILE),
+            ty: Math.floor((e.clientY - r.top)  * sy / TILE),
+        };
     }
 
     canvas.addEventListener('mousemove', function(e) {
@@ -155,7 +192,7 @@
     canvas.addEventListener('mouseleave', function() { hoverTile = null; if (placingKey) draw(); });
     canvas.addEventListener('click', function(e) {
         if (!placingKey) return;
-        const {tx, ty} = getTile(e);
+        const { tx, ty } = getTile(e);
         const [tw, th] = getTiles(placingKey);
         if (!isValidPlacement(tx, ty, tw, th)) return;
         document.getElementById('land-place-key').value = placingKey;
@@ -168,7 +205,7 @@
     draw();
 
     window.LandEditor = {
-        startPlacing(key, name) {
+        startPlacing: function(key, name) {
             placingKey = key; _placingName = name; hoverTile = null;
             document.getElementById('land-place-mode-bar').style.display = 'flex';
             document.getElementById('land-placing-name').textContent = name;
@@ -176,7 +213,7 @@
             canvas.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             draw();
         },
-        cancel() {
+        cancel: function() {
             placingKey = null; _placingName = null; hoverTile = null;
             document.getElementById('land-place-mode-bar').style.display = 'none';
             canvas.style.cursor = '';
@@ -188,6 +225,8 @@
     const autoKey   = urlParams.get('place_key');
     const autoName  = urlParams.get('place_name');
     if (autoKey && autoName) {
-        setTimeout(() => window.LandEditor.startPlacing(autoKey, decodeURIComponent(autoName)), 200);
+        setTimeout(function() {
+            window.LandEditor.startPlacing(autoKey, decodeURIComponent(autoName));
+        }, 200);
     }
 })();
