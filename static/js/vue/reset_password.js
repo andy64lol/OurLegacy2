@@ -1,9 +1,12 @@
 const { createApp } = Vue;
 
+const _d = (window._init) || {};
+
 createApp({
     delimiters: ['[[', ']]'],
     data() {
         return {
+            hasToken: !!_d.has_token,
             password: '',
             confirm: '',
             loading: false,
@@ -29,7 +32,7 @@ createApp({
                 const res = await fetch('/api/online/reset-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: window._rpToken, password: pw, confirm: cf }),
+                    body: JSON.stringify({ token: _d.token || null, password: pw, confirm: cf }),
                 });
                 const json = await res.json();
                 if (json.ok) {
