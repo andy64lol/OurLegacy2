@@ -938,7 +938,7 @@
                         <button @click="switchTab('leaderboard')" class="btn btn-secondary btn-small" style="text-align:center;">Leaderboard</button>
                         <button @click="switchTab('wiki')" class="btn btn-secondary btn-small" style="text-align:center;">Wiki</button>
                         <button @click="openCustomizeModal" class="btn btn-secondary btn-small" style="text-align:center;"
-                                :title="player && player.gold < 10000 ? 'Costs 10,000 gold' : 'Change your character\'s name, gender, race, or class (10,000g)'">Change Character</button>
+                                :title="player && player.gold &lt; 10000 ? 'Costs 10,000 gold' : 'Change your character\'s name, gender, race, or class (10,000g)'">Change Character</button>
                     </div>
                 </div>
 
@@ -1381,8 +1381,8 @@
                                 <button v-for="sp in spellPagedSpells" :key="sp.id"
                                         class="btn btn-small btn-secondary spell-btn"
                                         @click="battleSpell(sp.id)"
-                                        :disabled="actionPending || (player && player.mp < sp.mp_cost)"
-                                        :style="{ '--spell-color': spellTypeColor(sp), opacity: (player && player.mp < sp.mp_cost) ? 0.45 : 1 }">
+                                        :disabled="actionPending || (player && player.mp &lt; sp.mp_cost)"
+                                        :style="{ '--spell-color': spellTypeColor(sp), opacity: (player && player.mp &lt; sp.mp_cost) ? 0.45 : 1 }">
                                     <img class="type-glyph" src="/game_assets/glyphs/spell.webp" alt="" style="width:14px;height:14px;opacity:0.7;vertical-align:middle;margin-right:3px;">
                                     [[ sp.name ]]
                                     <span style="font-size:10px;color:var(--mana-bright);margin-left:3px;">[[ sp.mp_cost ]]MP</span>
@@ -2031,7 +2031,7 @@
                                 </div>
                                 <button class="btn btn-small btn-secondary"
                                         @click="claimChallenge(ch.id)"
-                                        :disabled="actionPending || ch.claimed || (ch.count || 0) < ch.target"
+                                        :disabled="actionPending || ch.claimed || (ch.count || 0) &lt; ch.target"
                                         style="margin-left:10px;">
                                     Claim
                                 </button>

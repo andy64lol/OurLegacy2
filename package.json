@@ -3,6 +3,9 @@
     "lint": "eslint --no-eslintrc -c .eslintrc.json static/js/**/*.js"
   },
   "devDependencies": {
-    "eslint": "^8.57.1"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^8.57.1",
+    "eslint-plugin-vue": "^10.9.2",
+    "globals": "^17.6.0"
   }
 }
