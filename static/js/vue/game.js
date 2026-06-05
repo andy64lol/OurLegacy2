@@ -256,8 +256,9 @@ createApp({
             if (!val) this.spellPage = 0;
         },
         activeTab(newTab) {
-            if (newTab === 'explore' && this.area && this.area.key === 'your_land' && this.landData) {
-                this.$nextTick(() => this.drawLandMinimap());
+            if (newTab === 'explore' && this.area && this.area.key === 'your_land') {
+                if (!this.landData && !this.landLoading) this.loadLandData();
+                else if (this.landData) this.$nextTick(() => this.drawLandMinimap());
             }
             if (newTab === 'map') {
                 this.$nextTick(() => this.initWorldMapCanvas());
@@ -266,6 +267,11 @@ createApp({
         landData(newData) {
             if (newData && this.activeTab === 'explore' && this.area && this.area.key === 'your_land') {
                 this.$nextTick(() => this.drawLandMinimap());
+            }
+        },
+        area(newArea) {
+            if (newArea && newArea.key === 'your_land' && this.activeTab === 'explore' && !this.landData && !this.landLoading) {
+                this.loadLandData();
             }
         },
     },
