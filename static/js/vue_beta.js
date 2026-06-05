@@ -54,7 +54,6 @@ createApp({
             inBattle: !!(window._betaInit && window._betaInit.in_battle),
             battle: null,
             activeTab: "explore",
-            tabDropdownOpen: false,
             actionPending: false,
             toasts: [],
             lastMsgCount: 0,

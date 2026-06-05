@@ -1064,12 +1064,7 @@
                         <button class="tab-btn" @click="typeof openSettings === 'function' ? openSettings() : (document.getElementById('settings-modal').style.display='flex')" title="Settings">Settings</button>
                     </div>
                     <!-- Vue-native tab overflow dropdown -->
-                    <div class="vtab-more-wrap" @click.stop>
-                        <button class="tab-btn tab-more-btn" @click.stop="tabDropdownOpen = !tabDropdownOpen" title="All tabs">&bull;&bull;&bull;</button>
-                        <div v-if="tabDropdownOpen" class="tab-overflow-dropdown open">
-                            <button v-for="tab in allTabOptions" :key="tab.key" class="tab-overflow-item" :class="{ active: activeTab === tab.key }" @click="switchTab(tab.key); tabDropdownOpen = false">[[ tab.label ]]</button>
-                        </div>
-                    </div>
+
                 </div>
 
                 <!-- news ticker -->
