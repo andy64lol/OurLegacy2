@@ -1057,10 +1057,12 @@
                             Events<span v-if="activeEventsCount > 0" class="tab-badge" style="background:var(--gold);">[[ activeEventsCount ]]</span>
                         </button>
                         <button class="tab-btn" v-if="onlineUsername" :class="{ active: activeTab === 'friends' }" @click="switchTab('friends')">Friends</button>
+                        <button class="tab-btn" v-if="onlineUsername && dmTarget" :class="{ active: activeTab === 'dm' }" @click="switchTab('dm')">DM: [[ dmTarget ]]</button>
                         <button class="tab-btn" v-if="onlineUsername" :class="{ active: activeTab === 'group' }" @click="switchTab('group')">Group</button>
                         <button class="tab-btn" v-if="area && area.key === 'your_land'" :class="{ active: activeTab === 'land' }" @click="switchTab('land')">Land</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'leaderboard' }" @click="switchTab('leaderboard')">Leaderboard</button>
                         <button class="tab-btn" :class="{ active: activeTab === 'wiki' }" @click="switchTab('wiki')">Wiki</button>
+                        <button class="tab-btn" :class="{ active: activeTab === 'customize' }" @click="openCustomizeModal()">Customize</button>
                         <button class="tab-btn" @click="typeof openSettings === 'function' ? openSettings() : (document.getElementById('settings-modal').style.display='flex')" title="Settings">Settings</button>
                     </div>
                     <!-- Vue-native tab overflow dropdown -->
@@ -2220,36 +2222,6 @@
                 <!-- ═══ FRIENDS tab ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'friends' }">
                     <div v-if="onlineUsername">
-
-                        <!-- DM conversation view -->
-                        <div v-if="dmTarget">
-                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                                <button class="btn btn-xsmall btn-secondary" @click="closeDM()">&larr; Back</button>
-                                <span style="font-size:14px;color:var(--gold);font-weight:bold;">DM: [[ dmTarget ]]</span>
-                            </div>
-                            <div id="dm-messages-wrap" style="height:320px;overflow-y:auto;background:var(--bg-main);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:8px;display:flex;flex-direction:column;gap:4px;">
-                                <div v-if="!dmMessages.length" style="color:var(--text-dim);font-size:12px;text-align:center;margin-top:40px;">No messages yet. Say hi!</div>
-                                <div v-for="m in dmMessages" :key="m.id || m.created_at"
-                                     :style="{ textAlign: m.sender === onlineUsername ? 'right' : 'left' }">
-                                    <span :style="{
-                                        display:'inline-block', maxWidth:'80%', padding:'4px 8px',
-                                        borderRadius:'6px', fontSize:'12px',
-                                        background: m.sender === onlineUsername ? 'rgba(100,70,30,0.6)' : 'rgba(40,40,60,0.6)',
-                                        color:'var(--text-light)', wordBreak:'break-word'
-                                    }">[[ m.message ]]</span>
-                                    <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">[[ fmtTime(m.created_at) ]]</div>
-                                </div>
-                            </div>
-                            <div style="display:flex;gap:6px;">
-                                <input type="text" v-model="dmInput" @keydown="dmEnterKey"
-                                       placeholder="Type a message…"
-                                       style="flex:1;background:var(--bg-panel);border:1px solid var(--border);color:var(--text-light);padding:6px 8px;font-size:12px;border-radius:4px;font-family:inherit;">
-                                <button class="btn btn-small btn-secondary" @click="sendDM()" :disabled="!dmInput.trim()">Send</button>
-                            </div>
-                        </div>
-
-                        <!-- Main friends view -->
-                        <div v-else>
                             <!-- Add friend -->
                             <div class="panel" style="margin-bottom:10px;">
                                 <div class="panel-title">Add Friend</div>
@@ -2320,9 +2292,38 @@
                                     <div v-else style="color:var(--text-dim);font-size:13px;">No friends yet.</div>
                                 </div>
                             </div>
-                        </div>
                     </div>
                     <div v-else class="empty-state">Sign in online to use the friends feature.</div>
+                </div>
+
+                <!-- ═══ DM tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'dm' }">
+                    <div v-if="dmTarget && onlineUsername">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                            <button class="btn btn-xsmall btn-secondary" @click="closeDM()">&larr; Friends</button>
+                            <span style="font-size:14px;color:var(--gold);font-weight:bold;">DM: [[ dmTarget ]]</span>
+                        </div>
+                        <div id="dm-messages-wrap" style="height:320px;overflow-y:auto;background:var(--bg-main);border:1px solid var(--border);border-radius:4px;padding:8px;margin-bottom:8px;display:flex;flex-direction:column;gap:4px;">
+                            <div v-if="!dmMessages.length" style="color:var(--text-dim);font-size:12px;text-align:center;margin-top:40px;">No messages yet. Say hi!</div>
+                            <div v-for="m in dmMessages" :key="m.id || m.created_at"
+                                 :style="{ textAlign: m.sender === onlineUsername ? 'right' : 'left' }">
+                                <span :style="{
+                                    display:'inline-block', maxWidth:'80%', padding:'4px 8px',
+                                    borderRadius:'6px', fontSize:'12px',
+                                    background: m.sender === onlineUsername ? 'rgba(100,70,30,0.6)' : 'rgba(40,40,60,0.6)',
+                                    color:'var(--text-light)', wordBreak:'break-word'
+                                }">[[ m.message ]]</span>
+                                <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">[[ fmtTime(m.created_at) ]]</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:6px;">
+                            <input type="text" v-model="dmInput" @keydown="dmEnterKey"
+                                   placeholder="Type a message…"
+                                   style="flex:1;background:var(--bg-panel);border:1px solid var(--border);color:var(--text-light);padding:6px 8px;font-size:12px;border-radius:4px;font-family:inherit;">
+                            <button class="btn btn-small btn-secondary" @click="sendDM()" :disabled="!dmInput.trim()">Send</button>
+                        </div>
+                    </div>
+                    <div v-else class="empty-state">Open a conversation from the Friends tab.</div>
                 </div>
 
                 <!-- ═══ GROUP tab ═══ -->
@@ -2610,6 +2611,48 @@
                     <div style="text-align:center;padding:30px 0;">
                         <div style="font-size:14px;color:var(--text-dim);margin-bottom:16px;">Item &amp; Game Wiki</div>
                         <a href="/wiki" class="btn btn-secondary" style="font-size:14px;padding:10px 24px;">Open Wiki ↗</a>
+                    </div>
+                </div>
+
+                <!-- ═══ CUSTOMIZE tab ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'customize' }">
+                    <div style="max-width:400px;margin:0 auto;">
+                        <div style="font-size:15px;font-weight:bold;color:var(--gold);margin-bottom:6px;">Change Character</div>
+                        <div style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">Costs <strong style="color:var(--gold);">10,000 gold</strong>. Leave any field blank to keep it unchanged.</div>
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <div v-if="!onlineUsername">
+                                <label style="font-size:12px;color:var(--text-dim);">New Name</label>
+                                <input type="text" v-model="customizeName" maxlength="20" placeholder="Leave blank to keep current"
+                                    style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:7px 9px;font-size:13px;color:var(--text-light);outline:none;box-sizing:border-box;margin-top:3px;font-family:inherit;">
+                            </div>
+                            <div>
+                                <label style="font-size:12px;color:var(--text-dim);">Gender</label>
+                                <select v-model="customizeGender" style="width:100%;background:rgba(10,8,16,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:7px 9px;font-size:13px;color:var(--text-light);outline:none;margin-top:3px;font-family:inherit;">
+                                    <option value="">Keep current</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="nonbinary">Non-binary</option>
+                                </select>
+                            </div>
+                            <div v-if="customizeRaces && customizeRaces.length">
+                                <label style="font-size:12px;color:var(--text-dim);">Race</label>
+                                <select v-model="customizeRace" style="width:100%;background:rgba(10,8,16,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:7px 9px;font-size:13px;color:var(--text-light);outline:none;margin-top:3px;font-family:inherit;">
+                                    <option value="">Keep current</option>
+                                    <option v-for="r in customizeRaces" :key="r" :value="r">[[ r.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase()) ]]</option>
+                                </select>
+                            </div>
+                            <div v-if="customizeClasses && customizeClasses.length">
+                                <label style="font-size:12px;color:var(--text-dim);">Class</label>
+                                <select v-model="customizeClass" style="width:100%;background:rgba(10,8,16,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:7px 9px;font-size:13px;color:var(--text-light);outline:none;margin-top:3px;font-family:inherit;">
+                                    <option value="">Keep current</option>
+                                    <option v-for="c in customizeClasses" :key="c" :value="c">[[ c.replace(/_/g,' ').replace(/\b\w/g, ch => ch.toUpperCase()) ]]</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:10px;margin-top:18px;">
+                            <button @click="submitCustomize()" class="btn btn-primary" :disabled="customizeSubmitting" style="flex:1;">[[ customizeSubmitting ? 'Saving…' : 'Save Changes (10,000g)' ]]</button>
+                            <button @click="closeCustomizeModal()" class="btn btn-secondary">Back</button>
+                        </div>
                     </div>
                 </div>
 

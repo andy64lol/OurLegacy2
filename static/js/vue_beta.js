@@ -199,7 +199,7 @@ createApp({
             QUEST_PAGE_SIZE: 10,
             CHALLENGE_PAGE_SIZE: 10,
             COMPANION_PAGE_SIZE: 8,
-            FRIEND_PAGE_SIZE: 12,
+            FRIEND_PAGE_SIZE: 7,
             BOSS_PAGE_SIZE: 8,
         };
     },
@@ -243,10 +243,12 @@ createApp({
                 { key: 'diary',       label: 'Diary',       show: true },
                 { key: 'events',      label: 'Events',      show: true },
                 { key: 'friends',     label: 'Friends',     show: !!this.onlineUsername },
+                { key: 'dm',          label: 'DM: ' + (this.dmTarget || ''), show: !!(this.dmTarget && this.onlineUsername) },
                 { key: 'group',       label: 'Group',       show: !!this.onlineUsername },
                 { key: 'land',        label: 'Land',        show: !!(this.area && this.area.key === 'your_land') },
                 { key: 'leaderboard', label: 'Leaderboard', show: true },
                 { key: 'wiki',        label: 'Wiki',        show: true },
+                { key: 'customize',   label: 'Customize',   show: true },
             ].filter(t => t.show);
         },
         craftableCount() {
@@ -832,11 +834,13 @@ createApp({
             // mark unread badge clear
             const f = this.friendsList.find(x => x.username === username);
             if (f) f.unread = 0;
+            this.switchTab('dm');
         },
 
         closeDM() {
             this.dmTarget = null;
             if (this.dmPolling) { clearInterval(this.dmPolling); this.dmPolling = null; }
+            this.switchTab('friends');
         },
 
         async loadDMMessages() {
@@ -1455,10 +1459,10 @@ createApp({
             this.customizeGender = "";
             this.customizeRace = "";
             this.customizeClass = "";
-            this.customizeModalOpen = true;
+            this.switchTab('customize');
         },
 
-        closeCustomizeModal() { this.customizeModalOpen = false; },
+        closeCustomizeModal() { this.switchTab('character'); },
 
         async submitCustomize() {
             if (this.customizeSubmitting) return;
@@ -1478,7 +1482,7 @@ createApp({
                 const data = await r.json();
                 if (data.ok) {
                     this.showToast(data.message || "Character updated!", "var(--green-bright)");
-                    this.customizeModalOpen = false;
+                    this.switchTab('character');
                     this.fetchState();
                 } else {
                     this.showToast(data.message || "Could not update character.", "var(--red)");
