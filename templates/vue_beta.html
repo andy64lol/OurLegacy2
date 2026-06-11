@@ -72,7 +72,16 @@
             scrollbar-width: none;
         }
         .tab-bar-wrap .tab-nav::-webkit-scrollbar { display: none; }
-        .tab-bar-wrap .vtab-more-wrap { display: none; }
+        /* overflow dropdown — overrides the second-block default */
+        .vtab-more-backdrop { position: fixed; inset: 0; z-index: 209; background: transparent; }
+        .vtab-more-menu { position: absolute; top: 100%; left: 0; z-index: 211; min-width: 155px; background: var(--bg-panel-dark, #0e0905); border: 1px solid var(--border); border-top: none; border-radius: 0 0 4px 4px; box-shadow: 0 6px 20px rgba(0,0,0,0.65); max-height: 60vh; overflow-y: auto; }
+        .vtab-more-item { display: block; width: 100%; text-align: left; padding: 8px 14px; font-size: 13px; font-family: 'Tiny5', monospace; color: var(--text-dim); background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer; }
+        .vtab-more-item:hover, .vtab-more-item.active { color: var(--gold); background: rgba(200,165,60,0.08); }
+        /* land sub-tabs */
+        .land-subtab-nav { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+        .land-subtab-btn { padding: 4px 12px; font-size: 11px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 3px; color: var(--text-dim); cursor: pointer; font-family: 'Tiny5', monospace; }
+        .land-subtab-btn:hover { color: var(--text-light); background: rgba(255,255,255,0.05); }
+        .land-subtab-btn.active { color: var(--gold); border-color: rgba(200,165,60,0.5); background: rgba(200,165,60,0.1); }
 
         /* ── Tab panels ─────────────────────────────────── */
         .vtab-panel { display: none; padding: 14px 2px; }
@@ -597,10 +606,10 @@
 
         /* ── Tab bar ──────────────────────────────────────── */
         .tab-bar-wrap { display: flex; flex-direction: row; align-items: flex-end; overflow: visible; gap: 0; }
-        .tab-bar-wrap .tab-nav { flex: 1; min-width: 0; overflow-x: auto; overflow-y: visible; scrollbar-width: none; flex-wrap: nowrap; }
+        .tab-bar-wrap .tab-nav { flex: 1; min-width: 0; overflow-x: visible; overflow-y: visible; scrollbar-width: none; flex-wrap: nowrap; display: flex; }
         .tab-bar-wrap .tab-nav::-webkit-scrollbar { display: none; }
-        .vtab-more-wrap { flex-shrink: 0; position: relative; align-self: flex-end; }
-        .vtab-more-wrap .tab-more-btn { display: block !important; }
+        .vtab-more-wrap { flex-shrink: 0; position: relative; align-self: flex-end; display: inline-flex; }
+        .vtab-more-wrap .tab-more-btn { display: block !important; letter-spacing: 0.08em; min-width: 42px; }
 
         /* ── Friends ──────────────────────────────────────── */
         .friends-list-item {
@@ -1027,46 +1036,32 @@
                 <!-- tab navigation -->
                 <div class="tab-nav-wrap tab-bar-wrap">
                     <div class="tab-nav">
-                        <button class="tab-btn" :class="{ active: activeTab === 'explore' }" @click="switchTab('explore')">Explore</button>
-                        <button class="tab-btn vtab-battle" v-if="inBattle" :class="{ active: activeTab === 'battle' }" @click="switchTab('battle')">
-                            <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="battle"> Battle!
+                        <button v-for="tab in visibleTabs" :key="tab.key"
+                            class="tab-btn"
+                            :class="[{ active: activeTab === tab.key }, tab.cls || '']"
+                            @click="handleTabClick(tab.key)">
+                            <img v-if="tab.icon" class="type-glyph" :src="tab.icon" alt="">
+                            [[ tab.label ]]
+                            <span v-if="tab.badge != null" class="tab-badge" :style="tab.badgeStyle || ''">[[ tab.badge ]]</span>
                         </button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'character' }" @click="switchTab('character')">
-                            Character<span v-if="player && player.attr_points > 0" style="margin-left:4px;color:var(--gold);font-size:10px;font-weight:700;">&#9650;</span>
-                        </button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'equipment' }" @click="switchTab('equipment')">Equipment</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'inventory' }" @click="switchTab('inventory')">Inventory</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'map' }" @click="switchTab('map')">Map</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'travel' }" @click="switchTab('travel')">Travel</button>
-                        <button class="tab-btn" v-if="shopItems && shopItems.length" :class="{ active: activeTab === 'shop' }" @click="switchTab('shop')">Shop</button>
-                        <button class="tab-btn" v-if="mineData" :class="{ active: activeTab === 'mine' }" @click="switchTab('mine')">Mines</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'crafting' }" @click="switchTab('crafting')">Crafting</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'dungeons' }" @click="switchTab('dungeons')">
-                            Dungeons<span v-if="activeDungeon && activeDungeon.id" class="tab-badge" style="background:var(--gold);">!</span>
-                        </button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'market' }" @click="switchTab('market')">Market</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'party' }" @click="switchTab('party')">
-                            Party<span v-if="activeCompanions && activeCompanions.length" class="tab-badge">[[ activeCompanions.length ]]</span>
-                        </button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'quests' }" @click="switchTab('quests')">Quests ([[ completedMissionsCount ]])</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'challenges' }" @click="switchTab('challenges')">
-                            Challenges<span v-if="readyChallengesCount > 0" class="tab-badge" style="background:var(--gold);">[[ readyChallengesCount ]]</span>
-                        </button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'diary' }" @click="switchTab('diary')">Diary</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'events' }" @click="switchTab('events')">
-                            Events<span v-if="activeEventsCount > 0" class="tab-badge" style="background:var(--gold);">[[ activeEventsCount ]]</span>
-                        </button>
-                        <button class="tab-btn" v-if="onlineUsername" :class="{ active: activeTab === 'friends' }" @click="switchTab('friends')">Friends</button>
-                        <button class="tab-btn" v-if="onlineUsername && dmTarget" :class="{ active: activeTab === 'dm' }" @click="switchTab('dm')">DM: [[ dmTarget ]]</button>
-                        <button class="tab-btn" v-if="onlineUsername" :class="{ active: activeTab === 'group' }" @click="switchTab('group')">Group</button>
-                        <button class="tab-btn" v-if="area && area.key === 'your_land'" :class="{ active: activeTab === 'land' }" @click="switchTab('land')">Land</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'leaderboard' }" @click="switchTab('leaderboard')">Leaderboard</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'wiki' }" @click="switchTab('wiki')">Wiki</button>
-                        <button class="tab-btn" :class="{ active: activeTab === 'customize' }" @click="openCustomizeModal()">Customize</button>
-                        <button class="tab-btn" @click="typeof openSettings === 'function' ? openSettings() : (document.getElementById('settings-modal').style.display='flex')" title="Settings">Settings</button>
                     </div>
-                    <!-- Vue-native tab overflow dropdown -->
-
+                    <div v-if="overflowTabs.length" class="vtab-more-wrap">
+                        <div v-if="tabOverflowOpen" class="vtab-more-backdrop" @click="tabOverflowOpen = false"></div>
+                        <button class="tab-btn tab-more-btn"
+                            :class="{ active: overflowActiveLabel != null }"
+                            @click="tabOverflowOpen = !tabOverflowOpen">
+                            [[ overflowActiveLabel ? overflowActiveLabel + ' \u25be' : '...' ]]
+                        </button>
+                        <div v-if="tabOverflowOpen" class="vtab-more-menu">
+                            <button v-for="tab in overflowTabs" :key="tab.key"
+                                class="vtab-more-item"
+                                :class="{ active: activeTab === tab.key }"
+                                @click="handleTabClick(tab.key); tabOverflowOpen = false">
+                                [[ tab.label ]]
+                                <span v-if="tab.badge != null" class="tab-badge" :style="tab.badgeStyle || ''">[[ tab.badge ]]</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- news ticker -->
@@ -2451,88 +2446,121 @@
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'land' }">
                     <div v-if="area && area.key === 'your_land'">
 
-                        <!-- Quick nav links (full-page navigation) -->
-                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
-                            <a href="/land/map" class="btn btn-secondary btn-small">&#127760; Map</a>
-                            <a href="/land/shop" class="btn btn-secondary btn-small">&#127873; Shop</a>
-                            <a href="/land/pets" class="btn btn-secondary btn-small">&#128062; Pets</a>
-                            <span style="font-size:11px;color:var(--text-dim);margin-left:auto;align-self:center;">Navigates to full land page</span>
-                        </div>
-
                         <!-- Loading state -->
                         <div v-if="landLoading" style="text-align:center;padding:30px 0;color:var(--text-dim);font-size:13px;">Loading land data…</div>
 
                         <!-- Land data loaded -->
                         <template v-else-if="landData">
-                            <!-- Land status summary -->
-                            <div class="panel" style="margin-bottom:10px;">
-                                <div class="panel-title">&#127968; Your Land</div>
-                                <div class="panel-body">
-                                    <div style="display:flex;gap:16px;flex-wrap:wrap;">
-                                        <div v-if="landData.land_level != null" style="font-size:12px;color:var(--text-dim);">
-                                            Land Lv <span style="color:var(--gold);font-weight:700;">[[ landData.land_level ]]</span>
-                                        </div>
-                                        <div v-if="landData.housing_slots != null" style="font-size:12px;color:var(--text-dim);">
-                                            Plots <span style="color:var(--text-light);">[[ landData.placed_count || 0 ]] / [[ landData.housing_slots ]]</span>
-                                        </div>
-                                        <div v-if="landData.farm_slots != null" style="font-size:12px;color:var(--text-dim);">
-                                            Farm Slots <span style="color:var(--text-light);">[[ landData.farm_slots ]]</span>
-                                        </div>
-                                        <div v-if="landData.pet_slots != null" style="font-size:12px;color:var(--text-dim);">
-                                            Pet Slots <span style="color:var(--text-light);">[[ landData.active_pets ? landData.active_pets.length : 0 ]] / [[ landData.pet_slots ]]</span>
-                                        </div>
-                                    </div>
-                                </div>
+
+                            <!-- Sub-tab nav -->
+                            <div class="land-subtab-nav">
+                                <button class="land-subtab-btn" :class="{ active: landSubTab === 'overview' }" @click="landSubTab = 'overview'">Overview</button>
+                                <button class="land-subtab-btn" :class="{ active: landSubTab === 'farm' }" @click="landSubTab = 'farm'">Farm</button>
+                                <button class="land-subtab-btn" :class="{ active: landSubTab === 'pets' }" @click="landSubTab = 'pets'">Pets</button>
+                                <button class="land-subtab-btn" :class="{ active: landSubTab === 'actions' }" @click="landSubTab = 'actions'">Actions</button>
+                                <button class="land-subtab-btn" :class="{ active: landSubTab === 'pages' }" @click="landSubTab = 'pages'">Pages</button>
                             </div>
 
-                            <!-- Crops / Farm -->
-                            <div v-if="landData.farm_plots && landData.farm_plots.length" class="panel" style="margin-bottom:10px;">
-                                <div class="panel-title">&#127807; Farm</div>
-                                <div class="panel-body">
-                                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                                        <div v-for="(plot, idx) in landData.farm_plots" :key="idx"
-                                             style="background:var(--bg-main);border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:12px;min-width:90px;">
-                                            <div v-if="plot.crop" style="color:var(--text-light);">[[ plot.crop ]]</div>
-                                            <div v-if="plot.crop && plot.ready" style="color:var(--green-bright);font-size:11px;">Ready to harvest!</div>
-                                            <div v-else-if="plot.crop" style="color:var(--text-dim);font-size:11px;">Growing…</div>
-                                            <div v-else style="color:var(--text-dim);font-size:11px;">Empty</div>
-                                            <button v-if="plot.crop && plot.ready"
-                                                    class="btn btn-xsmall btn-secondary" style="margin-top:4px;color:var(--green-bright);"
-                                                    @click="doAction('/api/action/land/harvest', { slot_id: plot.slot_id })"
-                                                    :disabled="actionPending">
-                                                Harvest
-                                            </button>
+                            <!-- Overview -->
+                            <template v-if="landSubTab === 'overview'">
+                                <div class="panel" style="margin-bottom:10px;">
+                                    <div class="panel-title">Your Land</div>
+                                    <div class="panel-body">
+                                        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                                            <div v-if="landData.land_level != null" style="font-size:12px;color:var(--text-dim);">
+                                                Land Lv <span style="color:var(--gold);font-weight:700;">[[ landData.land_level ]]</span>
+                                            </div>
+                                            <div v-if="landData.comfort_points != null" style="font-size:12px;color:var(--text-dim);">
+                                                Comfort <span style="color:var(--gold);font-weight:700;">[[ landData.comfort_points ]]</span>
+                                            </div>
+                                            <div v-if="landData.housing_slots != null" style="font-size:12px;color:var(--text-dim);">
+                                                Plots <span style="color:var(--text-light);">[[ landData.placed_count || 0 ]] / [[ landData.housing_slots ]]</span>
+                                            </div>
+                                            <div v-if="landData.farm_slots != null" style="font-size:12px;color:var(--text-dim);">
+                                                Farm Slots <span style="color:var(--text-light);">[[ landData.farm_slots ]]</span>
+                                            </div>
+                                            <div v-if="landData.pet_slots != null" style="font-size:12px;color:var(--text-dim);">
+                                                Pet Slots <span style="color:var(--text-light);">[[ landData.active_pets ? landData.active_pets.length : 0 ]] / [[ landData.pet_slots ]]</span>
+                                            </div>
+                                        </div>
+                                        <div v-if="landData.current_pet" style="margin-top:10px;padding:8px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:4px;">
+                                            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Active Companion</div>
+                                            <div style="font-size:13px;color:var(--gold);font-weight:bold;">[[ landData.current_pet.name ]]</div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </template>
+
+                            <!-- Farm -->
+                            <template v-else-if="landSubTab === 'farm'">
+                                <div class="panel" style="margin-bottom:10px;">
+                                    <div class="panel-title">Farm</div>
+                                    <div class="panel-body">
+                                        <div v-if="!landData.farm_plots || !landData.farm_plots.length" style="color:var(--text-dim);font-size:13px;">No farm plots available.</div>
+                                        <div v-else style="display:flex;flex-wrap:wrap;gap:6px;">
+                                            <div v-for="(plot, idx) in landData.farm_plots" :key="idx"
+                                                 style="background:var(--bg-main);border:1px solid var(--border);border-radius:4px;padding:6px 10px;font-size:12px;min-width:90px;">
+                                                <div v-if="plot.crop" style="color:var(--text-light);">[[ plot.crop ]]</div>
+                                                <div v-if="plot.crop && plot.ready" style="color:var(--green-bright);font-size:11px;">Ready to harvest!</div>
+                                                <div v-else-if="plot.crop" style="color:var(--text-dim);font-size:11px;">Growing…</div>
+                                                <div v-else style="color:var(--text-dim);font-size:11px;">Empty</div>
+                                                <button v-if="plot.crop && plot.ready"
+                                                        class="btn btn-xsmall btn-secondary" style="margin-top:4px;color:var(--green-bright);"
+                                                        @click="doAction('/api/action/land/harvest', { slot_id: plot.slot_id })"
+                                                        :disabled="actionPending">
+                                                    Harvest
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
 
                             <!-- Pets -->
-                            <div v-if="landData.active_pets && landData.active_pets.length" class="panel" style="margin-bottom:10px;">
-                                <div class="panel-title">&#128062; Active Pets</div>
-                                <div class="panel-body">
-                                    <div v-for="pet in landData.active_pets" :key="pet.name"
-                                         style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);">
-                                        <span style="font-size:18px;">&#128062;</span>
-                                        <div style="flex:1;">
-                                            <div style="font-size:13px;color:var(--text-light);font-weight:600;">[[ pet.name ]]</div>
-                                            <div style="font-size:11px;color:var(--text-dim);">[[ pet.type || '' ]] Lv [[ pet.level || 1 ]]</div>
+                            <template v-else-if="landSubTab === 'pets'">
+                                <div class="panel" style="margin-bottom:10px;">
+                                    <div class="panel-title">Companion Pets</div>
+                                    <div class="panel-body">
+                                        <div v-if="!landData.active_pets || !landData.active_pets.length" style="color:var(--text-dim);font-size:13px;">No active pets. Visit the <a href="/land/pets" style="color:var(--gold);">Pets page</a> to adopt one.</div>
+                                        <div v-else>
+                                            <div v-for="pet in landData.active_pets" :key="pet.name"
+                                                 style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+                                                <div style="flex:1;">
+                                                    <div style="font-size:13px;color:var(--text-light);font-weight:600;">[[ pet.name ]]</div>
+                                                    <div style="font-size:11px;color:var(--text-dim);">[[ pet.type || '' ]] Lv [[ pet.level || 1 ]]</div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </template>
 
-                            <!-- Rest action -->
-                            <div class="panel" style="margin-bottom:10px;">
-                                <div class="panel-title">&#128716; Actions</div>
-                                <div class="panel-body" style="display:flex;gap:6px;flex-wrap:wrap;">
-                                    <button class="btn btn-secondary btn-small"
-                                            @click="doAction('/api/action/land/rest', {})"
-                                            :disabled="actionPending">
-                                        &#128716; Rest (Restore HP/MP)
-                                    </button>
+                            <!-- Actions -->
+                            <template v-else-if="landSubTab === 'actions'">
+                                <div class="panel" style="margin-bottom:10px;">
+                                    <div class="panel-title">Actions</div>
+                                    <div class="panel-body" style="display:flex;gap:8px;flex-wrap:wrap;">
+                                        <button class="btn btn-secondary btn-small"
+                                                @click="doAction('/api/action/land/rest', {})"
+                                                :disabled="actionPending">
+                                            Rest (Restore HP/MP)
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            </template>
+
+                            <!-- Pages -->
+                            <template v-else-if="landSubTab === 'pages'">
+                                <div class="panel" style="margin-bottom:10px;">
+                                    <div class="panel-title">Land Pages</div>
+                                    <div class="panel-body" style="display:flex;gap:8px;flex-wrap:wrap;">
+                                        <a href="/land/map" class="btn btn-secondary btn-small" style="flex:1;min-width:120px;text-align:center;">Map Editor</a>
+                                        <a href="/land/shop" class="btn btn-secondary btn-small" style="flex:1;min-width:120px;text-align:center;">Housing Shop</a>
+                                        <a href="/land/pets" class="btn btn-secondary btn-small" style="flex:1;min-width:120px;text-align:center;">Companion Pets</a>
+                                    </div>
+                                </div>
+                            </template>
+
                         </template>
 
                         <!-- Load error / not yet loaded -->
@@ -2542,7 +2570,6 @@
 
                     </div>
                     <div v-else class="empty-state" style="padding:40px 0;">
-                        <div style="font-size:32px;margin-bottom:12px;">&#127968;</div>
                         <div style="color:var(--text-dim);font-size:14px;margin-bottom:16px;">You need to travel to your land to manage housing.</div>
                         <button class="btn btn-secondary btn-small"
                                 @click="travel('your_land')"

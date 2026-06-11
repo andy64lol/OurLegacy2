@@ -178,6 +178,10 @@ createApp({
             // land / housing
             landData: null,
             landLoading: false,
+            landSubTab: "overview",
+
+            // tab overflow
+            tabOverflowOpen: false,
 
             invPage: 1,
             shopPage: 1,
@@ -225,8 +229,8 @@ createApp({
         allTabOptions() {
             return [
                 { key: 'explore',     label: 'Explore',     show: true },
-                { key: 'battle',      label: 'Battle!',     show: this.inBattle },
-                { key: 'character',   label: 'Character',   show: true },
+                { key: 'battle',      label: 'Battle!',     show: this.inBattle, icon: '/game_assets/glyphs/fight.webp', cls: 'vtab-battle' },
+                { key: 'character',   label: 'Character',   show: true, badge: (this.player && this.player.attr_points > 0) ? '\u25b2' : null, badgeStyle: 'color:var(--gold);font-size:10px;font-weight:700;background:none;padding:0;min-width:unset;' },
                 { key: 'equipment',   label: 'Equipment',   show: true },
                 { key: 'inventory',   label: 'Inventory',   show: true },
                 { key: 'map',         label: 'Map',         show: true },
@@ -234,13 +238,13 @@ createApp({
                 { key: 'shop',        label: 'Shop',        show: !!(this.shopItems && this.shopItems.length) },
                 { key: 'mine',        label: 'Mine',        show: !!this.mineData },
                 { key: 'crafting',    label: 'Crafting',    show: true },
-                { key: 'dungeons',    label: 'Dungeons',    show: true },
+                { key: 'dungeons',    label: 'Dungeons',    show: true, badge: (this.activeDungeon && this.activeDungeon.id) ? '!' : null, badgeStyle: 'background:var(--gold);' },
                 { key: 'market',      label: 'Market',      show: true },
-                { key: 'party',       label: 'Party',       show: true },
-                { key: 'quests',      label: 'Quests',      show: true },
-                { key: 'challenges',  label: 'Challenges',  show: true },
+                { key: 'party',       label: 'Party',       show: true, badge: (this.activeCompanions && this.activeCompanions.length) ? this.activeCompanions.length : null },
+                { key: 'quests',      label: 'Quests (' + this.completedMissionsCount + ')', show: true },
+                { key: 'challenges',  label: 'Challenges',  show: true, badge: this.readyChallengesCount > 0 ? this.readyChallengesCount : null, badgeStyle: 'background:var(--gold);' },
                 { key: 'diary',       label: 'Diary',       show: true },
-                { key: 'events',      label: 'Events',      show: true },
+                { key: 'events',      label: 'Events',      show: true, badge: this.activeEventsCount > 0 ? this.activeEventsCount : null, badgeStyle: 'background:var(--gold);' },
                 { key: 'friends',     label: 'Friends',     show: !!this.onlineUsername },
                 { key: 'dm',          label: 'DM: ' + (this.dmTarget || ''), show: !!(this.dmTarget && this.onlineUsername) },
                 { key: 'group',       label: 'Group',       show: !!this.onlineUsername },
@@ -248,7 +252,21 @@ createApp({
                 { key: 'leaderboard', label: 'Leaderboard', show: true },
                 { key: 'wiki',        label: 'Wiki',        show: true },
                 { key: 'customize',   label: 'Customize',   show: true },
+                { key: 'settings',    label: 'Settings',    show: true },
             ].filter(t => t.show);
+        },
+        visibleTabs() {
+            const all = this.allTabOptions;
+            if (all.length <= 7) return all;
+            const activeIdx = all.findIndex(t => t.key === this.activeTab);
+            if (activeIdx >= 7) return [...all.slice(0, 6), all[activeIdx]];
+            return all.slice(0, 7);
+        },
+        overflowTabs() {
+            const all = this.allTabOptions;
+            if (all.length <= 7) return [];
+            const visibleKeys = new Set(this.visibleTabs.map(t => t.key));
+            return all.filter(t => !visibleKeys.has(t.key));
         },
         craftableCount() {
             return (this.craftingRecipes || []).filter((r) => r.can_craft).length;
@@ -365,6 +383,10 @@ createApp({
         },
         activeEventsCount() {
             return (this.eventsData && this.eventsData.active) ? this.eventsData.active.length : 0;
+        },
+        overflowActiveLabel() {
+            const t = this.overflowTabs.find(t => t.key === this.activeTab);
+            return t ? t.label : null;
         },
     },
 
@@ -1186,19 +1208,24 @@ createApp({
         },
 
         // ── tab switching ─────────────────────────────────────
+        handleTabClick(key) {
+            if (key === 'customize') { this.openCustomizeModal(); return; }
+            if (key === 'settings') {
+                if (typeof openSettings === 'function') openSettings();
+                else { const m = document.getElementById('settings-modal'); if (m) m.style.display = 'flex'; }
+                return;
+            }
+            this.switchTab(key);
+        },
         switchTab(tab) {
             this.activeTab = tab;
+            this.tabOverflowOpen = false;
             if (tab === "market" && !this.marketItems.length && !this.marketLoading) this.loadMarket();
             if (tab === "friends" && !this.friendsList.length) this.loadFriends();
             if (tab === "group" && !this.groupData && !this.groupLoading) this.loadGroup();
             if (tab === "land" && !this.landData && !this.landLoading) this.loadLandData();
             if (tab === "leaderboard" && !this.leaderboardData && !this.leaderboardLoading) this.loadLeaderboard();
             if (tab === "map") this.$nextTick(() => this.initWorldMapCanvas());
-            this.$nextTick(() => {
-                const tabNav = document.querySelector(".tab-bar-wrap .tab-nav");
-                const activeBtn = tabNav && tabNav.querySelector(".tab-btn.active");
-                if (activeBtn) activeBtn.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
-            });
         },
 
         // ── land data ─────────────────────────────────────────
