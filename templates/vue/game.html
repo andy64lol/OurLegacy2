@@ -1135,15 +1135,12 @@ window._betaInit = {
                                     <button class="btn btn-xsmall btn-secondary" @click="openDm(f.username)">DM</button>
                                     <button class="btn btn-xsmall btn-secondary" style="color:var(--red);" @click="removeFriend(f.username)">&#10005;</button>
                                 </div>
+                                <div v-if="friendsPageCount > 1" class="pagination-bar" style="margin-top:8px;">
+                                    <button class="btn btn-xsmall btn-secondary" :disabled="friendsPage <= 1" @click="friendsPage = Math.max(1, friendsPage - 1)">&larr;</button>
+                                    <span>Page [[ friendsPage ]] / [[ friendsPageCount ]]</span>
+                                    <button class="btn btn-xsmall btn-secondary" :disabled="friendsPage >= friendsPageCount" @click="friendsPage = Math.min(friendsPageCount, friendsPage + 1)">&rarr;</button>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                        <div v-if="friendsPageCount > 1" class="pagination-bar">
-                            <button class="btn btn-xsmall btn-secondary" :disabled="friendsPage <= 1" @click="friendsPage = Math.max(1, friendsPage - 1)">&larr;</button>
-                            <span>Page [[ friendsPage ]] / [[ friendsPageCount ]]</span>
-                            <button class="btn btn-xsmall btn-secondary" :disabled="friendsPage >= friendsPageCount" @click="friendsPage = Math.min(friendsPageCount, friendsPage + 1)">&rarr;</button>
-                        </div>
                         </div>
                     </div>
                 </div>
@@ -1707,7 +1704,7 @@ window._betaInit = {
                         :disabled="customizeSubmitting">
                 </div>
                 <div class="cust-name-locked" v-else>
-                    &#128274; Name changes are disabled for cloud-save accounts.
+                    Name changes are disabled for cloud-save accounts.
                 </div>
 
                 <!-- Gender -->

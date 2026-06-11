@@ -579,6 +579,20 @@ createApp({
             if (f) f.unread = 0;
         },
 
+        async refreshDmMessages() {
+            if (!this.dmTarget) return;
+            try {
+                const r = await fetch(`/api/dm/${encodeURIComponent(this.dmTarget)}`, {
+                    credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                const data = await r.json();
+                if (data.ok) {
+                    this.dmMessages = data.messages || [];
+                    this.$nextTick(() => { const el = document.getElementById('dm-msg-area'); if (el) el.scrollTop = el.scrollHeight; });
+                }
+            } catch (_) {}
+        },
+
         closeDm() { this.dmTarget = null; this.dmMessages = []; this.dmInput = ''; this.dmModalOpen = false; },
 
         async sendDm() {
@@ -595,7 +609,7 @@ createApp({
                 });
                 const data = await r.json();
                 if (data.ok) {
-                    await this.openDm(this.dmTarget);
+                    await this.refreshDmMessages();
                 } else {
                     this.showToast(data.message || 'Could not send.', 'var(--red)');
                     this.dmInput = prev;
