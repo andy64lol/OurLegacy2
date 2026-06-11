@@ -145,6 +145,8 @@ window._betaInit = {
     .land-slot-grid { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px; }
     .land-slot-card { background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:8px;font-size:12px; }
     .land-slot-filled { border-color:rgba(80,200,80,0.25);background:rgba(50,120,50,0.1); }
+    .area-map-wrap { width:100%;margin-top:10px; }
+    .area-map-img { width:100%;height:auto;max-height:220px;object-fit:contain;display:block;border-radius:6px;image-rendering:pixelated; }
     /* Group level-up overlay */
     .group-levelup-enter-active,.group-levelup-leave-active{transition:opacity 0.4s,transform 0.4s;}
     .group-levelup-enter-from,.group-levelup-leave-to{opacity:0;transform:translateX(-50%) translateY(-18px);}
@@ -351,13 +353,14 @@ window._betaInit = {
         <div class="main-content">
             <div style="padding:0 0 12px 0;max-width:960px;margin:0 auto;">
                 <!-- Announcement ticker -->
-                <div v-if="announcements && announcements.length" class="vue-ticker">
+                <div class="vue-ticker">
                     <div class="vue-ticker-label">
                         <img src="/game_assets/glyphs/sparkles.webp" alt="" style="width:12px;height:12px;image-rendering:pixelated;">
                         News
                     </div>
                     <div class="vue-ticker-track">
-                        <span class="vue-ticker-inner">[[ announcements.join('  ✦  ') ]]</span>
+                        <span v-if="announcements && announcements.length" class="vue-ticker-inner">[[ announcements.join('  \u2726  ') ]]</span>
+                        <span v-else style="color:rgba(255,255,255,0.35);font-size:13px;padding-left:6px;">No announcements at this time.</span>
                     </div>
                 </div>
 
@@ -1288,6 +1291,16 @@ window._betaInit = {
                                         </div>
                                     </div>
                                 </template>
+                            </div>
+                        </div>
+
+                        <!-- Land Pages -->
+                        <div class="panel land-section" style="margin-bottom:14px;">
+                            <div class="panel-title">Land Pages</div>
+                            <div class="panel-body" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;">
+                                <a href="/land/map" class="btn btn-secondary" style="flex:1;min-width:140px;text-align:center;padding:10px 8px;font-size:13px;">Map Editor</a>
+                                <a href="/land/shop" class="btn btn-secondary" style="flex:1;min-width:140px;text-align:center;padding:10px 8px;font-size:13px;">Housing Shop</a>
+                                <a href="/land/pets" class="btn btn-secondary" style="flex:1;min-width:140px;text-align:center;padding:10px 8px;font-size:13px;">Companion Pets</a>
                             </div>
                         </div>
 

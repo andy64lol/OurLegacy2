@@ -2777,6 +2777,22 @@ def api_announcements():
     ), 200
 
 
+@app.route("/api/admin/announce", methods=["POST"])
+def api_admin_announce():
+    import time as _time
+
+    if not _is_owner(session.get("online_username", "")):
+        return jsonify({"ok": False, "message": "Unauthorized"}), 403
+    body = request.get_json(force=True) or {}
+    text = (body.get("text") or "").strip()
+    if not text:
+        return jsonify({"ok": False, "message": "No announcement text provided."}), 400
+    global _server_announcements
+    _server_announcements.append((int(_time.time()), text))
+    _server_announcements = _server_announcements[-10:]
+    return jsonify({"ok": True, "message": f"Announced: {text}"})
+
+
 @app.route("/chat")
 def chat_page():
     username = session.get("online_username")

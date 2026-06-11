@@ -991,7 +991,7 @@ createApp({
             try {
                 const r = await fetch('/api/announcements', { credentials: 'same-origin' });
                 const data = await r.json();
-                this.announcements = data.announcements || [];
+                this.announcements = (data.announcements || []).map(a => (a && typeof a === 'object') ? (a.text || '') : a).filter(Boolean);
             } catch(_) {}
         },
         typeGlyph(type) {

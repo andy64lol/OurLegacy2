@@ -425,7 +425,7 @@
             try {
                 switch (cmd) {
                     case 'help':
-                        tPrint('server:  ban unban kick mute unmute warn addmod removemod online', 'info');
+                        tPrint('server:  ban unban kick mute unmute warn addmod removemod online announce', 'info');
                         tPrint('char:    stats inventory heal  give gold/xp/item/mxp  set level/stat/mining  remove item', 'info');
                         tPrint('travel:  tp <area>  |  tp <user> <area>  |  tp all <area>', 'info'); break;
                     case 'stats': { var d = await tApi('GET', '/api/admin/game/stats'); if (!d.ok) { tPrint(d.message, 'err'); break; } tPrint(d.name + ' (' + d.class + ')  Lv' + d.level + ' [' + d.rank + ']  ' + d.hp + '/' + d.max_hp + 'HP  ' + d.gold + 'g  Mining:' + d.mining_level, 'info'); tPrint('ATK:' + d.attack + '  DEF:' + d.defense + '  SPD:' + d.speed + '  EXP:' + d.experience + '/' + d.experience_to_next + '  Inv:' + d.inventory_count, 'dim'); break; }
@@ -466,6 +466,13 @@
                     case 'listbans': { var d = await tApi('GET', '/api/admin/data'); if (!d.ok) { tPrint(d.message, 'err'); break; } tPrint('banned (' + d.bans.length + '):', 'head'); if (d.bans.length) d.bans.forEach(function(b) { tPrint('  ' + b.username + ' — ' + (b.reason||'no reason') + ' (by ' + (b.banned_by||'?') + ')', 'dim'); }); else tPrint('  none', 'dim'); break; }
                     case 'listmutes': { var d = await tApi('GET', '/api/admin/data'); if (!d.ok) { tPrint(d.message, 'err'); break; } tPrint('muted (' + d.mutes.length + '):', 'head'); if (d.mutes.length) d.mutes.forEach(function(m) { tPrint('  ' + m.username + ' — ' + (m.reason||'no reason'), 'dim'); }); else tPrint('  none', 'dim'); break; }
                     case 'listmods': { var d = await tApi('GET', '/api/admin/data'); if (!d.ok) { tPrint(d.message, 'err'); break; } tPrint('mods: ' + (d.mods.join(', ') || 'none'), 'info'); break; }
+                    case 'announce': {
+                        var text = parts.slice(1).join(' ').trim();
+                        if (!text) { tPrint('usage: announce <message>', 'warn'); break; }
+                        var r = await tApi('POST', '/api/admin/announce', { text: text });
+                        tPrint(r.message, r.ok ? 'ok' : 'err');
+                        break;
+                    }
                     case 'clear': document.getElementById('term-out').innerHTML = ''; break;
                     default: tPrint('unknown: ' + cmd + '  (type help)', 'err');
                 }
