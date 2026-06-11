@@ -2756,51 +2756,6 @@
             </div>
         </div>
 
-    <!-- Change Character Modal -->
-    <div v-if="customizeModalOpen" style="position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9997;display:flex;align-items:center;justify-content:center;padding:16px;" @click.self="closeCustomizeModal">
-        <div style="background:var(--panel-bg,#1a1520);border:1px solid rgba(200,165,90,0.45);border-radius:8px;padding:24px 28px;width:100%;max-width:420px;box-sizing:border-box;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-                <div style="font-size:16px;font-weight:bold;color:var(--gold);">Change Character</div>
-                <button @click="closeCustomizeModal" class="btn btn-xsmall btn-secondary" style="font-size:16px;line-height:1;padding:2px 8px;">&times;</button>
-            </div>
-            <div style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">Costs <strong style="color:var(--gold);">10,000 gold</strong>. Leave any field blank to keep it unchanged.</div>
-            <div style="display:flex;flex-direction:column;gap:10px;">
-                <div v-if="!onlineUsername">
-                    <label style="font-size:12px;color:var(--text-dim);">New Name</label>
-                    <input type="text" v-model="customizeName" maxlength="20" placeholder="Leave blank to keep current"
-                        style="width:100%;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:7px 9px;font-size:13px;color:var(--text-light);outline:none;box-sizing:border-box;margin-top:3px;font-family:inherit;">
-                </div>
-                <div>
-                    <label style="font-size:12px;color:var(--text-dim);">Gender</label>
-                    <select v-model="customizeGender" style="width:100%;background:rgba(10,8,16,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:7px 9px;font-size:13px;color:var(--text-light);outline:none;margin-top:3px;font-family:inherit;">
-                        <option value="">Keep current</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="nonbinary">Non-binary</option>
-                    </select>
-                </div>
-                <div v-if="customizeRaces && customizeRaces.length">
-                    <label style="font-size:12px;color:var(--text-dim);">Race</label>
-                    <select v-model="customizeRace" style="width:100%;background:rgba(10,8,16,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:7px 9px;font-size:13px;color:var(--text-light);outline:none;margin-top:3px;font-family:inherit;">
-                        <option value="">Keep current</option>
-                        <option v-for="r in customizeRaces" :key="r" :value="r">[[ r.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase()) ]]</option>
-                    </select>
-                </div>
-                <div v-if="customizeClasses && customizeClasses.length">
-                    <label style="font-size:12px;color:var(--text-dim);">Class</label>
-                    <select v-model="customizeClass" style="width:100%;background:rgba(10,8,16,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:7px 9px;font-size:13px;color:var(--text-light);outline:none;margin-top:3px;font-family:inherit;">
-                        <option value="">Keep current</option>
-                        <option v-for="c in customizeClasses" :key="c" :value="c">[[ c.replace(/_/g,' ').replace(/\b\w/g, ch => ch.toUpperCase()) ]]</option>
-                    </select>
-                </div>
-            </div>
-            <div style="display:flex;gap:10px;margin-top:18px;">
-                <button @click="submitCustomize" class="btn btn-primary" :disabled="customizeSubmitting" style="flex:1;">[[ customizeSubmitting ? 'Saving…' : 'Save Changes (10,000g)' ]]</button>
-                <button @click="closeCustomizeModal" class="btn btn-secondary">Cancel</button>
-            </div>
-        </div>
-    </div>
-
     <!-- ═══ Native Vue Chat Widget ═══ -->
     <template v-if="onlineUsername">
         <!-- Chat panel -->
