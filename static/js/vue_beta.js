@@ -120,7 +120,6 @@ createApp({
             groupLevelUpTimer: null,
 
             // customize character modal
-            customizeModalOpen: false,
             customizeName: "",
             customizeGender: "",
             customizeRace: "",
@@ -388,7 +387,7 @@ createApp({
         friendsList() { this.friendPage = 1; },
         availableBosses() { this.bossPage = 1; },
         inBattle(val) { if (!val) this.spellPage = 0; },
-        dmMessages(newVal) {
+        dmMessages(_newVal) {
             if (this.chatAutoScroll) {
                 this.$nextTick(() => {
                     const el = document.getElementById('dm-messages-wrap');
@@ -647,7 +646,7 @@ createApp({
                 } else {
                     this.showToast(data.message || "Failed.", "var(--red)");
                 }
-            } catch (e) {
+            } catch (_) {
                 this.showToast("Request failed.", "var(--red)");
             } finally {
                 this.actionPending = false;
@@ -702,7 +701,7 @@ createApp({
                         const meetsClass = !reqClass || plClass === reqClass;
                         const sp = [];
                         for (const [k, lbl] of STAT_KEYS) {
-                            if (item[k] != null && item[k] !== 0) {
+                            if (item[k] !== null && item[k] !== undefined && item[k] !== 0) {
                                 sp.push(k === "critical_chance"
                                     ? `+${Math.round(item[k] * 100)}% ${lbl}`
                                     : `+${item[k]} ${lbl}`);
@@ -723,7 +722,7 @@ createApp({
                         };
                     });
                 }
-            } catch (e) {
+            } catch (_) {
                 this.marketCooldown = "Could not load market.";
             } finally {
                 this.marketLoading = false;
@@ -891,7 +890,7 @@ createApp({
                 });
                 const data = await r.json();
                 this.leaderboardData = data.ok ? { players: data.players || [], groups: data.groups || [] } : { players: [], groups: [] };
-            } catch (e) {
+            } catch (_) {
                 this.leaderboardData = { players: [], groups: [], error: true };
             } finally {
                 this.leaderboardLoading = false;
