@@ -1,3 +1,4 @@
+/* global io */
 const { createApp, nextTick } = Vue;
 
 const GLYPHS = {
@@ -56,7 +57,7 @@ function formatTime(created_at) {
     try {
         const d = typeof created_at === 'number' ? new Date(created_at * 1000) : new Date(created_at);
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch (e) { return ''; }
+    } catch { return ''; }
 }
 
 createApp({
@@ -225,7 +226,7 @@ createApp({
                 if (this.messages.length > 200) this.messages.shift();
                 this.scrollBottom();
                 if (!msg.is_system) {
-                    try { window.parent.postMessage({ type: 'chat_unread' }, '*'); } catch (_e) { /* cross-origin post ignored */ }
+                    try { window.parent.postMessage({ type: 'chat_unread' }, '*'); } catch { /* cross-origin post ignored */ }
                 }
             });
 

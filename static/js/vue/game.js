@@ -1,4 +1,5 @@
 // vue 3 game — options api, custom delimiters [[ ]] to avoid jinja2 conflict
+/* global io, clearTimeout */
 const { createApp } = Vue;
 
 createApp({
@@ -105,7 +106,7 @@ createApp({
             chatInput:            '',
             chatSending:          false,
             chatPollTimer:        null,
-            readMsgIds:           (() => { try { return JSON.parse(localStorage.getItem('ol2_chat_read') || '[]'); } catch(_) { return []; } })(),
+            readMsgIds:           (() => { try { return JSON.parse(localStorage.getItem('ol2_chat_read') || '[]'); } catch { return []; } })(),
 
             settingsTheme:        localStorage.getItem('ol2_theme') || 'default',
             settingsBg:           localStorage.getItem('ol2_bg') || '1',
@@ -160,6 +161,7 @@ createApp({
 
             announcements:  [],
             dmModalOpen:    false,
+            battleItemSelect: '',
         };
     },
 
@@ -172,6 +174,10 @@ createApp({
         craftableCount() { return (this.craftingRecipes || []).filter(r => r.can_craft).length; },
         battleSpells() { return (this.battle && this.battle.spells) ? this.battle.spells : []; },
         battleConsumables() { return (this.inventoryItems || []).filter(i => i.type === 'consumable').slice(0, 6); },
+        announcementsTickerText() {
+            const combined = (this.announcements || []).join('  ·  ');
+            return combined + '          ══          ' + combined;
+        },
         spellPageCount() { return Math.max(1, Math.ceil(this.battleSpells.length / 4)); },
         spellPagedSpells() {
             const page = Math.min(this.spellPage, this.spellPageCount - 1);
@@ -228,7 +234,6 @@ createApp({
         allTabOptions() {
             return [
                 { key: 'explore',    label: 'Explore',     show: true },
-                { key: 'battle',     label: 'Battle!',     show: this.inBattle },
                 { key: 'equipment',  label: 'Equipment',   show: true },
                 { key: 'map',        label: 'Map',         show: true },
                 { key: 'travel',     label: 'Travel',      show: true },
@@ -288,7 +293,7 @@ createApp({
                 const data = await r.json();
                 if (!data.ok) return;
                 this._applyState(data);
-            } catch (_) { /* network/parse error ignored */ }
+            } catch { /* network/parse error ignored */ }
         },
 
         _applyState(data) {
@@ -331,7 +336,6 @@ createApp({
             this.inventory        = data.inventory   || [];
             this.inventoryItems   = data.inventory_items || [];
             this.equippedDetails  = data.equipped_details || {};
-            const wasInBattle     = this.inBattle;
             this.inBattle         = !!data.in_battle;
             if (data.battle) this.battle = data.battle;
             if (!data.in_battle) this.battle = null;
@@ -371,8 +375,6 @@ createApp({
             this.messages     = msgs;
             this.lastMsgCount = msgs.length;
 
-            if (!wasInBattle && data.in_battle) this.activeTab = 'battle';
-            if (wasInBattle && !data.in_battle && this.activeTab === 'battle') this.activeTab = 'explore';
             if (!this.shopItems.length && this.activeTab === 'shop') this.activeTab = 'explore';
             if (!this.mineData && this.activeTab === 'mine') this.activeTab = 'explore';
         },
@@ -434,7 +436,7 @@ createApp({
             if (res && res.redirect) window.location.href = res.redirect;
         },
         async abandonDungeon() {
-            if (!confirm('Abandon this dungeon run? All progress will be lost.')) return;
+            if (!window.confirm('Abandon this dungeon run? All progress will be lost.')) return;
             return this.doAction('/api/action/dungeon/abandon');
         },
         battleAttack()        { return this.doAction('/api/battle/attack'); },
@@ -469,7 +471,7 @@ createApp({
                         const meetsClass = !reqClass || plClass === reqClass;
                         const sp = [];
                         for (const [k, lbl] of STAT_KEYS) {
-                            if (item[k] != null && item[k] !== 0) {
+                            if (item[k] !== null && item[k] !== undefined && item[k] !== 0) {
                                 sp.push(k === 'critical_chance'
                                     ? `+${Math.round(item[k] * 100)}% ${lbl}`
                                     : `+${item[k]} ${lbl}`);
@@ -490,7 +492,7 @@ createApp({
                         };
                     });
                 }
-            } catch (e) {
+            } catch {
                 this.marketCooldown = 'Could not load market.';
             } finally {
                 this.marketLoading = false;
@@ -512,7 +514,7 @@ createApp({
                     this.friendsList = data.friends || [];
                     this.pendingRequests = { incoming: data.incoming || [], outgoing: data.outgoing || [] };
                 }
-            } catch (_) { /* network/parse error ignored */ }
+            } catch { /* network/parse error ignored */ }
             this.friendsLoading = false;
         },
 
@@ -529,7 +531,7 @@ createApp({
                 const data = await r.json();
                 this.showToast(data.message || (data.ok ? 'Request sent!' : 'Failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
                 if (data.ok) { this.friendAddTarget = ''; await this.loadFriends(); }
-            } catch (_) { this.showToast('Network error.', 'var(--red)'); }
+            } catch { this.showToast('Network error.', 'var(--red)'); }
             this.friendAddLoading = false;
         },
 
@@ -543,11 +545,11 @@ createApp({
                 const data = await r.json();
                 this.showToast(data.message || (data.ok ? 'Done!' : 'Failed.'), data.ok ? 'var(--green-bright)' : 'var(--red)');
                 if (data.ok) await this.loadFriends();
-            } catch (_) { this.showToast('Network error.', 'var(--red)'); }
+            } catch { this.showToast('Network error.', 'var(--red)'); }
         },
 
         async removeFriend(username) {
-            if (!confirm(`Remove ${username} from friends?`)) return;
+            if (!window.confirm(`Remove ${username} from friends?`)) return;
             try {
                 const r = await fetch('/api/friends/remove', {
                     method: 'POST', credentials: 'same-origin',
@@ -557,7 +559,7 @@ createApp({
                 const data = await r.json();
                 this.showToast(data.message || (data.ok ? 'Removed.' : 'Failed.'), data.ok ? 'var(--text-dim)' : 'var(--red)');
                 if (data.ok) { if (this.dmTarget === username) this.dmTarget = null; await this.loadFriends(); }
-            } catch (_) { this.showToast('Network error.', 'var(--red)'); }
+            } catch { this.showToast('Network error.', 'var(--red)'); }
         },
 
         async openDm(username) {
@@ -571,7 +573,7 @@ createApp({
                 });
                 const data = await r.json();
                 if (data.ok) this.dmMessages = data.messages || [];
-            } catch (_) {}
+            } catch {}
             this.dmLoading = false;
             this.$nextTick(() => { const el = document.getElementById('dm-msg-area'); if (el) el.scrollTop = el.scrollHeight; });
             // Mark unread cleared on this friend
@@ -590,7 +592,7 @@ createApp({
                     this.dmMessages = data.messages || [];
                     this.$nextTick(() => { const el = document.getElementById('dm-msg-area'); if (el) el.scrollTop = el.scrollHeight; });
                 }
-            } catch (_) {}
+            } catch {}
         },
 
         closeDm() { this.dmTarget = null; this.dmMessages = []; this.dmInput = ''; this.dmModalOpen = false; },
@@ -614,13 +616,13 @@ createApp({
                     this.showToast(data.message || 'Could not send.', 'var(--red)');
                     this.dmInput = prev;
                 }
-            } catch (_) { this.dmInput = prev; }
+            } catch { this.dmInput = prev; }
             this.dmSending = false;
         },
 
         fmtDmTime(ts) {
             if (!ts) return '';
-            try { return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (_) { return ''; }
+            try { return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return ''; }
         },
 
         async loadGroup() {
@@ -628,7 +630,7 @@ createApp({
             try {
                 const r = await fetch('/api/groups/my', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 if (r.ok) { const data = await r.json(); if (data.ok) this.groupData = data.group || null; }
-            } catch (_) { /* network/parse error ignored */ }
+            } catch { /* network/parse error ignored */ }
         },
 
         async loadNearby() {
@@ -636,7 +638,17 @@ createApp({
             try {
                 const r = await fetch('/api/area_activity', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 if (r.ok) { const data = await r.json(); this.nearbyPlayers = (data.ok && data.players) ? data.players.slice(0, 5) : []; }
-            } catch (_) { /* network/parse error ignored */ }
+            } catch { /* network/parse error ignored */ }
+        },
+
+        battleLogClass(entry) {
+            if (typeof entry !== 'string') return 'log-normal';
+            if (entry.includes('CRITICAL'))                    return 'log-crit';
+            if (entry.includes('enters a new phase'))          return 'log-phase';
+            if (/uses [A-Z]/.test(entry))                      return 'log-ability';
+            if (/(deal|deals|strike|hits|attacks)/.test(entry)) return 'log-damage';
+            if (/(defeated|falls|Victory|escaped)/.test(entry)) return 'log-victory';
+            return 'log-normal';
         },
 
         switchTab(tab) {
@@ -665,7 +677,7 @@ createApp({
                     }
                     this.landPlantSelections = sels;
                 }
-            } catch (_) {}
+            } catch {}
             this.landLoading = false;
         },
 
@@ -717,7 +729,7 @@ createApp({
                     if (this.chatMessages.length !== prevLen) this.$nextTick(() => this.scrollChatBottom());
                     if (!document.hidden) this.$nextTick(() => this.markChatRead());
                 }
-            } catch (_) {}
+            } catch {}
             this.chatLoading = false;
         },
 
@@ -759,7 +771,7 @@ createApp({
 
         chatFmtTime(ts) {
             if (!ts) return '';
-            try { return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; }
+            try { return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return ''; }
         },
 
         scrollChatBottom() {
@@ -776,7 +788,7 @@ createApp({
             const last9 = this.chatMessages.slice(-9);
             const ids = last9.map(m => String(m.id || m.created_at || '')).filter(Boolean);
             this.readMsgIds = ids;
-            try { localStorage.setItem('ol2_chat_read', JSON.stringify(ids)); } catch (_) {}
+            try { localStorage.setItem('ol2_chat_read', JSON.stringify(ids)); } catch {}
         },
 
         setPage(type, page) {
@@ -785,7 +797,7 @@ createApp({
 
         fmtTime(ts) {
             if (!ts) return '';
-            try { return new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; }
+            try { return new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return ''; }
         },
 
         /* ── World Map Canvas (BFS layout, fog of war, pan/zoom) ── */
@@ -958,7 +970,7 @@ createApp({
         },
         async vLogoutAndSave() {
             this.showToast('Saving & exiting...', 'var(--text-dim)', 1500);
-            try { await fetch('/api/online/logout', { method: 'POST' }); } catch(_) {}
+            try { await fetch('/api/online/logout', { method: 'POST' }); } catch {}
             window.location.href = '/';
         },
 
@@ -992,7 +1004,7 @@ createApp({
                 const r = await fetch('/api/announcements', { credentials: 'same-origin' });
                 const data = await r.json();
                 this.announcements = (data.announcements || []).map(a => (a && typeof a === 'object') ? (a.text || '') : a).filter(Boolean);
-            } catch(_) {}
+            } catch {}
         },
         typeGlyph(type) {
             const map = { weapon:'weapon', armor:'armor', offhand:'offhand', accessory:'accessories', consumable:'food', material:'materials', pickaxe:'pickaxe', spell:'spell', book:'book' };
@@ -1090,7 +1102,7 @@ createApp({
                 } else {
                     this.showToast(data.message || 'Could not update character.', 'var(--red)');
                 }
-            } catch (_) { this.showToast('Network error.', 'var(--red)'); }
+            } catch { this.showToast('Network error.', 'var(--red)'); }
             finally { this.customizeSubmitting = false; }
         },
 

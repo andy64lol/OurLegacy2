@@ -87,7 +87,7 @@ createApp({
             try {
                 await fetch('/api/online/logout', { method: 'POST' });
                 window.location.reload();
-            } catch (e) {
+            } catch {
                 this.authLoading = false;
             }
         },
@@ -97,7 +97,7 @@ createApp({
                 const res  = await fetch('/api/online/saves');
                 const data = await res.json();
                 this.cloudSaves = data.saves || [];
-            } catch (_) { /* network/parse error ignored */ } finally {
+            } catch { /* network/parse error ignored */ } finally {
                 this.savesLoading = false;
             }
         },

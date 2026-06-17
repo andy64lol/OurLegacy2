@@ -45,9 +45,10 @@ function renderMsg(text) {
     return out;
 }
 
+/* global io */
 function formatTime(created_at) {
     if (!created_at) return '';
-    try { return new Date(created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; }
+    try { return new Date(created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return ''; }
 }
 
 createApp({

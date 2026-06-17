@@ -1,4 +1,5 @@
-const { createApp, nextTick } = "vue";
+/* global io */
+const { createApp, nextTick } = Vue;
 const _fr = window._init || {};
 
 createApp({
@@ -49,16 +50,6 @@ createApp({
                 }
             }
             nextTick(() => this.scrollDm());
-        }
-        },
-        mounted() {
-            this.connectSocket();
-        },
-        beforeUnmount() {
-            if (this.socket) {
-                this.socket.disconnect();
-                this.socket = null;
-            }
         },
         scrollDm() {
             const el = this.$refs.dmArea;
@@ -89,7 +80,7 @@ createApp({
                 } else {
                     this.toast(data.message || "Failed to send message.");
                 }
-            } catch (_) {
+            } catch {
                 this.toast("Network error sending message.");
             }
         },
@@ -107,7 +98,7 @@ createApp({
                     data.message || (data.ok ? "Request sent!" : "Failed");
                 this.addMsgOk = !!data.ok;
                 if (data.ok) this.addName = "";
-            } catch (e) {
+            } catch {
                 this.addMsg = "Network error";
                 this.addMsgOk = false;
             }
@@ -124,12 +115,12 @@ createApp({
                     this.friends.push({ username: fromUser, online: false });
                     this.toast(fromUser + " is now your friend!");
                 }
-            } catch (_) {
+            } catch {
                 /* network/parse error ignored */
             }
         },
         async removeFriend(username) {
-            if (!confirm("Remove " + username + " from friends?")) return;
+            if (!window.confirm("Remove " + username + " from friends?")) return;
             try {
                 await fetch("/api/friends/remove", {
                     method: "POST",
@@ -140,12 +131,12 @@ createApp({
                     (f) => f.username !== username,
                 );
                 if (this.activeFriend === username) this.activeFriend = null;
-            } catch (_) {
+            } catch {
                 /* network/parse error ignored */
             }
         },
         async blockUser(username) {
-            if (!confirm("Block " + username + "?")) return;
+            if (!window.confirm("Block " + username + "?")) return;
             try {
                 await fetch("/api/block", {
                     method: "POST",
@@ -157,7 +148,7 @@ createApp({
                 );
                 this.blocked.push(username);
                 if (this.activeFriend === username) this.activeFriend = null;
-            } catch (_) {
+            } catch {
                 /* network/parse error ignored */
             }
         },
@@ -172,7 +163,7 @@ createApp({
                     }),
                 });
                 this.blocked = this.blocked.filter((u) => u !== username);
-            } catch (_) {
+            } catch {
                 /* network/parse error ignored */
             }
         },
@@ -192,7 +183,7 @@ createApp({
                 const res = await fetch("/api/player/inventory");
                 const data = await res.json();
                 this.myInventory = data.inventory || [];
-            } catch (_) {
+            } catch {
                 /* network/parse error ignored */
             }
         },

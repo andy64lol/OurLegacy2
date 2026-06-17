@@ -31,7 +31,7 @@ createApp({
                 if (!data.ok) { this.error = 'Failed to load leaderboard.'; return; }
                 this.groups  = data.groups  || [];
                 this.players = data.players || [];
-            } catch (e) {
+            } catch {
                 this.error = 'Error loading leaderboard.';
             } finally {
                 this.loading = false;

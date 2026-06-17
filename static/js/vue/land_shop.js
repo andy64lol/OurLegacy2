@@ -24,10 +24,10 @@ createApp({
                 if (data.ok !== false) {
                     window.location.reload();
                 } else {
-                    alert(data.message || 'Action failed.');
+                    window.alert(data.message || 'Action failed.');
                 }
             } catch (e) {
-                alert('Network error: ' + e.message);
+                window.alert('Network error: ' + e.message);
             } finally {
                 this.actionPending = false;
             }

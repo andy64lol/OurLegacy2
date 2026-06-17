@@ -56,7 +56,7 @@ createApp({
                     document.getElementById('abandon-form').submit();
                 });
             } else {
-                if (confirm('Retreat from the dungeon? All progress will be lost.')) {
+                if (window.confirm('Retreat from the dungeon? All progress will be lost.')) {
                     document.getElementById('abandon-form').submit();
                 }
             }

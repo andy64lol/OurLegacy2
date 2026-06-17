@@ -1,3 +1,4 @@
+/* global URLSearchParams */
 (function() {
     'use strict';
 
@@ -94,7 +95,7 @@
         loadedImgs[f] = img;
     });
 
-    let placingKey = null, _placingName = null, hoverTile = null;
+    let placingKey = null, hoverTile = null;
 
     function getTiles(key) { return BUILDING_TILES[key] || [3, 3]; }
 
@@ -206,7 +207,7 @@
 
     window.LandEditor = {
         startPlacing: function(key, name) {
-            placingKey = key; _placingName = name; hoverTile = null;
+            placingKey = key; hoverTile = null;
             document.getElementById('land-place-mode-bar').style.display = 'flex';
             document.getElementById('land-placing-name').textContent = name;
             canvas.style.cursor = 'crosshair';
@@ -214,7 +215,7 @@
             draw();
         },
         cancel: function() {
-            placingKey = null; _placingName = null; hoverTile = null;
+            placingKey = null; hoverTile = null;
             document.getElementById('land-place-mode-bar').style.display = 'none';
             canvas.style.cursor = '';
             draw();

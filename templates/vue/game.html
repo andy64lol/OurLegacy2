@@ -351,29 +351,264 @@ window._betaInit = {
         <div id="sidebar-resize-handle"></div>
 
         <div class="main-content">
-            <div style="padding:0 0 12px 0;max-width:960px;margin:0 auto;">
-                <!-- Announcement ticker -->
-                <div class="vue-ticker">
-                    <div class="vue-ticker-label">
-                        <img src="/game_assets/glyphs/sparkles.webp" alt="" style="width:12px;height:12px;image-rendering:pixelated;">
-                        News
-                    </div>
-                    <div class="vue-ticker-track">
-                        <span v-if="announcements && announcements.length" class="vue-ticker-inner">[[ announcements.join('  \u2726  ') ]]</span>
-                        <span v-else style="color:rgba(255,255,255,0.35);font-size:13px;padding-left:6px;">No announcements at this time.</span>
-                    </div>
-                </div>
 
-                <div style="display:flex;align-items:flex-end;gap:0;position:relative;margin-bottom:18px;">
-                    <div class="tab-bar-wrap" style="flex:1;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.15) transparent;">
-                    <div class="tab-nav">
-                        <button v-for="tab in allTabOptions" :key="tab.key"
-                            class="tab-btn"
-                            :class="{ active: activeTab === tab.key, 'vtab-battle': tab.key === 'battle' }"
-                            @click="switchTab(tab.key)">
-                            [[ tab.label ]]
+            <!-- ═══════════════════════════════════════════════════════════════
+                 BATTLE VIEW — shown when in_battle, replaces tab container
+                 Matches Jinja2 battle-outer layout: main column + spell sidebar
+                 ═══════════════════════════════════════════════════════════════ -->
+            <div v-if="inBattle && battle" class="battle-outer">
+                <div class="battle-main">
+
+                    <!-- Header -->
+                    <div class="battle-header">
+                        <div v-if="battle.is_boss">
+                            <div style="font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:0.18em;margin-bottom:6px;font-weight:700;opacity:0.85;">
+                                <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="boss battle"> Boss Encounter
+                            </div>
+                            <div style="font-size:22px;font-weight:700;color:var(--gold);letter-spacing:0.04em;text-shadow:0 0 20px rgba(255,180,60,0.5);display:flex;align-items:center;justify-content:center;gap:10px;">
+                                <img :src="'/game_assets/glyphs/' + enemyGlyph(battle.enemy_key) + '.webp'" style="width:28px;height:28px;image-rendering:pixelated;" @error="$event.target.style.display='none'">
+                                [[ battle.enemy_name ]]
+                            </div>
+                        </div>
+                        <div v-else>
+                            <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Combat</div>
+                            <div style="font-size:20px;font-weight:600;color:var(--red);display:flex;align-items:center;gap:8px;">
+                                <img :src="'/game_assets/glyphs/' + enemyGlyph(battle.enemy_key) + '.webp'" style="width:22px;height:22px;image-rendering:pixelated;" @error="$event.target.style.display='none'">
+                                [[ battle.enemy_name ]]
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boss dialogue banner -->
+                    <div v-if="battle.is_boss && battle.boss_dialogue" class="boss-dialogue-banner">
+                        <div class="boss-dialogue-icon">
+                            <img :src="'/game_assets/glyphs/' + enemyGlyph(battle.enemy_key) + '.webp'" style="width:28px;height:28px;image-rendering:pixelated;" @error="$event.target.style.display='none'">
+                        </div>
+                        <div class="boss-dialogue-body">
+                            <div class="boss-dialogue-label">[[ battle.enemy_name ]] declares</div>
+                            <div class="boss-dialogue-text">&ldquo;[[ battle.boss_dialogue ]]&rdquo;</div>
+                        </div>
+                    </div>
+
+                    <!-- Boss phase indicator -->
+                    <div v-if="battle.is_boss && battle.boss_phase_info"
+                         style="background:linear-gradient(135deg,rgba(180,30,30,0.18),rgba(120,10,10,0.10));border:1px solid rgba(200,50,50,0.5);border-radius:8px;padding:10px 16px;margin:0 0 12px 0;">
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                            <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">Phase</span>
+                            <div style="display:flex;gap:4px;">
+                                <div v-for="n in battle.boss_phase_info.total" :key="n"
+                                     :style="{ width:'18px', height:'8px', borderRadius:'3px', background: n <= battle.boss_phase_info.index ? 'var(--red)' : 'rgba(255,255,255,0.12)', border: '1px solid ' + (n <= battle.boss_phase_info.index ? 'var(--red)' : 'rgba(255,255,255,0.2)') }">
+                                </div>
+                            </div>
+                            <span style="font-size:12px;font-weight:600;color:var(--gold);">[[ battle.boss_phase_info.index ]] / [[ battle.boss_phase_info.total ]]</span>
+                            <span v-if="battle.boss_phase_info.attack_multiplier > 1.0"
+                                  style="font-size:11px;color:var(--red);background:rgba(200,50,50,0.15);border:1px solid rgba(200,50,50,0.3);border-radius:4px;padding:1px 6px;">
+                                ATK &times;[[ battle.boss_phase_info.attack_multiplier.toFixed(1) ]]
+                            </span>
+                        </div>
+                        <div v-if="battle.boss_phase_info.description" style="font-size:12px;color:var(--text-dim);margin-top:5px;font-style:italic;">[[ battle.boss_phase_info.description ]]</div>
+                    </div>
+
+                    <!-- Battle arena: player vs enemy -->
+                    <div class="battle-arena">
+                        <div class="panel" v-if="player">
+                            <div class="panel-title">
+                                <img class="class-glyph" :src="'/game_assets/glyphs/' + glyphFor(player.char_class) + '.webp'" :alt="player.char_class" style="width:18px;height:18px;image-rendering:pixelated;vertical-align:middle;margin-right:5px;">
+                                [[ player.name ]]
+                            </div>
+                            <div class="panel-body">
+                                <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">[[ player.char_class ]] &mdash; <img class="type-glyph" src="/game_assets/glyphs/level.gif" alt="level"> Lv.[[ player.level ]]</div>
+                                <div class="bar-group">
+                                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP <span class="bar-nums">[[ player.hp ]] / [[ player.max_hp ]]</span></div>
+                                    <div class="bar-track"><div class="bar-fill bar-hp" :style="{ width: hpPct + '%' }"></div></div>
+                                </div>
+                                <div class="bar-group">
+                                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/mana.webp" alt="mp"> MP <span class="bar-nums">[[ player.mp ]] / [[ player.max_mp ]]</span></div>
+                                    <div class="bar-track"><div class="bar-fill bar-mp" :style="{ width: mpPct + '%' }"></div></div>
+                                </div>
+                                <div class="stat-mini-grid">
+                                    <div class="stat-mini"><span>ATK</span><strong>[[ player.attack ]]</strong></div>
+                                    <div class="stat-mini"><span>DEF</span><strong>[[ player.defense ]]</strong></div>
+                                    <div class="stat-mini"><span>SPD</span><strong>[[ player.speed ]]</strong></div>
+                                </div>
+                                <div v-if="battle.player_effects && Object.keys(battle.player_effects).length" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                                    <div v-for="(eff_val, eff_key) in battle.player_effects" :key="eff_key"
+                                         style="background:rgba(100,200,100,0.15);border:1px solid var(--green-bright);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--green-bright);">
+                                        [[ eff_key.replace(/_/g,' ') ]] ([[ typeof eff_val === 'object' ? eff_val.turns : eff_val ]]t)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="battle-vs">VS</div>
+
+                        <div class="panel" :class="{ 'boss-panel': battle.is_boss }">
+                            <div class="panel-title" style="display:flex;align-items:center;gap:7px;">
+                                <img :src="'/game_assets/glyphs/' + enemyGlyph(battle.enemy_key) + '.webp'" class="type-glyph" @error="$event.target.style.display='none'">
+                                [[ battle.enemy_name ]]
+                                <img v-if="battle.is_boss" class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="boss" style="opacity:0.8;">
+                            </div>
+                            <div class="panel-body">
+                                <template v-if="battle.is_boss">
+                                    <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> Boss Vitality</div>
+                                    <div :class="{ 'boss-hp-low': Math.round(battle.enemy_hp / (battle.enemy_max_hp || 1) * 100) <= 25 }">
+                                        <div class="boss-hp-track"><div class="boss-hp-fill" :style="{ width: Math.min(100, Math.round(battle.enemy_hp / (battle.enemy_max_hp || 1) * 100)) + '%' }"></div></div>
+                                        <div class="boss-hp-numbers"><span>HP</span><strong>[[ battle.enemy_hp ]] / [[ battle.enemy_max_hp ]]</strong></div>
+                                    </div>
+                                </template>
+                                <div v-else class="bar-group">
+                                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP <span class="bar-nums">[[ battle.enemy_hp ]] / [[ battle.enemy_max_hp ]]</span></div>
+                                    <div class="bar-track"><div class="bar-fill bar-hp" :style="{ width: Math.min(100, Math.round(battle.enemy_hp / (battle.enemy_max_hp || 1) * 100)) + '%' }"></div></div>
+                                </div>
+                                <div class="stat-mini-grid" style="margin-top:8px;">
+                                    <div class="stat-mini"><span>ATK</span><strong>[[ battle.enemy_attack ]]</strong></div>
+                                    <div class="stat-mini"><span>DEF</span><strong>[[ battle.enemy_defense ]]</strong></div>
+                                </div>
+                                <div v-if="battle.enemy_tags && battle.enemy_tags.length" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;">
+                                    <span v-for="tag in battle.enemy_tags" :key="tag"
+                                          style="font-size:0.65rem;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,0.08);color:var(--text-dim);letter-spacing:0.04em;text-transform:uppercase;">[[ tag ]]</span>
+                                </div>
+                                <div v-if="battle.enemy_effects && Object.keys(battle.enemy_effects).length" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                                    <div v-for="(eff_val, eff_key) in battle.enemy_effects" :key="eff_key"
+                                         style="background:rgba(220,80,80,0.15);border:1px solid var(--red);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--red);">
+                                        [[ eff_key.replace(/_/g,' ') ]] ([[ typeof eff_val === 'object' ? eff_val.turns : eff_val ]]t)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Party / companions row -->
+                    <div v-if="battle.companions && battle.companions.length" class="battle-companions-row">
+                        <div class="battle-companions-label">Party</div>
+                        <div v-for="comp in battle.companions" :key="comp.name"
+                             :class="['battle-comp-card', { 'battle-comp-fallen': comp.hp <= 0 }]">
+                            <div class="battle-comp-name">[[ comp.name ]]</div>
+                            <div class="battle-comp-bar-wrap">
+                                <div class="battle-comp-bar" :style="{
+                                    width: comp.hp_pct + '%',
+                                    background: comp.hp <= 0 ? 'var(--red)' : comp.hp_pct > 60 ? 'var(--green-bright)' : comp.hp_pct > 25 ? 'var(--gold)' : 'var(--red)'
+                                }"></div>
+                            </div>
+                            <div class="battle-comp-hp">[[ comp.hp <= 0 ? 'Fallen' : comp.hp + '/' + comp.max_hp ]]</div>
+                        </div>
+                    </div>
+
+                    <!-- Battle log -->
+                    <div class="panel battle-log-panel">
+                        <div class="panel-title">Battle Chronicle</div>
+                        <div class="panel-body message-log battle-log" id="vue-battle-log">
+                            <div v-for="(entry, i) in (battle.log || [])" :key="i"
+                                 :class="['log-entry', battleLogClass(entry)]"
+                                 v-html="renderGlyph(entry)"></div>
+                        </div>
+                    </div>
+
+                    <!-- Action grid — 4 actions matching Jinja2 layout -->
+                    <div class="battle-action-grid">
+                        <button class="btn btn-battle btn-attack" @click="battleAttack" :disabled="actionPending" title="Keyboard: 1">Strike<span class="kb-hint">[1]</span></button>
+                        <button class="btn btn-battle btn-defend" @click="battleDefend" :disabled="actionPending" title="Keyboard: 2">Defend<span class="kb-hint">[2]</span></button>
+                        <div class="item-use-form">
+                            <template v-if="battleConsumables && battleConsumables.length">
+                                <select v-model="battleItemSelect" class="item-select">
+                                    <option v-for="item in battleConsumables" :key="item.name" :value="item.name">[[ item.name ]]</option>
+                                </select>
+                                <button class="btn btn-battle btn-item" @click="battleUseItem(battleItemSelect)" :disabled="actionPending || !battleItemSelect" title="Keyboard: 3">Use Item<span class="kb-hint">[3]</span></button>
+                            </template>
+                            <button v-else class="btn btn-battle btn-item btn-disabled" disabled>No Items</button>
+                        </div>
+                        <button class="btn btn-battle btn-flee" @click="battleFlee" :disabled="actionPending" title="Keyboard: 4">
+                            <span v-if="battle.is_boss">Retreat</span><span v-else>Flee</span><span class="kb-hint">[4]</span>
                         </button>
                     </div>
+
+                    <!-- Boss abilities panel -->
+                    <div v-if="battle.is_boss && battle.boss_abilities && battle.boss_abilities.length" class="panel" style="margin-top:16px;">
+                        <div class="panel-title" style="color:var(--red);">Boss Abilities</div>
+                        <div class="panel-body">
+                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;">
+                                <div v-for="ab in battle.boss_abilities" :key="ab.name"
+                                     :style="{ background: ab.cooldown_left === 0 ? 'rgba(200,50,50,0.15)' : 'rgba(80,80,80,0.10)', border: '1px solid ' + (ab.cooldown_left === 0 ? 'rgba(200,50,50,0.5)' : 'rgba(120,120,120,0.3)'), borderRadius:'6px', padding:'8px 10px' }">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                                        <span :style="{ fontSize:'12px', fontWeight:'600', color: ab.cooldown_left === 0 ? 'var(--red)' : 'var(--text-dim)' }">[[ ab.name ]]</span>
+                                        <span v-if="ab.cooldown_left > 0" style="font-size:10px;color:var(--text-dim);background:rgba(0,0,0,0.2);border-radius:3px;padding:1px 5px;">[[ ab.cooldown_left ]]t</span>
+                                        <span v-else style="font-size:10px;color:var(--red);font-weight:600;">READY</span>
+                                    </div>
+                                    <div v-if="ab.description" style="font-size:11px;color:var(--text-dim);">[[ ab.description.slice(0,60) ]]</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /.battle-main -->
+
+                <!-- Spell sidebar (sticky) — btn-spell buttons matching Jinja2 style -->
+                <div class="battle-spell-sidebar">
+                    <div class="panel battle-spellbook-panel">
+                        <div class="panel-title" style="color:var(--mana-bright);">
+                            <img class="class-glyph" src="/game_assets/glyphs/sparkles.webp" alt="spells">Spellbook
+                        </div>
+                        <div class="panel-body">
+                            <div style="margin-bottom:12px;">
+                                <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">
+                                    MP: <strong style="color:var(--mana-bright);">[[ player ? player.mp + ' / ' + player.max_mp : '0 / 0' ]]</strong>
+                                </div>
+                                <div class="bar-track" style="height:7px;"><div class="bar-fill bar-mp" :style="{ width: mpPct + '%' }"></div></div>
+                            </div>
+                            <div v-if="battleSpells && battleSpells.length" id="spell-pages-container">
+                                <div v-for="sp in spellPagedSpells" :key="sp.id" class="spell-sidebar-item">
+                                    <button :class="['btn-spell', 'spell-' + (sp.type || 'damage').toLowerCase(), { 'btn-disabled': player && player.mp < sp.mp_cost }]"
+                                            :disabled="actionPending || (player && player.mp < sp.mp_cost)"
+                                            @click="battleSpell(sp.id)">
+                                        <div class="spell-header">
+                                            <img class="type-glyph" src="/game_assets/glyphs/spell.webp" alt="spell"><span class="spell-name">[[ sp.name ]]</span>
+                                            <span class="spell-cost-badge">[[ sp.mp_cost ]] MP</span>
+                                        </div>
+                                        <div class="spell-tags">
+                                            <span :class="'spell-tag spell-tag-' + (sp.type || 'damage').toLowerCase()">[[ sp.type || 'Damage' ]]</span>
+                                            <span v-if="sp.power" class="spell-tag" style="color:var(--red);border-color:var(--red-dark);">Pwr [[ sp.power ]]</span>
+                                        </div>
+                                        <div v-if="sp.description" class="spell-desc">[[ sp.description.slice(0, 70) ]]</div>
+                                        <div v-if="player && player.mp < sp.mp_cost" class="spell-no-mp">Not enough MP</div>
+                                    </button>
+                                </div>
+                            </div>
+                            <div v-else style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px 0;opacity:0.7;">Equip a magic weapon to unlock spells.</div>
+                            <div v-if="spellPageCount > 1" class="spell-pagination">
+                                <button class="spell-page-btn" @click="spellPage = Math.max(0, spellPage - 1)" :disabled="spellPage === 0">&#8249;</button>
+                                <span style="font-size:12px;color:var(--text-dim);min-width:60px;text-align:center;">[[ spellPage + 1 ]] / [[ spellPageCount ]]</span>
+                                <button class="spell-page-btn" @click="spellPage = Math.min(spellPageCount - 1, spellPage + 1)" :disabled="spellPage >= spellPageCount - 1">&#8250;</button>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /.battle-spell-sidebar -->
+            </div><!-- /.battle-outer -->
+
+            <!-- ═══════════════════════════════════════════════════════════════
+                 NORMAL GAME VIEW — tab container (hidden when in battle)
+                 Tab container matches Jinja2: tab-nav-wrap > nav.tab-nav + news-ticker
+                 ═══════════════════════════════════════════════════════════════ -->
+            <div v-else style="padding:0 0 12px 0;max-width:960px;margin:0 auto;">
+                <div class="tab-nav-wrap">
+                    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.15) transparent;">
+                        <nav class="tab-nav" id="vue-main-tabs" style="overflow:visible;min-width:max-content;">
+                            <button v-for="tab in allTabOptions" :key="tab.key"
+                                class="tab-btn"
+                                :class="{ active: activeTab === tab.key }"
+                                @click="switchTab(tab.key)">
+                                [[ tab.label ]]
+                            </button>
+                        </nav>
+                    </div>
+                    <div class="news-ticker">
+                        <div class="news-ticker-label">
+                            <span class="news-ticker-icon"><img src="/game_assets/glyphs/sparkles.webp" alt="" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle;"></span>
+                            <span>News</span>
+                        </div>
+                        <div class="news-ticker-track">
+                            <div v-if="announcements && announcements.length" class="news-ticker-inner">[[ announcementsTickerText ]]</div>
+                            <div v-else style="position:relative;top:auto;transform:none;animation:none;font-size:11px;color:rgba(255,255,255,0.35);padding:0 10px;height:100%;display:flex;align-items:center;">No announcements at this time.</div>
+                        </div>
                     </div>
                 </div>
 
@@ -385,10 +620,7 @@ window._betaInit = {
                         <div class="panel-body">
                             <p class="area-description" v-if="area && area.description">[[ area.description ]]</p>
                             <div class="danger-notice" v-if="area && area.possible_enemies && area.possible_enemies.length">Known threats: [[ area.possible_enemies.map(e => e.replace(/_/g,' ')).join(', ') ]]</div>
-                            <div v-if="inBattle" class="action-row" style="margin-top:10px;">
-                                <button class="btn btn-danger" @click="switchTab('battle')">Go to Battle!</button>
-                            </div>
-                            <div v-else class="action-row" style="margin-top:10px;">
+                            <div class="action-row" style="margin-top:10px;">
                                 <button class="btn btn-primary btn-wood" @click="explore" :disabled="actionPending || !player">[[ actionPending ? 'Working...' : 'Venture Forth' ]]</button>
                                 <button v-if="area && area.can_rest" class="btn btn-secondary" @click="rest"
                                     :disabled="actionPending || (area.rest_cost > 0 && player && player.gold &lt; area.rest_cost)"
@@ -437,172 +669,6 @@ window._betaInit = {
                             <div style="margin-top:8px;"><button class="btn btn-xsmall btn-secondary" @click="switchTab('diary')">Full Diary &rarr;</button></div>
                         </div>
                     </div>
-                </div>
-
-                <!-- ═══ BATTLE ═══ -->
-                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'battle' }">
-                    <div v-if="inBattle && battle" class="battle-outer">
-                        <div class="battle-main">
-                            <!-- Header -->
-                            <div class="battle-header">
-                                <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Combat</div>
-                                <div style="font-size:19px;font-weight:600;color:var(--red);display:flex;align-items:center;gap:8px;">
-                                    <img :src="'/game_assets/glyphs/' + enemyGlyph(battle.enemy_key) + '.webp'" style="width:22px;height:22px;image-rendering:pixelated;" @error="$event.target.style.display='none'">
-                                    [[ battle.enemy_name ]]<span v-if="battle.is_boss" style="font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:0.18em;margin-left:6px;">Boss</span>
-                                </div>
-                            </div>
-
-                            <!-- Arena: player vs enemy -->
-                            <div class="battle-arena">
-                                <div class="panel" v-if="player">
-                                    <div class="panel-title">
-                                        <img class="class-glyph" :src="'/game_assets/glyphs/' + glyphFor(player.char_class) + '.webp'" :alt="player.char_class" style="width:18px;height:18px;image-rendering:pixelated;vertical-align:middle;margin-right:5px;">
-                                        [[ player.name ]]
-                                    </div>
-                                    <div class="panel-body">
-                                        <div class="bar-group">
-                                            <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP <span class="bar-nums">[[ player.hp ]] / [[ player.max_hp ]]</span></div>
-                                            <div class="bar-track"><div class="bar-fill bar-hp" :style="{ width: hpPct + '%' }"></div></div>
-                                        </div>
-                                        <div class="bar-group">
-                                            <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/mana.webp" alt="mp"> MP <span class="bar-nums">[[ player.mp ]] / [[ player.max_mp ]]</span></div>
-                                            <div class="bar-track"><div class="bar-fill bar-mp" :style="{ width: mpPct + '%' }"></div></div>
-                                        </div>
-                                        <div class="stat-mini-grid">
-                                            <div class="stat-mini"><span>ATK</span><strong>[[ player.attack ]]</strong></div>
-                                            <div class="stat-mini"><span>DEF</span><strong>[[ player.defense ]]</strong></div>
-                                            <div class="stat-mini"><span>SPD</span><strong>[[ player.speed ]]</strong></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="battle-vs">VS</div>
-
-                                <div class="panel" :class="{ 'boss-panel': battle.is_boss }">
-                                    <div class="panel-title" style="color:var(--red);display:flex;align-items:center;gap:6px;">
-                                        <img :src="'/game_assets/glyphs/' + enemyGlyph(battle.enemy_key) + '.webp'" class="type-glyph" @error="$event.target.style.display='none'">
-                                        [[ battle.enemy_name ]]
-                                    </div>
-                                    <div class="panel-body">
-                                        <div class="bar-group">
-                                            <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP <span class="bar-nums">[[ battle.enemy_hp ]] / [[ battle.enemy_max_hp ]]</span></div>
-                                            <div class="bar-track"><div class="bar-fill bar-hp" :style="{ width: Math.min(100, Math.round(battle.enemy_hp / (battle.enemy_max_hp || 1) * 100)) + '%' }"></div></div>
-                                        </div>
-                                        <div class="stat-mini-grid">
-                                            <div class="stat-mini"><span>ATK</span><strong>[[ battle.enemy_attack ]]</strong></div>
-                                            <div class="stat-mini"><span>DEF</span><strong>[[ battle.enemy_defense ]]</strong></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Boss dialogue banner -->
-                            <div v-if="battle.is_boss && battle.boss_dialogue"
-                                 style="background:rgba(180,30,30,0.13);border:1px solid rgba(200,50,50,0.35);border-radius:5px;padding:8px 12px;margin:8px 0;font-size:13px;color:var(--text-light);font-style:italic;text-align:center;">
-                                <img src="/game_assets/glyphs/skull.webp" alt="" style="width:14px;height:14px;image-rendering:pixelated;vertical-align:middle;margin-right:5px;opacity:0.8;" @error="$event.target.style.display='none'">
-                                &ldquo;[[ battle.boss_dialogue ]]&rdquo;
-                            </div>
-
-                            <!-- Boss phase indicator -->
-                            <div v-if="battle.is_boss && battle.boss_phase_info"
-                                 style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:5px;padding:8px 12px;margin:8px 0;">
-                                <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-                                    <span style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;">Phase</span>
-                                    <div style="display:flex;gap:4px;">
-                                        <div v-for="n in battle.boss_phase_info.total" :key="n"
-                                             :style="{ width:'10px', height:'10px', borderRadius:'50%', background: n <= battle.boss_phase_info.index ? 'var(--red)' : 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)' }">
-                                        </div>
-                                    </div>
-                                    <span style="font-size:11px;color:var(--red);">
-                                        [[ battle.boss_phase_info.index ]] / [[ battle.boss_phase_info.total ]]
-                                        <span v-if="battle.boss_phase_info.attack_multiplier > 1.0" style="margin-left:6px;color:var(--red);">
-                                            ATK &times;[[ battle.boss_phase_info.attack_multiplier.toFixed(1) ]]
-                                        </span>
-                                    </span>
-                                </div>
-                                <div v-if="battle.boss_phase_info.description" style="font-size:12px;color:var(--text-dim);font-style:italic;">[[ battle.boss_phase_info.description ]]</div>
-                            </div>
-
-                            <!-- Player status effects -->
-                            <div v-if="battle.player_effects && Object.keys(battle.player_effects).length"
-                                 style="display:flex;flex-wrap:wrap;gap:5px;margin:6px 0;">
-                                <div v-for="(turns, eff) in battle.player_effects" :key="eff"
-                                     style="display:inline-flex;align-items:center;gap:4px;background:rgba(100,60,180,0.2);border:1px solid rgba(130,80,220,0.4);border-radius:12px;padding:2px 8px;font-size:11px;color:var(--mana-bright);">
-                                    [[ eff.replace(/_/g,' ') ]]
-                                    <span style="opacity:0.65;">[[ turns ]]t</span>
-                                </div>
-                            </div>
-
-                            <!-- Boss abilities collapsible panel -->
-                            <details v-if="battle.is_boss && battle.boss_abilities && battle.boss_abilities.length" style="margin:8px 0;">
-                                <summary style="font-size:12px;color:var(--text-dim);cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:5px;">
-                                    <span style="font-size:10px;">&#9654;</span> Boss Abilities ([[ battle.boss_abilities.length ]])
-                                </summary>
-                                <div style="margin-top:6px;">
-                                    <div v-for="ab in battle.boss_abilities" :key="ab.name" class="boss-ability-card">
-                                        <div class="boss-ability-name">[[ ab.name ]]</div>
-                                        <div class="boss-ability-desc" v-if="ab.description">[[ ab.description ]]</div>
-                                        <div class="boss-ability-cd" v-if="ab.cooldown_left > 0">Cooldown: [[ ab.cooldown_left ]] turn[[ ab.cooldown_left !== 1 ? 's' : '' ]]</div>
-                                        <div v-else style="font-size:11px;color:var(--green-bright);margin-top:2px;">Ready</div>
-                                    </div>
-                                </div>
-                            </details>
-
-                            <!-- Battle log -->
-                            <div class="battle-log-panel" v-if="battle.log && battle.log.length">
-                                <div class="battle-log">
-                                    <div v-for="(entry, i) in battle.log" :key="i" class="log-entry" v-html="renderGlyph(entry)"></div>
-                                </div>
-                            </div>
-
-                            <!-- Spells with 4-per-page pagination -->
-                            <div v-if="battleSpells && battleSpells.length" style="margin-top:10px;">
-                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                                    <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;">Spells</div>
-                                    <div v-if="spellPageCount > 1" style="display:flex;align-items:center;gap:6px;">
-                                        <button class="btn btn-xsmall btn-secondary" @click="spellPage = Math.max(0, spellPage - 1)" :disabled="spellPage === 0">&lt;</button>
-                                        <span style="font-size:11px;color:var(--text-dim)">[[ spellPage + 1 ]] / [[ spellPageCount ]]</span>
-                                        <button class="btn btn-xsmall btn-secondary" @click="spellPage = Math.min(spellPageCount - 1, spellPage + 1)" :disabled="spellPage >= spellPageCount - 1">&gt;</button>
-                                    </div>
-                                </div>
-                                <div class="battle-spell-grid">
-                                    <button v-for="sp in spellPagedSpells" :key="sp.id" class="btn btn-small btn-secondary battle-spell-btn" @click="battleSpell(sp.id)" :disabled="actionPending || (player && player.mp &lt; sp.mp_cost)" :class="{ 'spell-unavailable': player && player.mp &lt; sp.mp_cost }">
-                                        <img class="type-glyph" src="/game_assets/glyphs/spell.webp" alt="" style="width:14px;height:14px;opacity:0.7;vertical-align:middle;margin-right:3px;">
-                                        [[ sp.name ]] <span style="font-size:10px;color:var(--mana-bright);margin-left:3px;">[[ sp.mp_cost ]]MP</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Consumables -->
-                            <div v-if="battleConsumables && battleConsumables.length" style="margin-top:8px;">
-                                <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;">Use Item</div>
-                                <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                                    <button v-for="item in battleConsumables" :key="item.name" class="btn btn-xsmall btn-secondary" @click="battleUseItem(item.name)" :disabled="actionPending">[[ item.name ]] x[[ item.count ]]</button>
-                                </div>
-                            </div>
-
-                            <!-- Action buttons -->
-                            <div class="battle-action-grid" style="margin-top:12px;">
-                                <button class="btn btn-danger btn-attack" @click="battleAttack" :disabled="actionPending">Attack</button>
-                                <button class="btn btn-secondary btn-defend" @click="battleDefend" :disabled="actionPending">Defend</button>
-                                <button class="btn btn-secondary" @click="battleFlee" :disabled="actionPending">Flee</button>
-                            </div>
-
-                            <!-- Party below -->
-                            <div v-if="battle.companions && battle.companions.length" style="margin-top:14px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
-                                <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Your Party</div>
-                                <div class="battle-party-row">
-                                    <div v-for="comp in battle.companions" :key="comp.name" class="battle-party-member" :class="{ 'comp-fallen': comp.fallen }">
-                                        <img class="battle-sprite-sm" :src="'/game_assets/glyphs/' + glyphFor(comp.class) + '.webp'" :alt="comp.class" @error="$event.target.style.display='none'">
-                                        <div class="battle-party-name">[[ comp.name ]]<span v-if="comp.fallen" style="color:var(--red);"> [fallen]</span></div>
-                                        <div class="bar-track" style="height:4px;"><div class="bar-fill bar-hp" :style="{ width: comp.hp_pct + '%', opacity: comp.fallen ? 0.3 : 1 }"></div></div>
-                                        <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">[[ comp.hp ]]/[[ comp.max_hp ]]</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-else class="empty-state">No active battle.</div>
                 </div>
 
                 <!-- ═══ EQUIPMENT ═══ -->
@@ -777,51 +843,107 @@ window._betaInit = {
 
                 <!-- ═══ DUNGEONS ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'dungeons' }">
-                    <div v-if="activeDungeon && activeDungeon.dungeon" class="active-dungeon-panel">
-                        <div style="color:var(--gold);font-weight:bold;font-size:14px;margin-bottom:6px;">Active Dungeon: [[ activeDungeon.dungeon.name ]]</div>
-                        <div style="font-size:13px;color:var(--text-dim);">Room [[ activeDungeon.room_index + 1 ]] / [[ activeDungeon.rooms && activeDungeon.rooms.length ]]</div>
-                        <div class="bar-track" style="width:160px;margin-top:6px;">
-                            <div class="bar-fill bar-exp" :style="{ width: Math.round(((activeDungeon.room_index + 1) / ((activeDungeon.rooms && activeDungeon.rooms.length) || 1)) * 100) + '%' }"></div>
-                        </div>
-                        <div style="margin-top:10px;display:flex;gap:8px;">
-                            <a href="/dungeon/room" class="btn btn-primary btn-wood">Continue &rarr;</a>
-                            <button class="btn btn-danger btn-small" @click="abandonDungeon" :disabled="actionPending">Abandon</button>
-                        </div>
-                    </div>
-                    <div v-if="dungeonList && dungeonList.length">
-                        <div v-for="dungeon in pagedDungeons" :key="dungeon.id" class="dungeon-card"
-                             :style="{ opacity: dungeon.available ? 1 : 0.6 }">
-                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                                <div style="flex:1;min-width:0;">
-                                    <div class="dungeon-name">[[ dungeon.name ]]<span v-if="dungeon.completed" class="dungeon-complete-badge"> &#10003; done</span></div>
-                                    <div class="dungeon-meta" v-if="dungeon.description">[[ dungeon.description ]]</div>
-                                    <div class="dungeon-meta">
-                                        <span v-if="dungeon.difficulty">Difficulty [[ dungeon.difficulty.join ? dungeon.difficulty.join('-') : dungeon.difficulty ]]</span>
-                                        <span v-if="dungeon.rooms"> &bull; [[ dungeon.rooms ]] rooms</span>
-                                        <span v-if="dungeon.min_level"> &bull; Lv.[[ dungeon.min_level ]]+ required</span>
-                                    </div>
-                                    <div v-if="!dungeon.discovered" style="font-size:11px;color:var(--text-dim);margin-top:2px;">
-                                        Travel to [[ dungeon.hint_area_name ]] to discover this dungeon.
-                                    </div>
-                                    <div v-else-if="!dungeon.in_area" style="font-size:11px;color:var(--gold);margin-top:2px;">
-                                        Travel to [[ dungeon.hint_area_name ]] to enter.
-                                    </div>
-                                    <div v-else-if="player && player.level &lt; dungeon.min_level" style="font-size:11px;color:var(--red);margin-top:2px;">
-                                        Level [[ dungeon.min_level ]] required.
+
+                    <!-- Active dungeon banner -->
+                    <div v-if="activeDungeon && activeDungeon.dungeon" class="panel" style="margin-bottom:14px;border-color:rgba(200,165,60,0.5);">
+                        <div class="panel-title" style="color:var(--gold);">&#9654; Active Dungeon</div>
+                        <div class="panel-body">
+                            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                                <div>
+                                    <div style="font-size:16px;color:var(--gold);font-weight:600;">[[ activeDungeon.dungeon.name ]]</div>
+                                    <div style="font-size:13px;color:var(--text-dim);margin-top:3px;">Room [[ activeDungeon.room_index + 1 ]] of [[ activeDungeon.rooms && activeDungeon.rooms.length ]]</div>
+                                    <div class="bar-track" style="width:160px;margin-top:7px;">
+                                        <div class="bar-fill bar-exp" :style="{ width: Math.round(((activeDungeon.room_index + 1) / ((activeDungeon.rooms && activeDungeon.rooms.length) || 1)) * 100) + '%' }"></div>
                                     </div>
                                 </div>
-                                <button class="btn btn-small btn-secondary" style="margin-left:10px;flex-shrink:0;"
-                                        @click="enterDungeon(dungeon.id)"
-                                        :disabled="actionPending || !dungeon.available || (activeDungeon && !!activeDungeon.dungeon)">Enter</button>
+                                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                    <a href="/dungeon/room" class="btn btn-primary btn-wood">Continue &rarr;</a>
+                                    <button class="btn btn-danger btn-small" @click="abandonDungeon" :disabled="actionPending">Abandon</button>
+                                </div>
                             </div>
                         </div>
-                        <div v-if="dungeonPageCount > 1" class="pagination-bar">
-                            <button class="btn btn-xsmall btn-secondary" :disabled="dungeonPage &lt;= 1" @click="dungeonPage = Math.max(1, dungeonPage - 1)">&larr;</button>
-                            <span>Page [[ dungeonPage ]] / [[ dungeonPageCount ]]</span>
-                            <button class="btn btn-xsmall btn-secondary" :disabled="dungeonPage >= dungeonPageCount" @click="dungeonPage = Math.min(dungeonPageCount, dungeonPage + 1)">&rarr;</button>
+                    </div>
+
+                    <!-- Dungeon list panel -->
+                    <div class="panel">
+                        <div class="panel-title">Dungeons</div>
+                        <div class="panel-body">
+                            <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px;">Explore the world to discover dungeons. You must be in the correct area to enter one.</p>
+
+                            <div v-if="!dungeonList || !dungeonList.length" class="empty-state">No dungeons found.</div>
+
+                            <div v-else class="dg-list">
+                                <div v-for="dungeon in pagedDungeons" :key="dungeon.id"
+                                     :class="['dg-entry',
+                                        dungeon.completed ? 'dg-done' :
+                                        dungeon.available ? 'dg-open' :
+                                        dungeon.discovered ? 'dg-locked' : 'dg-fog']">
+                                    <div class="dg-accent"></div>
+
+                                    <!-- Undiscovered dungeon -->
+                                    <div v-if="!dungeon.discovered" class="dg-info">
+                                        <div class="dg-header">
+                                            <span class="dg-name" style="letter-spacing:4px;opacity:0.5;">???????????</span>
+                                            <span class="dg-pill dg-pill-fog">Undiscovered</span>
+                                        </div>
+                                        <div class="dg-desc" style="font-style:italic;">
+                                            Explore <strong>[[ dungeon.hint_area_name ]]</strong> to reveal this dungeon.
+                                        </div>
+                                    </div>
+
+                                    <!-- Discovered dungeon -->
+                                    <div v-else class="dg-info">
+                                        <div class="dg-header">
+                                            <span class="dg-name">[[ dungeon.name ]]</span>
+                                            <span v-if="dungeon.completed" class="dg-pill dg-pill-done">Cleared</span>
+                                            <span v-else-if="dungeon.available" class="dg-pill dg-pill-open">Available</span>
+                                            <span v-else-if="!dungeon.in_area" class="dg-pill dg-pill-locked">Wrong Area</span>
+                                            <span v-else class="dg-pill dg-pill-locked">Lv.[[ dungeon.min_level ]]+</span>
+                                        </div>
+                                        <div v-if="dungeon.description" class="dg-desc">[[ dungeon.description ]]</div>
+                                        <div class="dg-tags">
+                                            <span class="dg-tag-diff">Diff [[ Array.isArray(dungeon.difficulty) ? dungeon.difficulty[0] + '&ndash;' + dungeon.difficulty[1] : dungeon.difficulty ]]</span>
+                                            <span v-if="dungeon.rooms">&bull; [[ dungeon.rooms ]] rooms</span>
+                                            <template v-if="!dungeon.in_area">
+                                                <span>&bull;</span>
+                                                <span class="dg-tag-area">Go to [[ dungeon.hint_area_name ]]</span>
+                                            </template>
+                                            <template v-if="dungeon.completion_reward && dungeon.completion_reward.gold">
+                                                <span>&bull;</span>
+                                                <span class="dg-tag-reward">[[ dungeon.completion_reward.gold ]]g &middot; [[ dungeon.completion_reward.experience || 0 ]] EXP</span>
+                                            </template>
+                                            <template v-if="dungeon.completion_reward && dungeon.completion_reward.items && dungeon.completion_reward.items.length">
+                                                <span>&bull;</span>
+                                                <span class="dg-tag-items">[[ dungeon.completion_reward.items.join(', ') ]]</span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action button -->
+                                    <div v-if="dungeon.discovered" class="dg-action">
+                                        <template v-if="dungeon.available && (!activeDungeon || !activeDungeon.dungeon)">
+                                            <button :class="['btn', 'btn-small', dungeon.completed ? 'btn-secondary' : 'btn-primary']"
+                                                    @click="enterDungeon(dungeon.id)" :disabled="actionPending">
+                                                [[ dungeon.completed ? 'Replay' : 'Enter' ]]
+                                            </button>
+                                        </template>
+                                        <span v-else-if="dungeon.available && activeDungeon && activeDungeon.dungeon"
+                                              style="font-size:11px;color:var(--text-dim);text-align:center;line-height:1.4;">Finish active<br>dungeon first</span>
+                                        <span v-else-if="dungeon.discovered && !dungeon.in_area"
+                                              style="font-size:11px;color:var(--text-dim);text-align:center;line-height:1.4;">Travel to<br>[[ dungeon.hint_area_name ]]</span>
+                                        <span v-else
+                                              style="font-size:11px;color:var(--text-dim);text-align:center;">Lv.[[ dungeon.min_level ]]+</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="dungeonPageCount > 1" class="pagination-bar">
+                                <button class="btn btn-xsmall btn-secondary" :disabled="dungeonPage &lt;= 1" @click="dungeonPage = Math.max(1, dungeonPage - 1)">&larr;</button>
+                                <span>Page [[ dungeonPage ]] / [[ dungeonPageCount ]]</span>
+                                <button class="btn btn-xsmall btn-secondary" :disabled="dungeonPage >= dungeonPageCount" @click="dungeonPage = Math.min(dungeonPageCount, dungeonPage + 1)">&rarr;</button>
+                            </div>
                         </div>
                     </div>
-                    <div v-else-if="!activeDungeon || !activeDungeon.dungeon" class="empty-state">No dungeons available in this area.</div>
                 </div>
 
                 <!-- ═══ MARKET ═══ -->

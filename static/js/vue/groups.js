@@ -1,3 +1,4 @@
+/* global io */
 const { createApp, nextTick } = Vue;
 const _grp = window._init || {};
 
@@ -47,7 +48,7 @@ createApp({
                 this.createMsg = data.message || (data.ok ? 'Group created!' : 'Failed');
                 this.createOk  = !!data.ok;
                 if (data.ok) window.location.reload();
-            } catch (e) {
+            } catch {
                 this.createMsg = 'Network error'; this.createOk = false;
             }
         },
@@ -63,7 +64,7 @@ createApp({
                 this.joinMsg = data.message || (data.ok ? 'Joined!' : 'Failed');
                 this.joinOk  = !!data.ok;
                 if (data.ok) window.location.reload();
-            } catch (e) {
+            } catch {
                 this.joinMsg = 'Network error'; this.joinOk = false;
             }
         },
@@ -77,12 +78,12 @@ createApp({
                     const share = data.gold || 0;
                     this.group.gold_pool = Math.max(0, (this.group.gold_pool || 0) - share);
                 }
-            } catch (e) {
+            } catch {
                 this.collectMsg = 'Network error'; this.collectOk = false;
             }
         },
         async kickMember(username) {
-            if (!confirm('Kick ' + username + ' from the group?')) return;
+            if (!window.confirm('Kick ' + username + ' from the group?')) return;
             try {
                 await fetch('/api/groups/kick', {
                     method: 'POST',
@@ -90,21 +91,21 @@ createApp({
                     body: JSON.stringify({ target: username }),
                 });
                 if (this.group) this.group.members = this.group.members.filter(m => m.username !== username);
-            } catch (_) { /* network/parse error ignored */ }
+            } catch { /* network/parse error ignored */ }
         },
         async leaveGroup() {
-            if (!confirm('Leave the group? You can rejoin with the invite code.')) return;
+            if (!window.confirm('Leave the group? You can rejoin with the invite code.')) return;
             try {
                 await fetch('/api/groups/leave', { method: 'POST' });
                 window.location.reload();
-            } catch (_) { /* network/parse error ignored */ }
+            } catch { /* network/parse error ignored */ }
         },
         async disbandGroup() {
-            if (!confirm('Disband the group? This cannot be undone.')) return;
+            if (!window.confirm('Disband the group? This cannot be undone.')) return;
             try {
                 await fetch('/api/groups/leave', { method: 'POST' });
                 window.location.reload();
-            } catch (_) { /* network/parse error ignored */ }
+            } catch { /* network/parse error ignored */ }
         },
         copyCode() {
             if (!this.group) return;
