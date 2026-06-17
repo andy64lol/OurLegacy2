@@ -96,6 +96,9 @@ createApp({
             dmLoading:            false,
             dmSending:            false,
             groupData:            null,
+            groupCollectMsg:      '',
+            groupCollectOk:       false,
+            tabOverflowOpen:      false,
 
             landData:             null,
             landLoading:          false,
@@ -207,14 +210,14 @@ createApp({
         },
         isOnYourLand() { return this.area && this.area.key === 'your_land'; },
 
-        craftingPageCount()  { return Math.max(1, Math.ceil((this.craftingRecipes||[]).length / 12)); },
-        pagedCrafting()      { const p = Math.min(this.craftingPage, this.craftingPageCount) - 1; return (this.craftingRecipes||[]).slice(p*12, p*12+12); },
-        dungeonPageCount()   { return Math.max(1, Math.ceil((this.dungeonList||[]).length / 8)); },
-        pagedDungeons()      { const p = Math.min(this.dungeonPage, this.dungeonPageCount) - 1; return (this.dungeonList||[]).slice(p*8, p*8+8); },
-        marketPageCount()    { return Math.max(1, Math.ceil((this.marketItems||[]).length / 20)); },
-        pagedMarket()        { const p = Math.min(this.marketPage, this.marketPageCount) - 1; return (this.marketItems||[]).slice(p*20, p*20+20); },
-        questPageCount()     { return Math.max(1, Math.ceil((this.missions||[]).length / 10)); },
-        pagedQuests()        { const p = Math.min(this.questPage, this.questPageCount) - 1; return (this.missions||[]).slice(p*10, p*10+10); },
+        craftingPageCount()  { return Math.max(1, Math.ceil((this.craftingRecipes||[]).length / 7)); },
+        pagedCrafting()      { const p = Math.min(this.craftingPage, this.craftingPageCount) - 1; return (this.craftingRecipes||[]).slice(p*7, p*7+7); },
+        dungeonPageCount()   { return Math.max(1, Math.ceil((this.dungeonList||[]).length / 5)); },
+        pagedDungeons()      { const p = Math.min(this.dungeonPage, this.dungeonPageCount) - 1; return (this.dungeonList||[]).slice(p*5, p*5+5); },
+        marketPageCount()    { return Math.max(1, Math.ceil((this.marketItems||[]).length / 6)); },
+        pagedMarket()        { const p = Math.min(this.marketPage, this.marketPageCount) - 1; return (this.marketItems||[]).slice(p*6, p*6+6); },
+        questPageCount()     { return Math.max(1, Math.ceil((this.missions||[]).length / 5)); },
+        pagedQuests()        { const p = Math.min(this.questPage, this.questPageCount) - 1; return (this.missions||[]).slice(p*5, p*5+5); },
         challengePageCount() { return Math.max(1, Math.ceil((this.challenges||[]).length / 10)); },
         pagedChallenges()    { const p = Math.min(this.challengePage, this.challengePageCount) - 1; return (this.challenges||[]).slice(p*10, p*10+10); },
         diaryPageCount()     { return Math.max(1, Math.ceil((this.diary||[]).length / 30)); },
@@ -231,6 +234,13 @@ createApp({
         totalDmUnread() {
             return (this.friendsList || []).reduce((a, f) => a + (f.unread || 0), 0);
         },
+        visibleTabs() { return this.allTabOptions.slice(0, 8); },
+        overflowTabs() { return this.allTabOptions.slice(8); },
+        overflowActiveLabel() {
+            const t = this.overflowTabs.find(ot => ot.key === this.activeTab);
+            return t ? t.label : null;
+        },
+
         allTabOptions() {
             return [
                 { key: 'explore',    label: 'Explore',     show: true },
@@ -343,7 +353,7 @@ createApp({
             this.connections         = data.connections          || [];
             this.shopItems           = data.shop_items           || [];
             this.shopName            = data.shop_name            || '';
-            this.mineData            = data.mine_data            || null;
+            this.mineData            = (data.mine_data && data.mine_data.pool && data.mine_data.pool.length) ? data.mine_data : null;
             this.craftingRecipes     = data.crafting_recipes     || [];
             this.dungeonList         = data.dungeon_list         || [];
             this.activeDungeon       = data.active_dungeon       || {};
@@ -649,6 +659,37 @@ createApp({
             if (/(deal|deals|strike|hits|attacks)/.test(entry)) return 'log-damage';
             if (/(defeated|falls|Victory|escaped)/.test(entry)) return 'log-victory';
             return 'log-normal';
+        },
+
+        handleTabClick(key) {
+            this.switchTab(key);
+            this.tabOverflowOpen = false;
+        },
+
+        slotGlyph(slot) {
+            const map = { weapon: 'weapon', armor: 'armor', offhand: 'offhand', accessory_1: 'accessories', accessory_2: 'accessories', accessory_3: 'accessories' };
+            return map[slot] || null;
+        },
+
+        async collectGroupGold() {
+            try {
+                const r = await fetch('/api/groups/collect_gold', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({}),
+                });
+                const data = await r.json();
+                this.groupCollectMsg = data.message || (data.ok ? 'Gold collected!' : 'Failed.');
+                this.groupCollectOk = !!data.ok;
+                if (data.ok) {
+                    const share = data.gold || 0;
+                    if (this.groupData) this.groupData.gold_pool = Math.max(0, (this.groupData.gold_pool || 0) - share);
+                    if (data.new_gold !== undefined && this.player) this.player.gold = data.new_gold;
+                }
+            } catch {
+                this.groupCollectMsg = 'Network error.';
+                this.groupCollectOk = false;
+            }
         },
 
         switchTab(tab) {

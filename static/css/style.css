@@ -2200,9 +2200,11 @@ body.ol2-bg-4 .welcome-screen {
 .game-layout {
     display: grid;
     grid-template-columns: 280px 5px 1fr;
+    height: calc(100vh / var(--ui-scale));
     min-height: calc(100vh / var(--ui-scale));
     transition: grid-template-columns 0.22s ease;
     background: var(--bg-panel-dark);
+    overflow: hidden;
 }
 
 .game-layout.sidebar-collapsed {
@@ -2394,6 +2396,7 @@ body.ol2-bg-4 .welcome-screen {
     overflow-y: auto;
     overscroll-behavior: contain;
     position: relative;
+    min-height: 0;
 }
 
 body.ol2-bg-1 .main-content {
@@ -2626,6 +2629,62 @@ html[data-bg="4"] body .main-content::before {
 
 .tab-more-btn:hover {
     background: var(--slate-light);
+    color: var(--text-bright);
+}
+
+.vtab-more-wrap {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+.vtab-more-wrap .tab-more-btn {
+    display: flex !important;
+    align-items: center;
+}
+
+.vtab-more-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 498;
+}
+
+.vtab-more-menu {
+    position: absolute;
+    top: calc(100% + 2px);
+    right: 0;
+    z-index: 499;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.55);
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.vtab-more-item {
+    padding: 9px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    font-family: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.12s, color 0.12s;
+}
+
+.vtab-more-item:last-child {
+    border-bottom: none;
+}
+
+.vtab-more-item:hover,
+.vtab-more-item.active {
+    background: rgba(180,140,60,0.18);
     color: var(--text-bright);
 }
 
