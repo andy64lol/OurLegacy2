@@ -220,8 +220,8 @@ createApp({
         pagedQuests()        { const p = Math.min(this.questPage, this.questPageCount) - 1; return (this.missions||[]).slice(p*5, p*5+5); },
         challengePageCount() { return Math.max(1, Math.ceil((this.challenges||[]).length / 10)); },
         pagedChallenges()    { const p = Math.min(this.challengePage, this.challengePageCount) - 1; return (this.challenges||[]).slice(p*10, p*10+10); },
-        diaryPageCount()     { return Math.max(1, Math.ceil((this.diary||[]).length / 30)); },
-        pagedDiary()         { const p = Math.min(this.diaryPage, this.diaryPageCount) - 1; return (this.diary||[]).slice(p*30, p*30+30); },
+        diaryPageCount()     { return Math.max(1, Math.ceil((this.diary||[]).length / 22)); },
+        pagedDiary()         { const p = Math.min(this.diaryPage, this.diaryPageCount) - 1; return (this.diary||[]).slice(p*22, p*22+22); },
         friendsPageCount()   { return Math.max(1, Math.ceil((this.friendsList||[]).length / 20)); },
         pagedFriends()       { const p = Math.min(this.friendsPage, this.friendsPageCount) - 1; return (this.friendsList||[]).slice(p*20, p*20+20); },
         unreadChatCount() {
