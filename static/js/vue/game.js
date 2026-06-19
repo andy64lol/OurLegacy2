@@ -99,10 +99,9 @@ createApp({
             groupCollectMsg:      '',
             groupCollectOk:       false,
             tabOverflowOpen:      false,
-
-            landData:             null,
-            landLoading:          false,
-            landPlantSelections:  {},
+            visibleTabCount:      8,
+            questModal:           null,
+            seenQuestIds:         null,
 
             chatMessages:         [],
             chatLoading:          false,
@@ -192,24 +191,6 @@ createApp({
         paginatedBosses()      { const p = Math.min(this.bossPage, this.bossTotalPages) - 1; return (this.availableBosses || []).slice(p * 3, p * 3 + 3); },
         invPageCount()         { return Math.max(1, Math.ceil((this.inventoryItems || []).length / 15)); },
         pagedInventory()       { const p = Math.min(this.invPage, this.invPageCount) - 1; return (this.inventoryItems || []).slice(p * 15, p * 15 + 15); },
-        landCraftCategories() {
-            if (!this.landData || !this.landData.crafting_recipes) return [];
-            const cats = [];
-            for (const r of this.landData.crafting_recipes) {
-                if (!cats.includes(r.category)) cats.push(r.category);
-            }
-            return cats;
-        },
-        storedItemCounts() {
-            if (!this.landData || !this.landData.stored_items) return {};
-            const counts = {};
-            for (const item of this.landData.stored_items) {
-                counts[item] = (counts[item] || 0) + 1;
-            }
-            return counts;
-        },
-        isOnYourLand() { return this.area && this.area.key === 'your_land'; },
-
         craftingPageCount()  { return Math.max(1, Math.ceil((this.craftingRecipes||[]).length / 7)); },
         pagedCrafting()      { const p = Math.min(this.craftingPage, this.craftingPageCount) - 1; return (this.craftingRecipes||[]).slice(p*7, p*7+7); },
         dungeonPageCount()   { return Math.max(1, Math.ceil((this.dungeonList||[]).length / 5)); },
@@ -234,8 +215,8 @@ createApp({
         totalDmUnread() {
             return (this.friendsList || []).reduce((a, f) => a + (f.unread || 0), 0);
         },
-        visibleTabs() { return this.allTabOptions.slice(0, 8); },
-        overflowTabs() { return this.allTabOptions.slice(8); },
+        visibleTabs() { return this.allTabOptions.slice(0, this.visibleTabCount); },
+        overflowTabs() { return this.allTabOptions.slice(this.visibleTabCount); },
         overflowActiveLabel() {
             const t = this.overflowTabs.find(ot => ot.key === this.activeTab);
             return t ? t.label : null;
@@ -260,7 +241,6 @@ createApp({
                 { key: 'events',     label: 'Events',      show: true },
                 { key: 'friends',    label: 'Friends',     show: !!this.onlineUsername },
                 { key: 'group',      label: 'Group',       show: !!this.onlineUsername },
-                { key: 'land',       label: 'Your Land',   show: this.isOnYourLand },
                 { key: 'settings',   label: 'Settings',    show: true },
             ].filter(t => t.show);
         },
@@ -271,22 +251,8 @@ createApp({
             if (!val) this.spellPage = 0;
         },
         activeTab(newTab) {
-            if (newTab === 'explore' && this.area && this.area.key === 'your_land') {
-                if (!this.landData && !this.landLoading) this.loadLandData();
-                else if (this.landData) this.$nextTick(() => this.drawLandMinimap());
-            }
             if (newTab === 'map') {
                 this.$nextTick(() => this.initWorldMapCanvas());
-            }
-        },
-        landData(newData) {
-            if (newData && this.activeTab === 'explore' && this.area && this.area.key === 'your_land') {
-                this.$nextTick(() => this.drawLandMinimap());
-            }
-        },
-        area(newArea) {
-            if (newArea && newArea.key === 'your_land' && this.activeTab === 'explore' && !this.landData && !this.landLoading) {
-                this.loadLandData();
             }
         },
     },
@@ -357,7 +323,19 @@ createApp({
             this.craftingRecipes     = data.crafting_recipes     || [];
             this.dungeonList         = data.dungeon_list         || [];
             this.activeDungeon       = data.active_dungeon       || {};
-            this.missions            = data.missions             || [];
+            const newMissions = data.missions || [];
+            if (this.seenQuestIds === null) {
+                this.seenQuestIds = new Set(newMissions.map(m => String(m.id || m.name)));
+            } else {
+                for (const mission of newMissions) {
+                    const mid = String(mission.id || mission.name);
+                    if (!this.seenQuestIds.has(mid)) {
+                        this.seenQuestIds.add(mid);
+                        if (!this.questModal) this.questModal = mission;
+                    }
+                }
+            }
+            this.missions            = newMissions;
             this.completedMissionsCount = data.completed_missions_count || 0;
             this.challenges          = data.challenges           || [];
             this.activeCompanions    = data.active_companions    || [];
@@ -698,66 +676,32 @@ createApp({
             if (tab === 'friends' && !this.friendsList.length)                        this.loadFriends();
             if (tab === 'group'   && !this.groupData)                                 this.loadGroup();
             if (tab === 'map') this.$nextTick(() => this.initWorldMapCanvas());
-            if (tab === 'land'  && !this.landData && !this.landLoading)  this.loadLandData();
         },
 
-        async loadLandData() {
-            if (this.landLoading) return;
-            this.landLoading = true;
-            try {
-                const r = await fetch('/api/land_data', { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                if (!r.ok) return;
-                const data = await r.json();
-                if (data.ok) {
-                    this.landData = data.land_data;
-                    const sels = {};
-                    const crops = data.land_data.farming_crops || {};
-                    const firstCrop = Object.keys(crops)[0] || '';
-                    for (const slot of (data.land_data.farm_crops || [])) {
-                        if (!slot.crop_key) sels[slot.slot_id] = firstCrop;
-                    }
-                    this.landPlantSelections = sels;
+        recalcTabOverflow() {
+            this.$nextTick(() => {
+                const nav = document.getElementById('vue-main-tabs');
+                if (!nav) return;
+                const container = nav.closest('.tab-nav-wrap') || nav.parentElement;
+                if (!container) return;
+                const availWidth = container.offsetWidth;
+                const moreBtnW = 70;
+                const tabs = this.allTabOptions;
+                if (!tabs.length) return;
+                const buttons = Array.from(nav.querySelectorAll('.tab-btn:not(.tab-more-btn)'));
+                if (!buttons.length) return;
+                let total = 0;
+                let count = 0;
+                for (let i = 0; i < buttons.length; i++) {
+                    const w = buttons[i].getBoundingClientRect().width || buttons[i].offsetWidth;
+                    const wouldNeedMore = (i + 1) < tabs.length;
+                    if (total + w + (wouldNeedMore ? moreBtnW : 0) > availWidth) break;
+                    total += w;
+                    count = i + 1;
                 }
-            } catch {}
-            this.landLoading = false;
+                if (count > 0) this.visibleTabCount = count;
+            });
         },
-
-        async landAction(path, body) {
-            if (this.actionPending) return null;
-            this.actionPending = true;
-            try {
-                const r = await fetch(path, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                    body: JSON.stringify(body || {}),
-                });
-                const data = await r.json();
-                if (!data.ok) { this.showToast(data.message || 'Action failed.', 'var(--red)'); }
-                else {
-                    if (data.message) this.showToast(data.message, 'var(--green-bright)');
-                    await this.fetchState();
-                    await this.loadLandData();
-                    this.resetPoll();
-                }
-                return data;
-            } catch (e) {
-                this.showToast('Request failed: ' + e.message, 'var(--red)');
-                return null;
-            } finally {
-                this.actionPending = false;
-            }
-        },
-
-        landRest()                    { return this.landAction('/api/action/land/rest'); },
-        landTrain(key)                { return this.landAction('/api/action/land/train',   { training_key: key }); },
-        landPlant(slotId, cropKey)    { return this.landAction('/api/action/land/plant',   { slot_id: slotId, crop_key: cropKey }); },
-        landHarvest(slotId)           { return this.landAction('/api/action/land/harvest', { slot_id: slotId }); },
-        landCraft(recipeKey)          { return this.landAction('/api/action/land/craft',   { recipe_key: recipeKey }); },
-        landStore(itemName)           { return this.landAction('/api/action/land/store',   { item_name: itemName }); },
-        landRetrieve(itemName)        { return this.landAction('/api/action/land/retrieve',{ item_name: itemName }); },
-        landBuyPet(petKey)            { return this.landAction('/api/action/land/buy_pet', { pet_key: petKey }); },
-        landBuyHousing(housingKey)    { return this.landAction('/api/action/land/buy_housing', { housing_key: housingKey }); },
 
         async loadChatMessages() {
             try {
@@ -1147,82 +1091,6 @@ createApp({
             finally { this.customizeSubmitting = false; }
         },
 
-        drawLandMinimap() {
-            const canvas = document.getElementById('land-mini-canvas');
-            if (!canvas || !this.landData || !this.landData.placed_buildings_map) return;
-            const ctx    = canvas.getContext('2d');
-            canvas.width = 960; canvas.height = 800;
-            const TILE   = 16;
-            const BTILES = {
-                'small_tent':[3,3],'large_tent':[4,4],'small_hut':[3,4],
-                'stone_wall_medium_house':[4,5],'large_stone_house':[6,8],
-                'elven_treehouse':[3,4],'large_house_with_tower':[5,7],
-                'stone_castle_with_golden_dragon_statues_and_marbled_floors':[9,12],
-                'makeshift_campfire':[2,2],'stone_bench':[3,2],'tribal_statue':[2,3],
-                'garden_with_fountain':[4,4],'dragon_statue':[2,3],'grand_stone_tower':[2,4],
-                'dragon_nest':[4,4],'wooden_fence_border':[5,2],
-                'golden_gates_with_marble_walls':[4,3],'small_garden':[3,3],
-                'enchanted_garden':[5,4],'small_farm':[4,3],'large_farm':[7,5],
-                'storage_shed':[3,4],'basic_training_dummy':[3,4],
-                'advanced_gymnasium':[6,8],'dwarven_forge':[3,4],
-            };
-            const BIMG = {
-                'small_tent':'simple_tent.png','large_tent':'simple_tent.png',
-                'small_hut':'simple_house.png','stone_wall_medium_house':'simple_house.png',
-                'large_stone_house':'simple_house.png','elven_treehouse':'simple_house.png',
-                'large_house_with_tower':'simple_house.png',
-                'stone_castle_with_golden_dragon_statues_and_marbled_floors':'simple_house.png',
-                'makeshift_campfire':'campfire.png',
-                'dwarven_forge':'simple_workshop.png','advanced_gymnasium':'simple_workshop.png',
-                'basic_training_dummy':'simple_workshop.png',
-            };
-            const BCOLORS = {
-                'house':'rgba(139,105,20,0.88)','decoration':'rgba(107,75,138,0.88)',
-                'fencing':'rgba(90,74,58,0.88)','garden':'rgba(45,106,45,0.88)',
-                'farming':'rgba(74,122,45,0.88)','training_place':'rgba(138,45,45,0.88)',
-                'storage':'rgba(58,90,122,0.88)','crafting':'rgba(122,74,45,0.88)',
-            };
-            const IMG_FILE_MAP = {
-                'simple_tent.png':'simple_tent_3_3_ratio_16px_each_tiles.png',
-                'simple_house.png':'simple_house_3_4_ratio_16px_each_tiles.png',
-                'campfire.png':'campfire_3_3_ratio_16px_each_tiles.png',
-                'simple_workshop.png':'simple_workshop_3_4_ratio_16px_each_tiles.png',
-            };
-            const placed     = this.landData.placed_buildings_map || [];
-            const loadedImgs = {};
-            let pending      = 4;
-            let mapReady     = false;
-            const drawAll = () => {
-                ctx.drawImage(mapImg, 0, 0, 960, 800);
-                placed.forEach(b => {
-                    if (b.x < 0 || b.y < 0) return;
-                    const tiles = BTILES[b.key] || [3, 3];
-                    const px = b.x * TILE, py = b.y * TILE, pw = tiles[0] * TILE, ph = tiles[1] * TILE;
-                    const imgFile = BIMG[b.key];
-                    if (imgFile && loadedImgs[imgFile] && loadedImgs[imgFile].naturalWidth > 0) {
-                        ctx.drawImage(loadedImgs[imgFile], px, py, pw, ph);
-                    } else {
-                        ctx.fillStyle = BCOLORS[b.type] || 'rgba(180,180,180,0.85)';
-                        ctx.fillRect(px, py, pw, ph);
-                    }
-                    ctx.strokeStyle = 'rgba(255,220,60,0.9)';
-                    ctx.lineWidth   = 2;
-                    ctx.strokeRect(px, py, pw, ph);
-                });
-            };
-            const check = () => { if (pending <= 0 && mapReady) drawAll(); };
-            ['simple_tent.png','simple_house.png','campfire.png','simple_workshop.png'].forEach(f => {
-                const img = new Image();
-                img.onload = img.onerror = () => { pending--; check(); };
-                img.src = '/game_assets/maps/your_land_buildings/' + IMG_FILE_MAP[f];
-                loadedImgs[f] = img;
-            });
-            const mapImg = new Image();
-            mapImg.onload  = () => { mapReady = true; check(); };
-            mapImg.onerror = () => { mapReady = true; check(); };
-            mapImg.src = '/game_assets/maps/your_land.png';
-            if (mapImg.complete && mapImg.naturalWidth > 0) { mapReady = true; check(); }
-        },
     },
 
     mounted() {
@@ -1239,12 +1107,22 @@ createApp({
             if (!document.hidden) { this.fetchState(); this.resetPoll(); }
             else { if (this.pollTimer) clearInterval(this.pollTimer); }
         });
+        this.$nextTick(() => {
+            const nav = document.getElementById('vue-main-tabs');
+            const container = nav ? (nav.closest('.tab-nav-wrap') || nav.parentElement) : null;
+            if (container && window.ResizeObserver) {
+                this._tabResizeObserver = new ResizeObserver(() => this.recalcTabOverflow());
+                this._tabResizeObserver.observe(container);
+            }
+            this.recalcTabOverflow();
+        });
     },
 
     beforeUnmount() {
         if (this.pollTimer) clearInterval(this.pollTimer);
         if (this.groupSocket) { this.groupSocket.disconnect(); }
         if (this.groupLevelUpTimer) clearTimeout(this.groupLevelUpTimer);
+        if (this._tabResizeObserver) this._tabResizeObserver.disconnect();
     },
 
 }).mount('#vue-beta-app');

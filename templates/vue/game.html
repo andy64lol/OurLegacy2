@@ -141,10 +141,6 @@ window._betaInit = {
     /* Hide floating FABs — replaced by right panel */
     #chat-widget,
     #terminal-fab { display:none !important; }
-    /* Land section */
-    .land-slot-grid { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px; }
-    .land-slot-card { background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:8px;font-size:12px; }
-    .land-slot-filled { border-color:rgba(80,200,80,0.25);background:rgba(50,120,50,0.1); }
     .area-map-wrap { width:100%;margin-top:10px; }
     .area-map-img { width:100%;height:auto;max-height:220px;object-fit:contain;display:block;border-radius:6px;image-rendering:pixelated; }
     /* Group level-up overlay */
@@ -295,10 +291,7 @@ window._betaInit = {
                         <div class="location-desc" v-if="area.description">[[ area.description.slice(0,110) ]]</div>
                         <div v-if="area.can_rest" class="rest-notice">
                             <span v-if="area.rest_cost > 0">Inn available ([[ area.rest_cost ]] gold)</span>
-                            <span v-else>Rest freely on your land</span>
-                        </div>
-                        <div v-if="area.key === 'your_land' && landData && landData.comfort_points !== undefined" style="font-size:12px;color:var(--gold);margin-top:5px;">
-                            Comfort: <strong>[[ landData.comfort_points ]]</strong> pts
+                            <span v-else>Rest here (free)</span>
                         </div>
                     </div>
                 </div>
@@ -641,15 +634,11 @@ window._betaInit = {
                                     :disabled="actionPending || (area.rest_cost > 0 && player && player.gold &lt; area.rest_cost)"
                                     :title="area.rest_cost > 0 && player && player.gold &lt; area.rest_cost ? 'Need ' + area.rest_cost + 'g to rest here (you have ' + player.gold + 'g)' : ''">
                                     <span v-if="area && area.rest_cost > 0">Rest at Inn ([[ area.rest_cost ]] gold)</span>
-                                    <span v-else>Rest on Your Land</span>
+                                    <span v-else>Rest (Free)</span>
                                 </button>
                             </div>
-                            <div class="area-map-wrap" v-if="area && area.map_image && area.key !== 'your_land'">
+                            <div class="area-map-wrap" v-if="area && area.map_image">
                                 <img :src="'/game_assets/maps/' + area.map_image" :alt="'Map of ' + area.name" class="area-map-img" @error="$event.target.style.display='none'">
-                            </div>
-                            <div v-if="area && area.key === 'your_land'" style="margin-top:10px;text-align:center;">
-                                <canvas id="land-mini-canvas" style="display:block;width:100%;max-width:100%;height:auto;max-height:200px;border-radius:8px;image-rendering:pixelated;aspect-ratio:960/800;"></canvas>
-                                <div v-if="!landData" style="font-size:12px;color:var(--text-dim);margin-top:6px;">Loading minimap…</div>
                             </div>
                         </div>
                     </div>
@@ -1375,260 +1364,6 @@ window._betaInit = {
                     </div>
                 </div>
 
-                <!-- ═══ YOUR LAND ═══ -->
-                <div class="vtab-panel" v-if="area && area.key === 'your_land'" :class="{ 'vtab-panel-active': activeTab === 'land' }">
-                    <div v-if="landLoading" class="empty-state">Loading land data...</div>
-                    <div v-else-if="!landData" class="empty-state">Could not load land data. <button class="btn btn-secondary btn-small" @click="loadLandData()">Retry</button></div>
-                    <template v-else>
-
-                        <!-- Overview -->
-                        <div class="panel land-section" style="margin-bottom:14px;">
-                            <div class="panel-title">Your Land &mdash; Overview</div>
-                            <div class="panel-body">
-                                <div style="font-size:14px;color:var(--gold);margin-bottom:6px;">Comfort Points: <strong>[[ landData.comfort_points ]]</strong></div>
-                                <p style="font-size:13px;color:var(--text-dim);">Build structures, plant crops, train your body, and care for a companion on your personal plot of land.</p>
-                                <div v-if="landData.current_pet" style="margin-top:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:5px;padding:10px 12px;">
-                                    <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Active Companion</div>
-                                    <div style="font-size:14px;color:var(--gold);font-weight:bold;">[[ landData.current_pet.name ]]</div>
-                                    <div v-if="landData.current_pet.boosts" style="font-size:12px;color:var(--text-dim);margin-top:3px;">
-                                        <span v-for="(val, stat) in landData.current_pet.boosts" :key="stat" style="margin-right:8px;">+[[ val ]] [[ stat.replace('_',' ') ]]</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Rest at Home -->
-                        <div class="panel land-section" style="margin-bottom:14px;">
-                            <div class="panel-title">Rest at Home</div>
-                            <div class="panel-body">
-                                <div v-if="!landData.has_house" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:12px;color:var(--text-dim);">
-                                    <strong style="color:var(--text-light);">House Required</strong>
-                                    <p style="font-size:13px;margin:4px 0 0;">Build a house on your land to rest and recover HP &amp; MP.</p>
-                                </div>
-                                <template v-else>
-                                    <p style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">Rest at your home to recover HP and MP. More comfort points = more recovery.</p>
-                                    <div style="font-size:14px;margin-bottom:10px;">
-                                        HP: <strong>[[ player.hp ]] / [[ player.max_hp ]]</strong> &nbsp;|&nbsp;
-                                        MP: <strong>[[ player.mp ]] / [[ player.max_mp ]]</strong> &nbsp;|&nbsp;
-                                        Comfort: <strong>[[ landData.comfort_points ]]</strong>
-                                    </div>
-                                    <button class="btn btn-primary"
-                                        :disabled="actionPending || (player.hp >= player.max_hp && player.mp >= player.max_mp)"
-                                        @click="landRest()">
-                                        Rest (~[[ Math.max(10, landData.comfort_points * 2) ]] HP / ~[[ Math.max(5, landData.comfort_points) ]] MP)
-                                    </button>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Training Grounds -->
-                        <div class="panel land-section" style="margin-bottom:14px;">
-                            <div class="panel-title">Training Grounds</div>
-                            <div class="panel-body">
-                                <div v-if="!landData.has_training_place" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:12px;color:var(--text-dim);">
-                                    <strong style="color:var(--text-light);">Training Place Required</strong>
-                                    <p style="font-size:13px;margin:4px 0 0;">Build a Training Place on your land to unlock physical training sessions.</p>
-                                </div>
-                                <template v-else>
-                                    <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Train your body to grow stronger. Each session costs gold.</p>
-                                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">
-                                        <div v-for="(opt, tk) in landData.training_options" :key="tk"
-                                             style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:5px;padding:10px;text-align:center;">
-                                            <div style="font-size:13px;color:var(--text-light);font-weight:bold;margin-bottom:4px;">[[ opt.label ]]</div>
-                                            <div style="font-size:12px;color:var(--green-bright);margin-bottom:2px;">+[[ opt.gain ]] [[ opt.stat.replace('max_','').toUpperCase() ]]</div>
-                                            <div style="font-size:12px;color:var(--gold);margin-bottom:8px;">[[ opt.cost ]]g</div>
-                                            <button class="btn btn-xsmall btn-primary"
-                                                :disabled="actionPending || player.gold &lt; opt.cost"
-                                                @click="landTrain(tk)">Train</button>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Land Pages -->
-                        <div class="panel land-section" style="margin-bottom:14px;">
-                            <div class="panel-title">Land Pages</div>
-                            <div class="panel-body" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px;">
-                                <a href="/land/map" class="btn btn-secondary" style="flex:1;min-width:140px;text-align:center;padding:10px 8px;font-size:13px;">Map Editor</a>
-                                <a href="/land/shop" class="btn btn-secondary" style="flex:1;min-width:140px;text-align:center;padding:10px 8px;font-size:13px;">Housing Shop</a>
-                                <a href="/land/pets" class="btn btn-secondary" style="flex:1;min-width:140px;text-align:center;padding:10px 8px;font-size:13px;">Companion Pets</a>
-                            </div>
-                        </div>
-
-                        <!-- Farming -->
-                        <div class="panel land-section" style="margin-bottom:14px;">
-                            <div class="panel-title">Farming</div>
-                            <div class="panel-body">
-                                <div v-if="!landData.has_garden" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:12px;color:var(--text-dim);">
-                                    <strong style="color:var(--text-light);">Garden Required</strong>
-                                    <p style="font-size:13px;margin:4px 0 0;">Build a Garden on your land to unlock farming and crop cultivation.</p>
-                                </div>
-                                <template v-else>
-                                    <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Plant crops in your farm slots. Each exploration or rest advances growth. Harvest for gold.</p>
-                                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">
-                                        <div v-for="slot in landData.farm_crops" :key="slot.slot_id"
-                                             :style="{ background: slot.crop_key ? (slot.ready ? 'rgba(50,120,50,0.15)' : 'rgba(255,255,255,0.03)') : 'rgba(255,255,255,0.02)', border: '1px solid ' + (slot.ready ? 'rgba(80,200,80,0.4)' : 'rgba(255,255,255,0.08)'), borderRadius: '5px', padding: '10px' }">
-                                            <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">[[ slot.slot_id ]]</div>
-                                            <template v-if="slot.crop_key">
-                                                <div style="font-size:13px;color:var(--text-light);font-weight:bold;margin-bottom:4px;">[[ slot.name ]]</div>
-                                                <template v-if="slot.ready">
-                                                    <div style="font-size:12px;color:var(--green-bright);margin-bottom:4px;">Ready to harvest!</div>
-                                                    <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">[[ slot.harvest_amount ]]x &mdash; [[ slot.sell_price * slot.harvest_amount ]]g</div>
-                                                    <button class="btn btn-xsmall btn-primary" :disabled="actionPending" @click="landHarvest(slot.slot_id)">Harvest</button>
-                                                </template>
-                                                <template v-else>
-                                                    <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">[[ slot.turns ]] / [[ slot.growth_time ]] turns</div>
-                                                    <div class="bar-track"><div class="bar-fill bar-exp" :style="{ width: Math.min(100, Math.round(slot.turns / slot.growth_time * 100)) + '%' }"></div></div>
-                                                </template>
-                                            </template>
-                                            <template v-else>
-                                                <div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:8px;">Empty plot</div>
-                                                <select v-model="landPlantSelections[slot.slot_id]" style="width:100%;font-size:12px;background:var(--bg-input,#1a1a24);color:var(--text-light);border:1px solid rgba(255,255,255,0.15);border-radius:3px;padding:4px;margin-bottom:6px;">
-                                                    <option v-for="(crop, ck) in landData.farming_crops" :key="ck" :value="ck">[[ crop.name ]] ([[ crop.growth_time ]]t, [[ crop.sell_price * crop.harvest_amount ]]g)</option>
-                                                </select>
-                                                <button class="btn btn-xsmall btn-secondary" :disabled="actionPending" @click="landPlant(slot.slot_id, landPlantSelections[slot.slot_id])">Plant</button>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Crafting Forge -->
-                        <div class="panel land-section" style="margin-bottom:14px;">
-                            <div class="panel-title">Crafting Forge</div>
-                            <div class="panel-body">
-                                <div v-if="!landData.has_crafting" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:12px;color:var(--text-dim);">
-                                    <strong style="color:var(--text-light);">Crafting Building Required</strong>
-                                    <p style="font-size:13px;margin:4px 0 0;">Place a crafting building like the Dwarven Forge to unlock recipes.</p>
-                                </div>
-                                <template v-else>
-                                    <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Use materials from your inventory to craft potions, weapons, and more.</p>
-                                    <div v-for="cat in landCraftCategories" :key="cat" style="margin-bottom:12px;">
-                                        <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">[[ cat ]]</div>
-                                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">
-                                            <div v-for="r in landData.crafting_recipes.filter(x => x.category === cat)" :key="r.key"
-                                                 :style="{ background: r.can_craft ? 'rgba(50,120,50,0.12)' : 'rgba(255,255,255,0.02)', border: '1px solid ' + (r.can_craft ? 'rgba(80,200,80,0.3)' : 'rgba(255,255,255,0.06)'), borderRadius: '5px', padding: '10px' }">
-                                                <div :class="'rarity-' + r.rarity" style="font-size:13px;font-weight:bold;margin-bottom:4px;">[[ r.name ]]</div>
-                                                <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">[[ r.description ? r.description.slice(0,70) : '' ]]</div>
-                                                <div style="font-size:11px;margin-bottom:4px;">
-                                                    <strong style="color:var(--text-dim);">Needs:</strong>
-                                                    <span v-for="(qty, mat) in r.materials" :key="mat"
-                                                          :style="{ color: (r.have[mat] || 0) >= qty ? 'var(--green-bright)' : 'var(--red)', marginLeft: '4px' }">
-                                                        [[ qty ]]x [[ mat ]] ([[ r.have[mat] || 0 ]])
-                                                    </span>
-                                                </div>
-                                                <div style="font-size:11px;color:var(--gold);margin-bottom:8px;">
-                                                    <strong>Output:</strong>
-                                                    <span v-for="(qty, name) in r.output" :key="name"> [[ qty ]]x [[ name ]]</span>
-                                                </div>
-                                                <button class="btn btn-xsmall btn-primary" :disabled="!r.can_craft || actionPending" @click="landCraft(r.key)">Craft</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Home Storage -->
-                        <div class="panel land-section" style="margin-bottom:14px;">
-                            <div class="panel-title">Home Storage</div>
-                            <div class="panel-body">
-                                <div v-if="!landData.has_storage" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:12px;color:var(--text-dim);">
-                                    <strong style="color:var(--text-light);">Storage Building Required</strong>
-                                    <p style="font-size:13px;margin:4px 0 0;">Place a Storage Shed on your land to store items from your inventory.</p>
-                                </div>
-                                <template v-else>
-                                    <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
-                                        Capacity: [[ landData.stored_items.length ]] / [[ landData.storage_capacity ]]
-                                    </p>
-                                    <div v-if="landData.stored_items && landData.stored_items.length" style="margin-bottom:12px;">
-                                        <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Stored Items</div>
-                                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                                            <div v-for="(count, item) in storedItemCounts" :key="item"
-                                                 style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:6px 10px;display:flex;align-items:center;gap:8px;">
-                                                <span style="font-size:13px;color:var(--text-light);">[[ item ]]</span>
-                                                <span v-if="count > 1" style="font-size:11px;color:var(--text-dim);">x[[ count ]]</span>
-                                                <button class="btn btn-xsmall btn-secondary" :disabled="actionPending" @click="landRetrieve(item)">Retrieve</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div v-else style="font-size:13px;color:var(--text-dim);font-style:italic;margin-bottom:12px;">Storage is empty.</div>
-                                    <div v-if="inventoryItems && inventoryItems.length">
-                                        <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Store from Inventory</div>
-                                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                                            <div v-for="item in inventoryItems" :key="item.name"
-                                                 style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 10px;display:flex;align-items:center;gap:8px;">
-                                                <span style="font-size:13px;color:var(--text-light);">[[ item.name ]]</span>
-                                                <span v-if="item.count > 1" style="font-size:11px;color:var(--text-dim);">x[[ item.count ]]</span>
-                                                <button class="btn btn-xsmall btn-primary"
-                                                    :disabled="actionPending || landData.stored_items.length >= landData.storage_capacity"
-                                                    @click="landStore(item.name)">Store</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                        <!-- Companion Pets -->
-                        <div class="panel land-section" style="margin-bottom:14px;">
-                            <div class="panel-title">Companion Pets</div>
-                            <div class="panel-body">
-                                <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Adopt a companion pet for permanent stat bonuses. Only one active pet at a time (old pet refunds 50%).</p>
-                                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">
-                                    <div v-for="(pet, petKey) in landData.pets" :key="petKey"
-                                         :style="{ background: (landData.current_pet && landData.current_pet.key === petKey) ? 'rgba(200,165,60,0.12)' : 'rgba(255,255,255,0.03)', border: '1px solid ' + ((landData.current_pet && landData.current_pet.key === petKey) ? 'rgba(200,165,60,0.5)' : 'rgba(255,255,255,0.08)'), borderRadius: '5px', padding: '10px' }">
-                                        <div style="font-size:13px;color:var(--gold);font-weight:bold;margin-bottom:4px;">[[ pet.name ]]</div>
-                                        <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">[[ pet.description ? pet.description.slice(0,80) : '' ]]</div>
-                                        <div v-if="pet.boosts" style="font-size:11px;color:var(--green-bright);margin-bottom:4px;">
-                                            <span v-for="(val, stat) in pet.boosts" :key="stat" style="margin-right:6px;">+[[ val ]] [[ stat.replace('_',' ') ]]</span>
-                                        </div>
-                                        <div style="font-size:13px;color:var(--gold);margin-bottom:8px;">[[ pet.price ]]g</div>
-                                        <button class="btn btn-xsmall btn-primary"
-                                            :disabled="(landData.current_pet && landData.current_pet.key === petKey) || !pet.can_afford || actionPending"
-                                            @click="landBuyPet(petKey)">
-                                            [[ (landData.current_pet && landData.current_pet.key === petKey) ? 'Active' : 'Adopt' ]]
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Housing Shop -->
-                        <div class="panel land-section" style="margin-bottom:14px;">
-                            <div class="panel-title">Housing Shop</div>
-                            <div class="panel-body">
-                                <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Buy structures to build up your land. Owned structures increase your comfort points.</p>
-                                <template v-for="(typeInfo, typeKey) in landData.building_types" :key="typeKey">
-                                    <div v-if="landData.housing_by_type[typeKey] && landData.housing_by_type[typeKey].length" style="margin-bottom:12px;">
-                                        <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">[[ typeInfo.label ]] &mdash; [[ typeInfo.slots ]] slot[[ typeInfo.slots !== 1 ? 's' : '' ]]</div>
-                                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;">
-                                            <div v-for="h in landData.housing_by_type[typeKey]" :key="h.key"
-                                                 :style="{ background: h.owned ? 'rgba(50,120,50,0.12)' : 'rgba(255,255,255,0.02)', border: '1px solid ' + (h.owned ? 'rgba(80,200,80,0.3)' : 'rgba(255,255,255,0.06)'), borderRadius: '5px', padding: '10px' }">
-                                                <div :class="'rarity-' + h.rarity" style="font-size:13px;font-weight:bold;margin-bottom:4px;">[[ h.name ]]</div>
-                                                <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">[[ h.description ? h.description.slice(0,60) : '' ]]</div>
-                                                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                                                    <span style="font-size:13px;color:var(--gold);">[[ h.price ]]g</span>
-                                                    <span style="font-size:11px;color:var(--text-dim);">+[[ h.comfort ]] comfort</span>
-                                                </div>
-                                                <div v-if="h.owned" style="display:flex;gap:6px;align-items:center;">
-                                                    <span style="font-size:12px;color:var(--green-bright);">Owned</span>
-                                                </div>
-                                                <button v-else class="btn btn-xsmall btn-primary"
-                                                    :disabled="!h.can_afford || actionPending"
-                                                    @click="landBuyHousing(h.key)">Buy</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-
-                    </template>
-                </div>
-
                 <!-- ═══ SETTINGS TAB ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'settings' }">
                     <div class="panel" style="margin-bottom:14px;">
@@ -1923,6 +1658,38 @@ window._betaInit = {
 
         </div>
     </div>
+
+    <!-- ═══ Quest Award Modal ═══ -->
+    <transition name="quest-modal-fade">
+    <div v-if="questModal" class="quest-modal-overlay" @click.self="questModal = null"
+         style="position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.72);backdrop-filter:blur(3px);">
+        <div style="background:var(--bg-panel,#1a1520);border:2px solid rgba(200,165,60,0.6);border-radius:10px;width:100%;max-width:420px;padding:0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.8);">
+            <div style="background:rgba(200,165,60,0.1);border-bottom:1px solid rgba(200,165,60,0.3);padding:14px 20px;display:flex;align-items:center;gap:10px;">
+                <img src="/game_assets/glyphs/sparkles.webp" alt="" style="width:18px;height:18px;image-rendering:pixelated;" onerror="this.style.display='none'">
+                <span style="font-family:'Tiny5',monospace;font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold);">New Quest Unlocked!</span>
+            </div>
+            <div style="padding:20px;">
+                <div style="font-size:18px;font-weight:bold;color:var(--text-bright,#fff);margin-bottom:8px;">[[ questModal.name ]]</div>
+                <div v-if="questModal.description" style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:16px;">[[ questModal.description ]]</div>
+                <div style="display:flex;gap:16px;margin-bottom:20px;">
+                    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px 14px;text-align:center;flex:1;">
+                        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);margin-bottom:3px;">EXP Reward</div>
+                        <div style="font-size:16px;font-weight:bold;color:var(--green-bright);">[[ questModal.exp_reward || 0 ]]</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px 14px;text-align:center;flex:1;">
+                        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);margin-bottom:3px;">Gold Reward</div>
+                        <div style="font-size:16px;font-weight:bold;color:var(--gold);">[[ questModal.gold_reward || 0 ]]g</div>
+                    </div>
+                </div>
+                <div v-if="questModal.unlock_level && questModal.unlock_level > 1" style="font-size:12px;color:var(--text-dim);margin-bottom:14px;">Requires level [[ questModal.unlock_level ]]</div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-primary" style="flex:1;" @click="questModal = null; activeTab = 'quests'">View Quests</button>
+                    <button class="btn btn-secondary" @click="questModal = null">Dismiss</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </transition>
 
     <!-- ═══ DM Floating Modal ═══ -->
     <div v-if="dmTarget && dmModalOpen" class="dm-modal-overlay" @click.self="closeDm">
