@@ -100,6 +100,8 @@ function detailBoss(d) {
         '<div class="detail-grid">' + statBlock(rows) + loot + abils + '</div>';
 }
 
+const ITEM_TYPE_GLYPHS = {weapon:'weapon',armor:'armor',accessory:'accessories',consumable:'food',material:'materials',offhand:'offhand',junk:'gold'};
+
 function detailItem(d) {
     const key = d.key || d.name;
     const rows = [];
@@ -112,8 +114,8 @@ function detailItem(d) {
     if (d.speed)      rows.push(['Speed', d.speed]);
     if (d.hp_restore) rows.push(['HP Restore', d.hp_restore]);
     if (d.mp_restore) rows.push(['MP Restore', d.mp_restore]);
-    const src = d.texture ? '/game_assets/' + d.texture : null;
-    const imgHtml = src ? imgOrPlaceholder(src, key) : '<div class="detail-hero-placeholder">no<br>texture</div>';
+    const glyphName = ITEM_TYPE_GLYPHS[(d.type || '').toLowerCase()] || 'gold';
+    const imgHtml = '<img class="detail-hero-img" src="/game_assets/glyphs/' + esc(glyphName) + '.webp" alt="' + esc(d.type || 'item') + '" style="width:72px;height:72px;image-rendering:pixelated;">';
     const rarityTag = d.rarity ? '<span class="rarity rarity-' + esc(d.rarity) + '">' + esc(d.rarity) + '</span>' : '';
     const tagsBlock = (d.tags && d.tags.length) ? '<div class="detail-block" style="grid-column:1/-1;"><div class="detail-block-title">Tags</div>' + tagsHtml(d.tags) + '</div>' : '';
     return backBtn() +

@@ -518,17 +518,14 @@
         <!-- section: items -->
         <section id="sec-items" class="section">
             <div class="section-title">Items</div>
-            <div class="section-note">some items do not yet have textures &mdash; shown with placeholder. more textures planned.</div>
             <div class="items-grid">
+                {% set _item_glyphs = {'weapon':'weapon','armor':'armor','accessory':'accessories','consumable':'food','material':'materials','offhand':'offhand','junk':'gold'} %}
                 {% for name, item in items.items() %}
                 <div class="card" onclick="showDetail('items',{{ name | tojson }})">
                     <div class="card-head">
-                        {% if item.get('texture') %}
-                        <img class="card-thumb" src="/game_assets/{{ item.texture }}" alt="{{ name }}"
-                             onerror="this.outerHTML='<div class=\'card-thumb-placeholder\'>no<br>texture</div>'">
-                        {% else %}
-                        <div class="card-thumb-placeholder">no<br>texture</div>
-                        {% endif %}
+                        <img class="card-thumb" src="/game_assets/glyphs/{{ _item_glyphs.get(item.get('type',''), 'gold') }}.webp" alt="{{ item.get('type','item') }}"
+                             style="image-rendering:pixelated;"
+                             onerror="this.style.opacity='0.3'">
                         <div>
                             <div class="card-name" style="font-size:12px;">{{ name }}</div>
                             <div class="card-sub">{% if item.get('rarity') %}<span class="rarity rarity-{{ item.rarity }}">{{ item.rarity }}</span>{% endif %}</div>
@@ -897,6 +894,8 @@ function detailBoss(key, d) {
         '<div class="detail-grid">' + statBlock(rows) + loot + abils + '</div>';
 }
 
+var ITEM_TYPE_GLYPHS = {weapon:'weapon',armor:'armor',accessory:'accessories',consumable:'food',material:'materials',offhand:'offhand',junk:'gold'};
+
 function detailItem(key, d) {
     var rows = [];
     if (d.type)    rows.push(['Type', d.type]);
@@ -908,8 +907,8 @@ function detailItem(key, d) {
     if (d.speed)   rows.push(['Speed', d.speed]);
     if (d.hp_restore) rows.push(['HP Restore', d.hp_restore]);
     if (d.mp_restore) rows.push(['MP Restore', d.mp_restore]);
-    var src = d.texture ? '/game_assets/' + d.texture : null;
-    var imgHtml = src ? imgOrPlaceholder(src, key) : '<div class="detail-hero-placeholder">no<br>texture</div>';
+    var glyphName = ITEM_TYPE_GLYPHS[(d.type || '').toLowerCase()] || 'gold';
+    var imgHtml = '<img class="detail-hero-img" src="/game_assets/glyphs/' + esc(glyphName) + '.webp" alt="' + esc(d.type || 'item') + '" style="width:72px;height:72px;image-rendering:pixelated;">';
     var rarityTag = d.rarity ? '<span class="rarity rarity-' + esc(d.rarity) + '">' + esc(d.rarity) + '</span>' : '';
     var tagsBlock = (d.tags && d.tags.length) ? '<div class="detail-block" style="grid-column:1/-1;"><div class="detail-block-title">Tags</div>' + tagsHtml(d.tags) + '</div>' : '';
     return backBtn() +
