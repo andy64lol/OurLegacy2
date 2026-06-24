@@ -40,6 +40,8 @@ createApp({
                 attr_discovery:      p.attr_discovery       || 0,
                 attr_spell_power:    p.attr_spell_power     || 0,
                 attr_gold_discount:  p.attr_gold_discount   || 0,
+                gender:              p.gender               || '',
+                background:          p.background           || '',
             };
         }
         return {
@@ -307,6 +309,8 @@ createApp({
                     attr_discovery:      p.attr_discovery       || 0,
                     attr_spell_power:    p.attr_spell_power     || 0,
                     attr_gold_discount:  p.attr_gold_discount   || 0,
+                    gender:              p.gender               || '',
+                    background:          p.background           || '',
                 };
             }
 

@@ -730,6 +730,20 @@ window._betaInit = {
                                         <div v-else class="equip-slot-empty">— Empty —</div>
                                     </div>
                                 </div>
+                                <!-- Stat mini-grid matching Jinja2 layout -->
+                                <div class="stat-mini-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px;">
+                                    <div class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Max HP</span><strong style="color:#f08080;">[[ fmtNum(player.max_hp) ]]</strong></div>
+                                    <div class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Max MP</span><strong style="color:#80a8f0;">[[ fmtNum(player.max_mp) ]]</strong></div>
+                                    <div class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Attack</span><strong style="color:#e0a060;">[[ fmtNum(player.attack) ]]</strong></div>
+                                    <div class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Defense</span><strong style="color:#70c8c8;">[[ fmtNum(player.defense) ]]</strong></div>
+                                    <div class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Speed</span><strong style="color:#c080f0;">[[ fmtNum(player.speed) ]]</strong></div>
+                                    <div class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Level</span><strong style="color:var(--gold);">[[ player.level ]]</strong></div>
+                                    <div v-if="player.attr_spell_power" class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Spell Power</span><strong style="color:var(--mana-bright,#7eb8f7);">+[[ player.attr_spell_power ]]</strong></div>
+                                    <div v-if="player.dodge_chance" class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Dodge</span><strong style="color:var(--green-bright);">[[ Math.round(player.dodge_chance*100) ]]%</strong></div>
+                                    <div v-if="player.attr_crit_chance" class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Crit Chance</span><strong style="color:var(--green-bright);">+[[ Math.round(player.attr_crit_chance*100) ]]%</strong></div>
+                                    <div v-if="player.attr_gold_discount" class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Shop Discount</span><strong style="color:var(--gold);">[[ Math.round(player.attr_gold_discount*100) ]]%</strong></div>
+                                    <div v-if="player.attr_discovery" class="stat-mini" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:6px 8px;font-size:12px;"><span style="color:var(--text-dim);display:block;font-size:10px;margin-bottom:2px;">Item Discovery</span><strong style="color:var(--green-bright);">+[[ Math.round(player.attr_discovery*100) ]]%</strong></div>
+                                </div>
                             </div>
                         </div>
                         <div class="panel">
@@ -890,7 +904,7 @@ window._betaInit = {
                                     </div>
                                 </div>
                                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                                    <a href="/dungeon/room" class="btn btn-primary btn-wood">Continue &rarr;</a>
+                                    <a href="/beta/dungeon/room" class="btn btn-primary btn-wood">Continue &rarr;</a>
                                     <button class="btn btn-danger btn-small" @click="abandonDungeon" :disabled="actionPending">Abandon</button>
                                 </div>
                             </div>
@@ -1148,53 +1162,93 @@ window._betaInit = {
                 <!-- ═══ CHARACTER ═══ -->
                 <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'character' }">
                     <div v-if="player">
-                        <div class="panel" style="margin-bottom:12px;">
-                            <div class="panel-title">[[ player.name ]]</div>
-                            <div class="panel-body">
-                                <div style="font-size:14px;margin-bottom:4px;">[[ player.char_class ]] &mdash; Rank [[ player.rank ]]</div>
-                                <div style="font-size:13px;color:var(--text-dim);">[[ player.race ]] &bull; Level [[ player.level ]]</div>
-                                <div v-if="player.title" style="font-size:13px;color:var(--gold);margin-top:2px;">[[ player.title ]]</div>
-                            </div>
-                        </div>
-                        <div class="stat-grid-big" style="margin-bottom:14px;">
-                            <div class="stat-card"><div class="stat-card-label">HP</div><div class="stat-card-val">[[ fmtNum(player.hp) ]]/[[ fmtNum(player.max_hp) ]]</div></div>
-                            <div class="stat-card"><div class="stat-card-label">MP</div><div class="stat-card-val">[[ fmtNum(player.mp) ]]/[[ fmtNum(player.max_mp) ]]</div></div>
-                            <div class="stat-card"><div class="stat-card-label">EXP</div><div class="stat-card-val" :title="player.experience + ' / ' + player.experience_to_next">[[ fmtNum(player.experience) ]]/[[ fmtNum(player.experience_to_next) ]]</div></div>
-                            <div class="stat-card"><div class="stat-card-label">Attack</div><div class="stat-card-val">[[ fmtNum(player.attack) ]]</div></div>
-                            <div class="stat-card"><div class="stat-card-label">Defense</div><div class="stat-card-val">[[ fmtNum(player.defense) ]]</div></div>
-                            <div class="stat-card"><div class="stat-card-label">Speed</div><div class="stat-card-val">[[ fmtNum(player.speed) ]]</div></div>
-                        </div>
+
+                        <!-- Attributes (top — matches Jinja2) -->
                         <div v-if="attrSummary && attrSummary.length" class="panel" style="margin-bottom:12px;">
-                            <div class="panel-title">Attributes <span v-if="player.attr_points > 0" style="color:var(--gold);font-size:12px;margin-left:8px;">[[ player.attr_points ]] point[[ player.attr_points !== 1 ? 's' : '' ]] to spend</span></div>
+                            <div class="panel-title">
+                                Attributes
+                                <span v-if="player.attr_points > 0" class="attr-points-badge" style="background:rgba(200,165,80,0.18);border:1px solid rgba(200,165,80,0.4);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--gold);margin-left:8px;">[[ player.attr_points ]] point[[ player.attr_points !== 1 ? 's' : '' ]] available</span>
+                            </div>
                             <div class="panel-body">
-                                <div v-for="attr in attrSummary" :key="attr.key" class="attr-row">
-                                    <div><div class="attr-name">[[ attr.label ]]</div><div style="font-size:11px;color:var(--text-dim);">[[ attr.effect ]]</div></div>
-                                    <div style="display:flex;align-items:center;gap:8px;">
-                                        <span class="attr-val">[[ attr.value ]]</span>
-                                        <button v-if="player.attr_points > 0" class="btn btn-xsmall btn-secondary attr-spend-btn" @click="spendAttrPoint(attr.key)" :disabled="actionPending">+1</button>
+                                <p v-if="player.attr_points > 0" style="font-size:12px;color:var(--gold);margin:0 0 10px;">You have unspent attribute points! Spend them to grow stronger.</p>
+                                <p v-else style="font-size:12px;color:var(--text-dim);margin:0 0 10px;">Gain attribute points by leveling up (3 per level). Each attribute permanently boosts your stats.</p>
+                                <div class="attr-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                    <div v-for="attr in attrSummary" :key="attr.key" class="attr-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:5px;padding:10px 12px;">
+                                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                                            <span class="attr-name" style="font-size:13px;color:var(--text-light);font-weight:600;">[[ attr.label ]]</span>
+                                            <span class="attr-val" style="font-size:15px;color:var(--gold);font-weight:bold;">[[ attr.value ]] <span :style="{ color: Math.floor((attr.value-10)/2) >= 0 ? 'var(--green-bright)' : 'var(--red)', fontSize:'12px' }">[[ Math.floor((attr.value-10)/2) >= 0 ? '+' : '' ]][[ Math.floor((attr.value-10)/2) ]]</span></span>
+                                        </div>
+                                        <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">[[ attr.effect ]]</div>
+                                        <div v-if="player.attr_points > 0" style="display:flex;gap:4px;flex-wrap:wrap;">
+                                            <button class="btn btn-xsmall btn-primary" @click="spendAttrPoint(attr.key)" :disabled="actionPending">+1</button>
+                                            <button v-if="player.attr_points >= 5" class="btn btn-xsmall btn-primary" @click="spendAttrPointN(attr.key, 5)" :disabled="actionPending">+5</button>
+                                            <button v-if="player.attr_points >= 10" class="btn btn-xsmall btn-primary" @click="spendAttrPointN(attr.key, 10)" :disabled="actionPending">+10</button>
+                                            <button v-if="player.attr_points > 1" class="btn btn-xsmall btn-secondary" @click="spendAttrPointAll(attr.key)" :disabled="actionPending" :title="'Spend all ' + player.attr_points + ' points here'">+All</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Character Sheet -->
                         <div class="panel" style="margin-bottom:12px;">
-                            <div class="panel-title">Adventure Stats</div>
+                            <div class="panel-title">Character Sheet</div>
                             <div class="panel-body">
+                                <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Identity</div>
+                                <div class="stats-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;margin-bottom:14px;">
+                                    <div class="attr-row"><span class="attr-name">Name</span><span class="attr-val" style="font-size:13px;">[[ player.name ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Gender</span><span class="attr-val" style="font-size:13px;">[[ player.gender || '—' ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Class</span><span class="attr-val" style="font-size:13px;">[[ player.char_class ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Race</span><span class="attr-val" style="font-size:13px;">[[ player.race || '—' ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Background</span><span class="attr-val" style="font-size:13px;">[[ (player.background || '—').replace(/_/g,' ') ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Level</span><span class="attr-val" style="font-size:13px;">[[ player.level ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Rank</span><span class="attr-val" style="font-size:13px;">[[ player.rank ]]</span></div>
+                                    <div v-if="player.title" class="attr-row"><span class="attr-name">Title</span><span class="attr-val" style="font-size:13px;color:var(--gold);">[[ player.title ]]</span></div>
+                                </div>
+                                <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Combat Stats</div>
+                                <div class="stats-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;margin-bottom:14px;">
+                                    <div class="attr-row"><span class="attr-name">Max HP</span><span class="attr-val">[[ fmtNum(player.max_hp) ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Current HP</span><span class="attr-val" style="color:#f08080;">[[ fmtNum(player.hp) ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Max MP</span><span class="attr-val">[[ fmtNum(player.max_mp) ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Current MP</span><span class="attr-val" style="color:#80a8f0;">[[ fmtNum(player.mp) ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Attack</span><span class="attr-val">[[ fmtNum(player.attack) ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Defense</span><span class="attr-val">[[ fmtNum(player.defense) ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Speed</span><span class="attr-val">[[ fmtNum(player.speed) ]]</span></div>
+                                    <div class="attr-row"><span class="attr-name">Gold</span><span class="attr-val" style="color:var(--gold);">[[ fmtNum(player.gold) ]]</span></div>
+                                    <div class="attr-row" style="grid-column:1/-1;"><span class="attr-name">Experience</span><span class="attr-val">[[ fmtNum(player.experience) ]] / [[ fmtNum(player.experience_to_next) ]]</span></div>
+                                </div>
+                                <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Attributes &amp; Modifiers</div>
+                                <div class="stats-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;margin-bottom:14px;">
+                                    <div v-for="attr in attrSummary" :key="'sheet-' + attr.key" class="attr-row">
+                                        <span class="attr-name">[[ attr.label ]] ([[ attr.key.toUpperCase() ]])</span>
+                                        <span class="attr-val">
+                                            [[ attr.value ]]
+                                            <span :style="{ fontSize:'12px', color: Math.floor((attr.value-10)/2) >= 0 ? 'var(--green-bright)' : 'var(--red)', marginLeft:'4px' }">[[ '[' + (Math.floor((attr.value-10)/2) >= 0 ? '+' : '') + Math.floor((attr.value-10)/2) + ']' ]]</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Bonus Modifiers</div>
+                                <div class="stats-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">
+                                    <div v-if="player.attr_spell_power" class="attr-row"><span class="attr-name">Spell Power</span><span class="attr-val" style="color:var(--mana-bright,#7eb8f7);">+[[ player.attr_spell_power ]]</span></div>
+                                    <div v-if="player.dodge_chance" class="attr-row"><span class="attr-name">Dodge Chance</span><span class="attr-val" style="color:var(--green-bright);">[[ Math.round(player.dodge_chance * 100) ]]%</span></div>
+                                    <div v-if="player.attr_crit_chance" class="attr-row"><span class="attr-name">Crit Chance</span><span class="attr-val" style="color:var(--green-bright);">+[[ Math.round(player.attr_crit_chance * 100) ]]%</span></div>
+                                    <div v-if="player.attr_gold_discount" class="attr-row"><span class="attr-name">Shop Discount</span><span class="attr-val" style="color:var(--gold);">[[ Math.round(player.attr_gold_discount * 100) ]]%</span></div>
+                                    <div v-if="player.attr_discovery" class="attr-row"><span class="attr-name">Item Discovery</span><span class="attr-val" style="color:var(--green-bright);">+[[ Math.round(player.attr_discovery * 100) ]]%</span></div>
+                                    <div v-if="player.attr_exp_bonus" class="attr-row"><span class="attr-name">EXP Bonus</span><span class="attr-val" style="color:var(--green-bright);">+[[ Math.round(player.attr_exp_bonus * 100) ]]%</span></div>
+                                    <div v-if="!player.attr_spell_power && !player.dodge_chance && !player.attr_crit_chance && !player.attr_gold_discount && !player.attr_discovery && !player.attr_exp_bonus" class="attr-row" style="grid-column:1/-1;"><span class="attr-name" style="color:var(--text-dim);">No bonus modifiers yet. Spend attribute points to unlock them.</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Adventure Stats -->
+                        <div class="panel">
+                            <div class="panel-title">Adventure Stats</div>
+                            <div class="panel-body" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;">
                                 <div class="attr-row"><span class="attr-name">Total Kills</span><span class="attr-val">[[ fmtNum(player.total_kills) ]]</span></div>
                                 <div class="attr-row"><span class="attr-name">Bosses Defeated</span><span class="attr-val">[[ fmtNum(player.total_bosses_defeated) ]]</span></div>
                                 <div class="attr-row"><span class="attr-name">Deaths</span><span class="attr-val">[[ fmtNum(player.deaths) ]]</span></div>
                                 <div class="attr-row"><span class="attr-name">Days Played</span><span class="attr-val">[[ player.days ]]</span></div>
-                                <div class="attr-row"><span class="attr-name">Reputation</span><span class="attr-val">[[ fmtNum(player.reputation) ]]</span></div>
-                            </div>
-                        </div>
-                        <div v-if="player.attr_spell_power || player.dodge_chance || player.attr_crit_chance || player.attr_gold_discount || player.attr_discovery || player.attr_exp_bonus" class="panel">
-                            <div class="panel-title">Bonus Modifiers</div>
-                            <div class="panel-body">
-                                <div v-if="player.attr_spell_power" class="attr-row"><span class="attr-name">Spell Power</span><span class="attr-val">+[[ player.attr_spell_power ]]</span></div>
-                                <div v-if="player.dodge_chance" class="attr-row"><span class="attr-name">Dodge Chance</span><span class="attr-val">[[ Math.round(player.dodge_chance * 100) ]]%</span></div>
-                                <div v-if="player.attr_crit_chance" class="attr-row"><span class="attr-name">Crit Chance</span><span class="attr-val">[[ Math.round(player.attr_crit_chance * 100) ]]%</span></div>
-                                <div v-if="player.attr_gold_discount" class="attr-row"><span class="attr-name">Shop Discount</span><span class="attr-val">[[ Math.round(player.attr_gold_discount * 100) ]]%</span></div>
-                                <div v-if="player.attr_discovery" class="attr-row"><span class="attr-name">Item Discovery</span><span class="attr-val">[[ Math.round(player.attr_discovery * 100) ]]%</span></div>
-                                <div v-if="player.attr_exp_bonus" class="attr-row"><span class="attr-name">EXP Bonus</span><span class="attr-val">+[[ Math.round(player.attr_exp_bonus * 100) ]]%</span></div>
+                                <div class="attr-row" style="grid-column:1/-1;"><span class="attr-name">Reputation</span><span class="attr-val">[[ fmtNum(player.reputation) ]]</span></div>
                             </div>
                         </div>
                     </div>

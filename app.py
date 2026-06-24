@@ -172,6 +172,7 @@ def _decode_jwt(token: str):
 def _jwt_required(f):
     """Decorator: accept either a valid session or a Bearer JWT token."""
     import functools
+    from flask import g as _flask_g
 
     @functools.wraps(f)
     def decorated(*args, **kwargs):
@@ -183,6 +184,21 @@ def _jwt_required(f):
         if auth_header.startswith("Bearer "):
             payload = _decode_jwt(auth_header[7:])
             if payload:
+                user_id  = payload.get("sub") or payload.get("user_id")
+                username = payload.get("username", "")
+                # Inject into request context so _api_resolve_player can load the player
+                _flask_g.jwt_user_id  = user_id
+                _flask_g.jwt_username = username
+                # If no player is loaded in session yet, attempt cloud auto-load
+                if not session.get("player") and user_id:
+                    session["online_user_id"]  = user_id
+                    session["online_username"] = username
+                    try:
+                        result = character_autoload(user_id)
+                        if result.get("ok") and result.get("data"):
+                            _apply_game_state(result["data"])
+                    except Exception:
+                        pass
                 return f(*args, **kwargs)
         return jsonify({"ok": False, "message": "Authentication required."}), 401
 
@@ -1713,11 +1729,21 @@ def gain_experience(player, amount):
         player["level"] += 1
         player["experience_to_next"] = int(player["experience_to_next"] * 1.5)
         b = player.get("level_up_bonuses", {})
-        player["max_hp"] += b.get("hp", 10)
-        player["max_mp"] += b.get("mp", 2)
-        player["attack"] += b.get("attack", 2)
-        player["defense"] += b.get("defense", 1)
-        player["speed"] += b.get("speed", 1)
+        hp_gain  = random.randint(10, 20)
+        def_gain = random.randint(10, 20)
+        spd_gain = random.randint(10, 20)
+        mp_gain  = b.get("mp", 2)
+        atk_gain = b.get("attack", 2)
+        player["max_hp"]  += hp_gain
+        player["max_mp"]  += mp_gain
+        player["attack"]  += atk_gain
+        player["defense"] += def_gain
+        player["speed"]   += spd_gain
+        player["base_max_hp"]  = player.get("base_max_hp",  player["max_hp"])  + hp_gain
+        player["base_max_mp"]  = player.get("base_max_mp",  player["max_mp"])  + mp_gain
+        player["base_attack"]  = player.get("base_attack",  player["attack"])  + atk_gain
+        player["base_defense"] = player.get("base_defense", player["defense"]) + def_gain
+        player["base_speed"]   = player.get("base_speed",   player["speed"])   + spd_gain
         player["hp"] = player["max_hp"]
         player["mp"] = player["max_mp"]
         player["rank"] = get_rank(player["level"])
@@ -8628,6 +8654,8 @@ def _api_resolve_player(scope: str = "game:read"):
 
 
 def _api_player_summary(player):
+    from utilities.stats import get_unspent_points, ensure_attributes
+    ensure_attributes(player)
     return {
         "name": player.get("name"),
         "level": player.get("level"),
@@ -8648,6 +8676,21 @@ def _api_player_summary(player):
         "in_battle": bool(session.get("battle_enemy")),
         "equipment": player.get("equipment", {}),
         "attributes": player.get("attributes", {}),
+        "attr_points": get_unspent_points(player),
+        "attr_spell_power": player.get("attr_spell_power", 0),
+        "attr_gold_discount": player.get("attr_gold_discount", 0.0),
+        "attr_discovery": player.get("attr_discovery", 0.0),
+        "dodge_chance": player.get("dodge_chance", 0.0),
+        "attr_crit_chance": player.get("attr_crit_chance", 0.0),
+        "attr_exp_bonus": player.get("attr_exp_bonus", 0.0),
+        "total_kills": player.get("total_kills", 0),
+        "total_bosses_defeated": player.get("total_bosses_defeated", 0),
+        "deaths": player.get("deaths", 0),
+        "days": player.get("day", player.get("days", 1)),
+        "reputation": player.get("reputation", 0),
+        "title": player.get("title", ""),
+        "gender": player.get("gender", ""),
+        "background": player.get("background", ""),
     }
 
 
@@ -9963,9 +10006,19 @@ def api_game_state_extended():
         d["completed"] = d.get("id", "") in completed_dungeons_set
     active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}
 
-    # attr summary
+    # attr summary — build as array for Vue beta
     ensure_attributes(player)
-    attr_summary = get_attribute_summary(player)
+    _raw_attr = get_attribute_summary(player)
+    from utilities.stats import ATTRIBUTE_NAMES, ATTRIBUTE_DESCRIPTIONS
+    attr_summary = [
+        {
+            "key":    attr,
+            "label":  ATTRIBUTE_NAMES[attr],
+            "value":  _raw_attr["attributes"][attr]["value"],
+            "effect": ATTRIBUTE_DESCRIPTIONS[attr],
+        }
+        for attr in ATTRIBUTE_NAMES
+    ]
 
     # mine data
     mine_data = None
@@ -10501,7 +10554,7 @@ def api_action_dungeon_enter():
     add_message(f"You enter {dungeon.get('name', 'the dungeon')}! Steel yourself.", "var(--gold)")
     save_player(player)
     msgs = (session.get("messages") or [])[-10:]
-    return jsonify({"ok": True, "redirect": "/dungeon/room", "messages": msgs})
+    return jsonify({"ok": True, "redirect": "/beta/dungeon/room", "messages": msgs})
 
 
 @app.route("/api/action/dungeon/abandon", methods=["POST"])
