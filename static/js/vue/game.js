@@ -674,6 +674,7 @@ createApp({
 
         switchTab(tab) {
             if (tab === 'dungeons') { window.location.href = '/beta/dungeons'; return; }
+            if (tab === 'party' || tab === 'group') { window.location.href = '/beta/party'; return; }
             this.activeTab = tab;
             if (tab === 'market'  && !this.marketItems.length && !this.marketLoading) this.loadMarket();
             if (tab === 'friends' && !this.friendsList.length)                        this.loadFriends();

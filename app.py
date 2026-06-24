@@ -8370,6 +8370,14 @@ def vue_beta_dungeons():
         return redirect(url_for("index"))
     return render_template("vue/dungeons.html", is_admin=True)
 
+
+@app.route("/beta/party")
+def vue_beta_party():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return redirect(url_for("index"))
+    return render_template("vue/party.html", is_admin=True)
+
 from asgiref.sync import sync_to_async as _sync_to_async
 from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi, WsgiToAsgiInstance as _WsgiToAsgiInstance
 

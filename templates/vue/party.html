@@ -1,0 +1,407 @@
+{% extends "vue/base.html" %}
+{% block title %}Party & Group — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<style>
+[v-cloak]{display:none!important;}
+.party-wrap{max-width:820px;margin:0 auto;padding:14px 12px 40px;}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);font-size:12px;text-decoration:none;margin-bottom:14px;padding:5px 11px;border:1px solid rgba(255,255,255,0.1);border-radius:4px;transition:all 0.15s;}
+.back-link:hover{color:var(--text-light);border-color:rgba(255,255,255,0.25);}
+.party-tabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:0;}
+.party-tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;padding:8px 16px;font-size:13px;font-family:'Tiny5',monospace;color:var(--text-dim);cursor:pointer;letter-spacing:0.04em;transition:all 0.15s;margin-bottom:-1px;}
+.party-tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+.party-tab-btn:hover:not(.active){color:var(--text-light);}
+/* companions */
+.comp-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:12px 14px;margin-bottom:8px;}
+.comp-name{font-size:14px;font-weight:600;color:var(--text-light);}
+.comp-meta{font-size:12px;color:var(--text-dim);margin-top:2px;}
+/* group subtabs */
+.group-subtab-nav{display:flex;gap:3px;margin-bottom:12px;}
+.group-subtab-nav .btn{font-size:12px;padding:4px 10px;}
+/* chat */
+.gchat-log{height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding:4px 0;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.1) transparent;}
+.gchat-log::-webkit-scrollbar{width:3px;}.gchat-log::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:2px;}
+.gchat-msg{font-size:12px;line-height:1.6;padding:2px 0;}
+.gchat-name{color:var(--gold);font-weight:600;}
+.gchat-text{color:var(--text-light);margin-left:5px;}
+.gchat-ts{font-size:10px;color:var(--text-dim);margin-left:6px;}
+.ws-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;background:var(--text-dim);}
+.ws-dot.connected{background:var(--green-bright);}
+/* toasts */
+.party-toast-wrap{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;}
+.party-toast{background:rgba(14,9,5,0.94);border:1px solid rgba(200,165,60,0.4);border-radius:5px;padding:9px 18px;font-size:13px;font-family:'Pixelify Sans',monospace;max-width:340px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.6);}
+/* level-up banner */
+.levelup-banner{position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:9998;background:linear-gradient(135deg,#3d1a00,#7a4200);border:2px solid var(--gold);border-radius:8px;padding:14px 28px;text-align:center;box-shadow:0 4px 22px rgba(0,0,0,0.75);pointer-events:none;min-width:260px;}
+.member-row{font-size:13px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:6px;}
+</style>
+{% endblock %}
+{% block content %}
+<div id="vue-party-app" v-cloak>
+
+    <!-- Toasts -->
+    <div class="party-toast-wrap">
+        <div v-for="t in toasts" :key="t.id" class="party-toast" :style="{ color: t.color || 'var(--text-light)' }">[[ t.text ]]</div>
+    </div>
+
+    <!-- Group level-up banner -->
+    <transition name="fade">
+        <div v-if="levelUpBanner" class="levelup-banner">
+            <div style="font-size:17px;font-weight:bold;color:var(--gold);letter-spacing:0.04em;">GROUP LEVEL UP!</div>
+            <div style="font-size:13px;color:var(--text-light);margin-top:4px;">[[ levelUpBanner ]]</div>
+        </div>
+    </transition>
+
+    <div class="party-wrap">
+        <a href="/beta" class="back-link">&#8592; Back to Game</a>
+
+        <!-- Top-level tab switcher -->
+        <div class="party-tabs">
+            <button class="party-tab-btn" :class="{ active: mainTab === 'companions' }" @click="mainTab = 'companions'">&#9876; Companions</button>
+            <button class="party-tab-btn" :class="{ active: mainTab === 'group' }" @click="mainTab = 'group'; ensureGroupLoaded()">&#9750; Group</button>
+        </div>
+
+        <!-- ══════════ COMPANIONS ══════════ -->
+        <div v-if="mainTab === 'companions'">
+
+            <!-- Active party -->
+            <div v-if="activeCompanions && activeCompanions.length" style="margin-bottom:18px;">
+                <div class="panel-title" style="margin-bottom:10px;">Your Party ([[ activeCompanions.length ]]/4)</div>
+                <div v-for="comp in activeCompanions" :key="comp.id" class="comp-card">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                        <div style="flex:1;">
+                            <div class="comp-name">[[ comp.name ]]<span v-if="comp.fallen" style="color:var(--red);font-size:12px;"> [fallen]</span></div>
+                            <div class="comp-meta">[[ comp.class ]] &bull; [[ comp.rank ]]</div>
+                            <div class="bar-group" style="margin-top:6px;">
+                                <div class="bar-label">HP <span class="bar-nums">[[ comp.hp ]]/[[ comp.max_hp ]]</span></div>
+                                <div class="bar-track"><div class="bar-fill bar-hp" :style="{ width: comp.hp_pct + '%' }"></div></div>
+                            </div>
+                        </div>
+                        <button class="btn btn-xsmall btn-secondary" style="margin-left:10px;" @click="dismissCompanion(comp.id)" :disabled="actionPending">Dismiss</button>
+                    </div>
+                </div>
+            </div>
+            <div v-else class="empty-state" style="margin-bottom:14px;">Your party is empty.</div>
+
+            <!-- Available at tavern -->
+            <div v-if="companionsAvailable && companionsAvailable.length">
+                <div class="panel-title" style="margin-bottom:10px;">Available at Tavern</div>
+                <div v-for="comp in companionsAvailable" :key="comp.id" class="comp-card">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                        <div style="flex:1;">
+                            <div class="comp-name">[[ comp.name ]]</div>
+                            <div class="comp-meta">[[ comp.class ]] &bull; [[ comp.rank ]] &bull; [[ comp.price ]]g</div>
+                        </div>
+                        <button class="btn btn-small btn-secondary" @click="hireCompanion(comp.id)"
+                                :disabled="actionPending || comp.already_hired || !comp.can_afford">
+                            [[ comp.already_hired ? 'Hired' : 'Hire' ]]
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div v-else-if="!loading" style="font-size:13px;color:var(--text-dim);">No companions available at the tavern right now.</div>
+
+        </div><!-- /companions -->
+
+        <!-- ══════════ GROUP ══════════ -->
+        <div v-if="mainTab === 'group'">
+
+            <div v-if="groupData">
+
+                <!-- Sub-tab nav -->
+                <div class="group-subtab-nav">
+                    <button class="btn" :class="groupSubTab === 'info'    ? 'btn-primary' : 'btn-secondary'" @click="groupSubTab = 'info'">Info</button>
+                    <button class="btn" :class="groupSubTab === 'members' ? 'btn-primary' : 'btn-secondary'" @click="groupSubTab = 'members'">Members ([[ (groupData.members || []).length ]])</button>
+                    <button class="btn" :class="groupSubTab === 'chat'    ? 'btn-primary' : 'btn-secondary'" @click="groupSubTab = 'chat'; $nextTick(scrollChatBottom)">
+                        Chat
+                        <span v-if="unreadCount > 0" style="display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 3px;background:var(--red);color:#fff;font-size:10px;border-radius:9px;margin-left:5px;">[[ unreadCount ]]</span>
+                    </button>
+                </div>
+
+                <!-- Info sub-tab -->
+                <template v-if="groupSubTab === 'info'">
+                    <div class="panel" style="margin-bottom:12px;">
+                        <div class="panel-title">[[ groupData.name ]]</div>
+                        <div class="panel-body">
+                            <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">[[ groupData.description ]]</div>
+                            <div style="font-size:12px;color:var(--gold);">Level [[ groupData.level ]] Group &bull; Led by [[ groupData.leader ]]</div>
+                            <div v-if="groupData.xp !== undefined" style="margin-top:8px;">
+                                <div style="font-size:12px;color:var(--text-dim);margin-bottom:3px;">Group XP: [[ groupData.xp ]] / [[ groupData.xp_to_next || '?' ]]</div>
+                                <div class="bar-track"><div class="bar-fill bar-exp" :style="{ width: groupData.xp_to_next ? Math.min(100, Math.round(groupData.xp / groupData.xp_to_next * 100)) + '%' : '0%' }"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">Treasury</div>
+                        <div class="panel-body">
+                            <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:10px;">[[ groupData.gold_pool || 0 ]]g in pool</div>
+                            <button class="btn btn-primary btn-small" @click="collectGroupGold" :disabled="actionPending || !(groupData.gold_pool > 0)">Collect My Share</button>
+                            <div v-if="collectMsg" style="font-size:11px;margin-top:6px;" :style="{ color: collectOk ? 'var(--green-bright)' : 'var(--red)' }">[[ collectMsg ]]</div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Members sub-tab -->
+                <div v-if="groupSubTab === 'members'" class="panel">
+                    <div class="panel-title">Members</div>
+                    <div class="panel-body">
+                        <div v-for="m in groupData.members" :key="m.username" class="member-row">
+                            <span :style="{ color: m.username === groupData.leader ? 'var(--gold)' : 'var(--text-dim)', fontSize:'11px' }">
+                                [[ m.username === groupData.leader ? '[Leader]' : '[Member]' ]]
+                            </span>
+                            <span>[[ m.username ]]</span>
+                            <span v-if="m.online !== undefined" style="margin-left:auto;font-size:11px;" :style="{ color: m.online ? 'var(--green-bright)' : 'var(--text-dim)' }">[[ m.online ? 'online' : 'offline' ]]</span>
+                        </div>
+                        <div v-if="!groupData.members || !groupData.members.length" style="color:var(--text-dim);font-size:13px;">No members found.</div>
+                    </div>
+                </div>
+
+                <!-- Chat sub-tab -->
+                <div v-if="groupSubTab === 'chat'" class="panel">
+                    <div class="panel-title" style="display:flex;align-items:center;gap:8px;">
+                        Group Chat
+                        <span class="ws-dot" :class="{ connected: !!groupSocket }" :title="groupSocket ? 'Live' : 'Disconnected'"></span>
+                        <span style="font-size:11px;color:var(--text-dim);">[[ groupSocket ? 'Live' : 'Disconnected' ]]</span>
+                    </div>
+                    <div class="panel-body">
+                        <div id="gchat-log" class="gchat-log" ref="chatLog">
+                            <div v-if="!groupChatMessages.length" style="color:var(--text-dim);font-size:12px;font-style:italic;margin:auto;">No messages yet. Say hello!</div>
+                            <div v-for="(msg, i) in groupChatMessages" :key="i" class="gchat-msg">
+                                <span class="gchat-name">[[ msg.username ]]:</span>
+                                <span class="gchat-text">[[ msg.message ]]</span>
+                                <span v-if="msg.ts" class="gchat-ts">[[ fmtTime(msg.ts) ]]</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" v-model="groupChatInput" placeholder="Message your group…" maxlength="200"
+                                style="flex:1;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:7px 10px;font-size:13px;color:var(--text-light);outline:none;font-family:'Pixelify Sans',monospace;"
+                                @keydown.enter.prevent="sendGroupChat"
+                                :disabled="groupChatSending || !groupSocket">
+                            <button class="btn btn-small btn-secondary" @click="sendGroupChat"
+                                :disabled="groupChatSending || !groupChatInput.trim() || !groupSocket">Send</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /groupData -->
+
+            <!-- Not in a group -->
+            <div v-else-if="!loading">
+                <div class="empty-state" style="margin-bottom:14px;">You are not in a group.</div>
+                <div class="panel">
+                    <div class="panel-title">Join or Create</div>
+                    <div class="panel-body">
+                        <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Groups let you adventure together, share XP, and level up as a team.</p>
+                        <a href="/groups" class="btn btn-secondary btn-small" style="display:block;text-align:center;">Open Group Manager &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else style="text-align:center;padding:40px;color:var(--text-dim);">Loading…</div>
+
+        </div><!-- /group -->
+
+    </div>
+</div>
+
+<script>
+const PartyApp = Vue.createApp({
+    delimiters: ['[[', ']]'],
+    data() {
+        return {
+            mainTab:             'companions',
+            groupSubTab:         'info',
+            activeCompanions:    [],
+            companionsAvailable: [],
+            groupData:           null,
+            groupChatMessages:   [],
+            groupChatInput:      '',
+            groupChatSending:    false,
+            groupSocket:         null,
+            actionPending:       false,
+            loading:             true,
+            toasts:              [],
+            _toastId:            0,
+            pollTimer:           null,
+            collectMsg:          '',
+            collectOk:           false,
+            levelUpBanner:       null,
+            _levelUpTimer:       null,
+            unreadCount:         0,
+        };
+    },
+    watch: {
+        groupSubTab(val) {
+            if (val === 'chat') { this.unreadCount = 0; this.$nextTick(this.scrollChatBottom); }
+        },
+    },
+    methods: {
+        showToast(text, color) {
+            const id = ++this._toastId;
+            this.toasts.push({ id, text, color });
+            setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 3200);
+        },
+
+        async fetchState() {
+            if (document.hidden) return;
+            try {
+                const r = await fetch('/api/game/state/extended', {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                if (!r.ok) return;
+                const data = await r.json();
+                if (!data.ok) return;
+                this.activeCompanions    = data.active_companions    || [];
+                this.companionsAvailable = data.companions_available || [];
+                this.loading = false;
+            } catch { this.loading = false; }
+        },
+
+        async loadGroup() {
+            try {
+                const r = await fetch('/api/groups/my', {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                if (r.ok) {
+                    const data = await r.json();
+                    if (data.ok) this.groupData = data.group || null;
+                    else this.groupData = null;
+                }
+            } catch {}
+        },
+
+        ensureGroupLoaded() {
+            if (!this.groupData) this.loadGroup();
+            this.connectGroupSocket();
+        },
+
+        async doAction(url, body = {}) {
+            if (this.actionPending) return null;
+            this.actionPending = true;
+            try {
+                const r = await fetch(url, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify(body),
+                });
+                const data = await r.json();
+                if (data.message) this.showToast(data.message, data.ok ? null : 'var(--red)');
+                await this.fetchState();
+                return data;
+            } catch (e) {
+                this.showToast('Network error.', 'var(--red)');
+                return null;
+            } finally {
+                this.actionPending = false;
+            }
+        },
+
+        hireCompanion(id)    { return this.doAction('/api/action/hire_companion',    { companion_id: id }); },
+        dismissCompanion(id) { return this.doAction('/api/action/dismiss_companion', { companion_id: id }); },
+
+        async collectGroupGold() {
+            if (this.actionPending) return;
+            this.actionPending = true;
+            this.collectMsg = ''; this.collectOk = false;
+            try {
+                const r = await fetch('/api/groups/collect_gold', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({}),
+                });
+                const data = await r.json();
+                this.collectMsg = data.message || (data.ok ? 'Gold collected!' : 'Failed.');
+                this.collectOk = !!data.ok;
+                if (data.ok && this.groupData) {
+                    const share = data.gold || 0;
+                    this.groupData.gold_pool = Math.max(0, (this.groupData.gold_pool || 0) - share);
+                }
+            } catch {
+                this.collectMsg = 'Network error.'; this.collectOk = false;
+            } finally { this.actionPending = false; }
+        },
+
+        connectGroupSocket() {
+            if (this.groupSocket || typeof io === 'undefined') return;
+            const sio = io({ transports: ['websocket', 'polling'] });
+
+            sio.on('connect', () => { this.groupSocket = sio; });
+            sio.on('disconnect', () => { this.groupSocket = null; });
+
+            sio.on('group_chat_message', (data) => {
+                this.groupChatMessages.push(data);
+                if (this.groupChatMessages.length > 100) this.groupChatMessages.shift();
+                if (this.groupSubTab !== 'chat' || this.mainTab !== 'group') {
+                    this.unreadCount++;
+                } else {
+                    this.$nextTick(this.scrollChatBottom);
+                }
+            });
+
+            sio.on('group_chat_error', (data) => {
+                this.showToast((data && data.message) || 'Chat error.', 'var(--red)');
+            });
+
+            sio.on('group_level_up', (data) => {
+                const lvl = (data && data.new_level) ? data.new_level : '?';
+                this.showToast(`Group leveled up to Level ${lvl}!`, 'var(--gold)');
+                this.levelUpBanner = `Your group has reached Level ${lvl}!`;
+                if (this._levelUpTimer) clearTimeout(this._levelUpTimer);
+                this._levelUpTimer = setTimeout(() => { this.levelUpBanner = null; }, 5000);
+                this.loadGroup();
+            });
+
+            sio.on('friend_request', (data) => {
+                this.showToast(`Friend request from ${data.from}!`, 'var(--gold)');
+            });
+
+            sio.on('friend_accepted', (data) => {
+                this.showToast(`${data.from} accepted your friend request!`, 'var(--green-bright)');
+            });
+
+            // store immediately so the template shows connected state
+            this.groupSocket = sio;
+        },
+
+        sendGroupChat() {
+            const msg = (this.groupChatInput || '').trim();
+            if (!msg || !this.groupSocket || this.groupChatSending) return;
+            this.groupChatSending = true;
+            this.groupSocket.emit('group_chat_send', { message: msg });
+            this.groupChatInput = '';
+            this.groupChatSending = false;
+        },
+
+        scrollChatBottom() {
+            const el = document.getElementById('gchat-log');
+            if (el) el.scrollTop = el.scrollHeight;
+        },
+
+        fmtTime(ts) {
+            if (!ts) return '';
+            try { return new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return ''; }
+        },
+    },
+
+    mounted() {
+        this.fetchState();
+        this.connectGroupSocket();
+        this.pollTimer = setInterval(() => {
+            this.fetchState();
+            if (this.mainTab === 'group') this.loadGroup();
+        }, 5000);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) { this.fetchState(); if (this.mainTab === 'group') this.loadGroup(); }
+        });
+    },
+
+    beforeUnmount() {
+        if (this.pollTimer) clearInterval(this.pollTimer);
+        if (this.groupSocket) { this.groupSocket.disconnect(); this.groupSocket = null; }
+        if (this._levelUpTimer) clearTimeout(this._levelUpTimer);
+    },
+});
+PartyApp.mount('#vue-party-app');
+</script>
+{% endblock %}
