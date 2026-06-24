@@ -424,7 +424,7 @@ createApp({
         async enterDungeon(id) {
             const res = await this.doAction('/api/action/dungeon/enter', { dungeon_id: id });
             if (res && res.ok) {
-                window.location.href = res.redirect || '/dungeon/room';
+                window.location.href = '/beta/dungeon/room';
             }
         },
         async abandonDungeon() {
@@ -436,7 +436,9 @@ createApp({
         battleFlee()          { return this.doAction('/api/battle/flee'); },
         battleSpell(id)       { return this.doAction('/api/battle/spell',    { spell: id }); },
         battleUseItem(name)   { return this.doAction('/api/battle/use_item', { item: name }); },
-        spendAttrPoint(attr)  { return this.doAction('/api/spend_attr_point', { attr, count: 1 }); },
+        spendAttrPoint(attr)     { return this.doAction('/api/spend_attr_point', { attr, count: 1 }); },
+        spendAttrPointN(attr, n) { return this.doAction('/api/spend_attr_point', { attr, count: n }); },
+        spendAttrPointAll(attr)  { return this.doAction('/api/spend_attr_point', { attr, count: this.player ? this.player.attr_points : 1 }); },
 
         async loadMarket() {
             this.marketLoading = true;

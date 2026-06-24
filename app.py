@@ -8378,6 +8378,43 @@ def vue_beta_party():
         return redirect(url_for("index"))
     return render_template("vue/party.html", is_admin=True)
 
+
+@app.route("/beta/dungeon/room")
+def vue_beta_dungeon_room():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return redirect(url_for("index"))
+    player = get_player()
+    active: dict[str, Any] = session.get("active_dungeon") or {}
+    if not player or not active:
+        return redirect("/beta?tab=dungeons")
+    rooms = active.get("rooms", [])
+    idx = active.get("room_index", 0)
+    if idx >= len(rooms):
+        return redirect(url_for("dungeon_complete"))
+    room: dict[str, Any] = rooms[idx]
+    dungeon = active.get("dungeon", {})
+    current_challenge = active.get("current_challenge")
+    room_type = room.get("type", "empty")
+    if room_type in ("question", "multi_choice") and not current_challenge:
+        dungeons_data: dict[str, Any] = GAME_DATA.get("dungeons", {})
+        if room_type == "question":
+            current_challenge = room.get("challenge") or process_question_room(dungeons_data)
+        else:
+            current_challenge = room.get("challenge") or _pick_multi_choice(dungeons_data)
+        active["current_challenge"] = current_challenge
+        session["active_dungeon"] = active
+    return render_template(
+        "vue/dungeon_room.html",
+        player=player,
+        room=room,
+        room_num=idx + 1,
+        total_rooms=len(rooms),
+        dungeon=dungeon,
+        current_challenge=current_challenge,
+        messages=list(reversed(get_messages()))[:10],
+    )
+
 from asgiref.sync import sync_to_async as _sync_to_async
 from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi, WsgiToAsgiInstance as _WsgiToAsgiInstance
 
