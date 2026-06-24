@@ -20,7 +20,6 @@
     </div>
 
     <div class="combat-wrap">
-        <a href="/beta" class="back-link">&#8592; Back to Game</a>
 
         <div v-if="!inBattle" class="no-battle">
             <div class="no-battle-title">No Active Combat</div>
@@ -177,7 +176,10 @@
                 </div>
 
                 <!-- Action grid -->
-                <div class="battle-action-grid">
+                <div v-if="enemyDefeated" style="text-align:center;padding:14px 0;font-size:15px;font-weight:700;color:var(--gold);letter-spacing:0.06em;">
+                    Victory! Returning to game…
+                </div>
+                <div v-else class="battle-action-grid">
                     <button class="btn btn-battle btn-attack" @click="battleAttack" :disabled="actionPending" title="Keyboard: 1">Strike<span class="kb-hint">[1]</span></button>
                     <button class="btn btn-battle btn-defend" @click="battleDefend" :disabled="actionPending" title="Keyboard: 2">Defend<span class="kb-hint">[2]</span></button>
                     <div class="item-use-form">
@@ -277,11 +279,13 @@ const CombatApp = Vue.createApp({
             toasts:           [],
             _toastId:         0,
             pollTimer:        null,
+            _victoryQueued:   false,
         };
     },
     computed: {
         hpPct() { return this.player ? Math.min(100, Math.round(this.player.hp / (this.player.max_hp || 1) * 100)) : 0; },
         mpPct() { return this.player ? Math.min(100, Math.round(this.player.mp / (this.player.max_mp || 1) * 100)) : 0; },
+        enemyDefeated() { return !!(this.battle && (this.battle.enemy_hp || 0) <= 0); },
         battleSpells() { return (this.battle && this.battle.spells) ? this.battle.spells : []; },
         spellPageCount() { return Math.max(1, Math.ceil(this.battleSpells.length / 4)); },
         spellPagedSpells() {
@@ -295,6 +299,13 @@ const CombatApp = Vue.createApp({
             if (!val) {
                 this.showToast('Battle ended — returning to game…', 'var(--gold)');
                 setTimeout(() => { window.location.href = '/beta'; }, 1200);
+            }
+        },
+        'battle.enemy_hp'(val) {
+            if (val !== undefined && val <= 0 && !this._victoryQueued) {
+                this._victoryQueued = true;
+                this.showToast('Enemy defeated! Victory!', 'var(--gold)');
+                setTimeout(() => { window.location.href = '/beta'; }, 1500);
             }
         },
     },

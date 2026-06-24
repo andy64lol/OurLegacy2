@@ -423,7 +423,9 @@ createApp({
         claimEventReward(evKey) { return this.doAction('/api/action/claim_event', { event_key: evKey }); },
         async enterDungeon(id) {
             const res = await this.doAction('/api/action/dungeon/enter', { dungeon_id: id });
-            if (res && res.redirect) window.location.href = res.redirect;
+            if (res && res.ok) {
+                window.location.href = res.redirect || '/dungeon/room';
+            }
         },
         async abandonDungeon() {
             if (!window.confirm('Abandon this dungeon run? All progress will be lost.')) return;
@@ -673,7 +675,6 @@ createApp({
         },
 
         switchTab(tab) {
-            if (tab === 'dungeons') { window.location.href = '/beta/dungeons'; return; }
             if (tab === 'party' || tab === 'group') { window.location.href = '/beta/party'; return; }
             this.activeTab = tab;
             if (tab === 'market'  && !this.marketItems.length && !this.marketLoading) this.loadMarket();

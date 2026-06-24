@@ -2,13 +2,9 @@
   "starting_village": {
     "name": "Starting Village",
     "description": "A peaceful village where new adventurers begin their journey. The innkeeper serves warm meals and merchants offer basic equipment.",
-    "possible_enemies": [
-      "thief"
-    ],
+    "possible_enemies": ["thief"],
     "possible_bosses": [],
-    "shops": [
-      "general_store"
-    ],
+    "shops": ["general_store"],
     "missions_available": true,
     "connections": [
       "forest_path",
@@ -45,37 +41,14 @@
     "map_image": "starting_village.webp",
     "map_json": "maps/starting_village.json"
   },
-  "your_land": {
-    "name": "Your Land",
-    "description": "A personal plot of land where you can build and customize your home. The possibilities are endless.",
-    "possible_enemies": [],
-    "possible_bosses": [],
-    "shops": [
-      "pet_shop"
-    ],
-    "missions_available": false,
-    "connections": [
-      "starting_village"
-    ],
-    "rest_cost": 0,
-    "can_rest": true,
-    "map_image": "your_land.png"
-  },
   "forest_path": {
     "name": "Dark Forest",
     "description": "A dense forest filled with twisted trees and mysterious shadows. Strange sounds echo through the undergrowth.",
-    "possible_enemies": [
-      "goblin",
-      "goblin_archer",
-      "wolf"
-    ],
+    "possible_enemies": ["goblin", "goblin_archer", "wolf"],
     "possible_bosses": [],
     "shops": [],
     "missions_available": false,
-    "connections": [
-      "starting_village",
-      "deep_woods"
-    ],
+    "connections": ["starting_village", "deep_woods"],
     "difficulty": 1,
     "rest_cost": 7,
     "can_rest": true,
@@ -93,31 +66,16 @@
       }
     ],
     "map_image": "forest_path.webp",
-    "mine_pool": [
-      "Coal",
-      "Copper Ore",
-      "Iron Ore"
-    ]
+    "mine_pool": ["Coal", "Copper Ore", "Iron Ore"]
   },
   "deep_woods": {
     "name": "Deep Woods",
     "description": "The heart of the forest where ancient magic still lingers. Dangerous creatures prowl these shadows.",
-    "possible_enemies": [
-      "goblin",
-      "orc",
-      "dark_mage",
-      "wolf",
-      "bandit"
-    ],
-    "possible_bosses": [
-      "orc_chieftain"
-    ],
+    "possible_enemies": ["goblin", "orc", "dark_mage", "wolf", "bandit"],
+    "possible_bosses": ["orc_chieftain"],
     "shops": [],
     "missions_available": false,
-    "connections": [
-      "forest_path",
-      "crystal_caves"
-    ],
+    "connections": ["forest_path", "crystal_caves"],
     "difficulty": 2,
     "can_rest": false,
     "npcs": [
@@ -143,17 +101,10 @@
       "shadow_knight",
       "ancient_golem"
     ],
-    "possible_bosses": [
-      "shadow_lord"
-    ],
-    "shops": [
-      "equipment_shop"
-    ],
+    "possible_bosses": ["shadow_lord"],
+    "shops": ["equipment_shop"],
     "missions_available": false,
-    "connections": [
-      "starting_village",
-      "underground_tombs"
-    ],
+    "connections": ["starting_village", "underground_tombs"],
     "difficulty": 2,
     "rest_cost": 8,
     "can_rest": true,
@@ -170,55 +121,29 @@
       }
     ],
     "map_image": "ancient_ruins.webp",
-    "mine_pool": [
-      "Iron Ore",
-      "Silver Ore",
-      "Coal"
-    ]
+    "mine_pool": ["Iron Ore", "Silver Ore", "Coal"]
   },
   "underground_tombs": {
     "name": "Underground Tombs",
     "description": "Hidden beneath the ruins, ancient burial chambers guarded by undead warriors.",
-    "possible_enemies": [
-      "skeleton",
-      "troll",
-      "shadow_knight"
-    ],
-    "possible_bosses": [
-      "troll_king",
-      "necromancer_lord"
-    ],
+    "possible_enemies": ["skeleton", "troll", "shadow_knight"],
+    "possible_bosses": ["troll_king", "necromancer_lord"],
     "shops": [],
     "missions_available": false,
-    "connections": [
-      "ancient_ruins"
-    ],
+    "connections": ["ancient_ruins"],
     "difficulty": 3,
     "can_rest": false,
     "map_image": "underground_tombs.webp",
-    "mine_pool": [
-      "Iron Ore",
-      "Silver Ore",
-      "Darkstone"
-    ]
+    "mine_pool": ["Iron Ore", "Silver Ore", "Darkstone"]
   },
   "crystal_caves": {
     "name": "Crystal Caves",
     "description": "Glowing crystals illuminate these caverns, but dangerous elementals guard their secrets.",
-    "possible_enemies": [
-      "ice_elemental",
-      "orc",
-      "fire_wraith"
-    ],
-    "possible_bosses": [
-      "ice_queen",
-      "fire_dragon_boss"
-    ],
+    "possible_enemies": ["ice_elemental", "orc", "fire_wraith"],
+    "possible_bosses": ["ice_queen", "fire_dragon_boss"],
     "shops": [],
     "missions_available": false,
-    "connections": [
-      "deep_woods"
-    ],
+    "connections": ["deep_woods"],
     "difficulty": 3,
     "can_rest": false,
     "npcs": [
@@ -234,24 +159,16 @@
       }
     ],
     "map_image": "crystal_caves.webp",
-    "mine_pool": [
-      "Silver Ore",
-      "Gold Ore",
-      "Darkstone"
-    ]
+    "mine_pool": ["Silver Ore", "Gold Ore", "Darkstone"]
   },
   "tavern": {
     "name": "The Rusty Tankard",
     "description": "A warm tavern in the heart of the town. Adventurers meet here to swap stories and hire companions.",
     "possible_enemies": [],
     "possible_bosses": [],
-    "shops": [
-      "tavern_keeper"
-    ],
+    "shops": ["tavern_keeper"],
     "missions_available": false,
-    "connections": [
-      "starting_village"
-    ],
+    "connections": ["starting_village"],
     "rest_cost": 10,
     "can_rest": true,
     "npcs": [
@@ -280,19 +197,11 @@
   "forgotten_oasis": {
     "name": "Forgotten Oasis",
     "description": "A hidden sanctuary in the desert, with crystal clear water and lush palm trees. Travelers rest here — if they survive the journey.",
-    "possible_enemies": [
-      "sand_viper",
-      "bandit",
-      "thief"
-    ],
+    "possible_enemies": ["sand_viper", "bandit", "thief"],
     "possible_bosses": [],
-    "shops": [
-      "general_store"
-    ],
+    "shops": ["general_store"],
     "missions_available": true,
-    "connections": [
-      "starting_village"
-    ],
+    "connections": ["starting_village"],
     "difficulty": 3,
     "rest_cost": 5,
     "can_rest": true,
@@ -301,19 +210,11 @@
   "taiga_outskirts": {
     "name": "Taiga Outskirts",
     "description": "The frigid outer edge of the Vaelthari taiga. Frost-covered pines stretch endlessly into the grey horizon. Vaelthari wolves howl in the distance and the ground crunches underfoot with permafrost. The air smells of pine resin and ice.",
-    "possible_enemies": [
-      "vaelthari_wolf",
-      "taiga_lynx",
-      "taiga_bandit"
-    ],
+    "possible_enemies": ["vaelthari_wolf", "taiga_lynx", "taiga_bandit"],
     "possible_bosses": [],
-    "shops": [
-      "taiga_traders"
-    ],
+    "shops": ["taiga_traders"],
     "missions_available": false,
-    "connections": [
-      "starting_village"
-    ],
+    "connections": ["starting_village"],
     "difficulty": 3,
     "rest_cost": 10,
     "can_rest": true,
