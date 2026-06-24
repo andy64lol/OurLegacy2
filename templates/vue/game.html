@@ -116,6 +116,11 @@ window._betaInit = {
     .tab-bar-wrap::-webkit-scrollbar { height:4px; }
     .tab-bar-wrap::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.18);border-radius:2px; }
     .tab-bar-wrap .tab-nav { overflow:visible!important;min-width:max-content; }
+    /* Tab overflow fix — nav + "..." button sit side-by-side */
+    .tab-nav-wrap { display:flex !important; align-items:stretch; position:relative; }
+    .tab-nav-wrap > nav.tab-nav { flex:1; overflow-x:auto; min-width:0; white-space:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.15) transparent; }
+    .tab-nav-wrap > nav.tab-nav::-webkit-scrollbar { height:3px; }
+    .tab-nav-wrap > nav.tab-nav::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
     .friends-list-item { display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px; }
     .boss-card { display:flex;align-items:center;justify-content:space-between;background:rgba(80,10,10,0.18);border:1px solid rgba(200,60,60,0.25);border-radius:5px;padding:10px 14px;margin-bottom:8px; }
     .boss-name { font-size:14px;color:var(--red);font-weight:bold; }
@@ -346,10 +351,9 @@ window._betaInit = {
         <div class="main-content">
 
             <!-- ═══════════════════════════════════════════════════════════════
-                 BATTLE VIEW — shown when in_battle, replaces tab container
-                 Matches Jinja2 battle-outer layout: main column + spell sidebar
+                 BATTLE VIEW — redirects to /beta/combat (separate page)
                  ═══════════════════════════════════════════════════════════════ -->
-            <div v-if="inBattle && battle" class="battle-outer">
+            <div v-if="inBattle && battle" class="battle-outer" style="display:none!important;"><!-- battle moved to /beta/combat -->
                 <div class="battle-main">
 
                     <!-- Header -->
@@ -590,24 +594,26 @@ window._betaInit = {
                             @click="handleTabClick(tab.key)">
                             [[ tab.label ]]
                         </button>
-                        <!-- "..." overflow button -->
-                        <div v-if="overflowTabs.length" class="vtab-more-wrap">
-                            <div v-if="tabOverflowOpen" class="vtab-more-backdrop" @click="tabOverflowOpen = false"></div>
-                            <button class="tab-btn tab-more-btn"
-                                :class="{ active: overflowActiveLabel != null }"
-                                @click.stop="tabOverflowOpen = !tabOverflowOpen">
-                                [[ overflowActiveLabel ? overflowActiveLabel + ' \u25be' : '...' ]]
-                            </button>
-                            <div v-if="tabOverflowOpen" class="vtab-more-menu">
-                                <button v-for="tab in overflowTabs" :key="tab.key"
-                                    class="vtab-more-item"
-                                    :class="{ active: activeTab === tab.key }"
-                                    @click="handleTabClick(tab.key)">
-                                    [[ tab.label ]]
-                                </button>
-                            </div>
-                        </div>
                     </nav>
+                    <!-- "..." overflow button — placed OUTSIDE nav so fixed-positioned menu is never clipped -->
+                    <div v-if="overflowTabs.length" class="vtab-more-wrap" style="flex-shrink:0;position:relative;align-self:flex-end;display:inline-flex;z-index:213;">
+                        <div v-if="tabOverflowOpen" class="vtab-more-backdrop" @click="tabOverflowOpen = false" style="position:fixed;inset:0;z-index:209;background:transparent;"></div>
+                        <button class="tab-btn tab-more-btn"
+                            :class="{ active: overflowActiveLabel != null }"
+                            @click.stop="openMoreMenu($event)"
+                            style="display:block!important;letter-spacing:0.08em;min-width:42px;position:relative;z-index:214;">
+                            [[ overflowActiveLabel ? overflowActiveLabel + ' \u25be' : '...' ]]
+                        </button>
+                        <div v-if="tabOverflowOpen"
+                             :style="{ position:'fixed', top: moreMenuPos.top + 'px', right: moreMenuPos.right + 'px', left:'auto', zIndex:9999, minWidth:'155px', background:'var(--bg-panel-dark,#0e0905)', border:'1px solid var(--border)', borderRadius:'0 0 4px 4px', boxShadow:'0 6px 20px rgba(0,0,0,0.65)', maxHeight:'60vh', overflowY:'auto' }">
+                            <button v-for="tab in overflowTabs" :key="tab.key"
+                                style="display:block;width:100%;text-align:left;padding:8px 14px;font-size:13px;font-family:'Tiny5',monospace;color:var(--text-dim);background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;"
+                                :style="activeTab === tab.key ? { color:'var(--gold)', background:'rgba(200,165,60,0.08)' } : {}"
+                                @click="handleTabClick(tab.key); tabOverflowOpen = false">
+                                [[ tab.label ]]
+                            </button>
+                        </div>
+                    </div>
                     <div class="news-ticker">
                         <div class="news-ticker-label">
                             <span class="news-ticker-icon"><img src="/game_assets/glyphs/sparkles.webp" alt="" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle;"></span>

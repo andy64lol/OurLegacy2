@@ -164,6 +164,7 @@ createApp({
             announcements:  [],
             dmModalOpen:    false,
             battleItemSelect: '',
+            moreMenuPos: { top: 0, right: 0 },
         };
     },
 
@@ -249,6 +250,7 @@ createApp({
     watch: {
         inBattle(val) {
             if (!val) this.spellPage = 0;
+            if (val)  window.location.href = '/beta/combat';
         },
         activeTab(newTab) {
             if (newTab === 'map') {
@@ -671,11 +673,19 @@ createApp({
         },
 
         switchTab(tab) {
+            if (tab === 'dungeons') { window.location.href = '/beta/dungeons'; return; }
             this.activeTab = tab;
             if (tab === 'market'  && !this.marketItems.length && !this.marketLoading) this.loadMarket();
             if (tab === 'friends' && !this.friendsList.length)                        this.loadFriends();
             if (tab === 'group'   && !this.groupData)                                 this.loadGroup();
             if (tab === 'map') this.$nextTick(() => this.initWorldMapCanvas());
+        },
+
+        openMoreMenu(event) {
+            const btn = event.currentTarget;
+            const rect = btn.getBoundingClientRect();
+            this.moreMenuPos = { top: rect.bottom, right: window.innerWidth - rect.right };
+            this.tabOverflowOpen = !this.tabOverflowOpen;
         },
 
         recalcTabOverflow() {
@@ -1094,6 +1104,7 @@ createApp({
     },
 
     mounted() {
+        if (this.inBattle) { window.location.href = '/beta/combat'; return; }
         this.fetchState();
         this.resetPoll();
         this.loadAnnouncements();

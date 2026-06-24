@@ -1,0 +1,246 @@
+{% extends "vue/base.html" %}
+{% block title %}Dungeons — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<style>
+[v-cloak]{display:none!important;}
+.dg-page-wrap{max-width:820px;margin:0 auto;padding:14px 12px 40px;}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);font-size:12px;text-decoration:none;margin-bottom:14px;padding:5px 11px;border:1px solid rgba(255,255,255,0.1);border-radius:4px;transition:all 0.15s;}
+.back-link:hover{color:var(--text-light);border-color:rgba(255,255,255,0.25);}
+.dg-page-title{font-family:'Tiny5',monospace;font-size:18px;color:var(--gold);letter-spacing:0.06em;margin-bottom:14px;}
+.dg-toast-wrap{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;}
+.dg-toast{background:rgba(14,9,5,0.94);border:1px solid rgba(200,165,60,0.4);border-radius:5px;padding:9px 18px;font-size:13px;font-family:'Pixelify Sans',monospace;max-width:340px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.6);}
+.dg-list{display:flex;flex-direction:column;gap:8px;}
+.dg-entry{display:flex;align-items:center;gap:0;border-radius:6px;border:1px solid rgba(255,255,255,0.07);overflow:hidden;background:rgba(255,255,255,0.02);transition:border-color 0.15s;}
+.dg-open{border-color:rgba(200,165,60,0.35);background:rgba(200,165,60,0.04);}
+.dg-done{border-color:rgba(80,160,80,0.3);background:rgba(80,160,80,0.03);opacity:0.7;}
+.dg-locked{opacity:0.6;}
+.dg-fog{opacity:0.4;}
+.dg-accent{width:4px;align-self:stretch;flex-shrink:0;background:rgba(255,255,255,0.1);}
+.dg-open .dg-accent{background:var(--gold);}
+.dg-done .dg-accent{background:var(--green-bright);}
+.dg-info{flex:1;padding:10px 14px;min-width:0;}
+.dg-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+.dg-name{font-size:14px;font-weight:600;color:var(--text-light);}
+.dg-pill{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
+.dg-pill-open{background:rgba(200,165,60,0.18);color:var(--gold);border:1px solid rgba(200,165,60,0.4);}
+.dg-pill-done{background:rgba(80,160,80,0.18);color:var(--green-bright);border:1px solid rgba(80,160,80,0.4);}
+.dg-pill-locked{background:rgba(255,255,255,0.05);color:var(--text-dim);border:1px solid rgba(255,255,255,0.12);}
+.dg-pill-fog{background:rgba(255,255,255,0.04);color:var(--text-dim);border:1px solid rgba(255,255,255,0.08);}
+.dg-desc{font-size:12px;color:var(--text-dim);margin-bottom:5px;}
+.dg-tags{display:flex;flex-wrap:wrap;gap:5px;font-size:11px;color:var(--text-dim);}
+.dg-tag-diff{color:var(--red);font-weight:600;}
+.dg-tag-area{color:var(--gold);}
+.dg-tag-reward{color:var(--green-bright);}
+.dg-tag-items{color:var(--mana-bright);}
+.dg-action{padding:10px 14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pagination-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px;padding:6px 0;}
+.pagination-bar span{font-size:12px;color:var(--text-dim);}
+</style>
+{% endblock %}
+{% block content %}
+<div id="vue-dungeons-app" v-cloak>
+
+    <div class="dg-toast-wrap">
+        <div v-for="t in toasts" :key="t.id" class="dg-toast" :style="{ color: t.color || 'var(--text-light)' }">[[ t.text ]]</div>
+    </div>
+
+    <div class="dg-page-wrap">
+        <a href="/beta" class="back-link">&#8592; Back to Game</a>
+        <div class="dg-page-title">&#9760; Dungeons</div>
+
+        <!-- Active dungeon banner -->
+        <div v-if="activeDungeon && activeDungeon.dungeon" class="panel" style="margin-bottom:14px;border-color:rgba(200,165,60,0.5);">
+            <div class="panel-title" style="color:var(--gold);">&#9654; Active Dungeon</div>
+            <div class="panel-body">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                    <div>
+                        <div style="font-size:16px;color:var(--gold);font-weight:600;">[[ activeDungeon.dungeon.name ]]</div>
+                        <div style="font-size:13px;color:var(--text-dim);margin-top:3px;">Room [[ activeDungeon.room_index + 1 ]] of [[ activeDungeon.rooms && activeDungeon.rooms.length ]]</div>
+                        <div class="bar-track" style="width:160px;margin-top:7px;">
+                            <div class="bar-fill bar-exp" :style="{ width: Math.round(((activeDungeon.room_index + 1) / ((activeDungeon.rooms && activeDungeon.rooms.length) || 1)) * 100) + '%' }"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <a href="/dungeon/room" class="btn btn-primary btn-wood">Continue &rarr;</a>
+                        <button class="btn btn-danger btn-small" @click="abandonDungeon" :disabled="actionPending">Abandon</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dungeon list -->
+        <div class="panel">
+            <div class="panel-title">Available Dungeons</div>
+            <div class="panel-body">
+                <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px;">Explore the world to discover dungeons. You must be in the correct area to enter one.</p>
+
+                <div v-if="loading" style="text-align:center;padding:30px;color:var(--text-dim);">Loading…</div>
+                <div v-else-if="!dungeonList || !dungeonList.length" class="empty-state">No dungeons found.</div>
+
+                <div v-else class="dg-list">
+                    <div v-for="dungeon in pagedDungeons" :key="dungeon.id"
+                         :class="['dg-entry',
+                            dungeon.completed ? 'dg-done' :
+                            dungeon.available ? 'dg-open' :
+                            dungeon.discovered ? 'dg-locked' : 'dg-fog']">
+                        <div class="dg-accent"></div>
+
+                        <div v-if="!dungeon.discovered" class="dg-info">
+                            <div class="dg-header">
+                                <span class="dg-name" style="letter-spacing:4px;opacity:0.5;">???????????</span>
+                                <span class="dg-pill dg-pill-fog">Undiscovered</span>
+                            </div>
+                            <div class="dg-desc" style="font-style:italic;">
+                                Explore <strong>[[ dungeon.hint_area_name ]]</strong> to reveal this dungeon.
+                            </div>
+                        </div>
+
+                        <div v-else class="dg-info">
+                            <div class="dg-header">
+                                <span class="dg-name">[[ dungeon.name ]]</span>
+                                <span v-if="dungeon.completed" class="dg-pill dg-pill-done">Cleared</span>
+                                <span v-else-if="dungeon.available" class="dg-pill dg-pill-open">Available</span>
+                                <span v-else-if="!dungeon.in_area" class="dg-pill dg-pill-locked">Wrong Area</span>
+                                <span v-else class="dg-pill dg-pill-locked">Lv.[[ dungeon.min_level ]]+</span>
+                            </div>
+                            <div v-if="dungeon.description" class="dg-desc">[[ dungeon.description ]]</div>
+                            <div class="dg-tags">
+                                <span class="dg-tag-diff">Diff [[ Array.isArray(dungeon.difficulty) ? dungeon.difficulty[0] + '–' + dungeon.difficulty[1] : dungeon.difficulty ]]</span>
+                                <span v-if="dungeon.rooms">&bull; [[ dungeon.rooms ]] rooms</span>
+                                <template v-if="!dungeon.in_area">
+                                    <span>&bull;</span>
+                                    <span class="dg-tag-area">Go to [[ dungeon.hint_area_name ]]</span>
+                                </template>
+                                <template v-if="dungeon.completion_reward && dungeon.completion_reward.gold">
+                                    <span>&bull;</span>
+                                    <span class="dg-tag-reward">[[ dungeon.completion_reward.gold ]]g &middot; [[ dungeon.completion_reward.experience || 0 ]] EXP</span>
+                                </template>
+                                <template v-if="dungeon.completion_reward && dungeon.completion_reward.items && dungeon.completion_reward.items.length">
+                                    <span>&bull;</span>
+                                    <span class="dg-tag-items">[[ dungeon.completion_reward.items.join(', ') ]]</span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div v-if="dungeon.discovered" class="dg-action">
+                            <template v-if="dungeon.available && (!activeDungeon || !activeDungeon.dungeon)">
+                                <button :class="['btn', 'btn-small', dungeon.completed ? 'btn-secondary' : 'btn-primary']"
+                                        @click="enterDungeon(dungeon.id)" :disabled="actionPending">
+                                    [[ dungeon.completed ? 'Replay' : 'Enter' ]]
+                                </button>
+                            </template>
+                            <span v-else-if="dungeon.available && activeDungeon && activeDungeon.dungeon"
+                                  style="font-size:11px;color:var(--text-dim);text-align:center;line-height:1.4;">Finish active<br>dungeon first</span>
+                            <span v-else-if="dungeon.discovered && !dungeon.in_area"
+                                  style="font-size:11px;color:var(--text-dim);text-align:center;line-height:1.4;">Travel to<br>[[ dungeon.hint_area_name ]]</span>
+                            <span v-else
+                                  style="font-size:11px;color:var(--text-dim);text-align:center;">Lv.[[ dungeon.min_level ]]+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="dungeonPageCount > 1" class="pagination-bar">
+                    <button class="btn btn-xsmall btn-secondary" :disabled="dungeonPage <= 1" @click="dungeonPage = Math.max(1, dungeonPage - 1)">&larr;</button>
+                    <span>Page [[ dungeonPage ]] / [[ dungeonPageCount ]]</span>
+                    <button class="btn btn-xsmall btn-secondary" :disabled="dungeonPage >= dungeonPageCount" @click="dungeonPage = Math.min(dungeonPageCount, dungeonPage + 1)">&rarr;</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const DungeonsApp = Vue.createApp({
+    delimiters: ['[[', ']]'],
+    data() {
+        return {
+            dungeonList:   [],
+            activeDungeon: {},
+            inBattle:      false,
+            dungeonPage:   1,
+            loading:       true,
+            actionPending: false,
+            toasts:        [],
+            _toastId:      0,
+            pollTimer:     null,
+        };
+    },
+    computed: {
+        dungeonPageCount() { return Math.max(1, Math.ceil((this.dungeonList || []).length / 8)); },
+        pagedDungeons() {
+            const p = Math.min(this.dungeonPage, this.dungeonPageCount) - 1;
+            return (this.dungeonList || []).slice(p * 8, p * 8 + 8);
+        },
+    },
+    watch: {
+        inBattle(val) {
+            if (val) window.location.href = '/beta/combat';
+        },
+    },
+    methods: {
+        showToast(text, color) {
+            const id = ++this._toastId;
+            this.toasts.push({ id, text, color });
+            setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 3200);
+        },
+        async fetchState() {
+            if (document.hidden) return;
+            try {
+                const r = await fetch('/api/game/state/extended', {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                if (!r.ok) return;
+                const data = await r.json();
+                if (!data.ok) return;
+                this.dungeonList   = data.dungeon_list   || [];
+                this.activeDungeon = data.active_dungeon || {};
+                this.inBattle      = !!data.in_battle;
+                this.loading = false;
+            } catch { this.loading = false; }
+        },
+        async doAction(url, body = {}) {
+            if (this.actionPending) return null;
+            this.actionPending = true;
+            try {
+                const r = await fetch(url, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify(body),
+                });
+                const data = await r.json();
+                if (data.message) this.showToast(data.message, data.ok ? null : 'var(--red)');
+                await this.fetchState();
+                return data;
+            } catch (e) {
+                this.showToast('Network error.', 'var(--red)');
+                return null;
+            } finally {
+                this.actionPending = false;
+            }
+        },
+        async enterDungeon(id) {
+            const res = await this.doAction('/api/action/dungeon/enter', { dungeon_id: id });
+            if (res && res.redirect) window.location.href = res.redirect;
+        },
+        async abandonDungeon() {
+            if (!window.confirm('Abandon this dungeon run? All progress will be lost.')) return;
+            return this.doAction('/api/action/dungeon/abandon');
+        },
+    },
+    mounted() {
+        this.fetchState();
+        this.pollTimer = setInterval(() => this.fetchState(), 4000);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) this.fetchState();
+        });
+    },
+    beforeUnmount() {
+        if (this.pollTimer) clearInterval(this.pollTimer);
+    },
+});
+DungeonsApp.mount('#vue-dungeons-app');
+</script>
+{% endblock %}

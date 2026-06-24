@@ -1,0 +1,413 @@
+{% extends "vue/base.html" %}
+{% block title %}Combat — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<style>
+[v-cloak]{display:none!important;}
+.combat-wrap{max-width:900px;margin:0 auto;padding:14px 12px 32px;}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);font-size:12px;text-decoration:none;margin-bottom:14px;padding:5px 11px;border:1px solid rgba(255,255,255,0.1);border-radius:4px;transition:all 0.15s;}
+.back-link:hover{color:var(--text-light);border-color:rgba(255,255,255,0.25);}
+.no-battle{text-align:center;padding:70px 20px;color:var(--text-dim);}
+.no-battle-title{font-size:20px;color:var(--gold);margin-bottom:10px;font-family:'Tiny5',monospace;}
+.combat-toast-wrap{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;}
+.combat-toast{background:rgba(14,9,5,0.94);border:1px solid rgba(200,165,60,0.4);border-radius:5px;padding:9px 18px;font-size:13px;font-family:'Pixelify Sans',monospace;max-width:340px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.6);}
+</style>
+{% endblock %}
+{% block content %}
+<div id="vue-combat-app" v-cloak>
+
+    <div class="combat-toast-wrap">
+        <div v-for="t in toasts" :key="t.id" class="combat-toast" :style="{ color: t.color || 'var(--text-light)' }">[[ t.text ]]</div>
+    </div>
+
+    <div class="combat-wrap">
+        <a href="/beta" class="back-link">&#8592; Back to Game</a>
+
+        <div v-if="!inBattle" class="no-battle">
+            <div class="no-battle-title">No Active Combat</div>
+            <div style="margin-bottom:20px;">You are not currently in battle.</div>
+            <a href="/beta" class="btn btn-primary">Return to Game</a>
+        </div>
+
+        <div v-else-if="battle" class="battle-outer">
+
+            <div class="battle-main">
+
+                <!-- Header -->
+                <div class="battle-header">
+                    <div v-if="battle.is_boss">
+                        <div style="font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:0.18em;margin-bottom:6px;font-weight:700;opacity:0.85;">
+                            <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="boss"> Boss Encounter
+                        </div>
+                        <div style="font-size:22px;font-weight:700;color:var(--gold);letter-spacing:0.04em;text-shadow:0 0 20px rgba(255,180,60,0.5);display:flex;align-items:center;justify-content:center;gap:10px;">
+                            <img :src="'/game_assets/glyphs/' + enemyGlyph(battle.enemy_key) + '.webp'" style="width:28px;height:28px;image-rendering:pixelated;" @error="$event.target.style.display='none'">
+                            [[ battle.enemy_name ]]
+                        </div>
+                    </div>
+                    <div v-else>
+                        <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Combat</div>
+                        <div style="font-size:20px;font-weight:600;color:var(--red);display:flex;align-items:center;gap:8px;">
+                            <img :src="'/game_assets/glyphs/' + enemyGlyph(battle.enemy_key) + '.webp'" style="width:22px;height:22px;image-rendering:pixelated;" @error="$event.target.style.display='none'">
+                            [[ battle.enemy_name ]]
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boss dialogue -->
+                <div v-if="battle.is_boss && battle.boss_dialogue" class="boss-dialogue-banner">
+                    <div class="boss-dialogue-icon">
+                        <img :src="'/game_assets/glyphs/' + enemyGlyph(battle.enemy_key) + '.webp'" style="width:28px;height:28px;image-rendering:pixelated;" @error="$event.target.style.display='none'">
+                    </div>
+                    <div class="boss-dialogue-body">
+                        <div class="boss-dialogue-label">[[ battle.enemy_name ]] declares</div>
+                        <div class="boss-dialogue-text">&ldquo;[[ battle.boss_dialogue ]]&rdquo;</div>
+                    </div>
+                </div>
+
+                <!-- Boss phase -->
+                <div v-if="battle.is_boss && battle.boss_phase_info"
+                     style="background:linear-gradient(135deg,rgba(180,30,30,0.18),rgba(120,10,10,0.10));border:1px solid rgba(200,50,50,0.5);border-radius:8px;padding:10px 16px;margin:0 0 12px 0;">
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">Phase</span>
+                        <div style="display:flex;gap:4px;">
+                            <div v-for="n in battle.boss_phase_info.total" :key="n"
+                                 :style="{ width:'18px', height:'8px', borderRadius:'3px', background: n <= battle.boss_phase_info.index ? 'var(--red)' : 'rgba(255,255,255,0.12)', border: '1px solid ' + (n <= battle.boss_phase_info.index ? 'var(--red)' : 'rgba(255,255,255,0.2)') }"></div>
+                        </div>
+                        <span style="font-size:12px;font-weight:600;color:var(--gold);">[[ battle.boss_phase_info.index ]] / [[ battle.boss_phase_info.total ]]</span>
+                        <span v-if="battle.boss_phase_info.attack_multiplier > 1.0"
+                              style="font-size:11px;color:var(--red);background:rgba(200,50,50,0.15);border:1px solid rgba(200,50,50,0.3);border-radius:4px;padding:1px 6px;">
+                            ATK &times;[[ battle.boss_phase_info.attack_multiplier.toFixed(1) ]]
+                        </span>
+                    </div>
+                    <div v-if="battle.boss_phase_info.description" style="font-size:12px;color:var(--text-dim);margin-top:5px;font-style:italic;">[[ battle.boss_phase_info.description ]]</div>
+                </div>
+
+                <!-- Arena -->
+                <div class="battle-arena">
+                    <div class="panel" v-if="player">
+                        <div class="panel-title">
+                            <img class="class-glyph" :src="'/game_assets/glyphs/' + glyphFor(player.char_class) + '.webp'" :alt="player.char_class" style="width:18px;height:18px;image-rendering:pixelated;vertical-align:middle;margin-right:5px;">
+                            [[ player.name ]]
+                        </div>
+                        <div class="panel-body">
+                            <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">[[ player.char_class ]] &mdash; <img class="type-glyph" src="/game_assets/glyphs/level.gif" alt="level"> Lv.[[ player.level ]]</div>
+                            <div class="bar-group">
+                                <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP <span class="bar-nums">[[ player.hp ]] / [[ player.max_hp ]]</span></div>
+                                <div class="bar-track"><div class="bar-fill bar-hp" :style="{ width: hpPct + '%' }"></div></div>
+                            </div>
+                            <div class="bar-group">
+                                <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/mana.webp" alt="mp"> MP <span class="bar-nums">[[ player.mp ]] / [[ player.max_mp ]]</span></div>
+                                <div class="bar-track"><div class="bar-fill bar-mp" :style="{ width: mpPct + '%' }"></div></div>
+                            </div>
+                            <div class="stat-mini-grid">
+                                <div class="stat-mini"><span>ATK</span><strong>[[ player.attack ]]</strong></div>
+                                <div class="stat-mini"><span>DEF</span><strong>[[ player.defense ]]</strong></div>
+                                <div class="stat-mini"><span>SPD</span><strong>[[ player.speed ]]</strong></div>
+                            </div>
+                            <div v-if="battle.player_effects && Object.keys(battle.player_effects).length" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                                <div v-for="(v,k) in battle.player_effects" :key="k"
+                                     style="background:rgba(100,200,100,0.15);border:1px solid var(--green-bright);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--green-bright);">
+                                    [[ k.replace(/_/g,' ') ]] ([[ typeof v === 'object' ? v.turns : v ]]t)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="battle-vs">VS</div>
+
+                    <div class="panel" :class="{ 'boss-panel': battle.is_boss }">
+                        <div class="panel-title" style="display:flex;align-items:center;gap:7px;">
+                            <img :src="'/game_assets/glyphs/' + enemyGlyph(battle.enemy_key) + '.webp'" class="type-glyph" @error="$event.target.style.display='none'">
+                            [[ battle.enemy_name ]]
+                            <img v-if="battle.is_boss" class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="boss" style="opacity:0.8;">
+                        </div>
+                        <div class="panel-body">
+                            <template v-if="battle.is_boss">
+                                <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> Boss Vitality</div>
+                                <div :class="{ 'boss-hp-low': Math.round(battle.enemy_hp / (battle.enemy_max_hp || 1) * 100) <= 25 }">
+                                    <div class="boss-hp-track"><div class="boss-hp-fill" :style="{ width: Math.min(100, Math.round(battle.enemy_hp / (battle.enemy_max_hp || 1) * 100)) + '%' }"></div></div>
+                                    <div class="boss-hp-numbers"><span>HP</span><strong>[[ battle.enemy_hp ]] / [[ battle.enemy_max_hp ]]</strong></div>
+                                </div>
+                            </template>
+                            <div v-else class="bar-group">
+                                <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP <span class="bar-nums">[[ battle.enemy_hp ]] / [[ battle.enemy_max_hp ]]</span></div>
+                                <div class="bar-track"><div class="bar-fill bar-hp" :style="{ width: Math.min(100, Math.round(battle.enemy_hp / (battle.enemy_max_hp || 1) * 100)) + '%' }"></div></div>
+                            </div>
+                            <div class="stat-mini-grid" style="margin-top:8px;">
+                                <div class="stat-mini"><span>ATK</span><strong>[[ battle.enemy_attack ]]</strong></div>
+                                <div class="stat-mini"><span>DEF</span><strong>[[ battle.enemy_defense ]]</strong></div>
+                            </div>
+                            <div v-if="battle.enemy_tags && battle.enemy_tags.length" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;">
+                                <span v-for="tag in battle.enemy_tags" :key="tag"
+                                      style="font-size:0.65rem;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,0.08);color:var(--text-dim);letter-spacing:0.04em;text-transform:uppercase;">[[ tag ]]</span>
+                            </div>
+                            <div v-if="battle.enemy_effects && Object.keys(battle.enemy_effects).length" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                                <div v-for="(v,k) in battle.enemy_effects" :key="k"
+                                     style="background:rgba(220,80,80,0.15);border:1px solid var(--red);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--red);">
+                                    [[ k.replace(/_/g,' ') ]] ([[ typeof v === 'object' ? v.turns : v ]]t)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Companions row -->
+                <div v-if="battle.companions && battle.companions.length" class="battle-companions-row">
+                    <div class="battle-companions-label">Party</div>
+                    <div v-for="comp in battle.companions" :key="comp.name"
+                         :class="['battle-comp-card', { 'battle-comp-fallen': comp.hp <= 0 }]">
+                        <div class="battle-comp-name">[[ comp.name ]]</div>
+                        <div class="battle-comp-bar-wrap">
+                            <div class="battle-comp-bar" :style="{
+                                width: comp.hp_pct + '%',
+                                background: comp.hp <= 0 ? 'var(--red)' : comp.hp_pct > 60 ? 'var(--green-bright)' : comp.hp_pct > 25 ? 'var(--gold)' : 'var(--red)'
+                            }"></div>
+                        </div>
+                        <div class="battle-comp-hp">[[ comp.hp <= 0 ? 'Fallen' : comp.hp + '/' + comp.max_hp ]]</div>
+                    </div>
+                </div>
+
+                <!-- Battle log -->
+                <div class="panel battle-log-panel">
+                    <div class="panel-title">Battle Chronicle</div>
+                    <div class="panel-body message-log battle-log" id="vue-battle-log">
+                        <div v-for="(entry, i) in (battle.log || [])" :key="i"
+                             :class="['log-entry', battleLogClass(entry)]"
+                             v-html="renderGlyph(entry)"></div>
+                    </div>
+                </div>
+
+                <!-- Action grid -->
+                <div class="battle-action-grid">
+                    <button class="btn btn-battle btn-attack" @click="battleAttack" :disabled="actionPending" title="Keyboard: 1">Strike<span class="kb-hint">[1]</span></button>
+                    <button class="btn btn-battle btn-defend" @click="battleDefend" :disabled="actionPending" title="Keyboard: 2">Defend<span class="kb-hint">[2]</span></button>
+                    <div class="item-use-form">
+                        <template v-if="battleConsumables && battleConsumables.length">
+                            <select v-model="battleItemSelect" class="item-select">
+                                <option v-for="item in battleConsumables" :key="item.name" :value="item.name">[[ item.name ]]</option>
+                            </select>
+                            <button class="btn btn-battle btn-item" @click="battleUseItem(battleItemSelect)" :disabled="actionPending || !battleItemSelect" title="Keyboard: 3">Use Item<span class="kb-hint">[3]</span></button>
+                        </template>
+                        <button v-else class="btn btn-battle btn-item btn-disabled" disabled>No Items</button>
+                    </div>
+                    <button class="btn btn-battle btn-flee" @click="battleFlee" :disabled="actionPending" title="Keyboard: 4">
+                        <span v-if="battle.is_boss">Retreat</span><span v-else>Flee</span><span class="kb-hint">[4]</span>
+                    </button>
+                </div>
+
+                <!-- Boss abilities -->
+                <div v-if="battle.is_boss && battle.boss_abilities && battle.boss_abilities.length" class="panel" style="margin-top:16px;">
+                    <div class="panel-title" style="color:var(--red);">Boss Abilities</div>
+                    <div class="panel-body">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;">
+                            <div v-for="ab in battle.boss_abilities" :key="ab.name"
+                                 :style="{ background: ab.cooldown_left === 0 ? 'rgba(200,50,50,0.15)' : 'rgba(80,80,80,0.10)', border: '1px solid ' + (ab.cooldown_left === 0 ? 'rgba(200,50,50,0.5)' : 'rgba(120,120,120,0.3)'), borderRadius:'6px', padding:'8px 10px' }">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                                    <span :style="{ fontSize:'12px', fontWeight:'600', color: ab.cooldown_left === 0 ? 'var(--red)' : 'var(--text-dim)' }">[[ ab.name ]]</span>
+                                    <span v-if="ab.cooldown_left > 0" style="font-size:10px;color:var(--text-dim);background:rgba(0,0,0,0.2);border-radius:3px;padding:1px 5px;">[[ ab.cooldown_left ]]t</span>
+                                    <span v-else style="font-size:10px;color:var(--red);font-weight:600;">READY</span>
+                                </div>
+                                <div v-if="ab.description" style="font-size:11px;color:var(--text-dim);">[[ ab.description.slice(0,60) ]]</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /.battle-main -->
+
+            <!-- Spell sidebar -->
+            <div class="battle-spell-sidebar">
+                <div class="panel battle-spellbook-panel">
+                    <div class="panel-title" style="color:var(--mana-bright);">
+                        <img class="type-glyph" src="/game_assets/glyphs/mana.webp" alt="spells"> Spellbook
+                    </div>
+                    <div class="panel-body">
+                        <div v-if="battleSpells && battleSpells.length">
+                            <div class="battle-spell-grid">
+                                <button v-for="sp in spellPagedSpells" :key="sp.id"
+                                    :class="['btn', 'btn-spell', 'battle-spell-btn', player && player.mp < sp.mp_cost ? 'btn-spell-disabled' : '']"
+                                    :disabled="actionPending || (player && player.mp < sp.mp_cost)"
+                                    @click="battleSpell(sp.id)"
+                                    :title="sp.name + ' — ' + sp.mp_cost + ' MP'">
+                                    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:4px;flex-wrap:nowrap;">
+                                        <span class="battle-spell-btn">[[ sp.name ]]</span>
+                                        <span style="font-size:10px;color:var(--mana-bright);white-space:nowrap;flex-shrink:0;">[[ sp.mp_cost ]]mp</span>
+                                    </div>
+                                    <div class="spell-tags">
+                                        <span :class="'spell-tag spell-tag-' + (sp.type || 'damage').toLowerCase()">[[ sp.type || 'Damage' ]]</span>
+                                        <span v-if="sp.power" class="spell-tag" style="color:var(--red);border-color:var(--red-dark);">Pwr [[ sp.power ]]</span>
+                                    </div>
+                                </button>
+                            </div>
+                            <div v-if="spellPageCount > 1" class="spell-pagination">
+                                <button class="spell-page-btn" @click="spellPage = Math.max(0, spellPage - 1)" :disabled="spellPage === 0">&#8249;</button>
+                                <span style="font-size:12px;color:var(--text-dim);min-width:60px;text-align:center;">[[ spellPage + 1 ]] / [[ spellPageCount ]]</span>
+                                <button class="spell-page-btn" @click="spellPage = Math.min(spellPageCount - 1, spellPage + 1)" :disabled="spellPage >= spellPageCount - 1">&#8250;</button>
+                            </div>
+                        </div>
+                        <div v-else style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px 0;opacity:0.7;">Equip a magic weapon to unlock spells.</div>
+                    </div>
+                </div>
+            </div><!-- /.battle-spell-sidebar -->
+
+        </div><!-- /.battle-outer -->
+
+        <div v-else style="text-align:center;padding:50px 20px;color:var(--text-dim);">
+            <div style="margin-bottom:12px;">Loading battle data...</div>
+            <div class="loader" style="margin:0 auto;transform:scale(0.5);transform-origin:center top;height:80px;"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const _combatInit = {{ init_data | tojson }};
+
+const CombatApp = Vue.createApp({
+    delimiters: ['[[', ']]'],
+    data() {
+        const init = _combatInit;
+        return {
+            player:           init.player || null,
+            inBattle:         !!init.in_battle,
+            battle:           init.battle  || null,
+            inventoryItems:   [],
+            actionPending:    false,
+            spellPage:        0,
+            battleItemSelect: '',
+            toasts:           [],
+            _toastId:         0,
+            pollTimer:        null,
+        };
+    },
+    computed: {
+        hpPct() { return this.player ? Math.min(100, Math.round(this.player.hp / (this.player.max_hp || 1) * 100)) : 0; },
+        mpPct() { return this.player ? Math.min(100, Math.round(this.player.mp / (this.player.max_mp || 1) * 100)) : 0; },
+        battleSpells() { return (this.battle && this.battle.spells) ? this.battle.spells : []; },
+        spellPageCount() { return Math.max(1, Math.ceil(this.battleSpells.length / 4)); },
+        spellPagedSpells() {
+            const page = Math.min(this.spellPage, this.spellPageCount - 1);
+            return this.battleSpells.slice(page * 4, page * 4 + 4);
+        },
+        battleConsumables() { return (this.inventoryItems || []).filter(i => i.type === 'consumable').slice(0, 6); },
+    },
+    watch: {
+        inBattle(val) {
+            if (!val) {
+                this.showToast('Battle ended — returning to game…', 'var(--gold)');
+                setTimeout(() => { window.location.href = '/beta'; }, 1200);
+            }
+        },
+    },
+    methods: {
+        showToast(text, color) {
+            const id = ++this._toastId;
+            this.toasts.push({ id, text, color });
+            setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 3200);
+        },
+        async fetchState() {
+            if (document.hidden) return;
+            try {
+                const r = await fetch('/api/game/state/extended', {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                if (!r.ok) return;
+                const data = await r.json();
+                if (!data.ok) return;
+                if (data.player) {
+                    const p = data.player;
+                    if (!this.player) this.player = {};
+                    Object.assign(this.player, {
+                        name: p.name, level: p.level, rank: p.rank,
+                        hp: p.hp, max_hp: p.max_hp, mp: p.mp, max_mp: p.max_mp,
+                        experience: p.experience, experience_to_next: p.experience_to_next,
+                        attack: p.attack, defense: p.defense, speed: p.speed,
+                        gold: p.gold, char_class: p.char_class, race: p.race,
+                        pet: p.pet,
+                    });
+                }
+                this.inventoryItems = data.inventory_items || [];
+                this.inBattle = !!data.in_battle;
+                if (data.battle) this.battle = data.battle;
+                if (!data.in_battle) this.battle = null;
+            } catch { /* ignored */ }
+        },
+        async doAction(url, body = {}) {
+            if (this.actionPending) return null;
+            this.actionPending = true;
+            try {
+                const r = await fetch(url, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify(body),
+                });
+                const data = await r.json();
+                if (data.message) this.showToast(data.message, data.ok ? null : 'var(--red)');
+                await this.fetchState();
+                return data;
+            } catch (e) {
+                this.showToast('Network error.', 'var(--red)');
+                return null;
+            } finally {
+                this.actionPending = false;
+            }
+        },
+        battleAttack()       { return this.doAction('/api/battle/attack'); },
+        battleDefend()       { return this.doAction('/api/battle/defend'); },
+        battleFlee()         { return this.doAction('/api/battle/flee'); },
+        battleSpell(id)      { return this.doAction('/api/battle/spell', { spell: id }); },
+        battleUseItem(name)  { return this.doAction('/api/battle/use_item', { item: name }); },
+        enemyGlyph(key) {
+            if (!key) return 'fight';
+            const k = String(key).toLowerCase().replace(/\s+/g, '_');
+            return k || 'fight';
+        },
+        glyphFor(cls) {
+            const map = { warrior:'warrior', mage:'mage', rogue:'rogue', ranger:'ranger', cleric:'cleric', paladin:'paladin', necromancer:'necromancer', bard:'bard' };
+            return map[(cls || '').toLowerCase()] || 'warrior';
+        },
+        battleLogClass(entry) {
+            if (typeof entry !== 'string') return 'log-normal';
+            if (entry.includes('CRITICAL'))                     return 'log-crit';
+            if (entry.includes('enters a new phase'))           return 'log-phase';
+            if (/uses [A-Z]/.test(entry))                       return 'log-ability';
+            if (/(deal|deals|strike|hits|attacks)/.test(entry)) return 'log-damage';
+            if (/(defeated|falls|Victory|escaped)/.test(entry)) return 'log-victory';
+            if (/(healed|restored|regenerate)/.test(entry))     return 'log-heal';
+            return 'log-normal';
+        },
+        renderGlyph(entry) {
+            if (typeof entry !== 'string') return '';
+            return entry.replace(/\[(.*?)\]/g, (m, k) => `<img src="/game_assets/glyphs/${k}.webp" class="type-glyph" style="width:14px;height:14px;" onerror="this.style.display='none'">`);
+        },
+    },
+    mounted() {
+        this.fetchState();
+        this.pollTimer = setInterval(() => this.fetchState(), 2000);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) this.fetchState();
+        });
+        document.addEventListener('keydown', e => {
+            if (!this.inBattle || this.actionPending || ['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+            if (e.key === '1') this.battleAttack();
+            else if (e.key === '2') this.battleDefend();
+            else if (e.key === '3') { if (this.battleItemSelect) this.battleUseItem(this.battleItemSelect); }
+            else if (e.key === '4') this.battleFlee();
+        });
+        this.$nextTick(() => {
+            const log = document.getElementById('vue-battle-log');
+            if (log) log.scrollTop = log.scrollHeight;
+        });
+    },
+    beforeUnmount() {
+        if (this.pollTimer) clearInterval(this.pollTimer);
+    },
+    updated() {
+        const log = document.getElementById('vue-battle-log');
+        if (log) log.scrollTop = log.scrollHeight;
+    },
+});
+CombatApp.mount('#vue-combat-app');
+</script>
+{% endblock %}

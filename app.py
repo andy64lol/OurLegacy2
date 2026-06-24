@@ -5,6 +5,8 @@ Medieval fantasy RPG playable in the browser.
 
 import warnings
 import redis as _redis_module
+import jwt as _jwt_lib
+import datetime as _dt_module
 
 warnings.filterwarnings("ignore", message="urllib3")
 warnings.filterwarnings("ignore", message="chardet")
@@ -144,6 +146,47 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1) 
 app.secret_key = os.environ.get("SECRET_KEY") or os.environ.get(
     "SESSION_SECRET", "ol2-default-dev-key-change-in-prod"
 )
+
+# ── JWT helpers ────────────────────────────────────────────────────────────────
+_JWT_ALGORITHM = "HS256"
+_JWT_EXPIRY_HOURS = 24
+
+
+def _create_jwt(user_id: str, username: str) -> str:
+    payload = {
+        "sub": str(user_id),
+        "username": username,
+        "iat": _dt_module.datetime.utcnow(),
+        "exp": _dt_module.datetime.utcnow() + _dt_module.timedelta(hours=_JWT_EXPIRY_HOURS),
+    }
+    return _jwt_lib.encode(payload, app.secret_key, algorithm=_JWT_ALGORITHM)
+
+
+def _decode_jwt(token: str):
+    try:
+        return _jwt_lib.decode(token, app.secret_key, algorithms=[_JWT_ALGORITHM])
+    except Exception:
+        return None
+
+
+def _jwt_required(f):
+    """Decorator: accept either a valid session or a Bearer JWT token."""
+    import functools
+
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        # Session-based auth (existing approach)
+        if session.get("online_user_id"):
+            return f(*args, **kwargs)
+        # Bearer token auth
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            payload = _decode_jwt(auth_header[7:])
+            if payload:
+                return f(*args, **kwargs)
+        return jsonify({"ok": False, "message": "Authentication required."}), 401
+
+    return decorated
 
 _REDIS_URL = os.environ.get("REDIS_URL")
 _redis_client = None
@@ -8303,6 +8346,30 @@ def vue_beta():
         classes=list(GAME_DATA.get("classes", {}).keys()),
     )
 
+
+@app.route("/beta/combat")
+def vue_beta_combat():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return redirect(url_for("index"))
+    player = get_player()
+    in_battle = bool(session.get("battle_enemy"))
+    battle_data = session.get("battle_enemy")
+    init_data = {
+        "player": player,
+        "in_battle": in_battle,
+        "battle": battle_data if isinstance(battle_data, dict) else None,
+    }
+    return render_template("vue/combat.html", init_data=init_data, is_admin=True)
+
+
+@app.route("/beta/dungeons")
+def vue_beta_dungeons():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return redirect(url_for("index"))
+    return render_template("vue/dungeons.html", is_admin=True)
+
 from asgiref.sync import sync_to_async as _sync_to_async
 from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi, WsgiToAsgiInstance as _WsgiToAsgiInstance
 
@@ -8411,6 +8478,7 @@ def api_login():
     session["online_user_id"] = user_id
     session["session_token"] = session_token
     session.modified = True
+    jwt_token = _create_jwt(user_id, actual_username)
     return jsonify(
         {
             "ok": True,
@@ -8418,8 +8486,31 @@ def api_login():
             "user_id": user_id,
             "username": actual_username,
             "session_token": session_token,
+            "token": jwt_token,
+            "token_expires_in": _JWT_EXPIRY_HOURS * 3600,
         }
     )
+
+
+@app.route("/api/auth/token", methods=["POST"])
+@limiter.limit("10 per minute")
+def api_auth_token():
+    """Return a JWT for the currently authenticated session, or accept username+password."""
+    user_id = session.get("online_user_id")
+    username = session.get("online_username")
+    if not user_id or not username:
+        data = request.get_json(force=True, silent=True) or {}
+        u = data.get("username", "").strip()
+        p = data.get("password", "")
+        if not u or not p:
+            return jsonify({"ok": False, "message": "Provide username and password, or be logged in."}), 401
+        result = login_user(u, p)
+        if not result["ok"]:
+            return jsonify({"ok": False, "message": result["message"]}), 401
+        user_id = result["user_id"]
+        username = result.get("username") or u.lower()
+    token = _create_jwt(user_id, username)
+    return jsonify({"ok": True, "token": token, "expires_in": _JWT_EXPIRY_HOURS * 3600})
 
 
 @app.route("/api/online/profile", methods=["POST"])
