@@ -229,6 +229,7 @@ createApp({
             return [
                 { key: 'explore',    label: 'Explore',     show: true },
                 { key: 'equipment',  label: 'Equipment',   show: true },
+                { key: 'inventory',  label: 'Inventory',   show: true },
                 { key: 'map',        label: 'Map',         show: true },
                 { key: 'travel',     label: 'Travel',      show: true },
                 { key: 'shop',       label: 'Shop',        show: !!(this.shopItems && this.shopItems.length) },
@@ -252,7 +253,7 @@ createApp({
     watch: {
         inBattle(val) {
             if (!val) this.spellPage = 0;
-            if (val)  window.location.href = '/beta/combat';
+            if (val)  window.location.href = '/beta/dungeon/combat';
         },
         activeTab(newTab) {
             if (newTab === 'map') {

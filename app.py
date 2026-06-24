@@ -6311,7 +6311,7 @@ def battle_attack():
     session["battle_enemy_effects"] = enemy_effects
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return redirect("/beta/dungeon/combat" if session.get("dungeon_beta") else url_for("game"))
 
 
 @app.route("/battle/defend", methods=["POST"])
@@ -6384,7 +6384,7 @@ def battle_defend():
     session["battle_enemy_effects"] = enemy_effects
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return redirect("/beta/dungeon/combat" if session.get("dungeon_beta") else url_for("game"))
 
 
 @app.route("/battle/use_item", methods=["POST"])
@@ -6501,7 +6501,7 @@ def battle_use_item():
     session["battle_enemy_effects"] = enemy_effects
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return redirect("/beta/dungeon/combat" if session.get("dungeon_beta") else url_for("game"))
 
 
 @app.route("/battle/flee", methods=["POST"])
@@ -6513,6 +6513,7 @@ def battle_flee():
 
     log = session.get("battle_log", [])
 
+    _beta_flee = session.get("dungeon_beta", False)
     if random.random() < 0.55:
         log.append("You break away from combat and escape!")
         add_message(f"You fled from the {enemy['name']}.", "var(--wood-light)")
@@ -6523,7 +6524,7 @@ def battle_flee():
         session["battle_log"] = []
         save_player(player)
         _autosave()
-        return redirect(url_for("game"))
+        return redirect("/beta/dungeon/room" if _beta_flee else url_for("game"))
     else:
         e_dmg = max(1, enemy["attack"] - player["defense"] + dice.between(0, 5))
         player["hp"] = max(0, player["hp"] - e_dmg)
@@ -6538,7 +6539,7 @@ def battle_flee():
     session["battle_log"] = log
     save_player(player)
     _autosave()
-    return redirect(url_for("game"))
+    return redirect("/beta/dungeon/combat" if _beta_flee else url_for("game"))
 
 
 def _handle_victory(player, enemy, log):
@@ -6638,12 +6639,13 @@ def _handle_victory(player, enemy, log):
             push_world_event(f"{_pname} slew a {enemy['name']} in {_aname}.")
 
     active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}
+    _beta_v = session.get("dungeon_beta", False)
     if active_dungeon:
         rooms = active_dungeon.get("rooms", [])
         idx = active_dungeon.get("room_index", 0)
         if idx >= len(rooms):
-            return redirect(url_for("dungeon_complete"))
-        return redirect(url_for("dungeon_room"))
+            return redirect("/beta/dungeon/complete" if _beta_v else url_for("dungeon_complete"))
+        return redirect("/beta/dungeon/room" if _beta_v else url_for("dungeon_room"))
 
     return render_template(
         "victory.html",
@@ -6661,6 +6663,7 @@ def _handle_defeat(player, enemy, log):
     log.append("You fall in battle...")
 
     active_dungeon: dict[str, Any] = session.get("active_dungeon") or {}
+    _beta_d = session.get("dungeon_beta", False)
     if active_dungeon:
         player["hp"] = max(1, int(player["max_hp"] * 0.40))
         log.append(f"You are dragged out of the dungeon, battered. HP: {player['hp']}")
@@ -6679,7 +6682,7 @@ def _handle_defeat(player, enemy, log):
         active_dungeon["challenge_answered"] = False
         session["active_dungeon"] = active_dungeon
         save_player(player)
-        return redirect(url_for("dungeon_room"))
+        return redirect("/beta/dungeon/room" if _beta_d else url_for("dungeon_room"))
 
     player["hp"] = max(1, int(player["max_hp"] * 0.25))
     log.append(f"You awaken later, battered. HP: {player['hp']}")
@@ -6930,6 +6933,7 @@ def dungeon_proceed():
     areas_data: dict[str, Any] = GAME_DATA.get("areas", {})
     area_key = session.get("current_area", "starting_village")
 
+    _beta = session.get("dungeon_beta", False)
     if room_type == "battle":
         result = process_battle_room(
             player, room, enemies_data, areas_data, area_key, dungeon=dungeon
@@ -6947,6 +6951,8 @@ def dungeon_proceed():
             active["current_challenge"] = None
             session["active_dungeon"] = active
             save_player(player)
+            if _beta:
+                return redirect("/beta/dungeon/combat")
             return spa_action_response()
         else:
             for msg in result.get("messages", []):
@@ -6969,6 +6975,8 @@ def dungeon_proceed():
             active["current_challenge"] = None
             session["active_dungeon"] = active
             save_player(player)
+            if _beta:
+                return redirect("/beta/dungeon/combat")
             return spa_action_response()
         else:
             for msg in result.get("messages", []):
@@ -7039,15 +7047,17 @@ def dungeon_proceed():
         active["current_challenge"] = None
         session["active_dungeon"] = active
         save_player(player)
+        if _beta:
+            return redirect("/beta/dungeon/combat")
         return spa_action_response()
 
     elif room_type == "question":
         add_message("A riddle challenge awaits in the chamber!", "var(--gold)")
-        return redirect(url_for("dungeon_room"))
+        return redirect("/beta/dungeon/room" if _beta else url_for("dungeon_room"))
 
     elif room_type == "multi_choice":
         add_message("A fateful choice confronts you!", "var(--gold)")
-        return redirect(url_for("dungeon_room"))
+        return redirect("/beta/dungeon/room" if _beta else url_for("dungeon_room"))
 
     else:
         result = process_empty_room(room)
@@ -7060,8 +7070,8 @@ def dungeon_proceed():
     save_player(player)
 
     if active["room_index"] >= len(rooms):
-        return redirect(url_for("dungeon_complete"))
-    return redirect(url_for("dungeon_room"))
+        return redirect("/beta/dungeon/complete" if _beta else url_for("dungeon_complete"))
+    return redirect("/beta/dungeon/room" if _beta else url_for("dungeon_room"))
 
 
 @app.route("/dungeon/answer", methods=["POST"])
@@ -7078,14 +7088,15 @@ def dungeon_answer():
     for msg in result.get("messages", []):
         add_message(msg["text"], msg.get("color", "var(--text-light)"))
 
+    _beta_ans = session.get("dungeon_beta", False)
     active["room_index"] = active.get("room_index", 0) + 1
     active["current_challenge"] = None
     session["active_dungeon"] = active
     save_player(player)
 
     if active["room_index"] >= len(active["rooms"]):
-        return redirect(url_for("dungeon_complete"))
-    return redirect(url_for("dungeon_room"))
+        return redirect("/beta/dungeon/complete" if _beta_ans else url_for("dungeon_complete"))
+    return redirect("/beta/dungeon/room" if _beta_ans else url_for("dungeon_room"))
 
 
 @app.route("/dungeon/choose", methods=["POST"])
@@ -7102,14 +7113,15 @@ def dungeon_choose():
     for msg in result.get("messages", []):
         add_message(msg["text"], msg.get("color", "var(--text-light)"))
 
+    _beta_cho = session.get("dungeon_beta", False)
     active["room_index"] = active.get("room_index", 0) + 1
     active["current_challenge"] = None
     session["active_dungeon"] = active
     save_player(player)
 
     if active["room_index"] >= len(active["rooms"]):
-        return redirect(url_for("dungeon_complete"))
-    return redirect(url_for("dungeon_room"))
+        return redirect("/beta/dungeon/complete" if _beta_cho else url_for("dungeon_complete"))
+    return redirect("/beta/dungeon/room" if _beta_cho else url_for("dungeon_room"))
 
 
 @app.route("/dungeon/complete")
@@ -7139,15 +7151,16 @@ def dungeon_complete():
         update_weekly_challenge(player, "dungeon_complete", 1)
         save_player(player)
         _autosave()
-
-    return redirect(url_for("game") + "?tab=dungeons")
+    _beta_cmp = session.pop("dungeon_beta", False)
+    return redirect("/beta?tab=dungeons" if _beta_cmp else url_for("game") + "?tab=dungeons")
 
 
 @app.route("/dungeon/abandon", methods=["POST"])
 def dungeon_abandon():
+    _beta_ab = session.pop("dungeon_beta", False)
     session.pop("active_dungeon", None)
     add_message("You retreat from the dungeon.", "var(--text-dim)")
-    return redirect(url_for("game") + "?tab=dungeons")
+    return redirect("/beta?tab=dungeons" if _beta_ab else url_for("game") + "?tab=dungeons")
 
 
 @app.route("/market")
@@ -8430,6 +8443,7 @@ def vue_beta_dungeon_room():
             current_challenge = room.get("challenge") or _pick_multi_choice(dungeons_data)
         active["current_challenge"] = current_challenge
         session["active_dungeon"] = active
+    session["dungeon_beta"] = True
     return render_template(
         "vue/dungeon_room.html",
         player=player,
@@ -8440,6 +8454,72 @@ def vue_beta_dungeon_room():
         current_challenge=current_challenge,
         messages=list(reversed(get_messages()))[:10],
     )
+
+
+@app.route("/beta/dungeon/combat")
+def vue_beta_dungeon_combat():
+    caller = session.get("online_username", "")
+    if not _is_admin_user(caller):
+        return redirect(url_for("index"))
+    player = get_player()
+    enemy: dict[str, Any] = session.get("battle_enemy") or {}
+    if not player or not enemy:
+        active = session.get("active_dungeon") or {}
+        if active:
+            return redirect("/beta/dungeon/room")
+        return redirect("/beta")
+    battle_log = session.get("battle_log", [])
+    player_effects: dict[str, Any] = session.get("battle_player_effects") or {}
+    enemy_effects: dict[str, Any] = session.get("battle_enemy_effects") or {}
+    battle_companions = session.get("battle_companions", [])
+    items_data: dict[str, Any] = GAME_DATA.get("items", {})
+    consumables = [
+        name for name in player.get("inventory", [])
+        if isinstance(items_data.get(name), dict) and items_data[name].get("type") == "consumable"
+    ]
+    classes_data: dict[str, Any] = GAME_DATA.get("classes", {})
+    char_class = player.get("class", player.get("char_class", "warrior"))
+    class_def: dict[str, Any] = classes_data.get(char_class, {})
+    spells = class_def.get("spells", [])
+    boss_dialogue = None
+    boss_phase_info = None
+    if enemy.get("is_boss"):
+        from utilities.boss_phases import get_boss_phase_info
+        try:
+            boss_phase_info = get_boss_phase_info(enemy)
+        except Exception:
+            pass
+        try:
+            boss_key = enemy.get("key", "")
+            from utilities.boss_dialogue import get_boss_dialogue
+            boss_dialogue = get_boss_dialogue(boss_key, "taunt")
+        except Exception:
+            pass
+    _cglyph = {
+        "warrior": "warrior", "mage": "mage", "rogue": "rogue",
+        "cleric": "cleric", "ranger": "ranger", "paladin": "paladin",
+        "necromancer": "necromancer", "bard": "bard",
+    }
+    return render_template(
+        "vue/dungeon_combat.html",
+        player=player,
+        enemy=enemy,
+        battle_log=battle_log,
+        player_effects=player_effects,
+        enemy_effects=enemy_effects,
+        battle_companions=battle_companions,
+        consumables=consumables,
+        spells=spells,
+        boss_dialogue=boss_dialogue,
+        boss_phase_info=boss_phase_info,
+        cglyph=_cglyph,
+    )
+
+
+@app.route("/beta/dungeon/complete")
+def vue_beta_dungeon_complete():
+    return redirect(url_for("dungeon_complete"))
+
 
 from asgiref.sync import sync_to_async as _sync_to_async
 from asgiref.wsgi import WsgiToAsgi as _WsgiToAsgi, WsgiToAsgiInstance as _WsgiToAsgiInstance

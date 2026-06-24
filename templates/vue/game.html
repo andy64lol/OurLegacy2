@@ -746,8 +746,23 @@ window._betaInit = {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div v-else class="empty-state">No character data.</div>
+                </div>
+
+                <!-- ═══ INVENTORY ═══ -->
+                <div class="vtab-panel" :class="{ 'vtab-panel-active': activeTab === 'inventory' }">
+                    <div v-if="player">
+                        <div class="action-row" style="margin-bottom:14px;">
+                            <button class="btn btn-secondary" @click="autoEquip" :disabled="actionPending">Auto-Equip Best</button>
+                            <button class="btn btn-secondary" @click="quickHeal" :disabled="actionPending">Quick Heal</button>
+                            <button class="btn btn-secondary" @click="sortInventory" :disabled="actionPending">Sort Inventory</button>
+                        </div>
                         <div class="panel">
-                            <div class="panel-title">Inventory</div>
+                            <div class="panel-title">
+                                Inventory
+                                <span v-if="inventoryItems && inventoryItems.length" style="font-size:11px;color:var(--text-dim);margin-left:8px;font-weight:400;">[[ inventoryItems.length ]] item[[ inventoryItems.length !== 1 ? 's' : '' ]]</span>
+                            </div>
                             <div class="panel-body">
                                 <div v-if="inventoryItems && inventoryItems.length">
                                     <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">

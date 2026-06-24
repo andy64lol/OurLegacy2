@@ -1,0 +1,269 @@
+{% extends "vue/base.html" %}
+{% block title %}Battle — Our Legacy 2{% endblock %}
+{% block extra_head %}
+<style>
+.battle-outer { display:flex; flex-direction:column; min-height:100vh; padding:0; }
+.battle-main { max-width:780px; margin:0 auto; width:100%; padding:14px 12px 24px; display:flex; flex-direction:column; gap:12px; }
+.battle-header { text-align:center; padding:14px 16px 10px; }
+.battle-arena { display:grid; grid-template-columns:1fr auto 1fr; gap:12px; align-items:start; }
+.battle-vs { font-size:16px; font-weight:700; color:var(--text-dim); padding:0 6px; margin-top:24px; }
+.battle-log-panel {}
+.battle-action-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.btn-battle { font-size:14px; padding:11px 8px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; }
+.btn-attack  { background:linear-gradient(135deg,rgba(220,80,60,0.3),rgba(180,40,30,0.15)); border-color:rgba(220,80,60,0.5); color:#f08070; }
+.btn-attack:hover { background:linear-gradient(135deg,rgba(220,80,60,0.5),rgba(180,40,30,0.3)); }
+.btn-defend  { background:linear-gradient(135deg,rgba(60,120,220,0.3),rgba(30,80,180,0.15)); border-color:rgba(60,120,220,0.5); color:#80b0f0; }
+.btn-defend:hover { background:linear-gradient(135deg,rgba(60,120,220,0.5),rgba(30,80,180,0.3)); }
+.btn-flee    { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.12); color:var(--text-dim); }
+.btn-flee:hover { background:rgba(255,255,255,0.09); }
+.kb-hint { font-size:10px; margin-left:6px; opacity:0.45; }
+.boss-hp-track { height:14px; background:rgba(255,255,255,0.07); border-radius:4px; overflow:hidden; margin-bottom:3px; }
+.boss-hp-fill { height:100%; background:linear-gradient(90deg,var(--red),#ff6060); border-radius:4px; transition:width 0.4s; }
+.boss-hp-numbers { display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); }
+.boss-hp-low .boss-hp-fill { animation:pulse 0.8s infinite alternate; }
+.boss-dialogue-banner { display:flex; align-items:flex-start; gap:12px; background:rgba(180,30,30,0.12); border:1px solid rgba(200,50,50,0.35); border-radius:6px; padding:12px 14px; margin-bottom:2px; }
+.boss-dialogue-label { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dim); margin-bottom:3px; }
+.boss-dialogue-text { font-size:13px; font-style:italic; color:var(--red); }
+.log-entry { padding:2px 0; line-height:1.5; font-size:13px; }
+.log-crit     { color:#ffe060; font-weight:700; }
+.log-phase    { color:var(--red); font-weight:700; border-top:1px solid rgba(200,50,50,0.3); margin-top:4px; padding-top:4px; }
+.log-ability  { color:#c0a0e8; }
+.log-damage   { color:#f08080; }
+.log-victory  { color:var(--green-bright); font-weight:600; }
+.log-normal   { color:var(--text-light); }
+.message-log.battle-log { max-height:200px; overflow-y:auto; display:flex; flex-direction:column-reverse; gap:1px; }
+@media (max-width:600px) {
+  .battle-arena { grid-template-columns:1fr; }
+  .battle-vs { text-align:center; margin:0; }
+  .battle-action-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="battle-outer">
+<div class="battle-main">
+
+    {% if messages %}
+    <div class="panel">
+        <div class="panel-body">
+            {% for msg in messages %}
+            <div style="color:{{ msg.color or 'var(--text-light)' }};padding:2px 0;line-height:1.5;">{{ msg.text }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Battle Header -->
+    <div class="battle-header">
+        {% if enemy.is_boss %}
+        <div style="font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:0.18em;margin-bottom:6px;font-weight:700;opacity:0.85;">
+            <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="boss"> Boss Encounter
+        </div>
+        <div style="font-size:22px;font-weight:700;color:var(--gold);letter-spacing:0.04em;text-shadow:0 0 20px rgba(255,180,60,0.5);display:flex;align-items:center;justify-content:center;gap:10px;">
+            <img src="/game_assets/glyphs/{{ enemy.key }}.webp" alt="{{ enemy.name }}" style="width:28px;height:28px;image-rendering:pixelated;" onerror="this.src='/game_assets/glyphs/fight.webp'">
+            {{ enemy.name }}
+        </div>
+        {% else %}
+        <div style="font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Combat</div>
+        <div style="font-size:20px;font-weight:600;color:var(--red);display:flex;align-items:center;justify-content:center;gap:8px;">
+            <img src="/game_assets/glyphs/{{ enemy.key }}.webp" alt="{{ enemy.name }}" style="width:22px;height:22px;image-rendering:pixelated;" onerror="this.src='/game_assets/glyphs/fight.webp'">
+            {{ enemy.name }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Boss Dialogue -->
+    {% if boss_dialogue and enemy.is_boss %}
+    <div class="boss-dialogue-banner">
+        <div class="boss-dialogue-icon"><img src="/game_assets/glyphs/fight.webp" alt="boss" style="width:28px;height:28px;image-rendering:pixelated;"></div>
+        <div class="boss-dialogue-body">
+            <div class="boss-dialogue-label">{{ enemy.name }} declares</div>
+            <div class="boss-dialogue-text">"{{ boss_dialogue }}"</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Boss Phase Info -->
+    {% if boss_phase_info %}
+    <div style="background:linear-gradient(135deg,rgba(180,30,30,0.18),rgba(120,10,10,0.10));border:1px solid rgba(200,50,50,0.5);border-radius:8px;padding:10px 16px;margin:0;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);">Phase</span>
+            <div style="display:flex;gap:4px;">
+                {% for i in range(boss_phase_info.total) %}
+                <div style="width:18px;height:8px;border-radius:3px;background:{{ 'var(--red)' if i < boss_phase_info.index else 'rgba(255,255,255,0.12)' }};border:1px solid {{ 'var(--red)' if i < boss_phase_info.index else 'rgba(255,255,255,0.2)' }};"></div>
+                {% endfor %}
+            </div>
+            <span style="font-size:12px;font-weight:600;color:var(--gold);">{{ boss_phase_info.index }} / {{ boss_phase_info.total }}</span>
+            {% if boss_phase_info.attack_multiplier > 1.0 %}
+            <span style="font-size:11px;color:var(--red);background:rgba(200,50,50,0.15);border:1px solid rgba(200,50,50,0.3);border-radius:4px;padding:1px 6px;">ATK ×{{ '%.1f'|format(boss_phase_info.attack_multiplier) }}</span>
+            {% endif %}
+        </div>
+        {% if boss_phase_info.description %}
+        <div style="font-size:12px;color:var(--text-dim);margin-top:5px;font-style:italic;">{{ boss_phase_info.description }}</div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Battle Arena -->
+    <div class="battle-arena">
+        <!-- Player Panel -->
+        <div class="panel">
+            <div class="panel-title">
+                <img class="class-glyph" src="/game_assets/glyphs/{{ cglyph.get(player['class'], cglyph.get(player.get('char_class','warrior'),'warrior')) }}.webp" alt="{{ player.get('class','warrior') }}" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;">
+                {{ player.name }}
+            </div>
+            <div class="panel-body">
+                <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">
+                    {{ player.get('class', player.get('char_class','Warrior')) }} &mdash; <img class="type-glyph" src="/game_assets/glyphs/level.gif" alt="level"> Lv.{{ player.level }}
+                </div>
+                <div class="bar-group">
+                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP <span class="bar-nums">{{ player.hp }} / {{ player.max_hp }}</span></div>
+                    <div class="bar-track"><div class="bar-fill bar-hp" style="width:{{ [(player.hp / player.max_hp * 100)|int, 100]|min }}%"></div></div>
+                </div>
+                <div class="bar-group">
+                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/mana.webp" alt="mp"> MP <span class="bar-nums">{{ player.mp }} / {{ player.max_mp }}</span></div>
+                    <div class="bar-track"><div class="bar-fill bar-mp" style="width:{{ [(player.mp / player.max_mp * 100)|int, 100]|min }}%"></div></div>
+                </div>
+                <div class="stat-mini-grid">
+                    <div class="stat-mini"><span>ATK</span><strong>{{ player.attack }}</strong></div>
+                    <div class="stat-mini"><span>DEF</span><strong>{{ player.defense }}</strong></div>
+                    <div class="stat-mini"><span>SPD</span><strong>{{ player.speed }}</strong></div>
+                </div>
+                {% if player_effects %}
+                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                    {% for eff_key, eff_info in player_effects.items() %}
+                    <div style="background:rgba(100,200,100,0.15);border:1px solid var(--green-bright);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--green-bright);">
+                        {{ eff_key.replace('_',' ').title() }} ({{ eff_info.turns }}t)
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="battle-vs">VS</div>
+
+        <!-- Enemy Panel -->
+        <div class="panel{% if enemy.is_boss %} boss-panel{% endif %}">
+            <div class="panel-title panel-title-enemy" style="display:flex;align-items:center;gap:7px;">
+                <img src="/game_assets/glyphs/{{ enemy.key }}.webp" alt="{{ enemy.name }}" class="type-glyph" onerror="this.src='/game_assets/glyphs/fight.webp'">
+                {{ enemy.name }}{% if enemy.is_boss %} <img class="type-glyph" src="/game_assets/glyphs/fight.webp" alt="boss" style="opacity:0.8;">{% endif %}
+            </div>
+            <div class="panel-body">
+                {% set _ehp_pct = [(enemy.hp / enemy.max_hp * 100)|int, 100]|min %}
+                {% if enemy.is_boss %}
+                <div class="boss-header-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> Boss Vitality</div>
+                <div class="{% if _ehp_pct <= 25 %}boss-hp-low{% endif %}">
+                    <div class="boss-hp-track"><div class="boss-hp-fill" style="width:{{ _ehp_pct }}%"></div></div>
+                    <div class="boss-hp-numbers"><span>HP</span><strong>{{ enemy.hp }} / {{ enemy.max_hp }}</strong></div>
+                </div>
+                {% else %}
+                <div class="bar-group">
+                    <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/hp.webp" alt="hp"> HP <span class="bar-nums">{{ enemy.hp }} / {{ enemy.max_hp }}</span></div>
+                    <div class="bar-track"><div class="bar-fill bar-hp" style="width:{{ _ehp_pct }}%"></div></div>
+                </div>
+                {% endif %}
+                <div class="stat-mini-grid" style="{% if enemy.is_boss %}margin-top:10px;{% endif %}">
+                    <div class="stat-mini"><span>ATK</span><strong>{{ enemy.attack }}</strong></div>
+                    <div class="stat-mini"><span>DEF</span><strong>{{ enemy.defense }}</strong></div>
+                    <div class="stat-mini"><span>SPD</span><strong>{{ enemy.speed }}</strong></div>
+                </div>
+                {% if enemy.get('tags') %}
+                <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;">
+                    {% for tag in enemy.tags %}
+                    <span style="font-size:0.65rem;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,0.08);color:var(--text-dim);letter-spacing:0.04em;text-transform:uppercase;">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if enemy_effects %}
+                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;">
+                    {% for eff_key, eff_info in enemy_effects.items() %}
+                    <div style="background:rgba(220,80,80,0.15);border:1px solid var(--red);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--red);">
+                        {{ eff_key.replace('_',' ').title() }} ({{ eff_info.turns }}t)
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Companions Row -->
+    {% if battle_companions %}
+    <div class="battle-companions-row">
+        <div class="battle-companions-label">Party</div>
+        {% for comp in battle_companions %}
+        {% set _chp_pct = [(comp.hp / comp.max_hp * 100)|int, 100]|min if comp.max_hp > 0 else 0 %}
+        <div class="battle-comp-card{% if comp.hp <= 0 %} battle-comp-fallen{% endif %}">
+            <div class="battle-comp-name">{{ comp.name }}</div>
+            <div class="battle-comp-bar-wrap">
+                <div class="battle-comp-bar" style="width:{{ _chp_pct }}%;background:{% if comp.hp <= 0 %}var(--red){% elif _chp_pct > 60 %}var(--green-bright){% elif _chp_pct > 25 %}var(--gold){% else %}var(--red){% endif %};"></div>
+            </div>
+            <div class="battle-comp-hp">{% if comp.hp <= 0 %}Fallen{% else %}{{ comp.hp }}/{{ comp.max_hp }}{% endif %}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Battle Log -->
+    <div class="panel battle-log-panel">
+        <div class="panel-title">Battle Chronicle</div>
+        <div class="panel-body message-log battle-log" id="battle-log">
+            {% for line in battle_log %}
+            <div class="log-entry
+                {%- if 'CRITICAL' in line %} log-crit
+                {%- elif 'enters a new phase' in line %} log-phase
+                {%- elif 'uses ' in line %} log-ability
+                {%- elif 'strikes you' in line or 'cuts you' in line or 'damage' in line.lower() %} log-damage
+                {%- elif 'defeated' in line.lower() or 'falls' in line.lower() or 'Victory' in line %} log-victory
+                {%- else %} log-normal
+                {%- endif %}">{{ line }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Action Grid -->
+    <div class="battle-action-grid">
+        <form method="post" action="/battle/attack">
+            <button type="submit" class="btn btn-battle btn-attack" style="width:100%;" title="Keyboard: 1">Strike <span class="kb-hint">[1]</span></button>
+        </form>
+        <form method="post" action="/battle/defend">
+            <button type="submit" class="btn btn-battle btn-defend" style="width:100%;" title="Keyboard: 2">Defend <span class="kb-hint">[2]</span></button>
+        </form>
+        {% if consumables %}
+        <form method="post" action="/battle/use_item" style="display:flex;gap:6px;grid-column:1/-1;">
+            <select name="item" class="form-select" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text-light);padding:6px 10px;border-radius:4px;font-size:13px;">
+                {% for item_name in consumables %}
+                <option value="{{ item_name }}">{{ item_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-battle btn-secondary" title="Keyboard: 4">Use Item <span class="kb-hint">[4]</span></button>
+        </form>
+        {% else %}
+        <form method="post" action="/battle/use_item" style="grid-column:1/-1;">
+            <button type="submit" class="btn btn-battle btn-secondary" style="width:100%;opacity:0.45;" disabled title="No consumables in inventory">No Items</button>
+        </form>
+        {% endif %}
+        <form method="post" action="/battle/flee" style="grid-column:1/-1;" onsubmit="return confirm('Attempt to flee? You may take damage if unsuccessful.');">
+            <button type="submit" class="btn btn-battle btn-flee" style="width:100%;" title="Keyboard: 5">Flee <span class="kb-hint">[5]</span></button>
+        </form>
+    </div>
+
+    <!-- Back link -->
+    <div style="text-align:center;margin-top:8px;">
+        <a href="/beta/dungeon/room" style="font-size:12px;color:var(--text-dim);text-decoration:none;opacity:0.6;">&larr; Dungeon Map</a>
+    </div>
+
+</div>
+</div>
+<script>
+document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === '1') document.querySelector('form[action="/battle/attack"] button').click();
+    if (e.key === '2') document.querySelector('form[action="/battle/defend"] button').click();
+    if (e.key === '5') document.querySelector('form[action="/battle/flee"] button').click();
+});
+const bl = document.getElementById('battle-log');
+if (bl) bl.scrollTop = bl.scrollHeight;
+</script>
+{% endblock %}
