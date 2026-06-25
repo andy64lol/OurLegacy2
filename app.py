@@ -8369,10 +8369,14 @@ def vue_beta():
         return redirect(url_for("index"))
     player = get_player()
     if player:
-        lvl = player.get("level", 1)
+        lvl = max(1, player.get("level", 1))
         correct_xp = max(100, int(100 * (lvl ** 1.5)))
-        if player.get("experience_to_next", 100) > correct_xp * 5:
+        current_xtn = player.get("experience_to_next", 100) or 100
+        current_exp = player.get("experience", 0) or 0
+        if current_xtn > correct_xp * 2 or current_exp > correct_xp * 50:
+            pct = min(0.99, current_exp / max(1, current_xtn))
             player["experience_to_next"] = correct_xp
+            player["experience"] = int(correct_xp * pct)
             save_player(player)
     visited = session.get("visited_areas", [])
     in_battle = bool(session.get("battle_enemy"))
