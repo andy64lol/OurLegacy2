@@ -1456,7 +1456,10 @@ BOSS_CHALLENGE_COOLDOWN = 8 * 3600
 
 
 def get_player() -> dict[str, Any] | None:
-    return session.get("player")
+    player = session.get("player")
+    if player is not None:
+        player["rank"] = get_rank(player.get("level", 1))
+    return player
 
 
 def save_player(player: dict[str, Any] | None) -> None:
