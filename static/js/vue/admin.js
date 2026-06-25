@@ -29,7 +29,7 @@ const ALL_COMMANDS = [
     { name: "give xp <n>",             desc: "Add XP (triggers level-ups)", ownerOnly: true },
     { name: "give item <name> [qty]",  desc: "Add an item to your inventory", ownerOnly: true },
     { name: "give mxp <n>",            desc: "Add mining XP to your character", ownerOnly: true },
-    { name: "set level <n>",           desc: "Set your character level (1–999)", ownerOnly: true },
+    { name: "set level <n>",           desc: "Set your character level (1+)", ownerOnly: true },
     { name: "set stat <name> <n>",     desc: "Set a stat: hp max_hp mp max_mp attack defense speed gold", ownerOnly: true },
     { name: "set mining <n>",          desc: "Set your mining level (1–25)", ownerOnly: true },
     { name: "remove item <name> [n]",  desc: "Remove item(s) from inventory", ownerOnly: true },
@@ -363,7 +363,7 @@ createApp({
                         const sub = (parts[1] || '').toLowerCase();
                         if (sub === 'level') {
                             const n = parseInt(parts[2]);
-                            if (!n || n < 1) { this.print('Usage: set level <1-999>', 'warn'); break; }
+                            if (!n || n < 1) { this.print('Usage: set level <n>', 'warn'); break; }
                             const r = await apiCall('POST', '/api/admin/game/set', { kind: 'level', value: n });
                             this.print(r.message, r.ok ? 'ok' : 'err');
                         } else if (sub === 'stat') {
