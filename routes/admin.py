@@ -430,12 +430,12 @@ def api_game_set():
     kind = body.get("kind", "").lower()
     if kind == "level":
         lvl = int(body.get("value", 1))
-        if lvl < 1 or lvl > 999:
-            return jsonify({"ok": False, "message": "Level must be 1–999."})
+        if lvl < 1:
+            return jsonify({"ok": False, "message": "Level must be at least 1."})
         player["level"] = lvl
         player["rank"] = h.get_rank(lvl)
         player["experience"] = 0
-        player["experience_to_next"] = int(100 * (1.5 ** (lvl - 1)))
+        player["experience_to_next"] = max(100, int(100 * (lvl ** 1.5)))
         session.modified = True
         return jsonify({"ok": True, "message": f"Level set to {lvl} (rank {player['rank']})."})
     elif kind == "stat":

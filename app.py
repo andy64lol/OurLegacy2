@@ -1661,64 +1661,90 @@ def add_message(text, color="var(--text-light)"):
 
 
 def get_rank(level):
-    if level < 5:
+    if level < 15:
         return "F"
-    elif level < 10:
-        return "F+"
-    elif level < 15:
-        return "E"
     elif level < 20:
-        return "E+"
+        return "F+"
     elif level < 25:
-        return "D"
+        return "E"
     elif level < 30:
-        return "D+"
+        return "E+"
     elif level < 35:
-        return "C"
+        return "D"
     elif level < 40:
-        return "C+"
+        return "D+"
     elif level < 45:
-        return "B"
+        return "C"
     elif level < 50:
-        return "B+"
+        return "C+"
     elif level < 55:
-        return "A"
+        return "B"
     elif level < 60:
-        return "A+"
+        return "B+"
     elif level < 65:
-        return "A++"
+        return "A"
+    elif level < 70:
+        return "A+"
     elif level < 75:
-        return "S"
+        return "A++"
     elif level < 85:
-        return "S+"
+        return "S"
     elif level < 95:
+        return "S+"
+    elif level < 105:
         return "S++"
-    elif level < 110:
+    elif level < 120:
         return "SS"
-    elif level < 125:
+    elif level < 135:
         return "SS+"
-    elif level < 140:
+    elif level < 150:
         return "SS++"
-    elif level < 160:
+    elif level < 170:
         return "SSS"
-    elif level < 180:
+    elif level < 190:
         return "SSS+"
-    elif level < 200:
+    elif level < 210:
         return "SSS++"
-    elif level < 225:
+    elif level < 235:
         return "SR"
-    elif level < 250:
+    elif level < 260:
         return "SR+"
-    elif level < 275:
+    elif level < 285:
         return "SR++"
-    elif level < 300:
+    elif level < 310:
         return "SRR"
-    elif level < 350:
+    elif level < 360:
         return "SRR+"
-    elif level < 400:
+    elif level < 410:
         return "SRR++"
-    else:
+    elif level < 500:
         return "Archon"
+    elif level < 600:
+        return "Archon+"
+    elif level < 750:
+        return "Archon++"
+    elif level < 1000:
+        return "Legend"
+    elif level < 1500:
+        return "Legend+"
+    elif level < 2000:
+        return "Legend++"
+    elif level < 3000:
+        return "Mythic"
+    elif level < 5000:
+        return "Mythic+"
+    elif level < 7500:
+        return "Mythic++"
+    elif level < 10000:
+        return "Divine"
+    elif level < 25000:
+        return "Divine+"
+    elif level < 50000:
+        return "Divine++"
+    elif level < 100000:
+        return "Transcendent"
+    else:
+        return "Eternal"
 
 
 def gain_experience(player, amount):
@@ -1727,7 +1753,7 @@ def gain_experience(player, amount):
     while player["experience"] >= player["experience_to_next"]:
         player["experience"] -= player["experience_to_next"]
         player["level"] += 1
-        player["experience_to_next"] = int(player["experience_to_next"] * 1.5)
+        player["experience_to_next"] = max(100, int(100 * (player["level"] ** 1.5)))
         b = player.get("level_up_bonuses", {})
         hp_gain  = random.randint(10, 20)
         def_gain = random.randint(10, 20)
