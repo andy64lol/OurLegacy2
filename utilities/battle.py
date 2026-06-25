@@ -228,8 +228,8 @@ def collect_battle_rewards(player: Dict[str, Any], enemy_dict: Dict[str, Any],
     while player['experience'] >= player.get('experience_to_next', 100):
         player['experience'] -= player['experience_to_next']
         player['level'] = player.get('level', 1) + 1
-        player['experience_to_next'] = int(
-            player.get('experience_to_next', 100) * 1.5)
+        new_level = player.get('level', 1)
+        player['experience_to_next'] = max(100, int(100 * (new_level ** 1.5)))
         bonuses = player.get('level_up_bonuses', {})
         player['max_hp'] = player.get('max_hp', 100) + bonuses.get('hp', 10)
         player['max_mp'] = player.get('max_mp', 50) + bonuses.get('mp', 2)

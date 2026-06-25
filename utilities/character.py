@@ -143,7 +143,7 @@ class Character:
     def level_up(self):
         self.level += 1
         self.experience -= self.experience_to_next
-        self.experience_to_next = int(self.experience_to_next * 1.5)
+        self.experience_to_next = max(100, int(100 * (self.level ** 1.5)))
         if self.level_up_bonuses:
             self.base_max_hp += self.level_up_bonuses.get("hp", 0)
             self.base_max_mp += self.level_up_bonuses.get("mp", 0)

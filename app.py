@@ -8368,6 +8368,12 @@ def vue_beta():
     if not _is_admin_user(caller):
         return redirect(url_for("index"))
     player = get_player()
+    if player:
+        lvl = player.get("level", 1)
+        correct_xp = max(100, int(100 * (lvl ** 1.5)))
+        if player.get("experience_to_next", 100) > correct_xp * 5:
+            player["experience_to_next"] = correct_xp
+            save_player(player)
     visited = session.get("visited_areas", [])
     in_battle = bool(session.get("battle_enemy"))
     _gid = session.get("online_user_id")

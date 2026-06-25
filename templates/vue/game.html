@@ -276,7 +276,7 @@ window._betaInit = {
                             <div class="bar-track"><div class="bar-fill bar-mp" :style="{ width: mpPct + '%' }"></div></div>
                         </div>
                         <div class="bar-group">
-                            <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/exp.webp" alt="exp"> EXP <span class="bar-nums">[[ player.experience ]] / [[ player.experience_to_next ]]</span></div>
+                            <div class="bar-label"><img class="type-glyph" src="/game_assets/glyphs/exp.webp" alt="exp"> EXP <span class="bar-nums">[[ fmtNum(player.experience) ]] / [[ fmtNum(player.experience_to_next) ]]</span></div>
                             <div class="bar-track"><div class="bar-fill bar-exp" :style="{ width: expPct + '%' }"></div></div>
                         </div>
                         <div class="gold-display"><img class="type-glyph" src="/game_assets/glyphs/gold.webp" alt="gold"> Gold: <span class="gold-amount">[[ player.gold ]]</span></div>
@@ -1403,7 +1403,7 @@ window._betaInit = {
                             <div class="panel-title">Treasury</div>
                             <div class="panel-body">
                                 <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:10px;">[[ groupData.gold_pool || 0 ]]g in pool</div>
-                                <button class="btn btn-primary btn-small" @click="collectGroupGold" :disabled="actionPending || !(groupData.gold_pool > 0)">Collect My Share</button>
+                                <button class="btn btn-primary btn-small" @click="collectGroupGold" :disabled="groupCollectPending || !(groupData.gold_pool > 0)">[[ groupCollectPending ? 'Collecting...' : 'Collect My Share' ]]</button>
                                 <div v-if="groupCollectMsg" style="font-size:11px;margin-top:6px;" :style="{ color: groupCollectOk ? 'var(--green-bright)' : 'var(--red)' }">[[ groupCollectMsg ]]</div>
                             </div>
                         </div>

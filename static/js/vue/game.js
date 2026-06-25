@@ -136,6 +136,7 @@ createApp({
 
             _mapInitDone: false,
 
+            groupCollectPending: false,
             groupChatMessages: [],
             groupChatInput:    '',
             groupChatSending:  false,
@@ -192,8 +193,8 @@ createApp({
         activeEventsCount()    { return (this.eventsData && this.eventsData.active) ? this.eventsData.active.length : 0; },
         bossTotalPages()       { return Math.max(1, Math.ceil((this.availableBosses || []).length / 3)); },
         paginatedBosses()      { const p = Math.min(this.bossPage, this.bossTotalPages) - 1; return (this.availableBosses || []).slice(p * 3, p * 3 + 3); },
-        invPageCount()         { return Math.max(1, Math.ceil((this.inventoryItems || []).length / 15)); },
-        pagedInventory()       { const p = Math.min(this.invPage, this.invPageCount) - 1; return (this.inventoryItems || []).slice(p * 15, p * 15 + 15); },
+        invPageCount()         { return Math.max(1, Math.ceil((this.inventoryItems || []).length / 30)); },
+        pagedInventory()       { const p = Math.min(this.invPage, this.invPageCount) - 1; return (this.inventoryItems || []).slice(p * 30, p * 30 + 30); },
         craftingPageCount()  { return Math.max(1, Math.ceil((this.craftingRecipes||[]).length / 7)); },
         pagedCrafting()      { const p = Math.min(this.craftingPage, this.craftingPageCount) - 1; return (this.craftingRecipes||[]).slice(p*7, p*7+7); },
         dungeonPageCount()   { return Math.max(1, Math.ceil((this.dungeonList||[]).length / 5)); },
@@ -661,6 +662,8 @@ createApp({
         },
 
         async collectGroupGold() {
+            if (this.groupCollectPending) return;
+            this.groupCollectPending = true;
             try {
                 const r = await fetch('/api/groups/collect_gold', {
                     method: 'POST', credentials: 'same-origin',
@@ -674,10 +677,13 @@ createApp({
                     const share = data.gold || 0;
                     if (this.groupData) this.groupData.gold_pool = Math.max(0, (this.groupData.gold_pool || 0) - share);
                     if (data.new_gold !== undefined && this.player) this.player.gold = data.new_gold;
+                    else if (this.player) this.player.gold = (this.player.gold || 0) + share;
                 }
             } catch {
                 this.groupCollectMsg = 'Network error.';
                 this.groupCollectOk = false;
+            } finally {
+                this.groupCollectPending = false;
             }
         },
 
